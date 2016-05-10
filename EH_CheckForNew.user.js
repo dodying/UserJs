@@ -37,8 +37,6 @@ div.querySelector('#EH_CheckForNew_Add').onclick = function () {
 		var FavSort = [
 			1
 		];
-		GM_setValue('FavUrl', FavUrl);
-		GM_setValue('FavSort', FavSort);
 	} else {
 		var FavUrl = GM_getValue('FavUrl');
 		var FavSort = GM_getValue('FavSort');
@@ -50,8 +48,6 @@ div.querySelector('#EH_CheckForNew_Add').onclick = function () {
 		} else {
 			FavUrl[Url] = Id;
 			FavSort.unshift(Id);
-			GM_setValue('FavUrl', FavUrl);
-			GM_setValue('FavSort', FavSort);
 		}
 	}
 	if (document.querySelector('h1#gn')) {
@@ -60,7 +56,8 @@ div.querySelector('#EH_CheckForNew_Add').onclick = function () {
 		var BookName = '';
 	}
 	var Title = prompt('请输入名称', BookName);
-	GM_setValue('length', Id);
+	if (Title == null || Title == '') return false;
+	GM_setValue('FavUrl', FavUrl);
 	var Today = new Date();
 	var BookmarkInfo = {
 		'Id' : Id,
@@ -69,6 +66,8 @@ div.querySelector('#EH_CheckForNew_Add').onclick = function () {
 		'Url' : Url
 	};
 	GM_setValue(Id, BookmarkInfo);
+	GM_setValue('FavSort', FavSort);
+	GM_setValue('length', Id);
 	window.location = window.location;
 }
 div.querySelector('#EH_CheckForNew_All').onclick = function () {
