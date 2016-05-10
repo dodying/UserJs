@@ -4,7 +4,7 @@
 // @namespace   Dodying
 // @author      Dodying
 // @description A monitor for EH
-// description:zh-CN 详见帮助
+// @description:zh-CN 详见帮助
 // @include     http://g.e-hentai.org/
 // @include     http://g.e-hentai.org/?*
 // @include     http://g.e-hentai.org/tag/*
