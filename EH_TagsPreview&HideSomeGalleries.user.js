@@ -17,24 +17,28 @@
 // @include     http://g.e-hentai.org/favorites.php
 // @include     http://g.e-hentai.org/favorites.php?*
 // @include     http://g.e-hentai.org/uploader/*
-// @version     1
+// @version     1.01
 // @grant       none
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @run-at      document-idle
 // ==/UserScript==
 /*要隐藏的标签*/
-var UnlikeTags = /yaoi|males only|vore|tentacles|guro|scat|netorare/g;
-/*男同|只有男性|活吞|触手|猎奇|排泄|NTR*/
+var UnlikeTags = /yaoi|females only|males only|vore|tentacles|guro|scat|netorare|bestiality|insect|worm|furry|amputee/g;
+/*男同|只有女性|只有男性|活吞|触手|猎奇|排泄|NTR|兽奸|昆虫|虫子|毛皮|残肢*/
 /*要隐藏的标签*/
 var Div = document.querySelectorAll('.it5>a');
 var gidlist = new Array;
+var gmetadata_all = new Array();
 for (var i = 0; i < Div.length; i++) {
   var url_array = Div[i].href.split('/');
   gidlist.push([url_array[4],
   url_array[5]])
-}
-xhr(gidlist);
-/**/
+  if (i % 25 == 24) {
+    xhr(gidlist);
+    var gidlist = new Array;
+  }
+}/**/
+
 function xhr(gidlist) {
   var gdata = {
     'method': 'gdata',
@@ -45,12 +49,14 @@ function xhr(gidlist) {
   xhr.open('POST', 'http://g.e-hentai.org/api.php', true);
   xhr.onload = function () {
     var apirsp = JSON.parse(xhr.responseText);
-    console.log(apirsp['gmetadata']);
+    //console.log(apirsp['gmetadata']);
     TagPreview(apirsp['gmetadata']);
   };
   xhr.send(JSON.stringify(gdata));
 }
 function TagPreview(gmetadata) {
+  gmetadata_all.concat(gmetadata);
+  //console.log(gmetadata_all)
   var Box = document.createElement('div');
   Box.id = 'TagPreview';
   var bgcolor;
@@ -59,10 +65,10 @@ function TagPreview(gmetadata) {
   for (var i = 0; i < Div.length; i++) {
     Div[i].className = 'TagPreview_' + i;
     Div[i].onmousemove = function (event) {
-      //console.log(gmetadata)
+      //console.log(gmetadata_all)
       var id = this.className.replace('TagPreview_', '');
-      //console.log(gmetadata[id])
-      var tag = gmetadata[id].tags.join('<br >');
+      //console.log(gmetadata_all[id])
+      var tag = gmetadata_all[id].tags.join('<br >');
       if (UnlikeTags.test(tag)) {
         this.parentNode.parentNode.parentNode.parentNode.style.display = 'none';
         return;
@@ -77,7 +83,7 @@ function TagPreview(gmetadata) {
     Div[i].onmouseout = function () {
       //Box.innerHTML = '';
       var id = this.className.replace('TagPreview_', '');
-      document.querySelector('#EH_a'+id+'+div').style.visibility='hidden';
+      document.querySelector('#EH_a' + id + '+div').style.visibility = 'hidden';
       setTimeout(function () {
         Box.style.display = 'none';
       }, 1000);
