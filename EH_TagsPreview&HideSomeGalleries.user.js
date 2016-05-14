@@ -39,19 +39,20 @@ var UnlikeTags = {
   'futanari': '扶她',
   'dickgirl on dickgirl': '扶她上扶她',
   'male on dickgirl': '男的上扶她',
-  'dickgirl on male': '扶她上男的'
+  'dickgirl on male': '扶她上男的',
+  'monster': '怪物',
+  'netorare': 'NTR'
 } /*要隐藏的标签*/
 /*要翻译的标签*/
-
 var TagsChs = {
 //艺术家
 "oouso":"大嘘","korie riko":"捆枝りこ","peko":"ぺこ","akaza":"あかざ","ishikei":"石惠","happoubi jin":"八宝备仁(はっぽうび じん)","kizuki aruchu":"鬼月あるちゅ","harumi chihiro":"晴见千寻（ハルミチヒロ）",
 //团队
 "usotsukiya":"嘘つき屋","softstar":"大宇资讯",
 //语言和色彩类
-"chinese":"中文","translated":"翻译本","Italian":"意大利文","english":"英文","portuguese":"葡萄牙文","french":"法文","full color":"全彩色","korean":"韩文","spanish":"西班牙语","russian":"俄罗斯语","	thai":"泰文","	italian":"意大利文",
+"chinese":"<span style=\"color:red;\">中文</span>","translated":"翻译本","english":"英文","portuguese":"葡萄牙文","french":"法文","full color":"全彩色","korean":"韩文","spanish":"西班牙语","russian":"俄罗斯语","thai":"泰文","italian":"意大利文",
 //同人题材类
-"touhou project":"东方Project","moetan":"萌单","ore no imouto ga konna ni kawaii wake ga nai":"我的妹妹不可能那么可爱","toaru kagaku no railgun":"某科学的超电磁炮","kantai collection":"舰队collection","pokemon | pocket monsters":"精灵宝可梦","higurashi no naku koro ni | when they cry":"寒蝉鸣泣之时","saki":"天才麻将少女","puella magi madoka magica":"魔法少女小圆","lotte no omocha":"露蒂的玩具","sword art online":"刀剑神域","to love-ru":"To LOVEる","ro-kyu-bu":"萝球社","tantei opera milky holmes":"侦探歌剧 少女福尔摩斯","hyperdimension neptunia | choujigen game neptune":"超次元游戏：海王星","love live":"Love Live!","sora no otoshimono | heavens lost property":"天降之物","boku wa tomodachi ga sukunai":"我的朋友很少","vocaloid":"V家","date a live":"约会大作战","gochuumon wa usagi desu ka | is the order a rabbit":"今天你也要来点兔子吗？",
+"touhou project":"东方Project","moetan":"萌单","ore no imouto ga konna ni kawaii wake ga nai":"我的妹妹不可能那么可爱","toaru kagaku no railgun":"某科学的超电磁炮","kantai collection":"舰队collection","pokemon":"精灵宝可梦","higurashi no naku koro ni":"寒蝉鸣泣之时","saki":"天才麻将少女","puella magi madoka magica":"魔法少女小圆","lotte no omocha":"露蒂的玩具","sword art online":"刀剑神域","to love-ru":"To LOVEる","ro-kyu-bu":"萝球社","tantei opera milky holmes":"侦探歌剧 少女福尔摩斯","hyperdimension neptunia":"超次元游戏：海王星","love live":"Love Live!","sora no otoshimono":"天降之物","boku wa tomodachi ga sukunai":"我的朋友很少","vocaloid":"V家","date a live":"约会大作战","gochuumon wa usagi desu ka":"今天你也要来点兔子吗？",
 //角色
 "reimu hakurei":"博丽灵梦","marisa kirisame":"雾雨魔理沙","rumia":"露米娅","cirno":"琪露诺","daiyousei":"大妖精","hong meiling":"红美铃","patchouli knowledge":"帕秋莉·诺蕾姬","koakuma":"小恶魔","sakuya izayoi":"十六夜咲夜","remilia scarlet":"蕾米莉亚·斯卡雷特","flandre scarlet":"芙兰朵露·斯卡雷特","letty whiterock":"蕾迪·霍瓦特罗克","chen":"橙",
 "ink nijihara":"虹原茵可","pastel ink":"闪亮茵可",
@@ -65,7 +66,8 @@ var TagsChs = {
 "incest":"乱伦","netorare":"NTR","guro":"猎奇","yuri":"女同(GL)","yaoi":"男同(BL)","femdom":"女性支配","original":"原创","mind control":"精神控制","body swap":"身体交换","tentacles":"触手","bestiality":"兽奸","cheating":"出轨","monster":"怪物","wore":"丸吞","inflation":"胃区膨胀","unbirth":"从B钻出来","skinsuit":"画皮（换皮）","absorb":"融合（皮类常用标签）","psssession":"占据（皮类常用标签）","birth":"出产","eggs":"生蛋","furry":"毛皮","worm":"虫子","amputee":"残肢","bbw":"丰满","wings":"翅膀","christmas":"圣诞服装","waiter":"服务员","waitress":"女服务员","mmf threesome":"二男一女（3P）","ffm threesome":"二女一男（3P）","condom":"避孕套","eyepatch":"眼罩","multiple penises":"多个阴茎","impregnation":"性行为后怀孕","stomach deformation":"胃部突起","tankoubon":"单行本","machine":"性机器","big penis":"大阴茎","strap-on":"可连接的假阳具","anthology":"选集（多个作者）","full censorship":"全面体检","leg locks":"脚锁","art book":"画集","full body tattoo":"纹身","uncensored":"无码","vomit":"呕吐物","torture":"酷刑","bdsm":"SM","tube":"管子","wooden horse":"木马","public use":"公众使用","speculum":"窥器","smegma":"包皮垢","insect":"昆虫","slime":"粘液","huge penis":"巨大的阴茎","zombie":"丧尸","diaper":"尿布","octopus":"章鱼","onahole":"自慰器","girls only":"只有女的","guys only":"只有男的","corruption":"腐朽（堕落？）","blood":"血","snuff":"死去","animated":"GIF动画的","double vaginal":"双阴道的","triple vaginal":"三阴道的","slave":"奴隶","doll":"玩偶","gamecg":"游戏CG","snake":"蛇","incomplete":"不完整的","all the way through":"一直走到底","petrification":"石化","transformation":"转化","giantess":"女巨人","ghost":"鬼魂","asphyxiation":"窒息","gasmask":"防毒面罩","infantilism":"幼稚型","parasite":"寄生虫","horse":"马","age progression":"年龄进展","plant girl":"植物（怪物娘）","slime girl":"史莱姆（怪物娘）","themeless":"无主题的","cervix penetration":"子宫颈透视","prostitution":"卖淫 / 援交","hairy":"多毛的","robot":"机器人","sole male":"男角唯一","sole female":"女角唯一","oni":"鬼（日本神话）","females only":"只有女性","low lolicon":"未通过萝莉控",
 //重新分类
 "doujinshi":"同人本","manga":"漫画杂志",
-}/*要翻译的标签*/
+}
+/*要翻译的标签*/
 
 var Div = document.querySelectorAll('.it5>a');
 var gidlist = new Array();
@@ -96,17 +98,18 @@ function xhr(gidlist) {
     var apirsp = JSON.parse(xhr.responseText);
     //console.log(apirsp['gmetadata']);
     TagPreview(apirsp['gmetadata']);
+    HideGalleries(apirsp['gmetadata']);
   };
   xhr.send(JSON.stringify(gdata));
 }
 function TagPreview(gmetadata) {
   gmetadata_all = gmetadata_all.concat(gmetadata);
-  //console.log(gmetadata_all)
+  console.log(gmetadata_all)
   var Box = document.createElement('div');
   Box.id = 'TagPreview';
   var bgcolor;
   (window.location.host == 'g.e-hentai.org') ? bgcolor = '#E3E0D1' : bgcolor = '#34353B';
-  Box.style = 'position:absolute;padding:5px;display:none;z-index:999;background-color:' + bgcolor + ';font-size:larger;';
+  Box.style = 'position:absolute;padding:5px;display:none;z-index:999;background-color:' + bgcolor + ';font-size:larger;width:250px;';
   for (var i = 0; i < Div.length; i++) {
     Div[i].className = 'TagPreview_' + i;
     Div[i].onmousemove = function (event) {
@@ -115,32 +118,38 @@ function TagPreview(gmetadata) {
       //console.log(gmetadata_all[id]);
       var tags = gmetadata_all[id].tags;
       for (var i = 0; i < tags.length; i++) {
-        if (tags[i] in UnlikeTags) {
-          this.parentNode.parentNode.parentNode.parentNode.style.display = 'none';
-          return;
-        }
-        if (tags[i] in TagsChs){
-          tags[i]=TagsChs[tags[i]];
+        if (tags[i] in TagsChs) {
+          tags[i] = TagsChs[tags[i]];
         }
       }
-      var tag = tags.join('<br >');
+      var tag = tags.join('_');
       var MousePos = getMousePos(event);
       //console.log(MousePos);
       Box.style.display = 'block';
       Box.style.left = eval(MousePos['x'] + 5) + 'px';
       Box.style.top = eval(MousePos['y'] + 5) + 'px';
-      Box.innerHTML = tag;
+      Box.innerHTML = '<div style="color:red">['+eval(parseInt(gmetadata_all[id].filesize/1024/1024))+'Mb]'+gmetadata_all[id].filecount+'Pages</div>'+tag;
     }
     Div[i].onmouseout = function () {
       //Box.innerHTML = '';
       var id = this.className.replace('TagPreview_', '');
       document.querySelector('#EH_a' + id + '+div').style.visibility = 'hidden';
       //setTimeout(function () {
-        Box.style.display = 'none';
+      Box.style.display = 'none';
       //}, 1000);
     }
   }
   document.body.appendChild(Box);
+}
+function HideGalleries(gmetadata) {
+  for (var i = 0; i < Div.length; i++) {
+    var tags = gmetadata_all[i].tags;
+    for (var n = 0; n < tags.length; n++) {
+      if (tags[n] in UnlikeTags) {
+        Div[i].parentNode.parentNode.parentNode.parentNode.style.display = 'none';
+      }
+    }
+  }
 }
 function getMousePos(event) {
   var e = event || window.event;
