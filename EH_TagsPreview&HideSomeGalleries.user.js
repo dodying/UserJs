@@ -23,8 +23,8 @@
 // @run-at      document-idle
 // ==/UserScript==
 /*要隐藏的标签*/
-var UnlikeTags = /yaoi|females only|males only|vore|tentacles|guro|scat|netorare|bestiality|insect|worm|furry|amputee/g;
-/*男同|只有女性|只有男性|活吞|触手|猎奇|排泄|NTR|兽奸|昆虫|虫子|毛皮|残肢*/
+var UnlikeTags = /yaoi|females only|males only|vore|tentacles|guro|scat|netorare|bestiality|insect|worm|furry|amputee|dickgirl|futanari/g;
+/*男同|只有女性|只有男性|活吞|触手|猎奇|排泄|NTR|兽奸|昆虫|虫子|毛皮|残肢|扶她|扶她*/
 /*要隐藏的标签*/
 var Div = document.querySelectorAll('.it5>a');
 var gidlist = new Array();
@@ -33,6 +33,10 @@ for (var i = 0; i < Div.length; i++) {
   var url_array = Div[i].href.split('/');
   gidlist.push([url_array[4],
   url_array[5]])
+  if (i == Div.length - 1) {
+    xhr(gidlist);
+    break;
+  }
   if (i % 25 == 24) {
     xhr(gidlist);
     var gidlist = new Array();
