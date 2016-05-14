@@ -135,9 +135,9 @@ function TagPreview(gmetadata) {
       //Box.innerHTML = '';
       var id = this.className.replace('TagPreview_', '');
       document.querySelector('#EH_a' + id + '+div').style.visibility = 'hidden';
-      setTimeout(function () {
+      //setTimeout(function () {
         Box.style.display = 'none';
-      }, 1000);
+      //}, 1000);
     }
   }
   document.body.appendChild(Box);
