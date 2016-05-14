@@ -27,7 +27,7 @@ var UnlikeTags = /yaoi|females only|males only|vore|tentacles|guro|scat|netorare
 /*男同|只有女性|只有男性|活吞|触手|猎奇|排泄|NTR|兽奸|昆虫|虫子|毛皮|残肢*/
 /*要隐藏的标签*/
 var Div = document.querySelectorAll('.it5>a');
-var gidlist = new Array;
+var gidlist = new Array();
 var gmetadata_all = new Array();
 for (var i = 0; i < Div.length; i++) {
   var url_array = Div[i].href.split('/');
@@ -35,10 +35,9 @@ for (var i = 0; i < Div.length; i++) {
   url_array[5]])
   if (i % 25 == 24) {
     xhr(gidlist);
-    var gidlist = new Array;
+    var gidlist = new Array();
   }
 }/**/
-
 function xhr(gidlist) {
   var gdata = {
     'method': 'gdata',
@@ -55,7 +54,7 @@ function xhr(gidlist) {
   xhr.send(JSON.stringify(gdata));
 }
 function TagPreview(gmetadata) {
-  gmetadata_all.concat(gmetadata);
+  gmetadata_all=gmetadata_all.concat(gmetadata);
   //console.log(gmetadata_all)
   var Box = document.createElement('div');
   Box.id = 'TagPreview';
