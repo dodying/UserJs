@@ -471,19 +471,17 @@ for (var i = 0; i < Div.length; i++) {
   var url_array = Div[i].href.split('/');
   gidlist.push([url_array[4],
   url_array[5]]);
-  switch (i) {
-    case 24:
-      xhr(gidlist, 0);
-      var gidlist = new Array();
-      break;
-    case 49:
-      xhr(gidlist, 1);
-      var gidlist = new Array();
-      break;
+  if (i == 24) {
+    xhr(gidlist, 0);
+    gidlist = new Array();
+  } else if (i == 49) {
+    xhr(gidlist, 1);
+  } else if (i == Div.length - 1 && i < 24) {
+    xhr(gidlist, 0);
+  } else if (i == Div.length - 1 && i > 24) {
+    xhr(gidlist, 1);
   }
-}
-
-/*以下为函数*/
+} /*以下为函数*/
 
 function xhr(gidlist, status) {
   var gdata = {
@@ -535,7 +533,7 @@ function TagPreview(gmetadata, status) {
     if (gmetadata_all[i].title.match(/\(.*?\)/)) {
       Doujinshi_Array[i] = gmetadata_all[i].title.match(/\(.*?\)/g) [gmetadata_all[i].title.match(/\(.*?\)/g).length - 1].replace('(', '').replace(')', '').toLowerCase().replace(/[!?\.]/, ' ').replace(/:.*/, '').replace(/ $/, '');
       if (gmetadata_all[i].title_jpn.match(/\(.*?\)/)) {
-        Doujinshi_Array_Chs[i] = gmetadata_all[i].title_jpn.match(/\(.*?\)/g) [gmetadata_all[i].title.match(/\(.*?\)/g).length - 1].replace('(', '').replace(')', '');
+        Doujinshi_Array_Chs[i] = gmetadata_all[i].title_jpn.match(/\(.*?\)/g) [gmetadata_all[i].title_jpn.match(/\(.*?\)/g).length - 1].replace('(', '').replace(')', '');
       }
     } else {
       Doujinshi_Array[i] = '';
@@ -547,33 +545,39 @@ function TagPreview(gmetadata, status) {
   for (var i = 0; i < Div.length; i++) {
     Div[i].className = 'TagPreview_' + i;
     Div[i].onmousemove = function (event) {
-      //console.log(gmetadata_all)
+      //console.log(gmetadata_all);
       var id = this.className.replace('TagPreview_', '');
       //console.log(gmetadata_all[id]);
-      var tags = gmetadata_all[id].tags;
-      for (var i = 0; i < tags.length; i++) {
-        if (tags[i] in TagsChs) {
-          tags[i] = TagsChs[tags[i]];
+      if (gmetadata_all[id].tags) {
+        var tags = gmetadata_all[id].tags;
+        for (var i = 0; i < tags.length; i++) {
+          if (tags[i] in TagsChs) {
+            tags[i] = TagsChs[tags[i]];
+          }else if (tags[i] == Doujinshi_Array[id]) {
+            if (Doujinshi_Array_Chs[id]) tags[i] = Doujinshi_Array_Chs[id];
+            tags[i] = '<span style="font-size:larger;color:yellow;">同人：' + tags[i] + '</span>';
+          }else if (tags[i] == Group_Array[id]) {
+            if (Group_Array_Chs[id]) tags[i] = Group_Array_Chs[id];
+            tags[i] = '<span style="font-size:larger;color:blue;">组织：' + tags[i] + '</span>';
+          }else if (tags[i] == Artist_Array[id]) {
+            if (Artist_Array_Chs[id]) tags[i] = Artist_Array_Chs[id];
+            tags[i] = '<span style="font-size:larger;color:green;">漫画家：' + tags[i] + '</span>';
+          }
         }
-        if (tags[i] == Doujinshi_Array[id]) {
-          if (Doujinshi_Array_Chs[id]) tags[i] = Doujinshi_Array_Chs[id];
-          tags[i] = '<span style="font-size:larger;color:yellow;">同人：' + tags[i] + '</span>';
-        }
-        if (tags[i] == Group_Array[id]) {
-          if (Group_Array_Chs[id]) tags[i] = Group_Array_Chs[id];
-          tags[i] = '<span style="font-size:larger;color:blue;">组织：' + tags[i] + '</span>';
-        }
-        if (tags[i] == Artist_Array[id]) {
-          if (Artist_Array_Chs[id]) tags[i] = Artist_Array_Chs[id];
-          tags[i] = '<span style="font-size:larger;color:green;">漫画家：' + tags[i] + '</span>';
-        }
+        var tag = tags.join('_');
+      } else {
+        var tag = '';
       }
-      var tag = tags.join('_');
+      if (gmetadata_all[id].title_jpn){
+        var title = gmetadata_all[id].title_jpn;
+      }else {
+        var title = gmetadata_all[id].title;
+      }
       var MousePos = getMousePos(event);
       Box.style.display = 'block';
       Box.style.left = eval(MousePos['x'] + 5) + 'px';
       Box.style.top = eval(MousePos['y'] + 5) + 'px';
-      Box.innerHTML = '<div>' + gmetadata_all[id].title_jpn + '</div><div style="color:red">[' + eval(parseInt(gmetadata_all[id].filesize / 1024 / 1024)) + 'M]' + gmetadata_all[id].filecount + 'P</div>' + tag;
+      Box.innerHTML = '<div>' + title + '</div><div style="color:red">[' + eval(parseInt(gmetadata_all[id].filesize / 1024 / 1024)) + 'M]' + gmetadata_all[id].filecount + 'P</div>' + tag;
     }
     Div[i].onmouseout = function (event) {
       //Box.innerHTML = '';
