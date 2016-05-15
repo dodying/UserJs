@@ -49,7 +49,7 @@ for (var i in UnlikeTags) {
   UnlikeTags_Alarm += UnlikeTags[i] + '&nbsp;';
 }
 UnlikeTags_Alarm += '</span>'
-var UnlikeTags_Div = document.querySelector('#toppane>h1');
+var UnlikeTags_Div = document.querySelector('h1');
 UnlikeTags_Div.innerHTML = UnlikeTags_Alarm;
 //setTimeout(function(){
 //a.style.display="none";
@@ -458,48 +458,34 @@ var TagsChs = {
 
 var Div = document.querySelectorAll('.it5>a');
 var Group_Artist_Array = new Array();
+var Group_Artist_Array_Chs = new Array();
 var Group_Array = new Array();
+var Group_Array_Chs = new Array();
 var Artist_Array = new Array();
+var Artist_Array_Chs = new Array();
 var Doujinshi_Array = new Array();
+var Doujinshi_Array_Chs = new Array();
 var gidlist = new Array();
 var gmetadata_all = new Array();
 for (var i = 0; i < Div.length; i++) {
-  if (Div[i].innerHTML.match(/\[.*?\]/)) {
-    Group_Artist_Array[i] = Div[i].innerHTML.match(/\[.*?\]/) [0].replace('[', '').replace(']', '').toLowerCase();
-    if (Group_Artist_Array[i].match(/\(.*?\)/)) {
-      Group_Array[i] = Group_Artist_Array[i].replace(/ \(.*\)/, '');
-      Artist_Array[i] = Group_Artist_Array[i].replace(Group_Array[i], '').replace(/ \((.*)\)/, '$1');
-    } else {
-      Group_Array[i] = Group_Artist_Array[i];
-      Artist_Array[i] = '';
-    }
-  } else {
-    Group_Array[i] = '';
-    Artist_Array[i] = '';
-  }
-  if (Div[i].innerHTML.match(/\(.*?\)/)) {
-    Doujinshi_Array[i] = Div[i].innerHTML.match(/\(.*?\)/g) [Div[i].innerHTML.match(/\(.*?\)/g).length - 1].replace('(', '').replace(')', '').toLowerCase().replace(/((?=[\x21-\x7e]+)[^A-Za-z0-9])/, ' ').replace(/ $/, '');
-  } else {
-    Doujinshi_Array[i] = '';
-  }
   var url_array = Div[i].href.split('/');
   gidlist.push([url_array[4],
-  url_array[5]])
-  if (i == Div.length - 1) {
-    xhr(gidlist);
-    break;
+  url_array[5]]);
+  switch (i) {
+    case 24:
+      xhr(gidlist, 0);
+      var gidlist = new Array();
+      break;
+    case 49:
+      xhr(gidlist, 1);
+      var gidlist = new Array();
+      break;
   }
-  if (i % 25 == 24) {
-    xhr(gidlist);
-    var gidlist = new Array();
-  }
-} /**/
-//console.log(Group_Artist_Array);
-//console.log(Group_Array);
-//console.log(Artist_Array);
-//console.log(Doujinshi_Array);
+}
 
-function xhr(gidlist) {
+/*以下为函数*/
+
+function xhr(gidlist, status) {
   var gdata = {
     'method': 'gdata',
     'gidlist': gidlist
@@ -509,20 +495,55 @@ function xhr(gidlist) {
   xhr.open('POST', 'http://g.e-hentai.org/api.php', true);
   xhr.onload = function () {
     var apirsp = JSON.parse(xhr.responseText);
-    //console.log(apirsp['gmetadata']);
-    TagPreview(apirsp['gmetadata']);
+    TagPreview(apirsp['gmetadata'], status);
     HideGalleries();
   };
   xhr.send(JSON.stringify(gdata));
 }
-function TagPreview(gmetadata) {
-  gmetadata_all = gmetadata_all.concat(gmetadata);
-  //console.log(gmetadata_all)
+function TagPreview(gmetadata, status) {
+  if (status == 0) {
+    gmetadata_all = gmetadata.concat(gmetadata_all);
+  } else {
+    gmetadata_all = gmetadata_all.concat(gmetadata);
+  }
+  console.log(gmetadata_all);
+  for (var i = 0; i < gmetadata_all.length; i++) {
+    if (gmetadata_all[i].title.match(/\[.*?\]/)) {
+      Group_Artist_Array[i] = gmetadata_all[i].title.match(/\[.*?\]/) [0].replace('[', '').replace(']', '').toLowerCase();
+      if (gmetadata_all[i].title_jpn.match(/\[.*?\]/)) {
+        Group_Artist_Array_Chs[i] = gmetadata_all[i].title_jpn.match(/\[.*?\]/) [0].replace('[', '').replace(']', '');
+      }
+      if (Group_Artist_Array[i].match(/\(.*?\)/)) {
+        Group_Array[i] = Group_Artist_Array[i].replace(/ \(.*\)/, '');
+        Artist_Array[i] = Group_Artist_Array[i].replace(Group_Array[i], '').replace(/ \((.*)\)/, '$1');
+        if (Group_Artist_Array_Chs[i].match(/\(.*?\)/)) {
+          Group_Array_Chs[i] = Group_Artist_Array_Chs[i].replace(/ \(.*\)/, '');
+          Artist_Array_Chs[i] = Group_Artist_Array_Chs[i].replace(Group_Array_Chs[i], '').replace(/ \((.*)\)/, '$1');
+        }
+      } else {
+        Group_Array[i] = Group_Artist_Array[i];
+        Artist_Array[i] = '';
+        if (Group_Artist_Array_Chs[i]) {
+          Group_Array_Chs[i] = Group_Artist_Array_Chs[i];
+          Artist_Array_Chs[i] = '';
+        }
+      }
+    } else {
+      Group_Array[i] = '';
+      Artist_Array[i] = '';
+    }
+    if (gmetadata_all[i].title.match(/\(.*?\)/)) {
+      Doujinshi_Array[i] = gmetadata_all[i].title.match(/\(.*?\)/g) [gmetadata_all[i].title.match(/\(.*?\)/g).length - 1].replace('(', '').replace(')', '').toLowerCase().replace(/[!?\.]/, ' ').replace(/:.*/, '').replace(/ $/, '');
+      if (gmetadata_all[i].title_jpn.match(/\(.*?\)/)) {
+        Doujinshi_Array_Chs[i] = gmetadata_all[i].title_jpn.match(/\(.*?\)/g) [gmetadata_all[i].title.match(/\(.*?\)/g).length - 1].replace('(', '').replace(')', '');
+      }
+    } else {
+      Doujinshi_Array[i] = '';
+    }
+  }
   var Box = document.createElement('div');
   Box.id = 'TagPreview';
-  var bgcolor;
-  (window.location.host == 'g.e-hentai.org') ? bgcolor = '#E3E0D1' : bgcolor = '#34353B';
-  Box.style = 'position:absolute;padding:5px;display:none;z-index:999;background-color:' + bgcolor + ';font-size:larger;width:250px;border-color:black;border-style:solid;';
+  Box.style = 'position:absolute;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:black;border-style:solid;color:white;background-color:#34353B;';
   for (var i = 0; i < Div.length; i++) {
     Div[i].className = 'TagPreview_' + i;
     Div[i].onmousemove = function (event) {
@@ -533,21 +554,18 @@ function TagPreview(gmetadata) {
       for (var i = 0; i < tags.length; i++) {
         if (tags[i] in TagsChs) {
           tags[i] = TagsChs[tags[i]];
-        }        //console.log(Doujinshi_Array[id]);
-
+        }
         if (tags[i] == Doujinshi_Array[id]) {
+          if (Doujinshi_Array_Chs[id]) tags[i] = Doujinshi_Array_Chs[id];
           tags[i] = '<span style="font-size:larger;color:yellow;">同人：' + tags[i] + '</span>';
-          //console.log(tags[i]);
-        }        //console.log(Group_Array[id]);
-
+        }
         if (tags[i] == Group_Array[id]) {
+          if (Group_Array_Chs[id]) tags[i] = Group_Array_Chs[id];
           tags[i] = '<span style="font-size:larger;color:blue;">组织：' + tags[i] + '</span>';
-          //console.log(tags[i]);
-        }        //console.log(Artist_Array[id]);
-
+        }
         if (tags[i] == Artist_Array[id]) {
+          if (Artist_Array_Chs[id]) tags[i] = Artist_Array_Chs[id];
           tags[i] = '<span style="font-size:larger;color:green;">漫画家：' + tags[i] + '</span>';
-          //console.log(tags[i]);
         }
       }
       var tag = tags.join('_');
@@ -587,7 +605,6 @@ function getMousePos(event) {
   var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
   var x = e.pageX || e.clientX + scrollX;
   var y = e.pageY || e.clientY + scrollY;
-  //alert('x: ' + x + '\ny: ' + y);
   return {
     'x': x,
     'y': y
