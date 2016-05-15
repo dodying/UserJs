@@ -42,18 +42,8 @@ var UnlikeTags = {
   'dickgirl on male': '扶她上男的',
   'monster': '怪物',
   //'netorare': 'NTR'
-} /*要隐藏的标签*/
-
-var UnlikeTags_Alarm = '当前屏蔽的标签有：<span style="font-size:larger">';
-for (var i in UnlikeTags) {
-  UnlikeTags_Alarm += UnlikeTags[i] + '&nbsp;';
 }
-UnlikeTags_Alarm += '</span>'
-var UnlikeTags_Div = document.querySelector('h1');
-UnlikeTags_Div.innerHTML = UnlikeTags_Alarm;
-//setTimeout(function(){
-//a.style.display="none";
-//},5000)
+/*要隐藏的标签*/
 /*要翻译的标签*/
 var TagsChs = {
   //艺术家
@@ -454,9 +444,20 @@ var TagsChs = {
   //重新分类
   'doujinshi': '同人本',
   'manga': '漫画杂志',
-} /*要翻译的标签*/
-
-var Div = document.querySelectorAll('.it5>a');
+}
+/*要翻译的标签*/
+var UnlikeTags_Alarm = '当前屏蔽的标签有：<span style="font-size:larger">';
+for (var i in UnlikeTags) {
+  UnlikeTags_Alarm += UnlikeTags[i] + '&nbsp;';
+}
+UnlikeTags_Alarm += '</span>';
+var UnlikeTags_Div = document.querySelector('h1');
+UnlikeTags_Div.innerHTML = UnlikeTags_Alarm;
+//setTimeout(function(){
+//a.style.display="none";
+//},5000)
+var Div = document.querySelectorAll('.it5>a,.id3>a');
+//console.log(Div);
 var Group_Artist_Array = new Array();
 var Group_Artist_Array_Chs = new Array();
 var Group_Array = new Array();
@@ -481,7 +482,8 @@ for (var i = 0; i < Div.length; i++) {
   } else if (i == Div.length - 1 && i > 24) {
     xhr(gidlist, 1);
   }
-} /*以下为函数*/
+}
+/*以下为函数*/
 
 function xhr(gidlist, status) {
   var gdata = {
@@ -553,13 +555,13 @@ function TagPreview(gmetadata, status) {
         for (var i = 0; i < tags.length; i++) {
           if (tags[i] in TagsChs) {
             tags[i] = TagsChs[tags[i]];
-          }else if (tags[i] == Doujinshi_Array[id]) {
+          } else if (tags[i] == Doujinshi_Array[id]) {
             if (Doujinshi_Array_Chs[id]) tags[i] = Doujinshi_Array_Chs[id];
             tags[i] = '<span style="font-size:larger;color:yellow;">同人：' + tags[i] + '</span>';
-          }else if (tags[i] == Group_Array[id]) {
+          } else if (tags[i] == Group_Array[id]) {
             if (Group_Array_Chs[id]) tags[i] = Group_Array_Chs[id];
             tags[i] = '<span style="font-size:larger;color:blue;">组织：' + tags[i] + '</span>';
-          }else if (tags[i] == Artist_Array[id]) {
+          } else if (tags[i] == Artist_Array[id]) {
             if (Artist_Array_Chs[id]) tags[i] = Artist_Array_Chs[id];
             tags[i] = '<span style="font-size:larger;color:green;">漫画家：' + tags[i] + '</span>';
           }
@@ -568,9 +570,9 @@ function TagPreview(gmetadata, status) {
       } else {
         var tag = '';
       }
-      if (gmetadata_all[id].title_jpn){
+      if (gmetadata_all[id].title_jpn) {
         var title = gmetadata_all[id].title_jpn;
-      }else {
+      } else {
         var title = gmetadata_all[id].title;
       }
       var MousePos = getMousePos(event);
@@ -581,7 +583,9 @@ function TagPreview(gmetadata, status) {
     }
     Div[i].onmouseout = function (event) {
       //Box.innerHTML = '';
-      this.parentNode.parentNode.querySelector('.it2').style.visibility = 'hidden';
+      if (this.parentNode.parentNode.querySelector('.it2')) {
+        this.parentNode.parentNode.querySelector('.it2').style.visibility = 'hidden';
+      }
       if (event.buttons != 0) {
         setTimeout(function () {
           Box.style.display = 'none';
@@ -598,7 +602,12 @@ function HideGalleries() {
     var tags = gmetadata_all[i].tags;
     for (var n = 0; n < tags.length; n++) {
       if (tags[n] in UnlikeTags) {
-        Div[i].parentNode.parentNode.parentNode.parentNode.style.display = 'none';
+        if (Div[i].querySelector('img')) {
+          Div[i].parentNode.parentNode.style.display = 'none';
+        } 
+        else {
+          Div[i].parentNode.parentNode.parentNode.parentNode.style.display = 'none';
+        }
       }
     }
   }
