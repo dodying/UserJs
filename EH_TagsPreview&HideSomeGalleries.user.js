@@ -552,7 +552,6 @@ function TagPreview(gmetadata) {
       }
       var tag = tags.join('_');
       var MousePos = getMousePos(event);
-      //console.log(MousePos);
       Box.style.display = 'block';
       Box.style.left = eval(MousePos['x'] + 5) + 'px';
       Box.style.top = eval(MousePos['y'] + 5) + 'px';
