@@ -8,11 +8,10 @@
 // @include     http://read.qidian.com/BookReader/*,*.aspx
 // @include     http://vipreader.qidian.com/BookReader/vip,*,*.aspx
 // @include     http://me.qidian.com/bookCase/bookCase.aspx*
-// @version     1.01
+// @version     1.02
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
-// @grant       GM_listValues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @run-at      document-idle
 // ==/UserScript==
@@ -106,11 +105,13 @@ if (window.location.href.indexOf('http://me.qidian.com/bookCase/bookCase.aspx') 
       document.querySelector('#tbBookList>tr:nth-child(' + eval(i + 1) + ')').appendChild(Bookmark);
     }
   }
-  var input = document.createElement('input');
-  input.type = 'button';
-  input.value = '标记已读';
-  input.className = 'btnbook';
-  input.onclick = function () {
+  if (window.location.href == 'http://me.qidian.com/bookCase/bookCase.aspx?caseId=-2') return;
+  QidianBookmark_Old();
+  var MarkRead = document.createElement('input');
+  MarkRead.type = 'button';
+  MarkRead.value = '标记已读';
+  MarkRead.className = 'btnbook';
+  MarkRead.onclick = function () {
     var input_check = document.querySelectorAll('#tbBookList input:checked');
     for (var i = 0; i < input_check.length; i++) {
       var BookName = input_check[i].parentNode.parentNode.querySelector('a[href^="http://www.qidian.com/Book/"]').innerHTML;
@@ -131,5 +132,30 @@ if (window.location.href.indexOf('http://me.qidian.com/bookCase/bookCase.aspx') 
     }
     window.location = window.location;
   }
-  document.querySelector('.bookcaseTable>tfoot>tr>th:nth-child(2)').appendChild(input);
+  document.querySelector('.bookcaseTable>tfoot>tr>th:nth-child(2)').appendChild(MarkRead);
+  var MardDelete = document.createElement('input');
+  MardDelete.type = 'button';
+  MardDelete.value = '删除书签';
+  MardDelete.className = 'btnbook';
+  MardDelete.onclick = function () {
+    if (confirm('是否删除书签')) {
+      var input_check = document.querySelectorAll('#tbBookList input:checked');
+      for (var i = 0; i < input_check.length; i++) {
+        var BookName = input_check[i].parentNode.parentNode.querySelector('a[href^="http://www.qidian.com/Book/"]').innerHTML;
+        if (GM_getValue(BookName)) {
+          GM_deleteValue(BookName);
+        }
+      }
+      window.location = window.location;
+    }
+  }
+  document.querySelector('.bookcaseTable>tfoot>tr>th:nth-child(2)').appendChild(MardDelete);
+} //////////////////////////////////
+
+function QidianBookmark_Old() {
+  document.querySelector('.bookcaseTable > thead:nth-child(1) > tr:nth-child(1) > th:nth-child(5)').width = '';
+  var QidianBookmark_Old = document.querySelectorAll('#tbBookList>tr>td:nth-child(5)>a');
+  for (var i = 0; i < QidianBookmark_Old.length; i++) {
+    QidianBookmark_Old[i].innerHTML = QidianBookmark_Old[i].title.replace('书签章节：', '');
+  }
 }
