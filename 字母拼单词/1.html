@@ -1,0 +1,18 @@
+<html>
+ <head> 
+  <title>字母拼单词</title>
+  <script type="text/javascript" src="1.js"></script> 
+  <script>window.addEventListener('keydown', function (e) {
+  if (e.keyCode == 13){
+    document.all.Button.click();
+  }
+  return;
+}, true);
+  </script> 
+ </head> 
+ <body style="text-align: center"> 
+  <input id="Input" type="text" /> 
+  <input type="button" id="Button" value="点我" onclick="document.all.p.innerHTML=document.all.Input.value+'&lt;br&gt;以上为原字母&lt;br&gt;';var a =main(document.all.Input.value);a=a.join('&lt;br&gt;');document.all.p.innerHTML+=a;document.all.Input.value='';document.all.Input.focus();" /> 
+  <p id="p"></p>  
+ </body>
+</html>
