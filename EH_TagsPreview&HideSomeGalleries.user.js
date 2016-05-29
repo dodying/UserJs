@@ -79,7 +79,7 @@ UnlikeTags_Div.innerHTML = TopAlert;
 //setTimeout(function(){
 //a.style.display="none";
 //},5000)
-var Div = document.querySelectorAll('.it5>a,.id2>a,.id3>a');
+var Div = document.querySelectorAll('.it5>a,.id3>a');
 //console.log(Div);
 var Group_Artist_Array = new Array();
 var Group_Artist_Array_Chs = new Array();
