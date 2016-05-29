@@ -17,7 +17,7 @@
 // @include     http://g.e-hentai.org/favorites.php
 // @include     http://g.e-hentai.org/favorites.php?*
 // @include     http://g.e-hentai.org/uploader/*
-// @version     1.03
+// @version     1.04
 // @grant       none
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @run-at      document-idle
@@ -40,7 +40,8 @@ var UnlikeTags = {
   'dickgirl on dickgirl': '扶她上扶她',
   'male on dickgirl': '男的上扶她',
   'dickgirl on male': '扶她上男的',
-  'monster': '怪物'
+  'monster': '怪物',
+  'novel' : '小说'
 }; /*要隐藏的标签*/
 var AlertTags = {
   'yuri': '女同',
@@ -94,18 +95,17 @@ for (var i = 0; i < Div.length; i++) {
   var url_array = Div[i].href.split('/');
   gidlist.push([url_array[4],
   url_array[5]]);
-  if (i == 24) {
+  if (i === 24) {
     xhr(gidlist, 0);
     gidlist = new Array();
-  } else if (i == 49) {
+  } else if (i === 49) {
     xhr(gidlist, 1);
-  } else if (i == Div.length - 1 && i < 24) {
+  } else if (i === Div.length - 1 && i < 24) {
     xhr(gidlist, 0);
-  } else if (i == Div.length - 1 && i > 24) {
+  } else if (i === Div.length - 1 && i > 24) {
     xhr(gidlist, 1);
   }
-} /*以下为函数*/
-
+}
 function xhr(gidlist, status) {
   var gdata = {
     'method': 'gdata',
@@ -122,7 +122,7 @@ function xhr(gidlist, status) {
   xhr.send(JSON.stringify(gdata));
 }
 function TagPreview(gmetadata, status) {
-  if (status == 0) {
+  if (status === 0) {
     gmetadata_all = gmetadata.concat(gmetadata_all);
   } else {
     gmetadata_all = gmetadata_all.concat(gmetadata);
@@ -233,10 +233,10 @@ function HideGalleries() {
     var tags = gmetadata_all[i].tags;
     for (var n = 0; n < tags.length; n++) {
       if (tags[n] in UnlikeTags) {
-        if (Div[i].querySelector('img')) {
-          Div[i].parentNode.parentNode.style.display = 'none';
-        } else {
+        if (Div[i].parentNode.className === 'it5') {
           Div[i].parentNode.parentNode.parentNode.parentNode.style.display = 'none';
+        } else {
+          Div[i].parentNode.parentNode.style.display = 'none';
         }
       }
     }
