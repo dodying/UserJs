@@ -17,7 +17,7 @@
 // @include     http://g.e-hentai.org/favorites.php
 // @include     http://g.e-hentai.org/favorites.php?*
 // @include     http://g.e-hentai.org/uploader/*
-// @version     1.04
+// @version     1.05
 // @grant       none
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @run-at      document-idle
@@ -30,7 +30,7 @@ var UnlikeTags = {
   'vore': '活吞',
   'tentacles': '触手',
   'guro': '猎奇',
-  'scat': '排泄',
+  //'scat': '排泄',
   'bestiality': '兽奸',
   'insect': '昆虫',
   'worm': '虫子',
@@ -79,6 +79,7 @@ UnlikeTags_Div.innerHTML = TopAlert;
 //setTimeout(function(){
 //a.style.display="none";
 //},5000)
+var Div_needHide=new Array();
 var Div = document.querySelectorAll('.it5>a,.id3>a');
 //console.log(Div);
 var Group_Artist_Array = new Array();
@@ -180,10 +181,6 @@ function TagPreview(gmetadata, status) {
       if (gmetadata_all[id].tags) {
         var tags = gmetadata_all[id].tags;
         for (var i = 0; i < tags.length; i++) {
-          if (tags[i] in AlertTags) {
-            this.innerHTML = '[' + AlertTags[tags[i]] + ']' + this.innerHTML;
-            this.style.color = 'yellow';
-          }
           if (tags[i] in TagsChs) {
             tags[i] = TagsChs[tags[i]];
           } else if (tags[i] == Doujinshi_Array[id]) {
@@ -229,18 +226,59 @@ function TagPreview(gmetadata, status) {
   document.body.appendChild(Box);
 }
 function HideGalleries() {
+  var amount = 0;
   for (var i = 0; i < Div.length; i++) {
     var tags = gmetadata_all[i].tags;
     for (var n = 0; n < tags.length; n++) {
+      if (tags[n] in AlertTags) {
+        Div[i].innerHTML = '[' + AlertTags[tags[n]] + ']' + Div[i].innerHTML;
+        if (Div[i].style.color !== 'red') {
+          Div[i].style.color = 'yellow';
+        }
+      }
       if (tags[n] in UnlikeTags) {
+        Div_needHide.push(Div[i])
+        amount++;
         if (Div[i].parentNode.className === 'it5') {
+          Div[i].innerHTML = '[' + UnlikeTags[tags[n]] + ']' + Div[i].innerHTML;
+          Div[i].style.color = 'red';
           Div[i].parentNode.parentNode.parentNode.parentNode.style.display = 'none';
         } else {
+          Div[i].innerHTML = '[' + UnlikeTags[tags[n]] + ']' + Div[i].innerHTML;
+          Div[i].style.color = 'red';
           Div[i].parentNode.parentNode.style.display = 'none';
         }
       }
     }
   }
+  document.querySelector('p.ip').innerHTML += '  总共屏蔽' + amount + '本本子。'
+  var ShowToggle = document.createElement('button');
+  ShowToggle.innerHTML = '显示';
+  ShowToggle.className = 'ShowToggle_Show';
+  ShowToggle.onclick = function () {
+    if (this.className === 'ShowToggle_Show') {
+      for (var i = 0; i < Div_needHide.length; i++) {
+        if (Div_needHide[i].parentNode.className === 'it5') {
+          Div_needHide[i].parentNode.parentNode.parentNode.parentNode.style.display = '';
+        } else {
+          Div_needHide[i].parentNode.parentNode.style.display = '';
+        }
+      }
+      this.className = 'ShowToggle_Hide';
+      this.innerHTML='隐藏';
+    }else{
+      for (var i = 0; i < Div_needHide.length; i++) {
+        if (Div_needHide[i].parentNode.className === 'it5') {
+          Div_needHide[i].parentNode.parentNode.parentNode.parentNode.style.display = 'none';
+        } else {
+          Div_needHide[i].parentNode.parentNode.style.display = 'none';
+        }
+      }
+      this.className = 'ShowToggle_Show';
+      this.innerHTML='显示';
+    }
+  }
+  document.querySelector('p.ip').appendChild(ShowToggle);
 }
 function getMousePos(event) {
   var e = event || window.event;
