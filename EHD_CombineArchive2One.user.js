@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        EHD_CombineArchive2One
 // @name:zh-CN  【EH】EHD_合并压缩卷
-// @namespace   Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
 // @description Combine the Archive from EHD A too One Archive
 // @description:zh-CN 合并下载自EHD的压缩包
