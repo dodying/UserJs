@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        EH_QuickSearch
 // @name:zh-CN  【EH】EH快捷搜索
-// @namespace   Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
 // @description Add a button to top-right; Left Click:choose the keywords;Right Click:search in other site;
 // @description:zh-CN 在右上角添加一个按钮；左键：选择搜索关键词，中间：添加\删除关键词：中文，右键：在其他站点搜索
