@@ -3,7 +3,7 @@
 // @name:zh-CN  【EH】EH快速收藏
 // @description 左键：加入到fav0，中键：弹出选项，右键：快速添加到上次的收藏夹，双击：移除收藏
 // @description:zh-CN 左键：加入到fav0，中键：弹出选项，右键：快速添加到上次的收藏夹，双击：移除收藏
-// @namespace   Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
 // @include     http://g.e-hentai.org/
 // @include     http://g.e-hentai.org/?*
