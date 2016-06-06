@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        HV_AutoAttack
 // @name:zh-CN  【HV】HV自动打怪
-// @namespace   Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
 // @description 自用的HV自动脚本，press [`~] pause，[double click] choose mode
 // @description:zh-CN 自用的HV自动脚本，按[`~]暂停，[双击]选择模式
