@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        NSFW_Mode
 // @name:zh-CN  绅士模式
-// @namespace   Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
 // @description Fake the page when view nsfw in puc
 // @description:zh-CN 在光天化日之下浏览不健康的网站时，伪装页面
@@ -90,6 +90,10 @@ var fakeAll = [
     'icon': 'http://lh3.appinn.net/wp-content/uploads/cropped-Appinn-icon-512-192x192.png'
   },
   {
+    'title': '新标签页',
+    'icon': ''
+  },
+  {
     'title': '',
     'icon': ''
   },
@@ -114,7 +118,7 @@ window.addEventListener('focus', function () {
   document.title = pretitle;
   document.querySelector('link[rel="icon"]').href = icon;
 });
-var img = document.querySelectorAll('img');
+var img = document.querySelectorAll('img,div[style*="background:transparent url"]');
 for (var i = 0; i < img.length; i++) {
   img[i].style.visibility = 'hidden';
 }
