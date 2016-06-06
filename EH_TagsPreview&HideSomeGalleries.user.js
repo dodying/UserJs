@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        EH_TagsPreview&HideSomeGalleries
 // @name:zh-CN  【EH】标签预览+隐藏画集
-// @namespace   Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
 // @description 移动到画廊上可预览标签，同时如果标签里有不喜欢的标签则会隐藏该画集
 // @description:zh-CN 移动到画廊上可预览标签，同时如果标签里有不喜欢的标签则会隐藏该画集
