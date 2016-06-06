@@ -6,7 +6,7 @@
 // @description 自用的HV自动脚本，press [`~] pause，[double click] choose mode
 // @description:zh-CN 自用的HV自动脚本，按[`~]暂停，[双击]选择模式
 // @include     http://hentaiverse.org/*
-// @version     1.045
+// @version     2.0
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
@@ -14,7 +14,7 @@
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @run-at      document-end
 // ==/UserScript==
-CheckHVSTAT(); //检查HVSTAT
+if (document.querySelector('form[name="ipb_login_form"]')) return;
 RiddleAlert(); //答题警报
 if (document.querySelector('img[src="http://ehgt.org/g/derpy.gif"]')) {
   window.location = window.location.href;
@@ -57,40 +57,26 @@ if (localStorage.HVAutoAttack_disabled == '1') { //如果禁用
 } //////////////////////////////////////////////////
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////
-
-
-function CheckHVSTAT() { //检查HVSTAT
-  if (!document.querySelector('#hvstat-icon')) {
-    var check = confirm('未安装HVSTAT，是否跳转到扩展安装页面');
-    if (check) {
-      if (confirm('是否打开帮助页面（推荐）')) {
-        window.open('https://github.com/GaryMcNabb/HVSTAT/releases');
-        window.open('https://github.com/dodying/Dodying-UserJs/tree/master/HV_AutoAttack');
-      } else {
-        window.open('https://github.com/GaryMcNabb/HVSTAT/releases');
-      }
-    }
-  }
-} //////////////////////////////////////////////////
+//////////////////////////////////////////////////
 //////////////////////////////////////////////////
 
 function OptionButton() {
   var HV_AutoAttack_Button = document.createElement('div');
-  HV_AutoAttack_Button.id='HV_AutoAttack_Button';
-  HV_AutoAttack_Button.style = 'top:4px;left:'+eval(document.querySelector('#hvstat-icon').offsetLeft+30)+'px;position:absolute;z-index:999;';
-  HV_AutoAttack_Button.innerHTML='<a href="javascript:void(0)"><img src="https://cdn0.iconfinder.com/data/icons/thinico/88/thinico-17-24.png" /></a>';
+  HV_AutoAttack_Button.id = 'HV_AutoAttack_Button';
+  HV_AutoAttack_Button.style = 'top:4px;left:' + eval(window.innerWidth - 225) + 'px;position:absolute;z-index:999;';
+  HV_AutoAttack_Button.innerHTML = '<a href="javascript:void(0)"><img src="https://cdn0.iconfinder.com/data/icons/thinico/88/thinico-17-24.png" /></a>';
   HV_AutoAttack_Button.querySelector('a').onclick = function () {
-  if (document.querySelector('#HV_AutoAttack_Option').style.display == 'none') {
-    document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
-  } else {
-    document.querySelector('#HV_AutoAttack_Option').style.display = 'none';
+    if (document.querySelector('#HV_AutoAttack_Option').style.display == 'none') {
+      document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
+    } else {
+      document.querySelector('#HV_AutoAttack_Option').style.display = 'none';
+    }
   }
-}
   document.body.appendChild(HV_AutoAttack_Button);
   var HV_AutoAttack_Option = document.createElement('div');
-  HV_AutoAttack_Option.id='HV_AutoAttack_Option';
+  HV_AutoAttack_Option.id = 'HV_AutoAttack_Option';
   HV_AutoAttack_Option.style = 'z-index:999;width:600px;display:none;background-color:white;position:absolute;left:' + eval(document.documentElement.clientWidth / 2 - 300) + 'px;top:270px;border-color:black;border-style: solid;';
-  HV_AutoAttack_Option.innerHTML='<h2>HV_AutoAttack设置</h2><input type="checkbox" value="答题时暂停">答题时暂停</input><div>打怪模式<input type="radio" value="打怪-物理" name="Attack_Status">物理</input><input type="radio" value="打怪-火" name="Attack_Status" checked>火</input><input type="radio" value="打怪-冰" name="Attack_Status">冰</input><input type="radio" value="打怪-雷" name="Attack_Status">雷</input><input type="radio" value="打怪-风" name="Attack_Status">风</input><input type="radio" value="打怪-圣" name="Attack_Status">圣</input><input type="radio" value="打怪-暗" name="Attack_Status">暗</input></div><h3>警报</h3><div>警报【默认】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3\');audio.play();">试听【默认】</a><br />警报【答题】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3\');audio.play();">试听【默认】</a><br />警报【胜利】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3\');audio.play();">试听【默认】</a><br />警报【错误】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3\');audio.play();">试听【默认】</a><br />警报【失败】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3\');audio.play();">试听【默认】</a></div><button>确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button>';
+  HV_AutoAttack_Option.innerHTML = '<h2>HV_AutoAttack设置</h2><input type="checkbox" value="答题时暂停">答题时暂停</input><div>打怪模式<input type="radio" value="打怪-物理" name="Attack_Status">物理</input><input type="radio" value="打怪-火" name="Attack_Status" checked>火</input><input type="radio" value="打怪-冰" name="Attack_Status">冰</input><input type="radio" value="打怪-雷" name="Attack_Status">雷</input><input type="radio" value="打怪-风" name="Attack_Status">风</input><input type="radio" value="打怪-圣" name="Attack_Status">圣</input><input type="radio" value="打怪-暗" name="Attack_Status">暗</input></div><h3>警报</h3><div>警报【默认】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3\');audio.play();">试听【默认】</a><br />警报【答题】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3\');audio.play();">试听【默认】</a><br />警报【胜利】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3\');audio.play();">试听【默认】</a><br />警报【错误】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3\');audio.play();">试听【默认】</a><br />警报【失败】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3\');audio.play();">试听【默认】</a></div><button>确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button>';
   document.body.appendChild(HV_AutoAttack_Option);
 } //////////////////////////////////////////////////
 
@@ -134,6 +120,7 @@ function HotKey() { //设置全局快捷键
 
 function RiddleAlert() { //答题警报
   if (document.getElementById('riddlemaster')) {
+    document.title = '！！！紧急';
     var audio = document.createElement('audio');
     audio.src = 'http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3';
     audio.play();
@@ -167,29 +154,56 @@ function OtherAlert(event) { //其他警报
   audio.play();
 } //////////////////////////////////////////////////
 
-function CountRound() { //回合计数及自动前进
-  var RoundType = window.location.toString().replace('http://hentaiverse.org/?', '').replace('s=Battle', '').replace('ss=', '').replace('page=2', '').replace(/filter=(.*)/, '').replace(/encounter=(.*)/, '').replace(/&/g, '');
-  if (RoundType == 'ar' || RoundType == 'iw' || RoundType == 'rb' || RoundType == 'gr') {
-    Round_Now = document.querySelector('div.hvstat-round-counter').innerHTML.replace(/\/.*/, ''); //全局变量
-    Round_All = document.querySelector('div.hvstat-round-counter').innerHTML.replace(/.*\//, ''); //全局变量
-  } else if (RoundType == 'ba' || RoundType == '') {
-    if (Monster_All > 6 || Monster_Boss_Alive > 0) {
-      Round_Now = '1';
-      Round_All = '1';
-      //document.getElementById('1001').click();
+function CountRound() { //回合计数及自动前进并获取怪物Hp
+  if (!localStorage['HVAutoAttack_RoundType']) {
+    var RoundType = window.location.toString().replace('http://hentaiverse.org/?', '').replace('s=Battle', '').replace('ss=', '').replace('page=2', '').replace(/filter=(.*)/, '').replace(/encounter=(.*)/, '').replace(/&/g, '');
+    localStorage['HVAutoAttack_RoundType'] = RoundType;
+  } else {
+    var RoundType = localStorage['HVAutoAttack_RoundType'];
+  }
+  if (!localStorage['HVAutoAttack_Round_Now']) {
+    if (RoundType == 'ba') {
+      if (Monster_All > 6 || Monster_Boss_Alive > 0) {
+        Round_Now = '1';
+        localStorage['HVAutoAttack_Round_Now'] = Round_Now;
+        Round_All = '1';
+        localStorage['HVAutoAttack_Round_All'] = Round_All;
+        //document.getElementById('1001').click();
+      } else {
+        Round_Now = '2';
+        localStorage['HVAutoAttack_Round_Now'] = Round_Now;
+        Round_All = '2';
+        localStorage['HVAutoAttack_Round_All'] = Round_All;
+      }
     } else {
-      Round_Now = '2';
-      Round_All = '2';
+      var BattleLog = document.querySelectorAll('#togpane_log>table>tbody>tr>td.t3');
+      var Round = BattleLog[BattleLog.length - 2].innerHTML.replace(/.*\(Round /, '').replace(/\).*/, '').replace(/\s+/g, '');
+      Round_Now = Round.replace(/\/.*/, '');
+      localStorage['HVAutoAttack_Round_Now'] = Round_Now;
+      Round_All = Round.replace(/.*\//, '');
+      localStorage['HVAutoAttack_Round_All'] = Round_All;
+      var Monster_Hp = new Array();
+      for (var i = BattleLog.length - 3; i > BattleLog.length - 3 - Monster_All; i--) {
+        Monster_Hp.push(BattleLog[i].innerHTML.replace(/.*HP=/, ''));
+      }
+      localStorage['HVAutoAttack_Monster_Hp'] = Monster_Hp;
     }
   } else {
-    //alert(RoundType);
-    //OtherAlert('Error');
+    Round_Now = localStorage['HVAutoAttack_Round_Now'];
+    Round_All = localStorage['HVAutoAttack_Round_All'];
   }
   if (Monster_Alive > 0 && document.querySelector('.btcp')) {
     OtherAlert('Failed');
   } else if (Round_Now != Round_All && document.querySelector('.btcp')) {
+    localStorage.removeItem('HVAutoAttack_Round_Now');
+    localStorage.removeItem('HVAutoAttack_Round_All');
+    localStorage.removeItem('HVAutoAttack_Monster_Hp');
     document.getElementById('ckey_continue').click();
   } else if (Round_Now == Round_All && document.querySelector('.btcp')) {
+    localStorage.removeItem('HVAutoAttack_Round_Now');
+    localStorage.removeItem('HVAutoAttack_Round_All');
+    localStorage.removeItem('HVAutoAttack_Monster_Hp');
+    localStorage.removeItem('HVAutoAttack_RoundType');
     localStorage.removeItem('HVAutoAttack_status');
     localStorage.removeItem('HVAutoAttack_disabled');
     OtherAlert('Win');
@@ -204,7 +218,7 @@ function CountRound() { //回合计数及自动前进
 
 function AutoUseGem() { //自动使用宝石
   if (document.getElementById('ikey_p')) {
-    var Gem = document.getElementById('ikey_p').getAttribute('onmouseover').replace('battle.set_infopane_item(\'', '').replace(/',(.*)/, '');
+    var Gem = document.getElementById('ikey_p').getAttribute('onmouseover').replace(/battle.set_infopane_item\(\'(.*?)\'.*/, '$1');
     if (Gem == 'Health Gem' && HP <= 0.5) {
       document.getElementById('ikey_p').click();
     } else if (Gem == 'Mana Gem' && MP <= 0.7) {
@@ -255,11 +269,12 @@ function AutoUsePotAndBuffSkill() { //自动使用药水、Buff技能
   if ((Round_All >= 12) || (Round_All == Round_Now && Round_All == 1)) {
     if (document.querySelector('div.bte>img[src*="/e/channeling.png"]')) {
       var buff = document.querySelector('div.bte').querySelectorAll('img');
-      if (buff.length > 0) {
+      if (buff.length > 1) {
         for (var n = 0; n < buff.length; n++) {
-          var buff_lasttime = buff[n].getAttribute('onmouseover').replace(/(.*)\'\,/g, '').replace(')', '');
+          var spell_name = buff[n].getAttribute('onmouseover').replace(/battle.set_infopane_effect\(\'(.*?)\'.*/, '$1');
+          if (spell_name == 'Absorbing Ward') continue;
+          var buff_lasttime = buff[n].getAttribute('onmouseover').replace(/.*\'\,(.*?)\)/g, '$1');
           if (buff_lasttime <= 15) {
-            var spell_name = buff[n].getAttribute('onmouseover').match(/'([^']+)/) [1];
             if (spell_name == 'Cloak of the Fallen' && !document.querySelector('div.bte>img[src*="/e/sparklife.png"]')) {
               document.getElementById('422').click();
             } else if (spell_name == 'Spark of Life') {
@@ -310,25 +325,23 @@ function AutoUsePotAndBuffSkill() { //自动使用药水、Buff技能
   }
 } //////////////////////////////////////////////////
 
-function AutoAttack() { //自动打怪（借助HVSTAT）
+function AutoAttack() { //自动打怪
   if (HP < 0.44) {
     if (!confirm('HP小于44%，是否继续自动打怪？\r\n可能会死亡')) {
       //OtherAlert();
       return;
     }
   }
-  var Monster_Dead_Img = document.querySelectorAll('img[src*="/s/nbardead.png"]');
-  var MonsterHPNow = new Array();
-  for (var i = 0; i < Monster_Dead_Img.length; i++) {
-    Monster_Dead_Img[i].className = 'hvstat-monster-health';
-  }
-  var HPBar = document.getElementsByClassName('hvstat-monster-health');
+  var MonsterHPNow = localStorage['HVAutoAttack_Monster_Hp'].split(',');
+  console.log(MonsterHPNow);
+  var HPBar = document.querySelectorAll('div.btm4>div.btm5:nth-child(1)');
+  console.log(HPBar)
   for (var i = 0; i < HPBar.length; i++) {
-    var HPNow = HPBar[i].innerHTML.replace(/ \/(.*)/, '');
-    if (HPNow == '') {
-      HPNow = Math.pow(10, 10);
+    if (HPBar[i].querySelector('img[src="/y/s/nbardead.png"]')) {
+      MonsterHPNow[i] = Math.pow(10, 10);
+    } else {
+      MonsterHPNow[i] = MonsterHPNow[i] * parseInt(HPBar[i].querySelector('div.chbd>img.chb2').style.width) / 120;
     }
-    MonsterHPNow[i] = HPNow;
   }
   var HPMin = Math.min.apply(null, MonsterHPNow);
   for (var i = 0; i < MonsterHPNow.length; i++) {
