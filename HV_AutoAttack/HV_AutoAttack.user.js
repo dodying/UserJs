@@ -6,7 +6,7 @@
 // @description 自用的HV自动脚本，press [`~] pause，[double click] choose mode
 // @description:zh-CN 自用的HV自动脚本，按[`~]暂停，[双击]选择模式
 // @include     http://hentaiverse.org/*
-// @version     2.0
+// @version     2.01
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
@@ -162,6 +162,12 @@ function CountRound() { //回合计数及自动前进并获取怪物Hp
     var RoundType = localStorage['HVAutoAttack_RoundType'];
   }
   if (!localStorage['HVAutoAttack_Round_Now']) {
+    var BattleLog = document.querySelectorAll('#togpane_log>table>tbody>tr>td.t3');
+    var Monster_Hp = new Array();
+    for (var i = BattleLog.length - 3; i > BattleLog.length - 3 - Monster_All; i--) {
+      Monster_Hp.push(BattleLog[i].innerHTML.replace(/.*HP=/, ''));
+    }
+    localStorage['HVAutoAttack_Monster_Hp'] = Monster_Hp.join(',');
     if (RoundType == 'ba') {
       if (Monster_All > 6 || Monster_Boss_Alive > 0) {
         Round_Now = '1';
@@ -176,17 +182,11 @@ function CountRound() { //回合计数及自动前进并获取怪物Hp
         localStorage['HVAutoAttack_Round_All'] = Round_All;
       }
     } else {
-      var BattleLog = document.querySelectorAll('#togpane_log>table>tbody>tr>td.t3');
       var Round = BattleLog[BattleLog.length - 2].innerHTML.replace(/.*\(Round /, '').replace(/\).*/, '').replace(/\s+/g, '');
       Round_Now = Round.replace(/\/.*/, '');
       localStorage['HVAutoAttack_Round_Now'] = Round_Now;
       Round_All = Round.replace(/.*\//, '');
       localStorage['HVAutoAttack_Round_All'] = Round_All;
-      var Monster_Hp = new Array();
-      for (var i = BattleLog.length - 3; i > BattleLog.length - 3 - Monster_All; i--) {
-        Monster_Hp.push(BattleLog[i].innerHTML.replace(/.*HP=/, ''));
-      }
-      localStorage['HVAutoAttack_Monster_Hp'] = Monster_Hp;
     }
   } else {
     Round_Now = localStorage['HVAutoAttack_Round_Now'];
@@ -333,9 +333,7 @@ function AutoAttack() { //自动打怪
     }
   }
   var MonsterHPNow = localStorage['HVAutoAttack_Monster_Hp'].split(',');
-  console.log(MonsterHPNow);
   var HPBar = document.querySelectorAll('div.btm4>div.btm5:nth-child(1)');
-  console.log(HPBar)
   for (var i = 0; i < HPBar.length; i++) {
     if (HPBar[i].querySelector('img[src="/y/s/nbardead.png"]')) {
       MonsterHPNow[i] = Math.pow(10, 10);
