@@ -14,9 +14,9 @@
 // @run-at      document-idle
 // ==/UserScript==
 var div = document.createElement('div');
-var left = document.querySelector('.ehD-box').offsetLeft + 150;
-var top = document.querySelector('.ehD-box').offsetTop - 20;
-div.style = 'color:red;position: absolute;left: ' + left + 'px;top: ' + top + 'px;z-index: 999;';
+var BLeft = document.querySelector('.ehD-box').offsetLeft + 150;
+var BTop = document.querySelector('.ehD-box').offsetTop - 20;
+div.style = 'color:red;position:absolute;left:' + BLeft + 'px;top:' + BTop + 'px;z-index:999;';
 div.innerHTML = '请选择分页数目<select><option></option><option value ="2">2</option><option value ="3">3</option><option value ="4">4</option><option value ="5">5</option><option value ="6">6</option><option value ="7">7</option><option value ="8">8</option><option value ="9">9</option><option value ="10">10</option></select><button style="display:none;">第1次下载</button><button style="display:none;">下载BAT文件</button>';
 div.querySelector('select').onchange = function () {
   var amount = this.value;
@@ -32,12 +32,12 @@ div.querySelector('select').onchange = function () {
   //console.log(page);
   div.querySelectorAll('button') [0].style.display = '';
   div.querySelectorAll('button') [1].style.display = '';
-  localStorage['EHD_DPR_page'] = page;
-  localStorage['EHD_DPR_time'] = 1;
+  window.EHD_DPR_page = page;
+  window.EHD_DPR_time = 1;
 }
 div.querySelectorAll('button') [0].onclick = function () {
-  var time = parseInt(localStorage['EHD_DPR_time']);
-  var page = localStorage['EHD_DPR_page'].split(',');
+  var time = window.EHD_DPR_time;
+  var page = window.EHD_DPR_page;
   if (time == page.length) {
     this.innerHTML = '已完成';
   } else if (time > page.length) {
@@ -49,7 +49,7 @@ div.querySelectorAll('button') [0].onclick = function () {
   //document.querySelector('div.g2:nth-child(3)').click();
 
   document.querySelector('div.g2:nth-child(5) > a:nth-child(2) > label:nth-child(1) > input:nth-child(1)').value = page[time - 1];
-  localStorage['EHD_DPR_time']++;
+  window.EHD_DPR_time++;
 }
 div.querySelectorAll('button') [1].onclick = function () {
   var amount = div.querySelector('select').value;
