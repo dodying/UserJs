@@ -8,7 +8,7 @@
 // @description press [Enter] Or [Space] pause，[double click] choose mode
 // @description:zh-CN 自用的HV自动脚本，按[回车]或[空格]暂停，[双击]选择模式
 // @include     http://hentaiverse.org/*
-// @version     2.20
+// @version     2.201
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -471,7 +471,7 @@ function AutoAttack() { //自动打怪
     }
     setTimeout(function () {
       document.getElementById('mkey_' + minnum).click();
-    }, time);
+    }, 1000 * time);
   } else {
     setTimeout(function () {
       document.getElementById('mkey_' + minnum).click();
