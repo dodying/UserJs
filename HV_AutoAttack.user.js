@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name        HV_AutoAttack
 // @name:zh-CN  【HV】HV自动打怪
-// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
-// @description 自用的HV自动脚本，press [`~] pause，[double click] choose mode
-// @description:zh-CN 自用的HV自动脚本，按[`~]暂停，[双击]选择模式
-// @include     http://hentaiverse.org/*
-// @version     2.11
-// @grant       none
+// @namespace   https://github.com/dodying/Dodying-UserJs
+// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
+// @description press [Enter] Or [Space] pause，[double click] choose mode
+// @description:zh-CN 自用的HV自动脚本，按[回车]或[空格]暂停，[双击]选择模式
+// @include     http://hentaiverse.org/*
+// @version     2.20
+// @grant       none
 // @run-at      document-end
 // ==/UserScript==
 if (document.querySelector('form[name="ipb_login_form"]')) return;
@@ -17,37 +18,37 @@ if (document.querySelector('img[src="http://ehgt.org/g/derpy.gif"]')) {
   window.location = window.location.href;
 }
 OptionButton();
-if (localStorage['HV_AutoAttack_Setting']) {
-  var HV_AutoAttack_Setting = JSON.parse(localStorage['HV_AutoAttack_Setting']);
-  //console.log(HV_AutoAttack_Setting);
+if (localStorage['HVAA_Setting']) {
+  var HVAA_Setting = JSON.parse(localStorage['HVAA_Setting']);
+  //console.log(HVAA_Setting);
+  if (HVAA_Setting['version'] != GM_info.script.version) {
+    alert('HV-AutoAttack更新，请重新设置配置');
+    document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
+  }
 } else {
   alert('请设置HV-AutoAttack');
   document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
 }
 if (!document.querySelector('#togpane_log')) {
-  localStorage.removeItem('HVAutoAttack_Round_Now');
-  localStorage.removeItem('HVAutoAttack_Round_All');
-  localStorage.removeItem('HVAutoAttack_Monster_Hp');
-  localStorage.removeItem('HVAutoAttack_RoundType');
-  localStorage.removeItem('HVAutoAttack_status');
-  localStorage.removeItem('HVAutoAttack_disabled');
+  localStorage.removeItem('HVAA_Round_Now');
+  localStorage.removeItem('HVAA_Round_All');
+  localStorage.removeItem('HVAA_Monster_Hp');
+  localStorage.removeItem('HVAA_RoundType');
+  localStorage.removeItem('HVAA_status');
+  localStorage.removeItem('HVAA_disabled');
   //setTimeout(function () {
   //window.location = window.location;
   //}, 5 * 60 * 1000);
   return;
 }
 HotKey(); //设置全局快捷键
-if (localStorage['HVAutoAttack_disabled'] == '1') { //如果禁用
+if (localStorage['HVAA_disabled'] == '1') { //如果禁用
   return;
 } else { //如果没有禁用
-  if (!localStorage['HVAutoAttack_status']) {
-    if (HV_AutoAttack_Setting) {
-      var status = HV_AutoAttack_Setting['Attack_Status'];
-    } else {
-      var status = '1'; //0.物理 1.火 2.冰 3.雷 4.风 5.圣 6.暗
-    }
+  if (!localStorage['HVAA_status']) {
+    var status = HVAA_Setting['Attack_Status'];
   } else {
-    var status = localStorage['HVAutoAttack_status'];
+    var status = localStorage['HVAA_status'];
   }
   var Monster_All = document.querySelectorAll('div.btm1').length;
   var Monster_Dead = document.querySelectorAll('img[src*="/s/nbardead.png"]').length;
@@ -89,32 +90,39 @@ function OptionButton() {
   document.body.appendChild(HV_AutoAttack_Button);
   var HV_AutoAttack_Option = document.createElement('div');
   HV_AutoAttack_Option.id = 'HV_AutoAttack_Option';
-  HV_AutoAttack_Option.style = 'font-size:large;z-index:999;width:600px;display:none;background-color:white;position:absolute;left:' + eval(document.documentElement.clientWidth / 2 - 300) + 'px;top:200px;border-color:black;border-style:solid;';
-  HV_AutoAttack_Option.innerHTML = '<h1>HV AutoAttack设置</h1><input type="checkbox" id="CrazyMode"><label for="CrazyMode">即使<span style="color:red;font-weight:bold;">血量过低</span>，仍然继续打怪。</label><div>打怪模式：<input type="radio" id="Attack_Status_0" name="Attack_Status" value="0" /><label for="Attack_Status_0">物理</label><input type="radio" id="Attack_Status_1" name="Attack_Status" value="1" checked /><label for="Attack_Status_1">火</label><input type="radio" id="Attack_Status_2" name="Attack_Status" value="2" /><label for="Attack_Status_2">冰</label><input type="radio" id="Attack_Status_3" name="Attack_Status" value="3" /><label for="Attack_Status_3">雷</label><input type="radio" id="Attack_Status_4" name="Attack_Status" value="4" /><label for="Attack_Status_4">风</label><input type="radio" id="Attack_Status_5" name="Attack_Status" value="5" /><label for="Attack_Status_5">圣</label><input type="radio" id="Attack_Status_6" name="Attack_Status" value="6" /><label for="Attack_Status_6">暗</label></div><h2>警报</h2><div>  【默认】：<input class="Alert" name="Alert_default" size="70" value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br />  【答题】：<input class="Alert" name="Alert_Riddle" size="70" value="http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br />  【胜利】：<input class="Alert" name="Alert_Win" size="70" value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br />  【错误】：<input class="Alert" name="Alert_Error" size="70" value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br />  【失败】：<input class="Alert" name="Alert_Failed" size="70" value="http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a></div><button id="HV_AutoAttack_Setting_Apply">确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button>';
-  HV_AutoAttack_Option.querySelector('#HV_AutoAttack_Setting_Apply').onclick = function () {
-    var Option = this.parentNode;
-    var HV_AutoAttack_Setting = new Object();
-    (Option.querySelector('#CrazyMode').checked) ? HV_AutoAttack_Setting['CrazyMode'] = true : HV_AutoAttack_Setting['CrazyMode'] = false;
-    HV_AutoAttack_Setting['Attack_Status'] = parseInt(document.querySelector('input[name="Attack_Status"]:checked').value);
+  HV_AutoAttack_Option.style = 'font-size:large;z-index:999;width:600px;display:none;background-color:white;position:absolute;left:' + eval(document.documentElement.clientWidth / 2 - 300) + 'px;top:110px;border-color:black;border-style:solid;text-align:left;';
+  HV_AutoAttack_Option.innerHTML = '<h1 style="text-align:center;">HV AutoAttack设置</h1><div style="text-align:center;"><span style="color:green;">HP1:<input class="DeadSoon"name="HP1"style="width:16px;"value="50">%&nbsp;HP2:<input class="DeadSoon"name="HP2"style="width:16px;"value="44">%&nbsp;</span><span style="color:blue;">MP1:<input class="DeadSoon"name="MP1"style="width:16px;"value="70">%&nbsp;MP2:<input class="DeadSoon"name="MP2"style="width:16px;"value="10">%&nbsp;</span><span style="color:red;">SP1:<input class="DeadSoon"name="SP1"style="width:16px;"value="75">%&nbsp;SP2:<input class="DeadSoon"name="SP2"style="width:16px;"value="50">%</span></div><div><input type="checkbox"id="CrazyMode"><label for="CrazyMode">即使<span style="color:red;font-weight:bold;">血量过低</span>，仍然继续打怪。</label></div><div>延时攻击：延时<input id="Attack_Delay_Time"style="width:16px;"value="0.1">秒攻击。<br>延时攻击2：每隔<input id="Attack_Delay2_Round"style="width:16px;"value="10">回合，延迟<input id="Attack_Delay2_Time"style="width:16px;"value="10">秒攻击。</div><div>打怪模式：<input type="radio"id="Attack_Status_0"name="Attack_Status"value="0"><label for="Attack_Status_0">物理</label><input type="radio"id="Attack_Status_1"name="Attack_Status"value="1"checked><label for="Attack_Status_1">火</label><input type="radio"id="Attack_Status_2"name="Attack_Status"value="2"><label for="Attack_Status_2">冰</label><input type="radio"id="Attack_Status_3"name="Attack_Status"value="3"><label for="Attack_Status_3">雷</label><input type="radio"id="Attack_Status_4"name="Attack_Status"value="4"><label for="Attack_Status_4">风</label><input type="radio"id="Attack_Status_5"name="Attack_Status"value="5"><label for="Attack_Status_5">圣</label><input type="radio"id="Attack_Status_6"name="Attack_Status"value="6"><label for="Attack_Status_6">暗</label></div><div><h2 style="text-align:center;">警报</h2>【默认】：<input class="Alert"name="Alert_default"style="width:400px;"value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br/>【答题】：<input class="Alert"name="Alert_Riddle"style="width:400px;"value="http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br/>【胜利】：<input class="Alert"name="Alert_Win"style="width:400px;"value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br/>【错误】：<input class="Alert"name="Alert_Error"style="width:400px;"value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br/>【失败】：<input class="Alert"name="Alert_Failed"style="width:400px;"value="http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a></div><div style="text-align:center;"><button id="HVAA_Setting_Apply">确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button></div>';
+  HV_AutoAttack_Option.querySelector('#HVAA_Setting_Apply').onclick = function () {
+    var Option = this.parentNode.parentNode;
+    var HVAA_Setting = new Object();
+    HVAA_Setting['version'] = GM_info.script.version;
+    var DeadSoon = Option.querySelectorAll('.DeadSoon');
+    for (var i = 0; i < DeadSoon.length; i++) {
+      HVAA_Setting[DeadSoon[i].name] = parseFloat(DeadSoon[i].value);
+    }(Option.querySelector('#CrazyMode').checked) ? HVAA_Setting['CrazyMode'] = true : HVAA_Setting['CrazyMode'] = false;
+    HVAA_Setting['Attack_Delay_Time'] = parseFloat(Option.querySelector('#Attack_Delay_Time').value);
+    HVAA_Setting['Attack_Delay2_Round'] = parseFloat(Option.querySelector('#Attack_Delay2_Round').value);
+    HVAA_Setting['Attack_Delay2_Time'] = parseFloat(Option.querySelector('#Attack_Delay2_Time').value);
+    HVAA_Setting['Attack_Status'] = parseFloat(document.querySelector('input[name="Attack_Status"]:checked').value);
     var Input_Alert = Option.querySelectorAll('.Alert');
     for (var i = 0; i < Input_Alert.length; i++) {
-      HV_AutoAttack_Setting[Input_Alert[i].name] = Input_Alert[i].value;
+      HVAA_Setting[Input_Alert[i].name] = Input_Alert[i].value;
     }
-    localStorage['HV_AutoAttack_Setting'] = JSON.stringify(HV_AutoAttack_Setting);
-    document.querySelector('#HV_AutoAttack_Option').style.display = 'none';
+    localStorage['HVAA_Setting'] = JSON.stringify(HVAA_Setting);
+    Option.style.display = 'none';
   }
   document.body.appendChild(HV_AutoAttack_Option);
 } //////////////////////////////////////////////////
 
 function HotKey() { //设置全局快捷键
   window.addEventListener('keydown', function (e) {
-    if (e.keyCode == 192) //`~ 这里设置开关快捷键 对照表http://www.cnblogs.com/furenjian/articles/2957770.html
+    if (e.keyCode == 32 || e.keyCode == 13) //回车或空格 这里设置开关快捷键 对照表http://www.cnblogs.com/furenjian/articles/2957770.html
     {
-      if (!localStorage['HVAutoAttack_disabled'])
+      if (!localStorage['HVAA_disabled'])
       {
-        localStorage['HVAutoAttack_disabled'] = '1';
+        localStorage['HVAA_disabled'] = '1';
       } else {
-        localStorage.removeItem('HVAutoAttack_disabled');
+        localStorage.removeItem('HVAA_disabled');
       }
       e.returnValue = false;
       window.location.replace(window.location.href); //刷新页面
@@ -124,7 +132,7 @@ function HotKey() { //设置全局快捷键
     if (p == '' || p == null) {
       var p = 1;
     }
-    localStorage['HVAutoAttack_status'] = p;
+    localStorage['HVAA_status'] = p;
     e.returnValue = false;
     window.location.replace(window.location.href);
   }*/
@@ -136,7 +144,7 @@ function HotKey() { //设置全局快捷键
     if (p == '' || p == null) {
       var p = 1;
     }
-    localStorage['HVAutoAttack_status'] = p;
+    localStorage['HVAA_status'] = p;
     e.returnValue = false;
     window.location.replace(window.location.href);
   }, true);
@@ -148,11 +156,7 @@ function RiddleAlert() { //答题警报
   if (document.getElementById('riddlemaster')) {
     document.title = '！！！紧急';
     var audio = document.createElement('audio');
-    if (HV_AutoAttack_Setting) {
-      audio.src = HV_AutoAttack_Setting['Alert_Riddle'];
-    } else {
-      audio.src = 'http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3';
-    }
+    audio.src = HVAA_Setting['Alert_Riddle'];
     audio.play();
     var random = Math.random();
     if (random < 1 / 3) {
@@ -167,97 +171,80 @@ function RiddleAlert() { //答题警报
 
 function OtherAlert(event) { //其他警报
   var audio = document.createElement('audio');
-  if (HV_AutoAttack_Setting) {
-    switch (event) {
-      default:
-        audio.src = HV_AutoAttack_Setting['Alert_default'];
-        break;
-      case 'Win':
-        audio.src = HV_AutoAttack_Setting['Alert_Win'];
-        break;
-      case 'Error':
-        audio.src = HV_AutoAttack_Setting['Alert_Error'];
-        break;
-      case 'Failed':
-        audio.src = HV_AutoAttack_Setting['Alert_Failed'];
-        break;
-    }
-  } else {
-    switch (event) {
-      default:
-        audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3';
-        break;
-      case 'Win':
-        audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3';
-        break;
-      case 'Error':
-        audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3';
-        break;
-      case 'Failed':
-        audio.src = 'http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3';
-        break;
-    }
+  switch (event) {
+    default:
+      audio.src = HVAA_Setting['Alert_default'];
+      break;
+    case 'Win':
+      audio.src = HVAA_Setting['Alert_Win'];
+      break;
+    case 'Error':
+      audio.src = HVAA_Setting['Alert_Error'];
+      break;
+    case 'Failed':
+      audio.src = HVAA_Setting['Alert_Failed'];
+      break;
   }
   audio.play();
 } //////////////////////////////////////////////////
 
 function CountRound() { //回合计数及自动前进并获取怪物Hp
-  if (!localStorage['HVAutoAttack_RoundType']) {
+  if (!localStorage['HVAA_RoundType']) {
     var RoundType = window.location.toString().replace('http://hentaiverse.org/?', '').replace('s=Battle', '').replace('ss=', '').replace('page=2', '').replace(/filter=(.*)/, '').replace(/encounter=(.*)/, '').replace(/&/g, '');
-    localStorage['HVAutoAttack_RoundType'] = RoundType;
+    localStorage['HVAA_RoundType'] = RoundType;
   } else {
-    var RoundType = localStorage['HVAutoAttack_RoundType'];
+    var RoundType = localStorage['HVAA_RoundType'];
   }
-  if (!localStorage['HVAutoAttack_Round_Now']) {
+  if (!localStorage['HVAA_Round_Now']) {
     var BattleLog = document.querySelectorAll('#togpane_log>table>tbody>tr>td.t3');
     var Monster_Hp = new Array();
     for (var i = BattleLog.length - 3; i > BattleLog.length - 3 - Monster_All; i--) {
-      var hp = parseInt(BattleLog[i].innerHTML.replace(/.*HP=/, ''));
+      var hp = parseFloat(BattleLog[i].innerHTML.replace(/.*HP=/, ''));
       if (!isNaN(hp)) {
         Monster_Hp.push(hp);
       } else {
         return;
       }
     }
-    localStorage['HVAutoAttack_Monster_Hp'] = Monster_Hp.join(',');
+    localStorage['HVAA_Monster_Hp'] = Monster_Hp.join(',');
     if (RoundType == 'ba') {
       if (Monster_All > 6 || Monster_Boss_Alive > 0) {
         Round_Now = '1';
-        localStorage['HVAutoAttack_Round_Now'] = Round_Now;
+        localStorage['HVAA_Round_Now'] = Round_Now;
         Round_All = '1';
-        localStorage['HVAutoAttack_Round_All'] = Round_All;
+        localStorage['HVAA_Round_All'] = Round_All;
         //document.getElementById('1001').click();
       } else {
         Round_Now = '2';
-        localStorage['HVAutoAttack_Round_Now'] = Round_Now;
+        localStorage['HVAA_Round_Now'] = Round_Now;
         Round_All = '2';
-        localStorage['HVAutoAttack_Round_All'] = Round_All;
+        localStorage['HVAA_Round_All'] = Round_All;
       }
     } else {
       var Round = BattleLog[BattleLog.length - 2].innerHTML.replace(/.*\(Round /, '').replace(/\).*/, '').replace(/\s+/g, '');
       Round_Now = Round.replace(/\/.*/, '');
-      localStorage['HVAutoAttack_Round_Now'] = Round_Now;
+      localStorage['HVAA_Round_Now'] = Round_Now;
       Round_All = Round.replace(/.*\//, '');
-      localStorage['HVAutoAttack_Round_All'] = Round_All;
+      localStorage['HVAA_Round_All'] = Round_All;
     }
   } else {
-    Round_Now = localStorage['HVAutoAttack_Round_Now'];
-    Round_All = localStorage['HVAutoAttack_Round_All'];
+    Round_Now = localStorage['HVAA_Round_Now'];
+    Round_All = localStorage['HVAA_Round_All'];
   }
   if (Monster_Alive > 0 && document.querySelector('.btcp')) {
     OtherAlert('Failed');
   } else if (Round_Now != Round_All && document.querySelector('.btcp')) {
-    localStorage.removeItem('HVAutoAttack_Round_Now');
-    localStorage.removeItem('HVAutoAttack_Round_All');
-    localStorage.removeItem('HVAutoAttack_Monster_Hp');
+    localStorage.removeItem('HVAA_Round_Now');
+    localStorage.removeItem('HVAA_Round_All');
+    localStorage.removeItem('HVAA_Monster_Hp');
     document.getElementById('ckey_continue').click();
   } else if (Round_Now == Round_All && document.querySelector('.btcp')) {
-    localStorage.removeItem('HVAutoAttack_Round_Now');
-    localStorage.removeItem('HVAutoAttack_Round_All');
-    localStorage.removeItem('HVAutoAttack_Monster_Hp');
-    localStorage.removeItem('HVAutoAttack_RoundType');
-    localStorage.removeItem('HVAutoAttack_status');
-    localStorage.removeItem('HVAutoAttack_disabled');
+    localStorage.removeItem('HVAA_Round_Now');
+    localStorage.removeItem('HVAA_Round_All');
+    localStorage.removeItem('HVAA_Monster_Hp');
+    localStorage.removeItem('HVAA_RoundType');
+    localStorage.removeItem('HVAA_status');
+    localStorage.removeItem('HVAA_disabled');
     OtherAlert('Win');
     setTimeout(function () {
       window.location = 'http://hentaiverse.org/?s=Character&ss=ch';
@@ -271,11 +258,11 @@ function CountRound() { //回合计数及自动前进并获取怪物Hp
 function AutoUseGem() { //自动使用宝石
   if (document.getElementById('ikey_p')) {
     var Gem = document.getElementById('ikey_p').getAttribute('onmouseover').replace(/battle.set_infopane_item\(\'(.*?)\'.*/, '$1');
-    if (Gem == 'Health Gem' && HP <= 0.5) {
+    if (Gem == 'Health Gem' && HP <= HVAA_Setting['HP1'] * 0.01) {
       document.getElementById('ikey_p').click();
-    } else if (Gem == 'Mana Gem' && MP <= 0.7) {
+    } else if (Gem == 'Mana Gem' && MP <= HVAA_Setting['MP1'] * 0.01) {
       document.getElementById('ikey_p').click();
-    } else if (Gem == 'Spirit Gem' && SP <= 0.75) {
+    } else if (Gem == 'Spirit Gem' && SP <= HVAA_Setting['SP1'] * 0.01) {
       document.getElementById('ikey_p').click();
     } else if (Gem == 'Mystic Gem') {
       document.getElementById('ikey_p').click();
@@ -284,19 +271,19 @@ function AutoUseGem() { //自动使用宝石
 } //////////////////////////////////////////////////
 
 function DeadSoon() { //自动回血回魔
-  if (MP < 0.1) { //自动回魔
+  if (MP < HVAA_Setting['MP2'] * 0.01) { //自动回魔
     document.getElementById('quickbar').style.backgroundColor = 'blue';
     if (document.querySelector('#ikey_5')) {
       document.querySelector('.bti3>div[onmouseover*="Mana Potion"]').click();
     }
   }
-  if (SP < 0.5) { //自动回精
+  if (SP < HVAA_Setting['SP2'] * 0.01) { //自动回精
     document.getElementById('quickbar').style.backgroundColor = 'green';
     if (document.querySelector('#ikey_8')) {
       document.querySelector('.bti3>div[onmouseover*="Spirit Potion"]').click();
     }
   }
-  if (HP <= 0.5) { //自动回血
+  if (HP <= HVAA_Setting['HP1'] * 0.01) { //自动回血
     if (!document.querySelector('.cwb2[src*="/s/barsilver.png"]')) {
       document.getElementById('quickbar').style.backgroundColor = 'red';
     }
@@ -378,28 +365,21 @@ function AutoUsePotAndBuffSkill() { //自动使用药水、Buff技能
 } //////////////////////////////////////////////////
 
 function AutoAttack() { //自动打怪
-  if (HP < 0.44) {
-    if (HV_AutoAttack_Setting) {
-      if (!HV_AutoAttack_Setting['CrazyMode']) {
-        if (!confirm('HP小于44%，是否继续自动打怪？\r\n可能会死亡')) {
-          //OtherAlert();
-          return;
-        }
-      }
-    } else {
-      if (!confirm('HP小于44%，是否继续自动打怪？\r\n可能会死亡')) {
+  if (HP < HVAA_Setting['HP2'] * 0.01) {
+    if (!HVAA_Setting['CrazyMode']) {
+      if (!confirm('HP小于' + HVAA_Setting['HP2'] + '%，是否继续自动打怪？\r\n可能会死亡')) {
         //OtherAlert();
         return;
       }
     }
   }
-  var MonsterHPNow = localStorage['HVAutoAttack_Monster_Hp'].split(',');
+  var MonsterHPNow = localStorage['HVAA_Monster_Hp'].split(',');
   var HPBar = document.querySelectorAll('div.btm4>div.btm5:nth-child(1)');
   for (var i = 0; i < HPBar.length; i++) {
     if (HPBar[i].querySelector('img[src="/y/s/nbardead.png"]')) {
       MonsterHPNow[i] = Math.pow(10, 10);
     } else {
-      MonsterHPNow[i] = MonsterHPNow[i] * parseInt(HPBar[i].querySelector('div.chbd>img.chb2').style.width) / 120;
+      MonsterHPNow[i] = MonsterHPNow[i] * parseFloat(HPBar[i].querySelector('div.chbd>img.chb2').style.width) / 120;
     }
   }
   var HPMin = Math.min.apply(null, MonsterHPNow);
@@ -425,7 +405,7 @@ function AutoAttack() { //自动打怪
   } else if (status == '6') {
     var status_title = '暗';
   }
-  if (!localStorage['HVAutoAttack_disabled']) {
+  if (!localStorage['HVAA_disabled']) {
     document.title = Round_Now + '/' + Round_All + status_title + + ' ' + Monster_Boss_Alive + ' ' + Monster_Alive + '/' + Monster_All;
   } else {
     document.title = status_title + ' [OFF]';
@@ -479,51 +459,22 @@ function AutoAttack() { //自动打怪
   if (minnum == '10') {
     var minnum = '0';
   }
-  if (Round_Now % 10 == 0 && Monster_Alive == Monster_All && Monster_Alive - Monster_Boss_Alive > 0 && Round_Now > 10) {
+  if (Round_Now % HVAA_Setting['Attack_Delay2_Round'] == 0 && Monster_Alive == Monster_All && Monster_Alive - Monster_Boss_Alive > 0 && Round_Now > HVAA_Setting['Attack_Delay2_Round']) {
+    var i = 0;
+    var time = HVAA_Setting['Attack_Delay2_Time'];
     var title = document.title;
-    document.title = '[10秒后继续运行]' + title;
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number36-16.png');
-      document.title = '[9秒后继续运行]' + title;
-    }, 1000);
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number32-16.png');
-      document.title = '[8秒后继续运行]' + title;
-    }, 2000);
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number34-16.png');
-      document.title = '[7秒后继续运行]' + title;
-    }, 3000);
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number35-16.png');
-      document.title = '[6秒后继续运行]' + title;
-    }, 4000);
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number39-16.png');
-      document.title = '[5秒后继续运行]' + title;
-    }, 5000);
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number38-16.png');
-      document.title = '[4秒后继续运行]' + title;
-    }, 6000);
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number37-16.png');
-      document.title = '[3秒后继续运行]' + title;
-    }, 7000);
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number40-16.png');
-      document.title = '[2秒后继续运行]' + title;
-    }, 8000);
-    setTimeout(function () {
-      //document.querySelector('link[rel="icon"]').setAttribute('href', 'https://cdn4.iconfinder.com/data/icons/number-icon/512/number41-16.png');
-      document.title = '[1秒后继续运行]' + title;
-    }, 9000);
+    for (var j = 0; j < time; j++) {
+      setTimeout(function () {
+        document.title = '[' + eval(time - i) + '秒后继续运行]' + title;
+        i++;
+      }, 1000 * j);
+    }
     setTimeout(function () {
       document.getElementById('mkey_' + minnum).click();
-    }, 10000);
+    }, time);
   } else {
     setTimeout(function () {
       document.getElementById('mkey_' + minnum).click();
-    }, 1000);
+    }, HVAA_Setting['Attack_Delay_Time'] * 1000);
   }
 }
