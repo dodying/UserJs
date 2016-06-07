@@ -6,7 +6,7 @@
 // @description 自用的HV自动脚本，press [`~] pause，[double click] choose mode
 // @description:zh-CN 自用的HV自动脚本，按[`~]暂停，[双击]选择模式
 // @include     http://hentaiverse.org/*
-// @version     2.10
+// @version     2.11
 // @grant       none
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @run-at      document-end
@@ -16,6 +16,14 @@ RiddleAlert(); //答题警报
 if (document.querySelector('img[src="http://ehgt.org/g/derpy.gif"]')) {
   window.location = window.location.href;
 }
+OptionButton();
+if (localStorage['HV_AutoAttack_Setting']) {
+  var HV_AutoAttack_Setting = JSON.parse(localStorage['HV_AutoAttack_Setting']);
+  //console.log(HV_AutoAttack_Setting);
+} else {
+  alert('请设置HV-AutoAttack');
+  document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
+}
 if (!document.querySelector('#togpane_log')) {
   localStorage.removeItem('HVAutoAttack_Round_Now');
   localStorage.removeItem('HVAutoAttack_Round_All');
@@ -23,14 +31,6 @@ if (!document.querySelector('#togpane_log')) {
   localStorage.removeItem('HVAutoAttack_RoundType');
   localStorage.removeItem('HVAutoAttack_status');
   localStorage.removeItem('HVAutoAttack_disabled');
-  OptionButton();
-  if (localStorage['HV_AutoAttack_Setting']) {
-    var HV_AutoAttack_Setting = JSON.parse(localStorage['HV_AutoAttack_Setting']);
-    //console.log(HV_AutoAttack_Setting);
-  } else {
-    alert('请设置HV-AutoAttack');
-    document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
-  }
   //setTimeout(function () {
   //window.location = window.location;
   //}, 5 * 60 * 1000);
@@ -378,7 +378,7 @@ function AutoUsePotAndBuffSkill() { //自动使用药水、Buff技能
 } //////////////////////////////////////////////////
 
 function AutoAttack() { //自动打怪
-  if (HP < 1) {
+  if (HP < 0.44) {
     if (HV_AutoAttack_Setting) {
       if (!HV_AutoAttack_Setting['CrazyMode']) {
         if (!confirm('HP小于44%，是否继续自动打怪？\r\n可能会死亡')) {
