@@ -6,11 +6,8 @@
 // @description 自用的HV自动脚本，press [`~] pause，[double click] choose mode
 // @description:zh-CN 自用的HV自动脚本，按[`~]暂停，[双击]选择模式
 // @include     http://hentaiverse.org/*
-// @version     2.01
-// @grant       GM_setValue
-// @grant       GM_getValue
-// @grant       GM_deleteValue
-// @grant       GM_listValues
+// @version     2.10
+// @grant       none
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @run-at      document-end
 // ==/UserScript==
@@ -20,20 +17,37 @@ if (document.querySelector('img[src="http://ehgt.org/g/derpy.gif"]')) {
   window.location = window.location.href;
 }
 if (!document.querySelector('#togpane_log')) {
+  localStorage.removeItem('HVAutoAttack_Round_Now');
+  localStorage.removeItem('HVAutoAttack_Round_All');
+  localStorage.removeItem('HVAutoAttack_Monster_Hp');
+  localStorage.removeItem('HVAutoAttack_RoundType');
+  localStorage.removeItem('HVAutoAttack_status');
+  localStorage.removeItem('HVAutoAttack_disabled');
   OptionButton();
-  setTimeout(function () {
-    window.location = window.location;
-  }, 5 * 60 * 1000);
+  if (localStorage['HV_AutoAttack_Setting']) {
+    var HV_AutoAttack_Setting = JSON.parse(localStorage['HV_AutoAttack_Setting']);
+    //console.log(HV_AutoAttack_Setting);
+  } else {
+    alert('请设置HV-AutoAttack');
+    document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
+  }
+  //setTimeout(function () {
+  //window.location = window.location;
+  //}, 5 * 60 * 1000);
   return;
 }
 HotKey(); //设置全局快捷键
-if (localStorage.HVAutoAttack_disabled == '1') { //如果禁用
+if (localStorage['HVAutoAttack_disabled'] == '1') { //如果禁用
   return;
 } else { //如果没有禁用
-  if (!localStorage.HVAutoAttack_status) {
-    var status = '1'; //0.物理 1.火 2.冰 3.雷 4.风 5.圣 6.暗
+  if (!localStorage['HVAutoAttack_status']) {
+    if (HV_AutoAttack_Setting) {
+      var status = HV_AutoAttack_Setting['Attack_Status'];
+    } else {
+      var status = '1'; //0.物理 1.火 2.冰 3.雷 4.风 5.圣 6.暗
+    }
   } else {
-    var status = localStorage.HVAutoAttack_status;
+    var status = localStorage['HVAutoAttack_status'];
   }
   var Monster_All = document.querySelectorAll('div.btm1').length;
   var Monster_Dead = document.querySelectorAll('img[src*="/s/nbardead.png"]').length;
@@ -75,8 +89,20 @@ function OptionButton() {
   document.body.appendChild(HV_AutoAttack_Button);
   var HV_AutoAttack_Option = document.createElement('div');
   HV_AutoAttack_Option.id = 'HV_AutoAttack_Option';
-  HV_AutoAttack_Option.style = 'z-index:999;width:600px;display:none;background-color:white;position:absolute;left:' + eval(document.documentElement.clientWidth / 2 - 300) + 'px;top:270px;border-color:black;border-style: solid;';
-  HV_AutoAttack_Option.innerHTML = '<h2>HV_AutoAttack设置</h2><input type="checkbox" value="答题时暂停">答题时暂停</input><div>打怪模式<input type="radio" value="打怪-物理" name="Attack_Status">物理</input><input type="radio" value="打怪-火" name="Attack_Status" checked>火</input><input type="radio" value="打怪-冰" name="Attack_Status">冰</input><input type="radio" value="打怪-雷" name="Attack_Status">雷</input><input type="radio" value="打怪-风" name="Attack_Status">风</input><input type="radio" value="打怪-圣" name="Attack_Status">圣</input><input type="radio" value="打怪-暗" name="Attack_Status">暗</input></div><h3>警报</h3><div>警报【默认】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3\');audio.play();">试听【默认】</a><br />警报【答题】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3\');audio.play();">试听【默认】</a><br />警报【胜利】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3\');audio.play();">试听【默认】</a><br />警报【错误】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3\');audio.play();">试听【默认】</a><br />警报【失败】：<input /><a href="javascript:#" onclick="var audio = new Audio(\'http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3\');audio.play();">试听【默认】</a></div><button>确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button>';
+  HV_AutoAttack_Option.style = 'font-size:large;z-index:999;width:600px;display:none;background-color:white;position:absolute;left:' + eval(document.documentElement.clientWidth / 2 - 300) + 'px;top:200px;border-color:black;border-style:solid;';
+  HV_AutoAttack_Option.innerHTML = '<h1>HV AutoAttack设置</h1><input type="checkbox" id="CrazyMode"><label for="CrazyMode">即使<span style="color:red;font-weight:bold;">血量过低</span>，仍然继续打怪。</label><div>打怪模式：<input type="radio" id="Attack_Status_0" name="Attack_Status" value="0" /><label for="Attack_Status_0">物理</label><input type="radio" id="Attack_Status_1" name="Attack_Status" value="1" checked /><label for="Attack_Status_1">火</label><input type="radio" id="Attack_Status_2" name="Attack_Status" value="2" /><label for="Attack_Status_2">冰</label><input type="radio" id="Attack_Status_3" name="Attack_Status" value="3" /><label for="Attack_Status_3">雷</label><input type="radio" id="Attack_Status_4" name="Attack_Status" value="4" /><label for="Attack_Status_4">风</label><input type="radio" id="Attack_Status_5" name="Attack_Status" value="5" /><label for="Attack_Status_5">圣</label><input type="radio" id="Attack_Status_6" name="Attack_Status" value="6" /><label for="Attack_Status_6">暗</label></div><h2>警报</h2><div>  【默认】：<input class="Alert" name="Alert_default" size="70" value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br />  【答题】：<input class="Alert" name="Alert_Riddle" size="70" value="http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br />  【胜利】：<input class="Alert" name="Alert_Win" size="70" value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br />  【错误】：<input class="Alert" name="Alert_Error" size="70" value="http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a><br />  【失败】：<input class="Alert" name="Alert_Failed" size="70" value="http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3" /><a href="javascript:#" onclick="var audio = new Audio(this.previousElementSibling.value);audio.play();">试听</a></div><button id="HV_AutoAttack_Setting_Apply">确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button>';
+  HV_AutoAttack_Option.querySelector('#HV_AutoAttack_Setting_Apply').onclick = function () {
+    var Option = this.parentNode;
+    var HV_AutoAttack_Setting = new Object();
+    (Option.querySelector('#CrazyMode').checked) ? HV_AutoAttack_Setting['CrazyMode'] = true : HV_AutoAttack_Setting['CrazyMode'] = false;
+    HV_AutoAttack_Setting['Attack_Status'] = parseInt(document.querySelector('input[name="Attack_Status"]:checked').value);
+    var Input_Alert = Option.querySelectorAll('.Alert');
+    for (var i = 0; i < Input_Alert.length; i++) {
+      HV_AutoAttack_Setting[Input_Alert[i].name] = Input_Alert[i].value;
+    }
+    localStorage['HV_AutoAttack_Setting'] = JSON.stringify(HV_AutoAttack_Setting);
+    document.querySelector('#HV_AutoAttack_Option').style.display = 'none';
+  }
   document.body.appendChild(HV_AutoAttack_Option);
 } //////////////////////////////////////////////////
 
@@ -84,9 +110,9 @@ function HotKey() { //设置全局快捷键
   window.addEventListener('keydown', function (e) {
     if (e.keyCode == 192) //`~ 这里设置开关快捷键 对照表http://www.cnblogs.com/furenjian/articles/2957770.html
     {
-      if (!localStorage.HVAutoAttack_disabled)
+      if (!localStorage['HVAutoAttack_disabled'])
       {
-        localStorage.HVAutoAttack_disabled = '1';
+        localStorage['HVAutoAttack_disabled'] = '1';
       } else {
         localStorage.removeItem('HVAutoAttack_disabled');
       }
@@ -98,7 +124,7 @@ function HotKey() { //设置全局快捷键
     if (p == '' || p == null) {
       var p = 1;
     }
-    localStorage.HVAutoAttack_status = p;
+    localStorage['HVAutoAttack_status'] = p;
     e.returnValue = false;
     window.location.replace(window.location.href);
   }*/
@@ -110,7 +136,7 @@ function HotKey() { //设置全局快捷键
     if (p == '' || p == null) {
       var p = 1;
     }
-    localStorage.HVAutoAttack_status = p;
+    localStorage['HVAutoAttack_status'] = p;
     e.returnValue = false;
     window.location.replace(window.location.href);
   }, true);
@@ -122,7 +148,11 @@ function RiddleAlert() { //答题警报
   if (document.getElementById('riddlemaster')) {
     document.title = '！！！紧急';
     var audio = document.createElement('audio');
-    audio.src = 'http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3';
+    if (HV_AutoAttack_Setting) {
+      audio.src = HV_AutoAttack_Setting['Alert_Riddle'];
+    } else {
+      audio.src = 'http://zjdx1.sc.chinaz.com/files/downLoad/sound/huang/cd9/mp3/111.mp3';
+    }
     audio.play();
     var random = Math.random();
     if (random < 1 / 3) {
@@ -137,19 +167,36 @@ function RiddleAlert() { //答题警报
 
 function OtherAlert(event) { //其他警报
   var audio = document.createElement('audio');
-  switch (event) {
-    default:
-      audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3';
-      break;
-    case 'Win':
-      audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3';
-      break;
-    case 'Error':
-      audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3';
-      break;
-    case 'Failed':
-      audio.src = 'http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3';
-      break;
+  if (HV_AutoAttack_Setting) {
+    switch (event) {
+      default:
+        audio.src = HV_AutoAttack_Setting['Alert_default'];
+        break;
+      case 'Win':
+        audio.src = HV_AutoAttack_Setting['Alert_Win'];
+        break;
+      case 'Error':
+        audio.src = HV_AutoAttack_Setting['Alert_Error'];
+        break;
+      case 'Failed':
+        audio.src = HV_AutoAttack_Setting['Alert_Failed'];
+        break;
+    }
+  } else {
+    switch (event) {
+      default:
+        audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201601/6796.mp3';
+        break;
+      case 'Win':
+        audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6907.mp3';
+        break;
+      case 'Error':
+        audio.src = 'http://zjyd.sc.chinaz.com/files/downLoad/sound1/201602/6886.mp3';
+        break;
+      case 'Failed':
+        audio.src = 'http://zjyd.sc.chinaz.com/files/download/sound1/201207/1756.mp3';
+        break;
+    }
   }
   audio.play();
 } //////////////////////////////////////////////////
@@ -165,7 +212,12 @@ function CountRound() { //回合计数及自动前进并获取怪物Hp
     var BattleLog = document.querySelectorAll('#togpane_log>table>tbody>tr>td.t3');
     var Monster_Hp = new Array();
     for (var i = BattleLog.length - 3; i > BattleLog.length - 3 - Monster_All; i--) {
-      Monster_Hp.push(BattleLog[i].innerHTML.replace(/.*HP=/, ''));
+      var hp = parseInt(BattleLog[i].innerHTML.replace(/.*HP=/, ''));
+      if (!isNaN(hp)) {
+        Monster_Hp.push(hp);
+      } else {
+        return;
+      }
     }
     localStorage['HVAutoAttack_Monster_Hp'] = Monster_Hp.join(',');
     if (RoundType == 'ba') {
@@ -326,10 +378,19 @@ function AutoUsePotAndBuffSkill() { //自动使用药水、Buff技能
 } //////////////////////////////////////////////////
 
 function AutoAttack() { //自动打怪
-  if (HP < 0.44) {
-    if (!confirm('HP小于44%，是否继续自动打怪？\r\n可能会死亡')) {
-      //OtherAlert();
-      return;
+  if (HP < 1) {
+    if (HV_AutoAttack_Setting) {
+      if (!HV_AutoAttack_Setting['CrazyMode']) {
+        if (!confirm('HP小于44%，是否继续自动打怪？\r\n可能会死亡')) {
+          //OtherAlert();
+          return;
+        }
+      }
+    } else {
+      if (!confirm('HP小于44%，是否继续自动打怪？\r\n可能会死亡')) {
+        //OtherAlert();
+        return;
+      }
     }
   }
   var MonsterHPNow = localStorage['HVAutoAttack_Monster_Hp'].split(',');
@@ -364,7 +425,7 @@ function AutoAttack() { //自动打怪
   } else if (status == '6') {
     var status_title = '暗';
   }
-  if (!localStorage.HVAutoAttack_disabled) {
+  if (!localStorage['HVAutoAttack_disabled']) {
     document.title = Round_Now + '/' + Round_All + status_title + + ' ' + Monster_Boss_Alive + ' ' + Monster_Alive + '/' + Monster_All;
   } else {
     document.title = status_title + ' [OFF]';
