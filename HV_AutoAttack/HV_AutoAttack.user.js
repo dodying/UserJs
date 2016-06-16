@@ -8,7 +8,7 @@
 // @description The first user should configure in Chinese.
 // @description:zh-CN 自用的HV自动脚本，初次使用，请先设置好选项
 // @include     http://hentaiverse.org/*
-// @version     2.31
+// @version     2.32
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
