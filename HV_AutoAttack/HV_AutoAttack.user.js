@@ -3,8 +3,8 @@
 // @name:zh-CN  【HV】HV自动打怪
 // @name:zh-TW  【HV】HV自動打怪
 // @author      Dodying
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
+// @namespace   https://github.com/dodying/UserJs
+// @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @description HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
