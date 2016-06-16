@@ -3,14 +3,14 @@
 // @name:zh-CN  【HV】HV自动打怪
 // @name:zh-TW  【HV】HV自動打怪
 // @author      Dodying
-// @namespace   https://github.com/dodying/UserJs
-// @supportURL  https://github.com/dodying/UserJs/issues
+// @namespace   https://github.com/dodying/Dodying-UserJs
+// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @description HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.32
+// @version     2.321
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -129,7 +129,7 @@ function OptionButton() {
     //console.log(HVAA_Setting);
     var DeadSoon = HV_AutoAttack_Option.querySelectorAll('.HVAA_DeadSoon');
     for (var i = 0; i < DeadSoon.length; i++) {
-      DeadSoon[i].value = HVAA_Setting[DeadSoon[i].name];
+      DeadSoon[i].value = HVAA_Setting[DeadSoon[i].name.replace('HVAA_', '')];
     }
     HV_AutoAttack_Option.querySelector('#HVAA_Shortcut_Pause').value = HVAA_Setting.Shortcut_Pause;
     HV_AutoAttack_Option.querySelector('#HVAA_Shortcut_Choose').value = HVAA_Setting.Shortcut_Choose;
@@ -149,7 +149,7 @@ function OptionButton() {
     HV_AutoAttack_Option.querySelector('#HVAA_Attack_Delay2_Time').value = HVAA_Setting.Attack_Delay2_Time;
     HV_AutoAttack_Option.querySelector('#HVAA_Attack_Status_' + HVAA_Setting.Attack_Status).checked = true;
     for (i = 0; i < Input_Alert.length; i++) {
-      Input_Alert[i].value = HVAA_Setting[Input_Alert[i].name];
+      Input_Alert[i].value = HVAA_Setting[Input_Alert[i].name.replace('HVAA_', '')];
     }
   }
   HV_AutoAttack_Option.querySelector('#HVAA_Setting_Apply').onclick = function () {
@@ -174,7 +174,7 @@ function OptionButton() {
     HVAA_Setting.version = GM_info.script.version;
     var DeadSoon = Option.querySelectorAll('.HVAA_DeadSoon');
     for (var i = 0; i < DeadSoon.length; i++) {
-      HVAA_Setting[DeadSoon[i].name] = parseFloat(DeadSoon[i].value || DeadSoon[i].placeholder);
+      HVAA_Setting[DeadSoon[i].name.replace('HVAA_', '')] = parseFloat(DeadSoon[i].value || DeadSoon[i].placeholder);
     }
     HVAA_Setting.Shortcut_Pause = Option.querySelector('#HVAA_Shortcut_Pause').value || Option.querySelector('#HVAA_Shortcut_Pause').placeholder;
     HVAA_Setting.Shortcut_Choose = Option.querySelector('#HVAA_Shortcut_Choose').value || Option.querySelector('#HVAA_Shortcut_Choose').placeholder;
@@ -193,7 +193,7 @@ function OptionButton() {
     HVAA_Setting.Attack_Delay2_Time = parseFloat(Option.querySelector('#HVAA_Attack_Delay2_Time').value || Option.querySelector('#HVAA_Attack_Delay2_Time').placeholder);
     HVAA_Setting.Attack_Status = parseInt(document.querySelector('input[name="HVAA_Attack_Status"]:checked').value || 1);
     for (i = 0; i < Input_Alert.length; i++) {
-      HVAA_Setting[Input_Alert[i].name] = Input_Alert[i].value || Input_Alert[i].placeholder;
+      HVAA_Setting[Input_Alert[i].name.replace('HVAA_', '')] = Input_Alert[i].value || Input_Alert[i].placeholder;
     }
     console.log(HVAA_Setting);
     localStorage.HVAA_Setting = JSON.stringify(HVAA_Setting);
