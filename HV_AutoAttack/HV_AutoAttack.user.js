@@ -10,7 +10,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.345
+// @version     2.346
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -32,6 +32,7 @@ if (localStorage.HVAA_Setting) {
     alert('HV-AutoAttack版本更新，请重新设置\r\n强烈推荐【重置设置】后再设置。');
     document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
     document.querySelector('#HVAA_Setting_Clear').focus();
+    window.HVAA_End = true;
   }
 } else {
   alert('请设置HV-AutoAttack');
@@ -72,6 +73,7 @@ if (localStorage.HVAA_disabled) { //如果禁用
 //////////////////////////////////////////////////
 
 function main() {
+  if (window.HVAA_End) return;
   window.Monster_Count_All = document.querySelectorAll('div.btm1').length;
   window.Monster_Count_Dead = document.querySelectorAll('img[src*="/s/nbardead.png"]').length;
   window.Monster_Count_Alive = Monster_Count_All - Monster_Count_Dead;
@@ -530,10 +532,16 @@ function AutoAttack() { //自动打怪
     }
   }
   if (Attack_Status !== 0) {
-    document.getElementById('1' + Attack_Status + '1').click();
+    if (document.getElementById('1' + Attack_Status + '1')) {
+      document.getElementById('1' + Attack_Status + '1').click();
+    }
     if (Monster_Count_All >= 8 && Monster_Count_Dead <= 1) {
-      document.getElementById('1' + Attack_Status + '2').click();
-      document.getElementById('1' + Attack_Status + '3').click();
+      if (document.getElementById('1' + Attack_Status + '2')) {
+        document.getElementById('1' + Attack_Status + '2').click();
+      }
+      if (document.getElementById('1' + Attack_Status + '3')) {
+        document.getElementById('1' + Attack_Status + '3').click();
+      }
     }
   }
   if (document.getElementById('2501').style.opacity === '0.5' && oc >= 0.2) {
