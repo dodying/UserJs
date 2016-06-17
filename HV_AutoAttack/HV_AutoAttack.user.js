@@ -10,7 +10,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.34
+// @version     2.345
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -251,8 +251,11 @@ function CountRound() { //回合计数及自动前进并获取怪物Hp
   } else {
     RoundType = localStorage.HVAA_Round_Type;
   }
+  var BattleLog = document.querySelectorAll('#togpane_log>table>tbody>tr>td.t3');
+  if (BattleLog.length === Monster_Count_All + 2 && BattleLog[BattleLog.length - 1].innerHTML === 'Battle Start!') {
+    removeItemInStorage(1);
+  }
   if (!localStorage.HVAA_Round_Now) {
-    var BattleLog = document.querySelectorAll('#togpane_log>table>tbody>tr>td.t3');
     var Monster = [
     ];
     var id = 0;
@@ -430,12 +433,12 @@ function AutoUsePotAndSuSkill() { //自动使用药水、增益技能
 } //////////////////////////////////////////////////
 
 function AutoUseDeSkill() {
-  if (document.getElementById('212').style.opacity !== '0.5' && Round_Now >= 50) {
-    document.getElementById('212').click();
-    var random;
-    do {
-      random = ((Math.random() * (Monster_Count_All - 1)) + 1).toFixed();
-    } while (Monster[random - 1].isDead);
+  if (document.getElementById('213').style.opacity !== '0.5') { // && Round_Now >= 50
+    document.getElementById('213').click();
+    for (var i = 0; i < Monster_Count_All; i++) {
+      if (Monster[i].isBoss) break;
+    }
+    i++;
     document.getElementById('mkey_' + random).click();
   }
 } //////////////////////////////////////////////////
