@@ -10,7 +10,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.33
+// @version     2.34
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -29,8 +29,9 @@ if (localStorage.HVAA_Setting) {
   var HVAA_Setting = JSON.parse(localStorage.HVAA_Setting);
   //console.log(HVAA_Setting);
   if (HVAA_Setting.version !== GM_info.script.version) {
-    alert('HV-AutoAttack版本更新，请重新设置');
+    alert('HV-AutoAttack版本更新，请重新设置\r\n强烈推荐【重置设置】后再设置。');
     document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
+    document.querySelector('#HVAA_Setting_Clear').focus();
   }
 } else {
   alert('请设置HV-AutoAttack');
@@ -39,9 +40,6 @@ if (localStorage.HVAA_Setting) {
 RiddleAlert(); //答题警报
 if (!document.querySelector('#togpane_log')) {
   removeItemInStorage(2);
-  //setTimeout(function () {
-  //window.location = window.location;
-  //}, 5 * 60 * 1000);
   return;
 }
 HotKey(); //设置全局快捷键
@@ -54,12 +52,16 @@ if (localStorage.HVAA_disabled) { //如果禁用
   } else {
     var Attack_Status = localStorage.HVAA_Attack_Status;
   }
-  setTimeout(function () {
-    OtherAlert();
-  }, HVAA_Setting.Delay_Alert * 1000);
-  setTimeout(function () {
-    window.location = window.location.href;
-  }, HVAA_Setting.Delay_Reload * 1000);
+  if (HVAA_Setting.Delay_Alert) {
+    setTimeout(function () {
+      OtherAlert();
+    }, HVAA_Setting.Delay_Alert_Time * 1000);
+  }
+  if (HVAA_Setting.Delay_Reload) {
+    setTimeout(function () {
+      window.location = window.location.href;
+    }, HVAA_Setting.Delay_Reload_Time * 1000);
+  }
   if (HVAA_Setting.Reloader) {
     setInterval(main, HVAA_Setting.Reloader_Time * 1000);
   } else {
@@ -108,7 +110,7 @@ function removeItemInStorage(i) {
   }
 } //////////////////////////////////////////////////
 
-function OptionButton() {
+function OptionButton() { //配置
   var HV_AutoAttack_Button = document.createElement('div');
   HV_AutoAttack_Button.id = 'HV_AutoAttack_Button';
   var Left = window.innerWidth - 225;
@@ -126,7 +128,7 @@ function OptionButton() {
   HV_AutoAttack_Option.id = 'HV_AutoAttack_Option';
   Left = document.documentElement.clientWidth / 2 - 300;
   HV_AutoAttack_Option.style = 'font-size:large;z-index:999;width:600px;display:none;background-color:white;position:absolute;left:' + Left + 'px;top:110px;border-color:black;border-style:solid;text-align:left;';
-  HV_AutoAttack_Option.innerHTML = '<h1 style="text-align:center;">HV AutoAttack设置</h1><div style="text-align:center;"><span style="color:green;">HP1:<input class="HVAA_DeadSoon"name="HVAA_HP1"style="width:24px;"placeholder="50">%&nbsp;HP2:<input class="HVAA_DeadSoon"name="HVAA_HP2"style="width:24px;"placeholder="44">%&nbsp;</span><span style="color:blue;">MP1:<input class="HVAA_DeadSoon"name="HVAA_MP1"style="width:24px;"placeholder="70">%&nbsp;MP2:<input class="HVAA_DeadSoon"name="HVAA_MP2"style="width:24px;"placeholder="10">%&nbsp;</span><span style="color:red;">SP1:<input class="HVAA_DeadSoon"name="HVAA_SP1"style="width:24px;"placeholder="75">%&nbsp;SP2:<input class="HVAA_DeadSoon"name="HVAA_SP2"style="width:24px;"placeholder="50">%</span></div><div title="默认【空格】暂停，【回车】选择模式"><b>快捷键</b>：按<input id="HVAA_Shortcut_Pause"style="width:60px;"placeholder=" "onkeyup="this.value=event.key">暂停，按<input id="HVAA_Shortcut_Choose"style="width:60px;"placeholder="Enter"onkeyup="this.value=event.key;">选择模式</div><div><input type="checkbox"id="HVAA_CrazyMode"><label for="HVAA_CrazyMode"><b>浴血模式</b>：即使<span style="color:red;font-weight:bold;">血量过低</span>，仍然继续打怪。</label></div><div title="防止脚本莫名暂停">页面停留<input id="HVAA_Delay_Alert"placeholder="10"style="width:24px;">秒后，警报；<input id="HVAA_Delay_Reload"placeholder="15"style="width:24px;">秒后，刷新页面。</div><div title="感谢网友【zsp40088】提出，推荐安装版本【Vanilla Reloader 1.1.1】"><input id="HVAA_Reloader"type="checkbox"><label for="HVAA_Reloader">兼容Reloader脚本：每隔<input id="HVAA_Reloader_Time"placeholder="1"style="width:24px;">秒运行自动打怪主程序。</label></div><div title="延时攻击，防止内存使用过高，然并卵"><b>延时攻击</b>：延时<input id="HVAA_Attack_Delay_Time"style="width:24px;"placeholder="0.1">秒攻击。<br><input type="checkbox"id="HVAA_Attack_Delay2"><label for="HVAA_Attack_Delay2"><b>延时攻击2</b>：每隔<input id="HVAA_Attack_Delay2_Round"style="width:24px;"placeholder="10">回合，延迟<input id="HVAA_Attack_Delay2_Time"style="width:24px;"placeholder="10">秒攻击。</label></div><div id="HVAA_Su_Skill"style="display:none;"title="在战斗第一回合，满足以下条件，将自动使用\n1.总回合数大于等于12\n2.战斗类型为：浴血擂台\n3.遭遇战中，敌方有6只以上怪物"><b>增益技能</b>：<input type="checkbox"id="HVAA_Su_Skill_HD"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_HD">Health Draught</label><input type="checkbox"id="HVAA_Su_Skill_MD"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_MD">Mana Draught</label><input type="checkbox"id="HVAA_Su_Skill_SD"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_SD">Spirit Draught</label><input type="checkbox"id="HVAA_Su_Skill_Pr"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_Pr">Protection</label><input type="checkbox"id="HVAA_Su_Skill_Ha"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_Ha">Haste</label><input type="checkbox"id="HVAA_Su_Skill_SL"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_SL">Spark of Life</label><input type="checkbox"id="HVAA_Su_Skill_SS"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_SS">Spirit Shield</label></div><div id="HVAA_Channel_Skill"style="display:none;"title="当获得Channel这个Buff时，\n将先重新使用将要消失的技能，\n之后才会使用一下技能。\n需要满足的条件与【增益技能】相同"><b>Channel技能</b>：<input type="checkbox"id="HVAA_Channel_Skill_AF"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_AF">Arcane Focus</label><input type="checkbox"id="HVAA_Channel_Skill_He"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_He">Heartseeker</label><input type="checkbox"id="HVAA_Channel_Skill_Re"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_Re">Regen</label><input type="checkbox"id="HVAA_Channel_Skill_SV"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_SV">Shadow Veil</label><input type="checkbox"id="HVAA_Channel_Skill_Ab"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_Ab">Absorb</label></div><div id="HVAA_De_Skill"style="display:none;"><b>De技能</b>：<input type="checkbox"id="HVAA_Channel_Skill_Im"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_Im">Imperil</label></div><div id="HVAA_Attack_Status"style="color:red;"><b>攻击模式</b>：<input type="radio"id="HVAA_Attack_Status_0"name="HVAA_Attack_Status"value="0"><label for="HVAA_Attack_Status_0">物理</label><input type="radio"id="HVAA_Attack_Status_1"name="HVAA_Attack_Status"value="1"><label for="HVAA_Attack_Status_1">火</label><input type="radio"id="HVAA_Attack_Status_2"name="HVAA_Attack_Status"value="2"><label for="HVAA_Attack_Status_2">冰</label><input type="radio"id="HVAA_Attack_Status_3"name="HVAA_Attack_Status"value="3"><label for="HVAA_Attack_Status_3">雷</label><input type="radio"id="HVAA_Attack_Status_4"name="HVAA_Attack_Status"value="4"><label for="HVAA_Attack_Status_4">风</label><input type="radio"id="HVAA_Attack_Status_5"name="HVAA_Attack_Status"value="5"><label for="HVAA_Attack_Status_5">圣</label><input type="radio"id="HVAA_Attack_Status_6"name="HVAA_Attack_Status"value="6"><label for="HVAA_Attack_Status_6">暗</label></div><div id="HVAA_Alert"><h2 style="text-align:center;">警报</h2>【默认】：<input class="HVAA_Alert"name="HVAA_Alert_default"style="width:400px;"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【答题】：<input class="HVAA_Alert"name="HVAA_Alert_Riddle"style="width:400px;"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【胜利】：<input class="HVAA_Alert"name="HVAA_Alert_Win"style="width:400px;"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【错误】：<input class="HVAA_Alert"name="HVAA_Alert_Error"style="width:400px;"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【失败】：<input class="HVAA_Alert"name="HVAA_Alert_Failed"style="width:400px;"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a></div><div style="text-align:center;"><button id="HVAA_Setting_Apply">确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button></div>';
+  HV_AutoAttack_Option.innerHTML = '<h1 style="text-align:center;">HV AutoAttack设置&nbsp;<button id="HVAA_Setting_Clear"onclick="localStorage.removeItem(\'HVAA_Setting\');location.reload();"title="推荐每次更新后点击一次">重置设置</button></h1><div style="text-align:center;"><span style="color:green;">HP1:<input class="HVAA_DeadSoon"name="HVAA_HP1"style="width:24px;"placeholder="50"type="text">%&nbsp;HP2:<input class="HVAA_DeadSoon"name="HVAA_HP2"style="width:24px;"placeholder="44"type="text">%&nbsp;</span><span style="color:blue;">MP1:<input class="HVAA_DeadSoon"name="HVAA_MP1"style="width:24px;"placeholder="70"type="text">%&nbsp;MP2:<input class="HVAA_DeadSoon"name="HVAA_MP2"style="width:24px;"placeholder="10"type="text">%&nbsp;</span><span style="color:red;">SP1:<input class="HVAA_DeadSoon"name="HVAA_SP1"style="width:24px;"placeholder="75"type="text">%&nbsp;SP2:<input class="HVAA_DeadSoon"name="HVAA_SP2"style="width:24px;"placeholder="50"type="text">%</span></div><div title="默认【空格】暂停，【回车】选择模式"><b>快捷键</b>：按<input name="HVAA_Shortcut_Pause"style="width:60px;"type="text"placeholder=" "onkeyup="this.value=event.key;">暂停，按<input name="HVAA_Shortcut_Choose"style="width:60px;"type="text"placeholder="Enter"onkeyup="this.value=event.key;">选择模式</div><div><input type="checkbox"id="HVAA_CrazyMode"><label for="HVAA_CrazyMode"><b>浴血模式</b>：即使<span style="color:red;font-weight:bold;">血量过低</span>，仍然继续打怪。</label></div><div title="防止脚本莫名暂停"><input id="HVAA_Delay_Alert"type="checkbox"><label for="HVAA_Delay_Alert">页面停留<input name="HVAA_Delay_Alert_Time"placeholder="10"style="width:24px;"type="text">秒后，警报；</label><input id="HVAA_Delay_Reload"type="checkbox"checked="true"><label for="HVAA_Delay_Reload">页面停留<input name="HVAA_Delay_Reload_Time"placeholder="15"style="width:24px;"type="text">秒后，刷新页面。</label></div><div title="感谢网友【zsp40088】提出，推荐安装版本【Vanilla Reloader 1.1.1】"><input id="HVAA_Reloader"type="checkbox"><label for="HVAA_Reloader">兼容Reloader脚本：每隔<input name="HVAA_Reloader_Time"placeholder="1"style="width:24px;"type="text">秒运行自动打怪主程序。</label></div><div title="延时攻击，防止内存使用过高，然并卵"><b>延时攻击</b>：延时<input name="HVAA_Attack_Delay_Time"style="width:24px;"placeholder="0.1"type="text">秒攻击。<br><input type="checkbox"id="HVAA_Attack_Delay2"><label for="HVAA_Attack_Delay2"><b>延时攻击2</b>：每隔<input name="HVAA_Attack_Delay2_Round"style="width:24px;"placeholder="10"type="text">回合，延迟<input name="HVAA_Attack_Delay2_Time"style="width:24px;"placeholder="10"type="text">秒攻击。</label></div><div id="HVAA_Su_Skill"style="display:none;"title="在战斗第一回合，满足以下条件，将自动使用\n1.总回合数大于等于12\n2.战斗类型为：浴血擂台\n3.遭遇战中，敌方有6只以上怪物"><b>增益技能</b>：<input type="checkbox"id="HVAA_Su_Skill_HD"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_HD">Health Draught</label><input type="checkbox"id="HVAA_Su_Skill_MD"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_MD">Mana Draught</label><input type="checkbox"id="HVAA_Su_Skill_SD"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_SD">Spirit Draught</label><input type="checkbox"id="HVAA_Su_Skill_Pr"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_Pr">Protection</label><input type="checkbox"id="HVAA_Su_Skill_Ha"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_Ha">Haste</label><input type="checkbox"id="HVAA_Su_Skill_SL"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_SL">Spark of Life</label><input type="checkbox"id="HVAA_Su_Skill_SS"class="HVAA_Su_Skill"><label for="HVAA_Su_Skill_SS">Spirit Shield</label></div><div id="HVAA_Channel_Skill"style="display:none;"title="当获得Channel这个Buff时，\n将先重新使用将要消失的技能，\n之后才会使用一下技能。\n需要满足的条件与【增益技能】相同"><b>Channel技能</b>：<input type="checkbox"id="HVAA_Channel_Skill_AF"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_AF">Arcane Focus</label><input type="checkbox"id="HVAA_Channel_Skill_He"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_He">Heartseeker</label><input type="checkbox"id="HVAA_Channel_Skill_Re"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_Re">Regen</label><input type="checkbox"id="HVAA_Channel_Skill_SV"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_SV">Shadow Veil</label><input type="checkbox"id="HVAA_Channel_Skill_Ab"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_Ab">Absorb</label></div><div id="HVAA_De_Skill"style="display:none;"><b>De技能</b>：<input type="checkbox"id="HVAA_Channel_Skill_Im"class="HVAA_Channel_Skill"><label for="HVAA_Channel_Skill_Im">Imperil</label></div><div id="HVAA_Attack_Status"style="color:red;"><b>攻击模式</b>：<input type="radio"id="HVAA_Attack_Status_0"name="HVAA_Attack_Status"value="0"><label for="HVAA_Attack_Status_0">物理</label><input type="radio"id="HVAA_Attack_Status_1"name="HVAA_Attack_Status"value="1"><label for="HVAA_Attack_Status_1">火</label><input type="radio"id="HVAA_Attack_Status_2"name="HVAA_Attack_Status"value="2"><label for="HVAA_Attack_Status_2">冰</label><input type="radio"id="HVAA_Attack_Status_3"name="HVAA_Attack_Status"value="3"><label for="HVAA_Attack_Status_3">雷</label><input type="radio"id="HVAA_Attack_Status_4"name="HVAA_Attack_Status"value="4"><label for="HVAA_Attack_Status_4">风</label><input type="radio"id="HVAA_Attack_Status_5"name="HVAA_Attack_Status"value="5"><label for="HVAA_Attack_Status_5">圣</label><input type="radio"id="HVAA_Attack_Status_6"name="HVAA_Attack_Status"value="6"><label for="HVAA_Attack_Status_6">暗</label></div><div id="HVAA_Alert"><h2 style="text-align:center;">警报</h2>【默认】：<input class="HVAA_Alert"name="HVAA_Alert_default"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【答题】：<input class="HVAA_Alert"name="HVAA_Alert_Riddle"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【胜利】：<input class="HVAA_Alert"name="HVAA_Alert_Win"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【错误】：<input class="HVAA_Alert"name="HVAA_Alert_Error"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【失败】：<input class="HVAA_Alert"name="HVAA_Alert_Failed"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a></div><div style="text-align:center;"><button id="HVAA_Setting_Apply">确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button></div>';
   var Input_Alert = HV_AutoAttack_Option.querySelectorAll('.HVAA_Alert');
   var File_Type = (/Chrome|Safari/.test(window.navigator.userAgent)) ? '.mp3' : '.wav';
   for (var i = 0; i < Input_Alert.length; i++) {
@@ -135,37 +137,16 @@ function OptionButton() {
   if (localStorage.HVAA_Setting) {
     var HVAA_Setting = JSON.parse(localStorage.HVAA_Setting);
     //console.log(HVAA_Setting);
-    var DeadSoon = HV_AutoAttack_Option.querySelectorAll('.HVAA_DeadSoon');
-    for (var i = 0; i < DeadSoon.length; i++) {
-      DeadSoon[i].value = HVAA_Setting[DeadSoon[i].name.replace('HVAA_', '')];
-    }
-    HV_AutoAttack_Option.querySelector('#HVAA_Shortcut_Pause').value = HVAA_Setting.Shortcut_Pause;
-    HV_AutoAttack_Option.querySelector('#HVAA_Shortcut_Choose').value = HVAA_Setting.Shortcut_Choose;
-    if (HVAA_Setting.CrazyMode) {
-      HV_AutoAttack_Option.querySelector('#HVAA_CrazyMode').checked = true;
-    } else {
-      HV_AutoAttack_Option.querySelector('#HVAA_CrazyMode').checked = false;
-    }
-    HV_AutoAttack_Option.querySelector('#HVAA_Delay_Alert').value = HVAA_Setting.Delay_Alert;
-    HV_AutoAttack_Option.querySelector('#HVAA_Delay_Reload').value = HVAA_Setting.Delay_Reload;
-    if (HVAA_Setting.Reloader) {
-      HV_AutoAttack_Option.querySelector('#HVAA_Reloader').checked = true;
-    } else {
-      HV_AutoAttack_Option.querySelector('#HVAA_Reloader').checked = false;
-    }
-    HV_AutoAttack_Option.querySelector('#HVAA_Reloader_Time').value = HVAA_Setting.Reloader_Time;
-    HV_AutoAttack_Option.querySelector('#HVAA_Attack_Delay_Time').value = HVAA_Setting.Attack_Delay_Time;
-    if (HVAA_Setting.Attack_Delay2) {
-      HV_AutoAttack_Option.querySelector('#HVAA_Attack_Delay2').checked = true;
-    } else {
-      HV_AutoAttack_Option.querySelector('#HVAA_Attack_Delay2').checked = false;
-    }
-    HV_AutoAttack_Option.querySelector('#HVAA_Attack_Delay2_Round').value = HVAA_Setting.Attack_Delay2_Round;
-    HV_AutoAttack_Option.querySelector('#HVAA_Attack_Delay2_Time').value = HVAA_Setting.Attack_Delay2_Time;
-    HV_AutoAttack_Option.querySelector('#HVAA_Attack_Delay2_Time').value = HVAA_Setting.Attack_Delay2_Time;
-    HV_AutoAttack_Option.querySelector('#HVAA_Attack_Status_' + HVAA_Setting.Attack_Status).checked = true;
-    for (i = 0; i < Input_Alert.length; i++) {
-      Input_Alert[i].value = HVAA_Setting[Input_Alert[i].name.replace('HVAA_', '')];
+    var input = HV_AutoAttack_Option.querySelectorAll('input');
+    for (var i = 0; i < input.length; i++) {
+      if (input[i].parentNode.style.display === 'none') continue;
+      if (input[i].type === 'text') {
+        input[i].value = HVAA_Setting[input[i].name.replace('HVAA_', '')];
+      } else if (input[i].type === 'checkbox') {
+        input[i].checked = HVAA_Setting[input[i].id.replace('HVAA_', '')];
+      } else if (input[i].type === 'radio') {
+        (HVAA_Setting[input[i].name.replace('HVAA_', '')] === input[i].value) ? input[i].checked = true : input[i].checked = false;
+      }
     }
   }
   HV_AutoAttack_Option.querySelector('#HVAA_Setting_Apply').onclick = function () {
@@ -188,36 +169,16 @@ function OptionButton() {
     var HVAA_Setting = {
     };
     HVAA_Setting.version = GM_info.script.version;
-    var DeadSoon = Option.querySelectorAll('.HVAA_DeadSoon');
-    for (var i = 0; i < DeadSoon.length; i++) {
-      HVAA_Setting[DeadSoon[i].name.replace('HVAA_', '')] = parseFloat(DeadSoon[i].value || DeadSoon[i].placeholder);
-    }
-    HVAA_Setting.Shortcut_Pause = Option.querySelector('#HVAA_Shortcut_Pause').value || Option.querySelector('#HVAA_Shortcut_Pause').placeholder;
-    HVAA_Setting.Shortcut_Choose = Option.querySelector('#HVAA_Shortcut_Choose').value || Option.querySelector('#HVAA_Shortcut_Choose').placeholder;
-    if (Option.querySelector('#HVAA_CrazyMode').checked) {
-      HVAA_Setting.CrazyMode = true;
-    } else {
-      HVAA_Setting.CrazyMode = false;
-    }
-    HVAA_Setting.Delay_Alert = Option.querySelector('#HVAA_Delay_Alert').value || Option.querySelector('#HVAA_Delay_Alert').placeholder;
-    HVAA_Setting.Delay_Reload = Option.querySelector('#HVAA_Delay_Reload').value || Option.querySelector('#HVAA_Delay_Reload').placeholder;
-    if (Option.querySelector('#HVAA_Reloader').checked) {
-      HVAA_Setting.Reloader = true;
-    } else {
-      HVAA_Setting.Reloader = false;
-    }
-    HVAA_Setting.Reloader_Time = Option.querySelector('#HVAA_Reloader_Time').value || Option.querySelector('#HVAA_Reloader_Time').placeholder;
-    HVAA_Setting.Attack_Delay_Time = parseFloat(Option.querySelector('#HVAA_Attack_Delay_Time').value || Option.querySelector('#HVAA_Attack_Delay_Time').placeholder);
-    if (Option.querySelector('#HVAA_Attack_Delay2').checked) {
-      HVAA_Setting.Attack_Delay2 = true;
-    } else {
-      HVAA_Setting.Attack_Delay2 = false;
-    }
-    HVAA_Setting.Attack_Delay2_Round = parseInt(Option.querySelector('#HVAA_Attack_Delay2_Round').value || Option.querySelector('#HVAA_Attack_Delay2_Round').placeholder);
-    HVAA_Setting.Attack_Delay2_Time = parseFloat(Option.querySelector('#HVAA_Attack_Delay2_Time').value || Option.querySelector('#HVAA_Attack_Delay2_Time').placeholder);
-    HVAA_Setting.Attack_Status = parseInt(document.querySelector('input[name="HVAA_Attack_Status"]:checked').value || 1);
-    for (i = 0; i < Input_Alert.length; i++) {
-      HVAA_Setting[Input_Alert[i].name.replace('HVAA_', '')] = Input_Alert[i].value || Input_Alert[i].placeholder;
+    var input = Option.querySelectorAll('input');
+    for (var i = 0; i < input.length; i++) {
+      if (input[i].parentNode.style.display === 'none') continue;
+      if (input[i].type === 'text') {
+        HVAA_Setting[input[i].name.replace('HVAA_', '')] = input[i].value || input[i].placeholder;
+      } else if (input[i].type === 'checkbox') {
+        HVAA_Setting[input[i].id.replace('HVAA_', '')] = input[i].checked;
+      } else if (input[i].type === 'radio' && input[i].checked) {
+        HVAA_Setting[input[i].name.replace('HVAA_', '')] = input[i].value;
+      }
     }
     console.log(HVAA_Setting);
     localStorage.HVAA_Setting = JSON.stringify(HVAA_Setting);
@@ -476,9 +437,6 @@ function AutoUseDeSkill() {
       random = ((Math.random() * (Monster_Count_All - 1)) + 1).toFixed();
     } while (Monster[random - 1].isDead);
     document.getElementById('mkey_' + random).click();
-    setTimeout(function () {
-      window.location = window.location.href;
-    }, 10000);
   }
 } //////////////////////////////////////////////////
 
