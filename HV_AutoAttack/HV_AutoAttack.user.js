@@ -10,7 +10,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.37
+// @version     2.371
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -191,7 +191,7 @@ function OptionButton() { //配置
         HVAA_Setting[input[i].name.replace('HVAA_', '')] = input[i].value;
       }
     }
-    console.log(HVAA_Setting);
+    //console.log(HVAA_Setting);
     localStorage.HVAA_Setting = JSON.stringify(HVAA_Setting);
     Option.style.display = 'none';
     window.location = window.location.href;
@@ -448,7 +448,7 @@ function AutoUsePotAndSuSkill() { //自动使用药水、增益技能
             }
             for (var i in Skill_Lib) {
               if (HVAA_Setting['Ch_Skill_' + i] !== undefined || HVAA_Setting['Su_Skill_' + i] !== undefined) {
-                if ((HVAA_Setting['Ch_Skill_' + i] || HVAA_Setting['Su_Skill_' + i]) && spell_name === Skill_Lib[i].name) {
+                if ((HVAA_Setting['Ch_Skill_' + i] || HVAA_Setting['Su_Skill_' + i]) && spell_name === Skill_Lib[i].name && document.getElementById(Skill_Lib[i].id).style.opacity !== '0.5') {
                   document.getElementById(Skill_Lib[i].id).click();
                   window.HVAA_End = true;
                   return;
@@ -460,7 +460,7 @@ function AutoUsePotAndSuSkill() { //自动使用药水、增益技能
         }
         for (var i in Skill_Lib) {
           if (HVAA_Setting['Ch_Skill_' + i] !== undefined) {
-            if (HVAA_Setting['Ch_Skill_' + i] && !document.querySelector('div.bte>img[src*="/e/' + Skill_Lib[i].img + '.png"]')) {
+            if (HVAA_Setting['Ch_Skill_' + i] && !document.querySelector('div.bte>img[src*="/e/' + Skill_Lib[i].img + '.png"]') && document.getElementById(Skill_Lib[i].id).style.opacity !== '0.5') {
               document.getElementById(Skill_Lib[i].id).click();
               window.HVAA_End = true;
               return;
@@ -484,7 +484,7 @@ function AutoUsePotAndSuSkill() { //自动使用药水、增益技能
     }
     for (var i in Skill_Lib) {
       if (HVAA_Setting['Su_Skill_' + i] !== undefined) {
-        if (HVAA_Setting['Su_Skill_' + i] && !document.querySelector('div.bte>img[src*="/e/' + Skill_Lib[i].img + '.png"]')) {
+        if (HVAA_Setting['Su_Skill_' + i] && !document.querySelector('div.bte>img[src*="/e/' + Skill_Lib[i].img + '.png"]') && document.getElementById(Skill_Lib[i].id).style.opacity !== '0.5') {
           document.getElementById(Skill_Lib[i].id).click();
           window.HVAA_End = true;
           return;
