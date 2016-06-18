@@ -28,7 +28,7 @@ OptionButton();
 if (localStorage.HVAA_Setting) {
   var HVAA_Setting = JSON.parse(localStorage.HVAA_Setting);
   //console.log(HVAA_Setting);
-  if (HVAA_Setting.version !== GM_info.script.version) {
+  if (HVAA_Setting.version !== GM_info.script.version.substring(0,4)) {
     alert('HV-AutoAttack版本更新，请重新设置\r\n强烈推荐【重置设置】后再设置。');
     document.querySelector('#HV_AutoAttack_Option').style.display = 'block';
     document.querySelector('#HVAA_Setting_Clear').focus();
@@ -170,7 +170,7 @@ function OptionButton() { //配置
     }
     var HVAA_Setting = {
     };
-    HVAA_Setting.version = GM_info.script.version;
+    HVAA_Setting.version = GM_info.script.version.substring(0,4);
     var input = Option.querySelectorAll('input');
     for (var i = 0; i < input.length; i++) {
       if (input[i].parentNode.style.display === 'none') continue;
