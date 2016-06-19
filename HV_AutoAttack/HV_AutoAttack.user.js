@@ -10,7 +10,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.41
+// @version     2.411
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -621,13 +621,13 @@ function AutoUseDeSkill() { //自动施法De技能
       if (document.getElementById(Skill_Lib[i].id).style.opacity !== '0.5') {
         document.getElementById(Skill_Lib[i].id).click();
         for (var j = 0; j < Monster_Count_All; j++) {
-          if (Monster[j].isBoss && !document.querySelector('#mkey_' + j + 1 + '>.btm6>img[src*="/e/' + Skill_Lib[i].img + '.png"]')) {
+          if (Monster[j].isBoss && !document.querySelector('#mkey_' + eval(j + 1) + '>.btm6>img[src*="/e/' + Skill_Lib[i].img + '.png"]')) {
             var Boss_find = true;
             break;
           }
         }
         if (Boss_find) {
-          document.querySelector('#mkey_' + j).click();
+          document.querySelector('#mkey_' + eval(j + 1)).click();
           window.HVAA_End = true;
           return;
         }
