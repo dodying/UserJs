@@ -10,7 +10,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.40
+// @version     2.401
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -465,7 +465,7 @@ function AutoUsePotAndSuSkill() { //自动使用药水、施法增益技能
           var spell_name = buff[n].getAttribute('onmouseover').replace(/battle.set_infopane_effect\(\'(.*?)\'.*/, '$1');
           if (spell_name === 'Absorbing Ward') continue;
           var buff_lasttime = Number(buff[n].getAttribute('onmouseover').replace(/.*\'\,(.*?)\)/g, '$1'));
-          if (buff_lasttime <= HVAA_Setting.Ch_Re_Skill) {
+          if (buff_lasttime <= HVAA_Setting.Ch_ReSkill) {
             if (spell_name === 'Cloak of the Fallen' && !document.querySelector('div.bte>img[src*="/e/sparklife.png"]')) {
               document.getElementById('422').click();
               window.HVAA_End = true;
