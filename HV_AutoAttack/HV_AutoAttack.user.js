@@ -10,7 +10,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.401
+// @version     2.41
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -67,7 +67,7 @@ if (localStorage.HVAA_disabled) { //如果禁用
   runtime = 0;
   if (HVAA_Setting.Reloader) {
     if (HVAA_Setting.Reloader_Masking) {
-      AddMasking();//Reloader防止误操作
+      AddMasking(); //Reloader防止误操作
     }
     var mo = new MutationObserver(main);
     mo.observe(document.all.leftpane, {
@@ -123,8 +123,20 @@ function main() { //主程序
   window.SP = document.querySelectorAll('.cwb2') [2].offsetWidth / 120;
   window.oc = document.querySelectorAll('.cwb2') [3].offsetWidth / 120;
   AutoUseGem(); //自动使用宝石
+  if (window.HVAA_End) {
+    window.HVAA_End = false;
+    return;
+  }
   DeadSoon(); //自动回血回魔
+  if (window.HVAA_End) {
+    window.HVAA_End = false;
+    return;
+  }
   AutoUsePotAndSuSkill(); //自动使用药水、施法增益技能
+  if (window.HVAA_End) {
+    window.HVAA_End = false;
+    return;
+  }
   CountMonsterHP(); //统计怪物血量
   if (HVAA_Setting.De_Skill) { //自动施法De技能
     AutoUseDeSkill();
@@ -167,7 +179,7 @@ function OptionButton() { //配置
   HV_AutoAttack_Option.id = 'HV_AutoAttack_Option';
   Left = document.documentElement.clientWidth / 2 - 350;
   HV_AutoAttack_Option.style = 'font-size:large;z-index:9999;width:700px;display:none;background-color:white;position:absolute;left:' + Left + 'px;top:50px;border-color:black;border-style:solid;text-align:left;';
-  HV_AutoAttack_Option.innerHTML = '<h1 style="text-align:center;">HV AutoAttack设置&nbsp;<button id="HVAA_Setting_Clear"onclick="localStorage.removeItem(\'HVAA_Setting\');location.reload();"title="推荐每次更新后点击一次">重置设置</button></h1><div style="text-align:center;"><span style="color:green;">HP1:<input name="HVAA_HP1"style="width:24px;"placeholder="50"type="text">%&nbsp;HP2:<input name="HVAA_HP2"style="width:24px;"placeholder="44"type="text">%&nbsp;</span><span style="color:blue;">MP1:<input name="HVAA_MP1"style="width:24px;"placeholder="70"type="text">%&nbsp;MP2:<input name="HVAA_MP2"style="width:24px;"placeholder="10"type="text">%&nbsp;</span><span style="color:red;">SP1:<input name="HVAA_SP1"style="width:24px;"placeholder="75"type="text">%&nbsp;SP2:<input name="HVAA_SP2"style="width:24px;"placeholder="50"type="text">%</span></div><div id="HVAA_Attack_Status"style="color:red;text-align:center;"><b>攻击模式</b>：<input type="radio"id="HVAA_Attack_Status_0"name="HVAA_Attack_Status"value="0"><label for="HVAA_Attack_Status_0">物理</label><input type="radio"id="HVAA_Attack_Status_1"name="HVAA_Attack_Status"value="1"><label for="HVAA_Attack_Status_1">火</label><input type="radio"id="HVAA_Attack_Status_2"name="HVAA_Attack_Status"value="2"><label for="HVAA_Attack_Status_2">冰</label><input type="radio"id="HVAA_Attack_Status_3"name="HVAA_Attack_Status"value="3"><label for="HVAA_Attack_Status_3">雷</label><input type="radio"id="HVAA_Attack_Status_4"name="HVAA_Attack_Status"value="4"><label for="HVAA_Attack_Status_4">风</label><input type="radio"id="HVAA_Attack_Status_5"name="HVAA_Attack_Status"value="5"><label for="HVAA_Attack_Status_5">圣</label><input type="radio"id="HVAA_Attack_Status_6"name="HVAA_Attack_Status"value="6"><label for="HVAA_Attack_Status_6">暗</label></div><div title="默认【空格】暂停，【回车】选择模式"><b>快捷键</b>：按<input name="HVAA_Shortcut_Pause"style="width:60px;"type="text"placeholder=" "onkeyup="this.value=event.key;">暂停，按<input name="HVAA_Shortcut_Choose"style="width:60px;"type="text"placeholder="Enter"onkeyup="this.value=event.key;">选择模式</div><div style="display:none;"><input type="checkbox"id="HVAA_New_Mode"><label for="HVAA_New_Mode"><b>新手模式</b>：打怪模式：普攻，血低则防御，不然逃跑。</label></div><div><b>技能施放条件</b>：中级：怪物存活数≥<input name="HVAA_Mi_Skill"placeholder="4"style="width:24px;"type="text">；高级：怪物存活数≥<input name="HVAA_Hi_Skill"placeholder="6"style="width:24px;"type="text">。</div><div><input type="checkbox"id="HVAA_Crazy_Mode"><label for="HVAA_Crazy_Mode"><b>浴血模式</b>：即使<span style="color:red;font-weight:bold;">血量过低</span>，仍然继续打怪。</label></div><div title="防止脚本莫名暂停"><input id="HVAA_Delay_Alert"type="checkbox"><label for="HVAA_Delay_Alert">页面停留<input name="HVAA_Delay_Alert_Time"placeholder="10"style="width:24px;"type="text">秒后，<b>警报</b>；</label><input id="HVAA_Delay_Reload"type="checkbox"><label for="HVAA_Delay_Reload">页面停留<input name="HVAA_Delay_Reload_Time"placeholder="15"style="width:24px;"type="text">秒后，<b>刷新页面</b>。</label></div><div><input id="HVAA_Reloader"type="checkbox"><label for="HVAA_Reloader"><b>兼容<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894"target="_blank"title="感谢网友【zsp40088】提出，推荐安装版本【Vanilla Reloader 1.1.1】">Reloader</a>脚本</b></label><input id="HVAA_Reloader_Masking"type="checkbox"checked="true"><label for="HVAA_Reloader_Masking"><b>防止误操作</b></label></div><div title="延时攻击，防止内存使用过高，然并卵"><b>延时攻击</b>：延时<input name="HVAA_Attack_Delay_Time"style="width:24px;"placeholder="0.1"type="text">秒攻击。</div><div style="height:1px;background-color:black;"></div><div><input type="checkbox"id="HVAA_Attack_Weakness"checked="true"><label for="HVAA_Attack_Weakness"><b>弱点打击</b>：针对Boss，如果由于出现未知的Boss导致暂停，</label><button onclick="this.nextElementSibling.style.display=\'\';">显示</button><span style="display:none;"><br>请将Boss的姓名与弱点提交到<a href="https://github.com/dodying/UserJs/issues/"target="_blank">Github issues</a>，谢谢~！<br>解决办法：1.暂停脚本或不勾选本设置<br>【推荐】2.打开脚本，搜索【Boss的弱点库】，之后按格式添加</span></div><div style="height:1px;background-color:black;"></div><div title="全力模式"><b>全力模式</b>：满足条件（有一个成立就行）：<br>1、总回合数≥<input name="HVAA_All_Mode_All_Round"placeholder="12"style="width:24px;"type="text">。2、存活≥<input name="HVAA_All_Mode_Boss_Count"placeholder="1"style="width:24px;"type="text">只Boss。3、遭遇战中，存在≥<input name="HVAA_All_Mode_Monster_Count"placeholder="6"style="width:24px;"type="text">只怪物。<br><b>增益技能</b>（Buff不存在就施放的技能，按【施放顺序】排序）：<br><input type="checkbox"id="HVAA_Su_Skill_HD"checked="true"><label for="HVAA_Su_Skill_HD">Health Draught</label><input type="checkbox"id="HVAA_Su_Skill_MD"checked="true"><label for="HVAA_Su_Skill_MD">Mana Draught</label><input type="checkbox"id="HVAA_Su_Skill_SD"checked="true"><label for="HVAA_Su_Skill_SD">Spirit Draught</label><input type="checkbox"id="HVAA_Su_Skill_Pr"checked="true"><label for="HVAA_Su_Skill_Pr">Protection</label><input type="checkbox"id="HVAA_Su_Skill_Ha"checked="true"><label for="HVAA_Su_Skill_Ha">Haste</label><input type="checkbox"id="HVAA_Su_Skill_SL"checked="true"><label for="HVAA_Su_Skill_SL">Spark of Life</label><br><input type="checkbox"id="HVAA_Su_Skill_SS"checked="true"><label for="HVAA_Su_Skill_SS">Spirit Shield</label><input type="checkbox"id="HVAA_Su_Skill_AF"><label for="HVAA_Su_Skill_AF">Arcane Focus</label><input type="checkbox"id="HVAA_Su_Skill_He"><label for="HVAA_Su_Skill_He">Heartseeker</label><input type="checkbox"id="HVAA_Su_Skill_Re"><label for="HVAA_Su_Skill_Re">Regen</label><input type="checkbox"id="HVAA_Su_Skill_SV"><label for="HVAA_Su_Skill_SV">Shadow Veil</label><input type="checkbox"id="HVAA_Su_Skill_Ab"><label for="HVAA_Su_Skill_Ab">Absorb</label><br>当<b>获得Channel时</b>，即施法只需1点MP<br><b>先ReBuff</b>：buff存在≤<input name="HVAA_Ch_ReSkill"style="width:24px;"placeholder="15"type="text">回合时，重新使用该技能<br><b>再施放Channel技能</b>（按【施放顺序】排序）：<br><input type="checkbox"id="HVAA_Ch_Skill_Pr"><label for="HVAA_Ch_Skill_Pr">Protection</label><input type="checkbox"id="HVAA_Ch_Skill_Ha"><label for="HVAA_Ch_Skill_Ha">Haste</label><input type="checkbox"id="HVAA_Ch_Skill_SL"><label for="HVAA_Ch_Skill_SL">Spark of Life</label><input type="checkbox"id="HVAA_Ch_Skill_SS"><label for="HVAA_Ch_Skill_SS">Spirit Shield</label><input type="checkbox"id="HVAA_Ch_Skill_AF"checked="true"><label for="HVAA_Ch_Skill_AF">Arcane Focus</label><br><input type="checkbox"id="HVAA_Ch_Skill_He"><label for="HVAA_Ch_Skill_He">Heartseeker</label><input type="checkbox"id="HVAA_Ch_Skill_Re"checked="true"><label for="HVAA_Ch_Skill_Re">Regen</label><input type="checkbox"id="HVAA_Ch_Skill_SV"checked="true"><label for="HVAA_Ch_Skill_SV">Shadow Veil</label><input type="checkbox"id="HVAA_Ch_Skill_Ab"checked="true"><label for="HVAA_Ch_Skill_Ab">Absorb</label></div><div style="height:1px;background-color:black;"></div><div title="随机对怪物施放，满足条件：&#10;1、活着&#10;2、身上没有该Buff"><input type="checkbox"id="HVAA_De_Skill"checked="true"><label for="HVAA_De_Skill"><b>（对Boss施放）De技能</b>：</label><input type="checkbox"id="HVAA_De_Skill_Im"checked="true"><label for="HVAA_De_Skill_Im">Imperil</label><input type="checkbox"id="HVAA_De_Skill_Dr"><label for="HVAA_De_Skill_Dr">Drain</label><input type="checkbox"id="HVAA_De_Skill_We"><label for="HVAA_De_Skill_We">Weaken</label><input type="checkbox"id="HVAA_De_Skill_Slo"><label for="HVAA_De_Skill_Slo">Slow</label><input type="checkbox"id="HVAA_De_Skill_Sle"><label for="HVAA_De_Skill_Sle">Sleep</label><input type="checkbox"id="HVAA_De_Skill_Bl"><label for="HVAA_De_Skill_Bl">Blind</label></div><div style="height:1px;background-color:black;"></div><div id="HVAA_Alert"style="text-align:center;"><b>警报</b><br>【默认】：<input class="HVAA_Alert"name="HVAA_Alert_default"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【答题】：<input class="HVAA_Alert"name="HVAA_Alert_Riddle"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【胜利】：<input class="HVAA_Alert"name="HVAA_Alert_Win"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【错误】：<input class="HVAA_Alert"name="HVAA_Alert_Error"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【失败】：<input class="HVAA_Alert"name="HVAA_Alert_Failed"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a></div><div style="text-align:center;"><button id="HVAA_Setting_Apply">确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button></div>';
+  HV_AutoAttack_Option.innerHTML = '<h1 style="text-align:center;">HV AutoAttack设置&nbsp;<button id="HVAA_Setting_Clear"onclick="localStorage.removeItem(\'HVAA_Setting\');location.reload();"title="推荐每次更新后点击一次">重置设置</button></h1><div style="text-align:center;"onmouseover="this.firstElementChild.style.display=\'\';"onmouseout="this.firstElementChild.style.display=\'none\';"><div style="display:none;">请移动到输入框上查看各HP、MP、SP条备注</div><span style="color:green;">HP:1.<input name="HVAA_HP1"style="width:24px;"placeholder="50"type="text"title="自动回血，包括宝石、技能、药水、防御">%&nbsp;2.<input name="HVAA_HP2"style="width:24px;"placeholder="44"type="text"title="浴血模式警告">%&nbsp;3.<input name="HVAA_HP3"style="width:24px;"placeholder="5"type="text"title="使用Elixir级别药水">%&nbsp;</span><span style="color:blue;">MP:1.<input name="HVAA_MP1"style="width:24px;"placeholder="70"type="text"title="使用宝石回魔">%&nbsp;2.<input name="HVAA_MP2"style="width:24px;"placeholder="10"type="text"title="使用药水回魔">%&nbsp;3.<input name="HVAA_MP3"style="width:24px;"placeholder="5"type="text"title="使用Elixir级别药水">%&nbsp;</span><span style="color:red;">SP:1.<input name="HVAA_SP1"style="width:24px;"placeholder="75"type="text"title="使用宝石回精">%&nbsp;2.<input name="HVAA_SP2"style="width:24px;"placeholder="50"type="text"title="使用药水回精">%&nbsp;3.<input name="HVAA_SP3"style="width:24px;"placeholder="5"type="text"title="使用Elixir级别药水">%&nbsp;</span></div><div id="HVAA_Attack_Status"style="color:red;text-align:center;"><b>攻击模式</b>：<input type="radio"id="HVAA_Attack_Status_0"name="HVAA_Attack_Status"value="0"><label for="HVAA_Attack_Status_0">物理</label><input type="radio"id="HVAA_Attack_Status_1"name="HVAA_Attack_Status"value="1"><label for="HVAA_Attack_Status_1">火</label><input type="radio"id="HVAA_Attack_Status_2"name="HVAA_Attack_Status"value="2"><label for="HVAA_Attack_Status_2">冰</label><input type="radio"id="HVAA_Attack_Status_3"name="HVAA_Attack_Status"value="3"><label for="HVAA_Attack_Status_3">雷</label><input type="radio"id="HVAA_Attack_Status_4"name="HVAA_Attack_Status"value="4"><label for="HVAA_Attack_Status_4">风</label><input type="radio"id="HVAA_Attack_Status_5"name="HVAA_Attack_Status"value="5"><label for="HVAA_Attack_Status_5">圣</label><input type="radio"id="HVAA_Attack_Status_6"name="HVAA_Attack_Status"value="6"><label for="HVAA_Attack_Status_6">暗</label></div><div title="默认【空格】暂停，【回车】选择模式"><b>快捷键</b>：按<input name="HVAA_Shortcut_Pause"style="width:60px;"type="text"placeholder=" "onkeyup="this.value=event.key;">暂停，按<input name="HVAA_Shortcut_Choose"style="width:60px;"type="text"placeholder="Enter"onkeyup="this.value=event.key;">选择模式</div><div><b>技能施放条件</b>：中级：怪物存活数≥<input name="HVAA_Mi_Skill"placeholder="4"style="width:24px;"type="text">；高级：怪物存活数≥<input name="HVAA_Hi_Skill"placeholder="6"style="width:24px;"type="text">。</div><div><input type="checkbox"id="HVAA_Crazy_Mode"><label for="HVAA_Crazy_Mode"><b>浴血模式</b>：即使<span style="color:red;font-weight:bold;">血量过低</span>，仍然继续打怪。</label></div><div title="防止脚本莫名暂停"><input id="HVAA_Delay_Alert"type="checkbox"><label for="HVAA_Delay_Alert">页面停留<input name="HVAA_Delay_Alert_Time"placeholder="10"style="width:24px;"type="text">秒后，<b>警报</b>；</label><input id="HVAA_Delay_Reload"type="checkbox"><label for="HVAA_Delay_Reload">页面停留<input name="HVAA_Delay_Reload_Time"placeholder="15"style="width:24px;"type="text">秒后，<b>刷新页面</b>。</label></div><div><input id="HVAA_Reloader"type="checkbox"><label for="HVAA_Reloader"><b>兼容<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894"target="_blank"title="感谢网友【zsp40088】提出，推荐安装版本【Vanilla Reloader 1.1.1】">Reloader</a>脚本</b></label><input id="HVAA_Reloader_Masking"type="checkbox"checked="true"><label for="HVAA_Reloader_Masking"><b>防止误操作</b></label></div><div title="延时攻击，防止内存使用过高，然并卵"><b>延时攻击</b>：延时<input name="HVAA_Attack_Delay_Time"style="width:24px;"placeholder="0.1"type="text">秒攻击。</div><div style="height:1px;background-color:black;"></div><div onmouseover="this.lastElementChild.style.display=\'\';"onmouseout="this.lastElementChild.style.display=\'none\';"><input type="checkbox"id="HVAA_Attack_Weakness"checked="true"><label for="HVAA_Attack_Weakness"><b>弱点打击</b>：针对Boss，如果由于出现未知的Boss导致暂停，</label><div style="display:none;">请将Boss的姓名与弱点提交到<a href="https://github.com/dodying/UserJs/issues/"target="_blank">Github issues</a>，谢谢~！<br>解决办法：1.暂停脚本或不勾选本设置<br>【推荐】2.打开脚本，搜索【Boss的弱点库】，之后按格式添加</div></div><div style="height:1px;background-color:black;"></div><div title="全力模式"onmouseover="this.querySelector(\'#HVAA_Su_Skill_Div\').style.display=\'\';this.querySelector(\'#HVAA_Ch_Skill_Div\').style.display=\'\';"onmouseout="this.querySelector(\'#HVAA_Su_Skill_Div\').style.display=\'none\';this.querySelector(\'#HVAA_Ch_Skill_Div\').style.display=\'none\';"><b>全力模式</b>：满足条件（有一个成立就行）：<br>1、总回合数≥<input name="HVAA_All_Mode_All_Round"placeholder="12"style="width:24px;"type="text">。2、存活≥<input name="HVAA_All_Mode_Boss_Count"placeholder="1"style="width:24px;"type="text">只Boss。3、遭遇战中，存在≥<input name="HVAA_All_Mode_Monster_Count"placeholder="6"style="width:24px;"type="text">只怪物。<br><b>增益技能</b>（Buff不存在就施放的技能，按【施放顺序】排序）：<div id="HVAA_Su_Skill_Div"style="display:none;"><input type="checkbox"id="HVAA_Su_Skill_HD"checked="true"><label for="HVAA_Su_Skill_HD">Health Draught</label><input type="checkbox"id="HVAA_Su_Skill_MD"checked="true"><label for="HVAA_Su_Skill_MD">Mana Draught</label><input type="checkbox"id="HVAA_Su_Skill_SD"checked="true"><label for="HVAA_Su_Skill_SD">Spirit Draught</label><input type="checkbox"id="HVAA_Su_Skill_Pr"checked="true"><label for="HVAA_Su_Skill_Pr">Protection</label><input type="checkbox"id="HVAA_Su_Skill_Ha"checked="true"><label for="HVAA_Su_Skill_Ha">Haste</label><input type="checkbox"id="HVAA_Su_Skill_SL"checked="true"><label for="HVAA_Su_Skill_SL">Spark of Life</label><br><input type="checkbox"id="HVAA_Su_Skill_SS"checked="true"><label for="HVAA_Su_Skill_SS">Spirit Shield</label><input type="checkbox"id="HVAA_Su_Skill_AF"><label for="HVAA_Su_Skill_AF">Arcane Focus</label><input type="checkbox"id="HVAA_Su_Skill_He"><label for="HVAA_Su_Skill_He">Heartseeker</label><input type="checkbox"id="HVAA_Su_Skill_Re"><label for="HVAA_Su_Skill_Re">Regen</label><input type="checkbox"id="HVAA_Su_Skill_SV"><label for="HVAA_Su_Skill_SV">Shadow Veil</label><input type="checkbox"id="HVAA_Su_Skill_Ab"><label for="HVAA_Su_Skill_Ab">Absorb</label></div><div></div>当<b>获得Channel时</b>，即施法只需1点MP<br><b>先ReBuff</b>：buff存在≤<input name="HVAA_Ch_ReSkill"style="width:24px;"placeholder="15"type="text">回合时，重新使用该技能<br><b>再施放Channel技能</b>（按【施放顺序】排序）：<div id="HVAA_Ch_Skill_Div"style="display:none;"><input type="checkbox"id="HVAA_Ch_Skill_Pr"><label for="HVAA_Ch_Skill_Pr">Protection</label><input type="checkbox"id="HVAA_Ch_Skill_Ha"><label for="HVAA_Ch_Skill_Ha">Haste</label><input type="checkbox"id="HVAA_Ch_Skill_SL"><label for="HVAA_Ch_Skill_SL">Spark of Life</label><input type="checkbox"id="HVAA_Ch_Skill_SS"><label for="HVAA_Ch_Skill_SS">Spirit Shield</label><input type="checkbox"id="HVAA_Ch_Skill_AF"checked="true"><label for="HVAA_Ch_Skill_AF">Arcane Focus</label><br><input type="checkbox"id="HVAA_Ch_Skill_He"><label for="HVAA_Ch_Skill_He">Heartseeker</label><input type="checkbox"id="HVAA_Ch_Skill_Re"checked="true"><label for="HVAA_Ch_Skill_Re">Regen</label><input type="checkbox"id="HVAA_Ch_Skill_SV"checked="true"><label for="HVAA_Ch_Skill_SV">Shadow Veil</label><input type="checkbox"id="HVAA_Ch_Skill_Ab"checked="true"><label for="HVAA_Ch_Skill_Ab">Absorb</label></div></div><div style="height:1px;background-color:black;"></div><div onmouseover="this.querySelector(\'#HVAA_De_Skill_Div\').style.display=\'\';"onmouseout="this.querySelector(\'#HVAA_De_Skill_Div\').style.display=\'none\';"><input type="checkbox"id="HVAA_De_Skill"checked="true"><label for="HVAA_De_Skill"><b>（对Boss施放）De技能</b>：</label><div id="HVAA_De_Skill_Div"style="display:none;"><input type="checkbox"id="HVAA_De_Skill_Im"checked="true"><label for="HVAA_De_Skill_Im">Imperil</label><input type="checkbox"id="HVAA_De_Skill_Dr"><label for="HVAA_De_Skill_Dr">Drain</label><input type="checkbox"id="HVAA_De_Skill_We"><label for="HVAA_De_Skill_We">Weaken</label><input type="checkbox"id="HVAA_De_Skill_Slo"><label for="HVAA_De_Skill_Slo">Slow</label><input type="checkbox"id="HVAA_De_Skill_Sle"><label for="HVAA_De_Skill_Sle">Sleep</label><input type="checkbox"id="HVAA_De_Skill_Bl"><label for="HVAA_De_Skill_Bl">Blind</label></div></div><div style="height:1px;background-color:black;"></div><div id="HVAA_Alert"style="text-align:center;"><b>警报</b><br>【默认】：<input class="HVAA_Alert"name="HVAA_Alert_default"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【答题】：<input class="HVAA_Alert"name="HVAA_Alert_Riddle"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【胜利】：<input class="HVAA_Alert"name="HVAA_Alert_Win"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【错误】：<input class="HVAA_Alert"name="HVAA_Alert_Error"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a><br/>【失败】：<input class="HVAA_Alert"name="HVAA_Alert_Failed"style="width:400px;"type="text"><a href="javascript:#"onclick="var audio = new Audio(this.previousElementSibling.value||this.previousElementSibling.placeholder);audio.play();">试听</a></div><div style="text-align:center;"><button id="HVAA_Setting_Apply">确认</button><button onclick="document.querySelector(\'#HV_AutoAttack_Option\').style.display=\'none\';">取消</button></div>';
   var Input_Alert = HV_AutoAttack_Option.querySelectorAll('.HVAA_Alert');
   var File_Type = (/Chrome|Safari/.test(window.navigator.userAgent)) ? '.mp3' : '.wav';
   for (var i = 0; i < Input_Alert.length; i++) {
@@ -177,7 +189,6 @@ function OptionButton() { //配置
     var HVAA_Setting = JSON.parse(localStorage.HVAA_Setting);
     var input = HV_AutoAttack_Option.querySelectorAll('input');
     for (var i = 0; i < input.length; i++) {
-      if (input[i].parentNode.style.display === 'none') continue;
       if (input[i].type === 'text') {
         input[i].value = HVAA_Setting[input[i].name.replace('HVAA_', '')];
       } else if (input[i].type === 'checkbox') {
@@ -209,7 +220,6 @@ function OptionButton() { //配置
     HVAA_Setting.version = GM_info.script.version.substring(0, 4);
     var input = Option.querySelectorAll('input');
     for (var i = 0; i < input.length; i++) {
-      if (input[i].parentNode.style.display === 'none') continue;
       if (input[i].type === 'text') {
         HVAA_Setting[input[i].name.replace('HVAA_', '')] = input[i].value || input[i].placeholder;
       } else if (input[i].type === 'checkbox') {
@@ -358,12 +368,20 @@ function AutoUseGem() { //自动使用宝石
     var Gem = document.getElementById('ikey_p').getAttribute('onmouseover').replace(/battle.set_infopane_item\(\'(.*?)\'.*/, '$1');
     if (Gem === 'Health Gem' && HP <= HVAA_Setting.HP1 * 0.01) {
       document.getElementById('ikey_p').click();
+      window.HVAA_End = true;
+      return;
     } else if (Gem === 'Mana Gem' && MP <= HVAA_Setting.MP1 * 0.01) {
       document.getElementById('ikey_p').click();
+      window.HVAA_End = true;
+      return;
     } else if (Gem === 'Spirit Gem' && SP <= HVAA_Setting.SP1 * 0.01) {
       document.getElementById('ikey_p').click();
+      window.HVAA_End = true;
+      return;
     } else if (Gem === 'Mystic Gem') {
       document.getElementById('ikey_p').click();
+      window.HVAA_End = true;
+      return;
     }
   }
 } //////////////////////////////////////////////////
@@ -373,39 +391,61 @@ function DeadSoon() { //自动回血回魔
     document.getElementById('quickbar').style.backgroundColor = 'blue';
     if (document.querySelector('.bti3>div[onmouseover*="Mana Potion"]')) {
       document.querySelector('.bti3>div[onmouseover*="Mana Potion"]').click();
+      window.HVAA_End = true;
+      return;
     }
   }
-  if (MP <= 0.05 && !document.querySelector('.bti3>div[onmouseover*="Mana Potion"]') && document.querySelector('.bti3>div[onmouseover*="Mana Elixir"]')) {
+  if (MP <= HVAA_Setting.MP3 * 0.01 && document.querySelector('.bti3>div[onmouseover*="Mana Elixir"]')) {
     document.querySelector('.bti3>div[onmouseover*="Mana Elixir"]').click();
+    window.HVAA_End = true;
+    return;
   }
   if (SP < HVAA_Setting.SP2 * 0.01) { //自动回精
     document.getElementById('quickbar').style.backgroundColor = 'green';
     if (document.querySelector('.bti3>div[onmouseover*="Spirit Potion"]')) {
       document.querySelector('.bti3>div[onmouseover*="Spirit Potion"]').click();
+      window.HVAA_End = true;
+      return;
     }
   }
-  if (SP <= 0.05 && !document.querySelector('.bti3>div[onmouseover*="Spirit Potion"]') && document.querySelector('.bti3>div[onmouseover*="Spirit Elixir"]')) {
+  if (SP <= HVAA_Setting.SP3 * 0.01 && document.querySelector('.bti3>div[onmouseover*="Spirit Elixir"]')) {
     document.querySelector('.bti3>div[onmouseover*="Spirit Elixir"]').click();
+    window.HVAA_End = true;
+    return;
   }
   if (HP <= HVAA_Setting.HP1 * 0.01) { //自动回血
-    document.getElementById('311').click();
     if (!document.querySelector('.cwb2[src*="/s/barsilver.png"]')) {
       document.getElementById('quickbar').style.backgroundColor = 'red';
-      if (document.getElementById('311').style.opacity === '0.5') {
-        document.getElementById('313').click();
-        if (document.getElementById('313').style.opacity === '0.5') {
-          if (document.querySelector('.bti3>div[onmouseover*="Health Potion"]')) {
-            document.querySelector('.bti3>div[onmouseover*="Health Potion"]').click();
-          } else if (oc > 0) {
-            document.getElementById('ckey_defend').click();
-          }
-        }
-        document.getElementById('313').click();
+    }
+    if (document.getElementById('311')) {
+      if (document.getElementById('311').style.opacity !== '0.5') {
+        document.getElementById('311').click();
+        window.HVAA_End = true;
+        return;
       }
     }
+    if (document.getElementById('313')) {
+      if (document.getElementById('313').style.opacity !== '0.5') {
+        document.getElementById('313').click();
+        window.HVAA_End = true;
+        return;
+      }
+    }
+    if (document.querySelector('.bti3>div[onmouseover*="Health Potion"]')) {
+      document.querySelector('.bti3>div[onmouseover*="Health Potion"]').click();
+      window.HVAA_End = true;
+      return;
+    }
+    if (oc > 0.05) {
+      document.getElementById('ckey_defend').click();
+      window.HVAA_End = true;
+      return;
+    }
   }
-  if (HP <= 0.05 && !document.querySelector('.bti3>div[onmouseover*="Health Potion"]') && document.querySelector('.bti3>div[onmouseover*="Health Elixir"]')) {
+  if (HP <= HVAA_Setting.HP3 * 0.01 && document.querySelector('.bti3>div[onmouseover*="Health Elixir"]')) {
     document.querySelector('.bti3>div[onmouseover*="Health Elixir"]').click();
+    window.HVAA_End = true;
+    return;
   }
 } //////////////////////////////////////////////////
 
@@ -466,7 +506,7 @@ function AutoUsePotAndSuSkill() { //自动使用药水、施法增益技能
           if (spell_name === 'Absorbing Ward') continue;
           var buff_lasttime = Number(buff[n].getAttribute('onmouseover').replace(/.*\'\,(.*?)\)/g, '$1'));
           if (buff_lasttime <= HVAA_Setting.Ch_ReSkill) {
-            if (spell_name === 'Cloak of the Fallen' && !document.querySelector('div.bte>img[src*="/e/sparklife.png"]')) {
+            if (spell_name === 'Cloak of the Fallen' && !document.querySelector('div.bte>img[src*="/e/sparklife.png"]') && document.getElementById('422').style.opacity !== '0.5') {
               document.getElementById('422').click();
               window.HVAA_End = true;
               return;
@@ -521,7 +561,7 @@ function AutoUsePotAndSuSkill() { //自动使用药水、施法增益技能
       }
     }
   } else if (Round_All === Round_Now && Round_All === 2) {
-    if (!document.querySelector('div.bte>img[src*="/e/sparklife.png"]')) {
+    if (!document.querySelector('div.bte>img[src*="/e/sparklife.png"]') && document.getElementById('422').style.opacity !== '0.5') {
       document.getElementById('422').click();
     }
   }
@@ -586,7 +626,11 @@ function AutoUseDeSkill() { //自动施法De技能
             break;
           }
         }
-        if (Boss_find) document.querySelector('#mkey_' + j).click();
+        if (Boss_find) {
+          document.querySelector('#mkey_' + j).click();
+          window.HVAA_End = true;
+          return;
+        }
       }
     }
   }
@@ -683,7 +727,7 @@ function AutoAttack() { //自动打怪
       document.getElementById('1' + Attack_Status + '3').click();
     }
   }
-  if (document.getElementById('2501').style.opacity === '0.5' && oc >= 0.2) {
+  if (document.getElementById('2501').style.opacity !== '0.5' && oc >= 0.2) {
     document.getElementById('2501').click();
   }
   if (minnum === 10) {
