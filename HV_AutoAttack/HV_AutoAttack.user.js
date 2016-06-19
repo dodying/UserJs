@@ -10,7 +10,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
-// @version     2.413
+// @version     2.414
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -77,31 +77,6 @@ if (localStorage.HVAA_disabled) { //如果禁用
   }
   main();
 } //////////////////////////////////////////////////
-//////////////////////////////////////////////////
-
-function AddMasking() { //Reloader防止误操作
-  var img = document.createElement('img');
-  img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==';
-  img.style.position = 'absolute';
-  img.style.width = document.all.mainpane.offsetWidth + 'px';
-  img.style.height = document.all.mainpane.offsetHeight + 'px';
-  img.style.top = document.all.mainpane.offsetTop + 'px';
-  img.style.left = document.all.mainpane.offsetLeft + 'px';
-  img.style.zIndex = '999';
-  document.body.appendChild(img)
-  var button = document.createElement('button');
-  button.innerHTML = '【误操作模式】开启';
-  button.onclick = function () {
-    if (img.style.zIndex === '999') {
-      img.style.zIndex = '0';
-      button.innerHTML = '【误操作模式】关闭';
-    } else {
-      img.style.zIndex = '999';
-      button.innerHTML = '【误操作模式】开启';
-    }
-  }
-  document.querySelector('.clb').insertBefore(button, document.querySelector('.clb>.cbl'))
-} //////////////////////////////////////////////////
 
 function main() { //主程序
   runtime++;
@@ -111,17 +86,15 @@ function main() { //主程序
   window.Monster_Count_Boss = document.querySelectorAll('div.btm2[style^=\'background:\']').length;
   window.Monster_Count_Boss_Dead = document.querySelectorAll('div.btm1[style*=\'opacity:\'] div.btm2[style*=\'background:\']').length;
   window.Monster_Count_Boss_Alive = Monster_Count_Boss - Monster_Count_Boss_Dead;
-  if (localStorage.HVAA_Monster) {
-    window.Monster = JSON.parse(localStorage.HVAA_Monster);
-  } else {
-    window.Monster = {
-    };
-  }
   CountRound(); //回合计数及自动前进并获取怪物总Hp
+  if (localStorage.HVAA_Monster_Status) {
+    window.Monster_Status = JSON.parse(localStorage.HVAA_Monster_Status);
+  }
   window.HP = document.querySelectorAll('.cwb2') [0].offsetWidth / 120;
   window.MP = document.querySelectorAll('.cwb2') [1].offsetWidth / 120;
   window.SP = document.querySelectorAll('.cwb2') [2].offsetWidth / 120;
   window.oc = document.querySelectorAll('.cwb2') [3].offsetWidth / 120;
+  BattleInfo(); //战斗战况
   AutoUseGem(); //自动使用宝石
   if (window.HVAA_End) {
     window.HVAA_End = false;
@@ -148,12 +121,36 @@ function main() { //主程序
   AutoAttack(); //自动打怪
 } //////////////////////////////////////////////////
 
+function AddMasking() { //Reloader防止误操作
+  var img = document.createElement('img');
+  img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==';
+  img.style.position = 'absolute';
+  img.style.width = document.all.mainpane.offsetWidth + 'px';
+  img.style.height = document.all.mainpane.offsetHeight + 'px';
+  img.style.top = document.all.mainpane.offsetTop + 'px';
+  img.style.left = document.all.mainpane.offsetLeft + 'px';
+  img.style.zIndex = '999';
+  document.body.appendChild(img)
+  var button = document.createElement('button');
+  button.innerHTML = '【误操作模式】开启';
+  button.onclick = function () {
+    if (img.style.zIndex === '999') {
+      img.style.zIndex = '0';
+      button.innerHTML = '【误操作模式】关闭';
+    } else {
+      img.style.zIndex = '999';
+      button.innerHTML = '【误操作模式】开启';
+    }
+  }
+  document.querySelector('.clb').insertBefore(button, document.querySelector('.clb>.cbl'))
+} //////////////////////////////////////////////////
+
 function removeItemInStorage(i) {
   localStorage.removeItem('HVAA_disabled');
   if (i > 0) {
     localStorage.removeItem('HVAA_Round_Now');
     localStorage.removeItem('HVAA_Round_All');
-    localStorage.removeItem('HVAA_Monster');
+    localStorage.removeItem('HVAA_Monster_Status');
     if (i > 1) {
       localStorage.removeItem('HVAA_Round_Type');
       localStorage.removeItem('HVAA_Attack_Status');
@@ -241,7 +238,7 @@ function HotKey() { //设置全局快捷键
       if (!localStorage.HVAA_disabled) {
         localStorage.HVAA_disabled = true;
       } else {
-        removeItemInStorage();
+        removeItemInStorage(0);
       }
       window.location = window.location.href;
     } else if (e.key === HVAA_Setting.Shortcut_Choose) {
@@ -300,11 +297,11 @@ function CountRound() { //回合计数及自动前进并获取怪物总Hp
     RoundType = localStorage.HVAA_Round_Type;
   }
   var BattleLog = document.querySelectorAll('#togpane_log>table>tbody>tr>td.t3');
-  if (BattleLog.length === Monster_Count_All + 2 && BattleLog[BattleLog.length - 1].innerHTML === 'Battle Start!') {
+  if (BattleLog[BattleLog.length - 1].innerHTML === 'Battle Start!') {
     removeItemInStorage(1);
   }
   if (!localStorage.HVAA_Round_Now) {
-    var Monster = [
+    var Monster_Status = [
     ];
     var id = 0;
     for (var i = BattleLog.length - 3; i > BattleLog.length - 3 - Monster_Count_All; i--) {
@@ -316,13 +313,15 @@ function CountRound() { //回合计数及自动前进并获取怪物总Hp
       temp.isBoss = (document.querySelectorAll('div.btm2') [id].style.background === '') ? false : true;
       if (!isNaN(hp)) {
         temp.Hp = hp;
+        temp.HPNow = temp.Hp;
       } else {
-        temp.Hp(Monster[Monster.length - 1].hp);
+        temp.Hp(Monster_Status[Monster_Status.length - 1].hp);
+        temp.HPNow = temp.Hp;
       }
-      Monster[id] = temp;
+      Monster_Status[id] = temp;
       id++;
     }
-    localStorage.HVAA_Monster = JSON.stringify(Monster);
+    localStorage.HVAA_Monster_Status = JSON.stringify(Monster_Status);
     if (RoundType === 'encounter') {
       if (Monster_Count_All >= HVAA_Setting.All_Mode_HVAA_Setting.All_Mode_Boss_Count_Count || Monster_Count_Boss_Alive >= HVAA_Setting.All_Mode_Boss_Count) {
         Round_Now = 1;
@@ -361,6 +360,29 @@ function CountRound() { //回合计数及自动前进并获取怪物总Hp
   } else if (Round_Now === Round_All) {
     document.getElementById('infopane').style.backgroundColor = 'gray';
   }
+} //////////////////////////////////////////////////
+
+function BattleInfo() { //战斗战况
+  var Attack_Status2Chinese = {
+    0: '物理',
+    1: '火',
+    2: '冰',
+    3: '雷',
+    4: '风',
+    5: '圣',
+    6: '暗'
+  };
+  var Attack_Status_title = Attack_Status2Chinese[Attack_Status];
+  if (!document.querySelector('#HVAA_BattleLog')) {
+    var div = document.createElement('div');
+    div.id = 'HVAA_BattleLog';
+    div.innerHTML = '运行次数：' + runtime + '<br>回合：' + Round_Now + '/' + Round_All + '<br>攻击模式：' + Attack_Status_title + '<br>存活Boss：' + Monster_Count_Boss_Alive + '<br>怪物：' + Monster_Count_Alive + '/' + Monster_Count_All;
+    div.style = 'font-size:20px;text-align:center;';
+    document.querySelector('div.clb').insertBefore(div, document.querySelector('.cit'));
+  } else {
+    document.querySelector('#HVAA_BattleLog').innerHTML = '运行次数：' + runtime + '<br>回合：' + Round_Now + '/' + Round_All + '<br>攻击模式：' + Attack_Status_title + '<br>存活Boss：' + Monster_Count_Boss_Alive + '<br>怪物：' + Monster_Count_Alive + '/' + Monster_Count_All;
+  }
+  document.title = runtime + '||' + Round_Now + '/' + Round_All + '||' + Monster_Count_Alive + '/' + Monster_Count_All;
 } //////////////////////////////////////////////////
 
 function AutoUseGem() { //自动使用宝石
@@ -570,19 +592,17 @@ function AutoUsePotAndSuSkill() { //自动使用药水、施法增益技能
 } //////////////////////////////////////////////////
 
 function CountMonsterHP() { //统计怪物血量
-  window.MonsterHPNow = [
-  ];
   var HPBar = document.querySelectorAll('div.btm4>div.btm5:nth-child(1)');
   for (var i = 0; i < HPBar.length; i++) {
     if (HPBar[i].querySelector('img[src="/y/s/nbardead.png"]')) {
-      Monster[i].isDead = true;
-      MonsterHPNow[i] = Infinity;
+      Monster_Status[i].isDead = true;
+      Monster_Status[i].HPNow = Infinity;
     } else {
-      Monster[i].isDead = false;
-      MonsterHPNow[i] = Math.floor(Monster[i].Hp * parseFloat(HPBar[i].querySelector('div.chbd>img.chb2').style.width) / 120);
+      Monster_Status[i].isDead = false;
+      Monster_Status[i].HPNow = Math.floor(Monster_Status[i].Hp * parseFloat(HPBar[i].querySelector('div.chbd>img.chb2').style.width) / 120);
     }
   }
-  console.log(MonsterHPNow);
+  localStorage.HVAA_Monster_Status = JSON.stringify(Monster_Status);
 } //////////////////////////////////////////////////
 
 function AutoUseDeSkill() { //自动施法De技能
@@ -623,7 +643,7 @@ function AutoUseDeSkill() { //自动施法De技能
       if (document.getElementById(Skill_Lib[i].id).style.opacity !== '0.5') {
         document.getElementById(Skill_Lib[i].id).click();
         for (var j = 0; j < Monster_Count_All; j++) {
-          if (Monster[j].isBoss && !document.querySelector('#mkey_' + eval(j + 1) + '>.btm6>img[src*="/e/' + Skill_Lib[i].img + '.png"]')) {
+          if (Monster_Status[j].isBoss && !document.querySelector('#mkey_' + eval(j + 1) + '>.btm6>img[src*="/e/' + Skill_Lib[i].img + '.png"]')) {
             var Boss_find = true;
             break;
           }
@@ -648,23 +668,9 @@ function AutoAttack() { //自动打怪
       }
     }
   }
-  localStorage.HVAA_Monster = JSON.stringify(Monster);
-  var HPMin = Math.min.apply(null, MonsterHPNow);
-  var minnum;
-  for (i = 0; i < MonsterHPNow.length; i++) {
-    if (HPMin === MonsterHPNow[i]) {
-      minnum = i + 1;
-      break;
-    }
-  }
-  var Attack_Status2Chinese = {
-    0: '物理',
-    1: '火',
-    2: '冰',
-    3: '雷',
-    4: '风',
-    5: '圣',
-    6: '暗',
+  Monster_Status.sort(ArrCom('HPNow'));
+  var minnum = Monster_Status[Monster_Status.length - 1].id + 1;
+  var Chinese2Attack_Status = {
     '物理': 0,
     '火': 1,
     '冰': 2,
@@ -673,17 +679,6 @@ function AutoAttack() { //自动打怪
     '圣': 5,
     '暗': 6
   };
-  var Attack_Status_title = Attack_Status2Chinese[Attack_Status];
-  if (!document.querySelector('#HVAA_BattleLog')) {
-    var div = document.createElement('div');
-    div.id = 'HVAA_BattleLog';
-    div.innerHTML = '运行次数：' + runtime + '<br>回合：' + Round_Now + '/' + Round_All + '<br>攻击模式：' + Attack_Status_title + '<br>存活Boss：' + Monster_Count_Boss_Alive + '<br>怪物：' + Monster_Count_Alive + '/' + Monster_Count_All;
-    div.style = 'font-size:20px;text-align:center;';
-    document.querySelector('div.clb').insertBefore(div, document.querySelector('.cit'));
-  } else {
-    document.querySelector('#HVAA_BattleLog').innerHTML = '运行次数：' + runtime + '<br>回合：' + Round_Now + '/' + Round_All + '<br>攻击模式：' + Attack_Status_title + '<br>存活Boss：' + Monster_Count_Boss_Alive + '<br>怪物：' + Monster_Count_Alive + '/' + Monster_Count_All;
-  }
-  document.title = runtime + '||' + Round_Now + '/' + Round_All + '||' + Monster_Count_Alive + '/' + Monster_Count_All;
   if (Monster_Count_Alive <= Monster_Count_Boss_Alive && Monster_Count_Alive > 0 && HVAA_Setting.Attack_Weakness) {
     var MonsterDiv = document.querySelector('#mkey_' + minnum + '>.btm3>.fd2>div');
     var MonsterName = MonsterDiv.innerHTML;
@@ -710,8 +705,8 @@ function AutoAttack() { //自动打怪
       MonsterDiv.innerHTML = Boss_Weakness[MonsterName];
       MonsterName = MonsterDiv.innerHTML;
       MonsterName = MonsterName.replace('弱点-', '').replace(/\|.*/, '');
-      if (MonsterName in Attack_Status2Chinese) {
-        Attack_Status = Attack_Status2Chinese[MonsterName];
+      if (MonsterName in Chinese2Attack_Status) {
+        Attack_Status = Chinese2Attack_Status[MonsterName];
       }
     } else {
       OtherAlert('Error');
@@ -739,4 +734,18 @@ function AutoAttack() { //自动打怪
   setTimeout(function () {
     document.getElementById('mkey_' + minnum).click();
   }, HVAA_Setting.Attack_Delay_Time * 1000);
+} //////////////////////////////////////////////////
+
+function ArrCom(propertyName) { //对象数组排序函数，来自http://www.jb51.net/article/24536.htm
+  return function (object1, object2) {
+    var value1 = object1[propertyName];
+    var value2 = object2[propertyName];
+    if (value2 < value1) {
+      return - 1;
+    } else if (value2 > value1) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 }
