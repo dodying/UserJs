@@ -396,7 +396,7 @@ function DeadSoon() { //自动回血回魔
         if (document.getElementById('313').style.opacity === '0.5') {
           if (document.querySelector('.bti3>div[onmouseover*="Health Potion"]')) {
             document.querySelector('.bti3>div[onmouseover*="Health Potion"]').click();
-          } else if (oc 
+          } else if (oc > 0) {
             document.getElementById('ckey_defend').click();
           }
         }
