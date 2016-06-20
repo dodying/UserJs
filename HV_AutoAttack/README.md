@@ -4,7 +4,7 @@
 
 ### 设置说明
 
-
+![HV_AutoAttack_Setting](https://raw.githubusercontent.com/dodying/UserJs/master/HV_AutoAttack/HV_AutoAttack_Setting.png)
 
 
 
