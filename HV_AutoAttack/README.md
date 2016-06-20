@@ -6,6 +6,14 @@
 
 ![HV_AutoAttack_Setting](https://raw.githubusercontent.com/dodying/UserJs/master/HV_AutoAttack/HV_AutoAttack_Setting.png)
 
+##### 三条HP、MP、SP
+
+HP1、MP1、SP1为使用Gem（宝石）回复的界限
+
+HP2、MP2、SP2为使用Potion级别药水（、技能、防御）回复的界限
+
+HP3、MP3、SP3为使用Elixir级别药水回复的界限
+
 
 
 
