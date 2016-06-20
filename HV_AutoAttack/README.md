@@ -65,6 +65,15 @@ HP3、MP3、SP3为使用Elixir级别药水回复的界限
 
 ### 权重规则
 
+<table>
+<tbody>
+<tr><td>怪物id</td><td>当前血量</td><td>初始权重</td><td>技能1<br>（权重：+2）</td><td>技能2<br>（权重：+1）</td><td>技能3<br>（权重：-2）</td><td>最终权重</td></tr>
+<tr><td>1</td><td>10</td><td>10</td><td>√</td><td></td><td>√</td><td>10</td></tr>
+<tr><td>2</td><td>15</td><td>15</td><td></td><td>√</td><td></td><td>16</td></tr>
+<tr><td>3</td><td>20</td><td>20</td><td>√</td><td></td><td></td><td>22</td></tr>
+</tbody>
+</table>
+
 ### 更新历史
 
 
