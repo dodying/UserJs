@@ -707,7 +707,6 @@ function AutoUseDeSkill() { //自动施法De技能
             }
             if (Monster_Find){
             document.getElementById(Skill_Lib[i].id).click();
-            alert(Monster_Status[j].id)
             document.querySelector('#mkey_' + Monster_Status[j].id).click();
             window.HVAA_End = true;
             return;}
