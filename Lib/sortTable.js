@@ -1,3 +1,4 @@
+/*来自http://www.jb51.net/article/46976.htm*/
 function generateCompareTRs(iCol, sDataType) {
   return function compareTRs(oTR1, oTR2) {
     vValue1 = convert(oTR1.cells[iCol].firstChild.nodeValue, sDataType);
