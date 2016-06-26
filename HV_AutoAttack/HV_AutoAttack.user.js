@@ -336,20 +336,6 @@ function RiddleAlert() { //答题警报
     } else {
       document.querySelector('#riddlemaster').value = 'C';
     }
-    document.querySelector('#riddlemaster+img').onclick = function () {
-      if (localStorage.HVAA_Riddle) {
-        var HVAA_Riddle = JSON.parse(localStorage.HVAA_Riddle);
-      } else {
-        var HVAA_Riddle = [
-        ];
-      }
-      var temp = {
-      };
-      temp.url = document.querySelector('#riddleform>div>img[src^="http://hentaiverse.org/riddlemaster.php?"]').src;
-      temp.answer = document.querySelector('#riddlemaster').value;
-      HVAA_Riddle.push(temp);
-      localStorage.HVAA_Riddle = JSON.stringify(HVAA_Riddle);
-    }
   }
 } //////////////////////////////////////////////////
 
