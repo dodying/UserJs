@@ -344,6 +344,15 @@ function RiddleAlert() { //答题警报
     var audio = document.createElement('audio');
     audio.src = HVAA_Setting.Alert_Riddle;
     audio.play();
+    var random = Math.random();
+    if (random < 1 / 3) {
+      document.querySelector('#riddlemaster').value = 'A';
+    } else if (random < 2 / 3) {
+      document.querySelector('#riddlemaster').value = 'B';
+    } else {
+      document.querySelector('#riddlemaster').value = 'C';
+    }
+    /*
     var time_div = document.querySelectorAll('#riddlecounter>div>div');
     for (var i = 0; i < 30; i++) {
       setTimeout(function () {
@@ -352,14 +361,6 @@ function RiddleAlert() { //答题警报
         }
         console.log(time);
       }, i * 1000)
-    }
-    var random = Math.random();
-    if (random < 1 / 3) {
-      document.querySelector('#riddlemaster').value = 'A';
-    } else if (random < 2 / 3) {
-      document.querySelector('#riddlemaster').value = 'B';
-    } else {
-      document.querySelector('#riddlemaster').value = 'C';
     }
     document.querySelector('#riddlemaster+img').onclick = function () {
       if (localStorage.HVAA_Riddle) {
@@ -376,6 +377,7 @@ function RiddleAlert() { //答题警报
       localStorage.HVAA_Riddle = JSON.stringify(HVAA_Riddle);
       document.getElementById('riddleform').submit();
     }
+    */
   }
 } //////////////////////////////////////////////////
 
