@@ -566,44 +566,111 @@ function DeadSoon() { //自动回血回魔
 } //////////////////////////////////////////////////
 
 function AutoUseScroll() {
+  
   var Scroll_Lib = {
     'Go': {
       'name': 'Scroll of the Gods',
       'mult': '3',
-      'img1': 'absorb_scroll',
-      'img2': 'shadowveil_scroll',
-      'img3': 'sparklife_scroll'
+      'img1': 'absorb',
+      'img2': 'shadowveil',
+      'img3': 'sparklife'
     },
     'Av': {
       'name': 'Scroll of the Avatar',
       'mult': '2',
-      'img1': 'haste_scroll',
-      'img2': 'protection_scroll'
+      'img1': 'haste',
+      'img2': 'protection'
     },
     'Pr': {
       'name': 'Scroll of Protection',
       'mult': '1',
-      'img1': 'protection_scroll'
+      'img1': 'protection'
     },
     'Sw': {
       'name': 'Scroll of Swiftness',
       'mult': '1',
-      'img1': 'haste_scroll'
+      'img1': 'haste'
     },
     'Li': {
       'name': 'Scroll of Life',
       'mult': '1',
-      'img1': 'sparklife_scroll'
+      'img1': 'sparklife'
     },
     'Sh': {
       'name': 'Scroll of Shadows',
       'mult': '1',
-      'img1': 'shadowveil_scroll'
+      'img1': 'shadowveil'
     },
     'Ab': {
       'name': 'Scroll of Absorption',
       'mult': '1',
-      'img1': 'absorb_scroll'
+      'img1': 'absorb'
+    }
+  };
+  for (var i in Scroll_Lib) {
+    if (HVAA_Setting['Scroll_' + i] && document.querySelector('.bti3>div[onmouseover*="' + Scroll_Lib[i].name + '"]')) {
+      for (var j = 1; j <= Scroll_Lib[i].mult; j++) {
+        if (document.querySelector('div.bte>img[src*="' + Scroll_Lib[i]['img' + j] + '"]')) {
+          var isUsed = false;
+          break;
+        }
+        var isUsed = false;
+      }
+      if (!isUsed) {
+        document.querySelector('.bti3>div[onmouseover*="' + Scroll_Lib[i].name + '"]').click();
+        window.HVAA_End = true;
+        return;
+      }
+    }
+  }
+} //////////////////////////////////////////////////
+
+function AutoUsePotAndSuSkill() { //自动使用药水、施法增益技能
+  var Skill_Lib = {
+    'Pr': {
+      'name': 'Protection',
+      'id': '411',
+      'img': 'protection'
+    },
+    'Ha': {
+      'name': 'Haste',
+      'id': '412',
+      'img': 'haste'
+    },
+    'SL': {
+      'name': 'Spark of Life',
+      'id': '422',
+      'img': 'sparklife'
+    },
+    'SS': {
+      'name': 'Spirit Shield',
+      'id': '423',
+      'img': 'spiritshield'
+    },
+    'AF': {
+      'name': 'Arcane Focus',
+      'id': '432',
+      'img': 'arcanemeditation',
+    },
+    'He': {
+      'name': 'Heartseeker',
+      'id': '431',
+      'img': 'heartseeker'
+    },
+    'Re': {
+      'name': 'Regen',
+      'id': '312',
+      'img': 'regen'
+    },
+    'SV': {
+      'name': 'Shadow Veil',
+      'id': '413',
+      'img': 'shadowveil'
+    },
+    'Ab': {
+      'name': 'Absorb',
+      'id': '421',
+      'img': 'absorb'
     }
   };
   for (var i in Scroll_Lib) {
