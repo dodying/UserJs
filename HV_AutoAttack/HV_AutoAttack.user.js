@@ -343,6 +343,7 @@ function RiddleAlert() { //答题警报
     var audio = document.createElement('audio');
     audio.src = HVAA_Setting.Alert_Riddle;
     audio.play();
+    //alert('#riddlecounter');
     var random = Math.random();
     if (random < 1 / 3) {
       document.querySelector('#riddlemaster').value = 'A';
@@ -351,8 +352,7 @@ function RiddleAlert() { //答题警报
     } else {
       document.querySelector('#riddlemaster').value = 'C';
     }
-    /*
-    document.querySelector('#riddlemaster+img').onclick = function () {
+    /*document.querySelector('#riddlemaster+img').onclick = function () {
       if (localStorage.HVAA_Riddle) {
         var HVAA_Riddle = JSON.parse(localStorage.HVAA_Riddle);
       } else {
@@ -365,8 +365,8 @@ function RiddleAlert() { //答题警报
       temp.answer = document.querySelector('#riddlemaster').value;
       HVAA_Riddle.push(temp);
       localStorage.HVAA_Riddle = JSON.stringify(HVAA_Riddle);
-    }
-    */
+      document.getElementById('riddleform').submit();
+    }*/
   }
 } //////////////////////////////////////////////////
 
@@ -566,7 +566,6 @@ function DeadSoon() { //自动回血回魔
 } //////////////////////////////////////////////////
 
 function AutoUseScroll() {
-  
   var Scroll_Lib = {
     'Go': {
       'name': 'Scroll of the Gods',
@@ -605,72 +604,6 @@ function AutoUseScroll() {
       'name': 'Scroll of Absorption',
       'mult': '1',
       'img1': 'absorb'
-    }
-  };
-  for (var i in Scroll_Lib) {
-    if (HVAA_Setting['Scroll_' + i] && document.querySelector('.bti3>div[onmouseover*="' + Scroll_Lib[i].name + '"]')) {
-      for (var j = 1; j <= Scroll_Lib[i].mult; j++) {
-        if (document.querySelector('div.bte>img[src*="' + Scroll_Lib[i]['img' + j] + '"]')) {
-          var isUsed = false;
-          break;
-        }
-        var isUsed = false;
-      }
-      if (!isUsed) {
-        document.querySelector('.bti3>div[onmouseover*="' + Scroll_Lib[i].name + '"]').click();
-        window.HVAA_End = true;
-        return;
-      }
-    }
-  }
-} //////////////////////////////////////////////////
-
-function AutoUsePotAndSuSkill() { //自动使用药水、施法增益技能
-  var Skill_Lib = {
-    'Pr': {
-      'name': 'Protection',
-      'id': '411',
-      'img': 'protection'
-    },
-    'Ha': {
-      'name': 'Haste',
-      'id': '412',
-      'img': 'haste'
-    },
-    'SL': {
-      'name': 'Spark of Life',
-      'id': '422',
-      'img': 'sparklife'
-    },
-    'SS': {
-      'name': 'Spirit Shield',
-      'id': '423',
-      'img': 'spiritshield'
-    },
-    'AF': {
-      'name': 'Arcane Focus',
-      'id': '432',
-      'img': 'arcanemeditation',
-    },
-    'He': {
-      'name': 'Heartseeker',
-      'id': '431',
-      'img': 'heartseeker'
-    },
-    'Re': {
-      'name': 'Regen',
-      'id': '312',
-      'img': 'regen'
-    },
-    'SV': {
-      'name': 'Shadow Veil',
-      'id': '413',
-      'img': 'shadowveil'
-    },
-    'Ab': {
-      'name': 'Absorb',
-      'id': '421',
-      'img': 'absorb'
     }
   };
   for (var i in Scroll_Lib) {
