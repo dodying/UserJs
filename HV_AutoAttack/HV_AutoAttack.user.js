@@ -631,14 +631,14 @@ function AutoUseScroll() {
   for (var i in Scroll_Lib) {
     if (HVAA_Setting['Scroll_' + i] && document.querySelector('.bti3>div[onmouseover*="' + Scroll_Lib[i].name + '"]')) {
       for (var j = 1; j <= Scroll_Lib[i].mult; j++) {
-        if (document.querySelector('div.bte>img[src*="' + Scroll_Lib[i]['img' + j] + '"]')) {
+        if (document.querySelector('div.bte>img[src*="' + Scroll_Lib[i]['img' + j] + Scroll_First + '"]')) {
           var isUsed = true;
           break;
         }
         var isUsed = false;
       }
       if (!isUsed) {
-        document.querySelector('.bti3>div[onmouseover*="' + Scroll_Lib[i].name + Scroll_First + '"]').click();
+        document.querySelector('.bti3>div[onmouseover*="' + Scroll_Lib[i].name + '"]').click();
         window.HVAA_End = true;
         return;
       }
