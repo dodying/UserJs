@@ -406,7 +406,7 @@ function OtherAlert(e) { //其他警报
 
 function CountRound() { //回合计数及自动前进并获取怪物总HP
   if (!localStorage.HVAA_Round_Type) {
-    Round_Type = searchParse().ss;
+    Round_Type = window.location.search.replace(/.*ss=([a-z]{2}).*/, '$1');
     localStorage.HVAA_Round_Type = Round_Type;
   } else {
     Round_Type = localStorage.HVAA_Round_Type;
@@ -986,21 +986,4 @@ function ArrCom(propertyName) { //对象数组排序函数，从小到大排序�
       return 0;
     }
   }
-}
-function searchParse() { //解析url的search部分，来自http://www.jb51.net/article/22075.htm
-  var resultObj = {
-  };
-  var search = window.location.search;
-  if (search && search.length > 1) {
-    var search = search.substring(1);
-    var items = search.split('&');
-    for (var index = 0; index < items.length; index++) {
-      if (!items[index]) {
-        continue;
-      }
-      var kv = items[index].split('=');
-      resultObj[kv[0]] = typeof kv[1] === 'undefined' ? '' : kv[1];
-    }
-  }
-  return resultObj;
 }
