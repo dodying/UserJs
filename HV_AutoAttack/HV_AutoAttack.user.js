@@ -11,7 +11,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
 // @exclude     http://hentaiverse.org/pages/showequip.php?*
-// @version     2.512
+// @version     2.513
 // @grant       GM_addStyle
 // @run-at      document-end
 // ==/UserScript==
@@ -349,7 +349,7 @@ function OptionButton() { //配置
 } //////////////////////////////////////////////////
 
 function HotKey() { //设置全局快捷键
-  window.onkeydown = function (e) {
+  document.onkeydown = function (e) {
     if (e.key === HVAA_Setting.Shortcut_Pause) {
       (!localStorage.HVAA_disabled) ? localStorage.HVAA_disabled = true : removeItemInStorage(0);
       window.location = window.location.href;
