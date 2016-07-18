@@ -11,7 +11,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://hentaiverse.org/*
 // @exclude     http://hentaiverse.org/pages/showequip.php?*
-// @version     2.52
+// @version     2.521
 // @grant       GM_addStyle
 // @run-at      document-end
 // ==/UserScript==
@@ -772,6 +772,17 @@ function AutoUsePotAndSuSkill() { //自动使用药水、施法增益技能
         }
       }
     }
+    for (var i in Skill_Lib) {
+      if (HVAA_Setting['Su_Skill_' + i] !== undefined) {
+        if (HVAA_Setting['Su_Skill_' + i] && !ge(0, 'div.bte>img[src*="' + Skill_Lib[i].img + '"]') && ge(2, Skill_Lib[i].id)) {
+          if (ge(2, Skill_Lib[i].id).style.opacity !== '0.5') {
+            ge(2, Skill_Lib[i].id).click();
+            window.HVAA_End = true;
+            return;
+          }
+        }
+      }
+    }
     if (!ge(0, 'div.bte>img[src*="healthpot"]') && HP < 1 && HVAA_Setting.Su_Skill_HD && ge(0, '.bti3>div[onmouseover*="Health Draught"]')) {
       ge(0, '.bti3>div[onmouseover*="Health Draught"]').click();
       window.HVAA_End = true;
@@ -784,17 +795,6 @@ function AutoUsePotAndSuSkill() { //自动使用药水、施法增益技能
       ge(0, '.bti3>div[onmouseover*="Spirit Draught"]').click();
       window.HVAA_End = true;
       return;
-    }
-    for (var i in Skill_Lib) {
-      if (HVAA_Setting['Su_Skill_' + i] !== undefined) {
-        if (HVAA_Setting['Su_Skill_' + i] && !ge(0, 'div.bte>img[src*="' + Skill_Lib[i].img + '"]') && ge(2, Skill_Lib[i].id)) {
-          if (ge(2, Skill_Lib[i].id).style.opacity !== '0.5') {
-            ge(2, Skill_Lib[i].id).click();
-            window.HVAA_End = true;
-            return;
-          }
-        }
-      }
     }
   } else if (Round_All === Round_Now && Round_All === 2) {
     if (!ge(0, 'div.bte>img[src*="sparklife"]') && ge(2, '422').style.opacity !== '0.5') {
