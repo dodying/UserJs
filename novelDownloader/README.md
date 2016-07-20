@@ -16,13 +16,15 @@
 
 ### 帮助说明
 
-#### Press key "D" to show the options
-
 #### 按“D”来显示下载选项
 
 ######预览
 
 ![预览](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)
+
+### 作者需要帮助的网站
+
+欢乐污客 [www.hbooker.com](www.hbooker.com) 可能先后采用Base64与CryptoJS加密数据；
 
 ### 支持网站
 
@@ -49,10 +51,6 @@ SF轻小说 [book.sfacg.com](book.sfacg.com)
 笔趣阁 [www.biquge.la](www.biquge.la)
 
 书迷楼 [www.shumilou.co](www.shumilou.co)
-
-### 作者需要帮助的网站
-
-欢乐污客 [www.hbooker.com](www.hbooker.com) 可能先后采用Base64与CryptoJS加密数据；
 
 ### 更新历史
 
