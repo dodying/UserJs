@@ -1,3 +1,7 @@
+###预览
+
+![预览](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)
+
 ### 由于引用外来库的原因，可能导致长时间无法安装。请多次尝试。
 
 ### 由于引用外来库未通过的原因，导致【GF上的版本】简繁体转换的功能暂时失效。
