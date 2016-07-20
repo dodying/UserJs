@@ -56,9 +56,25 @@ SF轻小说 [book.sfacg.com](book.sfacg.com)
 
 书迷楼 [www.shumilou.co](www.shumilou.co)
 
+3G书城 [www.3gsc.com.cn](www.3gsc.com.cn)
+
+#### 版本命名规则
+
+如**1.0.13**分成两段，1.0与13
+
+1.0表示脚本功能为1.0版本。
+
+13表示支持13个网站。
+
 ### 更新历史
 
 #### Latest
+##### 1.0.13
+
+更改版本命名规则
+
+增加网站：[3G书城](www.3gsc.com.cn)
+
 ##### 1.02
 
 增加网站：[黑岩](www.heiyan.com)，[顶点小说](www.23wx.com)，[SF轻小说](book.sfacg.com)，[笔趣阁](www.biquge.la)，[书迷楼](www.shumilou.co)
