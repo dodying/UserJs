@@ -1,6 +1,4 @@
-###预览
-
-![预览](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)
+###预览![预览](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)
 
 ### 由于引用外来库的原因，可能导致长时间无法安装。请多次尝试。
 
