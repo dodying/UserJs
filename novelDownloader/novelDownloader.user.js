@@ -19,7 +19,7 @@
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
-// require     https://github.com/hustlzp/jquery-s2t/raw/master/jquery.s2t.js
+// @require     https://github.com/hustlzp/jquery-s2t/raw/master/jquery.s2t.js
 // @grant       GM_xmlhttpRequest
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -118,8 +118,8 @@ var chapterRule = {
           content = response.response.replace(/document\.write\(\'(.*)\'\);/, '$1').replace(/\<a.*?\<\/a\>/g, '').replace(/\<p\>/g, '\r\n');
           content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
           if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
-            //name = jQuery.s2t(name);
-            //content = jQuery.s2t(content);
+            name = jQuery.s2t(name);
+            content = jQuery.s2t(content);
           }
           jQuery(window).data('dataDownload') [num].name = name;
           console.log(jQuery(window).data('dataDownload') [num])
@@ -165,8 +165,8 @@ var chapterRule = {
         content = temp;
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
         if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
-          //name = jQuery.s2t(name);
-          //content = jQuery.s2t(content);
+          name = jQuery.s2t(name);
+          content = jQuery.s2t(content);
         }
         jQuery(window).data('dataDownload') [num].name = name;
         jQuery(window).data('dataDownload') [num].content = content;
@@ -399,11 +399,11 @@ function xhr(num, url) {
       content = name + '\r\n来源地址：' + url + '\r\n\r\n' + content;
       if (jQuery('.bookDownloaderLang:checked') [0].value !== chapterRule[host].lang) {
         if (jQuery('.bookDownloaderLang:checked') [0].value === 'zhc') {
-          //name = jQuery.t2s(name);
-          //content = jQuery.t2s(content);
+          name = jQuery.t2s(name);
+          content = jQuery.t2s(content);
         } else {
-          //name = jQuery.s2t(name);
-          //content = jQuery.s2t(content);
+          name = jQuery.s2t(name);
+          content = jQuery.s2t(content);
         }
       }
       jQuery(window).data('dataDownload') [num].name = name;
