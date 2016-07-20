@@ -40,6 +40,10 @@ SF轻小说 [book.sfacg.com](book.sfacg.com)
 
 书迷楼 [www.shumilou.co](www.shumilou.co)
 
+### 作者需要帮助的网站
+
+欢乐污客 [www.hbooker.com](www.hbooker.com) 可能先后采用Base64与CryptoJS加密数据；
+
 ### 更新历史
 
 #### Latest
