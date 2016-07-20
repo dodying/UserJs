@@ -1,18 +1,28 @@
-######预览
+#### 由于引用外来库的原因，可能导致长时间无法安装。请多次尝试。
 
-![预览](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)
+#### 由于引用外来库未通过的原因，导致【GF上的版本】简繁体转换的功能暂时失效。
 
-### 由于引用外来库的原因，可能导致长时间无法安装。请多次尝试。
+#### 急用简繁体转换功能的请点击[【安装】](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloaderRaw.user.js)（源自Github，缺点：脚本无法更新）
 
-### 由于引用外来库未通过的原因，导致【GF上的版本】简繁体转换的功能暂时失效。
+### 意见、建议、Bug
 
-### 急用简繁体转换功能的请点击[【安装】](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloaderRaw.user.js)（源自Github，缺点：脚本无法更新）
+#### 两个地址：[Github-issues](https://github.com/dodying/UserJs/issues)与[GF-反馈](https://greasyfork.org/zh-CN/scripts/21515-noveldownloader/feedback)
+
+#### 想添加其他网站可以在**上面两个地方**发布讨论，或是尝试自行修改代码。
+
+#### 同时，请务必分享你添加的代码。感激不尽。
+
+#### 脚本出错，请务必发布讨论，以便帮助作者能及时发现并修正它们。
 
 ### 帮助说明
 
 #### Press key "D" to show the options
 
 #### 按“D”来显示下载选项
+
+######预览
+
+![预览](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)
 
 ### 支持网站
 
