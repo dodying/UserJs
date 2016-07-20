@@ -21,8 +21,9 @@
 // @include     http://book.sfacg.com/Novel/*
 // @include     http://www.biquge.la/book/*
 // @include     http://www.shumilou.co/*/
+// @include     http://www.3gsc.com.cn/bookreader/*
 // include     http://18av.mm-cg.com/*
-// @version     1.02
+// @version     1.0.13
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -98,6 +99,10 @@ var indexRule = {
   'www.shumilou.co': {
     'name': '#mybook+.list>.tit>b',
     'chapter': 'li.zl>a'
+  },
+  'www.3gsc.com.cn':{
+    'name': 'h1>a',
+    'chapter': '.menu-area>p>a'
   },
   '18av.mm-cg.com': {
     'name': '.label>div',
@@ -264,6 +269,11 @@ var chapterRule = {
   'www.shumilou.co': {
     'name': 'h2',
     'content': '#content',
+    'lang': 'zhc',
+  },
+  'www.3gsc.com.cn':{
+    'name': 'h1',
+    'content': '.menu-area',
     'lang': 'zhc',
   },
   '18av.mm-cg.com': {
