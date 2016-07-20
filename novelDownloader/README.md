@@ -6,7 +6,7 @@
 
 ### 由于引用外来库未通过的原因，导致【GF上的版本】简繁体转换的功能暂时失效。
 
-### 急用简繁体转换功能的请点击[【安装】](github-windows://openRepo/https://github.com/dodying/UserJs?branch=master&filepath=novelDownloader%2FnovelDownloaderRaw.user.js)（源自Github，缺点：脚本无法更新）
+### 急用简繁体转换功能的请点击[【安装】](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloaderRaw.user.js)（源自Github，缺点：脚本无法更新）
 
 ### 帮助说明
 
