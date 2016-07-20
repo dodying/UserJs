@@ -15,7 +15,9 @@
 // @include     http://www.17k.com/list/*.html
 // @include     http://www.17k.com/chapter/*/*.html
 // @include     http://chuangshi.qq.com/bk/*/*-*.html
-// @version     1.00
+// @include     http://free.qidian.com/Free/ChapterList.aspx?bookId=*
+// @include     http://free.qidian.com/Free/ReadChapter.aspx?bookId=*&chapterId=*
+// @version     1.01
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -70,6 +72,10 @@ var indexRule = {
     'name': 'h1.Title',
     'chapter': 'dl.Volume>dd>a',
     'vip': 'dl.Volume>dd>a:has(img)'
+  },
+  'free.qidian.com': {
+    'name': '.book_title>h2>strong',
+    'chapter': '#book_box>div>div>ul>li>a'
   }
 };
 var chapterRule = {
@@ -80,6 +86,7 @@ var chapterRule = {
     'lang': '必填-内容语言',String,zhc-简体,zht-繁体
     'MimeType': '选填',String gbk-'text/html; charset=gb2312'
     'Deal': '选填-网址防盗贴时进行的处理，参数为num、url',Function
+    特殊处理时可不填name与content
   }
   一般来说，只用填上必填的就行。
   */
@@ -94,15 +101,13 @@ var chapterRule = {
     'lang': 'zhc'
   },
   'read.qidian.com': {
-    'name': '.story_title>h1',
-    'content': 'script[src$=".txt"]',
     'lang': 'zhc',
     'Deal': function (num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
         url: url,
         onload: function (response) {
-          var name = jQuery('.story_title>h1', response.response).text();
+          var name = jQuery('.story_title>h1,.title>h3', response.response).text();
           var content = jQuery('script[src$=".txt"]', response.response);
           chapterRule['read.qidian.com'].Deal2(num, name, content);
         }
@@ -131,8 +136,6 @@ var chapterRule = {
     }
   },
   'chuangshi.qq.com': {
-    'name': '.copyRightWrap>h1',
-    'content': '.bookreadercontent',
     'lang': 'zhc',
     'Deal': function (num, url) {
       GM_xmlhttpRequest({
@@ -202,6 +205,12 @@ var chapterRule = {
     'name': 'h1',
     'content': '#chapterContentWapper',
     'lang': 'zhc'
+  },
+  'free.qidian.com': {
+    'lang':'zhc',
+    'Deal':function (num, url){
+      chapterRule['read.qidian.com'].Deal(num, url);
+    }
   }
 };
 jQuery(document.body).append('<div id="bookDownloader">下载线程：<input id="bookDownloaderThread" placeholder="10" type="text"><br><input id="boodDownloaderVip" type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><br>语言：<input id="bookDownloaderLangZhc" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="zhc" checked="true"></input><label for="bookDownloaderLangZhc">简体</label><input id="bookDownloaderLangZht" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="zht"></input><label for="bookDownloaderLangZht">繁体</label><br><button id="bookDownloaderThis">下载本章(TXT)</button><br><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><br><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><br><button id="bookDownloaderSome2Zip">特定下载某些章节(ZIP)</button></div><div id="bookDownloaderLog"></div>');
