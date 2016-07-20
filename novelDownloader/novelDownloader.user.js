@@ -14,7 +14,8 @@
 // @include     http://book.zongheng.com/chapter/*/*.html
 // @include     http://www.17k.com/list/*.html
 // @include     http://www.17k.com/chapter/*/*.html
-// @include     http://chuangshi.qq.com/bk/xh/*-*.html
+// @include     http://chuangshi.qq.com/bk/*/*-*.html
+// @include     http://www.hbooker.com/chapter/get_chapter_list?book_id=*
 // @version     1.00
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
@@ -70,7 +71,12 @@ var indexRule = {
     'name': 'h1.Title',
     'chapter': 'dl.Volume>dd>a',
     'vip': 'dl.Volume>dd>a:has(img)'
-  }
+  },
+  "www.hbooker.com": {
+    'name': '.hd>h3',
+    'chapter': '.book-chapter-list>.clearfix>li>a',
+    'vip': '.book-chapter-list>.clearfix>li>a:has(i.icon-vip)'
+  },
 };
 var chapterRule = {
   /*
@@ -202,7 +208,12 @@ var chapterRule = {
     'name': 'h1',
     'content': '#chapterContentWapper',
     'lang': 'zhc'
-  }
+  },
+  "www.hbooker.com": {
+    'name': '.read-hd>h3',
+    'content': '#J_BookRead',
+    'lang': 'zhc'
+  },
 };
 jQuery(document.body).append('<div id="bookDownloader">下载线程：<input id="bookDownloaderThread" placeholder="10" type="text"><br><input id="boodDownloaderVip" type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><br>语言：<input id="bookDownloaderLangZhc" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="zhc" checked="true"></input><label for="bookDownloaderLangZhc">简体</label><input id="bookDownloaderLangZht" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="zht"></input><label for="bookDownloaderLangZht">繁体</label><br><button id="bookDownloaderThis">下载本章(TXT)</button><br><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><br><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><br><button id="bookDownloaderSome2Zip">特定下载某些章节(ZIP)</button></div><div id="bookDownloaderLog"></div>');
 jQuery('#bookDownloader').css({
