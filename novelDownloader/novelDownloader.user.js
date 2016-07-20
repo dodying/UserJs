@@ -21,6 +21,7 @@
 // @include     http://book.sfacg.com/Novel/*
 // @include     http://www.biquge.la/book/*
 // @include     http://www.shumilou.co/*/
+// include     http://18av.mm-cg.com/*
 // @version     1.02
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
@@ -90,13 +91,17 @@ var indexRule = {
     'name': 'h1',
     'chapter': '.list_Content>volumeitem>li>a'
   },
-  'www.biquge.la':{
+  'www.biquge.la': {
     'name': 'h1',
     'chapter': '#list>dl>dd>a'
   },
-  'www.shumilou.co':{
+  'www.shumilou.co': {
     'name': '#mybook+.list>.tit>b',
     'chapter': 'li.zl>a'
+  },
+  '18av.mm-cg.com': {
+    'name': '.label>div',
+    'chapter': '.novel_left>a'
   }
 };
 var chapterRule = {
@@ -114,11 +119,6 @@ var chapterRule = {
   }
   一般来说，只用填上必填的就行。
   */
-  '18av.mm-cg.com': {
-    'name': '#left>h1',
-    'content': '#novel_content_txtsize',
-    'lang': 'zht'
-  },
   'vipreader.qidian.com': {
     'name': '.story_title>h1',
     'content': '#chaptercontent',
@@ -255,16 +255,21 @@ var chapterRule = {
     'content': '#ChapterBody',
     'lang': 'zhc'
   },
-  'www.biquge.la':{
+  'www.biquge.la': {
     'name': 'h1',
     'content': '#content',
     'lang': 'zhc',
     'MimeType': 'text/html; charset=gb2312'
   },
-  'www.shumilou.co':{
+  'www.shumilou.co': {
     'name': 'h2',
     'content': '#content',
     'lang': 'zhc',
+  },
+  '18av.mm-cg.com': {
+    'name': '#left>h1',
+    'content': '#novel_content_txtsize',
+    'lang': 'zht'
   }
 };
 jQuery(document.body).append('<div id="bookDownloader">下载线程：<input id="bookDownloaderThread" placeholder="10" type="text"><br><input id="boodDownloaderVip" type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><br>语言：<input id="bookDownloaderLangZhc" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="zhc" checked="true"></input><label for="bookDownloaderLangZhc">简体</label><input id="bookDownloaderLangZht" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="zht"></input><label for="bookDownloaderLangZht">繁体</label><br><button id="bookDownloaderThis">下载本章(TXT)</button><br><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><br><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><br><button id="bookDownloaderSome2Zip">特定下载某些章节(ZIP)</button></div><div id="bookDownloaderLog"></div>');
@@ -338,7 +343,6 @@ jQuery('#bookDownloaderSome2Zip').click(function () {
   console.log(arr);
   download(arr, 'zip');
 });
-//xhr(0,'http://18av.mm-cg.com/novel_1382.html');
 //////////////////////////////////////////////////////
 function download(chapterArray, fileType) { //下载
   jQuery('#bookDownloaderLog').html('');
