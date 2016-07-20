@@ -18,6 +18,8 @@
 
 起点主站 [read.qidian.com](read.qidian.com)
 
+起点免费 [free.qidian.com](free.qidian.com)
+
 飞卢 [b.faloo.com](b.faloo.com)
 
 轻小说文库 [www.wenku8.com](www.wenku8.com)
@@ -31,6 +33,10 @@
 ### 更新历史
 
 #### Latest
+
+##### 1.01
+
+增加网站：[起点免费](free.qidian.com)
 
 ##### 1.00
 
