@@ -3,13 +3,11 @@
 // @name:zh-CN  小说下载
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper
-// @description:zh-CN 帮助小说下载
+// @description:zh-CN 帮助下载小说
 // @include     http://read.qidian.com/BookReader/*.aspx
 // @include     http://b.faloo.com/f/*.html
 // @include     http://b.faloo.com/p/*/*.html
 // @include     http://www.wenku8.com/novel/*/*/*.htm
-// include     http://www.bxwx8.org/b/*/*/*.html
-//             笔下文学莫名无效，苦恼中。
 // @include     http://book.zongheng.com/showchapter/*.html
 // @include     http://book.zongheng.com/chapter/*/*.html
 // @include     http://www.17k.com/list/*.html
@@ -17,7 +15,13 @@
 // @include     http://chuangshi.qq.com/bk/*/*-*.html
 // @include     http://free.qidian.com/Free/ChapterList.aspx?bookId=*
 // @include     http://free.qidian.com/Free/ReadChapter.aspx?bookId=*&chapterId=*
-// @version     1.01
+// @include     http://www.heiyan.com/book/*/chapter
+// @include     http://www.heiyan.com/book/*/*
+// @include     http://www.23wx.com/html/*
+// @include     http://book.sfacg.com/Novel/*
+// @include     http://www.biquge.la/book/*
+// @include     http://www.shumilou.co/*/
+// @version     1.02
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -59,10 +63,6 @@ var indexRule = {
     'name': '#title',
     'chapter': '.css>tbody>tr>td>a'
   },
-  'www.bxwx8.org': {
-    'name': '#title',
-    'chapter': '#TabCss>dl>dd>a'
-  },
   'book.zongheng.com': {
     'name': '.txt>h1',
     'chapter': '.chapterBean>a',
@@ -76,6 +76,27 @@ var indexRule = {
   'free.qidian.com': {
     'name': '.book_title>h2>strong',
     'chapter': '#book_box>div>div>ul>li>a'
+  },
+  'www.heiyan.com': {
+    'name': 'h1.page-title',
+    'chapter': 'div.bd>ul>li>a',
+    'vip': 'div.bd>ul>li>a.isvip'
+  },
+  'www.23wx.com': {
+    'name': '.bdsub>dl:nth-child(1)>dt:nth-child(1)>a:nth-child(4)',
+    'chapter': '#at>tbody>tr>td>a'
+  },
+  'book.sfacg.com': {
+    'name': 'h1',
+    'chapter': '.list_Content>volumeitem>li>a'
+  },
+  'www.biquge.la':{
+    'name': 'h1',
+    'chapter': '#list>dl>dd>a'
+  },
+  'www.shumilou.co':{
+    'name': '#mybook+.list>.tit>b',
+    'chapter': 'li.zl>a'
   }
 };
 var chapterRule = {
@@ -86,7 +107,10 @@ var chapterRule = {
     'lang': '必填-内容语言',String,zhc-简体,zht-繁体
     'MimeType': '选填',String gbk-'text/html; charset=gb2312'
     'Deal': '选填-网址防盗贴时进行的处理，参数为num、url',Function
-    特殊处理时可不填name与content
+    还有特殊处理时可不填name与content,
+    最后要得到【章节名称】与【内容】，
+    之后调用函数 thisDownloaded(num, name, content);
+    详情请看【起点>Dead2】
   }
   一般来说，只用填上必填的就行。
   */
@@ -120,17 +144,13 @@ var chapterRule = {
         url: url,
         overrideMimeType: 'text/html; charset=gb2312',
         onload: function (response) {
-          content = response.response.replace(/document\.write\(\'(.*)\'\);/, '$1').replace(/\<a.*?\<\/a\>/g, '').replace(/\<p\>/g, '\r\n');
+          content = wordFormat(response.response.replace(/document\.write\(\'(.*)\'\);/, '$1'));
           content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
           if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
             //name = jQuery.s2t(name);
             //content = jQuery.s2t(content);
           }
-          jQuery(window).data('dataDownload') [num].name = name;
-          console.log(jQuery(window).data('dataDownload') [num])
-          jQuery(window).data('dataDownload') [num].content = content;
-          jQuery(window).data('dataDownload') [num].ok = true;
-          jQuery(window).data('downloadNow') [num].ok = true;
+          thisDownloaded(num, name, content);
         }
       });
     }
@@ -164,17 +184,14 @@ var chapterRule = {
           arrStr.push(String.fromCharCode(parseInt(arrText[i], base)));
         }
         content = arrStr.join('');
-        temp = jQuery('.bookreadercontent', content).html().replace(/\<p\>/g, '\r\n').replace(/<\/p>/g, '');
+        temp = wordFormat(jQuery('.bookreadercontent', content).html());
         content = temp;
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
         if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
           //name = jQuery.s2t(name);
           //content = jQuery.s2t(content);
         }
-        jQuery(window).data('dataDownload') [num].name = name;
-        jQuery(window).data('dataDownload') [num].content = content;
-        jQuery(window).data('dataDownload') [num].ok = true;
-        jQuery(window).data('downloadNow') [num].ok = true;
+        thisDownloaded(num, name, content);
       }
       xhr.send('lang=zhs');
     }
@@ -185,12 +202,6 @@ var chapterRule = {
     'lang': 'zhc'
   },
   'www.wenku8.com': {
-    'name': '#title',
-    'content': '#content',
-    'lang': 'zhc',
-    'MimeType': 'text/html; charset=gb2312'
-  },
-  'www.bxwx8.org': {
     'name': '#title',
     'content': '#content',
     'lang': 'zhc',
@@ -207,10 +218,53 @@ var chapterRule = {
     'lang': 'zhc'
   },
   'free.qidian.com': {
-    'lang':'zhc',
-    'Deal':function (num, url){
+    'lang': 'zhc',
+    'Deal': function (num, url) {
       chapterRule['read.qidian.com'].Deal(num, url);
     }
+  },
+  'www.heiyan.com': {
+    'lang': 'zhc',
+    'Deal': function (num, url) {
+      urlTrue = 'http://a.heiyan.com/ajax/chapter/content/' + url.replace(/.*\//, '');
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: urlTrue,
+        onload: function (response) {
+          var info = JSON.parse(response.response);
+          var name = info.chapter.title;
+          var content = wordFormat(info.chapter.htmlContent);
+          content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
+          if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
+            //name = jQuery.s2t(name);
+            //content = jQuery.s2t(content);
+          }
+          thisDownloaded(num, name, content);
+        }
+      });
+    }
+  },
+  'www.23wx.com': {
+    'name': 'h1',
+    'content': '#contents',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'book.sfacg.com': {
+    'name': '.list_menu_title',
+    'content': '#ChapterBody',
+    'lang': 'zhc'
+  },
+  'www.biquge.la':{
+    'name': 'h1',
+    'content': '#content',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.shumilou.co':{
+    'name': 'h2',
+    'content': '#content',
+    'lang': 'zhc',
   }
 };
 jQuery(document.body).append('<div id="bookDownloader">下载线程：<input id="bookDownloaderThread" placeholder="10" type="text"><br><input id="boodDownloaderVip" type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><br>语言：<input id="bookDownloaderLangZhc" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="zhc" checked="true"></input><label for="bookDownloaderLangZhc">简体</label><input id="bookDownloaderLangZht" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="zht"></input><label for="bookDownloaderLangZht">繁体</label><br><button id="bookDownloaderThis">下载本章(TXT)</button><br><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><br><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><br><button id="bookDownloaderSome2Zip">特定下载某些章节(ZIP)</button></div><div id="bookDownloaderLog"></div>');
@@ -394,12 +448,12 @@ function xhr(num, url) {
     onload: function (response) {
       console.log('下载中', url);
       console.log(response.response);
-      var name = jQuery(chapterRule[host].name, response.response).text();
+      var name = jQuery(chapterRule[host].name, response.response).text().replace(/^\s+|\s+$/g, '');
       //console.log('name', name);
       var content = jQuery(chapterRule[host].content, response.response);
       //console.log('content', content);
       if (content.length > 0) {
-        content = content.text().replace(/\s+/g, '\r\n');
+        content = wordFormat(content.html());
       } else {
         jQuery(window).data('errorUrl') [0] = url;
         alert(url + '失败');
@@ -415,16 +469,60 @@ function xhr(num, url) {
           //content = jQuery.s2t(content);
         }
       }
-      jQuery(window).data('dataDownload') [num].name = name;
-      jQuery(window).data('dataDownload') [num].content = content;
-      jQuery(window).data('dataDownload') [num].ok = true;
-      jQuery(window).data('downloadNow') [num].ok = true;
+      thisDownloaded(num, name, content);
     },
     onerror: function (response) {
       console.log(response);
       alert(response)
     }
   });
+}
+function thisDownloaded(num, name, content) {
+  jQuery(window).data('dataDownload') [num].name = name;
+  jQuery(window).data('dataDownload') [num].content = content;
+  jQuery(window).data('dataDownload') [num].ok = true;
+  jQuery(window).data('downloadNow') [num].ok = true;
+}
+function wordFormat(word) {
+  var replaceLib = [
+    /*替换前的文本|||替换后的文本*/
+    /*换行符请先用【换行】二字代替，最后同一替代*/
+    /*请在最前方插入*/
+    '&nbsp;||| ',
+    '&amp;|||&',
+    '&lt;|||<',
+    '&gt;|||>',
+    '&hellip;|||...',
+    '&mdash;|||—',
+    '&quot;|||"',
+    '&qpos;|||\'',
+    '&ldquo;|||“',
+    '&rdquo;|||”',
+    '“(.*?)“|||“$1”',
+    '\\s+|||',
+    '<!--.*-->|||换行',
+    '<br>|||换行',
+    '<p.*?>|||换行',
+    '</p>|||换行',
+    '<a.*?>.*?</a>|||',
+    '<div.*?>.*?</div>|||换行',
+    '<center.*?>.*?</center>|||换行',
+    '<style.*?>.*?</style>|||换行',
+    '<script.*?>.*?</script>|||换行',
+    '<ul.*?>.*?</ul>|||',
+    '<b.*?>.*?</b>|||换行',
+    '<font.*?>.*?</font>|||换行',
+    '换行|||\r\n',
+    '\\s+|||\r\n　　'
+  ];
+  var regexp = new RegExp();
+  var temp;
+  for (var i = 0; i < replaceLib.length; i++) {
+    temp = replaceLib[i].split('|||');
+    regexp = new RegExp(temp[0], 'gi');
+    word = word.replace(regexp, temp[1]);
+  }
+  return word;
 }
 function addDownloadLogStart(num, name, url, status) {
   jQuery('<span id="bookDownloaderLog_' + num + '">' + num + ' <a href="' + url + '" target="_blank">' + name + '</a> ' + status + '</span><br>').appendTo(jQuery('#bookDownloaderLog'));
