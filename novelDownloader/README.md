@@ -30,9 +30,22 @@
 
 创世 [chuangshi.qq.com](chuangshi.qq.com)
 
+黑岩 [www.heiyan.com](www.heiyan.com)
+
+顶点小说 [www.23wx.com](www.23wx.com)
+
+SF轻小说 [book.sfacg.com](book.sfacg.com)
+
+笔趣阁 [www.biquge.la](www.biquge.la)
+
+书迷楼 [www.shumilou.co](www.shumilou.co)
+
 ### 更新历史
 
 #### Latest
+##### 1.02
+
+增加网站：[黑岩](www.heiyan.com)，[顶点小说](www.23wx.com)，[SF轻小说](book.sfacg.com)，[笔趣阁](www.biquge.la)，[书迷楼](www.shumilou.co)
 
 ##### 1.01
 
