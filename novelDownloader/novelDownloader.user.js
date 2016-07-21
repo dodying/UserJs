@@ -54,10 +54,13 @@
 // @include     http://www.uecg.net/html/*/*/*.html
 // @include     http://www.5du5.com/book/*
 // @include     http://www.klxsw.com/files/article/html/*/*/*.html
+// @include     http://www.3gxs.com/html/*/*/*.html
+// @include     http://www.baoliny.com/*/*.html
+// @include     http://www.dhzw.com/book/*
 // include     http://18av.mm-cg.com/*
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
-// @version     1.11.44
+// @version     1.11.47
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -316,6 +319,21 @@ var indexRule = {
     'cn': '可乐小说网',
     'name': 'h1>a',
     'chapter': 'body>center>table>tbody>tr>td>div>a'
+  },
+  'www.3gxs.com': {
+    'cn': '00小说',
+    'name': '.book_news_title>ul:nth-child(1)>li:nth-child(1)>a:nth-child(3)',
+    'chapter': '.booklist>li>span>a'
+  },
+  'www.baoliny.com': {
+    'cn': '风云小说阅读网',
+    'name': 'h1',
+    'chapter': 'table.acss>tbody>tr>td.ccss>a',
+  },
+  'www.dhzw.com': {
+    'cn': '大海中文',
+    'name': 'h1',
+    'chapter': '#list>dl>dd>a',
   },
   '18av.mm-cg.com': {
     'name': '.label>div',
@@ -704,6 +722,24 @@ var chapterRule = {
     'lang': 'zhc',
     'MimeType': 'text/html; charset=gb2312'
   },
+  'www.3gxs.com': {
+    'name': '.vv',
+    'content': '#content',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.baoliny.com': {
+    'name': 'h1',
+    'content': '#content',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.dhzw.com': {
+    'name': 'h1',
+    'content': '#BookText',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
   '18av.mm-cg.com': {
     'name': '#left>h1',
     'content': '#novel_content_txtsize',
@@ -795,6 +831,8 @@ jQuery(window).scroll(function (event) {
     jQuery('#bookDownloader').css('top', '0px');
     jQuery('#bookDownloaderSupport').css('top', '0px');
   }
+}).unload(function () {
+  jQuery(window).data('blob', null);
 });
 jQuery('#boodDownloaderVip').click(function () {
   if (this.checked && !confirm('是否下载Vip章节，如未登录或未订阅，则只会下载章节预览。\r\n不会帮你把未订阅的章节订阅。\r\n如果不放心，请勿勾选。出事作者概不负责。')) this.checked = false;
@@ -1121,18 +1159,17 @@ function addDownloadLogEnd(num, name, url, status) {
 }
 function download2Zip(bookName) { //下载到1个zip
   var name = (bookName === '') ? jQuery(window).data('dataDownload') [0].name : bookName;
-  var zip = new JSZip();
+  jQuery(window).data('blob', new JSZip())
   var len = String(jQuery(window).data('dataDownload').length).length;
   for (var i = 0; i < jQuery(window).data('dataDownload').length; i++) {
-    zip.file(String(preZeroFill(i, len)) + '-' + jQuery(window).data('dataDownload') [i].name + '.txt', jQuery(window).data('dataDownload') [i].content);
+    jQuery(window).data('blob').file(String(preZeroFill(i, len)) + '-' + jQuery(window).data('dataDownload') [i].name + '.txt', jQuery(window).data('dataDownload') [i].content);
   }
-  zip.generateAsync({
+  jQuery(window).data('blob').generateAsync({
     type: 'blob'
   }).then(function (content) {
     saveAs(content, name + '.zip');
   });
   removeData();
-  delete zip;
 }
 function download2Txt(bookName) { //下载到1个txt
   var name = (bookName === '') ? jQuery(window).data('dataDownload') [0].name : bookName;
@@ -1140,13 +1177,11 @@ function download2Txt(bookName) { //下载到1个txt
   for (var i = 0; i < jQuery(window).data('dataDownload').length; i++) {
     all += jQuery(window).data('dataDownload') [i].content + '\r\n\r\n';
   }
-  var blob = new Blob([all], {
+  jQuery(window).data('blob', new Blob([all], {
     type: 'text/plain;charset=utf-8'
-  });
-  saveAs(blob, name + '.txt');
-  console.log(blob);
+  }))
+  saveAs(jQuery(window).data('blob'), name + '.txt');
   removeData();
-  delete blob;
 }
 function downloadedCheck(arr) { //检查下载是否完成
   var undownload = 0;
