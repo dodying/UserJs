@@ -8,15 +8,9 @@
 
 #### 由于引用外来库的原因，可能导致无法正常安装。请尝试多次。
 
-#### 脚本引用的库，感谢他们
+#### 此脚本引用的库，感谢他们
 
-##### jQuery
-
-##### [FileSaver](https://github.com/eligrey/FileSaver.js)
-
-##### [jszip](https://github.com/Stuk/jszip)
-
-##### [jquery-s2t](https://github.com/hustlzp/jquery-s2t)
+##### jQuery [FileSaver](https://github.com/eligrey/FileSaver.js) [jszip](https://github.com/Stuk/jszip) [jquery-s2t](https://github.com/hustlzp/jquery-s2t)
 
 ### 意见、建议、Bug
 
