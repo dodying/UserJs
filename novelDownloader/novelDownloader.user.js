@@ -22,8 +22,10 @@
 // @include     http://www.biquge.la/book/*
 // @include     http://www.shumilou.co/*/
 // @include     http://www.3gsc.com.cn/bookreader/*
+// @include     http://www.8kana.com/book/*.html
+// @include     http://www.8kana.com/read/*.html
 // include     http://18av.mm-cg.com/*
-// @version     1.1.13
+// @version     1.1.14
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -50,6 +52,11 @@ var indexRule = {
   */
   'read.qidian.com': {
     'cn': '起点主站',
+    'name': '.booktitle>h1',
+    'chapter': '.box_cont>div.list>ul>li>a',
+    'vip': '.box_title:contains("VIP")+.box_cont>div.list>ul>li>a'
+  },
+  'vipreader.qidian.com': {
     'name': '.booktitle>h1',
     'chapter': '.box_cont>div.list>ul>li>a',
     'vip': '.box_title:contains("VIP")+.box_cont>div.list>ul>li>a'
@@ -118,6 +125,12 @@ var indexRule = {
     'name': 'h1>a',
     'chapter': '.menu-area>p>a',
     'vip': '.menu-area>p>a:has(span.vip)'
+  },
+  'www.8kana.com':{
+    'cn': '不可能的世界',
+    'name': 'h2.left',
+    'chapter': 'li.nolooking>a',
+    'vip': 'li.nolooking>a:has(.chapter_con_VIP)'
   },
   '18av.mm-cg.com': {
     'name': '.label>div',
@@ -290,6 +303,11 @@ var chapterRule = {
     'name': 'h1',
     'content': '.menu-area',
     'lang': 'zhc',
+  },
+  'www.8kana.com':{
+    'name': 'h2',
+    'content': '.myContent',
+    'lang': 'zhc'
   },
   '18av.mm-cg.com': {
     'name': '#left>h1',
