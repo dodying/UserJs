@@ -26,7 +26,7 @@
 // @include     http://www.8kana.com/read/*.html
 // @include     http://www.quledu.com/wcxs-*/
 // include     http://18av.mm-cg.com/*
-// @version     1.1.14
+// @version     1.1.15
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
