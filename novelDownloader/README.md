@@ -54,6 +54,7 @@
 12. 书迷楼 [www.shumilou.co](www.shumilou.co)
 13. 3G书城 [www.3gsc.com.cn](www.3gsc.com.cn)
 14. 不可能的世界 [www.8kana.com](www.8kana.com)
+15. 无错小说网 [www.quledu.com](www.quledu.com)
 
 #### 版本命名规则
 
@@ -66,6 +67,14 @@
 ### 更新历史
 
 #### Latest
+
+##### 1.1.15
+
+还是说一下，由于无错小说网章节里有些文字图片，所以增加了一大段替换规则。
+
+接下来的版本有可能将替换规则放到网上，利用GM_getResourceText的方式来使用。
+
+顺便纪念一下，小说下载阅读器。
 
 ##### 1.1.13
 
