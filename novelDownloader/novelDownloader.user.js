@@ -15,7 +15,6 @@
 // @include     http://chuangshi.qq.com/bk/*/*-*.html
 // @include     http://free.qidian.com/Free/ChapterList.aspx?bookId=*
 // @include     http://free.qidian.com/Free/ReadChapter.aspx?bookId=*&chapterId=*
-// @include     http://www.heiyan.com/book/*/chapter
 // @include     http://www.heiyan.com/book/*/*
 // @include     http://www.23wx.com/html/*
 // @include     http://book.sfacg.com/Novel/*
@@ -40,10 +39,25 @@
 // @include     http://www.suimeng.la/files/article/html/*
 // @include     http://www.00ksw.com/html/*
 //              以上在Chrome里测试过
+// @include     http://www.wangshuge.com/books/*
+// @include     http://tt.71wx.net/xiaoshuo/*/*
+// @include     http://www.71wx.net/xiaoshuo/*/*
+// @include     http://www.kuaidu.cc/*/
+// @include     http://www.vodtw.com/Html/Book/*/*/*.html
+// @include     http://www.sqsxs.com/book/*
+// @include     http://www.dashubao.co/book/*/*/*.html
+// @include     http://www.qingdou.cc/chapter_*.html
+// @include     http://www.aszw520.com/book/*
+// @include     http://www.geilwx.com/GeiLi/*
+// @include     http://www.abcsee.net/book/*/*/*.html
+// @include     http://www.bxwx.cc/*/*/*.html
+// @include     http://www.uecg.net/html/*/*/*.html
+// @include     http://www.5du5.com/book/*
+// @include     http://www.klxsw.com/files/article/html/*/*/*.html
 // include     http://18av.mm-cg.com/*
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
-// @version     1.11.29
+// @version     1.11.44
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -228,6 +242,81 @@ var indexRule = {
     'name': 'h1',
     'chapter': '#list>dl>dd>a'
   },
+  'www.wangshuge.com': {
+    'cn': '望书阁',
+    'name': 'h1',
+    'chapter': '#at>tbody>tr>td.L>a'
+  },
+  'tt.71wx.net': {
+    'cn': '天天中文',
+    'name': 'h1',
+    'chapter': '.ml_main>dl>dd>a'
+  },
+  'www.71wx.net': {
+    'cn': '清逸文学网',
+    'name': 'h1',
+    'chapter': '.ml_main>dl>dd>a'
+  },
+  'www.kuaidu.cc': {
+    'cn': '快读',
+    'name': '.xsname>a',
+    'chapter': '.mulu>ul>li>a'
+  },
+  'www.vodtw.com': {
+    'cn': '品书网',
+    'name': 'h1',
+    'chapter': '.insert_list>dl>dd>ul>li>a'
+  },
+  'www.sqsxs.com': {
+    'cn': '手牵手小说',
+    'name': 'h1',
+    'chapter': '#list>dl>dd>a'
+  },
+  'www.dashubao.co': {
+    'cn': '大书包小说网',
+    'name': 'h1',
+    'chapter': '.ml_main>dl>dd>a'
+  },
+  'www.qingdou.cc': {
+    'cn': '青豆小说',
+    'name': 'h1>a',
+    'chapter': '.dirconone>ul>li>a'
+  },
+  'www.aszw520.com': {
+    'cn': '爱上中文',
+    'name': 'h1',
+    'chapter': '#at>tbody>tr>td.L>a'
+  },
+  'www.geilwx.com': {
+    'cn': '给力文学网',
+    'name': 'h1',
+    'chapter': '.TabCss>dl>dd>a'
+  },
+  'www.abcsee.net': {
+    'cn': '北辰文学网',
+    'name': 'h1',
+    'chapter': '#at>tbody>tr>td.L>a'
+  },
+  'www.bxwx.cc': {
+    'cn': '新笔下文学',
+    'name': '.novel_name',
+    'chapter': '.novel_list>ul>li>a'
+  },
+  'www.uecg.net': {
+    'cn': '优易小说网',
+    'name': '.novel_name',
+    'chapter': '.chapter>dd>a'
+  },
+  'www.5du5.com': {
+    'cn': '吾读小说网',
+    'name': 'h1',
+    'chapter': '#list>li>a'
+  },
+  'www.klxsw.com': {
+    'cn': '可乐小说网',
+    'name': 'h1>a',
+    'chapter': 'body>center>table>tbody>tr>td>div>a'
+  },
   '18av.mm-cg.com': {
     'name': '.label>div',
     'chapter': '.novel_left>a'
@@ -260,7 +349,7 @@ var chapterRule = {
         method: 'GET',
         url: url,
         onload: function (response) {
-          var name = jQuery('.story_title>h1,.title>h3', response.response).text();
+          var name = jQuery('.story_title>h1', response.response).text();
           var content = jQuery('script[src$=".txt"]', response.response);
           chapterRule['read.qidian.com'].Deal2(num, name, content);
         }
@@ -349,7 +438,42 @@ var chapterRule = {
   'free.qidian.com': {
     'lang': 'zhc',
     'Deal': function (num, url) {
-      chapterRule['read.qidian.com'].Deal(num, url);
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: url,
+        onload: function (response) {
+          var name = jQuery('.title>h3', response.response).text();
+          var content = jQuery('script[src$=".txt"]', response.response);
+          if (content.length > 0) {
+            chapterRule['read.qidian.com'].Deal2(num, name, content);
+          } else {
+            content = wordFormat(jQuery('#content', response.response).html());
+            content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
+            if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
+              name = tranStr(name, true);
+              content = tranStr(content, true);
+            }
+            thisDownloaded(num, name, content);
+          }
+        }
+      });
+    },
+    'Deal2': function (num, name, content) {
+      var url = content.attr('src');
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: url,
+        overrideMimeType: 'text/html; charset=gb2312',
+        onload: function (response) {
+          content = wordFormat(response.response.replace(/document\.write\(\'(.*)\'\);/, '$1'));
+          content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
+          if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
+            name = tranStr(name, true);
+            content = tranStr(content, true);
+          }
+          thisDownloaded(num, name, content);
+        }
+      });
     }
   },
   'www.heiyan.com': {
@@ -492,6 +616,94 @@ var chapterRule = {
     'lang': 'zhc',
     'MimeType': 'text/html; charset=gb2312'
   },
+  'www.wangshuge.com': {
+    'name': 'h1',
+    'content': '#contents',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'tt.71wx.net': {
+    'name': 'h2',
+    'content': '.yd_text2',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.71wx.net': {
+    'name': 'h2',
+    'content': '.yd_text2',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.kuaidu.cc': {
+    'name': '.h1title>h1',
+    'content': '.contentbox',
+    'lang': 'zhc'
+  },
+  'www.vodtw.com': {
+    'name': '#htmltimu',
+    'content': '.contentbox',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.sqsxs.com': {
+    'name': 'h1',
+    'content': '#content',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.dashubao.co': {
+    'name': 'h2',
+    'content': '.yd_text2',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.qingdou.cc': {
+    'name': 'h2>a',
+    'content': '#chapter_content',
+    'lang': 'zhc'
+  },
+  'www.aszw520.com': {
+    'name': 'h1',
+    'content': '#contents',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.geilwx.com': {
+    'name': 'h1',
+    'content': '#content',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.abcsee.net': {
+    'name': 'h1',
+    'content': '#contents',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.bxwx.cc': {
+    'name': '.novel_title',
+    'content': '.novel_content',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.uecg.net': {
+    'name': '.novel_title',
+    'content': '.novel_content',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.5du5.com': {
+    'name': 'h1',
+    'content': '#content',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
+  'www.klxsw.com': {
+    'name': '.newstitle',
+    'content': '#r1c',
+    'lang': 'zhc',
+    'MimeType': 'text/html; charset=gb2312'
+  },
   '18av.mm-cg.com': {
     'name': '#left>h1',
     'content': '#novel_content_txtsize',
@@ -609,11 +821,11 @@ jQuery('#bookDownloaderSome2Zip').click(function () {
 });
 jQuery('.bookDownloaderShowSupport').click(function () {
   jQuery('#bookDownloaderSupport').toggle();
-}) //////////////////////////////////////////////////////
+});
+//////////////////////////////////////////////////////
 function download(chapterArray, fileType) { //下载
   jQuery('#bookDownloaderLog').html('');
   jQuery('#bookDownloaderLog').css('display', 'block');
-  jQuery(window).data('errorUrl', new Object());
   if (chapterArray === 'index') {
     var chapter = jQuery(indexRule[location.host].chapter);
   } else {
@@ -649,9 +861,11 @@ function download(chapterArray, fileType) { //下载
   jQuery(window).data('downloadNow').length = 0;
   for (var i = 0; i < chapter.length; i++) {
     href = chapter[i].href || chapter[i];
+    var name = chapter[0].innerHTML || chapter[0];
     var host = getHostName(href);
     var dataDownload = new Object();
     dataDownload.url = href;
+    dataDownload.name = name;
     dataDownload.ok = false;
     jQuery(window).data('dataDownload') [i] = dataDownload;
     jQuery(window).data('downloadList') [i] = href;
@@ -708,6 +922,12 @@ function downloadTask(fun) {
     return;
   }
 }
+function removeData() {
+  jQuery(window).removeData('downloadNow');
+  jQuery(window).removeData('downloadList');
+  jQuery(window).removeData('number');
+  jQuery(window).removeData('dataDownload');
+}
 function xhr(num, url) {
   var host = getHostName(url);
   console.log(host);
@@ -718,16 +938,18 @@ function xhr(num, url) {
     onload: function (response) {
       console.log('下载中', url);
       console.log(response.response);
-      var name = jQuery(chapterRule[host].name, response.response).text().replace(/^\s+|\s+$/g, '');
-      //console.log('name', name);
-      var content = jQuery(chapterRule[host].content, response.response);
-      //console.log('content', content);
+      var name = jQuery(chapterRule[host].name, response.response);
+      if (name.length > 0) {
+        name = name.text().replace(/^\s+|\s+$/g, '');
+      } else {
+        var name = response.responseText.replace(/\s+/g, ' ').replace(/.*<TITLE>(.*?)<\/TITLE>.*/i, '$1');
+      }
+      var content = jQuery(chapterRule[host].content, response.responseText);
       if (content.length > 0) {
         content = wordFormat(content.html());
       } else {
-        jQuery(window).data('errorUrl') [0] = url;
-        alert(url + '失败');
-        return;
+        content = wordFormat(response.responseText);
+        //错误了怎么办...
       }
       content = name + '\r\n来源地址：' + url + '\r\n\r\n' + content;
       if (jQuery('.bookDownloaderLang:checked') [0].value !== chapterRule[host].lang) {
@@ -740,10 +962,6 @@ function xhr(num, url) {
         }
       }
       thisDownloaded(num, name, content);
-    },
-    onerror: function (response) {
-      console.log(response);
-      alert(response)
     }
   });
 }
@@ -864,6 +1082,10 @@ function wordFormat(word) {
     '<img src="/sss/ddefr.jpg">|||',
     '“(.*?)“|||“$1”',
     '\\s+|||',
+    '<!DOCTYPE.*?>|||',
+    '<BODY>|||',
+    '<HTML.*?>|||',
+    '<HEAD>.*?</HEAD>|||',
     '<!--.*?-->|||换行',
     '<br>|||换行',
     '<p.*?>|||换行',
@@ -877,6 +1099,8 @@ function wordFormat(word) {
     '<ul.*?>.*?</ul>|||',
     '<b.*?>.*?</b>|||换行',
     '<font.*?>.*?</font>|||换行',
+    '<br/>|||',
+    '</.*?>|||',
     '换行|||\r\n',
     '\\s+|||\r\n　　'
   ];
@@ -907,7 +1131,7 @@ function download2Zip(bookName) { //下载到1个zip
   }).then(function (content) {
     saveAs(content, name + '.zip');
   });
-  jQuery(window).removeData('dataDownload');
+  removeData();
   delete zip;
 }
 function download2Txt(bookName) { //下载到1个txt
@@ -920,7 +1144,8 @@ function download2Txt(bookName) { //下载到1个txt
     type: 'text/plain;charset=utf-8'
   });
   saveAs(blob, name + '.txt');
-  jQuery(window).removeData('dataDownload');
+  console.log(blob);
+  removeData();
   delete blob;
 }
 function downloadedCheck(arr) { //检查下载是否完成
