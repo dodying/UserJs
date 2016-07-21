@@ -32,7 +32,7 @@
 
 ######预览
 
-![预览1](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png) ![预览2](https://github.com/dodying/UserJs/raw/master/novelDownloader/2.png) ![预览3](https://github.com/dodying/UserJs/raw/master/novelDownloader/3.png)
+![预览1](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)  ![预览3](https://github.com/dodying/UserJs/raw/master/novelDownloader/3.png)
 
 ### 作者需要帮助的网站
 
