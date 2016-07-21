@@ -1,3 +1,11 @@
+### 安装地址
+
+#### [来自Github](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloaderRaw.user.js)
+
+#### [来自GreaseFork](https://greasyfork.org/scripts/21515-noveldownloader/code/novelDownloader.user.js)
+
+### 一些说明
+
 #### 由于引用外来库的原因，可能导致无法正常安装。请尝试多次。
 
 #### 由于引用外来库未通过的原因，导致【GF上的版本】简繁体转换的功能暂时失效。
