@@ -759,6 +759,7 @@ jQuery('#bookDownloaderSupport').append(SupportUrl).css({
   'height': '500px',
   'overflow': 'auto',
 });
+jQuery('#bookDownloaderThread').css('width', '24px');
 jQuery('.bookDownloaderBoxCenter').css({
   'display': 'none',
   'z-index': '999',
