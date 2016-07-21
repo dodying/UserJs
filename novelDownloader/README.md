@@ -8,9 +8,15 @@
 
 #### 由于引用外来库的原因，可能导致无法正常安装。请尝试多次。
 
-#### 由于引用外来库未通过的原因，导致【GF上的版本】简繁体转换的功能暂时失效。
+#### 脚本引用的库，感谢他们
 
-#### 急用简繁体转换功能的请点击[【安装】](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloaderRaw.user.js)（源自Github，缺点：脚本无法更新）
+##### jQuery
+
+##### [FileSaver](https://github.com/eligrey/FileSaver.js)
+
+##### [jszip](https://github.com/Stuk/jszip)
+
+##### [jquery-s2t](https://github.com/hustlzp/jquery-s2t)
 
 ### 意见、建议、Bug
 
@@ -83,6 +89,10 @@
 ### 更新历史
 
 #### Latest
+
+##### 1.10.29
+
+简繁体转换功能正式上线。
 
 ##### 1.1.15
 
