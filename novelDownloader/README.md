@@ -28,6 +28,8 @@
 
 #### 按“D”来显示下载选项。
 
+#### 按“T”使下载选项到最上端。
+
 #### 网站情况不同，可能导致无法显示下载选项。
 
 ######预览
@@ -55,6 +57,20 @@
 13. 3G书城 [www.3gsc.com.cn](www.3gsc.com.cn)
 14. 不可能的世界 [www.8kana.com](www.8kana.com)
 15. 无错小说网 [www.quledu.com](www.quledu.com)
+16. 追书网 [www.mangg.com](www.mangg.com)
+17. 傲世中文网 [www.23zw.com](www.23zw.com)
+18. 三易文学 [www.31wxw.com](www.31wxw.com)
+19. 520小说网 [www.520xs.la](www.520xs.la)
+20. 笔趣阁 [www.biquge.com](www.biquge.com)
+21. 69书吧 [www.69shu.com](www.69shu.com)
+22. 笔趣库 [www.biquku.com](www.biquku.com)
+23. 我看书斋 [www.5ccc.net](www.5ccc.net)
+24. 爱去小说网 [www.aiquxs.com](www.aiquxs.com)
+25. 2K小说阅读网 [www.2kxs.com](www.2kxs.com)
+26. 棉花糖小说网 [www.mianhuatang.la](www.mianhuatang.la)
+27. 随梦小说网 [www.suimengxiaoshuo.com](www.suimengxiaoshuo.com)
+28. 随梦小说网 [www.suimeng.la](www.suimeng.la)
+29. 零点看书 [www.00ksw.com](www.00ksw.com)
 
 #### 版本命名规则
 
