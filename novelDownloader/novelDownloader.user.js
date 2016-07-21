@@ -43,11 +43,11 @@
 // include     http://18av.mm-cg.com/*
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
-// @version     1.10.29
+// @version     1.11.29
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
-// @require     https://greasyfork.org/scripts/21539-jquery-s2t/code/jquery-s2t.js?version=137271
+// @require     https://greasyfork.org/scripts/21541-chs2sht/code/chs2sht.js?version=137286
 // @grant       GM_xmlhttpRequest
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -276,8 +276,8 @@ var chapterRule = {
           content = wordFormat(response.response.replace(/document\.write\(\'(.*)\'\);/, '$1'));
           content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
           if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
-            name = jQuery.s2t(name);
-            content = jQuery.s2t(content);
+            name = tranStr(name, true);
+            content = tranStr(content, true);
           }
           thisDownloaded(num, name, content);
         }
@@ -317,8 +317,8 @@ var chapterRule = {
         content = temp;
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
         if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
-          name = jQuery.s2t(name);
-          content = jQuery.s2t(content);
+          name = tranStr(name, true);
+          content = tranStr(content, true);
         }
         thisDownloaded(num, name, content);
       }
@@ -365,8 +365,8 @@ var chapterRule = {
           var content = wordFormat(info.chapter.htmlContent);
           content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
           if (jQuery('.bookDownloaderLang:checked') [0].value !== 'zhc') {
-            name = jQuery.s2t(name);
-            content = jQuery.s2t(content);
+            name = tranStr(name, true);
+            content = tranStr(content, true);
           }
           thisDownloaded(num, name, content);
         }
@@ -732,11 +732,11 @@ function xhr(num, url) {
       content = name + '\r\n来源地址：' + url + '\r\n\r\n' + content;
       if (jQuery('.bookDownloaderLang:checked') [0].value !== chapterRule[host].lang) {
         if (jQuery('.bookDownloaderLang:checked') [0].value === 'zhc') {
-          name = jQuery.t2s(name);
-          content = jQuery.t2s(content);
+          name = tranStr(name, false);
+          content = tranStr(content, false);
         } else {
-          name = jQuery.s2t(name);
-          content = jQuery.s2t(content);
+          name = tranStr(name, true);
+          content = tranStr(content, true);
         }
       }
       thisDownloaded(num, name, content);
