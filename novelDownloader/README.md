@@ -40,31 +40,31 @@
 
 ### 支持网站
 
-起点主站 [read.qidian.com](read.qidian.com)
+1. 起点主站 [read.qidian.com](read.qidian.com)
 
-起点免费 [free.qidian.com](free.qidian.com)
+2. 起点免费 [free.qidian.com](free.qidian.com)
 
-飞卢 [b.faloo.com](b.faloo.com)
+3. 飞卢 [b.faloo.com](b.faloo.com)
 
-轻小说文库 [www.wenku8.com](www.wenku8.com)
+4. 轻小说文库 [www.wenku8.com](www.wenku8.com)
 
-纵横 [book.zongheng.com](book.zongheng.com)
+5. 纵横 [book.zongheng.com](book.zongheng.com)
 
-17K [www.17k.com](www.17k.com)
+6. 17K [www.17k.com](www.17k.com)
 
-创世 [chuangshi.qq.com](chuangshi.qq.com)
+7. 创世 [chuangshi.qq.com](chuangshi.qq.com)
 
-黑岩 [www.heiyan.com](www.heiyan.com)
+8. 黑岩 [www.heiyan.com](www.heiyan.com)
 
-顶点小说 [www.23wx.com](www.23wx.com)
+9. 顶点小说 [www.23wx.com](www.23wx.com)
 
-SF轻小说 [book.sfacg.com](book.sfacg.com)
+10. SF轻小说 [book.sfacg.com](book.sfacg.com)
 
-笔趣阁 [www.biquge.la](www.biquge.la)
+11. 笔趣阁 [www.biquge.la](www.biquge.la)
 
-书迷楼 [www.shumilou.co](www.shumilou.co)
+12. 书迷楼 [www.shumilou.co](www.shumilou.co)
 
-3G书城 [www.3gsc.com.cn](www.3gsc.com.cn)
+13. 3G书城 [www.3gsc.com.cn](www.3gsc.com.cn)
 
 #### 版本命名规则
 
