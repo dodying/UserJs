@@ -71,6 +71,24 @@
 27. 随梦小说网 [www.suimengxiaoshuo.com](www.suimengxiaoshuo.com)
 28. 随梦小说网 [www.suimeng.la](www.suimeng.la)
 29. 零点看书 [www.00ksw.com](www.00ksw.com)
+30. 望书阁 [www.wangshuge.com](www.wangshuge.com)
+31. 天天中文 tt.71wx.net
+32. 清逸文学网 [www.71wx.net](www.71wx.net)
+33. 快读 [www.kuaidu.cc](www.kuaidu.cc)
+34. 品书网 [www.vodtw.com](www.vodtw.com)
+35. 手牵手小说 [www.sqsxs.com](www.sqsxs.com)
+36. 大书包小说网 [www.dashubao.co](www.dashubao.co)
+37. 青豆小说 [www.qingdou.cc](www.qingdou.cc)
+38. 爱上中文 [www.aszw520.com](www.aszw520.com)
+39. 给力文学网 [www.geilwx.com](www.geilwx.com)
+40. 北辰文学网 [www.abcsee.net](www.abcsee.net)
+41. 新笔下文学 [www.bxwx.cc](www.bxwx.cc)
+42. 优易小说网 [www.uecg.net](www.uecg.net)
+43. 吾读小说网 [www.5du5.com](www.5du5.com)
+44. 可乐小说网 [www.klxsw.com](www.klxsw.com)
+45. 00小说 [www.3gxs.com](www.3gxs.com)
+46. 风云小说阅读网 [www.baoliny.com](www.baoliny.com)
+47. 大海中文 [www.dhzw.com](www.dhzw.com)
 
 #### 版本命名规则
 
