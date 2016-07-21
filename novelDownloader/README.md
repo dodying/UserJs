@@ -41,30 +41,19 @@
 ### 支持网站
 
 1. 起点主站 [read.qidian.com](read.qidian.com)
-
 2. 起点免费 [free.qidian.com](free.qidian.com)
-
 3. 飞卢 [b.faloo.com](b.faloo.com)
-
 4. 轻小说文库 [www.wenku8.com](www.wenku8.com)
-
 5. 纵横 [book.zongheng.com](book.zongheng.com)
-
 6. 17K [www.17k.com](www.17k.com)
-
 7. 创世 [chuangshi.qq.com](chuangshi.qq.com)
-
 8. 黑岩 [www.heiyan.com](www.heiyan.com)
-
 9. 顶点小说 [www.23wx.com](www.23wx.com)
-
 10. SF轻小说 [book.sfacg.com](book.sfacg.com)
-
 11. 笔趣阁 [www.biquge.la](www.biquge.la)
-
 12. 书迷楼 [www.shumilou.co](www.shumilou.co)
-
 13. 3G书城 [www.3gsc.com.cn](www.3gsc.com.cn)
+14. 不可能的世界 [www.8kana.com](www.8kana.com)
 
 #### 版本命名规则
 
@@ -87,6 +76,8 @@
 更改版本命名规则
 
 增加网站：[3G书城](www.3gsc.com.cn)
+
+以后版本更新，不将**新增**的网站写入[更新历史](#更新历史)，详见[支持网站](#支持网站)。但会将修正的网站写入[更新历史](#更新历史)
 
 ##### 1.02
 
