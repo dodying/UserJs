@@ -1,6 +1,6 @@
 ### 安装地址
 
-#### [![Github](https://github.com/dodying/UserJs/raw/master/Install-Github.gif)](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloaderRaw.user.js)  [![GF](https://github.com/dodying/UserJs/raw/master/Install-GF.gif)](https://greasyfork.org/scripts/21515-noveldownloader/code/novelDownloader.user.js)
+#### [![Github](https://github.com/dodying/UserJs/raw/master/Install-Github.gif)](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloader.user.js)  [![GF](https://github.com/dodying/UserJs/raw/master/Install-GF.gif)](https://greasyfork.org/scripts/21515-noveldownloader/code/novelDownloader.user.js)
 
 #### 由于引用外来库的原因，可能导致无法正常安装。请尝试多次。
 
