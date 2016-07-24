@@ -1,6 +1,4 @@
-### 安装地址
-
-#### [![Github](https://github.com/dodying/UserJs/raw/master/Install-Github.gif)](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloader.user.js)  [![GF](https://github.com/dodying/UserJs/raw/master/Install-GF.gif)](https://greasyfork.org/scripts/21515-noveldownloader/code/novelDownloader.user.js)
+### [![Github](https://github.com/dodying/UserJs/raw/master/Install-Github.gif)](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloader.user.js)  [![GF](https://github.com/dodying/UserJs/raw/master/Install-GF.gif)](https://greasyfork.org/scripts/21515-noveldownloader/code/novelDownloader.user.js)
 
 #### 由于引用外来库的原因，可能导致无法正常安装。请尝试多次。
 
@@ -38,7 +36,7 @@
 
 ### 作者需要帮助的网站  搞毛啊，加密的这么厉害，要死
 
-欢乐污客 [www.hbooker.com](http://www.hbooker.com) 可能先后采用Base64与CryptoJS加密数据；
+欢乐污客 [www.hbooker.com](http://www.hbooker.com) 可能先后采用Base64与CryptoJS加密数据； **绝赞、自行解决中**
 
 网易云阅读 [yuedu.163.com](http://yuedu.163.com)
 
