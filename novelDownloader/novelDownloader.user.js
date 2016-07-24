@@ -12,6 +12,8 @@
 // @include     http://chuangshi.qq.com/bk/*/*-*.html
 // @include     http://yunqi.qq.com/bk/*/*-*.html
 // @include     http://dushu.qq.com/intro.html?bid=*
+// @include     http://www.hbooker.com/chapter/get_chapter_list?book_id=*
+// @include     http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=*
 // @include     http://www.3gsc.com.cn/bookreader/*
 // @include     http://book.zongheng.com/showchapter/*.html
 // @include     http://book.zongheng.com/chapter/*/*.html
@@ -109,12 +111,15 @@
 // include     http://18av.mm-cg.com/*
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
-// @version     1.13.87
+// @version     1.14.88
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
 // @require     https://greasyfork.org/scripts/21541-chs2sht/code/chs2sht.js?version=137286
 // @grant       GM_xmlhttpRequest
+// @grant       unsafeWindow
+// @grant       GM_setValue
+// @grant       GM_getValue
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
@@ -125,6 +130,10 @@ var script = document.createElement('script');
 script.src = 'http://libs.baidu.com/jquery/1.9.1/jquery.min.js';
 document.head.appendChild(script);
 */
+if (GM_getValue('firstRun', true)) {
+  alert('使用说明，第一次使用时弹出\n在目录页或是章节页使用。\n按“Shift+D”来显示下载选项。 网站情况不同，可能导致无法显示下载选项。\n按“Shift+T”使下载选项到最上端。\n按“Shift+Q”来【下载本章(TXT)】。\n按“Shift+W”来【下载整个目录页(TXT)】。\n按“Shift+E”来【每个章节生成1个txt(ZIP)】。');
+  GM_setValue('firstRun', false);
+}
 var indexRule = new Object();
 var chapterRule = new Object();
 /*
@@ -149,6 +158,7 @@ chapterRule['read.qidian.com'] = {
           content = wordFormat(jQuery('#content', response.response).html());
           content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
           if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+            GM_setValue('lang',1);
             name = tranStr(name, true);
             content = tranStr(content, true);
           }
@@ -167,6 +177,7 @@ chapterRule['read.qidian.com'] = {
         content = wordFormat(response.response.replace(/document\.write\(\'(.*)\'\);/, '$1'));
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
         if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+          GM_setValue('lang',1);
           name = tranStr(name, true);
           content = tranStr(content, true);
         }
@@ -234,6 +245,7 @@ chapterRule['chuangshi.qq.com'] = {
       content = temp;
       content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
       if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+        GM_setValue('lang',1);
         name = tranStr(name, true);
         content = tranStr(content, true);
       }
@@ -254,6 +266,90 @@ chapterRule['dushu.qq.com'] = {
   'lang': 0,
   'Deal': function (num, url) {
     chapterRule['chuangshi.qq.com'].Deal(num, url);
+  }
+};
+addIRule('www.hbooker.com', '欢乐书客(请将下载线程设置为1)', '.hd>h3', '.book-chapter-list>.clearfix>li>a', '.book-chapter-list>.clearfix>li>a:has(.icon-vip)');
+chapterRule['www.hbooker.com'] = {
+  'lang': 0,
+  'Deal': function (num, url) {
+    if (!jQuery(window).data('firstRun')) {
+      jQuery(window).data('firstRun', true);
+      unsafeWindow.jQuery('head').append('<script type="text/javascript" src="http://www.hbooker.com/resources/js/jquery-plugins/jquery.base64.min.js"></script>');
+      jQuery('head').append('<script type="text/javascript" src="http://www.hbooker.com/resources/js/enjs.min.js"></script>');
+    }
+    var chapterId = url.replace('http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=', '');
+    GM_xmlhttpRequest({
+      method: 'POST',
+      url: 'http://www.hbooker.com/chapter/ajax_get_session_code',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Referer': 'http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=' + chapterId,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      data: 'chapter_id=' + chapterId,
+      onload: function (response) {
+        var json = JSON.parse(response.response);
+        var accessKey = json.chapter_access_key;
+        chapterRule['www.hbooker.com'].Deal2(num, url, accessKey)
+      }
+    });
+  },
+  'Deal2': function (num, url, accessKey) {
+    var chapterId = url.replace('http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=', '');
+    GM_xmlhttpRequest({
+      method: 'POST',
+      url: 'http://www.hbooker.com/chapter/get_book_chapter_detail_info',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Referer': 'http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=' + chapterId,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      data: 'chapter_id=' + chapterId + '&chapter_access_key=' + accessKey,
+      onload: function (response) {
+        var json = JSON.parse(response.response);
+        console.log(json);
+        /*以下代码来自http://www.hbooker.com/resources/js/myEncrytExtend-min.js*/
+        var s = {
+          content: json.chapter_content,
+          keys: json.encryt_keys,
+          accessKey: accessKey
+        }
+        var n = s.content;
+        var r = s.keys;
+        var t = s.keys.length;
+        var q = s.accessKey;
+        var o = q.split('');
+        var m = o.length;
+        var k = new Array();
+        k.push(r[(o[m - 1].charCodeAt(0)) % t]);
+        k.push(r[(o[0].charCodeAt(0)) % t]);
+        for (i = 0; i < k.length; i++) {
+          n = unsafeWindow.jQuery.base64.decode(n);
+          var p = k[i];
+          var j = unsafeWindow.jQuery.base64.encode(n.substr(0, 16));
+          var f = unsafeWindow.jQuery.base64.encode(n.substr(16));
+          var h = CryptoJS.format.OpenSSL.parse(f);
+          n = CryptoJS.AES.decrypt(h, CryptoJS.enc.Base64.parse(p), {
+            iv: CryptoJS.enc.Base64.parse(j),
+            format: CryptoJS.format.OpenSSL
+          });
+          if (i < k.length - 1) {
+            n = n.toString(CryptoJS.enc.Base64);
+            n = unsafeWindow.jQuery.base64.decode(n)
+          }
+        }
+        var content = n.toString(CryptoJS.enc.Utf8);
+        var name = jQuery(window).data('dataDownload') [num].name;
+        content = wordFormat(content);
+        content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
+        if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+          GM_setValue('lang',1);
+          name = tranStr(name, true);
+          content = tranStr(content, true);
+        }
+        thisDownloaded(num, name, content);
+      }
+    });
   }
 };
 addIRule('www.3gsc.com.cn', '3G书城', 'h1>a', '.menu-area>p>a', '.menu-area>p>a:has(span.vip)');
@@ -280,6 +376,7 @@ chapterRule['www.heiyan.com'] = {
         var content = wordFormat(info.chapter.htmlContent);
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
         if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+          GM_setValue('lang',1);
           name = tranStr(name, true);
           content = tranStr(content, true);
         }
@@ -313,10 +410,11 @@ chapterRule['book.hjsm.tom.com'] = {
       url: urlTrue,
       onload: function (response) {
         var name = jQuery(window).data('dataDownload') [num].name;
-        var content =response.response.replace('document.write("<p>', '').replace('");', '')
+        var content = response.response.replace('document.write("<p>', '').replace('");', '')
         content = wordFormat(eval('\'' + content + '\''));
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
         if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+          GM_setValue('lang',1);
           name = tranStr(name, true);
           content = tranStr(content, true);
         }
@@ -326,20 +424,21 @@ chapterRule['book.hjsm.tom.com'] = {
   }
 }
 addIRule('www.kanshu.com', '看书网', '.mu_h1>h1', '.mulu_list>li>a', '.mulu_list>li:has(span)>a');
-addCRule('www.kanshu.com', 'h1', '.yd_text2', 0,1);
+addCRule('www.kanshu.com', 'h1', '.yd_text2', 0, 1);
 addIRule('book.weibo.com', '微博读书', 'h1.book_name', '.chapter>span>a', '.chapter>span:has(i)>a');
-chapterRule['book.weibo.com']={
+chapterRule['book.weibo.com'] = {
   'lang': 0,
   'Deal': function (num, url) {
     GM_xmlhttpRequest({
       method: 'GET',
       url: url,
       onload: function (response) {
-        var name = jQuery('.sr-play-box-scroll-t-path>span',response.response).text();
-        var content=response.response.replace(/\s+/g,' ').replace(/.*chapterContent ="(.*?)";.*/, '$1');
+        var name = jQuery('.sr-play-box-scroll-t-path>span', response.response).text();
+        var content = response.response.replace(/\s+/g, ' ').replace(/.*chapterContent ="(.*?)";.*/, '$1');
         content = wordFormat(eval('\'' + content + '\''));
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
         if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+          GM_setValue('lang',1);
           name = tranStr(name, true);
           content = tranStr(content, true);
         }
@@ -348,9 +447,8 @@ chapterRule['book.weibo.com']={
     });
   }
 }
-
-addIRule('www.lcread.com', '看书网', '.bri>table>tbody>tr>td>h1', '#abl4>table>tbody>tr>td>a', '#abl4>table>tbody>tr>td>a[href^="http://vipbook.lc1234.com/"]');
-addCRule('www.lcread.com', 'h2', '#ccon', 0,1);
+addIRule('www.lcread.com', '连城读书', '.bri>table>tbody>tr>td>h1', '#abl4>table>tbody>tr>td>a', '#abl4>table>tbody>tr>td>a[href^="http://vipbook.lc1234.com/"]');
+addCRule('www.lcread.com', 'h2', '#ccon', 0, 1);
 //////////////////////////////////////////////////
 addIRule('www.wenku8.com', '轻小说文库', '#title', '.css>tbody>tr>td>a');
 addCRule('www.wenku8.com', '#title', '#content', 0, 1);
@@ -487,7 +585,12 @@ addCRule('','','',0,1);
 */
 //addIRule('18av.mm-cg.com', '', '.label>div', '.novel_left>a');
 //addCRule('18av.mm-cg.com', '#left>h1', '#novel_content_txtsize', 1);
-jQuery(document.body).append('<div id="bookDownloader" class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">支持网站</button><br>下载线程：<input id="bookDownloaderThread" placeholder="10" type="text"><br><input id="boodDownloaderVip" type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><br>语言：<input id="bookDownloaderLangZhs" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="0" checked="true"></input><label for="bookDownloaderLangZhs">简体</label><input id="bookDownloaderLangZht" type="radio" name="bookDownloaderLang" class="bookDownloaderLang" value="1"></input><label for="bookDownloaderLangZht">繁体</label><br><button id="bookDownloaderThis">下载本章(TXT)</button><br><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><br><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><br><button id="bookDownloaderSome">特定下载某些章节</button><div id="bookDownloaderSomeDiv"><textarea id="bookDownloaderSomeText"></textarea><br><button id="bookDownloaderSome2Txt">开始下载特定章节(TXT)</button>  <button id="bookDownloaderSome2Zip">开始下载特定章节(ZIP)</button></div></div><div id="bookDownloaderLog"></div><div id="bookDownloaderSupport" class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">隐藏</button><br></div>');
+jQuery(document.body).append('<div id="bookDownloader"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowHelp">使用说明</button><div class="bookDownloaderSeparator"></div><button class="bookDownloaderShowSupport">支持网站</button><div class="bookDownloaderSeparator"></div><span id="bookDownloaderInfo"></span><div class="bookDownloaderSeparator"></div>下载线程：<input id="bookDownloaderThread"placeholder="10"type="text"><br><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><br>语言：<input id="bookDownloaderLangZhs"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="0"checked="true"></input><label for="bookDownloaderLangZhs">简体</label><input id="bookDownloaderLangZht"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="1"></input><label for="bookDownloaderLangZht">繁体</label><br><button id="bookDownloaderThis">下载本章(TXT)</button><br><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><br><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><div class="bookDownloaderSeparator"></div><button id="bookDownloaderSome">特定下载某些章节</button><div id="bookDownloaderSomeDiv"><textarea id="bookDownloaderSomeText"></textarea><br><button id="bookDownloaderSome2Txt">开始下载特定章节(TXT)</button><button id="bookDownloaderSome2Zip">开始下载特定章节(ZIP)</button></div></div><div id="bookDownloaderLog"></div><div id="bookDownloaderSupport"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">隐藏</button><br></div><div id="bookDownloaderHelp"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowHelp">隐藏</button><br><img src="https://github.com/dodying/UserJs/raw/master/novelDownloader/Help.png"></img></div>');
+if (GM_getValue('lang',0)===0){
+  jQuery('#bookDownloaderLangZhs')[0].checked=true;
+}else{
+  jQuery('#bookDownloaderLangZht')[0].checked=true;
+}
 SupportUrl = '';
 var num = 0;
 for (var i in indexRule) {
@@ -495,18 +598,18 @@ for (var i in indexRule) {
   num++;
   SupportUrl += num + '. ' + indexRule[i].cn + ' <a href="http://' + i + '" target="_blank">' + i + '</a><br>';
 }
-SupportUrl = '总共支持网站' + num + '个。<br>网站基本排序：正版>轻小说>盗贴<br>' + SupportUrl;
+SupportUrl = '总共支持网站' + num + '个。<br>网站基本排序：正版>轻小说>盗贴<div class="bookDownloaderSeparator"></div>' + SupportUrl;
 jQuery('#bookDownloaderSupport').append(SupportUrl).css({
   'height': '500px',
   'overflow': 'auto',
 });
+jQuery('#bookDownloaderInfo').html('当前网站：<br>' + indexRule[location.host].cn);
 jQuery('#bookDownloaderThread').css('width', '24px');
 jQuery('.bookDownloaderBoxCenter').css({
   'display': 'none',
   'z-index': '999999',
   'background-color': 'white',
-  'border-color': 'black',
-  'border-style': 'solid',
+  'border': '1px solid black',
   'text-align': 'center',
   'position': 'absolute',
   'left': function () {
@@ -521,8 +624,7 @@ jQuery('#bookDownloaderLog').css({
   'display': 'none',
   'z-index': '999999',
   'background-color': 'white',
-  'border-color': 'black',
-  'border-style': 'solid',
+  'border': '1px solid black',
   'text-align': 'center',
   'position': 'absolute',
   'width': '300px',
@@ -535,6 +637,7 @@ jQuery('#bookDownloaderLog').css({
     return String(jQuery(window).scrollTop() + jQuery(window).height() - jQuery(this).height() - 5) + 'px';
   }
 });
+jQuery('.bookDownloaderSeparator').css('border', '1px solid black');
 var textareaPlaceholder = '可拉伸大小\n示例:\nhttp://www.example.com/1\nhttp://www.example.com/2\nhttp://www.example.com/3\n...';
 jQuery('#bookDownloaderSomeText').css({
   'width': '95%',
@@ -567,20 +670,23 @@ jQuery(window).scroll(function (event) {
     }
   });
 }).keydown(function (e) {
-  if (e.shiftKey&&e.keyCode === 68) {//D
+  if (e.shiftKey && e.keyCode === 68) { //D
     jQuery('#bookDownloader').toggle();
-  } else if (e.shiftKey&&e.keyCode === 84) {//T
+  } else if (e.shiftKey && e.keyCode === 84) { //T
     jQuery('#bookDownloader').css('top', '0px');
     jQuery('#bookDownloaderSupport').css('top', '0px');
-  } else if (e.shiftKey&&e.keyCode === 81){//Q
+  } else if (e.shiftKey && e.keyCode === 81) { //Q
     jQuery('#bookDownloaderThis').click();
-  } else if (e.shiftKey&&e.keyCode === 87){//W
+  } else if (e.shiftKey && e.keyCode === 87) { //W
     jQuery('#bookDownloaderAll2Txt').click();
-  } else if (e.shiftKey&&e.keyCode === 69){//E
+  } else if (e.shiftKey && e.keyCode === 69) { //E
     jQuery('#bookDownloaderAll2Zip').click();
   }
 }).unload(function () {
   jQuery(window).data('blob', null);
+});
+jQuery('.bookDownloaderShowHelp').click(function(){
+  jQuery('#bookDownloaderHelp').toggle();
 });
 jQuery('#boodDownloaderVip').click(function () {
   if (this.checked && !confirm('是否下载Vip章节，如未登录或未订阅，则只会下载章节预览。\r\n不会帮你把未订阅的章节订阅。\r\n如果不放心，请勿勾选。出事作者概不负责。')) this.checked = false;
@@ -761,6 +867,7 @@ function xhr(num, url) {
       }
       content = name + '\r\n来源地址：' + url + '\r\n\r\n' + content;
       if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== chapterRule[host].lang) {
+        GM_setValue('lang',parseInt(jQuery('.bookDownloaderLang:checked') [0].value));
         if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) === 0) {
           name = tranStr(name, false);
           content = tranStr(content, false);
