@@ -12,6 +12,8 @@
 // @include     http://chuangshi.qq.com/bk/*/*-*.html
 // @include     http://yunqi.qq.com/bk/*/*-*.html
 // @include     http://dushu.qq.com/intro.html?bid=*
+// @include     http://book.tianya.cn/html2/dir.aspx?bookid=*
+// @include     http://book.tianya.cn/chapter-*-*
 // @include     http://www.hbooker.com/chapter/get_chapter_list?book_id=*
 // @include     http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=*
 // @include     http://www.3gsc.com.cn/bookreader/*
@@ -46,6 +48,8 @@
 // @include     http://novel.feiku.com/*/*
 // @include     http://www.abada.com/Book/*/*.html
 // @include     http://www.kujiang.com/book/*/*
+// @include     http://www.tadu.com/book/catalogue/*
+// @include     http://www.tadu.com/book/*/*/
 //              轻小说
 // @include     http://www.wenku8.com/novel/*/*/*.htm
 // @include     http://book.sfacg.com/Novel/*
@@ -115,13 +119,22 @@
 // @include     http://www.99shumeng.org/shu/*/*/*.html
 // @include     http://www.bookbao.net/views/*/*/*.html
 // @include     http://www.sto.cc/*-*/
+// @include     http://www.shouda8.com/*
+// @include     http://www.shumilou.net/*/*/
+// @include     http://www.64mi.com/book/*/*/
+// @include     http://www.zhuzhudao.cc/*_*/*
+// @include     http://www.wanshuba.com/Html/*.html
+// @include     http://www.bqxs.com/book/*
+// @include     http://www.6yzw.com/*_*/*
+// @include     http://www.daomengren.com/*_*/*
+// @include     http://www.muyuge.net/*_*/*
 //              脚本于Firefox47编写并测试
 //              以上在Chrome里测试过，2016年7月22日 15:52:55
 //              第一次测试后，如无反馈，基本不会再测试
 // include     http://18av.mm-cg.com/*
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
-// @version     1.16.97
+// @version     1.16.107
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -268,11 +281,43 @@ chapterRule['yunqi.qq.com'] = {
     chapterRule['chuangshi.qq.com'].Deal(num, url);
   }
 };
-addIRule('dushu.qq.com', '腾讯读书(只支持目录第一页)', 'h3>a', '#chapterList>div>ol>li>a', '#chapterList>div>ol>li:not(:has(span.free))>a');
+addIRule('dushu.qq.com', '腾讯读书(只支持当前目录页)', 'h3>a', '#chapterList>div>ol>li>a', '#chapterList>div>ol>li:not(:has(span.free))>a');
 chapterRule['dushu.qq.com'] = {
   'lang': 0,
   'Deal': function (num, url) {
     chapterRule['chuangshi.qq.com'].Deal(num, url);
+  }
+};
+addIRule('book.tianya.cn', '天涯文学(只支持当前目录页)', 'h1>a', 'ul.dit-list>li>a', 'ul.dit-list>li:not(:has(.free))>a');
+chapterRule['book.tianya.cn'] = {
+  'lang': 0,
+  'Deal': function (num, url) {
+    if (!jQuery(window).data('firstRun')) {
+      jQuery(window).data('firstRun', true);
+      unsafeWindow.jQuery('head').append('<script type="text/javascript" src="http://static.tianyaui.com/global/ebook/web/static/js/dropdown_f10ac7c.js"></script>');
+    }
+    var urlArr = url.split('-');
+    GM_xmlhttpRequest({
+      method: 'POST',
+      url: 'http://app.3g.tianya.cn/webservice/web/read_chapter.jsp',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Referer': 'http://app.3g.tianya.cn/webservice/web/proxy.html',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      data: 'bookid=' + urlArr[1] + '&chapterid=' + urlArr[2],
+      onload: function (response) {
+        var info = JSON.parse(response.response);
+        var name = info.data.curChapterName;
+        var content = wordFormat(unsafeWindow.bitcake.dec(info.data.chapterContent));
+        content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
+        if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+          name = tranStr(name, true);
+          content = tranStr(content, true);
+        }
+        thisDownloaded(num, name, content);
+      }
+    });
   }
 };
 addIRule('www.hbooker.com', '欢乐书客(请将下载线程设置为1)', '.hd>h3', '.book-chapter-list>.clearfix>li>a', '.book-chapter-list>.clearfix>li>a:has(.icon-vip)');
@@ -372,7 +417,7 @@ addIRule('www.heiyan.com', '黑岩', 'h1.page-title', 'div.bd>ul>li>a', 'div.bd>
 chapterRule['www.heiyan.com'] = {
   'lang': 0,
   'Deal': function (num, url) {
-    urlTrue = 'http://a.heiyan.com/ajax/chapter/content/' + url.replace(/.*\//, '');
+    var urlTrue = 'http://a.heiyan.com/ajax/chapter/content/' + url.replace(/.*\//, '');
     GM_xmlhttpRequest({
       method: 'GET',
       url: urlTrue,
@@ -482,6 +527,27 @@ chapterRule['www.kujiang.com'] = {
         }
         var name = jQuery('.entry-title', response.response).text();
         var content = jQuery('#endText', response.response).html();
+        content = wordFormat(content);
+        content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
+        if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+          name = tranStr(name, true);
+          content = tranStr(content, true);
+        }
+        thisDownloaded(num, name, content);
+      }
+    });
+  }
+};
+addIRule('www.tadu.com', '塔读文学', '.book-detail.catalog-tip>h3', '.detail-chapters>ul>li>h5>a', '.detail-chapters>ul>li>h5>a:has(span)');
+chapterRule['www.tadu.com'] = {
+  'lang': 0,
+  'Deal': function (num, url) {
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: url,
+      onload: function (response) {
+        var name = jQuery('div.title_>h2', response.response).text();
+        var content = unescape(response.response.replace(/\s+/g, ' ').replace(/.*unescape\("(.*?)"\).*/, '$1'));
         content = wordFormat(content);
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n\r\n' + content;
         if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
@@ -627,6 +693,24 @@ addIRule('www.bookbao.net', '书包网', 'h1', '#chapterlist>ul>li>a');
 addCRule('www.bookbao.net', 'h1', '#contents', 0, 1);
 addIRule('www.sto.cc', '思兔閱讀(请使用通配符模式)', 'h1', '');
 addCRule('www.sto.cc', 'h1', '#BookContent', 1);
+addIRule('www.shouda8.com', '手打吧', '#info>h1', '#list>dl>dd>a');
+addCRule('www.shouda8.com', 'h1', '#content', 0, 1);
+addIRule('www.shumilou.net', '书迷楼', '.btitle>h1', '.chapterlist>dd>a');
+addCRule('www.shumilou.net', 'h1', '#BookText', 0, 1);
+addIRule('www.64mi.com', '爱尚小说网', 'h1', '#at>tbody>tr>td.L>a');
+addCRule('www.64mi.com', 'h1', '#contents', 0, 1);
+addIRule('www.zhuzhudao.cc', '猪猪岛小说网', 'h1', '#list>dl>dd>a');
+addCRule('www.zhuzhudao.cc', 'h1', '#content', 0, 1);
+addIRule('www.wanshuba.com', '万书吧', '.ml_title>h1', '.ml_main>dl>dd>a');
+addCRule('www.wanshuba.com', 'h2', '.yd_text2', 0, 1);
+addIRule('www.bqxs.com', '比奇小说网', '#smallcons>h1', '#readerlist>ul>li>a');
+addCRule('www.bqxs.com', 'h1', '#content', 0, 1);
+addIRule('www.6yzw.com', '六月中文网', '#info>h1', '#list>dl>dd>a');
+addCRule('www.6yzw.com', 'h1', '#content>p', 0, 1);
+addIRule('www.daomengren.com', '盗梦人小说网', '#info>h1', '#list>dl>dd>a');
+addCRule('www.daomengren.com', 'h1', '#content>p', 0, 1);
+addIRule('www.muyuge.net', '木鱼哥', '.xsh1>h1>a', '#xslist>ul>li>a');
+addCRule('www.muyuge.net', 'h1', '#content', 0, 1);
 /*
 addIRule('','','','');
 addCRule('','','',0,1);
@@ -651,7 +735,7 @@ jQuery('#bookDownloaderSupport').append(SupportUrl).css({
   'height': '500px',
   'overflow': 'auto',
 });
-jQuery('#bookDownloaderInfo').html('当前网站：<div class="bookDownloaderSeparatorWhite"></div>' + indexRule[location.host].cn);
+jQuery('#bookDownloaderInfo').html('当前网站：<div class="bookDownloaderSeparatorWhite"></div><a href="http://' + location.host + '/" target="_blank">' + indexRule[location.host].cn) + '</a>';
 jQuery('#bookDownloaderThread').css('width', '24px');
 jQuery('.bookDownloaderBoxCenter').css({
   'display': 'none',
