@@ -128,13 +128,15 @@
 // @include     http://www.6yzw.com/*_*/*
 // @include     http://www.daomengren.com/*_*/*
 // @include     http://www.muyuge.net/*_*/*
+// @include     http://www.zaiduu.com/zaidu*/*
+// @include     http://www.00xs.cc/xiaoshuo/*/*/
+// @include     http://www.musemailsvr.com/*.shtml
+// @include     http://www.lewenwu.com/books/*/*/*
 //              脚本于Firefox47编写并测试
-//              以上在Chrome里测试过，2016年7月22日 15:52:55
-//              第一次测试后，如无反馈，基本不会再测试
 // include     http://18av.mm-cg.com/*
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
-// @version     1.16.107
+// @version     1.17.112
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -154,7 +156,7 @@ script.src = 'http://libs.baidu.com/jquery/1.9.1/jquery.min.js';
 document.head.appendChild(script);
 */
 if (GM_getValue('firstRun', true)) {
-  alert('使用说明，第一次使用时弹出\n在目录页或是章节页使用。\n按“Shift+D”来显示下载选项。 网站情况不同，可能导致无法显示下载选项。\n按“Shift+T”使下载选项到最上端。\n按“Shift+Q”来【下载本章(TXT)】。\n按“Shift+W”来【下载整个目录页(TXT)】。\n按“Shift+E”来【每个章节生成1个txt(ZIP)】。');
+  alert('使用说明，第一次使用时弹出\n在目录页或是章节页使用。\n按“Shift+D”来显示下载选项。 网站情况不同，可能导致无法显示下载选项。\n按“Shift+Q”来【下载本章(TXT)】。\n按“Shift+W”来【下载整个目录页(TXT)】。\n按“Shift+E”来【每个章节生成1个txt(ZIP)】。');
   GM_setValue('firstRun', false);
 }
 var indexRule = new Object();
@@ -711,6 +713,16 @@ addIRule('www.daomengren.com', '盗梦人小说网', '#info>h1', '#list>dl>dd>a'
 addCRule('www.daomengren.com', 'h1', '#content>p', 0, 1);
 addIRule('www.muyuge.net', '木鱼哥', '.xsh1>h1>a', '#xslist>ul>li>a');
 addCRule('www.muyuge.net', 'h1', '#content', 0, 1);
+addIRule('www.zaiduu.com', '再读中文', '#info>h1', '#list>dl>dd>a');
+addCRule('www.zaiduu.com', 'h1', '#TXT', 0);
+addIRule('www.00xs.cc', '00小说', '.chapter-hd>h1', '.chapter-list>li>span>a');
+addCRule('www.00xs.cc', 'h1', '.article-con', 0, 1);
+addIRule('www.musemailsvr.com', 'MuseMail中文', '.wrapper>h1>a', '.nav>span>a');
+addCRule('www.musemailsvr.com', '.title', '#content', 0, 1);
+addIRule('www.lewenwu.com','乐文屋','.infot>h1','.chapterlist>li>a');
+addCRule('www.lewenwu.com','h1','#content',0,1);
+addIRule('www.biquge.tw','笔趣阁','#info>h1','#list>dl>dd>a');
+addCRule('www.biquge.tw','h1','#content',0,1);
 /*
 addIRule('','','','');
 addCRule('','','',0,1);
@@ -745,10 +757,10 @@ jQuery('.bookDownloaderBoxCenter').css({
   'text-align': 'center',
   'position': 'absolute',
   'left': function () {
-    return String(jQuery(window).scrollLeft() + (jQuery(window).width() - jQuery(this).width()) / 2) + 'px';
+    return String(jQuery(window).scrollLeft() + (window.screen.availWidth - jQuery(this).width()) / 2) + 'px';
   },
   'top': function () {
-    return String(jQuery(window).scrollTop() + (jQuery(window).height() - jQuery(this).height()) / 2) + 'px';
+    return String(jQuery(window).scrollTop() + (window.screen.availHeight - jQuery(this).height()) / 2) + 'px';
   }
 });
 jQuery('#bookDownloaderLog').css({
@@ -762,15 +774,15 @@ jQuery('#bookDownloaderLog').css({
   'height': '350px',
   'overflow': 'auto',
   'left': function () {
-    return String(jQuery(window).scrollLeft() + jQuery(window).width() - jQuery(this).width() - 5) + 'px';
+    return String(jQuery(window).scrollLeft() + window.screen.availWidth - jQuery(this).width() - 20) + 'px';
   },
   'top': function () {
-    return String(jQuery(window).scrollTop() + jQuery(window).height() - jQuery(this).height() - 5) + 'px';
+    return String(jQuery(window).scrollTop() + window.screen.availHeight - jQuery(this).height() - 90) + 'px';
   }
 });
 jQuery('.bookDownloaderSeparatorBlack').css('border', '1px solid black');
 jQuery('.bookDownloaderSeparatorWhite').css('border', '1px none');
-var textareaPlaceholder = '可拉伸大小\n示例:\nhttp://http://www.example.com/1\nhttp://http://www.example.com/2\nhttp://http://www.example.com/3\n...';
+var textareaPlaceholder = '可拉伸大小，双击清空内容\n示例:\nhttp://http://www.example.com/1\nhttp://http://www.example.com/2\nhttp://http://www.example.com/3\n...';
 jQuery('#bookDownloaderBatchTextarea').css({
   'resize': 'both',
   'width': '95%',
@@ -784,30 +796,29 @@ jQuery('#bookDownloaderBatchTextarea').css({
   if (jQuery(this).val() == '') {
     jQuery(this).val(textareaPlaceholder);
   }
+}).dblclick(function () {
+  jQuery(this).val('');
 });
 jQuery(window).scroll(function (event) {
   jQuery('.bookDownloaderBoxCenter').css({
     'left': function () {
-      return String(jQuery(window).scrollLeft() + (jQuery(window).width() - jQuery(this).width()) / 2) + 'px';
+      return String(jQuery(window).scrollLeft() + (window.screen.availWidth - jQuery(this).width()) / 2) + 'px';
     },
     'top': function () {
-      return String(jQuery(window).scrollTop() + (jQuery(window).height() - jQuery(this).height()) / 2) + 'px';
+      return String(jQuery(window).scrollTop() + (window.screen.availHeight - jQuery(this).height()) / 2) + 'px';
     }
   });
   jQuery('#bookDownloaderLog').css({
     'left': function () {
-      return String(jQuery(window).scrollLeft() + jQuery(window).width() - jQuery(this).width() - 5) + 'px';
+      return String(jQuery(window).scrollLeft() + window.screen.availWidth - jQuery(this).width() - 20) + 'px';
     },
     'top': function () {
-      return String(jQuery(window).scrollTop() + jQuery(window).height() - jQuery(this).height() - 5) + 'px';
+      return String(jQuery(window).scrollTop() + window.screen.availHeight - jQuery(this).height() - 90) + 'px';
     }
   });
 }).keydown(function (e) {
   if (e.shiftKey && e.keyCode === 68) { //D
     jQuery('#bookDownloader').toggle();
-  } else if (e.shiftKey && e.keyCode === 84) { //T
-    jQuery('#bookDownloader').css('top', '0px');
-    jQuery('#bookDownloaderSupport').css('top', '0px');
   } else if (e.shiftKey && e.keyCode === 81) { //Q
     jQuery('#bookDownloaderThis').click();
   } else if (e.shiftKey && e.keyCode === 87) { //W
@@ -892,7 +903,7 @@ jQuery('.bookDownloaderShowSupport').click(function () {
   jQuery('#bookDownloaderSupport').toggle();
 });
 //////////////////////////////////////////////////////
-function addCRule(host, name, content, lang, MimeType) {
+function addCRule(host, name, content, lang, MimeType) { //增加章节规则
   MimeType = (MimeType === 1) ? 'text/html; charset=gb2312' : '';
   chapterRule[host] = {
     name: name,
@@ -901,7 +912,7 @@ function addCRule(host, name, content, lang, MimeType) {
     MimeType: MimeType
   }
 }
-function addIRule(host, cn, name, chapter, vip, sort) {
+function addIRule(host, cn, name, chapter, vip, sort) { //增加目录规则
   var cnT = cn || '';
   var vipT = vip || '';
   var sortT = sort || false;
@@ -952,7 +963,7 @@ function download(chapterArray, fileType) { //下载
   jQuery(window).data('downloadNow').length = 0;
   for (var i = 0; i < chapter.length; i++) {
     href = chapter[i].href || chapter[i];
-    var name = chapter[i].innerHTML || chapter[0];
+    var name = chapter[i].innerHTML || '';
     var host = getHostName(href);
     var dataDownload = new Object();
     dataDownload.url = href;
@@ -982,7 +993,7 @@ function download(chapterArray, fileType) { //下载
     }
   }, 200);
 }
-function downloadTask(fun) {
+function downloadTask(fun) { //下载列队
   var thread = parseInt($('#bookDownloaderThread').val()) || 10;
   for (var i in jQuery(window).data('downloadNow')) {
     if (!/^\d+$/.test(i)) continue;
@@ -1014,13 +1025,13 @@ function downloadTask(fun) {
     return;
   }
 }
-function removeData() {
+function removeData() { //移除数据
   jQuery(window).removeData('downloadNow');
   jQuery(window).removeData('downloadList');
   jQuery(window).removeData('number');
   jQuery(window).removeData('dataDownload');
 }
-function xhr(num, url) {
+function xhr(num, url) { //xhr
   var host = getHostName(url);
   console.log(host);
   GM_xmlhttpRequest({
@@ -1030,19 +1041,30 @@ function xhr(num, url) {
     onload: function (response) {
       console.log('下载中', url);
       console.log(response.response);
-      var name = jQuery(chapterRule[host].name, response.response);
-      if (name.length > 0) {
-        name = name.text().replace(/^\s+|\s+$/g, '');
+      if (jQuery(window).data('dataDownload') [num].name !== '') {
+        var name = jQuery(window).data('dataDownload') [num].name;
       } else {
-        name = jQuery(window).data('dataDownload') [num].name;
+        var name = jQuery(chapterRule[host].name, response.response);
+        if (name.length > 0) {
+          name = name.text().replace(/^\s+|\s+$/g, '');
+        } else {
+          name = jQuery(window).data('dataDownload') [num].url;
+          var _html = response.response.replace(/\s+/g, ' ').replace(/<!DOCTYPE.*?>|<html.*?>|<\/html>|<head>.*?<\/head>|<body>|<\/body>|<a.*?>.*?<\/a>|<script.*?>.*?<\/script>|<img.*?>.*?<\/img>/g, '');
+          jQuery('body').append('<div id="findTitle' + num + '">' + _html + '</div>');
+          name = jQuery('#findTitle' + num + ' ' + chapterRule[host].name).text();
+          jQuery('#findTitle' + num).remove();
+        }
       }
-      var content = jQuery(chapterRule[host].content, response.responseText);
+      var content = jQuery(chapterRule[host].content, response.response);
       if (content.length > 0) {
-        content = wordFormat(content.html());
+        content = content.html();
       } else {
-        content = wordFormat(response.responseText);
-        //错误了怎么办...
+        var _html = response.response.replace(/\s+/g, ' ').replace(/<!DOCTYPE.*?>|<html.*?>|<\/html>|<head>.*?<\/head>|<body>|<\/body>|<a.*?>.*?<\/a>|<script.*?>.*?<\/script>|<img.*?>.*?<\/img>/g, '');
+        jQuery('body').append('<div id="findContent' + num + '">' + _html + '</div>');
+        content = jQuery('#findContent' + num + ' ' + chapterRule[host].content).html();
+        jQuery('#findContent' + num).remove();
       }
+      content = wordFormat(content);
       content = name + '\r\n来源地址：' + url + '\r\n\r\n' + content;
       if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== chapterRule[host].lang) {
         if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) === 0) {
@@ -1181,18 +1203,13 @@ function wordFormat(word) {
     '“(.*?)“|||“$1”',
     '\\s+|||',
     '<spanclass="watermark">.*?</span>|||',
-    '<!DOCTYPE.*?>|||',
-    '<BODY>|||',
-    '<HTML.*?>|||',
     '<HEAD>.*?</HEAD>|||',
-    '<!--.*?-->|||换行',
     '<br>|||换行',
     '<br/>|||换行',
     '<p.*?>|||换行',
     '</p>|||换行',
     '<strong.*?>.*?</strong>|||',
     '<a.*?>.*?</a>|||',
-    '<div.*?>.*?</div>|||换行',
     '<center.*?>.*?</center>|||换行',
     '<style.*?>.*?</style>|||换行',
     '<script.*?>.*?</script>|||换行',
@@ -1200,6 +1217,7 @@ function wordFormat(word) {
     '<b.*?>.*?</b>|||换行',
     '<font.*?>.*?</font>|||换行',
     '</.*?>|||',
+    '<.*?>|||换行',
     '换行|||\r\n',
     '\\s+|||\r\n　　'
   ];
@@ -1215,6 +1233,7 @@ function wordFormat(word) {
 }
 function addDownloadLogStart(num, name, url, status) {
   jQuery('<span id="bookDownloaderLog_' + num + '">' + num + ' <a href="' + url + '" target="_blank">' + name + '</a> ' + status + '</span><br>').appendTo(jQuery('#bookDownloaderLog'));
+  jQuery('#bookDownloaderLog') [0].scrollBy(0, 999);
 }
 function addDownloadLogEnd(num, name, url, status) {
   jQuery('#bookDownloaderLog_' + num).html(num + ' <a href="' + url + '" target="_blank">' + name + '</a> ' + status);
