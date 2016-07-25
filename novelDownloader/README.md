@@ -12,12 +12,6 @@
 
 #### 按“Shift+D”来显示下载选项。
 
-#### 按“Shift+Q”来【下载本章(TXT)】。
-
-#### 按“Shift+W”来【下载整个目录页(TXT)】。
-
-#### 按“Shift+E”来【每个章节生成1个txt(ZIP)】。
-
 ### 意见、建议、Bug
 
 #### 两个地址：[Github-issues](https://github.com/dodying/UserJs/issues)与[GF-反馈](https://greasyfork.org/zh-CN/scripts/21515-noveldownloader/feedback)
@@ -166,6 +160,8 @@
 ##### 1.18.112
 
 增加下载为Epub格式的功能。
+
+再次去除"Shift+Q"、"Shift+W"、"Shift+E"这些快捷键。原因是，面板经过上个版本修改后在所有网站**应该**都可以正确显示。
 
 ##### 1.17.112
 
