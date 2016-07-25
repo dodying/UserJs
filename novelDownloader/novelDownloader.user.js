@@ -156,7 +156,7 @@ script.src = 'http://libs.baidu.com/jquery/1.9.1/jquery.min.js';
 document.head.appendChild(script);
 */
 if (GM_getValue('firstRun', true)) {
-  alert('使用说明，第一次使用时弹出\n在目录页或是章节页使用。\n按“Shift+D”来显示下载选项。\n按“Shift+Q”来【下载本章(TXT)】。\n按“Shift+W”来【下载整个目录页(TXT)】。\n按“Shift+E”来【每个章节生成1个txt(ZIP)】。');
+  alert('使用说明，第一次使用时弹出\n在目录页或是章节页使用。\n按“Shift+D”来显示下载选项。');
   GM_setValue('firstRun', false);
 }
 var indexRule = new Object();
@@ -819,12 +819,6 @@ jQuery(window).scroll(function (event) {
 }).keydown(function (e) {
   if (e.shiftKey && e.keyCode === 68) { //D
     jQuery('#bookDownloader').toggle();
-  } else if (e.shiftKey && e.keyCode === 81) { //Q
-    jQuery('#bookDownloaderThis').click();
-  } else if (e.shiftKey && e.keyCode === 87) { //W
-    jQuery('#bookDownloaderAll2Txt').click();
-  } else if (e.shiftKey && e.keyCode === 69) { //E
-    jQuery('#bookDownloaderAll2Zip').click();
   }
 }).unload(function () {
   jQuery(window).data('blob', null);
