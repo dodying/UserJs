@@ -147,6 +147,11 @@
 105. 比奇小说网 [www.bqxs.com](http://www.bqxs.com/)
 106. 六月中文网 [www.6yzw.com](http://www.6yzw.com/)
 107. 木鱼哥 [www.muyuge.net](http://www.muyuge.net/)
+108. 再读中文 [www.zaiduu.com](http://www.zaiduu.com/)
+109. 00小说 [www.00xs.cc](http://www.00xs.cc/)
+110. MuseMail中文 [www.musemailsvr.com](http://www.musemailsvr.com/)
+111. 乐文屋 [www.lewenwu.com](http://www.lewenwu.com/)
+112. 笔趣阁 [www.biquge.tw](http://www.biquge.tw/)
 
 #### 版本命名规则
 
@@ -159,6 +164,12 @@
 ### 更新历史
 
 #### Latest
+
+##### 1.17.112
+
+更改了面板界面定位的方式，去除了"Shift+T"快捷键。
+
+更改了当从response查找不到元素时的解决方案（将response主体部分添加到当前网页，在当前网页查找）。
 
 ##### 1.16.97
 
