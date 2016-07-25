@@ -729,7 +729,7 @@ addCRule('','','',0,1);
 */
 //addIRule('18av.mm-cg.com', '', '.label>div', '.novel_left>a');
 //addCRule('18av.mm-cg.com', '#left>h1', '#novel_content_txtsize', 1);
-jQuery(document.body).append('<div id="bookDownloader"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowHelp">使用说明</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowSupport">支持网站</button><div class="bookDownloaderSeparatorBlack"></div><span id="bookDownloaderInfo"></span><div class="bookDownloaderSeparatorBlack"></div>下载线程：<input id="bookDownloaderThread"placeholder="10"type="text"><div class="bookDownloaderSeparatorWhite"></div><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><div class="bookDownloaderSeparatorWhite"></div>语言：<input id="bookDownloaderLangZhs"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="0"checked="true"></input><label for="bookDownloaderLangZhs">简体</label><input id="bookDownloaderLangZht"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="1"></input><label for="bookDownloaderLangZht">繁体</label><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderThis">下载本章(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Epub">下载整个目录页(Epub)</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowBatch">特定下载某些章节</button></div><div id="bookDownloaderBatch"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowBatch">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderBatchWildHelp">?</button>通配符模式：<input id="bookDownloaderBatchWild"placeholder="http://www.example.com/*"></input><div class="bookDownloaderSeparatorWhite"></div><textarea id="bookDownloaderBatchTextarea"></textarea><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderBatch2Txt">开始下载特定章节(TXT)</button><button id="bookDownloaderBatch2Zip">开始下载特定章节(ZIP)</button><button id="bookDownloaderBatch2Epub">开始下载特定章节(Epub)/button></div><div id="bookDownloaderSupport"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">隐藏</button><div class="bookDownloaderSeparatorWhite"></div></div><div id="bookDownloaderHelp"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowHelp">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><img src="https://github.com/dodying/UserJs/raw/master/novelDownloader/Help.png"></img></div><div id="bookDownloaderLog"></div>');
+jQuery(document.body).append('<div id="bookDownloader"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">支持网站</button><div class="bookDownloaderSeparatorBlack"></div><span id="bookDownloaderInfo"></span><div class="bookDownloaderSeparatorBlack"></div>下载线程：<input id="bookDownloaderThread"placeholder="10"type="text"><div class="bookDownloaderSeparatorWhite"></div><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><div class="bookDownloaderSeparatorWhite"></div>语言：<input id="bookDownloaderLangZhs"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="0"checked="true"></input><label for="bookDownloaderLangZhs">简体</label><input id="bookDownloaderLangZht"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="1"></input><label for="bookDownloaderLangZht">繁体</label><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderThis">下载本章(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Epub">下载整个目录页(Epub)</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowBatch">特定下载某些章节</button></div><div id="bookDownloaderBatch"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowBatch">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderBatchWildHelp">?</button>通配符模式：<input id="bookDownloaderBatchWild"placeholder="http://www.example.com/*"></input><div class="bookDownloaderSeparatorWhite"></div><textarea id="bookDownloaderBatchTextarea"></textarea><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderBatch2Txt">开始下载特定章节(TXT)</button><button id="bookDownloaderBatch2Zip">开始下载特定章节(ZIP)</button><button id="bookDownloaderBatch2Epub">开始下载特定章节(Epub)</button></div><div id="bookDownloaderSupport"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">隐藏</button><div class="bookDownloaderSeparatorWhite"></div></div><div id="bookDownloaderLog"></div>');
 if (GM_getValue('lang', 0) === 0) {
   jQuery('#bookDownloaderLangZhs') [0].checked = true;
 } else {
@@ -782,11 +782,12 @@ jQuery('#bookDownloaderLog').css({
 });
 jQuery('.bookDownloaderSeparatorBlack').css('border', '1px solid black');
 jQuery('.bookDownloaderSeparatorWhite').css('border', '1px none');
+jQuery('#bookDownloaderBatchWild').css('width', '330px');
 var textareaPlaceholder = '可拉伸大小，双击清空内容\n示例:\nhttp://http://www.example.com/1\nhttp://http://www.example.com/2\nhttp://http://www.example.com/3\n...';
 jQuery('#bookDownloaderBatchTextarea').css({
   'resize': 'both',
   'width': '95%',
-  'height': '100%',
+  'height': '100px',
   'overflow': 'hidden'
 }).val(textareaPlaceholder).focus(function () {
   if (jQuery(this).val() == textareaPlaceholder) {
@@ -822,9 +823,6 @@ jQuery(window).scroll(function (event) {
   }
 }).unload(function () {
   jQuery(window).data('blob', null);
-});
-jQuery('.bookDownloaderShowHelp').click(function () {
-  jQuery('#bookDownloaderHelp').toggle();
 });
 jQuery('#bookDownloaderBatchWildHelp').click(function () {
   alert('示例：\n我要下载如下章节\nhttp://www.example.com/1\nhttp://www.example.com/2\nhttp://www.example.com/3\nhttp://www.example.com/...\nhttp://www.example.com/100\n...\n请在输入框输入（不包括括号）\n[http://www.example.com/*]\n然后分别在消息框里输入\n开头[1]、结尾[100]、间隔[1]、是否补足开头0[取消]');
