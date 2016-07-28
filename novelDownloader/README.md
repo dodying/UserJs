@@ -10,6 +10,8 @@
 
 #### 按“Shift+D”来显示下载选项。
 
+#### 关于【特定下载某些章节】功能的一些提示：可以使用带有【Snap Links】字样的附加组件或扩展或UC脚本
+
 ### 意见、建议、Bug
 
 #### 两个地址：[Github-issues](https://github.com/dodying/UserJs/issues)与[GF-反馈](https://greasyfork.org/zh-CN/scripts/21515-noveldownloader/feedback)
