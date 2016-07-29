@@ -1,5 +1,3 @@
-### [![Github](https://github.com/dodying/UserJs/raw/master/Install-Github.gif)](https://github.com/dodying/UserJs/raw/master/novelDownloader/novelDownloader.user.js)  [![GF](https://github.com/dodying/UserJs/raw/master/Install-GF.gif)](https://greasyfork.org/scripts/21515-noveldownloader/code/novelDownloader.user.js)
-
 #### 由于引用外来库的原因，可能导致安装时间过长或是无法正常安装。请耐心等待并尝试多次。
 
 #### 此脚本引用的库，感谢他们 jQuery [FileSaver](https://github.com/eligrey/FileSaver.js) [jszip](https://github.com/Stuk/jszip) [jquery-s2t](https://github.com/hustlzp/jquery-s2t)
