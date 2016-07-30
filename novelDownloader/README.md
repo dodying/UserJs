@@ -26,7 +26,7 @@
 
 ### 作者需要帮助的网站  搞毛啊，加密的这么厉害，要死
 
-网易云阅读 [yuedu.163.com](http://yuedu.163.com)
+
 
 ### 支持网站【列举前50项】
 
@@ -37,7 +37,7 @@
 5. 云起书院 [yunqi.qq.com](http://yunqi.qq.com/)
 6. 腾讯读书(只支持当前目录页) [dushu.qq.com](http://dushu.qq.com/)
 7. 天涯文学(只支持当前目录页) [book.tianya.cn](http://book.tianya.cn/)
-8. 欢乐书客(请将下载线程设置为1) [www.hbooker.com](http://www.hbooker.com/)
+8. 欢乐书客 [www.hbooker.com](http://www.hbooker.com/)
 9. 3G书城 [www.3gsc.com.cn](http://www.3gsc.com.cn/)
 10. 纵横 [book.zongheng.com](http://book.zongheng.com/)
 11. 花语女生网 [huayu.baidu.com](http://huayu.baidu.com/)
@@ -63,23 +63,23 @@
 31. 阿巴达 [www.abada.com](http://www.abada.com/)
 32. 酷匠网 [www.kujiang.com](http://www.kujiang.com/)
 33. 塔读文学 [www.tadu.com](http://www.tadu.com/)
-34. 轻小说文库 [www.wenku8.com](http://www.wenku8.com/)
-35. SF轻小说 [book.sfacg.com](http://book.sfacg.com/)
-36. 动漫之家 [xs.dmzj.com](http://xs.dmzj.com/)
-37. 迷糊动漫 [www.yidm.com](http://www.yidm.com/)
-38. 顶点小说 [www.23wx.com](http://www.23wx.com/)
-39. 笔趣阁 [www.biquge.la](http://www.biquge.la/)
-40. 书迷楼 [www.shumilou.co](http://www.shumilou.co/)
-41. 无错小说网 [www.quledu.com](http://www.quledu.com/)
-42. 追书网 [www.mangg.com](http://www.mangg.com/)
-43. 傲世中文网 [www.23zw.com](http://www.23zw.com/)
-44. 三易文学 [www.31wxw.com](http://www.31wxw.com/)
-45. 520小说网 [www.520xs.la](http://www.520xs.la/)
-46. 笔趣阁 [www.biquge.com](http://www.biquge.com/)
-47. 69书吧 [www.69shu.com](http://www.69shu.com/)
-48. 笔趣库 [www.biquku.com](http://www.biquku.com/)
-49. 我看书斋 [www.5ccc.net](http://www.5ccc.net/)
-50. 爱去小说网 [www.aiquxs.com](http://www.aiquxs.com/)
+34. 网易云阅读 [yuedu.163.com](http://yuedu.163.com/) 感谢[JixunMoe](https://github.com/JixunMoe)
+35. 轻小说文库 [www.wenku8.com](http://www.wenku8.com/)
+36. SF轻小说 [book.sfacg.com](http://book.sfacg.com/)
+37. 动漫之家 [xs.dmzj.com](http://xs.dmzj.com/)
+38. 迷糊动漫 [www.yidm.com](http://www.yidm.com/)
+39. 顶点小说 [www.23wx.com](http://www.23wx.com/)
+40. 笔趣阁 [www.biquge.la](http://www.biquge.la/)
+41. 书迷楼 [www.shumilou.co](http://www.shumilou.co/)
+42. 无错小说网 [www.quledu.com](http://www.quledu.com/)
+43. 追书网 [www.mangg.com](http://www.mangg.com/)
+44. 傲世中文网 [www.23zw.com](http://www.23zw.com/)
+45. 三易文学 [www.31wxw.com](http://www.31wxw.com/)
+46. 520小说网 [www.520xs.la](http://www.520xs.la/)
+47. 笔趣阁 [www.biquge.com](http://www.biquge.com/)
+48. 69书吧 [www.69shu.com](http://www.69shu.com/)
+49. 笔趣库 [www.biquku.com](http://www.biquku.com/)
+50. 我看书斋 [www.5ccc.net](http://www.5ccc.net/)
 51. ...
 
 #### 版本命名规则
