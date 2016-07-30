@@ -14,6 +14,7 @@
 // @include     http://dushu.qq.com/intro.html?bid=*
 // @include     http://book.tianya.cn/html2/dir.aspx?bookid=*
 // @include     http://book.tianya.cn/chapter-*-*
+// @include     http://www.hbooker.com/book/book_detail?book_id=*
 // @include     http://www.hbooker.com/chapter/get_chapter_list?book_id=*
 // @include     http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=*
 // @include     http://www.3gsc.com.cn/bookreader/*
@@ -49,6 +50,8 @@
 // @include     http://www.kujiang.com/book/*/*
 // @include     http://www.tadu.com/book/catalogue/*
 // @include     http://www.tadu.com/book/*/*/
+// @include     http://yuedu.163.com/newBookReader.do?operation=catalog&sourceUuid=*
+// @include     http://yuedu.163.com/book_reader/*/*
 //              轻小说
 // @include     http://www.wenku8.com/novel/*/*/*
 // @include     http://book.sfacg.com/Novel/*
@@ -168,11 +171,13 @@
 // @include     http://www.tlxsw.com/files/article/html/*
 // @include     http://www.92zw.com/files/article/html/*
 // @include     http://www.d8qu.com/html/*
+// @include     http://www.zhuaji.org/read/*/*
+// @include     http://www.7kshu.com/*/*/*
 //              脚本于Firefox47编写并测试
 // include     http://18av.mm-cg.com/*
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
-// @version     1.18.149
+// @version     1.19.152
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -199,7 +204,7 @@ var indexRule = new Object();
 var chapterRule = new Object();
 /*
 目录页规则示例
-addIRule('域名','网站名称','选择器-小说标题','选择器-章节链接','可省略,选择器-Vip或是要过滤的章节链接','可省略,布尔，是否对章节链接进行排序');
+addIRule('域名','网站名称','选择器-小说标题','选择器-章节链接','可省略,选择器-Vip或是要过滤的章节链接','可省略,布尔，是否对章节链接进行排序，限制下载线程数');
 章节规则示例
 addCRule('域名','选择器-章节标题','选择器-章节内容','数字型,0-简体,1-繁体','可省略,数字型,文档编码,unicode则留空,简体中文则填1');
 */
@@ -358,7 +363,7 @@ chapterRule['book.tianya.cn'] = {
     });
   }
 };
-addIRule('www.hbooker.com', '欢乐书客(请将下载线程设置为1)', '.hd>h3', '.book-chapter-list>.clearfix>li>a', '.book-chapter-list>.clearfix>li>a:has(.icon-vip)');
+addIRule('www.hbooker.com', '欢乐书客', '.hd>h3', '.book-chapter-list>.clearfix>li>a', '.book-chapter-list>.clearfix>li>a:has(.icon-vip)', false, 1);
 chapterRule['www.hbooker.com'] = {
   'lang': 0,
   'Deal': function (num, url) {
@@ -586,6 +591,31 @@ chapterRule['www.tadu.com'] = {
       onload: function (response) {
         var name = jQuery('div.title_>h2', response.response).text();
         var content = unescape(response.response.replace(/\s+/g, ' ').replace(/.*unescape\("(.*?)"\).*/, '$1'));
+        content = wordFormat(content);
+        content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n由novelDownloader制作\r\n\r\n' + content;
+        if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
+          name = tranStr(name, true);
+          content = tranStr(content, true);
+        }
+        thisDownloaded(num, name, content);
+      }
+    });
+  }
+};
+addIRule('yuedu.163.com', '网易云阅读', 'h2.title', '.item>a', '.vip>a', false);
+chapterRule['yuedu.163.com'] = {
+  'lang': 0,
+  'Deal': function (num, url) {
+    urlArr = url.split('/');
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: 'http://yuedu.163.com/getArticleContent.do?sourceUuid=' + urlArr[4] + '&articleUuid=' + urlArr[5],
+      onload: function (response) {
+        var content = JSON.parse(response.response).content;
+        content = base64decode(content);
+        content = utf8to16(content);
+        var name = content.replace(/\s+/g, ' ').replace(/.*<h1><span>(.*?)<\/span><\/h1>.*/, '$1');
+        var content = content;
         content = wordFormat(content);
         content = name + '\r\n来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n由novelDownloader制作\r\n\r\n' + content;
         if (parseInt(jQuery('.bookDownloaderLang:checked') [0].value) !== 0) {
@@ -862,6 +892,10 @@ addIRule('www.92zw.com', '就爱中文网', 'h1', '#at>tbody>tr>td.L>a');
 addCRule('www.92zw.com', 'h1', '#contents', 0, 1);
 addIRule('www.d8qu.com', '第八区', '.title>h1', '.chapter>ul>li>a');
 addCRule('www.d8qu.com', '#cont>h1', '#content>#clickeye_content', 0, 1);
+addIRule('www.zhuaji.org', '爪机书屋', '.mulu-left>h1', '#mulu>dd>a');
+addCRule('www.zhuaji.org', '.title', '#content', 0, 1);
+addIRule('www.7kshu.com', '去看书网', 'h1', '#chapterlist>li>a');
+addCRule('www.7kshu.com', 'h1', '#content', 0, 1);
 /*
 addIRule('','','','');
 addCRule('','','',0,1);
@@ -1031,16 +1065,18 @@ function addCRule(host, name, content, lang, MimeType) { //增加章节规则
     MimeType: MimeType
   }
 }
-function addIRule(host, cn, name, chapter, vip, sort) { //增加目录规则
+function addIRule(host, cn, name, chapter, vip, sort, thread) { //增加目录规则
   var cnT = cn || '';
   var vipT = vip || '';
   var sortT = sort || false;
+  var threadT = thread | false;
   indexRule[host] = {
     cn: cnT,
     name: name,
     chapter: chapter,
     vip: vipT,
-    sort: sortT
+    sort: sortT,
+    thread: threadT
   }
 }
 function download(chapterArray, fileType) { //下载
@@ -1109,6 +1145,7 @@ function download(chapterArray, fileType) { //下载
   var downloadCheck = setInterval(function () {
     //console.log('dataDownload', jQuery(window).data('dataDownload'));
     if (downloadedCheck(jQuery(window).data('dataDownload'))) {
+      jQuery('#bookDownloaderLog').append('测试');
       if (fileType === 'zip') {
         download2Zip(bookName);
       } else if (fileType === 'txt') {
@@ -1122,7 +1159,7 @@ function download(chapterArray, fileType) { //下载
   }, 200);
 }
 function downloadTask(fun) { //下载列队
-  var thread = parseInt($('#bookDownloaderThread').val()) || 10;
+  var thread = (indexRule[location.host].thread) ? indexRule[location.host].thread : parseInt($('#bookDownloaderThread').val()) || 10;
   for (var i in jQuery(window).data('downloadNow')) {
     if (!/^\d+$/.test(i)) continue;
     if (jQuery(window).data('downloadNow') [i].ok) {
@@ -1440,11 +1477,101 @@ function downloadedCheck(arr) { //检查下载是否完成
 function getHostName(url) { //获取网址域名
   return (/^http(s|):\/\//.test(url)) ? url.split('/') [2] : url.split('/') [0];
 }
-function preZeroFill(num, size) { //补足0
+function preZeroFill(num, size) { //用0补足指定位数，来自https://segmentfault.com/q/1010000002607221，作者：captainblue与solar
   if (num >= Math.pow(10, size)) { //如果num本身位数不小于size位
     return num.toString();
   } else {
     var _str = Array(size + 1).join('0') + num;
     return _str.slice(_str.length - size);
   }
+}
+function utf8to16(str) { //来自http://www1.tc711.com/tool/js/Base64.js
+  var out,
+  i,
+  len,
+  c;
+  var char2,
+  char3;
+  out = '';
+  len = str.length;
+  i = 0;
+  while (i < len) {
+    c = str.charCodeAt(i++);
+    switch (c >> 4)
+      {
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+        // 0xxxxxxx
+        out += str.charAt(i - 1);
+        break;
+      case 12:
+      case 13:
+        // 110x xxxx   10xx xxxx
+        char2 = str.charCodeAt(i++);
+        out += String.fromCharCode(((c & 31) << 6) | (char2 & 63));
+        break;
+      case 14:
+        // 1110 xxxx  10xx xxxx  10xx xxxx
+        char2 = str.charCodeAt(i++);
+        char3 = str.charCodeAt(i++);
+        out += String.fromCharCode(((c & 15) << 12) | ((char2 & 63) << 6) | ((char3 & 63) << 0));
+        break;
+    }
+  }
+  return out;
+}
+function base64decode(str) { //来自http://www1.tc711.com/tool/js/Base64.js
+  var base64DecodeChars = new Array( - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, 62, - 1, - 1, - 1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, - 1, - 1, - 1, - 1, - 1, - 1, - 1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, - 1, - 1, - 1, - 1, - 1, - 1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, - 1, - 1, - 1, - 1, - 1);
+  var c1,
+  c2,
+  c3,
+  c4;
+  var i,
+  len,
+  out;
+  len = str.length;
+  i = 0;
+  out = '';
+  while (i < len) {
+    /* c1 */
+    do {
+      c1 = base64DecodeChars[str.charCodeAt(i++) & 255];
+    } while (i < len && c1 == - 1);
+    if (c1 == - 1)
+    break;
+    /* c2 */
+    do {
+      c2 = base64DecodeChars[str.charCodeAt(i++) & 255];
+    } while (i < len && c2 == - 1);
+    if (c2 == - 1)
+    break;
+    out += String.fromCharCode((c1 << 2) | ((c2 & 48) >> 4));
+    /* c3 */
+    do {
+      c3 = str.charCodeAt(i++) & 255;
+      if (c3 == 61)
+      return out;
+      c3 = base64DecodeChars[c3];
+    } while (i < len && c3 == - 1);
+    if (c3 == - 1)
+    break;
+    out += String.fromCharCode(((c2 & 15) << 4) | ((c3 & 60) >> 2));
+    /* c4 */
+    do {
+      c4 = str.charCodeAt(i++) & 255;
+      if (c4 == 61)
+      return out;
+      c4 = base64DecodeChars[c4];
+    } while (i < len && c4 == - 1);
+    if (c4 == - 1)
+    break;
+    out += String.fromCharCode(((c3 & 3) << 6) | c4);
+  }
+  return out;
 }
