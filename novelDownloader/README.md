@@ -10,6 +10,8 @@
 
 #### 关于【特定下载某些章节】功能的一些提示：可以使用带有【Snap Links】字样的附加组件或扩展或UC脚本
 
+#### 如果某章节长时间无法下载，请刷新重试。（浏览器应该会从缓存中读取数据，所以重试下载会很快完成。）
+
 ### 意见、建议、Bug
 
 #### 两个地址：[Github-issues](https://github.com/dodying/UserJs/issues)与[GF-反馈](https://greasyfork.org/zh-CN/scripts/21515-noveldownloader/feedback)
