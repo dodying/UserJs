@@ -4,6 +4,21 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 小说下载器，按“Shift+D”来显示面板
+// @version     1.20.159
+// @connect     files.qidian.com
+// @connect     a.heiyan.com
+// @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
+// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
+// @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
+// @require     https://greasyfork.org/scripts/21541-chs2sht/code/chs2sht.js?version=137286
+// @grant       GM_xmlhttpRequest
+// @grant       unsafeWindow
+// @grant       GM_setValue
+// @grant       GM_getValue
+// @author      Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
+// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
+// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 //              正版
 // @include     http://read.qidian.com/BookReader/*.aspx
 // @include     http://vipreader.qidian.com/BookReader/vip,*,*.aspx
@@ -173,23 +188,15 @@
 // @include     http://www.d8qu.com/html/*
 // @include     http://www.zhuaji.org/read/*/*
 // @include     http://www.7kshu.com/*/*/*
+// @include     http://www.luoqiu.com/read/*/*
+// @include     http://www.podlook.com/*.shtml
+// @include     http://www.630book.cc/shu/*.html
+// @include     http://www.vv44.net/novel/*
+// @include     http://www.88dushu.com/xiaoshuo/*
+// @include     http://www.23us.cc/html/*
+// @include     http://www.chinaliangzhu.com/*.shtml
 //              脚本于Firefox47编写并测试
 // include     http://18av.mm-cg.com/*
-// @connect     files.qidian.com
-// @connect     a.heiyan.com
-// @version     1.19.152
-// @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
-// @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
-// @require     https://greasyfork.org/scripts/21541-chs2sht/code/chs2sht.js?version=137286
-// @grant       GM_xmlhttpRequest
-// @grant       unsafeWindow
-// @grant       GM_setValue
-// @grant       GM_getValue
-// @author      Dodying
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // ==/UserScript==
 /*
 var script = document.createElement('script');
@@ -896,13 +903,27 @@ addIRule('www.zhuaji.org', '爪机书屋', '.mulu-left>h1', '#mulu>dd>a');
 addCRule('www.zhuaji.org', '.title', '#content', 0, 1);
 addIRule('www.7kshu.com', '去看书网', 'h1', '#chapterlist>li>a');
 addCRule('www.7kshu.com', 'h1', '#content', 0, 1);
+addIRule('www.luoqiu.com', '落秋中文', 'h1>a', '.dccss>a');
+addCRule('www.luoqiu.com', '.bname_content', '#content', 0, 1);
+addIRule('www.podlook.com', '菠萝网', '.wrapper>h1', 'ul.chapters>li>a');
+addCRule('www.podlook.com', 'div.title', '#content', 0, 1);
+addIRule('www.630book.cc', '恋上你看书网', '#info>h1', 'dl.zjlist>dd>a');
+addCRule('www.630book.cc', '#main>h1', '#content', 0, 1);
+addIRule('www.vv44.net', '琦书屋', '#list>div.bt>h1', 'div.book>table>tbody>tr>td>li>a');
+addCRule('www.vv44.net', '#content>div>h1', '#content', 0, 1);
+addIRule('www.88dushu.com', '88读书网', 'h1', '.mulu>ul>li>a');
+addCRule('www.88dushu.com', 'h1', '.yd_text2', 0, 1);
+addIRule('www.23us.cc', '顶点小说', 'h1', '.chapterlist>dd>a');
+addCRule('www.23us.cc', 'h1', '#content', 0, 1);
+addIRule('www.chinaliangzhu.com', '梁祝文学网', 'h1', 'ul.chapters>li>a');
+addCRule('www.chinaliangzhu.com', '.title', '#content', 0, 1);
 /*
 addIRule('','','','');
 addCRule('','','',0,1);
 */
 //addIRule('18av.mm-cg.com', '', '.label>div', '.novel_left>a');
 //addCRule('18av.mm-cg.com', '#left>h1', '#novel_content_txtsize', 1);
-jQuery(document.body).append('<div id="bookDownloader"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">支持网站</button><div class="bookDownloaderSeparatorBlack"></div><span id="bookDownloaderInfo"></span><div class="bookDownloaderSeparatorBlack"></div>下载线程：<input id="bookDownloaderThread"placeholder="10"type="text"><div class="bookDownloaderSeparatorWhite"></div><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><div class="bookDownloaderSeparatorWhite"></div>语言：<input id="bookDownloaderLangZhs"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="0"checked="true"></input><label for="bookDownloaderLangZhs">简体</label><input id="bookDownloaderLangZht"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="1"></input><label for="bookDownloaderLangZht">繁体</label><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderThis">下载本章(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Epub">下载整个目录页(Epub)</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowBatch">特定下载某些章节</button></div><div id="bookDownloaderBatch"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowBatch">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderBatchWildHelp">?</button>通配符模式：<input id="bookDownloaderBatchWild"placeholder="http://www.example.com/*"></input><div class="bookDownloaderSeparatorWhite"></div><textarea id="bookDownloaderBatchTextarea"></textarea><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderBatch2Txt">开始下载特定章节(TXT)</button><button id="bookDownloaderBatch2Zip">开始下载特定章节(ZIP)</button><button id="bookDownloaderBatch2Epub">开始下载特定章节(Epub)</button></div><div id="bookDownloaderSupport"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">隐藏</button><div class="bookDownloaderSeparatorWhite"></div></div><div id="bookDownloaderLog"></div>');
+jQuery(document.body).append('<div id="bookDownloaderDiv"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">支持网站</button><div class="bookDownloaderSeparatorBlack"></div><span id="bookDownloaderInfo"></span><div class="bookDownloaderSeparatorBlack"></div>下载线程：<input id="bookDownloaderThread"placeholder="10"type="text"><div class="bookDownloaderSeparatorWhite"></div><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节[测试中，起点成功]</label><div class="bookDownloaderSeparatorWhite"></div>语言：<input id="bookDownloaderLangZhs"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="0"checked="true"></input><label for="bookDownloaderLangZhs">简体</label><input id="bookDownloaderLangZht"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="1"></input><label for="bookDownloaderLangZht">繁体</label><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderThis">下载本章(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderAll2Epub">下载整个目录页(Epub)</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowBatch">特定下载某些章节</button></div><div id="bookDownloaderBatch"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowBatch">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderBatchWildHelp">?</button>通配符模式：<input id="bookDownloaderBatchWild"placeholder="http://www.example.com/*"></input><div class="bookDownloaderSeparatorWhite"></div><textarea id="bookDownloaderBatchTextarea"></textarea><div class="bookDownloaderSeparatorWhite"></div><button id="bookDownloaderBatch2Txt">开始下载特定章节(TXT)</button><button id="bookDownloaderBatch2Zip">开始下载特定章节(ZIP)</button><button id="bookDownloaderBatch2Epub">开始下载特定章节(Epub)</button></div><div id="bookDownloaderSupport"class="bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">隐藏</button><div class="bookDownloaderSeparatorWhite"></div></div><div id="bookDownloaderLog"><div id="bookDownloaderLogNow"><button id="bookDownloaderClearOk">移除已完成</button></div><div id="bookDownloaderLogDiv"></div></div>');
 if (GM_getValue('lang', 0) === 0) {
   jQuery('#bookDownloaderLangZhs') [0].checked = true;
 } else {
@@ -953,6 +974,10 @@ jQuery('#bookDownloaderLog').css({
     return String(jQuery(window).scrollTop() + window.screen.availHeight - jQuery(this).height() - 90) + 'px';
   }
 });
+jQuery('#bookDownloaderLogDiv').css({
+  'height': '290px',
+  'overflow': 'auto'
+});
 jQuery('.bookDownloaderSeparatorBlack').css('border', '1px solid black');
 jQuery('.bookDownloaderSeparatorWhite').css('border', '1px none');
 jQuery('#bookDownloaderBatchWild').css('width', '330px');
@@ -992,10 +1017,10 @@ jQuery(window).scroll(function (event) {
   });
 }).keydown(function (e) {
   if (e.shiftKey && e.keyCode === 68) { //D
-    jQuery('#bookDownloader').toggle();
+    jQuery('#bookDownloaderDiv').toggle();
   }
 }).unload(function () {
-  jQuery(window).data('blob', null);
+  jQuery(window).removeData('blob');
 });
 jQuery('#bookDownloaderBatchWildHelp').click(function () {
   alert('示例：\n我要下载如下章节\nhttp://www.example.com/1\nhttp://www.example.com/2\nhttp://www.example.com/3\nhttp://www.example.com/...\nhttp://www.example.com/100\n...\n请在输入框输入（不包括括号）\n[http://www.example.com/*]\n然后分别在消息框里输入\n开头[1]、结尾[100]、间隔[1]、是否补足开头0[取消]');
@@ -1030,7 +1055,9 @@ jQuery('.bookDownloaderShowBatch').click(function () {
 jQuery('.bookDownloaderShowSupport').click(function () {
   jQuery('#bookDownloaderSupport').toggle();
 });
-//////////////////////////////////////////////////////
+jQuery('#bookDownloaderClearOk').click(function () {
+  jQuery('#bookDownloaderLogDiv>span').remove('.bookDownloaderOk');
+}) //////////////////////////////////////////////////////
 function downloadBatch(fileType) {
   var arr = new Array();
   var temp;
@@ -1081,8 +1108,8 @@ function addIRule(host, cn, name, chapter, vip, sort, thread) { //增加目录�
 }
 function download(chapterArray, fileType) { //下载
   GM_setValue('lang', parseInt(jQuery('.bookDownloaderLang:checked') [0].value));
-  jQuery('#bookDownloaderLog').html('');
   jQuery('#bookDownloaderLog').css('display', 'block');
+  jQuery('#bookDownloaderLogDiv').html('');
   if (chapterArray === 'index') {
     var chapter = (indexRule[location.host].chapter.indexOf('jQuery') >= 0) ? eval(indexRule[location.host].chapter)  : jQuery(indexRule[location.host].chapter);
   } else {
@@ -1115,6 +1142,7 @@ function download(chapterArray, fileType) { //下载
   jQuery(window).data('downloadList', new Array());
   jQuery(window).data('downloadNow', new Object());
   jQuery(window).data('number', 0);
+  jQuery(window).data('numberOk', 0);
   jQuery(window).data('downloadNow').length = 0;
   for (var i = 0; i < chapter.length; i++) {
     href = chapter[i].href || chapter[i];
@@ -1127,6 +1155,7 @@ function download(chapterArray, fileType) { //下载
     jQuery(window).data('dataDownload') [i] = dataDownload;
     jQuery(window).data('downloadList') [i] = href;
   };
+  jQuery('#bookDownloaderLogNow').append('<span id="bookDownladerChapter">0</span> / ' + chapter.length);
   if (indexRule[location.host].sort) {
     jQuery(window).data('downloadList').sort();
     var arr = new Array();
@@ -1145,7 +1174,9 @@ function download(chapterArray, fileType) { //下载
   var downloadCheck = setInterval(function () {
     //console.log('dataDownload', jQuery(window).data('dataDownload'));
     if (downloadedCheck(jQuery(window).data('dataDownload'))) {
-      jQuery('#bookDownloaderLog').append('测试');
+      clearInterval(addTask);
+      clearInterval(downloadCheck);
+      jQuery('#bookDownloaderLog').append('<button id="bookDownloader">下载</button>');
       if (fileType === 'zip') {
         download2Zip(bookName);
       } else if (fileType === 'txt') {
@@ -1153,8 +1184,6 @@ function download(chapterArray, fileType) { //下载
       } else if (fileType === 'epub') {
         download2Epub(bookName);
       }
-      clearInterval(addTask);
-      clearInterval(downloadCheck);
     }
   }, 200);
 }
@@ -1203,6 +1232,7 @@ function xhr(num, url) { //xhr
     method: 'GET',
     url: url,
     overrideMimeType: chapterRule[host].MimeType,
+    timeout: 10000,
     onload: function (response) {
       console.log('下载中', url);
       console.log(response.response);
@@ -1255,6 +1285,8 @@ function thisDownloaded(num, name, content) {
   jQuery(window).data('dataDownload') [num].content = content;
   jQuery(window).data('dataDownload') [num].ok = true;
   jQuery(window).data('downloadNow') [num].ok = true;
+  jQuery(window).data('numberOk', jQuery(window).data('numberOk') + 1);
+  jQuery('#bookDownladerChapter').html(jQuery(window).data('numberOk'));
 }
 function wordFormat(word) {
   var replaceLib = [
@@ -1398,11 +1430,11 @@ function wordFormat(word) {
   return word;
 }
 function addDownloadLogStart(num, name, url, status) {
-  jQuery('<span id="bookDownloaderLog_' + num + '">' + num + ' <a href="' + url + '" target="_blank">' + name + '</a> ' + status + '</span><br>').appendTo(jQuery('#bookDownloaderLog'));
-  jQuery('#bookDownloaderLog') [0].scrollBy(0, 999);
+  jQuery('<span id="bookDownloaderLogDiv_' + num + '">' + num + ' <a href="' + url + '" target="_blank">' + name + '</a> ' + status + '<br></span>').appendTo(jQuery('#bookDownloaderLogDiv'));
+  jQuery('#bookDownloaderLogDiv') [0].scrollBy(0, 999);
 }
 function addDownloadLogEnd(num, name, url, status) {
-  jQuery('#bookDownloaderLog_' + num).html(num + ' <a href="' + url + '" target="_blank">' + name + '</a> ' + status);
+  jQuery('#bookDownloaderLogDiv_' + num).html(num + ' <a href="' + url + '" target="_blank">' + name + '</a> ' + status + '<br>').addClass('bookDownloaderOk');
 }
 function download2Zip(bookName) { //下载到1个zip
   var name = (bookName === '') ? jQuery(window).data('dataDownload') [0].name : bookName;
@@ -1414,6 +1446,9 @@ function download2Zip(bookName) { //下载到1个zip
   jQuery(window).data('blob').generateAsync({
     type: 'blob'
   }).then(function (content) {
+    jQuery('#bookDownloader').click(function () {
+      saveAs(content, name + '.zip');
+    })
     saveAs(content, name + '.zip');
   });
   removeData();
@@ -1447,6 +1482,9 @@ function download2Epub(bookName) {
   jQuery(window).data('blob').generateAsync({
     type: 'blob'
   }).then(function (content) {
+    jQuery('#bookDownloader').click(function () {
+      saveAs(content, name + '.epub');
+    })
     saveAs(content, name + '.epub');
   });
   removeData();
@@ -1460,6 +1498,9 @@ function download2Txt(bookName) { //下载到1个txt
   jQuery(window).data('blob', new Blob([all], {
     type: 'text/plain;charset=utf-8'
   }));
+  jQuery('#bookDownloader').click(function () {
+    saveAs(jQuery(window).data('blob'), name + '.txt');
+  })
   saveAs(jQuery(window).data('blob'), name + '.txt');
   removeData();
 }
