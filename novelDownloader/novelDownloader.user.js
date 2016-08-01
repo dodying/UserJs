@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 小说下载器，按“Shift+D”来显示面板
-// @version     1.21.167
+// @version     1.22.167
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
@@ -961,7 +961,7 @@ for (var i in indexRule) {
   num++;
   SupportUrl += num + '. ' + indexRule[i].cn + ' <a href="http://' + i + '" target="_blank">' + i + '</a><div class="bookDownloaderSeparatorWhite"></div>';
 }
-SupportUrl = '总共支持网站' + num + '个。<div class="bookDownloaderSeparatorWhite"></div>网站基本排序：正版>轻小说>盗贴<div class="bookDownloaderSeparator"></div>' + SupportUrl;
+SupportUrl = '总共支持网站' + num + '个。<div class="bookDownloaderSeparatorWhite"></div>网站基本排序：正版>轻小说>盗贴<span style="color:white">>18X</span><div class="bookDownloaderSeparator"></div>' + SupportUrl;
 jQuery('#bookDownloaderSupport').append(SupportUrl).css({
   'height': '500px',
   'overflow': 'auto',
@@ -1204,11 +1204,7 @@ function download(chapterArray, fileType) { //下载
   jQuery('#bookDownloaderLogNow').append('<span id="bookDownladerChapter">0</span> / ' + chapter.length);
   if (indexRule[location.host].sort) {
     jQuery(window).data('downloadList').sort();
-    var arr = new Array();
-    for (var i = jQuery(window).data('dataDownload').length - 1; i >= 0; i--) {
-      arr.push(jQuery(window).data('dataDownload') [i]);
-    }
-    jQuery(window).data('dataDownload', arr);
+    jQuery(window).data('dataDownload').sort(arrSort('url'));
   }
   var addTask = setInterval(function () {
     if (Boolean(chapterRule[host].Deal)) {
@@ -1453,8 +1449,8 @@ function wordFormat(word) {
     '<ul.*?>.*?</ul>|||',
     '<b.*?>.*?</b>|||换行',
     '<font.*?>.*?</font>|||换行',
-    '</.*?>|||',
-    '<.*?>|||换行',
+    '</w+>|||',
+    '<w+>|||换行',
     '换行|||\r\n',
     '\\s+|||\r\n　　'
   ];
@@ -1686,3 +1682,16 @@ function objComp(obj1, obj2) { //js对象的比较，来自http://www.jb51.net/a
   }
   return false;
 };
+function arrSort(propertyName) { //对象数组排序函数，从小到大排序，来自http://www.jb51.net/article/24536.htm
+  return function (object1, object2) {
+    var value1 = object1[propertyName];
+    var value2 = object2[propertyName];
+    if (value2 < value1) {
+      return 1;
+    } else if (value2 > value1) {
+      return - 1;
+    } else {
+      return 0;
+    }
+  }
+}
