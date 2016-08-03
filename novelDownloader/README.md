@@ -26,7 +26,7 @@
 
 ![预览1](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)
 
-### 作者需要帮助的网站  搞毛啊，加密的这么厉害，要死
+### helpWanted 作者需要帮助
 
 
 
@@ -95,6 +95,10 @@
 ### 更新历史
 
 #### Latest
+
+##### 1.23.202
+
+下载进程优化。修复epub编码。
 
 ##### 1.22.167
 
