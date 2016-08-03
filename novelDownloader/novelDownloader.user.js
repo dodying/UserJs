@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 小说下载器，按“Shift+D”来显示面板
-// @version     1.22.202
+// @version     1.23.202
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
