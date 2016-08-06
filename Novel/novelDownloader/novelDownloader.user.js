@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        novelDownloader
-// @name:zh-CN  小说下载
+// @name:zh-CN  【小说】下载脚本
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 小说下载器，按“Shift+D”来显示面板
