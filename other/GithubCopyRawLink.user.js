@@ -3,7 +3,6 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @name:zh-CN  【Github】复制原始链接
 // @description:zh-CN  
-// @include     https://github.com/*/blob/*
 // @include     https://github.com/*/tree/*
 // @version     1
 // @grant       GM_setClipboard
