@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name        EHD_CombineArchive2One
 // @name:zh-CN  【EH】EHD_合并压缩卷
-// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
+// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
+// @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @description Combine the Archive from EHD A too One Archive
 // @description:zh-CN 合并下载自EHD的压缩包
-// @include     http://g.e-hentai.org/g/*
-// @include     http://exhentai.org/g/*
-// @version     1
+// @include     http*://g.e-hentai.org/g/*
+// @include     http*://exhentai.org/g/*
+// @version     1.00
 // @grant       none
-// @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @run-at      document-idle
 // ==/UserScript==
