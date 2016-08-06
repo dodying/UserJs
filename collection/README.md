@@ -9,3 +9,4 @@
 6. [AutoPager for E-Hentai](https://greasyfork.org/zh-CN/scripts/3864)
 7. [知乎免登录](https://greasyfork.org/zh-CN/scripts/6489)
 8. [All Magnet to BT](https://greasyfork.org/zh-CN/scripts/12156)
+9. [AC-从Google Baidu Bing等搜索引擎结果中屏蔽自定义网站](https://greasyfork.org/zh-CN/scripts/13408)
