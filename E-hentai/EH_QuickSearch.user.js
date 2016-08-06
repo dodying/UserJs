@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        EH_QuickSearch
-// @name:zh-CN  【EH】EH快捷搜索
+// @name:zh-CN  【EH】快捷搜索
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
