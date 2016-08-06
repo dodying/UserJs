@@ -4,10 +4,10 @@
 // @include        http://*hentaiverse.org/*
 // @exclude        http://hentaiverse.org/?s=Character&ss=eq
 // @exclude        http://hentaiverse.org/pages/showequip.php?*
-// @namespace   Dodying
-// @author      Dodying
+// @rawJs          http://userscripts-mirror.org/scripts/show/41369
+// @author         Dodying
 // @copyright      JoeSimmons
-// @version        1.1.0
+// @version        1.0
 // @license        http://creativecommons.org/licenses/by-nc-nd/3.0/us/
 // @grant none
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
