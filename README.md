@@ -36,9 +36,24 @@
 
 ##### H
 
+1. 【BT】助手 [安装](https://github.com/dodying/UserJs/raw/master/H/btHelper.user.js)
+2. 【DMM】原始图片大小 [安装](https://github.com/dodying/UserJs/raw/master/H/dmmOriginalSizeImage.user.js)
+3. 【H】屏蔽已拥有AV [安装](https://github.com/dodying/UserJs/raw/master/H/hBlockOwnedAV.user.js)
+4. 【nH】下载器-修改自Doying [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) 修改自[nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
+
 ##### other
 
+1. 【GitHub】复制Issues里的代码 [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyCodeInIssues.user.js)
+2. 【Github】复制原始链接 [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyRawLink.user.js)
+3. 【百度云】分享页复制 [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopy.user.js)
+4. 【百度云】分享-答题专用 [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidao.user.js)
+5. 【维基】跳转到中文 [安装](https://github.com/dodying/UserJs/raw/master/other/wikiJump2Chinese.user.js)
+
 ##### modify
+
+1. 【HV】翻译 [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) 修改自[Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369)
+2. 【nH】下载器-修改自Doying [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) 修改自[nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
+3. 搜索引擎跳转-小说版+高亮 [安装](https://github.com/dodying/UserJs/raw/master/modify/搜索引擎跳转-小说版%2B高亮.user.js)
 
 ##### lib
 
