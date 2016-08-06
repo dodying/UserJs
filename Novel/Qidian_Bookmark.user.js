@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Qidian_Bookmark
-// @name:zh-CN  【Novel】起点书签
+// @name:zh-CN  【小说】起点书签
 // @namespace   Dodying
 // @author      Dodying
 // @description 在“起点个人中心-我的书架”里增加阅读记录，通过点击章节页里的按钮添加到阅读记录里
