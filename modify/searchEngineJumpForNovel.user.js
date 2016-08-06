@@ -1,5 +1,6 @@
 // ==UserScript==
-// @name               搜索引擎跳转-小说版+高亮
+// @name               searchEngineJumpForNovel
+// @name:zh-CN         搜索引擎跳转-小说版+高亮
 // @include            http*://www.baidu.com/*wd=*
 // @grant              none
 // @icon               https://cdn4.iconfinder.com/data/icons/education-volume-2-2/48/102-48.png
