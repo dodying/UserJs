@@ -12,3 +12,4 @@
 9. [AC-从Google Baidu Bing等搜索引擎结果中屏蔽自定义网站](https://greasyfork.org/zh-CN/scripts/13408)
 10. [Popup Search](https://greasyfork.org/zh-CN/scripts/340)
 11. [网易云音乐高音质支持](https://greasyfork.org/zh-CN/scripts/10582)
+12. [挊](https://greasyfork.org/zh-CN/scripts/8392)
