@@ -24,3 +24,4 @@
 19. [E-Hentai Downloader](https://greasyfork.org/zh-CN/scripts/10379)
 20. [百度网盘助手](https://greasyfork.org/zh-CN/scripts/986)
 [改](https://greasyfork.org/zh-CN/scripts/17083)
+21. [Manga Loader](https://greasyfork.org/zh-CN/scripts/692)
