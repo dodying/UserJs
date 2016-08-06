@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        hvBuyItem
-// @name        【HV】HV自动补充药剂
+// @name:zh-CN  【HV】HV自动补充药剂
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
