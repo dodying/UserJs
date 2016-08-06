@@ -6,10 +6,10 @@
 
 ##### novel
 
-1. 【小说】下载脚本
-2. 【小说】下载脚本助手
-3. 【小说】起点书签
-4. 【小说】目录页侧边分卷导航栏
+1. [【小说】下载脚本](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader)
+2. 【小说】下载脚本助手 [安装](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloaderHelper.user.js) 用来增加**【小说】下载脚本**的规则
+3. 【小说】起点书签 [安装](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js)
+4. 【小说】目录页侧边分卷导航栏 [安装](https://github.com/dodying/UserJs/raw/master/novel/SidebarInContent.user.js)
 
 ##### HentaiVerse
 
