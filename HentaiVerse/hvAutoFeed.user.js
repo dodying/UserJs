@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name        hvAutoFeed
-// @name:zh-CN  【HV】自动喂食
+// @name        hvFeed
+// @name:zh-CN  【HV】喂食
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
