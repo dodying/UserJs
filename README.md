@@ -43,7 +43,7 @@
 3. [安装](https://github.com/dodying/UserJs/raw/master/H/hBlockOwnedAV.user.js) 【H】屏蔽已拥有AV
 4. [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) 【nH】下载器-修改自Doying 修改自[nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
 
-##### other
+##### other 其它
 
 1. [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyCodeInIssues.user.js) 【GitHub】复制Issues里的代码
 2. [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyRawLink.user.js) 【Github】复制原始链接
@@ -51,17 +51,17 @@
 4. [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidao.user.js) 【百度云】分享-答题专用
 5. [安装](https://github.com/dodying/UserJs/raw/master/other/wikiJump2Chinese.user.js) 【维基】跳转到中文
 
-##### modify
+##### modify 修改自其它脚本
 
 1. [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) 【HV】翻译 修改自[Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369)
 2. [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) 【nH】下载器-修改自Doying 修改自[nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
 3. [安装](https://github.com/dodying/UserJs/raw/master/modify/searchEngineJumpForNovel.user.js) 搜索引擎跳转-小说版+高亮 修改自[搜索引擎跳转-文科版](https://greasyfork.org/zh-CN/scripts/2739)与[Highlighter](http://userscripts-mirror.org/scripts/show/15637)以及[Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121)
 
-##### lib
+##### lib 写脚本时，从网上复制来的函数
 
 1. sortTable.js 来源地址：[http://www.jb51.net/article/46976.htm](http://www.jb51.net/article/46976.htm)
 
-##### temp
+##### temp 临时文件
 
 ##### 字母拼单词
 
