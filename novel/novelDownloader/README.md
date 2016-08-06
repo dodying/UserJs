@@ -24,7 +24,7 @@
 
 ######预览
 
-![预览1](https://github.com/dodying/UserJs/raw/master/novelDownloader/1.png)
+![预览1](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/1.png)
 
 ### helpWanted 作者需要帮助
 
