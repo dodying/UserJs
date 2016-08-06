@@ -22,3 +22,5 @@
 17. [P站画师个人作品批量下载工具](https://greasyfork.org/zh-CN/scripts/17879)
 18. [E绅士标签构建者](https://greasyfork.org/zh-CN/scripts/19619)
 19. [E-Hentai Downloader](https://greasyfork.org/zh-CN/scripts/10379)
+20. [百度网盘助手](https://greasyfork.org/zh-CN/scripts/986)
+[改](https://greasyfork.org/zh-CN/scripts/17083)
