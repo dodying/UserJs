@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        HV_AutoAttack
+// @name        hvAutoAttack
 // @name:zh-CN  【HV】打怪
 // @name:zh-TW  【HV】打怪
 // @author      Dodying
