@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        EH_QuickAddToFav
-// @name:zh-CN  【EH】EH快速收藏
+// @name:zh-CN  【EH】快速收藏
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
