@@ -113,6 +113,9 @@
 6. [All Magnet to BT](https://greasyfork.org/zh-CN/scripts/12156)
 7. [挊](https://greasyfork.org/zh-CN/scripts/8392)
 8. [Create Download Links for HACG](https://greasyfork.org/zh-CN/scripts/7762)
+9. [Manga Loader NSFW](https://greasyfork.org/zh-CN/scripts/12657)
+10. [Fakku Transfer](https://greasyfork.org/zh-CN/scripts/14881)
+11. [Ex-Hentai: Frame Popups](https://sleazyfork.org/zh-CN/scripts/10268)
 
 ##### HentaiVerse相关
 
