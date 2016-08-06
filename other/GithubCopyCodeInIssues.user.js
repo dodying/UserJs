@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        CopyCodeInGithubIssues
+// @name        GithubCopyCodeInIssues
 // @name:zh-CN  【GitHub】复制Issues里的代码
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
