@@ -7,3 +7,4 @@
 4. [Automatically Pause Video](https://github.com/FirefoxBar/userscript/tree/master/Automatically_Pause_Video)
 5. [18H Hentai Manga Autoload](https://greasyfork.org/zh-CN/scripts/1726)
 6. [AutoPager for E-Hentai](https://greasyfork.org/zh-CN/scripts/3864-autopager-for-e-hentai)
+7. [知乎免登录](https://greasyfork.org/zh-CN/scripts/6489)
