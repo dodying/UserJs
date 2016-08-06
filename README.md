@@ -13,6 +13,15 @@
 
 ##### HentaiVerse
 
+1. [【HV】打怪](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvAutoAttack) [GF地址](https://greasyfork.org/zh-CN/scripts/18482)
+2. 【HV】喂食 [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoFeed.user.js)
+3. 【HV】补充物品 [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBuyItem.user.js)
+4. 【HV】修复装备 [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvRepairEpument.user.js)
+5. 【HV】出售装备 [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js)
+6. 【HV】祭坛 [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvShrine.user.js)
+7. 【HV】训练 [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvTrainer.user.js)
+8. 【HV】翻译 [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) 修改自[Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369)
+
 ##### E-hentai
 
 ##### H
