@@ -53,7 +53,7 @@
 
 1. 【HV】翻译 [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) 修改自[Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369)
 2. 【nH】下载器-修改自Doying [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) 修改自[nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
-3. 搜索引擎跳转-小说版+高亮 [安装](https://github.com/dodying/UserJs/raw/master/modify/搜索引擎跳转-小说版%2B高亮.user.js)
+3. 搜索引擎跳转-小说版+高亮 [安装](https://github.com/dodying/UserJs/raw/master/modify/搜索引擎跳转-小说版%2B高亮.user.js) 时间久远，当时版权意识不强，都是自己使用，加上**搜索引擎跳转**的脚本众多，所以不知道修改自哪个版本的**搜索引擎跳转** 看了下代码，应该是修改自[搜索引擎跳转-文科版](https://greasyfork.org/zh-CN/scripts/2739)与[Highlighter](http://userscripts-mirror.org/scripts/show/15637)以及[Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121)
 
 ##### lib
 
