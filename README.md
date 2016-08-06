@@ -24,6 +24,16 @@
 
 ##### E-hentai
 
+1. 【EHD】合并压缩卷 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EHD_CombineArchive2One.user.js)
+2. 【EH】批列表 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_BatchList.user.js)
+3. 【EH】检查新本子 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_CheckForNew.user.js)
+4. 【EH】扫图助手 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_FavHelper.user.js)
+5. 【EH】快速收藏 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_QuickAddToFav.user.js)
+6. 【EH】快捷搜索 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_QuickSearch.user.js)
+7. 【EH】搜索结果排序 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_SortBook.user.js)
+8. 【EH】标签预览+隐藏画集 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_TagsPreview%26HideSomeGalleries.user.js)
+9. 【EH】里站跳转 [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/ExHentai2E-Hantai.user.js)
+
 ##### H
 
 ##### other
