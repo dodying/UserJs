@@ -36,3 +36,4 @@
 30. [HV Random Encounter Notification](http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345)
 31. [HV Equipment Comparison](http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842)
 32. [HentaiVerse Better Equipment Shop](https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319)
+33. [Highlighter](http://userscripts-mirror.org/scripts/show/15637)
