@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        hvSellEquipment
-// @name:zh-CN  【HV】HV出售装备
+// @name:zh-CN  【HV】出售装备
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
