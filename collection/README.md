@@ -19,3 +19,4 @@
 15. [PopupFlash](http://opera.im/archives/pop-up-flash/)
 [GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
 16. [youku-html5-player](https://greasyfork.org/zh-CN/scripts/19282)
+17. [P站画师个人作品批量下载工具](https://greasyfork.org/zh-CN/scripts/17879)
