@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        HV_AutoAttack
-// @name:zh-CN  【HV】HV自动打怪
-// @name:zh-TW  【HV】HV自動打怪
+// @name:zh-CN  【HV】打怪
+// @name:zh-TW  【HV】打怪
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
