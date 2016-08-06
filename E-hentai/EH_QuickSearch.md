@@ -1,2 +1,2 @@
-在右上角添加一个按钮；左键：选择搜索关键词，右键：在其他站点搜索
+鍦ㄥ彸涓婅娣诲姞涓�涓寜閽紱宸﹂敭锛氶�夋嫨鎼滅储鍏抽敭璇嶏紝鍙抽敭锛氬湪鍏朵粬绔欑偣鎼滅储
 ![image](https://greasyfork.org/system/screenshots/screenshots/000/004/164/original/1.png?1463203165)
