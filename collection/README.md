@@ -5,3 +5,5 @@
 2. [贴吧去登录提示](https://greasyfork.org/zh-CN/scripts/9922)
 3. [monkey-videos](https://greasyfork.org/zh-CN/scripts/6807)
 4. [Automatically Pause Video](https://github.com/FirefoxBar/userscript/tree/master/Automatically_Pause_Video)
+5. [18H Hentai Manga Autoload](https://greasyfork.org/zh-CN/scripts/1726)
+6. [AutoPager for E-Hentai](https://greasyfork.org/zh-CN/scripts/3864-autopager-for-e-hentai)
