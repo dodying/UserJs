@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        baiduShareCopyForZhidao
 // @namespace   https://github.com/dodying/Dodying-UserJs
-// @name:zh-CN  
+// @name:zh-CN  【百度云】分享-答题专用
 // @description:zh-CN  
 // @include     http://pan.baidu.com/disk/home*
 // @version     1
@@ -22,7 +22,8 @@ var interval = setInterval(function () {
       if (inputPwd.value !== '') { //无提取密码
         clip += ' 密码:' + inputPwd.value;
       }
-      clip = '请享用。\n如无误，请及时采纳，谢谢。☆（ゝω・）v\n' + clip;
+      var word = '请享用。\n如无误，请及时采纳，谢谢。☆（ゝω・）v\n';
+      clip = word + clip;
       GM_setClipboard(clip);
     }
     clearInterval(interval);
