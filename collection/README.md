@@ -14,4 +14,7 @@
 11. [网易云音乐高音质支持](https://greasyfork.org/zh-CN/scripts/10582)
 12. [挊](https://greasyfork.org/zh-CN/scripts/8392)
 13. [Create Download Links for HACG](https://greasyfork.org/zh-CN/scripts/7762)
-14. [Original Size Image](http://www.opera.im/archives/original_size_image_js_v3/) [原地址可能失效，GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
+14. [Original Size Image](http://www.opera.im/archives/original_size_image_js_v3/) 
+[GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
+15. [PopupFlash](http://opera.im/archives/pop-up-flash/)
+[GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
