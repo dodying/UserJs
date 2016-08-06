@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        wikiJump2Chinese
-// @name:zh-CN  维基页面跳转到中文
+// @name:zh-CN  【维基】跳转到中文
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
