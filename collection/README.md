@@ -13,3 +13,4 @@
 10. [Popup Search](https://greasyfork.org/zh-CN/scripts/340)
 11. [网易云音乐高音质支持](https://greasyfork.org/zh-CN/scripts/10582)
 12. [挊](https://greasyfork.org/zh-CN/scripts/8392)
+13. [Create Download Links for HACG](https://greasyfork.org/zh-CN/scripts/7762)
