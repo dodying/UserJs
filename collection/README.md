@@ -26,3 +26,4 @@
 [改](https://greasyfork.org/zh-CN/scripts/17083)
 21. [Manga Loader](https://greasyfork.org/zh-CN/scripts/692)
 22. [Reloader](https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894)
+23. [remove the jump link in BAIDU (ECMA6)](https://greasyfork.org/zh-CN/scripts/11915)
