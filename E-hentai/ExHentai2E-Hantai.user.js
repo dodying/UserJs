@@ -1,5 +1,6 @@
 // ==UserScript==
-// @name        【EH】ExHentai2E-Hantai
+// @name        ExHentai2E-Hantai
+// @name:zh-CN  【EH】里站跳转
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
