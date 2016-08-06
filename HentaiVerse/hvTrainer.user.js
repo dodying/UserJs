@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Trainer
+// @name        hvTrainer
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @include     http://hentaiverse.org/*
 // @version     1
