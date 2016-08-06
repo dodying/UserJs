@@ -21,11 +21,11 @@
 
 ##### 自定义设置
 
-![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HV_AutoAttack/HV_AutoAttack_Setting.png)
+![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
 ##### 自动打怪演示
 
-![自动打怪演示](https://raw.githubusercontent.com/dodying/Dodying-UserJs/master/HV_AutoAttack/HV_AutoAttack_Screenshot.gif)
+![自动打怪演示](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Screenshot.gif)
 
 ##### 战斗中，选择攻击模式
 
@@ -34,8 +34,6 @@
 ## HV AutoAttack Help
 
 ### 设置说明
-
-![HV_AutoAttack_Setting](https://raw.githubusercontent.com/dodying/UserJs/master/HV_AutoAttack/HV_AutoAttack_Setting.png)
 
 #### 除了必须选择的攻击模式之外，其他皆可留空，留空则设置为默认值
 
