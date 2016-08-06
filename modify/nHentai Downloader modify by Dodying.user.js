@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         nHentai Downloader modify by Dodying
-// @name:zh-CN  【nH】nH下载器-修改自Doying
+// @name:zh-CN  【nH】下载器-修改自Doying
 // @description  Download manga on nHentai.net
 // @description:zh-CN  相对于原脚本，添加了输入框，可以下载某张图片
 // @version      1.2.0
