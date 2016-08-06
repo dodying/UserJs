@@ -1,6 +1,37 @@
 # HV自动打怪说明文件
 
-### 以下简称【HVAA】
+### 以下简称【HVAA】# 不要长期使用该脚本，不要使用该脚本打一些难度过高的关卡
+
+#### 现在使用该脚本不需要安装Hvstat了
+
+#### 支持设置一些自定义配置
+
+#### 运行后，浏览器内存占用会不断上升，推荐使用Chrome挂机
+
+#### 推荐使用[Vanilla Reloader 1.1.1](https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894)，可以减少内存占用，但由于不可抗力的问题，可能会导致GameOver
+
+#### HV自动打怪，懒人专用，适度使用
+
+#### 首次使用，或更新后首次使用，请先设置好配置。
+
+为了防止答题出错掉Stamina值，所以设置了音效。
+如果是战斗中，还没选好战斗模式，请务必先停止自动打怪，再选择，不然<s>根本停不下来</s>
+
+#### 话说真的有人玩这游戏吗，手动滑稽
+
+#### 图片演示
+
+##### 自定义设置
+
+![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HV_AutoAttack/HV_AutoAttack_Setting.png)
+
+##### 自动打怪演示
+
+![自动打怪演示](https://raw.githubusercontent.com/dodying/Dodying-UserJs/master/HV_AutoAttack/HV_AutoAttack_Screenshot.gif)
+
+##### 战斗中，选择攻击模式
+
+![战斗中，选择攻击模式](https://greasyfork.org/system/screenshots/screenshots/000/003/736/original/%E6%A8%A1%E5%BC%8F%E9%80%89%E6%8B%A9.png?1459739319)
 
 ## HV AutoAttack Help
 
