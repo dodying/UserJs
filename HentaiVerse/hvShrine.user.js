@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        hvShrine
-// @name:zh-CN  【HV】HV祭坛
+// @name:zh-CN  【HV】祭坛
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
