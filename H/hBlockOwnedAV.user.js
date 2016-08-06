@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name:zn-CN  hBlockOwnedAV
-// @name:zn-CN  【H】屏蔽已拥有AV
+// @name        hBlockOwnedAV
+// @name:zh-CN  【H】屏蔽已拥有AV
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
