@@ -59,7 +59,13 @@
 
 ##### lib 写脚本时，从网上复制来的函数
 
-1. sortTable.js 来源地址：[http://www.jb51.net/article/46976.htm](http://www.jb51.net/article/46976.htm)
+1. Base64.js 来源地址：[http://www1.tc711.com/tool/js/Base64.js](http://www1.tc711.com/tool/js/Base64.js)
+2. getHostName.js 忘了，应该是来自[SegmentFault](https://segmentfault.com/)的某个页面...
+3. getMousePos.js 忘了，应该是来自博客...
+4. objArrSort.js 来源地址：[http://www.jb51.net/article/24536.htm](http://www.jb51.net/article/24536.htm)
+5. objComp.js 来源地址：[http://www.jb51.net/article/26372.htm](http://www.jb51.net/article/26372.htm)
+6. preZeroFill 来源地址：[https://segmentfault.com/q/1010000002607221](https://segmentfault.com/q/1010000002607221)
+7. sortTable.js 来源地址：[http://www.jb51.net/article/46976.htm](http://www.jb51.net/article/46976.htm)
 
 ##### temp 临时文件
 
