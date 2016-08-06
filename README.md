@@ -59,8 +59,47 @@
 
 ##### lib
 
-##### collection
+1. sortTable.js 来源地址：[http://www.jb51.net/article/46976.htm](http://www.jb51.net/article/46976.htm)
 
 ##### temp
 
 ##### 字母拼单词
+
+#### 一些我收藏的脚本
+
+1. [网盘自动填写密码【增强版】](https://greasyfork.org/zh-CN/scripts/13463)
+2. [贴吧去登录提示](https://greasyfork.org/zh-CN/scripts/9922)
+3. [monkey-videos](https://greasyfork.org/zh-CN/scripts/6807)
+4. [Automatically Pause Video](https://github.com/FirefoxBar/userscript/tree/master/Automatically_Pause_Video)
+5. [18H Hentai Manga Autoload](https://greasyfork.org/zh-CN/scripts/1726)
+6. [AutoPager for E-Hentai](https://greasyfork.org/zh-CN/scripts/3864)
+7. [知乎免登录](https://greasyfork.org/zh-CN/scripts/6489)
+8. [All Magnet to BT](https://greasyfork.org/zh-CN/scripts/12156)
+9. [AC-从Google Baidu Bing等搜索引擎结果中屏蔽自定义网站](https://greasyfork.org/zh-CN/scripts/13408)
+10. [Popup Search](https://greasyfork.org/zh-CN/scripts/340)
+11. [网易云音乐高音质支持](https://greasyfork.org/zh-CN/scripts/10582)
+12. [挊](https://greasyfork.org/zh-CN/scripts/8392)
+13. [Create Download Links for HACG](https://greasyfork.org/zh-CN/scripts/7762)
+14. [Original Size Image](http://www.opera.im/archives/original_size_image_js_v3/) 
+[GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
+15. [PopupFlash](http://opera.im/archives/pop-up-flash/)
+[GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
+16. [youku-html5-player](https://greasyfork.org/zh-CN/scripts/19282)
+17. [P站画师个人作品批量下载工具](https://greasyfork.org/zh-CN/scripts/17879)
+18. [E绅士标签构建者](https://greasyfork.org/zh-CN/scripts/19619)
+19. [E-Hentai Downloader](https://greasyfork.org/zh-CN/scripts/10379)
+20. [百度网盘助手](https://greasyfork.org/zh-CN/scripts/986)
+[改](https://greasyfork.org/zh-CN/scripts/17083)
+21. [Manga Loader](https://greasyfork.org/zh-CN/scripts/692)
+22. [Reloader](https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894)
+23. [remove the jump link in BAIDU (ECMA6)](https://greasyfork.org/zh-CN/scripts/11915)
+24. [My Novel Reader](https://greasyfork.org/zh-CN/scripts/292)
+25. [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
+26. [Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369)
+27. [繁简转换](http://userscripts-mirror.org/scripts/show/29802)
+28. [Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121)
+29. [RiddleLimiter Plus](https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982)
+30. [HV Random Encounter Notification](http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345)
+31. [HV Equipment Comparison](http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842)
+32. [HentaiVerse Better Equipment Shop](https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319)
+33. [Highlighter](http://userscripts-mirror.org/scripts/show/15637)
