@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name        getHostForNovelDownloader
+// @name        novelDownloaderHelper
 // @namespace   https://github.com/dodying/Dodying-UserJs
-// @name:zh-CN  
+// @name:zh-CN  【小说】下载脚本助手
 // @description:zh-CN  
 // @include     *
 // @exclude     *.baidu.com*
