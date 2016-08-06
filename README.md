@@ -85,6 +85,7 @@
 3. [PopupFlash](http://opera.im/archives/pop-up-flash/) [GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
 4. [youku-html5-player](https://greasyfork.org/zh-CN/scripts/19282)
 5. [网易云音乐高音质支持](https://greasyfork.org/zh-CN/scripts/10582)
+6. [vipVideos_skipAd](https://greasyfork.org/zh-CN/scripts/8561)
 
 ##### 社区相关
 
