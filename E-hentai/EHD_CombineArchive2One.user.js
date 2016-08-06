@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        EHD_CombineArchive2One
-// @name:zh-CN  【EH】EHD_合并压缩卷
+// @name:zh-CN  【EHD】合并压缩卷
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
