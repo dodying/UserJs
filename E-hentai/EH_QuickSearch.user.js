@@ -1,30 +1,30 @@
 // ==UserScript==
 // @name        EH_QuickSearch
 // @name:zh-CN  【EH】EH快捷搜索
-// @namespace   https://github.com/dodying/Dodying-UserJs
 // @author      Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
+// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
+// @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @description Add a button to top-right; Left Click:choose the keywords;Right Click:search in other site;
 // @description:zh-CN 在右上角添加一个按钮；左键：选择搜索关键词，中间：添加\删除关键词：中文，右键：在其他站点搜索
-// @include     http://g.e-hentai.org/
-// @include     http://g.e-hentai.org/?*
-// @include     http://g.e-hentai.org/tag/*
-// @include     http://g.e-hentai.org/g/*
-// @include     http://g.e-hentai.org/uploader/*
-// @include     http://g.e-hentai.org/favorites.php*
-// @include     http://exhentai.org/
-// @include     http://exhentai.org/?*
-// @include     http://exhentai.org/tag/*
-// @include     http://exhentai.org/g/*
-// @include     http://exhentai.org/uploader/*
-// @include     http://exhentai.org/favorites.php*
-// @version     1.04
+// @include     http*://g.e-hentai.org/
+// @include     http*://g.e-hentai.org/?*
+// @include     http*://g.e-hentai.org/tag/*
+// @include     http*://g.e-hentai.org/g/*
+// @include     http*://g.e-hentai.org/uploader/*
+// @include     http*://g.e-hentai.org/favorites.php*
+// @include     http*://exhentai.org/
+// @include     http*://exhentai.org/?*
+// @include     http*://exhentai.org/tag/*
+// @include     http*://exhentai.org/g/*
+// @include     http*://exhentai.org/uploader/*
+// @include     http*://exhentai.org/favorites.php*
+// @version     1.040
 // @grant       none
-// @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @run-at      document-idle
 // require     https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js
 // ==/UserScript==
-var bookname;
-(window.location.href.indexOf('hentai.org/g/') < 0) ? bookname = document.querySelector('input.stdinput,form>input[name="favcat"]+div>input').value : bookname = document.querySelector('#gn').innerHTML;
+var bookname = (window.location.href.indexOf('hentai.org/g/') < 0) ? document.querySelector('input.stdinput,form>input[name="favcat"]+div>input').value : document.querySelector('#gn').innerHTML;
 bookname = bookname.replace(/"/g, '%22').replace(/ /g, '+');
 (window.location.host == 'g.e-hentai.org') ? exurl = window.location.href.replace('g.e-', 'ex')  : exurl = window.location.href.replace('ex', 'g.e-');
 var EH_QuickSearch_Button = document.createElement('div');
@@ -35,8 +35,8 @@ EH_QuickSearch_Button.oncontextmenu = function () {
 EH_QuickSearch_Button.onmousedown = function () {
   return false;
 };
-EH_QuickSearch_Button.style = 'left:' + eval(document.documentElement.clientWidth - 32) + 'px;top:0px;position:absolute;width:32px;';
-var EH_QuickSearch_Button_innerHTML = '<a style="cursor:pointer;" onmousedown="switch (event.button){case 0:var div = document.querySelector(\'#EH_QuickSearch_Box\');break;case 1:document.getElementById(\'EH_QuickSearch_Keyword_language:chinese$\').click();document.getElementById(\'EH_QuickSearch_Apply\').click();;break;case 2:var div = document.querySelector(\'#SearchInOtherSite\');break;};(div.style.display == \'none\') ? div.style.display = \'block\' : div.style.display = \'none\';"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-32.png" /></a><div id="SearchInOtherSite" style="display:none">';
+EH_QuickSearch_Button.style = 'left:' + eval(window.innerWidth - 58) + 'px;top:0px;position:absolute;width:32px;';
+var EH_QuickSearch_Button_innerHTML = '<a style="cursor:pointer;" onmousedown="switch (event.button){case 0:var div = document.querySelector(\'#EH_QuickSearch_Box\');break;case 1:document.getElementById(\'EH_QuickSearch_Keyword_language:chinese$\').click();document.getElementById(\'EH_QuickSearch_Apply\').click();;break;case 2:var div = document.querySelector(\'#SearchInOtherSite\');break;};(div.style.display == \'none\') ? div.style.display = \'block\' : div.style.display = \'none\';"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-32.png" /></a><br><div id="SearchInOtherSite" style="display:none">';
 EH_QuickSearch_Button_innerHTML += '<a href="' + exurl + '"" target="_blank"><img width="32px" src="http://exhentai.org/favicon.ico" /></a>';
 EH_QuickSearch_Button_innerHTML += '<a href="http://nhentai.net/search/?q=' + bookname + '" target="_blank"><img src="http://nhentai.net/favicon.ico" /></a>';
 EH_QuickSearch_Button_innerHTML += '<a href="https://hitomi.la/search.html?' + bookname + '" target="_blank"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADMklEQVRYhe2X609TZxyA/WdKjyg9p0KgoxfatTUBdQhqwmWaCV8UdLanCm3DkE5cFTRxuuzTtszbVLIv+6iCE3WI2iXbKBXxAqJzeNmSRYG2pn38QKlQjohQ5j7wS57knOS8vzznvf7eJUu1Jt4nS/6XAoLWRIZGr4BhxmRq0YhaNExDkIyzFxAkIyvyV7KxejvVW2SqElRvlSn/pAZNrlUx0fIcCw2+/Xx/4gzfHTud5Nujpygpq0ItKstPE1CLBgrXVvLno2Gi0SjhSIRwJEI0+pK+/jsYrMWKf6TJtdJ5+SqpEYvFcbl9qLL0sxcoKvmYp8/+npbs3sB9DLbpAoJkJO8DOz//cIp/A9cYfXCfeCw2SaBp4QQErYl8nZVvqjbzu0cm6JHpa27kn2td4wLxOLK7CVVWPmrJiJBugUytCX95JSGvi2BCoKfewS2/j/DwX4w9eUxbk4/W8go+/WgdObmWKRLzEhAkE6Z8Gx07agl55aRA0CMT9Lp4cPo4tw+1EPLI3PS66PHIfLlxE2KOOT0CaslIsaWIwK4d9HpSBCZwO5PPvR6ZQJ2D9dZVqBM55ilgwqK30+ncRm9qD8xA7ZpSMuYsYC1OrmlBSsyBsoo390AKf7idbC4snpvAwOAQ1qINiHlWJJ0NSWdDzLNhKSiirWbLWyVCXhcdjlosejuCNIc5MDo2xo1ff6OrOzCFX7oDhK7f4O7Xh6aM+eSxv+l1cUXeTs3q0rkvw7fFyOAAfX7fuITbSbDeQWi3h/MuB/6yCtaYC8mczz4wm3jSfpaeegd9ext59NOPPL/dT93OBlQafXLmL6hA+PEwD9tOMjJ4D+KxSTthGrbi2UQ8FiMWCSff03oWvBgZ4eLlLs61X+RcR+cU2i9cUmyT3sNocIiClSVkrihgebY5ybJsM1qdnUtXuhdYILERKdcDH85QDyzgcfxaYKaCZFFgUWBR4B3KckEyklewisY9LfgPHMHfepjdzQf47PMWHLsa0ersiomWZZvZ5vSy7+BX+FuPJPmi9TCFaytRi8q3I+WrmWQkQ6NHNZms8euZ0vcTZIgGVFkp7TT6d7ua/de8d4FXbI5vop5oew4AAAAASUVORK5CYII=" /></a>';
@@ -49,8 +49,8 @@ var EH_QuickSearch_Box = document.createElement('div');
 EH_QuickSearch_Box.id = 'EH_QuickSearch_Box';
 var bgcolor;
 (window.location.host == 'g.e-hentai.org') ? bgcolor = '#E3E0D1' : bgcolor = '#34353B';
-EH_QuickSearch_Box.style = 'z-index:999;width:400px;display:none;background-color:' + bgcolor + ';position:absolute;left:' + eval(document.documentElement.clientWidth / 2 - 200) + 'px;top:240px;border-color:black;border-style:solid;transform:scale(1.05);';
-EH_QuickSearch_Box.innerHTML = '<div id="EH_QuickSearch_Exchange"><div style="font-size:larger;">跳转</div></div><div id="EH_QuickSearch_Popular"><div style="font-size:larger;">常用</div></div><div id="EH_QuickSearch_Used"><div style="font-size:larger;">已使用</div></div><div id="EH_QuickSearch_Plus"><div style="font-size:larger;">要选择的</div></div><div id="EH_QuickSearch_Delete"><div style="font-size:larger;">要排除的</div></div><br /><button id="EH_QuickSearch_Apply">应用</button><button id="EH_QuickSearch_Cancel">取消</button>';
+EH_QuickSearch_Box.style = 'z-index:999;width:400px;display:none;background-color:' + bgcolor + ';position:absolute;left:' + eval(window.innerWidth / 2 - 200) + 'px;top:240px;border-color:black;border-style:solid;transform:scale(1.05);';
+EH_QuickSearch_Box.innerHTML = '<div id="EH_QuickSearch_Exchange"><div style="font-size:larger;">跳转</div></div><div id="EH_QuickSearch_Popular"><div style="font-size:larger;">常用</div></div><div id="EH_QuickSearch_Used"><div style="font-size:larger;">已使用</div></div><div id="EH_QuickSearch_Plus"><div style="font-size:larger;">要选择的</div></div><div id="EH_QuickSearch_Delete"><div style="font-size:larger;">要排除的</div></div><button id="EH_QuickSearch_Apply" class="stdbtn">应用</button><button id="EH_QuickSearch_Cancel" class="stdbtn">取消</button>';
 document.body.appendChild(EH_QuickSearch_Box);
 document.querySelector('#EH_QuickSearch_Box').onclick = function () {
   document.querySelector('#EH_QuickSearch_Apply').focus();
@@ -81,18 +81,19 @@ var Keyword_All = {
   'incest': '乱伦',
   //'female:lolicon$': '萝莉',
   'lolicon': '萝莉',
+  '"multi-work series$"': '系列作品',
   '"ffm threesome$"': '二女一男（3P）',
   'parody:"touhou project$"': '东方Project',
   'parody:"kantai collection$"': '舰C',
   'parody:"the idolmaster$"': '偶像大师',
   'parody:"love live$"': 'LL',
   '-futanari': '-扶她',
-  '-dilf':'-大叔',
-  '-bbm':'-胖男人',
-  '-male:"dark skin$"':'-男：黑皮肤',
-  '-drugs':'-药物',
-  '-"mind control$"':'-精神控制',
-  '-"mind break$"':'-心神崩溃',
+  '-dilf': '-大叔',
+  '-bbm': '-胖男人',
+  '-male:"dark skin$"': '-男：黑皮肤',
+  '-drugs': '-药物',
+  '-"mind control$"': '-精神控制',
+  '-"mind break$"': '-心神崩溃',
   '-tentacles': '-触手',
   '-insect': '-昆虫',
   '-monster': '-怪物',
@@ -200,7 +201,6 @@ function DeleteSpaceInQuotation(word) {
   delete temp;
   return word;
 }
-
 function EH_QuickSearch_Add2Exchange(name, img, url) {
   var a = document.createElement('a');
   //a.id = 'EH_QuickSearch_Exchange_' + name;
@@ -208,7 +208,7 @@ function EH_QuickSearch_Add2Exchange(name, img, url) {
   a.target = '_blank';
   a.innerHTML = '<img src="' + img + '" width="32px" />';
   document.querySelector('#EH_QuickSearch_Exchange').appendChild(a);
-  a.outerHTML += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';//空格
+  a.outerHTML += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; //空格
 }
 function EH_QuickSearch_Add2Popular(name, name_cn, url) {
   var a = document.createElement('a');
@@ -253,7 +253,7 @@ function EH_QuickSearch_Sort() {
     var div_ele = document.getElementsByClassName(div);
     for (var n = 0; n < div_ele.length; n++) {
       if (n % 6 == 5) {
-        div_ele[n].outerHTML += '<br />';
+        div_ele[n].outerHTML += '<br>';
       }
     }
   }
