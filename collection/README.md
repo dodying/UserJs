@@ -18,3 +18,4 @@
 [GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
 15. [PopupFlash](http://opera.im/archives/pop-up-flash/)
 [GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
+16. [youku-html5-player](https://greasyfork.org/zh-CN/scripts/19282)
