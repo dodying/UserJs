@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        baiduShareCopy
 // @namespace   https://github.com/dodying/Dodying-UserJs
-// @name:zh-CN  
-// @description:zh-CN  
+// @name:zh-CN  【百度云】分享页复制
+// @description:zh-CN  作者Firefox，常禁用Flash
 // @include     http://pan.baidu.com/share/manage
 // @version     1
 // @grant       GM_setClipboard
