@@ -29,3 +29,6 @@
 23. [remove the jump link in BAIDU (ECMA6)](https://greasyfork.org/zh-CN/scripts/11915)
 24. [My Novel Reader](https://greasyfork.org/zh-CN/scripts/292)
 25. [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
+26. [Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369)
+27. [繁简转换](http://userscripts-mirror.org/scripts/show/29802)
+28. [Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121)
