@@ -855,7 +855,7 @@ function CountMonsterHP() { //统计怪物血量
     }
   }
   localStorage.HVAA_Monster_Status = JSON.stringify(Monster_Status);
-  Monster_Status.sort(ArrCom('HPNow'));
+  Monster_Status.sort(objArrSort('HPNow'));
   var HP_Lowest = Monster_Status[0].HPNow;
   for (var i = 0; i < Monster_Status.length; i++) {
     Monster_Status[i].Init_Weight = (Monster_Status[i].isDead) ? Infinity : Monster_Status[i].HPNow / HP_Lowest * 10;
@@ -937,14 +937,14 @@ function AutoUseDeSkill() { //自动施法De技能
         'Weight': HVAA_Setting.Weight_Co
       }
     }
-    Monster_Status.sort(ArrCom('id'));
+    Monster_Status.sort(objArrSort('id'));
     var Monter_Buff = ge(1, 'div.btm6');
     for (var i = 0; i < Monter_Buff.length; i++) {
       for (var j in Skill_Lib) {
         Monster_Status[i].Fin_Weight += (Monter_Buff[i].querySelector('img[src*="' + Skill_Lib[j].img + '"]')) ? parseFloat(Skill_Lib[j].Weight)  : 0;
       }
     }
-    Monster_Status.sort(ArrCom('Fin_Weight'));
+    Monster_Status.sort(objArrSort('Fin_Weight'));
     for (var i in Skill_Lib) {
       if (HVAA_Setting['De_Skill_Boss_' + i] && window.Monster_Count_Boss_Alive > 0 && HVAA_Setting.De_Skill_Boss && Skill_Lib[i].effect && window.Monster_Count_Alive >= HVAA_Setting.De_Skill_Boss_Count) {
         if (ge(2, Skill_Lib[i].id)) {
@@ -981,7 +981,7 @@ function AutoAttack() { //自动打怪
   if (window.oc >= HVAA_Setting.Spirit_Stance_OC && HVAA_Setting.Spirit_Stance && !ge(0, '#ckey_spirit[src*="spirit_a"]')) {
     ge(0, '#ckey_spirit').click();
   }
-  Monster_Status.sort(ArrCom('Fin_Weight'));
+  Monster_Status.sort(objArrSort('Fin_Weight'));
   var minnum = Monster_Status[0].id;
   if (Attack_Status !== 0) {
     if (ge(2, '1' + Attack_Status + '1')) ge(2, '1' + Attack_Status + '1').click();
@@ -1005,7 +1005,7 @@ function AutoAttack() { //自动打怪
 } //////////////////////////////////////////////////
 /*外来函数*/
 
-function ArrCom(propertyName) { //对象数组排序函数，从小到大排序，来自http://www.jb51.net/article/24536.htm
+function objArrSort(propertyName) { //对象数组排序函数，从小到大排序，来自http://www.jb51.net/article/24536.htm
   return function (object1, object2) {
     var value1 = object1[propertyName];
     var value2 = object2[propertyName];

@@ -1432,7 +1432,7 @@ function download(chapterArray, fileType) { //下载
   jQuery('.bookDownladerChapterAll').html(chapter.length);
   if (indexRule[location.host].sort) {
     jQuery(window).data('downloadList').sort();
-    jQuery(window).data('dataDownload').sort(arrSort('url'));
+    jQuery(window).data('dataDownload').sort(objArrSort('url'));
   }
   var addTask = setInterval(function () {
     if (chapterRule[host].Deal instanceof Function) {
@@ -2009,7 +2009,7 @@ function objComp(obj1, obj2) { //js对象的比较，来自http://www.jb51.net/a
   }
   return false;
 };
-function arrSort(propertyName) { //对象数组排序函数，从小到大排序，来自http://www.jb51.net/article/24536.htm
+function objArrSort(propertyName) { //对象数组排序函数，从小到大排序，来自http://www.jb51.net/article/24536.htm
   return function (object1, object2) {
     var value1 = object1[propertyName];
     var value2 = object2[propertyName];
