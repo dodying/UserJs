@@ -1,6 +1,11 @@
 // ==UserScript==
 // @name        hvTrainer
+// @name:zh-CN  【HV】训练
 // @namespace   https://github.com/dodying/Dodying-UserJs
+// @author      Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
+// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
+// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include     http://hentaiverse.org/*
 // @version     1
 // @grant       none
