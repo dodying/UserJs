@@ -67,36 +67,57 @@
 
 #### 一些我收藏的脚本
 
+##### 通用以及搜索相关
+
 1. [Highlighter](http://userscripts-mirror.org/scripts/show/15637)
 2. [Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369)
 3. [繁简转换](http://userscripts-mirror.org/scripts/show/29802)
-4. [Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121)
-5. [monkey-videos](https://greasyfork.org/zh-CN/scripts/6807)
-6. [Automatically Pause Video](https://github.com/FirefoxBar/userscript/tree/master/Automatically_Pause_Video)
-7. [Popup Search](https://greasyfork.org/zh-CN/scripts/340)
-8. [Original Size Image](http://www.opera.im/archives/original_size_image_js_v3/) [GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
-9. [PopupFlash](http://opera.im/archives/pop-up-flash/) [GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
-10. [youku-html5-player](https://greasyfork.org/zh-CN/scripts/19282)
-11. [remove the jump link in BAIDU (ECMA6)](https://greasyfork.org/zh-CN/scripts/11915)
-12. [网盘自动填写密码【增强版】](https://greasyfork.org/zh-CN/scripts/13463)
-13. [百度网盘助手](https://greasyfork.org/zh-CN/scripts/986) [改](https://greasyfork.org/zh-CN/scripts/17083)
-14. [贴吧去登录提示](https://greasyfork.org/zh-CN/scripts/9922)
-15. [AC-从Google Baidu Bing等搜索引擎结果中屏蔽自定义网站](https://greasyfork.org/zh-CN/scripts/13408)
-16. [网易云音乐高音质支持](https://greasyfork.org/zh-CN/scripts/10582)
-17. [知乎免登录](https://greasyfork.org/zh-CN/scripts/6489)
-18. [My Novel Reader](https://greasyfork.org/zh-CN/scripts/292)
-19. [Manga Loader](https://greasyfork.org/zh-CN/scripts/692)
-20. [E-Hentai Downloader](https://greasyfork.org/zh-CN/scripts/10379)
-21. [P站画师个人作品批量下载工具](https://greasyfork.org/zh-CN/scripts/17879)
-22. [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
-23. [E绅士标签构建者](https://greasyfork.org/zh-CN/scripts/19619)
-24. [AutoPager for E-Hentai](https://greasyfork.org/zh-CN/scripts/3864)
-25. [18H Hentai Manga Autoload](https://greasyfork.org/zh-CN/scripts/1726)
-26. [All Magnet to BT](https://greasyfork.org/zh-CN/scripts/12156)
-27. [挊](https://greasyfork.org/zh-CN/scripts/8392)
-28. [Create Download Links for HACG](https://greasyfork.org/zh-CN/scripts/7762)
-29. [Reloader](https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894)
-30. [RiddleLimiter Plus](https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982)
-31. [HV Random Encounter Notification](http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345)
-32. [HV Equipment Comparison](http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842)
-33. [HentaiVerse Better Equipment Shop](https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319)
+4. [Popup Search](https://greasyfork.org/zh-CN/scripts/340)
+5. [Original Size Image](http://www.opera.im/archives/original_size_image_js_v3/) [GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
+6. [Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121)
+7. [AC-从Google Baidu Bing等搜索引擎结果中屏蔽自定义网站](https://greasyfork.org/zh-CN/scripts/13408)
+8. [remove the jump link in BAIDU (ECMA6)](https://greasyfork.org/zh-CN/scripts/11915)
+
+##### 视频音乐相关
+
+1. [monkey-videos](https://greasyfork.org/zh-CN/scripts/6807)
+2. [Automatically Pause Video](https://github.com/FirefoxBar/userscript/tree/master/Automatically_Pause_Video)
+3. [PopupFlash](http://opera.im/archives/pop-up-flash/) [GF搬运地址](https://greasyfork.org/zh-CN/scripts/12510)
+4. [youku-html5-player](https://greasyfork.org/zh-CN/scripts/19282)
+5. [网易云音乐高音质支持](https://greasyfork.org/zh-CN/scripts/10582)
+
+##### 社区相关
+
+1. [贴吧去登录提示](https://greasyfork.org/zh-CN/scripts/9922)
+2. [知乎免登录](https://greasyfork.org/zh-CN/scripts/6489)
+
+##### 网盘相关
+
+1. [百度网盘助手](https://greasyfork.org/zh-CN/scripts/986) [改](https://greasyfork.org/zh-CN/scripts/17083)
+2. [网盘自动填写密码【增强版】](https://greasyfork.org/zh-CN/scripts/13463)
+
+##### ACGN相关（全年龄）
+
+1. [My Novel Reader](https://greasyfork.org/zh-CN/scripts/292)
+2. [Manga Loader](https://greasyfork.org/zh-CN/scripts/692)
+3. [P站画师个人作品批量下载工具](https://greasyfork.org/zh-CN/scripts/17879)
+
+##### ACGN相关（18X）
+
+1. [E-Hentai Downloader](https://greasyfork.org/zh-CN/scripts/10379)
+2. [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088)
+3. [E绅士标签构建者](https://greasyfork.org/zh-CN/scripts/19619)
+4. [AutoPager for E-Hentai](https://greasyfork.org/zh-CN/scripts/3864)
+5. [18H Hentai Manga Autoload](https://greasyfork.org/zh-CN/scripts/1726)
+6. [All Magnet to BT](https://greasyfork.org/zh-CN/scripts/12156)
+7. [挊](https://greasyfork.org/zh-CN/scripts/8392)
+8. [Create Download Links for HACG](https://greasyfork.org/zh-CN/scripts/7762)
+
+##### HentaiVerse相关
+
+1. [Reloader](https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894)
+2. [RiddleLimiter Plus](https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982)
+3. [HV Random Encounter Notification](http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345)
+4. [HV Equipment Comparison](http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842)
+5. [HentaiVerse Better Equipment Shop](https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319)
+
