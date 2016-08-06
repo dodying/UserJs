@@ -32,3 +32,7 @@
 26. [Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369)
 27. [繁简转换](http://userscripts-mirror.org/scripts/show/29802)
 28. [Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121)
+29. [RiddleLimiter Plus](https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982)
+30. [HV Random Encounter Notification](http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345)
+31. [HV Equipment Comparison](http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842)
+32. [HentaiVerse Better Equipment Shop](https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319)
