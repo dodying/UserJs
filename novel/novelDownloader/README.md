@@ -34,7 +34,36 @@ Android：未测试...
 
 ps.果然[Anyview](#Anyview)很好很强大。
 
-### 支持网站【列举前50项】
+### 自定义站点规则说明
+
+#### 利用通配符添加网址
+
+1. ```http://www.example1.com/files/article/html/*.html```
+2. ```http://www.example2.com/Book/*```
+
+#### 目录页规则示例
+
+##### addIRule('域名','网站名称','小说标题-选择器','章节链接-选择器','Vip或是要过滤的章节链接-选择器，可省略','布尔，是否对章节链接进行排序，可省略','数字，限制下载线程数');
+
+1. ```addIRule('www.example1.com','示例网站1','h1','#list>dd>dl>a');```
+2. ```addIRule('www.example2.com','示例网站2','h1','#list>dd>dl>a','',true);```
+3. ```addIRule('www.example3.com','示例网站3','h1','#list>dd>dl>a','',false,1);```
+
+#### 章节规则示例
+
+##### addCRule('域名','章节标题-选择器','章节内容-选择器','数字型,0-简体,1-繁体','可省略,数字型,文档编码,unicode则留空,简体中文则填1');
+
+1. ```addCRule('www.example1.com','h1','#content',0);```
+2. ```addCRule('www.example2.com','h1','#content',0,1);```
+
+#### 章节内容替换示例（|||三竖杆为分隔符，如果替换为空字符串，可以不写|||）
+
+##### addRRule('域名','要匹配的正则表达式1|||替换后的文本1','要匹配的正则表达式2|||替换后的文本2',...);
+
+1. addRRule('www.example1.com','一秒记住...','example1.com');
+2. addRRule('www.example1.com','text1|||text99','text2|||text98','text3|||text97','text4|||text96','text5|||text95');
+
+### 支持网站【列举前10项】
 
 1. 起点主站 [read.qidian.com](http://read.qidian.com/)
 2. 起点免费 [free.qidian.com](http://free.qidian.com/)
@@ -46,59 +75,21 @@ ps.果然[Anyview](#Anyview)很好很强大。
 8. 欢乐书客 [www.hbooker.com](http://www.hbooker.com/)
 9. 3G书城 [www.3gsc.com.cn](http://www.3gsc.com.cn/)
 10. 纵横 [book.zongheng.com](http://book.zongheng.com/)
-11. 花语女生网 [huayu.baidu.com](http://huayu.baidu.com/)
-12. 17K [www.17k.com](http://www.17k.com/)
-13. 不可能的世界 [www.8kana.com](http://www.8kana.com/)
-14. 黑岩 [www.heiyan.com](http://www.heiyan.com/)
-15. 飞卢 [b.faloo.com](http://b.faloo.com/)
-16. 晋江文学城 [www.jjwxc.net](http://www.jjwxc.net/)
-17. 潇湘书院 [www.xxsy.net](http://www.xxsy.net/)
-18. 逐浪 [book.zhulang.com](http://book.zhulang.com/)
-19. 红袖添香 [novel.hongxiu.com](http://novel.hongxiu.com/)
-20. 小说阅读网 [www.readnovel.com](http://www.readnovel.com/)
-21. 言情小说吧 [www.xs8.cn](http://www.xs8.cn/)
-22. 幻剑书盟 [book.hjsm.tom.com](http://book.hjsm.tom.com/)
-23. 看书网 [www.kanshu.com](http://www.kanshu.com/)
-24. 微博读书 [book.weibo.com](http://book.weibo.com/)
-25. 连城读书 [www.lcread.com](http://www.lcread.com/)
-26. 磨铁中文网 [www.motie.com](http://www.motie.com/)
-27. 书海小说网 [www.shuhai.com](http://www.shuhai.com/)
-28. 香网 [www.xiang5.com](http://www.xiang5.com/)
-29. 凤鸣轩小说网 [read.fmx.cn](http://read.fmx.cn/)
-30. 飞库网 [novel.feiku.com](http://novel.feiku.com/)
-31. 阿巴达 [www.abada.com](http://www.abada.com/)
-32. 酷匠网 [www.kujiang.com](http://www.kujiang.com/)
-33. 塔读文学 [www.tadu.com](http://www.tadu.com/)
-34. 网易云阅读 [yuedu.163.com](http://yuedu.163.com/) 感谢[JixunMoe](https://github.com/JixunMoe)
-35. 轻小说文库 [www.wenku8.com](http://www.wenku8.com/)
-36. SF轻小说 [book.sfacg.com](http://book.sfacg.com/)
-37. 动漫之家 [xs.dmzj.com](http://xs.dmzj.com/)
-38. 迷糊动漫 [www.yidm.com](http://www.yidm.com/)
-39. 顶点小说 [www.23wx.com](http://www.23wx.com/)
-40. 笔趣阁 [www.biquge.la](http://www.biquge.la/)
-41. 书迷楼 [www.shumilou.co](http://www.shumilou.co/)
-42. 无错小说网 [www.quledu.com](http://www.quledu.com/)
-43. 追书网 [www.mangg.com](http://www.mangg.com/)
-44. 傲世中文网 [www.23zw.com](http://www.23zw.com/)
-45. 三易文学 [www.31wxw.com](http://www.31wxw.com/)
-46. 520小说网 [www.520xs.la](http://www.520xs.la/)
-47. 笔趣阁 [www.biquge.com](http://www.biquge.com/)
-48. 69书吧 [www.69shu.com](http://www.69shu.com/)
-49. 笔趣库 [www.biquku.com](http://www.biquku.com/)
-50. 我看书斋 [www.5ccc.net](http://www.5ccc.net/)
-51. ...
+11. ...
 
 #### 版本命名规则
 
 如**1.0.13**分成两段，1.0与13
-
-1.0表示脚本功能为1.0版本。
 
 13表示支持13个网站。
 
 ### 更新历史
 
 #### Latest
+
+##### 1.26.199
+
+支持自定义站点规则。
 
 ##### 1.25.199
 
