@@ -60,8 +60,8 @@ ps.果然[Anyview](#Anyview)很好很强大。
 
 ##### addRRule('域名','要匹配的正则表达式1|||替换后的文本1','要匹配的正则表达式2|||替换后的文本2',...);
 
-1. addRRule('www.example1.com','一秒记住...','example1.com');
-2. addRRule('www.example1.com','text1|||text99','text2|||text98','text3|||text97','text4|||text96','text5|||text95');
+1. ```addRRule('www.example1.com','一秒记住...','example1.com');```
+2. ```addRRule('www.example1.com','text1|||text99','text2|||text98','text3|||text97','text4|||text96','text5|||text95');```
 
 ### 支持网站【列举前10项】
 
