@@ -11,110 +11,91 @@
 // @run-at      document-end
 // ==/UserScript==
 var Item = [
+  /*
+  示例：
+  {
+    'name': '物品的英文名，谨慎填写',
+    'name_cn': '物品的中文名，可随意填写',
+    'amount': '物品总共的数量，谨慎填写'
+  },
+  */
   {
     'name': 'Health Draught',
     'name_cn': '初级HP药水',
-    'code': '11191',
-    'cost': '25',
     'amount': '100'
   },
   {
     'name': 'Health Potion',
     'name_cn': '中级HP药水',
-    'code': '11195',
-    'cost': '50',
     'amount': '100'
   },
   {
-    'name':'Health Elixir',
+    'name': 'Health Elixir',
     'name_cn': '高级HP药水',
-    'code': '11199',
-    'cost': '500',
     'amount': '100'
   },
   {
     'name': 'Mana Draught',
     'name_cn': '初级MP药水',
-    'code': '11291',
-    'cost': '50',
     'amount': '100'
   },
   {
     'name': 'Mana Potion',
     'name_cn': '中级MP药水',
-    'code': '11295',
-    'cost': '100',
     'amount': '100'
   },
   {
-    'name':'Mana Elixir',
+    'name': 'Mana Elixir',
     'name_cn': '高级MP药水',
-    'code': '11299',
-    'cost': '1000',
     'amount': '100'
   },
   {
     'name': 'Spirit Draught',
     'name_cn': '初级SP药水',
-    'code': '11391',
-    'cost': '50',
     'amount': '100'
   },
   {
     'name': 'Spirit Potion',
     'name_cn': '中级SP药水',
-    'code': '11395',
-    'cost': '100',
     'amount': '100'
   },
   {
-    'name':'Spirit Elixir',
+    'name': 'Spirit Elixir',
     'name_cn': '高级SP药水',
-    'code': '11399',
-    'cost': '1000',
     'amount': '100'
   },
   {
     'name': 'Infusion of Flames',
     'name_cn': '魔药-火',
-    'code': '12101',
-    'cost': '200',
     'amount': '100'
   },
   {
     'name': 'Scroll of Life',
     'name_cn': '卷轴-生命',
-    'code': '13221',
-    'cost': '300',
     'amount': '100'
   },
   {
     'name': 'Scroll of Swiftness',
     'name_cn': '卷轴-急速',
-    'code': '13101',
-    'cost': '200',
     'amount': '100'
   },
   {
     'name': 'Scroll of Protection',
     'name_cn': '卷轴-防护',
-    'code': '13111',
-    'cost': '200',
     'amount': '100'
   },
   {
     'name': 'Scroll of Shadows',
     'name_cn': '卷轴-影砂',
-    'code': '13211',
-    'cost': '200',
     'amount': '100'
   },
 ];
 for (var i = 0; i < Item.length; i++) {
   var ItemCount = document.querySelector('.idp[onmouseover*="' + Item[i].name + '"]').parentNode.parentNode.querySelector('.ii>.fd2>div').innerHTML;
+  var code = document.querySelector('.idp[onmouseover*="' + Item[i].name + '"]').id.replace(/(\d+).*/, '$1');
   var select_count = Item[i].amount - ItemCount;
   if (select_count > 0) {
-    Buy(Item[i].code, Item[i].amount - ItemCount, Item[i].name_cn, Item[i].amount, Item[i].cost)
+    Buy(code, Item[i].amount - ItemCount, Item[i].name_cn, Item[i].amount)
   } else {
     var div = 'div' + Math.random().toString();
     var div = document.createElement('div');
@@ -122,7 +103,7 @@ for (var i = 0; i < Item.length; i++) {
     document.querySelector('.clb').appendChild(div);
   }
 }
-function Buy(code, select_count, name_cn, amount, cost) {
+function Buy(code, select_count, name_cn, amount) {
   var xhr = 'xhr_Buy' + Math.random().toString();
   xhr = new XMLHttpRequest();
   xhr.open('POST', window.location.href);
@@ -135,10 +116,5 @@ function Buy(code, select_count, name_cn, amount, cost) {
     var div_Buy = document.createElement('div');
     div_Buy.innerHTML = '已购买[' + name_cn + '][' + select_count + ']瓶';
     document.querySelector('.clb').appendChild(div_Buy);
-    var money_last = document.querySelectorAll('.cit .fd4 div') [8].innerHTML.replace(',', '') - cost * select_count;
-    var arr = money_last.toString().split('');
-    for (var i = arr.length - 4; i > - 1; i -= 3) arr[i] += ',';
-    var money_last = arr.join('');
-    document.querySelectorAll('.cit .fd4 div') [8].innerHTML = money_last;
   }
 }

@@ -5,10 +5,8 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @include     http://hentaiverse.org/?s=Bazaar&ss=es*
 // @include     http://hentaiverse.org/?s=Character&ss=ch
 // @include     http://hentaiverse.org/
-// @include     http://hentaiverse.org/?s=Battle*
 // @version     1
 // @grant       none
 // @run-at      document-end
