@@ -21,30 +21,30 @@
 | 【HV】训练 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvTrainer.user.js) |  | × | 训练计时器而已... |
 | 【HV】翻译 | [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) |  | × | 修改自 [ReplaceText On Webpages](http://userscripts-mirror.org/scripts/show/41369) |
 | ```E-hentai``` | - | - | - | - |
-| 【EHD】合并压缩卷 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EHD_CombineArchive2One.user.js) |  |  |  |
+| 【EHD】合并压缩卷 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EHD_CombineArchive2One.user.js) |  |  | 需要安装 [E-Hentai Downloader](https://greasyfork.org/zh-CN/scripts/10379) 与```7z命令行版本``` |
 | 【EH】批列表 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_BatchList.user.js) |  |  |  |
 | 【EH】检查新本子 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_CheckForNew.user.js) |  |  |  |
-| 【EH】扫图助手 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_FavHelper.user.js) |  |  |  |
+| 【EH】扫图助手 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_FavHelper.user.js) |  |  | 需要安装 [E-Hentai Downloader](https://greasyfork.org/zh-CN/scripts/10379) |
 | 【EH】快速收藏 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_QuickAddToFav.user.js) |  |  |  |
-| 【EH】快捷搜索 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_QuickSearch.user.js) |  |  |  |
+| 【EH】快捷搜索 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_QuickSearch.user.js) | [GF](https://greasyfork.org/zh-CN/scripts/18915) |  |  |
 | 【EH】搜索结果排序 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_SortBook.user.js) |  |  | 根据本子类型排序... |
-| 【EH】标签预览+隐藏画集 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_TagsPreview%26HideSomeGalleries.user.js) |  |  |  |
-| 【EH】里站跳转 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/ExHentai2E-Hantai.user.js) |  |  | 里站自动跳转到表站。<br>如果表站无该本子，<br />则跳转回里站，之后不再跳转。 |
+| 【EH】标签预览+隐藏画集 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_TagsPreview%26HideSomeGalleries.user.js) | [GF](https://greasyfork.org/zh-CN/scripts/19667) |  |  |
+| 【EH】里站跳转 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/ExHentai2E-Hantai.user.js) |  | × | 里站自动跳转到表站。<br>如果表站无该本子，<br />则跳转回里站，之后不再跳转。 |
 | ```H``` | - | - | - | - |
 | 【BT】助手 | [安装](https://github.com/dodying/UserJs/raw/master/H/btHelper.user.js) |  |  |  |
 | 【DMM】原始图片大小 | [安装](https://github.com/dodying/UserJs/raw/master/H/dmmOriginalSizeImage.user.js) |  |  |  |
 | 【H】屏蔽已拥有AV | [安装](https://github.com/dodying/UserJs/raw/master/H/hBlockOwnedAV.user.js) |  |  |  |
-| 【nH】下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  |  | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
+| 【nH】下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  | × | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
 | ```other``` | - | - | - | 其它 |
-| 【GitHub】复制Issues里的代码 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyCodeInIssues.user.js) |  |  |  |
-| 【Github】复制原始链接 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyRawLink.user.js) |  |  |  |
-| 【百度云】分享页复制 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopy.user.js) |  |  |  |
-| 【百度云】分享-答题专用 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidao.user.js) |  |  |  |
-| 【维基】跳转到中文 | [安装](https://github.com/dodying/UserJs/raw/master/other/wikiJump2Chinese.user.js) |  |  |  |
+| 【GitHub】复制Issues里的代码 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyCodeInIssues.user.js) |  | × |  |
+| 【Github】复制原始链接 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyRawLink.user.js) |  | × |  |
+| 【百度云】分享页复制 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopy.user.js) |  | × |  |
+| 【百度云】分享-答题专用 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidao.user.js) |  | × |  |
+| 【维基】跳转到中文 | [安装](https://github.com/dodying/UserJs/raw/master/other/wikiJump2Chinese.user.js) |  | × |  |
 | ```modify``` | - | - | - | 修改自其它脚本 |
-| 【HV】翻译 | [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) |  |  | 修改自 [Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369) |
-| 【nH】下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  |  | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
-| 搜索引擎跳转-小说版+高亮 | [安装](https://github.com/dodying/UserJs/raw/master/modify/searchEngineJumpForNovel.user.js) |  |  | 修改自 [搜索引擎跳转-文科版](https://greasyfork.org/zh-CN/scripts/2739)<br />与[Highlighter](http://userscripts-mirror.org/scripts/show/15637)以及[Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121) |
+| 【HV】翻译 | [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) |  | × | 修改自 [Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369) |
+| 【nH】下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  | × | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
+| 搜索引擎跳转-小说版+高亮 | [安装](https://github.com/dodying/UserJs/raw/master/modify/searchEngineJumpForNovel.user.js) |  | × | 修改自 [搜索引擎跳转-文科版](https://greasyfork.org/zh-CN/scripts/2739)<br />与[Highlighter](http://userscripts-mirror.org/scripts/show/15637)以及[Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121) |
 | ```lib``` | - |  |  | 写脚本时，从网上复制来的函数 |
 | Base64 | [Base64编码/解码器 在线解码](http://www1.tc711.com/tool/BASE64.htm) |  |  | Base64编码/解码 |
 | getHostName | 应该是来自 [SegmentFault](https://segmentfault.com/) 的某个页面... |  |  | 获取```网页字符串```域名 |
@@ -97,7 +97,7 @@
 | Create Download Links for HACG | [GF](https://greasyfork.org/zh-CN/scripts/7762) |  |
 | Manga Loader NSFW | [GF](https://greasyfork.org/zh-CN/scripts/12657) |  |
 | Fakku Transfer | [GF](https://greasyfork.org/zh-CN/scripts/14881) |  |
-| Ex-Hentai: Frame Popups | [SF](https://sleazyfork.org/zh-CN/scripts/10268) | 弹出页面变镶入页面 |
+| Ex-Hentai: Frame Popups | [GF](https://greasyfork.org/zh-CN/scripts/10268) | 弹出页面变镶入页面 |
 | ```HentaiVerse相关``` | - | - |
 | Reloader | [E-Hentai Forums](https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894) | 页面不刷新 |
 | RiddleLimiter Plus | [E-Hentai Forums](https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982) | Riddle变单选 |
