@@ -1,3 +1,6 @@
-addIRule('www.blwen.com','bl文库','h2','.jogger2>li:gt(1):lt(-1)>a');
-addCRule('www.blwen.com','h2','.artz',0,1);
-addRRule('www.blwen.com', '\\s+||| ', '.*?<div class="arnr" id="arctext">', '<div class="ggk2">.*');
+{
+    "wild1": "http://www.blwen.com/chuanyuechongsheng/*.html", 
+    "indexRule": "addIRule('www.blwen.com','bl文库','h2','.jogger2>li:gt(1):lt(-1)>a');", 
+    "chapterRule": "addCRule('www.blwen.com','h2','.artz',0,1);", 
+    "reRule": "addRRule('www.blwen.com', '\\s+||| ', '.*?<div class=\"arnr\" id=\"arctext\">', '<div class=\"ggk2\">.*');"
+}

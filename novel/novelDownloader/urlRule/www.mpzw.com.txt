@@ -1,0 +1,6 @@
+{
+    "wild1": "http://www.mpzw.com/html/*.html", 
+    "wild2": "http://www.mpzw.com/modules/article/reader.php?aid=*", 
+    "indexRule": "addIRule('www.mpzw.com','猫扑中文','h1','.ccss>a');", 
+    "chapterRule": "addCRule('www.mpzw.com','h1','#clickeye_content',0,1);"
+}
