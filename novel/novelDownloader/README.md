@@ -12,6 +12,8 @@
 
 #### 如果某章节长时间无法下载，请刷新重试。
 
+#### 失败重试、超时重试只对```非特殊站点```有效
+
 ### 意见、建议、Bug
 
 #### 两个地址：[Github-issues](https://github.com/dodying/UserJs/issues)与[GF-反馈](https://greasyfork.org/zh-CN/scripts/21515-noveldownloader/feedback)
@@ -150,6 +152,12 @@ chapterRule['read.qidian.com'] = {
 ### 更新历史
 
 #### Latest
+
+##### 1.28.199
+
+将失败重试细分为失败(onerror)重试、超时(ontimeout)重试。
+
+自定义站点规则默认只显示```当前站点的自定义规则```。
 
 ##### 1.27.199
 
