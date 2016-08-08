@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 【小说】下载脚本，按“Shift+D”来显示面板
-// @version     1.26.199
+// @version     1.27.199
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
@@ -273,14 +273,6 @@ if (GM_getValue('firstRun', true)) {
 var indexRule = new Object();
 var chapterRule = new Object();
 var reRule = new Object();
-/*
-目录页规则示例
-addIRule('域名','网站名称','小说标题-选择器','章节链接-选择器','Vip或是要过滤的章节链接-选择器，可省略','布尔，是否对章节链接进行排序，可省略','数字，限制下载线程数');
-章节规则示例
-addCRule('域名','章节标题-选择器','章节内容-选择器','数字型,0-简体,1-繁体','可省略,数字型,文档编码,unicode则留空,简体中文则填1');
-章节内容替换示例（|||三竖杆为分隔符，如果替换为空字符串，可以不写|||）
-addRRule('域名','要匹配的正则表达式1|||替换后的文本1','要匹配的正则表达式2|||替换后的文本2',...);
-*/
 //////////////////////////////////////////////////正版
 addIRule('read.qidian.com', '起点主站', '.booktitle>h1', '.box_cont>div.list>ul>li>a', '.box_title:contains(\'VIP\')+.box_cont>div.list>ul>li>a');
 chapterRule['read.qidian.com'] = {
@@ -1143,6 +1135,8 @@ addIRule('www.qududu.net', '去读读', '.kui-left.kui-fs32', '#kui-book-list>#k
 addCRule('www.qududu.net', 'h1.kui-ac', '#kui-page-read-txt', 0, 1);
 addIRule('www.151xs.com', '151小说网', 'h3', '.listcon>dl>dd>a');
 addCRule('www.151xs.com', 'h1', '.content', 0);
+//addIRule('www.mpzw.com','猫扑中文','h1','.ccss>a');
+//addCRule('www.mpzw.com','h1','#clickeye_content',0,1);
 //////////////////////////////////////////////////18X
 addIRule('www.haiax.net', '青豆小说网', '.kui-left.kui-fs32', '.kui-item>a');
 addCRule('www.haiax.net', 'h1.kui-ac', '#kui-page-read-txt', 0, 1);
@@ -1160,30 +1154,9 @@ addIRule('www.neixiong88.com', '内兄小说网', 'h2.bookName', '.bookUpdate>dl
 addCRule('www.neixiong88.com', 'h2', '#content', 1, 1);
 addIRule('18av.mm-cg.com', '18H', '.label>div', '.novel_leftright>span>a:visible');
 addCRule('18av.mm-cg.com', '#left>h1', '#novel_content_txtsize', 1);
-jQuery(document.body).append('<div id="bookDownloader"><div class="bookDownloaderMain bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">支持网站</button><div class="bookDownloaderSeparatorBlack"></div><span class="bookDownloaderInfo"></span><div class="bookDownloaderSeparatorBlack"></div>下载线程：<input class="bookDownloaderInput bookDownloaderThread"placeholder="10"type="text"><div class="bookDownloaderSeparatorWhite"></div>失败重试次数：<input class="bookDownloaderInput bookDownloaderRetry"title="0表示不重试"placeholder="0"type="text"><div class="bookDownloaderSeparatorWhite"></div><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节</label><div class="bookDownloaderSeparatorWhite"></div>语言：<input id="bookDownloaderLangZhs"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="0"checked="true"></input><label for="bookDownloaderLangZhs">简体</label><input id="bookDownloaderLangZht"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="1"></input><label for="bookDownloaderLangZht">繁体</label><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderThis">下载本章(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderAll2Epub">下载整个目录页(Epub)</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowBatch">特定下载某些章节</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowCustomize">自定义站点规则</button></div><div class="bookDownloaderSupport bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">隐藏</button><div class="bookDownloaderSeparatorWhite"></div></div><div class="bookDownloaderBatch bookDownloaderBoxCenter"><button class="bookDownloaderShowBatch">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderBatchWildHelp">?</button>通配符模式：<input class="bookDownloaderBatchWild"placeholder="http://www.example.com/*"></input><div class="bookDownloaderSeparatorWhite"></div><textarea class="bookDownloaderBatchTextarea"></textarea><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderBatch2Txt">开始下载特定章节(TXT)</button><button class="bookDownloaderBatch2Zip">开始下载特定章节(ZIP)</button><button class="bookDownloaderBatch2Epub">开始下载特定章节(Epub)</button></div><div class="bookDownloaderCustomize bookDownloaderBoxCenter"><button class="bookDownloaderShowCustomize">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><span>&nbsp;双击后开始编写...</span><div class="bookDownloaderSeparatorWhite"></div><p class="bookDownloaderCustomizeTextarea">双击后，这个地方可以编写...<br>具体规则，详见<a href="https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明"target="_blank">自定义站点规则说明</a></p><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderCustomizeSave">保存</button><button class="bookDownloaderCustomizeDelete">删除某站点的规则</button><button class="bookDownloaderCustomizeClear">清空</button></div><div class="bookDownloaderLog"><div class="bookDownloaderLogNow"title="点击清除已完成"><div><progress class="bookDownladerProgress"value="0"max="0"></progress><span class="bookDownladerProgressSpan"><span class="bookDownladerChapter">0</span>/<span class="bookDownladerChapterAll">0</span></span></div></div><div class="bookDownloaderLogDiv"></div></div><div class="bookDownloaderFinder"></div></div>');
+jQuery(document.body).append('<div id="bookDownloader"><div class="bookDownloaderMain bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">支持网站</button><div class="bookDownloaderSeparatorBlack"></div><span class="bookDownloaderInfo"></span><div class="bookDownloaderSeparatorBlack"></div>下载线程：<input class="bookDownloaderInput bookDownloaderThread"placeholder="10"type="text"><div class="bookDownloaderSeparatorWhite"></div>失败重试次数：<input class="bookDownloaderInput bookDownloaderRetry"title="0表示不重试"placeholder="0"type="text"><div class="bookDownloaderSeparatorWhite"></div><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节</label><div class="bookDownloaderSeparatorWhite"></div>语言：<input id="bookDownloaderLangZhs"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="0"checked="true"></input><label for="bookDownloaderLangZhs">简体</label><input id="bookDownloaderLangZht"type="radio"name="bookDownloaderLang"class="bookDownloaderLang"value="1"></input><label for="bookDownloaderLangZht">繁体</label><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderThis">下载本章(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderAll2Txt">下载整个目录页(TXT)</button><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderAll2Zip">每个章节生成1个txt(ZIP)</button><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderAll2Epub">下载整个目录页(Epub)</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowBatch">特定下载某些章节</button><div class="bookDownloaderSeparatorBlack"></div><button class="bookDownloaderShowCustomize">自定义站点规则</button></div><div class="bookDownloaderSupport bookDownloaderBoxCenter"><button class="bookDownloaderShowSupport">隐藏</button><div class="bookDownloaderSeparatorWhite"></div></div><div class="bookDownloaderBatch bookDownloaderBoxCenter"><button class="bookDownloaderShowBatch">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderBatchWildHelp">?</button>通配符模式：<input class="bookDownloaderBatchWild"placeholder="http://www.example.com/*"></input><div class="bookDownloaderSeparatorWhite"></div><textarea class="bookDownloaderBatchTextarea"></textarea><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderBatch2Txt">开始下载特定章节(TXT)</button><button class="bookDownloaderBatch2Zip">开始下载特定章节(ZIP)</button><button class="bookDownloaderBatch2Epub">开始下载特定章节(Epub)</button></div><div class="bookDownloaderCustomize bookDownloaderBoxCenter"><button class="bookDownloaderShowCustomize">隐藏</button><div class="bookDownloaderSeparatorWhite"></div><span>双击后开始编写...<br>具体规则，详见<a href="https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明"target="_blank">自定义站点规则说明</a></span><div class="bookDownloaderSeparatorWhite"></div><p class="bookDownloaderCustomizeTextarea">双击后，这个地方可以编写...</p><div class="bookDownloaderSeparatorWhite"></div><button class="bookDownloaderCustomizeSave">保存</button><button class="bookDownloaderCustomizeDelete">删除某站点的规则</button><button class="bookDownloaderCustomizeClear">清空</button></div><div class="bookDownloaderLog"><div class="bookDownloaderLogNow"title="点击清除已完成"><div><progress class="bookDownladerProgress"value="0"max="0"></progress><span class="bookDownladerProgressSpan"><span class="bookDownladerChapter">0</span>/<span class="bookDownladerChapterAll">0</span></span></div></div><div class="bookDownloaderLogDiv"></div></div><div class="bookDownloaderFinder"></div></div>');
 jQuery('head').append('<style>#bookDownloader span{float:none}.bookDownloaderSeparatorBlack{border:1px solid #000}.bookDownloaderSeparatorWhite{border:1px none}.bookDownloaderSupport{height:500px;overflow:auto}.bookDownloaderInput{width:24px}.bookDownloaderBatchWild{width:330px}#bookDownloader textarea{resize:both;width:95%;height:108px;overflow:auto}.bookDownloaderCustomizeTextarea{border:1px solid #000;background-color:#e7f4fe}.bookDownloaderLogDiv{height:290px;overflow:auto}.bookDownladerProgressSpan{position:absolute;left:0;right:0}</style>');
-jQuery('.bookDownloaderCustomizeTextarea').dblclick(function () {
-  this.contentEditable = true;
-}).blur(function () {
-  this.contentEditable = false;
-})
-if (GM_getValue('customizeRule', false)) {
-  var savedValue = GM_listValues();
-  var RE = new RegExp('^indexRule_|^chapterRule_|^reRule_', 'i');
-  var host = new RegExp(location.host + '$');
-  var customizeRule = '';
-  for (i = 0; i < savedValue.length; i++) {
-    if (RE.test(savedValue[i])) {
-      customizeRule += GM_getValue(savedValue[i]) + '<br>';
-      if (host.test(savedValue[i])) eval(GM_getValue(savedValue[i]))
-    }
-  }
-  customizeRule = customizeRule.replace(/<br>$/, '');
-  delete savedValue;
-  delete RE;
-  jQuery('.bookDownloaderCustomizeTextarea').html(customizeRule);
-  delete customizeRule;
-}(GM_getValue('lang', 0) === 0) ? jQuery('#bookDownloaderLangZhs') [0].checked = true : jQuery('#bookDownloaderLangZht') [0].checked = true;
+(GM_getValue('lang', 0) === 0) ? jQuery('#bookDownloaderLangZhs') [0].checked = true : jQuery('#bookDownloaderLangZht') [0].checked = true;
 if (GM_getValue('thread', false) !== false) jQuery('.bookDownloaderThread').val(GM_getValue('thread'));
 if (GM_getValue('retry', false) !== false) jQuery('.bookDownloaderRetry').val(GM_getValue('retry'));
 var SupportedUrl = '';
@@ -1194,9 +1167,21 @@ for (var i in indexRule) {
   SupportedUrl += num + '. ' + indexRule[i].cn + ' <a href="http://' + i + '" target="_blank">' + i + '</a><div class="bookDownloaderSeparatorWhite"></div>';
 }
 jQuery('.bookDownloaderSupport').append('总共支持网站' + num + '个。<div class="bookDownloaderSeparatorWhite"></div>网站基本排序：正版>轻小说>盗贴<span style="color:white">>18X</span><div class="bookDownloaderSeparator"></div>' + SupportedUrl);
-delete SupportedUrl;
-delete num;
 jQuery('.bookDownloaderInfo').html('当前网站：<div class="bookDownloaderSeparatorWhite"></div><a href="http://' + location.host + '/" target="_blank">' + indexRule[location.host].cn) + '</a>';
+if (GM_getValue('customizeRule', false)) {
+  var savedValue = GM_listValues();
+  var RE = new RegExp('^indexRule_|^chapterRule_|^reRule_', 'i');
+  var host = new RegExp(location.host + '$');
+  var customizeRule = '';
+  for (i = 0; i < savedValue.length; i++) {
+    if (RE.test(savedValue[i])) {
+      customizeRule += html2Escape(GM_getValue(savedValue[i])) + '<br><br>';
+      if (host.test(savedValue[i])) eval(GM_getValue(savedValue[i]));
+    }
+  }
+  customizeRule = customizeRule.replace(/<br>$/, '');
+  jQuery('.bookDownloaderCustomizeTextarea').html(customizeRule);
+}
 jQuery('.bookDownloaderBoxCenter').css({
   'display': 'none',
   'z-index': '999999',
@@ -1306,6 +1291,11 @@ jQuery('.bookDownloaderShowBatch').click(function () {
 jQuery('.bookDownloaderShowCustomize').click(function () {
   jQuery('.bookDownloaderCustomize').toggle();
 });
+jQuery('.bookDownloaderCustomizeTextarea').dblclick(function () {
+  this.contentEditable = true;
+}).blur(function () {
+  this.contentEditable = false;
+});
 jQuery('.bookDownloaderCustomizeSave').click(function () {
   if (jQuery('.bookDownloaderCustomizeTextarea').html() === '') {
     GM_setValue('customizeRule', false);
@@ -1315,16 +1305,20 @@ jQuery('.bookDownloaderCustomizeSave').click(function () {
   }
   var arr = jQuery('.bookDownloaderCustomizeTextarea').html().split('<br>');
   var host;
+  var temp;
   for (var i = 0; i < arr.length; i++) {
     host = arr[i].split('\'') [1];
+    temp = escape2Html(arr[i]);
     if (/^\s+$/.test(arr[i]) || arr[i] === '') {
       continue;
     } else if (/^addIRule/.test(arr[i])) {
-      GM_setValue('indexRule_' + host, arr[i]);
+      GM_setValue('indexRule_' + host, temp);
     } else if (/^addCRule/.test(arr[i])) {
-      GM_setValue('chapterRule_' + host, arr[i]);
+      GM_setValue('chapterRule_' + host, temp);
+    } else if (/^chapterRule/.test(arr[i])) {
+      GM_setValue('chapterRule_' + host, temp);
     } else if (/^addRRule/.test(arr[i])) {
-      GM_setValue('reRule_' + host, arr[i]);
+      GM_setValue('reRule_' + host, temp);
     } else {
       var lineNow = i + 1;
       if (confirm('第' + lineNow + '行增加未知规则。\n此前的规则已经保存，后续操作已停止\n是否打开规则说明网址')) window.open('https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明');
@@ -1644,22 +1638,13 @@ function thisDownloaded(num, name, content) {
   jQuery('.bookDownladerProgress').val(jQuery(window).data('numberOk'));
 }
 function wordFormat(word) {
+  word = escape2Html(word);
   var replaceLib = [
     /*替换前的文本|||替换后的文本*/
     /*换行符请先用【换行】二字代替，最后同一替代*/
     /*请在最前方插入*/
     '无弹窗广告',
     '天才壹秒記住.*?為您提供精彩小說閱讀。',
-    '&nbsp;||| ',
-    '&amp;|||&',
-    '&lt;|||<',
-    '&gt;|||>',
-    '&hellip;|||...',
-    '&mdash;|||—',
-    '&quot;"',
-    '&apos;|||\'',
-    '&ldquo;|||“',
-    '&rdquo;|||”',
     '<HEAD>.*?</HEAD>',
     '<br.*?>|||换行',
     '<p.*?>|||换行',
@@ -2095,4 +2080,29 @@ function objArrSort(propertyName) { //对象数组排序函数，从小到大排
       return 0;
     }
   }
+}
+function html2Escape(sHtml) { //来自http://blog.csdn.net/win32fanex/article/details/11948659
+  return sHtml.replace(/[<>&"]/g, function (c) {
+    return {
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '"': '&quot;'
+    }
+    [
+      c
+    ];
+  });
+}
+function escape2Html(str) { //来自http://blog.csdn.net/win32fanex/article/details/11948659
+  var arrEntities = {
+    'lt': '<',
+    'gt': '>',
+    'nbsp': ' ',
+    'amp': '&',
+    'quot': '"'
+  };
+  return str.replace(/&(lt|gt|nbsp|amp|quot);/gi, function (all, t) {
+    return arrEntities[t];
+  });
 }

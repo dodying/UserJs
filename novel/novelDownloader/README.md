@@ -36,6 +36,8 @@ ps.果然[Anyview](#Anyview)很好很强大。
 
 ### 自定义站点规则说明
 
+#### 一条规则写一行，尤其是【章节规则示例-自定义版】，别写成块状。
+
 #### 利用通配符添加网址
 
 1. ```http://www.example1.com/files/article/html/*.html```
@@ -63,6 +65,64 @@ ps.果然[Anyview](#Anyview)很好很强大。
 1. ```addRRule('www.example1.com','一秒记住...','example1.com');```
 2. ```addRRule('www.example2.com','text1|||text99','text2|||text98','text3|||text97','text4|||text96','text5|||text95');```
 
+#### 章节规则示例-自定义版
+
+##### 此规则，是为了那些无法直接在网页原文件中获取到内容的网址准备的。
+
+```
+具体示例：起点主站-（未压缩成一行）
+chapterRule['read.qidian.com'] = {
+  'lang': 0,
+  'Deal': function (num, url) {
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: url,
+      onload: function (response) {
+        var name = jQuery('.story_title>h1,.title>h3', response.response).text();
+        var content = jQuery('script[src$=".txt"]', response.response);
+        if (content.length > 0) {
+          chapterRule['read.qidian.com'].Deal2(num, name, content);
+        } else {
+          content = wordFormat(jQuery('#content', response.response).html());
+          content = '来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n' + content;
+          if (parseInt(jQuery('.bookDownloaderLang:checked').val()) !== 0) {
+            name = tranStr(name, true);
+            content = tranStr(content, true);
+          }
+          thisDownloaded(num, name, content);
+        }
+      }
+    });
+  },
+  'Deal2': function (num, name, content) {
+    var url = content.attr('src');
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: url,
+      overrideMimeType: 'text/html; charset=gb2312',
+      onload: function (response) {
+        content = wordFormat(response.response.replace(/document\.write\(\'(.*)\'\);/, '$1'));
+        content = '来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n' + content;
+        if (parseInt(jQuery('.bookDownloaderLang:checked').val()) !== 0) {
+          name = tranStr(name, true);
+          content = tranStr(content, true);
+        }
+        thisDownloaded(num, name, content);
+      }
+    });
+  }
+};
+```
+
+```
+说明：
+1. 特殊处理的属性名称必须是Deal，如果还要进行第二次特殊处理，可随意
+2. Deal函数的参数必须是num（表示这是第几章）与url（原链接）
+3. 可用函数jQuery，wordFormat（对内容进行替换、美化，参数为字符串）、tranStr（简繁体转换，参数1为字符串，参数2为布尔-是转换成繁体，否转换成简体）、thisDownloaded（必须，传递章节内容，参数为num-表示这是第几章、name-标题、content-内容）
+```
+
+##### addCRule('域名','章节标题-选择器','章节内容-选择器','数字型,0-简体,1-繁体','可省略,数字型,文档编码,unicode则留空,简体中文则填1');
+
 ### 支持网站【列举前10项】
 
 1. 起点主站 [read.qidian.com](http://read.qidian.com/)
@@ -86,6 +146,10 @@ ps.果然[Anyview](#Anyview)很好很强大。
 ### 更新历史
 
 #### Latest
+
+##### 1.27.199
+
+修复保存自定义站点规则时特殊字符转义的问题。
 
 ##### 1.26.199
 
