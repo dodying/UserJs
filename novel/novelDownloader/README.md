@@ -63,7 +63,7 @@ ps.果然[Anyview](#Anyview)很好很强大。
 ##### addRRule('域名','要匹配的正则表达式1|||替换后的文本1','要匹配的正则表达式2|||替换后的文本2',...);
 
 1. ```addRRule('www.example1.com','一秒记住...','example1.com');```
-2. ```addRRule('www.example2.com','text1|||text99','text2|||text98','text3|||text97','text4|||text96','text5|||text95');```
+2. ```addRRule('www.example2.com','text1|||text99','text2|||text98','text3|||text97');```
 
 #### 章节规则示例-自定义版
 
@@ -118,7 +118,11 @@ chapterRule['read.qidian.com'] = {
 说明：
 1. 特殊处理的属性名称必须是Deal，如果还要进行第二次特殊处理，可随意
 2. Deal函数的参数必须是num（表示这是第几章）与url（原链接）
-3. 可用函数jQuery，wordFormat（对内容进行替换、美化，参数为字符串）、tranStr（简繁体转换，参数1为字符串，参数2为布尔-是转换成繁体，否转换成简体）、thisDownloaded（必须，传递章节内容，参数为num-表示这是第几章、name-标题、content-内容）
+3. 可用函数:
+  jQuery、
+  wordFormat（对内容进行替换、美化，参数为字符串）、
+  tranStr（简繁体转换，参数1为字符串，参数2为布尔-是转换成繁体，否转换成简体）、
+  thisDownloaded（必须，传递章节内容，参数为num-表示这是第几章、name-标题、content-内容）
 ```
 
 ##### addCRule('域名','章节标题-选择器','章节内容-选择器','数字型,0-简体,1-繁体','可省略,数字型,文档编码,unicode则留空,简体中文则填1');
