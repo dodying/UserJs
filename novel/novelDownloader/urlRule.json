@@ -1,4 +1,8 @@
 {
+    "updateInfo": {
+        "latestVersion": "²âÊÔ1",
+        "changeInfo": "²âÊÔ2"
+    },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*.html",
         "indexRule": "addIRule('www.blwen.com','blÎÄ¿â','h2','.jogger2>li:gt(1):lt(-1)>a');",
