@@ -1,0 +1,5 @@
+{
+    "include1": "http://www.yilego.com/book/*.html", 
+    "indexRule": "addIRule('www.yilego.com','乐高小说网','.t>h2','.list-directory>ul>li>a');", 
+    "chapterRule": "addCRule('www.yilego.com','h2','.content',0,1);"
+}
