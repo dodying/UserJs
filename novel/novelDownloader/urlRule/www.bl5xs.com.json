@@ -1,5 +1,0 @@
-{
-	"include1" : "http://www.bl5xs.com/read/*",
-	"indexRule" : "addIRule('www.bl5xs.com','BLÐ¡ËµÍø','h1','#list>dl>dd>a');",
-	"chapterRule" : "addCRule('www.bl5xs.com','h1','#content',0,1);"
-}

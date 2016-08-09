@@ -1,6 +1,0 @@
-{
-	"include1" : "http://www.blwen.com/*.html",
-	"indexRule" : "addIRule('www.blwen.com','bl文库','h2','.jogger2>li:gt(1):lt(-1)>a');",
-	"chapterRule" : "addCRule('www.blwen.com','h2','.artz',0,1);",
-	"reRule" : "addRRule('www.blwen.com', '\\s+||| ', '.*?<div class=\"arnr\" id=\"arctext\">', '<div class=\"ggk2\">.*');"
-}

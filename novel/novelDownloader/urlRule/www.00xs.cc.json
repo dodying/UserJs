@@ -1,6 +1,0 @@
-{
-	"include1" : "http://www.00xs.cc/xiaoshuo/*/*/",
-	"indexRule" : "addIRule('www.00xs.cc', '00小说', '.chapter-hd>h1', '.chapter-list>li>span>a');",
-	"chapterRule" : "addCRule('www.00xs.cc', 'h1', '.article-con', 0, 1);",
-	"reRule" : "addRRule('www.00xs.cc', '(以下为|)00小说网.*出版社。','00小说网','\\s+||| ', '<span style=\"color:#4876FF\">.*?</script>.*?</span>');"
-}
