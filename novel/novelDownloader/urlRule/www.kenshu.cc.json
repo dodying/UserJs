@@ -1,5 +1,5 @@
 {
-    "include1": "http://www.kenshu.cc/xiaoshuo/*", 
-    "indexRule": "addIRule('www.kenshu.cc', '啃书小说网', '.chapter-hd>h1', '.chapter-list>li>span>a');", 
-    "chapterRule": "addCRule('www.kenshu.cc', 'h1', '.article-con', 0, 1);",
+	"include1" : "http://www.kenshu.cc/xiaoshuo/*",
+	"indexRule" : "addIRule('www.kenshu.cc', '啃书小说网', '.chapter-hd>h1', '.chapter-list>li>span>a');",
+	"chapterRule" : "addCRule('www.kenshu.cc', 'h1', '.article-con', 0, 1);"
 }

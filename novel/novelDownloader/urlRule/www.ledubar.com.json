@@ -1,5 +1,5 @@
 {
-    "include1": "http://www.ledubar.com/book/*", 
-    "indexRule": "addIRule('www.ledubar.com','乐读吧','.title','.float-list>li>a');", 
-    "chapterRule": "addCRule('www.ledubar.com','.bd>h1','.page-content>p',0,1);"
+	"include1" : "http://www.ledubar.com/book/*",
+	"indexRule" : "addIRule('www.ledubar.com','乐读吧','.title','.float-list>li>a');",
+	"chapterRule" : "addCRule('www.ledubar.com','.bd>h1','.page-content>p',0,1);"
 }
