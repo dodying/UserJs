@@ -1,44 +1,44 @@
-{
+ï»¿{
     "updateInfo": {
-        "latestVersion": "²âÊÔ1",
-        "changeInfo": "²âÊÔ2"
+        "latestVersion": "æµ‹è¯•1",
+        "changeInfo": "æµ‹è¯•2"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*.html",
-        "indexRule": "addIRule('www.blwen.com','blÎÄ¿â','h2','.jogger2>li:gt(1):lt(-1)>a');",
+        "indexRule": "addIRule('www.blwen.com','blæ–‡åº“','h2','.jogger2>li:gt(1):lt(-1)>a');",
         "chapterRule": "addCRule('www.blwen.com','h2','.artz',0,1);",
         "reRule": "addRRule('www.blwen.com', '\\s+||| ', '.*?<div class=\"arnr\" id=\"arctext\">', '<div class=\"ggk2\">.*');"
     },
     "www.mpzw.com": {
         "include1": "http://www.mpzw.com/html/*.html",
         "include2": "http://www.mpzw.com/modules/article/reader.php?aid=*",
-        "indexRule": "addIRule('www.mpzw.com','Ã¨ÆËÖĞÎÄ','h1','.ccss>a');",
+        "indexRule": "addIRule('www.mpzw.com','çŒ«æ‰‘ä¸­æ–‡','h1','.ccss>a');",
         "chapterRule": "addCRule('www.mpzw.com','h1','#clickeye_content',0,1);"
     },
     "www.ledubar.com": {
         "include1": "http://www.ledubar.com/book/*",
-        "indexRule": "addIRule('www.ledubar.com','ÀÖ¶Á°É','.title','.float-list>li>a');",
+        "indexRule": "addIRule('www.ledubar.com','ä¹è¯»å§','.title','.float-list>li>a');",
         "chapterRule": "addCRule('www.ledubar.com','.bd>h1','.page-content>p',0,1);"
     },
     "www.yilego.com": {
         "include1": "http://www.yilego.com/book/*.html",
-        "indexRule": "addIRule('www.yilego.com','ÀÖ¸ßĞ¡ËµÍø','.t>h2','.list-directory>ul>li>a');",
+        "indexRule": "addIRule('www.yilego.com','ä¹é«˜å°è¯´ç½‘','.t>h2','.list-directory>ul>li>a');",
         "chapterRule": "addCRule('www.yilego.com','h2','.content',0,1);"
     },
     "www.00xs.cc": {
         "include1": "http://www.00xs.cc/xiaoshuo/*/*/",
-        "indexRule": "addIRule('www.00xs.cc', '00Ğ¡Ëµ', '.chapter-hd>h1', '.chapter-list>li>span>a');",
+        "indexRule": "addIRule('www.00xs.cc', '00å°è¯´', '.chapter-hd>h1', '.chapter-list>li>span>a');",
         "chapterRule": "addCRule('www.00xs.cc', 'h1', '.article-con', 0, 1);",
-        "reRule": "addRRule('www.00xs.cc', '(ÒÔÏÂÎª|)00Ğ¡ËµÍø.*³ö°æÉç¡£','00Ğ¡ËµÍø','\\s+||| ', '<span style=\"color:#4876FF\">.*?</script>.*?</span>');"
+        "reRule": "addRRule('www.00xs.cc', '(ä»¥ä¸‹ä¸º|)00å°è¯´ç½‘.*å‡ºç‰ˆç¤¾ã€‚','00å°è¯´ç½‘','\\s+||| ', '<span style=\"color:#4876FF\">.*?</script>.*?</span>');"
     },
     "www.kenshu.cc": {
         "include1": "http://www.kenshu.cc/xiaoshuo/*",
-        "indexRule": "addIRule('www.kenshu.cc', '¿ĞÊéĞ¡ËµÍø', '.chapter-hd>h1', '.chapter-list>li>span>a');",
+        "indexRule": "addIRule('www.kenshu.cc', 'å•ƒä¹¦å°è¯´ç½‘', '.chapter-hd>h1', '.chapter-list>li>span>a');",
         "chapterRule": "addCRule('www.kenshu.cc', 'h1', '.article-con', 0, 1);"
     },
     "www.bl5xs.com": {
         "include1": "http://www.bl5xs.com/read/*",
-        "indexRule": "addIRule('www.bl5xs.com','BL§³?¦È','h1','#list>dl>dd>a');",
+        "indexRule": "addIRule('www.bl5xs.com','BLĞ¡?Î¸','h1','#list>dl>dd>a');",
         "chapterRule": "addCRule('www.bl5xs.com','h1','#content',0,1);"
     }
 }
