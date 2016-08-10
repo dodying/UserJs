@@ -1,13 +1,13 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "测试1",
-        "changeInfo": "测试2"
+        "latestVersion": "1.29.200",
+        "changeInfo": "增加从[Github]项目上获取规则的功能，接下来将会逐步删除脚本中一些简单的站点规则，然后放在这里"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*.html",
         "indexRule": "addIRule('www.blwen.com','bl文库','h2','.jogger2>li:gt(1):lt(-1)>a');",
         "chapterRule": "addCRule('www.blwen.com','h2','.artz',0,1);",
-        "reRule": "addRRule('www.blwen.com', '\\s+||| ', '.*?<div class=\"arnr\" id=\"arctext\">', '<div class=\"ggk2\">.*');"
+        "reRule": "addRRule('www.blwen.com', '\\\\s+||| ', '.*?<div class=\"arnr\" id=\"arctext\">', '<div class=\"ggk2\">.*');"
     },
     "www.mpzw.com": {
         "include1": "http://www.mpzw.com/html/*.html",
@@ -29,7 +29,7 @@
         "include1": "http://www.00xs.cc/xiaoshuo/*/*/",
         "indexRule": "addIRule('www.00xs.cc', '00小说', '.chapter-hd>h1', '.chapter-list>li>span>a');",
         "chapterRule": "addCRule('www.00xs.cc', 'h1', '.article-con', 0, 1);",
-        "reRule": "addRRule('www.00xs.cc', '(以下为|)00小说网.*出版社。','00小说网','\\s+||| ', '<span style=\"color:#4876FF\">.*?</script>.*?</span>');"
+        "reRule": "addRRule('www.00xs.cc', '(以下为|)00小说网.*出版社。','00小说网','\\\\s+||| ', '<span style=\"color:#4876FF\">.*?</script>.*?</span>');"
     },
     "www.kenshu.cc": {
         "include1": "http://www.kenshu.cc/xiaoshuo/*",

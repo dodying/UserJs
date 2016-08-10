@@ -38,6 +38,8 @@ ps.果然[Anyview](#Anyview)很好很强大。
 
 ### 自定义站点规则说明
 
+#### 由脚本生成的【include】规则加在```// ==/UserScript==```这一行前。
+
 #### 一条规则写一行，尤其是【章节规则示例-自定义版】，别写成块状。
 
 #### 利用通配符添加网址
@@ -152,6 +154,10 @@ chapterRule['read.qidian.com'] = {
 ### 更新历史
 
 #### Latest
+
+##### 1.29.199
+
+增加从[Github](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader)项目上获取规则的功能。
 
 ##### 1.28.199
 
