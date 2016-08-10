@@ -38,7 +38,7 @@
     },
     "www.bl5xs.com": {
         "include1": "http://www.bl5xs.com/read/*",
-        "indexRule": "addIRule('www.bl5xs.com','BLС?θ','h1','#list>dl>dd>a');",
+        "indexRule": "addIRule('www.bl5xs.com','BL小说网','h1','#list>dl>dd>a');",
         "chapterRule": "addCRule('www.bl5xs.com','h1','#content',0,1);"
     }
 }
