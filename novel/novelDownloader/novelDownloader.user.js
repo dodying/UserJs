@@ -4,9 +4,10 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.30.200
+// @version     1.30.176
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
+// @connect     k2.kansha.cc
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -219,33 +220,6 @@
 // @include     http://www.bookba.net/read-*-chapter-*.html
 // @include     http://www.360118.com/html/*
 // @include     http://www.59tto.com/files/article/xiaoshuo/*
-// @include     http://www.9wh.net/*
-// @include     http://www.23txt.com/files/article/html/*
-// @include     http://www.book108.com/*
-// @include     http://www.5ycn.com/*
-// @include     http://www.zbzw.com/*
-// @include     http://www.5200zw.com/*
-// @include     http://www.uuxiaoshuo.net/html/*
-// @include     http://www.chinaisbn.com/*
-// @include     http://www.ty2016.net/*
-// @include     http://wx.ty2016.net/*
-// @include     http://www.my285.com/*
-// @include     http://www.5858xs.com/html/*
-// @include     http://book.58xs.com/html/*
-// @include     http://www.hjwzw.com/Book/Chapter/*
-// @include     http://www.hjwzw.com/Book/Read/*
-// @include     http://www.8shuw.net/book/*
-// @include     http://www.e8zw.com/book/*
-// @include     http://www.biquge.tw/*_*/*
-// @include     http://www.8535.org/*
-// @include     http://www.yfzww.com/Book/*
-// @include     http://www.yfzww.com/Read/*
-// @include     http://www.lewen8.com/lw*/*
-// @include     http://www.lread.net/read/*
-// @include     http://www.pbtxt.com/*
-// @include     http://www.quanbenba.com/yuedu/*
-// @include     http://www.qududu.net/book/*
-// @include     http://www.151xs.com/*/chapter/*
 // @include     http://*kansha.cc/shuji*.aspx?w_nameno=*
 //              18X
 // @include     http://www.haiax.net/files/article/html/*
@@ -916,8 +890,6 @@ addIRule('www.musemailsvr.com', 'MuseMail中文', '.wrapper>h1>a', '.nav>span>a'
 addCRule('www.musemailsvr.com', '.title', '#content', 0, 1);
 addIRule('www.lewenwu.com', '乐文屋', '.infot>h1', '.chapterlist>li>a');
 addCRule('www.lewenwu.com', 'h1', '#content', 0, 1);
-addIRule('www.biquge.tw', '笔趣阁', '#info>h1', '#list>dl>dd>a');
-addCRule('www.biquge.tw', 'h1', '#content', 0, 1);
 addIRule('www.50zw.co', '武林中文网', '#info>h1', '.chapterlist>li>a');
 addCRule('www.50zw.co', 'h1', '#htmlContent', 0, 1);
 addRRule('www.50zw.co', '\\s+||| ', '一秒记住.*?免费读！', '手机阅读本章.*');
@@ -1113,64 +1085,6 @@ addCRule('www.360118.com', 'h2', '.yd_text2', 0, 1);
 addIRule('www.59tto.com', '59文学', 'h1', '.xiaoshuo_list>dd>a');
 addCRule('www.59tto.com', 'h1', '.article', 0, 1);
 addRRule('www.59tto.com', '\\s+||| ', '您可以在百度里搜索.*');
-addIRule('www.9wh.net', '九头鸟书院', 'h1', '.ListCon>.ListRow>li>a');
-addCRule('www.9wh.net', 'h1', '#text_area', 0, 1);
-addRRule('www.9wh.net', '\\s+||| ', '\\(九头鸟书院http://www.9wh.net\\)');
-addIRule('www.23txt.com', '天籁小说', 'h1', '#list>dl>dd>a');
-addCRule('www.23txt.com', 'h1', '#content', 0, 1);
-addRRule('www.23txt.com', '\\s+||| ', '阅读本书最新章节请到.*');
-addIRule('www.book108.com', '108小说网(作者现无法访问)', 'h1', '.chapter-list>li>span>a');
-addCRule('www.book108.com', 'h1', '.article-con', 0, 1);
-addIRule('www.5ycn.com', '五月中文', 'h1', '#list>dl>dd>a');
-addCRule('www.5ycn.com', 'h1', '#content', 0, 1);
-addIRule('www.zbzw.com', '着笔中文网', 'h1', '#chapterlist>li>a');
-addCRule('www.zbzw.com', 'h1', '#text_area', 0, 1);
-addIRule('www.5200zw.com', '5200小说网', 'h1', '#readerlist>ul>li>a');
-addCRule('www.5200zw.com', 'h1', '#content', 0, 1);
-addIRule('www.uuxiaoshuo.net', '悠悠书盟', 'h1', '.ccss>a');
-addCRule('www.uuxiaoshuo.net', 'h1', '#content', 0, 1);
-addRRule('www.uuxiaoshuo.net', '【为了方便您下次阅读.*?】', '“24小时不间断更新.*?”', '『悠悠书盟.*?』');
-addIRule('www.chinaisbn.com', 'isbn书院', 'h1', '.mulu_list>li>a');
-addCRule('www.chinaisbn.com', 'h1', '#htmlContent', 0, 1);
-addRRule('www.chinaisbn.com', '\\(isbn书院.*?\\)');
-addIRule('www.ty2016.net', '天涯书库', 'h1', '.book>dl>dd>a');
-addCRule('www.ty2016.net', 'h1', 'p[align="center"]+p', 0, 1);
-addIRule('wx.ty2016.net', '天涯书库', 'h1', '.book>dl>dd>a');
-addCRule('wx.ty2016.net', 'font', 'p', 0, 1);
-addIRule('www.my285.com', ' 梦远书城(待续)', 'td[bgcolor="#FFC751"]', 'td>a:not(:has(span)):visible');
-addCRule('www.my285.com', 'td[height="30"]', 'td:has(br)', 0, 1);
-addIRule('www.5858xs.com', '58小说网', 'h1', 'td>a[href$=".html"]');
-addCRule('www.5858xs.com', 'h1', '#content', 0, 1);
-addRRule('www.5858xs.com', '本站公告', '5858xs.com');
-addIRule('book.58xs.com', '58小说网', 'h1', 'td>a[href$=".html"]');
-addCRule('book.58xs.com', 'h1', '#content', 0, 1);
-addRRule('book.58xs.com', '本站公告', '58xs.com');
-addIRule('www.hjwzw.com', '黄金屋中文', 'h1', '#tbchapterlist>table>tbody>tr>td>a');
-addCRule('www.hjwzw.com', 'h1', '#AllySite+div', 0);
-addRRule('www.hjwzw.com', '请记住本站域名.*</b>');
-addIRule('www.8shuw.net', '8书网', '#info>h1', '.indexlist>tbody>tr>td>span>a');
-addCRule('www.8shuw.net', 'h2>span:nth-child(2)', '#content', 0, 1);
-addRRule('www.8shuw.net', '<p class="prevue">.*?</p>');
-addIRule('www.e8zw.com', 'E8中文网', 'h1', '#list>dl>dd>a');
-addCRule('www.e8zw.com', 'h1', '#content', 0);
-addIRule('www.biquge.tw', '笔趣阁', 'h1', '#list>dl>dd>a');
-addCRule('www.biquge.tw', 'h1', '#content', 0);
-addIRule('www.yfzww.com', '一凡中文网', 'h2', '#chapters>li>a');
-addCRule('www.yfzww.com', 'h3', '#content', 0);
-addRRule('www.yfzww.com', '\\s+||| ', '【一凡中文网.*');
-addIRule('www.lewen8.com', '乐文小说网', '.infot>h1', '.chapterlist>li>a');
-addCRule('www.lewen8.com', 'h1', '#content', 0);
-addIRule('www.lread.net', '乐阅读', 'h1', '#list>dl>dd>a');
-addCRule('www.lread.net', 'h1', '#booktext', 0, 1);
-addIRule('www.pbtxt.com', '平板电子书网', 'h1', '.list>dl>dd>a', '', true);
-addCRule('www.pbtxt.com', 'h1', '.content', 0, 1);
-addRRule('www.pbtxt.com', '\\s+||| ', 'txt下载地址：.*');
-addIRule('www.quanbenba.com', '全本吧', 'h1', '.readerListShow>dl>dd>a');
-addCRule('www.quanbenba.com', 'h1', '#content', 0, 1);
-addIRule('www.qududu.net', '去读读', '.kui-left.kui-fs32', '#kui-book-list>#kui-book-show>.kui-body>.kui-item>a');
-addCRule('www.qududu.net', 'h1.kui-ac', '#kui-page-read-txt', 0, 1);
-addIRule('www.151xs.com', '151小说网', 'h3', '.listcon>dl>dd>a');
-addCRule('www.151xs.com', 'h1', '.content', 0);
 addIRule('kansha.cc', '看啥网', '.pad3.zb', '.pad5>a');
 addCRule('kansha.cc', '.pad3.zb', '.breakword', 0);
 addIRule('k2.kansha.cc', '看啥网', '.pad3.zb', '.pad5>a');
