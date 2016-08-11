@@ -20,11 +20,11 @@
 
 ######预览
 
-![主页面](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###main.png)
-![特定下载](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###Batch.png)
-![自定义站点规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###Customize.png)
-![检查项目上的规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###Url.png)
-![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###Log.png)
+![主页面](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23main.png)
+![特定下载](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Batch.png)
+![自定义站点规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Customize.png)
+![检查项目上的规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Url.png)
+![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Log.png)
 
 ### helpWanted 作者需要帮助
 
