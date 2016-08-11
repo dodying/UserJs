@@ -1368,9 +1368,7 @@ jQuery('.bookDownloaderCustomizeDownload').on('click', function () {
               var html1 = '';
               var html2 = '';
               for (var i in json) {
-                if (jQuery.inArray(i, savedUrl) !== - 1) {
-                  savedClass = 'bookDownloaderUrlSaved';
-                }
+                savedClass = (jQuery.inArray(i, savedUrl) === - 1) ? '' : 'bookDownloaderUrlSaved';
                 html = '';
                 html += '<div name="' + i + '"><input type="checkbox" id="bookDownloaderUrlCheck_' + i + '" class="' + savedClass + '"><label for="bookDownloaderUrlCheck_' + i + '" class="bookDownloaderGreen"> ' + i + '</label><span class="bookDownloaderUrlShow">+</span><div class="bookDownloaderHide"><table><tbody><tr><td>属性名称</td><td>属性值</td></tr>';
                 for (var j in json[i]) {
