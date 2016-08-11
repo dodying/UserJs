@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.29.200",
-        "changeInfo": "增加从[Github]项目上获取规则的功能，接下来将会逐步删除脚本中一些简单的站点规则，然后放在这里"
+        "latestVersion": "1.30.200",
+        "changeInfo": "修复错误，增加按钮[选择未保存]"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*.html",

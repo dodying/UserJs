@@ -16,17 +16,15 @@
 
 ### 意见、建议、Bug
 
-#### 两个地址：[Github-issues](https://github.com/dodying/UserJs/issues)与[GF-反馈](https://greasyfork.org/zh-CN/scripts/21515-noveldownloader/feedback)
-
-#### 想添加其他网站可以在**上面两个地方**发布讨论，或是尝试自行修改代码。
-
-#### 同时，请务必分享你添加的代码。感激不尽。
-
-#### 如果脚本出错，请务必发布讨论，以便帮助作者能及时发现并修正它们。
+#### [Github-issues](https://github.com/dodying/UserJs/issues)与[GF-Feedback](https://greasyfork.org/zh-CN/scripts/21515-noveldownloader/feedback)
 
 ######预览
 
-![预览1](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/1.png)
+![主页面](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###main.png)
+![特定下载](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###Batch.png)
+![自定义站点规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###Customize.png)
+![检查项目上的规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###Url.png)
+![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/###Log.png)
 
 ### helpWanted 作者需要帮助
 
@@ -154,6 +152,10 @@ chapterRule['read.qidian.com'] = {
 ### 更新历史
 
 #### Latest
+
+##### 1.30.199
+
+修复错误，增加**选择未保存**。
 
 ##### 1.29.199
 
