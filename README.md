@@ -46,7 +46,7 @@
 | 【nH】下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  | × | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
 | 搜索引擎跳转-小说版+高亮 | [安装](https://github.com/dodying/UserJs/raw/master/modify/searchEngineJumpForNovel.user.js) |  | × | 修改自 [搜索引擎跳转-文科版](https://greasyfork.org/zh-CN/scripts/2739)<br />与[Highlighter](http://userscripts-mirror.org/scripts/show/15637)以及[Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121) |
 | ```lib``` | 文件夹 |  |  | 写脚本时，从网上复制来的函数 |
-| Base64 | [Base64编码/解码器 在线解码](http://www1.tc711.com/tool/BASE64.htm) |  |  | Base64编码/解码 |
+| base64 | [代码攻城师的技术博客 - CSDN.NET](http://blog.csdn.net/gumanren/article/details/5870133) |  |  | JS实现base64编码与解码 |
 | getHostName | 应该是来自 [SegmentFault](https://segmentfault.com/) 的某个页面... |  |  | 获取```网页字符串```域名 |
 | getMousePos | 应该是来自某博客... |  |  | 获取鼠标位置 |
 | html2Escape | [Win32FanEx 的专栏 - CSDN.NET](http://blog.csdn.net/win32fanex/article/details/11948659) |  |  | web前端关于html转义符的常用js函数 |
