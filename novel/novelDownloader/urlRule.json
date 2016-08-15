@@ -180,7 +180,7 @@
     },
     "www.360118.com": {
         "include1": "http://www.360118.com/html/*",
-        "indexRule": "addIRule('www.360118.com', '天天中文', 'h1', '.ml_main>dl>dd>a');",
+        "indexRule": "addIRule('www.360118.com', '天天中文', 'h1', '.ml_main>dl>dd>a:lt(-1)');",
         "chapterRule": "addCRule('www.360118.com', 'h2', '.yd_text2', 0, 1);"
     },
     "www.bookba.net": {
