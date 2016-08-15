@@ -23,42 +23,6 @@
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
-//开始-自定义站点规则
-// @include     http://www.blwen.com/*.html
-// @include     http://www.mpzw.com/html/*.html
-// @include     http://www.mpzw.com/modules/article/reader.php?aid=*
-// @include     http://www.ledubar.com/book/*
-// @include     http://www.yilego.com/book/*.html
-// @include     http://www.00xs.cc/xiaoshuo/*/*/
-// @include     http://www.kenshu.cc/xiaoshuo/*
-// @include     http://www.bl5xs.com/read/*
-// @include     http://www.151xs.com/*/chapter/*
-// @include     http://www.qududu.net/book/*
-// @include     http://www.quanbenba.com/yuedu/*
-// @include     http://www.pbtxt.com/*
-// @include     http://www.lread.net/read/*
-// @include     http://www.lewen8.com/lw*/*
-// @include     http://www.yfzww.com/Book/*
-// @include     http://www.yfzww.com/Read/*
-// @include     http://www.biquge.tw/*_*/*
-// @include     http://www.e8zw.com/book/*
-// @include     http://www.8shuw.net/book/*
-// @include     http://www.hjwzw.com/Book/Chapter/*
-// @include     http://www.hjwzw.com/Book/Read/*
-// @include     http://book.58xs.com/html/*
-// @include     http://www.5858xs.com/html/*
-// @include     http://www.my285.com/*
-// @include     http://wx.ty2016.net/*
-// @include     http://www.ty2016.net/*
-// @include     http://www.chinaisbn.com/*
-// @include     http://www.uuxiaoshuo.net/html/*
-// @include     http://www.5200zw.com/*
-// @include     http://www.zbzw.com/*
-// @include     http://www.5ycn.com/*
-// @include     http://www.book108.com/*
-// @include     http://www.23txt.com/files/article/html/*
-// @include     http://www.9wh.net/*
-//结束-自定义站点规则
 //              正版
 // @include     http://read.qidian.com/BookReader/*.aspx
 // @include     http://vipreader.qidian.com/BookReader/vip,*,*.aspx
@@ -279,7 +243,6 @@ var script = document.createElement('script');
 script.src = 'http://libs.baidu.com/jquery/1.9.1/jquery.min.js';
 document.head.appendChild(script);
 */
-var debug = true;
 if (GM_getValue('firstRun', true)) {
   alert('使用说明，第一次使用时弹出\n在目录页或是章节页使用。\n按“Shift+D”来显示下载选项。');
   GM_setValue('firstRun', false);
