@@ -23,6 +23,69 @@
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
+//开始-自定义站点规则
+// @include     http://www.59tto.com/files/article/xiaoshuo/*
+// @include     http://www.360118.com/html/*
+// @include     http://www.bookba.net/mulu-*-list.html
+// @include     http://www.bookba.net/read-*-chapter-*.html
+// @include     http://www.qianrenge.net/book/*
+// @include     http://www.dushuge.net/html/*
+// @include     http://www.cmxsw.com/files/article/html/*
+// @include     http://www.xiaoyanwenxue.com/xs/*
+// @include     http://www.5800.cc/5200/*
+// @include     http://www.1kanshu.cc/files/article/html/*
+// @include     http://www.biquguan.com/bqg*/*
+// @include     http://www.wenxuemm.com/book/*
+// @include     http://www.chinaliangzhu.com/*.shtml
+// @include     http://www.23us.cc/html/*
+// @include     http://www.88dushu.com/xiaoshuo/*
+// @include     http://www.630book.cc/shu/*.html
+// @include     http://www.podlook.com/*.shtml
+// @include     http://www.luoqiu.com/read/*/*
+// @include     http://www.7kshu.com/*/*/*
+// @include     http://www.zhuaji.org/read/*/*
+// @include     http://www.d8qu.com/html/*
+// @include     http://www.92zw.com/files/article/html/*
+// @include     http://www.tlxsw.com/files/article/html/*
+// @include     http://www.59shuku.com/book/*
+// @include     http://www.bjxiaoshuo.com/files/article/html/*
+// @include     http://www.xs222.com/html/*
+// @include     http://www.wenchangshuyuan.com/xiaoshuo/*
+// @include     http://www.yqhhy.cc/*
+// @include     http://www.blwen.com/*.html
+// @include     http://www.mpzw.com/html/*.html
+// @include     http://www.mpzw.com/modules/article/reader.php?aid=*
+// @include     http://www.ledubar.com/book/*
+// @include     http://www.yilego.com/book/*.html
+// @include     http://www.00xs.cc/xiaoshuo/*/*/
+// @include     http://www.kenshu.cc/xiaoshuo/*
+// @include     http://www.bl5xs.com/read/*
+// @include     http://www.151xs.com/*/chapter/*
+// @include     http://www.quanbenba.com/yuedu/*
+// @include     http://www.pbtxt.com/*
+// @include     http://www.lread.net/read/*
+// @include     http://www.lewen8.com/lw*/*
+// @include     http://www.yfzww.com/Book/*
+// @include     http://www.yfzww.com/Read/*
+// @include     http://www.biquge.tw/*_*/*
+// @include     http://www.e8zw.com/book/*
+// @include     http://www.8shuw.net/book/*
+// @include     http://www.hjwzw.com/Book/Chapter/*
+// @include     http://www.hjwzw.com/Book/Read/*
+// @include     http://book.58xs.com/html/*
+// @include     http://www.5858xs.com/html/*
+// @include     http://www.my285.com/*
+// @include     http://wx.ty2016.net/*
+// @include     http://www.ty2016.net/*
+// @include     http://www.chinaisbn.com/*
+// @include     http://www.uuxiaoshuo.net/html/*
+// @include     http://www.5200zw.com/*
+// @include     http://www.zbzw.com/*
+// @include     http://www.5ycn.com/*
+// @include     http://www.book108.com/*
+// @include     http://www.23txt.com/files/article/html/*
+// @include     http://www.9wh.net/*
+//结束-自定义站点规则
 //              正版
 // @include     http://read.qidian.com/BookReader/*.aspx
 // @include     http://vipreader.qidian.com/BookReader/vip,*,*.aspx
@@ -175,20 +238,6 @@
 // @include     http://www.yawen8.com/dushi/*
 // @include     http://www.7dsw.com/book/*
 // @include     http://www.bookgew.com/Html/Book/*
-// @include     http://www.79xs.com/Html/Book/*
-// @include     http://www.shuhaha.com/Html/Book/*
-// @include     http://www.xiaoshuo2016.com/*
-// @include     http://www.ttzw.com/book/*
-// @include     http://www.shenmabook.com/ml-*/
-// @include     http://www.fkzww.com/Html/Book/*
-// @include     http://www.151kan.com/kan/*
-// @include     http://www.shuotxts.com/*
-// @include     http://www.doulaidu.com/xs/*
-// @include     http://www.kanshu.la/book/*
-// @include     http://www.kanunu8.com/files/*
-// @include     http://www.hkxs99.net/*
-// @include     http://paitxt.com/*
-// @include     http://www.shunong.com/*
 // @include     http://xiaoshuokan.com/haokan/*
 // @include     http://www.vv44.net/novel/*
 // @include     http://www.chuanyue8.com/files/article/html/*
@@ -921,40 +970,6 @@ addIRule('www.yawen8.com', '雅文小说', '#list>dl>dd>a', '#list>dl>dd>a');
 addCRule('www.yawen8.com', 'h1', '#content', 0, 1);
 addIRule('www.7dsw.com', '7度书屋', '.infotitle>h1', '#list>dl>dd>a');
 addCRule('www.7dsw.com', 'h1', '#BookText', 0, 1);
-addIRule('www.bookgew.com', '书阁网', '.booktitle', 'html>body>table[bordercolordark="white"]>tbody>tr>td>div>a');
-addCRule('www.bookgew.com', '.newstitle', '#booktext', 0, 1);
-addIRule('www.79xs.com', '79小说网', '.wrapper_list>h1>a', '.insert_list>dl>dd>ul>li>strong>a');
-addCRule('www.79xs.com', '#htmltimu', '#BookText', 0, 1);
-addIRule('www.shuhaha.com', '79小说网', '.wrapper_list>h1>a', '.insert_list>dl>dd>ul>li>strong>a');
-addCRule('www.shuhaha.com', '#htmltimu', '#BookText', 0, 1);
-addIRule('www.xiaoshuo2016.com', '小说2016', '.introMid>h1', '.cate-List>ul>li>a', '', true);
-addCRule('www.xiaoshuo2016.com', 'h1', '.articleDiv>p', 0, 1);
-addIRule('www.ttzw.com', '天天中文网', '#info>h1', '#list>dl>dd>a');
-addCRule('www.ttzw.com', 'h1', '#content', 0);
-addIRule('www.shenmabook.com', '神马小说网', '.bigname', '.zjlist4>ol>li>a');
-addCRule('www.shenmabook.com', '#htmltimu', '#htmlContent', 0, 1);
-addRRule('www.shenmabook.com', '更多手打全文字章节请到.*?com');
-addIRule('www.fkzww.com', '无敌龙书屋', '.booktitle', '#BookText>ul>li>a');
-addCRule('www.fkzww.com', '.newstitle', '#BookTextt', 0, 1);
-addIRule('www.151kan.com', '151看书网', '.title>ul>h1', '.chapter>ul>li>a');
-addCRule('www.151kan.com', 'h1', '#readtext>p', 0, 1);
-addRRule('www.151kan.com', 'www.151kan.com', '151看书网');
-addIRule('www.shuotxts.com', '小说下载', '.uu_bkt', '.chaptertd>a');
-addCRule('www.shuotxts.com', '#title', '#content', 0, 1);
-addIRule('www.doulaidu.com', '都来读', '#info>h1', '#list>dl>dd>a');
-addCRule('www.doulaidu.com', 'h1', '#content', 0);
-addIRule('www.kanshu.la', '看书啦', '#focus_book_info>h1>a', '.box1.mulu>ul>li>a');
-addCRule('www.kanshu.la', '.h1', '#contentTxt', 0);
-addIRule('www.kanunu8.com', '努努书坊', '.l15', 'html>body>div>table>tbody>tr>td>table>tbody>tr>td>table[bgcolor="#d4d0c8"]>tbody>tr>td>a');
-addCRule('www.kanunu8.com', 'font', 'p', 0, 1);
-addIRule('www.hkxs99.net', '无弹窗小说网', '.book>h1', '.book>dl>dd>a');
-addCRule('www.hkxs99.net', 'h1', '.book', 0);
-addRRule('www.hkxs99.net', '上一篇：.*', '下一篇：.*');
-addIRule('paitxt.com', '派小说网', '.book_news_style_text2>h1', '#chapterlist>dd>a');
-addCRule('paitxt.com', '#bgdiv>dl>dt', '#booktext', 0, 1);
-addIRule('www.shunong.com', '书农小说', '.infos>h1', '.book_list>ul>li>a');
-addCRule('www.shunong.com', '.h1title>h1', '#htmlContent', 0);
-addRRule('www.shunong.com', '\\s+||| ', '书农文学.*?下次阅读。', '如果觉得<a.*欣赏.*');
 addIRule('xiaoshuokan.com', '好看小说网', 'h1', '.c1>a');
 chapterRule['xiaoshuokan.com'] = {
   'lang': 0,
@@ -1456,6 +1471,7 @@ jQuery('.bookDownloaderUrlSave').click(function () {
       if (jQuery.inArray(host, savedUrl) === - 1) savedUrl.push(host);
       var temp = jQuery(window).data('urlRule') [host];
       for (var i in temp) {
+        if (temp[i] === '') continue;
         if (/Rule$/.test(i)) {
           GM_setValue(i + '_' + host, temp[i]);
         } else if (/^include|^match/.test(i)) {
