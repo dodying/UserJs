@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.30.176",
-        "changeInfo": "修复错误，增加按钮[选择未保存]"
+        "latestVersion": "1.31.178",
+        "changeInfo": "增加分次下载，具体功能自行摸索"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*.html",

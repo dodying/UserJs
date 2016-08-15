@@ -1,5 +1,3 @@
-#### 由于引用外来库的原因，可能导致安装时间过长或是无法正常安装。请耐心等待并尝试多次。
-
 #### 此脚本引用的库，感谢他们 jQuery [FileSaver](https://github.com/eligrey/FileSaver.js) [jszip](https://github.com/Stuk/jszip) [jquery-s2t](https://github.com/hustlzp/jquery-s2t)
 
 ### 使用说明
@@ -10,7 +8,7 @@
 
 #### 关于【特定下载某些章节】功能的一些提示：可以使用带有【Snap Links】字样的附加组件或扩展或UC脚本
 
-#### 如果某章节长时间无法下载，请刷新重试。
+#### 如果某章节长时间无法下载，请刷新重试。<s>浏览器会从缓存中提取数据。</s>
 
 #### 失败重试、超时重试只对```非特殊站点```有效
 
@@ -31,8 +29,6 @@
 iOS：生成的Epub格式电子书在[iBook](#iBook)中只显示每章节**前两页**，在[开卷有益](#KingReader)中显示**【不支持的epub格式】**，在[Anyview](#Anyview)中可以正常阅读。
 
 Android：未测试...
-
-ps.果然[Anyview](#Anyview)很好很强大。
 
 ### 自定义站点规则说明
 
@@ -72,38 +68,18 @@ ps.果然[Anyview](#Anyview)很好很强大。
 ##### 此规则，是为了那些无法直接在网页原文件中获取到内容的网址准备的。
 
 ```
-具体示例：起点主站-（未压缩成一行）
-chapterRule['read.qidian.com'] = {
+具体示例：黑岩-（未压缩成一行）
+chapterRule['www.heiyan.com'] = {
   'lang': 0,
   'Deal': function (num, url) {
+    var urlTrue = 'http://a.heiyan.com/ajax/chapter/content/' + url.replace(/.*\//, '');
     GM_xmlhttpRequest({
       method: 'GET',
-      url: url,
+      url: urlTrue,
       onload: function (response) {
-        var name = jQuery('.story_title>h1,.title>h3', response.response).text();
-        var content = jQuery('script[src$=".txt"]', response.response);
-        if (content.length > 0) {
-          chapterRule['read.qidian.com'].Deal2(num, name, content);
-        } else {
-          content = wordFormat(jQuery('#content', response.response).html());
-          content = '来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n' + content;
-          if (parseInt(jQuery('.bookDownloaderLang:checked').val()) !== 0) {
-            name = tranStr(name, true);
-            content = tranStr(content, true);
-          }
-          thisDownloaded(num, name, content);
-        }
-      }
-    });
-  },
-  'Deal2': function (num, name, content) {
-    var url = content.attr('src');
-    GM_xmlhttpRequest({
-      method: 'GET',
-      url: url,
-      overrideMimeType: 'text/html; charset=gb2312',
-      onload: function (response) {
-        content = wordFormat(response.response.replace(/document\.write\(\'(.*)\'\);/, '$1'));
+        var info = JSON.parse(response.response);
+        var name = info.chapter.title;
+        var content = wordFormat(info.chapter.htmlContent);
         content = '来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n' + content;
         if (parseInt(jQuery('.bookDownloaderLang:checked').val()) !== 0) {
           name = tranStr(name, true);
@@ -127,8 +103,6 @@ chapterRule['read.qidian.com'] = {
   thisDownloaded（必须，传递章节内容，参数为num-表示这是第几章、name-标题、content-内容）
 ```
 
-##### addCRule('域名','章节标题-选择器','章节内容-选择器','数字型,0-简体,1-繁体','可省略,数字型,文档编码,unicode则留空,简体中文则填1');
-
 ### 支持网站【列举前10项】
 
 1. 起点主站 [read.qidian.com](http://read.qidian.com/)
@@ -143,15 +117,13 @@ chapterRule['read.qidian.com'] = {
 10. 纵横 [book.zongheng.com](http://book.zongheng.com/)
 11. ...
 
-#### 版本命名规则
-
-如**1.0.13**分成两段，1.0与13
-
-13表示支持13个网站。
-
 ### 更新历史
 
 #### Latest
+
+##### 1.31.178
+
+增加**增加分次下载**，具体功能自行摸索。
 
 ##### 1.30.199
 
@@ -261,7 +233,7 @@ chapterRule['read.qidian.com'] = {
 
 以后版本更新，不将**新增**的网站写入[更新历史](#更新历史)，详见[支持网站](#支持网站)。但会将修正的网站写入[更新历史](#更新历史)。
 
-##### ...
+##### ... 神隐
 
 ##### 1.00
 
