@@ -47,9 +47,8 @@
         "chapterRule": "addCRule('www.151xs.com', 'h1', '.content', 0);"
     },
     "www.qududu.net": {
-        "include1": "http://www.qududu.net/book/*",
-        "indexRule": "addIRule('www.qududu.net', '去读读', '.kui-left.kui-fs32', '#kui-book-list>#kui-book-show>.kui-body>.kui-item>a');",
-        "chapterRule": "addCRule('www.qududu.net', 'h1.kui-ac', '#kui-page-read-txt', 0, \"1);"
+        "indexRule": "addIRule('www.qududu.net', '[已删除]去读读');",
+        "chapterRule": ""
     },
     "www.quanbenba.com": {
         "include1": "http://www.quanbenba.com/yuedu/*",
@@ -169,7 +168,7 @@
     },
     "www.9wh.net": {
         "include1": "http://www.9wh.net/*",
-        "indexRule": "addIRule('www.9wh.net', '九头鸟书院', 'h1', '.ListCon>.ListRow>li>a');",
+        "indexRule": "addIRule('www.9wh.net', '九头鸟书院', 'h1', '.ListCon>.ListRow>li>a:lt(-2)');",
         "chapterRule": "addCRule('www.9wh.net', 'h1', '#text_area', 0, 1);",
         "reRule": "addRRule('www.9wh.net', '\\s+||| ', '\\(九头鸟书院http://www.9wh.net\\)');"
     },
