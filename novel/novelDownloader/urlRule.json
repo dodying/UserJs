@@ -842,6 +842,27 @@
         "indexRule": "addIRule('www.20xs.cc', '顶点小说', 'h1', '.article_texttitleb>li>a');",
         "chapterRule": "addCRule('www.20xs.cc', 'h1', '#book_text', 0, 1);"
     },
+    "www.piaotian.net": {
+        "include1": "http://www.piaotian.net/html/*",
+        "indexRule": "addIRule('www.piaotian.net','飘天文学','h1','.centent>ul>li>a:gt(3)');",
+        "chapterRule": "addCRule('www.piaotian.net','h1','#content',0,1);",
+        "reRule": "addRRule('www.piaotian.net', '选择背景颜色：', '选择字体大小：','手机用户请访问http://m.piaotian.net.*');"
+    },
+    "www.biquge.com.tw": {
+        "include1": "http://www.biquge.com.tw/*_*/*",
+        "indexRule": "addIRule('www.biquge.com.tw', '笔趣阁', 'h1', '#list>dl>dd>a');",
+        "chapterRule": "addCRule('www.biquge.com.tw', 'h1', '#content', 0, 1);"
+    },
+    "www.xzmao.net": {
+        "include1": "http://www.xzmao.net/read/*",
+        "indexRule": "addIRule('www.xzmao.net', '下载猫', 'h1', '.TabCss>dl>dd>a');",
+        "chapterRule": "addCRule('www.xzmao.net', '#title', '#content');"
+    },
+    "www.shuyaya.com": {
+        "include1": "http://www.shuyaya.com/read/*",
+        "indexRule": "addIRule('www.shuyaya.com','丫丫电子书','h1','.dirconone>ul>li>a');",
+        "chapterRule": "addCRule('www.shuyaya.com','h1','#content',0);"
+    },
     "": {
         "include1": "",
         "indexRule": "",

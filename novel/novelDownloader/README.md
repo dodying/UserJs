@@ -23,6 +23,7 @@
 ![自定义站点规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Customize.png)
 ![检查项目上的规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Url.png)
 ![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Log.png)
+![搜索引擎提示](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Search.png)
 
 ### helpWanted 作者需要帮助
 
@@ -120,6 +121,10 @@ chapterRule['www.heiyan.com'] = {
 ### 更新历史
 
 #### Latest
+
+##### 1.33.57
+
+细节更新，增加搜索引擎提示。
 
 ##### 1.32.53
 
