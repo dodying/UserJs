@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.31.53",
-        "changeInfo": ""
+        "latestVersion": "1.32.53",
+        "changeInfo": "细节更新"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*.html",
