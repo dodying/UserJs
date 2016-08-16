@@ -71,7 +71,6 @@ Android：未测试...
 ```
 具体示例：黑岩-（未压缩成一行）
 chapterRule['www.heiyan.com'] = {
-  'lang': 0,
   'Deal': function (num, url) {
     var urlTrue = 'http://a.heiyan.com/ajax/chapter/content/' + url.replace(/.*\//, '');
     GM_xmlhttpRequest({
@@ -80,13 +79,8 @@ chapterRule['www.heiyan.com'] = {
       onload: function (response) {
         var info = JSON.parse(response.response);
         var name = info.chapter.title;
-        var content = wordFormat(info.chapter.htmlContent);
-        content = '来源地址：' + jQuery(window).data('dataDownload') [num].url + '\r\n' + content;
-        if (parseInt(jQuery('.bookDownloaderLang:checked').val()) !== 0) {
-          name = tranStr(name, true);
-          content = tranStr(content, true);
-        }
-        thisDownloaded(num, name, content);
+        var content = info.chapter.htmlContent;
+        thisDownloaded(num, name, content, 0);
       }
     });
   }
@@ -99,9 +93,7 @@ chapterRule['www.heiyan.com'] = {
 2. Deal函数的参数必须是num（表示这是第几章）与url（原链接）
 3. 可用函数:
   jQuery、
-  wordFormat（对内容进行替换、美化，参数为字符串）、
-  tranStr（简繁体转换，参数1为字符串，参数2为布尔-是转换成繁体，否转换成简体）、
-  thisDownloaded（必须，传递章节内容，参数为num-表示这是第几章、name-标题、content-内容）
+  thisDownloaded（必须，传递章节内容，参数为num-表示这是第几章、name-标题、content-内容、lang-该站点的默认语言0简体1繁体）
 ```
 
 ### 支持网站【列举前10项】
