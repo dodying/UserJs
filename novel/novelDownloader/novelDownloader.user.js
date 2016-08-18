@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.33.65
+// @version     1.34.65+242
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
 // @connect     k2.kansha.cc
@@ -25,11 +25,14 @@
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
 //              搜索引擎
-// @include     https://www.baidu.com/s?*wd=*
-// @include     https://www.baidu.com/s?*word=*
-// @include     https://www.baidu.com/baidu?*wd=*
-// @include     https://www.baidu.com/baidu?*word=*
-// @include     https://www.google.co.jp/search?*q=*
+// @include     http*://www.baidu.com/s?*wd=*
+// @include     http*://www.baidu.com/s?*word=*
+// @include     http*://www.baidu.com/baidu?*wd=*
+// @include     http*://www.baidu.com/baidu?*word=*
+// @include     http*://www.google.co.jp/search?*q=*
+// @include     http*://cn.bing.com/search?*q=*
+// @include     http*://www.sogou.com/web?query=*
+// @include     http*://www.so.com/s?*q=*
 //              正版
 // @include     http://read.qidian.com/BookReader/*.aspx
 // @include     http://vipreader.qidian.com/BookReader/vip,*,*.aspx
@@ -87,6 +90,8 @@
 // @include     http://www.1001p.com/book/*.html
 // @include     http://www.yqsd.cn/html/*
 // @include     http://book.xxs8.com/*
+// @include     http://www.longruo.com/chapterlist/*
+// @include     http://www.longruo.com/catalog/*_*.html
 //              轻小说
 // @include     http://www.wenku8.com/novel/*/*/*
 // @include     http://book.sfacg.com/Novel/*
@@ -119,6 +124,8 @@
 // @include     http://www.chenfenggm.com/quanwen/*.html
 // @include     http://www.chenfenggm.com/txtbook/*.html
 // @include     http://www.xncwxw.com/files/article/html/*.html
+// @include     http://www.1766bbs.com/*
+// @include     http://www.7788wx.com/Html/*
 // include     http://18av.mm-cg.com/novel*
 // include     http://18av.mm-cg.com/serch*
 // ==/UserScript==
@@ -136,10 +143,13 @@ var indexRule = new Object();
 var chapterRule = new Object();
 var reRule = new Object();
 //////////////////////////////////////////////////搜索引擎
-addIRule('www.baidu.com', '度娘');
-addIRule('www.google.co.jp', '谷歌');
+addIRuleForSearch('www.baidu.com', '.c-showurl', '#page>a', '#su', '#kw');
+addIRuleForSearch('www.google.co.jp', '._Rm', '#nav>tbody>tr>td>a', '.lsb', '#lst-ib');
+addIRuleForSearch('cn.bing.com', '.b_attribution>cite', '.sb_pagF>li>a', '#sb_form_go', '#sb_form_q');
+addIRuleForSearch('www.sogou.com', '.fb>cite', '#pagebar_container>a', '#searchBtn', '#upquery');
+addIRuleForSearch('www.so.com', 'p.res-linkinfo>cite', '#page>a', '#su', '#keyword');
 //////////////////////////////////////////////////正版
-addIRule('www.qidian.com', '起点');
+addIRule('www.qidian.com');
 addIRule('read.qidian.com', '起点主站', '.booktitle>h1', '.box_cont>div.list>ul>li>a', '.box_title:contains(\'VIP\')+.box_cont>div.list>ul>li>a');
 chapterRule['read.qidian.com'] = {
   'Deal': function (num, url) {
@@ -553,6 +563,8 @@ addIRule('www.yqsd.cn', '言情书殿', 'h1', '.list_section>.column3>ul>li>a', 
 addCRule('www.yqsd.cn', 'h2', '#read_txt');
 addIRule('book.xxs8.com', '新小说吧', 'strong>a', '.chapter-list>ul>li>a', '.chapter-list>ul>li>a:has(span)');
 addCRule('book.xxs8.com', '#read-content>h2', '.textinfo+p');
+addIRule('www.longruo.com', '龙若中文网', '.fs22', '.catalog>li>a', '.catalog>li>a:has(span.mark)');
+addCRule('www.longruo.com', 'h1', '.article');
 //////////////////////////////////////////////////轻小说
 addIRule('www.wenku8.com', '轻小说文库', '#title', '.css>tbody>tr>td>a');
 addCRule('www.wenku8.com', '#title', '#content', 0, 1);
@@ -646,7 +658,7 @@ chapterRule['www.chuanyue8.com'] = {
 };
 addIRule('kansha.cc', '看啥网', '.pad3.zb', '.pad5>a');
 addCRule('kansha.cc', '.pad3.zb', '.breakword');
-addIRule('k2.kansha.cc', '', '.pad3.zb', '.pad5>a');
+addIRule('k2.kansha.cc');
 addCRule('k2.kansha.cc', '.pad3.zb', '.breakword');
 addRRule('k2.kansha.cc', '<span class="par0">仧</span>', '<img src="imafont/[a-z](.*?).gif".*?>|||$1');
 addIRule('www.22ff.com', '爱书网', '.tname>a', '.main>.neirong>.clc>a');
@@ -783,11 +795,15 @@ addIRule('www.chenfenggm.com', '辣文小说网', 'h1', '#read.chapter>.list>ul>
 addCRule('www.chenfenggm.com', 'h1', '.chapter', 0, 1);
 addCRule('www.xncwxw.com', 'p.ctitle', '#content', 0, 1);
 addIRule('www.xncwxw.com', '新暖才文学网', 'h1>a', '#Table1>tbody>tr>td>a');
+addIRule('www.1766bbs.com', '屌丝小说网', 'h1', '.book_list>ul>li>a');
+addCRule('www.1766bbs.com', 'h1', '#htmlContent', 0, 1);
+addIRule('www.7788wx.com', '7788文学网', 'h1', '#list>dl>dd>a');
+addCRule('www.7788wx.com', 'h1', '#content', 0, 1);
 addIRule('18av.mm-cg.com', '18H', '.label>div', '.novel_leftright>span>a:visible');
 addCRule('18av.mm-cg.com', '#left>h1', '#novel_content_txtsize', 1);
 //////////////////////////////////////////////////以上为站点规则
-jQuery(document.body).append('<div id="nD"><div class="nD-Main nD-BoxCenter"><button class="nD-ShowMain nD-BtnShow">X</button><button class="nD-ShowSupport">支持网站</button><div class="nD-SeparatorBlack"></div><span class="nD-Info"></span><div class="nD-SeparatorBlack"></div>下载线程：<input class="nD-Input nD-Thread"name="thread"placeholder="5"type="text">&nbsp;失败重试次数：<input class="nD-Input nD-Error"title="0表示不重试"name="error"placeholder="0"type="text"><div class="nD-SeparatorWhite"></div>超时重试次数：<input class="nD-Input nD-Timeout"title="0表示不重试"name="timeout"placeholder="3"type="text">&nbsp;超时时间：<input class="nD-Input nD-Time"name="time"placeholder="20"type="text">秒<div class="nD-SeparatorWhite"></div><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节</label>&nbsp;语言：<input id="nD-LangZhs"type="radio"name="lang"class="nD-Lang"value="0"checked="true"></input><label for="nD-LangZhs">简体</label><input id="nD-LangZht"type="radio"name="lang"class="nD-Lang"value="1"></input><label for="nD-LangZht">繁体</label><div class="nD-SeparatorBlack"></div>分次下载&nbsp;<select class="nD-Split"name="type"><option value=""></option><option value="all-2">2次</option><option value="all-3">3次</option><option value="all-4">4次</option><option value="all-5">5次</option><option value="every-500">500章</option><option value="every-100">100章</option><option value="every-20">20章</option><option value="every-10">10章</option><option value="...">...</option></select>&nbsp;<button class="nD-SplitStart">开始下载</button><div class="nD-SeparatorWhite"></div>下载范围&nbsp;<input placeholder="0开头,例0-24,35,49"class="nD-SplitInput"><div class="nD-SeparatorBlack"></div><button class="nD-This">下载本章(TXT)</button>&nbsp;<button class="nD-All2Txt">下载目录页(TXT)</button><div class="nD-SeparatorWhite"></div><button class="nD-All2Zip">下载目录页(ZIP)</button>&nbsp;<button class="nD-All2Epub">下载目录页(Epub)</button><div class="nD-SeparatorBlack"></div><button class="nD-ShowBatch">特定下载</button>&nbsp;<button class="nD-ShowCustomize">自定义站点规则</button></div><div class="nD-Support nD-BoxCenter"><button class="nD-ShowSupport nD-BtnShow">X</button><div class="nD-SeparatorWhite"></div></div><div class="nD-Batch nD-BoxCenter"><button class="nD-ShowBatch nD-BtnShow">X</button><div class="nD-SeparatorWhite"></div><button class="nD-BatchWildHelp">?</button>通配符模式：<input class="nD-BatchWild"placeholder="http://www.example.com/*"></input><div class="nD-SeparatorWhite"></div><textarea class="nD-BatchTextarea"></textarea><div class="nD-SeparatorWhite"></div><button class="nD-Batch2Txt">开始下载(TXT)</button>&nbsp;<button class="nD-Batch2Zip">开始下载(ZIP)</button>&nbsp;<button class="nD-Batch2Epub">开始下载(Epub)</button></div><div class="nD-Customize nD-BoxCenter"><button class="nD-ShowCustomize nD-BtnShow">X</button><div class="nD-SeparatorWhite"></div><span>默认显示当前站点规则<br>双击后开始编写...<br>具体规则，详见<a href="https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明"target="_blank">自定义站点规则说明</a></span><div class="nD-SeparatorWhite"></div><p class="nD-CustomizeTextarea">双击后，这个地方可以编写...</p><div class="nD-SeparatorWhite"></div><button class="nD-CustomizeSave">保存</button>&nbsp;<button class="nD-CustomizeDelete">删除某站点的规则</button>&nbsp;<button class="nD-CustomizeClear">清空</button><div class="nD-SeparatorWhite"></div><button class="nD-CustomizeAll">显示所有规则</button>&nbsp;<button class="nD-CustomizeDownload">检查[项目]上的规则</button></div><div class="nD-Url nD-BoxCenter"><button class="nD-ShowUrl nD-BtnShow">X</button><div class="nD-UrlDiv"><div class="nD-UrlDivNormal">---以下站点规则未保存---</div><div class="nD-UrlDivChange">---以下站点规则已变更---</div><div class="nD-UrlDivSaved">---以下站点规则已保存---</div></div><button class="nD-UrlAll">全选</button>&nbsp;<button class="nD-UrlInverse">反选</button>&nbsp;<button class="nD-UrlUnsaved">选择未保存</button>&nbsp;<button class="nD-UrlSave">保存</button></div><div class="nD-Log"><div class="nD-LogNow"title="点击清除已完成"><div><progress class="bookDownladerProgress"value="0"max="0"></progress><span class="bookDownladerProgressSpan"><span class="bookDownladerChapter">0</span>/<span class="bookDownladerChapterAll">0</span></span></div></div><button class="nD-ShowLog nD-BtnShow">X</button><div class="nD-LogDiv"></div></div><div class="nD-Finder nD-Hide"></div></div>');
-jQuery('head').append('<style>#nD{text-align:center;}#nD span{float:none;background:none;}.nD-SeparatorBlack{border:1px solid #000;}.nD-SeparatorWhite{border:1px none;}.nD-Support{height:500px;overflow:auto;}.nD-Input{width:24px;}.nD-BatchWild{width:330px;}#nD textarea{resize:both;width:95%;height:108px;overflow:auto;}.nD-BtnShow{z-index:9999;float:right;color:red;}.nD-CustomizeTextarea{border:1px solid #000;background-color:#e7f4fe;word-wrap:break-word;max-width:600px;max-height:400px;overflow-x:hidden;overflow-y:auto;}.nD-UrlDiv{max-height:500px;overflow-x:hidden;overflow-y:auto;}.nD-UrlDiv table{border-collapse:collapse;}.nD-UrlDiv td{border:solid 1px gray;}.nD-Green{color:green;}.nD-Blue{color:blue;}.nD-Hide{display:none;}.nD-UrlShow{float:left!important;cursor:pointer;}.nD-LogDiv{height:290px;overflow:auto;}.bookDownladerProgressSpan{position:absolute;left:0;right:0;}.nD-StatusOk{color:green;}.nD-StatusError{color:red;}.nD-StatusTimeout{color:yellow;}</style>');
+jQuery(document.body).append('<div id="nD"><div class="nD-Main nD-BoxCenter"><button class="nD-ShowMain nD-BtnShow">X</button><button class="nD-ShowSupport">支持站点</button><div class="nD-Separator"></div><span class="nD-Info"></span><div class="nD-Separator"></div>下载线程：<input class="nD-Input nD-Thread"name="thread"placeholder="5"type="text">&nbsp;失败重试次数：<input class="nD-Input nD-Error"title="0表示不重试"name="error"placeholder="0"type="text"><br/>超时重试次数：<input class="nD-Input nD-Timeout"title="0表示不重试"name="timeout"placeholder="3"type="text">&nbsp;超时时间：<input class="nD-Input nD-Time"name="time"placeholder="20"type="text">秒<br/><input id="boodDownloaderVip"type="checkbox"></input><label for="boodDownloaderVip">下载Vip章节</label>&nbsp;语言：<input id="nD-LangZhs"type="radio"name="lang"class="nD-Lang"value="0"checked="true"></input><label for="nD-LangZhs">简体</label><input id="nD-LangZht"type="radio"name="lang"class="nD-Lang"value="1"></input><label for="nD-LangZht">繁体</label><div class="nD-Separator"></div>分次下载&nbsp;<select class="nD-Split"name="type"><option value=""></option><option value="all-2">2次</option><option value="all-3">3次</option><option value="all-4">4次</option><option value="every-500">500章</option><option value="every-100">100章</option><option value="every-10">10章</option><option value="...">...</option></select>&nbsp;<button class="nD-SplitStart">开始下载</button><br/>下载范围&nbsp;<input placeholder="0开头,例0-24,35,49"class="nD-SplitInput"><div class="nD-Separator"></div><button class="nD-This">下载本章(TXT)</button>&nbsp;<button class="nD-All2Txt">下载目录页(TXT)</button><br/><button class="nD-All2Zip">下载目录页(ZIP)</button>&nbsp;<button class="nD-All2Epub">下载目录页(Epub)</button><div class="nD-Separator"></div><button class="nD-ShowCustomize">自定义站点规则</button></div><div class="nD-Support nD-BoxCenter"><button class="nD-ShowSupport nD-BtnShow">X</button></div><div class="nD-Customize nD-BoxCenter"><button class="nD-ShowCustomize nD-BtnShow">X</button><span>默认显示当前站点规则<br/>具体规则，详见<a href="https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明"target="_blank">自定义站点规则说明</a></span><br/><textarea class="nD-CustomizeTextarea"></textarea><br/><button class="nD-CustomizeSave">保存</button>&nbsp;<button class="nD-CustomizeDelete">删除某站点的规则</button>&nbsp;<button class="nD-CustomizeClear">清空</button><br/><button class="nD-CustomizeAll">显示所有规则</button>&nbsp;<button class="nD-CustomizeDownload">检查[项目]上的规则</button></div><div class="nD-Url nD-BoxCenter"><button class="nD-ShowUrl nD-BtnShow">X</button><div class="nD-UrlDiv"><div class="nD-UrlDivNormal">---以下站点规则未保存---</div><div class="nD-UrlDivChange">---以下站点规则已变更---</div><div class="nD-UrlDivSaved">---以下站点规则已保存---</div></div><button class="nD-UrlAll">全选</button>&nbsp;<button class="nD-UrlInverse">反选</button>&nbsp;<button class="nD-UrlUnsaved">选择未保存</button>&nbsp;<button class="nD-UrlSave">保存</button></div><div class="nD-Log"><div class="nD-LogNow"title="点击清除已完成"><div><progress class="bookDownladerProgress"value="0"max="0"></progress><span class="bookDownladerProgressSpan"><span class="bookDownladerChapter">0</span>/<span class="bookDownladerChapterAll">0</span></span></div></div><button class="nD-ShowLog nD-BtnShow">X</button><div class="nD-LogDiv"></div></div><div class="nD-Finder nD-Hide"></div></div>');
+jQuery('head').append('<style>#nD{text-align:center;}.nD-BoxCenter,.nD-Log{display:none;z-index:999999;background-color:white;border:1px solid black;position:absolute;}.nD-Log{width:300px;height:350px;overflow:auto;}#nD button{border:#c0c0c0 1px solid;}#nD span{float:none;background:none;}.nD-Separator{border:1px solid #000;}.nD-Support{height:500px;overflow:auto;}.nD-Input{width:24px;}#nD textarea{resize:both;width:95%;height:108px;overflow:auto;}.nD-BtnShow{z-index:9999;float:right;color:red;}.nD-Customize{min-width:450px;}.nD-UrlDiv{max-height:500px;overflow-x:hidden;overflow-y:auto;}.nD-UrlDiv table{border-collapse:collapse;}.nD-UrlDiv td{border:solid 1px gray;}.nD-Green{color:green;}.nD-Blue{color:blue;}.nD-Hide{display:none;}.nD-UrlShow{float:left!important;cursor:pointer;}.nD-LogDiv{height:290px;overflow:auto;}.bookDownladerProgressSpan{position:absolute;left:0;right:0;}.nD-StatusOk{color:green;}.nD-StatusError{color:red;}.nD-StatusTimeout{color:yellow;}</style>');
 (GM_getValue('lang', 0) === 0) ? jQuery('#nD-LangZhs') [0].checked = true : jQuery('#nD-LangZht') [0].checked = true;
 if (GM_getValue('thread', false) !== false) jQuery('.nD-Thread').val(GM_getValue('thread'));
 if (GM_getValue('error', false) !== false) jQuery('.nD-Error').val(GM_getValue('error'));
@@ -803,77 +819,67 @@ if (GM_getValue('split', false) !== false) {
 var SupportedUrl = '';
 var num = 0;
 for (var i in indexRule) {
-  if (indexRule[i].cn === '') continue;
+  if (indexRule[i].cn === '' || indexRule[i].cn === undefined) continue;
   num++;
-  SupportedUrl += num + '. ' + indexRule[i].cn + ' <a href="http://' + i + '" target="_blank">' + i + '</a><div class="nD-SeparatorWhite"></div>';
+  SupportedUrl += num + '. ' + indexRule[i].cn + ' <a href="http://' + i + '" target="_blank">' + i + '</a><br/>';
 }
 if (GM_getValue('customizeRule', false)) {
   var savedValue = GM_listValues();
-  var host = new RegExp(location.host + '$');
   var nowCustomizeRule = '';
   var allCustomizeRule = '';
   var num2 = num;
   for (i = 0; i < savedValue.length; i++) {
     if (/^indexRule_|^chapterRule_|^reRule_/i.test(savedValue[i])) {
-      allCustomizeRule += html2Escape(GM_getValue(savedValue[i])) + '<br>';
-      if (host.test(savedValue[i])) {
-        nowCustomizeRule += html2Escape(GM_getValue(savedValue[i])) + '<br>';
+      allCustomizeRule += GM_getValue(savedValue[i]) + '\n';
+      if (savedValue[i].indexOf(location.host) > 0) {
+        nowCustomizeRule += GM_getValue(savedValue[i]) + '\n';
         eval(GM_getValue(savedValue[i]));
       }
-      if (((host.test('www.baidu.com')) || (host.test('www.google.co.jp'))) && /^indexRule_/i.test(savedValue[i])) {
+      if (indexRule[location.host] && indexRule[location.host].searchEngine && /^indexRule_/i.test(savedValue[i])) {
         eval(GM_getValue(savedValue[i]));
       }
       if (/^indexRule_/.test(savedValue[i])) {
         num2++;
         var arr = GM_getValue(savedValue[i]).split('\'');
-        SupportedUrl += num2 + '. ' + arr[3] + ' <a href="http://' + arr[1] + '" target="_blank">' + arr[1] + '</a><div class="nD-SeparatorWhite"></div>';
+        SupportedUrl += num2 + '. ' + arr[3] + ' <a href="http://' + arr[1] + '" target="_blank">' + arr[1] + '</a><br/>';
       }
     }
   }
-  if (host.test('www.baidu.com')) {
-    jQuery('.c-showurl').each(function () {
-      if (jQuery(this).parent().find('.nD-added').length === 0 && getHostName(this.innerText).replace(/^(.*?)\s+.*$/, '$1') in indexRule) {
+  if (indexRule[location.host] && indexRule[location.host].searchEngine) {
+    jQuery(indexRule[location.host].cite).each(function () {
+      if (getHostName(this.innerText).replace(/^(.*?)\s+.*$/, '$1') in indexRule) {
         jQuery(this).parent().append('<a class="nD-added nD-Blue"> 已加入' + GM_info.script.name + '豪华午餐</a>')
       }
     });
-    jQuery('#page>a').click(function (e) {
-      e.preventDefault();
+    jQuery(indexRule[location.host].nextpage).click(function () {
       location.href = this.href;
     });
-  } else if (host.test('www.google.co.jp')) {
-    jQuery('._Rm').each(function () {
-      if (jQuery(this).parent().find('.nD-added').length === 0 && getHostName(this.innerText).replace(/^(.*?)\s+.*$/, '$1') in indexRule) {
-        jQuery(this).parent().append('<a class="nD-added nD-Blue"> 已加入' + GM_info.script.name + '豪华午餐</a>')
-      }
-    });
+    jQuery(indexRule[location.host].searchBtn).click(function (e) {
+      var keyword = encodeURIComponent(jQuery(indexRule[location.host].searchInput).val());
+      location.search = '?' + jQuery(indexRule[location.host].searchInput).attr('name') + '=' + keyword;
+    })
   }
-  nowCustomizeRule = nowCustomizeRule.replace(/<br>$/, '');
-  if (nowCustomizeRule === '') nowCustomizeRule = '双击后，这个地方可以编写...';
+  nowCustomizeRule = nowCustomizeRule.replace(/\s+$/, '');
   if (allCustomizeRule === '') {
     GM_setValue('customizeRule', false);
     GM_setValue('savedUrl', new Array());
   }
-  jQuery('.nD-CustomizeTextarea').html(nowCustomizeRule);
+  jQuery('.nD-CustomizeTextarea').val(nowCustomizeRule);
   jQuery('.nD-CustomizeAll').click(function () {
-    if (confirm('请确定是否已保存规则')) jQuery('.nD-CustomizeTextarea').html(allCustomizeRule);
+    if (confirm('请确定是否已保存规则')) jQuery('.nD-CustomizeTextarea').val(allCustomizeRule);
   });
 }
-jQuery('.nD-Support').append('总共支持网站' + num + '个。<div class="nD-SeparatorWhite"></div>网站基本排序：正版>轻小说>盗贴<span style="color:white;background-color:white;" title="好孩子不要看">>18X</span>>自定义<div class="nD-Separator"></div>' + SupportedUrl);
-var nameThis = (indexRule[location.host]) ? indexRule[location.host].cn : '未命名的网址';
+jQuery('.nD-Support').append('脚本自带' + num + '个站点规则<br/>此外添加' + eval(num2 - num) + '个站点规则。<br/>站点排序：正版>轻小说>盗贴<span style="color:white;background-color:white;"title="好孩子不要看">>18X</span>>自定义<div class="nD-Separator"></div>' + SupportedUrl);
+var nameThis = (indexRule[location.host] && indexRule[location.host].cn) ? indexRule[location.host].cn : '未命名的站点';
 jQuery('.nD-Info').html('当前网站：<a href="http://' + location.host + '/" target="_blank">' + nameThis + '</a>');
-if (debug && indexRule[location.host]) {
+if (indexRule[location.host]) {
   jQuery(indexRule[location.host].chapter).each(function (i) {
-    jQuery(this).prepend('<div class="novelDownloaderChapter" style="color:black;float:none;display:inline;width:auto;">' + i + '-</div>');
+    jQuery(this).prepend('<div class="novelDownloaderChapter"style="color:black;float:none;display:inline;width:auto;"title="novelDownloader章节标记">' + i + '-</div>');
   });
   jQuery(indexRule[location.host].vip).find('.novelDownloaderChapter').css('color', 'red');
 };
 //////////////////////////////////////////////////以下为CSS设置与事件
 jQuery('.nD-BoxCenter').css({
-  'display': 'none',
-  'z-index': '999999',
-  'background-color': 'white',
-  'border': '1px solid black',
-  'position': 'absolute',
   'left': function () {
     return String(jQuery(window).scrollLeft() + (window.screen.availWidth - jQuery(this).width()) / 2) + 'px';
   },
@@ -882,14 +888,6 @@ jQuery('.nD-BoxCenter').css({
   }
 });
 jQuery('.nD-Log').css({
-  'display': 'none',
-  'z-index': '999999',
-  'background-color': 'white',
-  'border': '1px solid black',
-  'position': 'absolute',
-  'width': '300px',
-  'height': '350px',
-  'overflow': 'auto',
   'left': function () {
     return String(jQuery(window).scrollLeft() + window.screen.availWidth - jQuery(this).width() - 20) + 'px';
   },
@@ -897,43 +895,36 @@ jQuery('.nD-Log').css({
     return String(jQuery(window).scrollTop() + window.screen.availHeight - jQuery(this).height() - 90) + 'px';
   }
 });
-var textareaPlaceholder = '可拉伸大小，双击清空内容\n示例:\nhttp://www.example.com/1\nhttp://www.example.com/2\nhttp://www.example.com/3\n...';
-jQuery('.nD-BatchTextarea').val(textareaPlaceholder).focus(function () {
-  if (jQuery(this).val() == textareaPlaceholder) {
-    jQuery(this).val('');
-  }
-}).blur(function () {
-  if (jQuery(this).val() == '') {
-    jQuery(this).val(textareaPlaceholder);
-  }
-}).dblclick(function () {
-  jQuery(this).val('');
-});
-jQuery(window).scroll(function () {
-  jQuery('.nD-BoxCenter').css({
-    'left': function () {
-      return String(jQuery(window).scrollLeft() + (window.screen.availWidth - jQuery(this).width()) / 2) + 'px';
-    },
-    'top': function () {
-      return String(jQuery(window).scrollTop() + (window.screen.availHeight - jQuery(this).height()) / 2) + 'px';
+jQuery(window).bind({
+  scroll: function () {
+    jQuery('.nD-BoxCenter').css({
+      'left': function () {
+        return String(jQuery(window).scrollLeft() + (window.screen.availWidth - jQuery(this).width()) / 2) + 'px';
+      },
+      'top': function () {
+        return String(jQuery(window).scrollTop() + (window.screen.availHeight - jQuery(this).height()) / 2) + 'px';
+      }
+    });
+    jQuery('.nD-Log').css({
+      'left': function () {
+        return String(jQuery(window).scrollLeft() + window.screen.availWidth - jQuery(this).width() - 20) + 'px';
+      },
+      'top': function () {
+        return String(jQuery(window).scrollTop() + window.screen.availHeight - jQuery(this).height() - 90) + 'px';
+      }
+    });
+  },
+  keydown: function (e) {
+    if (e.shiftKey && e.keyCode === 68) { //Shift+D
+      jQuery('.nD-Main').toggle();
     }
-  });
-  jQuery('.nD-Log').css({
-    'left': function () {
-      return String(jQuery(window).scrollLeft() + window.screen.availWidth - jQuery(this).width() - 20) + 'px';
-    },
-    'top': function () {
-      return String(jQuery(window).scrollTop() + window.screen.availHeight - jQuery(this).height() - 90) + 'px';
-    }
-  });
-}).keydown(function (e) {
-  if (e.shiftKey && e.keyCode === 68) { //Shift+D
-    jQuery('.nD-Main').toggle();
+  },
+  unload: function () {
+    jQuery(window).removeData();
+  },
+  beforeunload: function () {
+    jQuery(window).removeData();
   }
-}).unload(function () {
-  jQuery(window).removeData();
-}).on('beforeunload', function () {
-  jQuery(window).removeData();
 });
 jQuery('.nD-Input').change(function () {
   GM_setValue(this.name, parseInt(this.value) || parseInt(this.placeholder));
@@ -974,9 +965,6 @@ jQuery('.nD-SplitStart').click(function () {
     jQuery(window).data('split', 0);
   }
 });
-jQuery('.nD-BatchWildHelp').click(function () {
-  alert('示例：\n我要下载如下章节\nhttp://www.example.com/1\nhttp://www.example.com/2\nhttp://www.example.com/3\nhttp://www.example.com/...\nhttp://www.example.com/100\n...\n请在输入框输入（不包括括号）\n[http://www.example.com/*]\n然后分别在消息框里输入\n开头[1]、结尾[100]、间隔[1]、是否补足开头0[取消]');
-});
 jQuery('#boodDownloaderVip').click(function () {
   if (this.checked && !confirm('起点测试成功，其它网站暂未测试。\n图片章节无能为力。\n是否下载Vip章节，如未登录或未订阅，则只会下载章节预览。\n不会帮你把未订阅的章节订阅。\n如果不放心，请勿勾选。出事作者概不负责。')) this.checked = false;
 });
@@ -992,15 +980,6 @@ jQuery('.nD-All2Zip').click(function () {
 jQuery('.nD-All2Epub').click(function () {
   download('index', 'epub');
 });
-jQuery('.nD-Batch2Txt').click(function () {
-  downloadBatch('txt');
-});
-jQuery('.nD-Batch2Zip').click(function () {
-  downloadBatch('zip');
-});
-jQuery('.nD-Batch2Epub').click(function () {
-  downloadBatch('epub');
-});
 jQuery('.nD-ShowMain').click(function () {
   jQuery('.nD-Main').toggle();
 });
@@ -1008,13 +987,10 @@ jQuery('.nD-ShowSupport').click(function () {
   jQuery('.nD-Support').toggle();
   jQuery('.nD-Main').toggle();
 });
-jQuery('.nD-ShowBatch').click(function () {
-  jQuery('.nD-Batch').toggle();
-  jQuery('.nD-Main').toggle();
-});
 jQuery('.nD-ShowCustomize').click(function () {
   jQuery('.nD-Customize').toggle();
   jQuery('.nD-Main').toggle();
+  jQuery('.nD-CustomizeTextarea').focus();
 });
 jQuery('.nD-ShowUrl').click(function () {
   jQuery('.nD-Url').toggle();
@@ -1023,40 +999,36 @@ jQuery('.nD-ShowUrl').click(function () {
 jQuery('.nD-ShowLog').click(function () {
   jQuery('.nD-Log').toggle();
 });
-jQuery('.nD-CustomizeTextarea').dblclick(function () {
-  this.contentEditable = true;
-});
 jQuery('.nD-CustomizeSave').click(function () {
-  if (jQuery('.nD-CustomizeTextarea').html() === '') {
+  if (jQuery('.nD-CustomizeTextarea').val() === '') {
     return;
   } else {
     GM_setValue('customizeRule', true);
   }
-  var arr = jQuery('.nD-CustomizeTextarea').html().split('<br>');
+  var arr = jQuery('.nD-CustomizeTextarea').val().split('\n');
   var savedUrl = GM_getValue('savedUrl', new Array());
   var host;
-  var temp;
   for (var i = 0; i < arr.length; i++) {
     host = arr[i].split('\'') [1];
     if (jQuery.inArray(host, savedUrl) === - 1) savedUrl.push(host);
     GM_setValue('savedUrl', savedUrl);
-    temp = escape2Html(arr[i]);
     if (/^\s+$/.test(arr[i]) || arr[i] === '') {
       continue;
     } else if (/^addIRule/.test(arr[i])) {
-      GM_setValue('indexRule_' + host, temp);
+      GM_setValue('indexRule_' + host, arr[i]);
     } else if (/^addCRule/.test(arr[i])) {
-      GM_setValue('chapterRule_' + host, temp);
+      GM_setValue('chapterRule_' + host, arr[i]);
     } else if (/^chapterRule/.test(arr[i])) {
-      GM_setValue('chapterRule_' + host, temp);
+      GM_setValue('chapterRule_' + host, arr[i]);
     } else if (/^addRRule/.test(arr[i])) {
-      GM_setValue('reRule_' + host, temp);
+      GM_setValue('reRule_' + host, arr[i]);
     } else {
       var lineNow = i + 1;
       if (confirm('第' + lineNow + '行增加未知规则。\n此前的规则已经保存，后续操作已停止\n是否打开规则说明网址')) window.open('https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明');
       return;
     }
   }
+  if (debug) location.reload();
 });
 jQuery('.nD-CustomizeDelete').click(function () {
   var host = prompt('请输入要删除的域名\n不分大小写...\n如：\nread.qidian.com', location.host);
@@ -1152,8 +1124,7 @@ jQuery('.nD-CustomizeDownload').on('click', function () {
                   return (h === '+') ? '-' : '+';
                 })
               });
-              jQuery('.nD-CustomizeDownload').off('click');
-              jQuery('.nD-CustomizeDownload').click(function () {
+              jQuery('.nD-CustomizeDownload').off('click').click(function () {
                 jQuery('.nD-Url').toggle();
                 jQuery('.nD-Customize').toggle();
               });
@@ -1231,6 +1202,15 @@ function addIRule(host, cn, name, chapter, vip, sort, thread) { //增加站点�
     thread: threadT
   }
 }
+function addIRuleForSearch(host, cite, nextpage, searchBtn, searchInput) { //增加站点目录规则-搜索引擎版
+  indexRule[host] = {
+    searchEngine: true,
+    cite: cite,
+    nextpage: nextpage,
+    searchBtn: searchBtn,
+    searchInput: searchInput
+  }
+}
 function addCRule(host, name, content, lang, MimeType) { //增加站点章节规则
   lang = (lang === 1) ? 1 : 0;
   MimeType = (MimeType === 1) ? 'text/html; charset=gb2312' : '';
@@ -1260,37 +1240,8 @@ function wordFormatSpecial(host, word) { //文本处理-特殊版
   }
   return word;
 }
-function downloadBatch(fileType) { //特定下载
-  var arr = new Array();
-  var temp;
-  if (jQuery('.nD-BatchWild').val() !== '') {
-    var wild = jQuery('.nD-BatchWild').val();
-    var start = parseInt(prompt('请输入开头'));
-    var end = prompt('请输入结尾');
-    var step = parseInt(prompt('请输入间隔'));
-    var zero = confirm('是否补足开头0');
-    if (zero) var len = end.length;
-    end = parseInt(end);
-    for (var i = start; i <= end; i = i + step) {
-      temp = (zero) ? preZeroFill(i, len)  : i;
-      temp = wild.replace('*', temp)
-      arr.push(temp);
-    }
-  }
-  if (jQuery('.nD-BatchTextarea').val() !== '' && jQuery('.nD-BatchTextarea').val() !== textareaPlaceholder) {
-    temp = jQuery('.nD-BatchTextarea').val().split('\n');
-    for (var i = 0; i < temp.length; i++) {
-      if (temp[i] === '') temp.splice(i, 1);
-    }
-  }
-  arr = arr.concat(temp);
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i].indexOf('http') !== 0) arr[i] = 'http://' + arr[i]
-  }
-  download(arr, fileType);
-}
 function downloadTo(bookName, fileType) { //下载到...
-  var name = bookName.replace(/(在线|全文)阅读|(最新|)章节列表|无弹窗$/, ''); //待续
+  var name = bookName.replace(/(在线|全文)阅读|(最新|)章节(目录|列表)|无弹窗/, '').replace(/^\s+|\s+$/g, ''); //待续
   if (fileType === 'zip') {
     download2Zip(name);
   } else if (fileType === 'txt') {
@@ -1300,10 +1251,10 @@ function downloadTo(bookName, fileType) { //下载到...
   }
 }
 function download(chapterArray, fileType) { //下载
-  var chapter = (chapterArray === 'index') ? jQuery(indexRule[location.host].chapter)  : chapterArray;
-  var href = chapter[0].href || chapter[0];
-  var bookName = (jQuery(indexRule[getHostName(href)].name).length === 0) ? '' : jQuery(indexRule[getHostName(href)].name) [0].innerText.replace(/^\s+|\s+$/g, '');
-  if (jQuery('#boodDownloaderVip') [0].checked === false && indexRule[location.host].vip !== '' && chapterArray === 'index') chapter = jQuery(chapter).not(jQuery(indexRule[location.host].vip));
+  var host = location.host;
+  var chapter = (chapterArray === 'index') ? jQuery(indexRule[host].chapter)  : chapterArray;
+  var bookName = (jQuery(indexRule[host].name).length === 0) ? '' : jQuery(indexRule[host].name).text().replace(/^\s+|\s+$/g, '');
+  if (jQuery('#boodDownloaderVip') [0].checked === false && indexRule[host].vip !== '' && chapterArray === 'index') chapter = jQuery(chapter).not(jQuery(indexRule[host].vip));
   if (jQuery('.nD-SplitInput').val() !== '' && chapterArray === 'index') {
     jQuery(chapter).each(function () {
       this.added = false;
@@ -1341,35 +1292,38 @@ function download(chapterArray, fileType) { //下载
   }
   jQuery('.nD-Log').css('display', 'block');
   jQuery('.nD-LogDiv').html('');
-  jQuery(window).data('chapter', chapter);
-  jQuery(window).data('dataDownload', new Array());
-  jQuery(window).data('downloadList', new Array());
-  jQuery(window).data('downloadNow', new Object());
-  jQuery(window).data('downloadError', new Array());
-  jQuery(window).data('downloadTimeout', new Array());
-  jQuery(window).data('number', 0);
-  jQuery(window).data('numberOk', 0);
+  jQuery(window).data({
+    'chapter': chapter,
+    'dataDownload': new Array(),
+    'downloadList': new Array(),
+    'downloadNow': new Object(),
+    'number': 0,
+    'numberOk': 0
+  });
   jQuery(window).data('downloadNow').length = 0;
+  var href;
+  var name;
+  var dataDownload;
   for (var i = 0; i < chapter.length; i++) {
-    href = chapter[i].href || chapter[i];
-    var name = (chapter[i].innerText) ? chapter[i].innerText.replace(/^\d+\-/, '')  : '';
-    var host = getHostName(href);
-    var dataDownload = new Object();
+    if (chapter[i].tagName === 'OPTION') {
+      href = location.origin + chapter[i].value;
+    } else {
+      href = chapter[i].href || chapter[i];
+    }
+    name = (chapter[i].innerText) ? chapter[i].innerText.replace(/^\d+\-/, '')  : '';
+    dataDownload = new Object();
     dataDownload.url = href;
     dataDownload.name = name;
+    dataDownload.error = 0;
+    dataDownload.timeout = 0;
     dataDownload.ok = false;
     jQuery(window).data('dataDownload') [i] = dataDownload;
     jQuery(window).data('downloadList') [i] = href;
-    jQuery(window).data('downloadError') [i] = 0;
-    jQuery(window).data('downloadTimeout') [i] = 0;
   };
   jQuery('.bookDownladerProgress').val(0).attr('max', chapter.length);
   jQuery('.bookDownladerChapter').html('0');
   jQuery('.bookDownladerChapterAll').html(chapter.length);
-  if (indexRule[location.host].sort) {
-    jQuery(window).data('downloadList').sort();
-    jQuery(window).data('dataDownload').sort(objArrSort('url'));
-  }
+  if (indexRule[host].sort) jQuery(window).data('dataDownload').sort(objArrSort('url'));
   var addTask = setInterval(function () {
     if (chapterRule[host].Deal instanceof Function) {
       downloadTask(chapterRule[host].Deal);
@@ -1420,13 +1374,12 @@ function downloadTask(fun) { //下载列队
   }
 }
 function removeData() { //移除数据
-  jQuery(window).removeData('downloadNow');
-  jQuery(window).removeData('downloadError');
-  jQuery(window).removeData('downloadTimeout');
-  jQuery(window).removeData('downloadList');
-  jQuery(window).removeData('number');
-  jQuery(window).removeData('check');
-  jQuery(window).removeData('urlRule');
+  jQuery(window).removeData(['downloadNow',
+  'downloadList',
+  'number',
+  'check',
+  'urlRule',
+  'numberOk']);
 }
 function xhr(num, url) { //xhr
   var host = getHostName(url);
@@ -1477,8 +1430,8 @@ function xhr(num, url) { //xhr
       thisDownloaded(num, name, content, chapterRule[host].lang);
     },
     ontimeout: function () {
-      jQuery(window).data('downloadTimeout') [num]++;
-      if (parseInt(jQuery('.nD-Timeout').val()) > jQuery(window).data('downloadTimeout') [num]) {
+      jQuery(window).data('dataDownload') [num].timeout++;
+      if (parseInt(jQuery('.nD-Timeout').val()) > jQuery(window).data('dataDownload') [num].timeout) {
         xhr(num, url);
       } else {
         var nameTrue = jQuery(window).data('dataDownload') [num].name || num;
@@ -1487,8 +1440,8 @@ function xhr(num, url) { //xhr
       }
     },
     onerror: function () {
-      jQuery(window).data('downloadError') [num]++;
-      if (parseInt(jQuery('.nD-Error').val()) > jQuery(window).data('downloadError') [num]) {
+      jQuery(window).data('dataDownload') [num].error++;
+      if (parseInt(jQuery('.nD-Error').val()) > jQuery(window).data('dataDownload') [num].error) {
         xhr(num, url);
       } else {
         var nameTrue = jQuery(window).data('dataDownload') [num].name || num;
@@ -1518,14 +1471,24 @@ function thisDownloaded(num, name, content, lang) { //下载完成，包括文�
   jQuery('.bookDownladerProgress').val(jQuery(window).data('numberOk'));
 }
 function wordFormat(word) { //文本处理-通用版
-  word = escape2Html(word);
   var replaceLib = [
     /*替换前的文本|||替换后的文本*/
     /*换行符请先用【换行】二字代替，最后同一替代*/
     /*请在最前方插入*/
-    '&nb p;',
+    '&lt;|||<',
+    '&gt;|||>',
+    '&nbsp;||| ',
+    '&amp;|||&',
+    '&quot;|||"',
+    '&quot;|||"',
+    '&nb p;||| ',
     '无弹窗广告',
     '天才壹秒記住.*?為您提供精彩小說閱讀。',
+    '(天才|)一秒.*?(无广告!|小说网站|）|阅读|地址|</a>)',
+    '手机阅读本章.*',
+    '本书最新TXT下载.*',
+    '为了方便下次阅读.*',
+    '手机用户请.*阅读体验。',
     '<HEAD>.*?</HEAD>',
     '<br.*?>|||换行',
     '<p.*?>|||换行',
@@ -1818,10 +1781,10 @@ function objComp(obj1, obj2) { //js对象的比较，来自http://www.jb51.net/a
   }
   return false;
 };
-function objArrSort(propertyName) { //对象数组排序函数，从小到大排序，来自http://www.jb51.net/article/24536.htm
+function objArrSort(propertyName) { //稍作修改，对象数组排序函数，从小到大排序，来自http://www.jb51.net/article/24536.htm
   return function (object1, object2) {
-    var value1 = object1[propertyName];
-    var value2 = object2[propertyName];
+    var value1 = parseInt(object1[propertyName].replace(/.*\//, ''));
+    var value2 = parseInt(object2[propertyName].replace(/.*\//, ''));
     if (value2 < value1) {
       return 1;
     } else if (value2 > value1) {
@@ -1842,17 +1805,5 @@ function html2Escape(sHtml) { //来自http://blog.csdn.net/win32fanex/article/de
     [
       c
     ];
-  });
-}
-function escape2Html(str) { //来自http://blog.csdn.net/win32fanex/article/details/11948659
-  var arrEntities = {
-    'lt': '<',
-    'gt': '>',
-    'nbsp': ' ',
-    'amp': '&',
-    'quot': '"'
-  };
-  return str.replace(/&(lt|gt|nbsp|amp|quot);/gi, function (all, t) {
-    return arrEntities[t];
   });
 }

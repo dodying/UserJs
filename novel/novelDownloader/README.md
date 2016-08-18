@@ -4,9 +4,7 @@
 
 #### 在目录页或是章节页使用。
 
-#### 按“Shift+D”来显示下载选项。
-
-#### 关于【特定下载某些章节】功能的一些提示：可以使用带有【Snap Links】字样的附加组件或扩展或UC脚本
+#### 按```Shift+D```来显示下载选项。
 
 #### 如果某章节长时间无法下载，请刷新重试。<s>浏览器会从缓存中提取数据。</s>
 
@@ -19,7 +17,6 @@
 ######预览
 
 ![主页面](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23main.png)
-![特定下载](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Batch.png)
 ![自定义站点规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Customize.png)
 ![检查项目上的规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Url.png)
 ![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Log.png)
@@ -27,7 +24,7 @@
 
 ### helpWanted 作者需要帮助
 
-iOS：生成的Epub格式电子书在[iBook](#iBook)中只显示每章节**前两页**，在[开卷有益](#KingReader)中显示**【不支持的epub格式】**，在[Anyview](#Anyview)中可以正常阅读。
+iOS：生成的Epub格式电子书在[iBook](https://itunes.apple.com/cn/app/ibooks/id364709193)中只显示每章节**前两页**，在[开卷有益](http://www.kingreader.com/)中显示**【不支持的epub格式】**，在[Anyview](http://www.anyview.net/)中可以正常阅读。
 
 Android：未测试...
 
@@ -68,24 +65,7 @@ Android：未测试...
 
 ##### 此规则，是为了那些无法直接在网页原文件中获取到内容的网址准备的。
 
-```
-具体示例：黑岩-（未压缩成一行）
-chapterRule['www.heiyan.com'] = {
-  'Deal': function (num, url) {
-    var urlTrue = 'http://a.heiyan.com/ajax/chapter/content/' + url.replace(/.*\//, '');
-    GM_xmlhttpRequest({
-      method: 'GET',
-      url: urlTrue,
-      onload: function (response) {
-        var info = JSON.parse(response.response);
-        var name = info.chapter.title;
-        var content = info.chapter.htmlContent;
-        thisDownloaded(num, name, content, 0);
-      }
-    });
-  }
-};
-```
+具体示例：详见[脚本代码#L367](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/novelDownloader.user.js#L367)
 
 ```
 说明：
@@ -96,23 +76,21 @@ chapterRule['www.heiyan.com'] = {
   thisDownloaded（必须，传递章节内容，参数为num-表示这是第几章、name-标题、content-内容、lang-该站点的默认语言0简体1繁体）
 ```
 
-### 支持网站【列举前10项】
+### ToDo
 
-1. 起点主站 [read.qidian.com](http://read.qidian.com/)
-2. 起点免费 [free.qidian.com](http://free.qidian.com/)
-3. 起点女生 [www.qdmm.com](http://www.qdmm.com/)
-4. 创世中文网 [chuangshi.qq.com](http://chuangshi.qq.com/)
-5. 云起书院 [yunqi.qq.com](http://yunqi.qq.com/)
-6. 腾讯读书(只支持当前目录页) [dushu.qq.com](http://dushu.qq.com/)
-7. 天涯文学(只支持当前目录页) [book.tianya.cn](http://book.tianya.cn/)
-8. 欢乐书客 [www.hbooker.com](http://www.hbooker.com/)
-9. 3G书城 [www.3gsc.com.cn](http://www.3gsc.com.cn/)
-10. 纵横 [book.zongheng.com](http://book.zongheng.com/)
-11. ...
+1. 强制分段
+2. 站点规则模版
+3. 搜索(谷歌自定义搜索Api)
+
+### [支持站点](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/supportUrl.md)
 
 ### 更新历史
 
 #### Latest
+
+##### 1.34.65+242
+
+去除【特定下载】，增加必应、搜狗、360搜索。
 
 ##### 1.33.57
 
