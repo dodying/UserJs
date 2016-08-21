@@ -2066,7 +2066,4 @@ function html2Escape(sHtml) { //来自http://blog.csdn.net/win32fanex/article/de
       c
     ];
   });
-} /*
-Exception: ReferenceError: GM_getValue is not defined
-@Scratchpad/1:509:1
-*/
+}
