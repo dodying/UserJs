@@ -78,15 +78,18 @@ Android：未测试...
 
 ### ToDo
 
-1. 强制分段
-2. 站点规则模版
-3. 搜索(谷歌自定义搜索Api)
+1. 站点规则模版
+2. 搜索(谷歌自定义搜索Api)
 
 ### [支持站点](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/supportUrl.md)
 
 ### 更新历史
 
 #### Latest
+
+##### 1.35.94+316
+
+增加【强制分段】功能。细节修改。
 
 ##### 1.34.65+242
 

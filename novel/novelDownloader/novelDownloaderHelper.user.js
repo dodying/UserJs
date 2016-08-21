@@ -6,21 +6,21 @@
 // @include     *
 // @exclude     *.baidu.com*
 // @exclude     *.google.*
-// @version     1.02
+// @version     1.03
 // @grant       GM_setClipboard
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @run-at      document-end
 // ==/UserScript==
 var info;
 var pretitle = document.title;
-jQuery(window).keydown(function (e) {
+window.onkeydown = function (e) {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.keyCode === 13) return
   info = '';
   if (e.shiftKey && e.keyCode === 72) { //H
-    var gbk = (jQuery('meta[content*="charset=gb"]').length > 0) ? ',0,1' : '';
+    var gbk = (document.querySelector('meta[content*="charset=gb"]')) ? ',0,1' : '';
     var text = '\n'
     + 'addIRule(\'' + location.host + '\',\'' + pretitle.replace(/.*\- /, '') + '\',\'\',\'\');\n'
     + 'addCRule(\'' + location.host + '\',\'\',\'\'' + gbk + ');';
@@ -33,7 +33,7 @@ jQuery(window).keydown(function (e) {
     var text = 'addRRule(\'' + location.host + '\', \'\\\\s+||| \', \'\');';
     info = 're';
   } else if (e.shiftKey && e.keyCode === 65) { //A
-    var gbk = (jQuery('meta[content*="charset=gb"]').length > 0) ? ',0,1' : '';
+    var gbk = (document.querySelector('meta[content*="charset=gb"]')) ? ',0,1' : '';
     var space = '    ';
     var text = '\n'
     + space + '"' + location.host + '": {\n'
@@ -50,4 +50,4 @@ jQuery(window).keydown(function (e) {
       document.title = pretitle;
     }, 3000);
   }
-});
+};
