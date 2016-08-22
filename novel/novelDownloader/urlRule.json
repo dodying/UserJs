@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.35.94+316",
-        "changeInfo": "增加【强制分段】功能。细节修改。"
+        "latestVersion": "1.36.94+316",
+        "changeInfo": "增加【搜索】。"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*",

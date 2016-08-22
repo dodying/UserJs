@@ -21,6 +21,7 @@
 ![检查项目上的规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Url.png)
 ![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Log.png)
 ![搜索引擎提示](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Search.png)
+![Google自定义搜索](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23CSE.png)
 
 ### helpWanted 作者需要帮助
 
@@ -65,7 +66,7 @@ Android：未测试...
 
 ##### 此规则，是为了那些无法直接在网页原文件中获取到内容的网址准备的。
 
-具体示例：详见[脚本代码#L376](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/novelDownloader.user.js#L376)
+具体示例：详见[脚本代码#L528](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/novelDownloader.user.js#L528)
 
 ```
 说明：
@@ -86,6 +87,10 @@ Android：未测试...
 ### 更新历史
 
 #### Latest
+
+##### 1.36.94+316
+
+增加【搜索】。
 
 ##### 1.35.94+316
 
