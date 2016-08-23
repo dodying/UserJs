@@ -66,7 +66,7 @@ Android：未测试...
 
 ##### 此规则，是为了那些无法直接在网页原文件中获取到内容的网址准备的。
 
-具体示例：详见[脚本代码#L528](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/novelDownloader.user.js#L528)
+具体示例：详见[脚本代码](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/novelDownloader.user.js#L477)
 
 ```
 说明：

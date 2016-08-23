@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.36.94+316",
-        "changeInfo": "增加【搜索】。"
+        "latestVersion": "1.36.113+329",
+        "changeInfo": "..."
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*",
@@ -1693,6 +1693,72 @@
         "include1": "http://www.yqxs.com/data/book2/*",
         "indexRule": "addIRule('www.yqxs.com','言情小说','#title','table>tbody>tr>td>a');",
         "chapterRule": "addCRule('www.yqxs.com','h3','#content',0,1);"
+    },
+    "www.zw360.com": {
+        "include1": "http://www.zw360.com/zhangjie/*",
+        "indexRule": "addIRule('www.zw360.com','360小说网','#htmltimu','.chapter-list>li>a');",
+        "chapterRule": "addCRule('www.zw360.com','h2','#htmlContent',0,1);"
+    },
+    "www.kanshu8.net": {
+        "include1": "http://www.kanshu8.net/book/*",
+        "indexRule": "addIRule('www.kanshu8.net','看书吧网','h1','.dccss>a');",
+        "chapterRule": "addCRule('www.kanshu8.net','h2','#content>p',0,1);"
+    },
+    "www.45xs.com": {
+        "include1": "http://www.45xs.com/books/*",
+        "indexRule": "addIRule('www.45xs.com','45小说网','h1','.chapterlist>li>a');",
+        "chapterRule": "addCRule('www.45xs.com','h1','#content',0,1);"
+    },
+    "www.2018pc.com": {
+        "include1": "http://www.2018pc.com/files/article/html/*",
+        "indexRule": "addIRule('www.2018pc.com','2018小说网','h1','.novel_list>ul>li>a');",
+        "chapterRule": "addCRule('www.2018pc.com','h1','.novel_content',0,1);"
+    },
+    "www.1778go.com": {
+        "include1": "http://www.1778go.com/bookhtml/*",
+        "indexRule": "addIRule('www.1778go.com','一起看书吧','h1','#list>dl>dd>a');",
+        "chapterRule": "addCRule('www.1778go.com','h1','#booktext',0,1);"
+    },
+    "www.qbyqxs.com": {
+        "include1": "http://www.qbyqxs.com/article/*",
+        "indexRule": "addIRule('www.qbyqxs.com','全本言情小说','h1','#readlist>ul>li>a');",
+        "chapterRule": "addCRule('www.qbyqxs.com','h1','#content');",
+        "reRule": "addRRule('www.qbyqxs.com', '\\s+||| ', '<div.*?</div>');"
+    },
+    "www.zwxiaoshuo.com": {
+        "include1": "http://www.zwxiaoshuo.com/book/*",
+        "indexRule": "addIRule('www.zwxiaoshuo.com','滋味小说网','h1','.insert_list>dl>dd>ul>li>ul>li>strong>a','',true);",
+        "chapterRule": "addCRule('www.zwxiaoshuo.com','#htmltimu','#htmlContent',0,1);"
+    },
+    "www.shubao22.com": {
+        "include1": "http://www.shubao22.com/xiazai/*",
+        "indexRule": "addIRule('www.shubao22.com','书包网','h1','#list>dl>dd>a');",
+        "chapterRule": "addCRule('www.shubao22.com','h1','#booktext',0,1);"
+    },
+    "www.55xs.com": {
+        "include1": "http://www.55xs.com/files/article/html/*",
+        "indexRule": "addIRule('www.55xs.com','55小说网','h1','.list>tbody>tr>td>a');",
+        "chapterRule": "addCRule('www.55xs.com','h1','#contents',0,1);"
+    },
+    "www.qingdoubook.com": {
+        "include1": "http://www.qingdoubook.com/files/article/html/*",
+        "indexRule": "addIRule('www.qingdoubook.com','青豆小说网','h1','.www>a');",
+        "chapterRule": "addCRule('www.qingdoubook.com','h1','#content',0,1);"
+    },
+    "www.shuqiba.com": {
+        "include1": "http://www.shuqiba.com/*",
+        "indexRule": "addIRule('www.shuqiba.com','书旗吧小说网','h1','.chapterlist>dd>a:gt(11)');",
+        "chapterRule": "addCRule('www.shuqiba.com','h1','#BookText',0,1);"
+    },
+    "www.xiuvi.com": {
+        "include1": "http://www.xiuvi.com/*",
+        "indexRule": "addIRule('www.xiuvi.com','秀薇小说','.title>h2','.list_box>ul>li>a');",
+        "chapterRule": "addCRule('www.xiuvi.com','h2','.box_box',0,1);"
+    },
+    "www.ryzww.com": {
+        "include1": "http://www.ryzww.com/*",
+        "indexRule": "addIRule('www.ryzww.com','若雨中文网','h1','#list>dl>dd>a');",
+        "chapterRule": "addCRule('www.ryzww.com','h1','#content>p',0,1);"
     },
     "": {
         "include1": "",

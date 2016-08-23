@@ -4,12 +4,13 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.36.94+316
+// @version     1.36.113+329
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
 // @connect     script.qwsy.com
 // @connect     k2.kansha.cc
 // @connect     soso2.xiaoshuokan.com
+// @connect     soso2.3zcn.org
 // @connect     121.40.22.93
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
@@ -123,6 +124,8 @@
 // @include     http://xs.dmzj.com/*/*/*.shtml
 // @include     http://www.yidm.com/article/html/*/*/*
 // @include     http://book.suixw.com/modules/article/reader.php*
+// @include     http://www.iqing.in/book/*
+// @include     http://www.iqing.in/read/*
 //              盗贴
 // @include     http://www.bookgew.com/Html/Book/*
 // @include     http://www.xiaoshuokan.com/haokan/*
@@ -138,6 +141,7 @@
 // @include     http://www.hunhun520.com/book/*
 // @include     http://www.3zcn.org/3z/*
 // @include     http://www.tanxshu.net/*
+// @include     http://www.booksrc.net/book/*
 //              18X
 // @include     http://www.haiax.net/files/article/html/*
 // @include     http://www.lewenxs.net/files/article/html/*
@@ -165,6 +169,24 @@
 // @include     http://www.ziqige3.com/book/*
 // @include     http://www.ziqige3.com/bookread/*
 // @include     http://www.lmzww.net/jlgcyy/*
+// @include     http://www.t259.com/read/*
+// @include     http://www.xt259.com/book/*
+// @include     http://www.ncwx.hk/wx/*
+// @include     http://520xs.co/*
+// @include     http://www.77xsk.com/novel/*
+// @include     http://www.wowoxs.com/files/article/html/*
+// @include     http://www.7zxs.com/ik258/*
+// @include     http://www.tushuguan.cc/*
+// @include     http://www.qingdou.info/book/*
+// @include     http://www.jipinwww.com/*
+// @include     http://www.duonie.com/files/article/html/*
+// @include     http://www.59tto.net/files/article/xiaoshuo/*
+// @include     http://www.qindouxs.net/book/*
+// @include     http://www.qindouxs.net/read/*
+// @include     http://www.shbdjs.org/files/article/html/*
+// @include     http://www.ik777.net/ik258/*
+// @include     http://www.hyperfree.com/amateur/sssbook/book/*
+// @include     http://www.woqudu.com/files/article/html/*
 // include     http://18av.mm-cg.com/novel*
 // include     http://18av.mm-cg.com/serch*
 // ==/UserScript==
@@ -711,6 +733,32 @@ addIRule('www.yidm.com', '迷糊动漫', 'title', '.chapters.clearfix>a');
 addCRule('www.yidm.com', '.bd>h4', '.bd', 0, 1);
 addIRule('book.suixw.com', '随想轻小说', '#title', '.ccss>a');
 addCRule('book.suixw.com', '#title', '#content', 0, 1);
+addIRule('www.iqing.in', '轻文轻小说', 'h1', '.chapter>a');
+addCRule('www.iqing.in', '', '');
+chapterRule['www.iqing.in'] = {
+  'lang': 0,
+  'Deal': function (num, url) {
+    var urlArr = url.split('/');
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: 'http://www.iqing.in/content/' + urlArr[4] + '/chapter/',
+      headers: {
+        'Referer': url,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      onload: function (response) {
+        var json = JSON.parse(response.response);
+        console.log(json);
+        var name = json.chapter_title;
+        var content = '';
+        for (var i = 0; i < json.results.length; i++) {
+          content += json.results[i].value;
+        }
+        thisDownloaded(num, name, content, 0);
+      }
+    });
+  }
+};
 //////////////////////////////////////////////////盗贴
 addIRule('www.xiaoshuokan.com', '好看小说网', 'h1', '.c1>a');
 chapterRule['www.xiaoshuokan.com'] = {
@@ -961,6 +1009,12 @@ chapterRule['www.tanxshu.net'] = {
     chapterRule['www.hunhun520.com'].Deal(num, url);
   }
 };
+addIRule('www.booksrc.net', '小说园', 'h1', '.booklist>span>a');
+chapterRule['www.booksrc.net'] = {
+  'Deal': function (num, url) {
+    chapterRule['www.xiaoshuokan.com'].Deal(num, url);
+  }
+};
 //////////////////////////////////////////////////18X
 addIRule('www.haiax.net', '海岸线文学网', '.kui-left.kui-fs32', '.kui-item>a');
 addCRule('www.haiax.net', 'h1.kui-ac', '#kui-page-read-txt', 0, 1);
@@ -1004,6 +1058,73 @@ addIRule('www.ziqige3.com', '紫气阁小说网', 'h1', '.list>ul>li>a');
 addCRule('www.ziqige3.com', 'h1', '.chapter', 0, 1);
 addIRule('www.lmzww.net', '林木中文网', 'h1', '.novel_list>ul>li>a');
 addCRule('www.lmzww.net', 'h1', '.novel_content', 0, 1);
+addIRule('www.t259.com', '紫轩小说吧', 'h1', '.L>a');
+addCRule('www.t259.com', 'h1', '#contents', 0, 1);
+addIRule('www.xt259.com', '紫轩小说吧', 'h1', '.L>a');
+addCRule('www.xt259.com', 'h1', '#contents', 0, 1);
+addIRule('www.ncwx.hk', '暖才文学网', 'h1', '.novel_list>ul>li>a');
+addCRule('www.ncwx.hk', 'h1', '.novel_content', 0, 1);
+addRRule('www.ncwx.hk', '【 暖才文学网 .*】');
+addIRule('www.77xsk.com', '腹黑书小说网', 'h1>a', '.dirconone>ul>li>a');
+addCRule('www.77xsk.com', 'h2', '#chapter_content');
+addIRule('520xs.co', '520小说', 'h1', '.dirinfo_list>dd>a');
+addCRule('520xs.co', 'h1', '#floatleft', 0, 1);
+addIRule('www.wowoxs.com', '7Z小说', '.font', '.chapter_box_ul>li>span>a');
+addCRule('www.wowoxs.com', '.font', '#a_content', 0, 1);
+addRRule('www.wowoxs.com', '(http://www.7zbook.com)', '7X24小时不间段更新最新小说');
+addIRule('www.7zxs.com', '7z小说网', '.title>h2', '.ocon>dl>dd>a');
+addCRule('www.7zxs.com', '.nr_title>h3', '#htmlContent', 0, 1);
+addRRule('www.7zxs.com', '登陆7z小说网.*');
+addIRule('www.tushuguan.cc', '小说图书馆', 'h1', '#list>dl>dd>a:gt(8)');
+chapterRule['www.tushuguan.cc'] = {
+  'Deal': function (num, url) {
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: url,
+      onload: function (response) {
+        var name = jQuery('h1', response.response).text();
+        var data = response.response.replace(/\s+/g, ' ').replace(/.*data:"(.*?)",.*/, '$1');
+        chapterRule['www.tushuguan.cc'].Deal2(num, name, url, data);
+      }
+    });
+  },
+  'Deal2': function (num, name, url, data) {
+    GM_xmlhttpRequest({
+      method: 'POST',
+      url: 'http://www.tushuguan.cc/content.xhtml',
+      data: data,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Referer': url,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      onload: function (response) {
+        var content = JSON.parse(response.response).msg;
+        thisDownloaded(num, name, content, 0);
+      }
+    });
+  }
+};
+addIRule('www.qingdou.info', '青豆小说网', 'h1', '.mulu_list>li>a');
+addCRule('www.qingdou.info', 'h1', '#htmlContent', 0, 1);
+addIRule('www.jipinwww.com', '极品小说网', 'h1', '.book_list>ul>li>a');
+addCRule('www.jipinwww.com', 'h1', '.contentbox', 0, 1);
+addRRule('www.jipinwww.com', '请记住【极品小说网】.*?下载！', '\\s+||| ', '<div class="chapter_Turnpage.*');
+addIRule('www.duonie.com', '多涅小说网', 'h1', '.L>a');
+addCRule('www.duonie.com', 'h1', '#contents', 0, 1);
+addIRule('www.59tto.net', '59文学', 'h1>a', '.xiaoshuo_list>dd>a');
+addCRule('www.59tto.net', 'h1', '.article', 0, 1);
+addRRule('www.59tto.net', '您可以在百度里搜索.*');
+addIRule('www.qindouxs.net', '青豆小说网', '.kui-left.kui-fs32', '.kui-item>a');
+addCRule('www.qindouxs.net', 'h1.kui-ac', '#kui-page-read-txt', 0, 1);
+addIRule('www.shbdjs.org', '电子书屋', 'h1', '.novel_list>ul>li>a');
+addCRule('www.shbdjs.org', 'h1', '.novel_content', 0, 1);
+addIRule('www.ik777.net', '艾克小说网', '.title>h2', '.ocon>dl>dd>a');
+addCRule('www.ik777.net', '.nr_title>h3', '#htmlContent', 0, 1);
+addIRule('www.hyperfree.com', '任我淫书屋', 'font>b', 'tr>td:nth-child(1)>font>a');
+addCRule('www.hyperfree.com', '', 'body>htlm', 0, 1);
+addIRule('www.woqudu.com', '我去读文学网', '#title', '.ccss>a');
+addCRule('www.woqudu.com', '#title', '#content', 0, 1);
 addIRule('18av.mm-cg.com', '18H', '.label>div', '.novel_leftright>span>a:visible');
 addCRule('18av.mm-cg.com', '#left>h1', '#novel_content_txtsize', 1);
 //////////////////////////////////////////////////以上为站点规则
@@ -1245,7 +1366,7 @@ jQuery('.nD-SearchInput').keydown(function (e) {
     jQuery(window).data('search', new Object());
     jQuery(window).data('search').length = 0;
   } else if (e.keyCode === 13) {
-    search(0);
+    jQuery('.nD-SearchBtnGo').click();
   }
 });
 jQuery('.nD-SearchBtnGo').click(function () {
@@ -1493,12 +1614,11 @@ function search(page) {
 function showSearchResult(page) {
   var cx = '010023307804081171493:0yligcah8w0';
   var data = jQuery(window).data('search');
-  console.log(data)
   jQuery('.nD-SearchTitle').html('关键词：<font class="nD-Blue">' + data.keyword + '</font>，第<font class="nD-Blue">' + (page + 1) + '</font>页，外部链接：<a href="https://cse.google.com/cse?ie=utf8&q=' + data.keyword + '&start=0&cx=' + cx + '#gsc.tab=0&gsc.q=' + data.keyword + '&gsc.page=' + (page + 1) + '" target="_blank">Google自定义搜索</a>');
   var _html = '';
   var items = data[page].items;
   for (var i = 0; i < items.length; i++) {
-    var host = getHostName(items[i].htmlFormattedUrl);
+    var host = getHostName(items[i].formattedUrl);
     if (indexRule[host] !== undefined) host = indexRule[host].cn + ' ';
     if (items[i].pagemap) {
       _html += '<div class="nD-SearchHtmlBox">';
