@@ -799,13 +799,19 @@ chapterRule['www.vv44.net'] = {
       method: 'GET',
       url: url,
       onload: function (response) {
-        if (!jQuery(window).data('firstRun')) {
-          jQuery(window).data('firstRun', true);
-          unsafeWindow.jQuery('head').append('<script type="text/javascript" src="/Public/Home/js/jquery.sha1.js"></script>');
-        }
         var name = jQuery('h1', response.response).text();
-        var fid = unsafeWindow.jQuery.sha1(eval(response.response.replace(/\s+/g, ' ').replace(/.*\$\.sha1\((.*?)\);.*/, '$1')));
-        chapterRule['www.vv44.net'].Deal2(num, name, url, fid);
+        var fid = response.response.replace(/\s+/g, ' ').replace(/.*\$\.sha1\((.*?)\);.*/, '$1');
+        if (/^String/.test(fid)) {
+          if (!jQuery(window).data('firstRun')) {
+            jQuery(window).data('firstRun', true);
+            unsafeWindow.jQuery('head').append('<script type="text/javascript" src="/Public/Home/js/jquery.sha1.js"></script>');
+          }
+          fid = unsafeWindow.jQuery.sha1(eval(fid));
+          chapterRule['www.vv44.net'].Deal2(num, name, url, fid);
+        } else {
+          var content = jQuery('.content', response.response).html();
+          thisDownloaded(num, name, content, 0);
+        }
       }
     });
   },

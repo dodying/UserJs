@@ -7,8 +7,8 @@
 | 名称 | 地址1 | 地址2 | 更新中 | 有效 | 说明 |
 |------------------------------|---------------------------------------------------------------------------------------------------------:|--------------------------------------------------|--------|--------|--------------------------------------|
 | ```novel``` | 文件夹 | - | - |  | - |
-| 【小说】下载脚本 | [GitHub](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader) | [GF](https://greasyfork.org/zh-CN/scripts/21515) | √ | √ |  |
-| 【小说】下载脚本助手 | [安装](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloaderHelper.user.js) |  | ? | √ | 用来增加```【小说】下载脚本```的规则 |
+| 【小说】下载脚本 | [GitHub](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader) | [GF](https://greasyfork.org/zh-CN/scripts/21515) | ? | √ |  |
+| 【小说】下载脚本助手 | [安装](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloaderHelper.user.js) |  | × | √ | 用来增加```【小说】下载脚本```的规则 |
 | 【小说】起点书签 | [安装](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) |  | × |  | 本地书签 |
 | 【小说】目录页侧边分卷导航栏 | [安装](https://github.com/dodying/UserJs/raw/master/novel/SidebarInContent.user.js) |  | × |  |  |
 | ```HentaiVerse``` | 文件夹 | - | - |  | - |
@@ -40,12 +40,13 @@
 | 【Github】复制原始链接 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyRawLink.user.js) |  | × |  |  |
 | 【百度云】分享页复制 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopy.user.js) |  | × |  |  |
 | 【百度云】分享-答题专用 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidao.user.js) |  | × |  |  |
+| 【百度云】分享-答题专用V2 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidaoV2.user.js) |  | × |  |  |
 | 【维基】跳转到中文 | [安装](https://github.com/dodying/UserJs/raw/master/other/wikiJump2Chinese.user.js) |  | × |  |  |
 | ```modify``` | 文件夹 | - | - |  | 修改自其它脚本 |
 | 【HV】翻译 | [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) |  | × |  | 修改自 [Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369) |
 | 【nH】下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  | × |  | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
 | 搜索引擎跳转-小说版+高亮 | [安装](https://github.com/dodying/UserJs/raw/master/modify/searchEngineJumpForNovel.user.js) |  | × |  | 修改自 [搜索引擎跳转-文科版](https://greasyfork.org/zh-CN/scripts/2739)<br />与[Highlighter](http://userscripts-mirror.org/scripts/show/15637)以及[Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121) |
-| ```lib``` | 文件夹 |  |  |  | 写脚本时，从网上复制来的函数 |
+| ```lib``` | 文件夹 |  |  |  | 写脚本时，从网上复制来的函数（可能做了修改） |
 | base64 | [代码攻城师的技术博客 - CSDN.NET](http://blog.csdn.net/gumanren/article/details/5870133) |  |  |  | JS实现base64编码与解码 |
 | getHostName | 应该是来自 [SegmentFault](https://segmentfault.com/) 的某个页面... |  |  |  | 获取```网页字符串```域名 |
 | getMousePos | 应该是来自某博客... |  |  |  | 获取鼠标位置 |
@@ -54,6 +55,7 @@
 | objComp | [脚本之家](http://www.jb51.net/article/26372.htm) |  |  |  | js对象的比较 |
 | preZeroFill | [SegmentFault](https://segmentfault.com/q/1010000002607221) |  |  |  | 用0补足指定位数 |
 | sortTable | [脚本之家](http://www.jb51.net/article/46976.htm) |  |  |  | 表格字段排序 |
+| textToImg | [开源中国社区](http://www.oschina.net/code/snippet_84535_10015) |  |  |  | 文字转图片 |
 | ```temp``` | 文件夹 | - | - |  | 临时文件 |
 | ```字母拼单词``` | 文件夹 | - | - |  | - |
 
