@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.36.113+329
+// @version     1.360.113+329
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
 // @connect     script.qwsy.com
@@ -1935,7 +1935,6 @@ function wordFormat(word) { //文本处理-通用版
     '&.*?;||| ',
     '无弹窗广告',
     '天才壹秒記住.*?為您提供精彩小說閱讀。',
-    '(天才|)一秒.*?(无广告!|小说网站|）|阅读|地址|</a>)',
     '手机阅读本章.*',
     '本书最新TXT下载.*',
     '为了方便下次阅读.*',
