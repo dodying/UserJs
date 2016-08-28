@@ -56,6 +56,8 @@
 | preZeroFill | [SegmentFault](https://segmentfault.com/q/1010000002607221) |  |  |  | 用0补足指定位数 |
 | sortTable | [脚本之家](http://www.jb51.net/article/46976.htm) |  |  |  | 表格字段排序 |
 | textToImg | [开源中国社区](http://www.oschina.net/code/snippet_84535_10015) |  |  |  | 文字转图片 |
+| gbk | [CSDN.NET](http://download.csdn.net/detail/jdluojing/4297634) |  |  |  | js实现GBK编码 |
+| :target伪类实现Tab切换效果 | [设计达人](http://www.shejidaren.com/examples/css3-target/css3-target.html) |  |  |  | :target伪类实现Tab切换效果 |
 | ```temp``` | 文件夹 | - | - |  | 临时文件 |
 | ```字母拼单词``` | 文件夹 | - | - |  | - |
 

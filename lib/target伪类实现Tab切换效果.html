@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>CSS3:target伪类制作Tab切换</title>
+
+<style type="text/css">
+body {
+	margin: 0;
+	padding: 0;
+	font: 12px normal \96B6\4E66, \6977\4F53, \5FAE\8F6F\96C5\9ED1, Helvetica, sans-serif;
+}
+a {
+	color:#98a61a
+}
+a:hover {
+	color:#006acd
+}
+ul {
+	list-style:none
+}
+h1 {
+	font: 3em normal \96B6\4E66, \6977\4F53, \5FAE\8F6F\96C5\9ED1, Georgia, 'Times New Roman', Times, serif;
+	text-align:center;
+	font-family:微软雅黑
+}
+h1 span {
+	color: #8fc1c7;
+}
+h1 small {
+	font: 0.3em normal Verdana, Arial, Helvetica, sans-serif;
+	text-transform:uppercase;
+	letter-spacing: 1.5em;
+	display: block;
+	color: #ccc;
+}
+.container {
+	margin: 0 auto;
+	width: 600px;
+}
+pre.gre {
+	background: url(pre-bg2.gif) repeat-y left top;
+	color:#688833;
+	border-left:1px solid #CCC;
+}
+pre {
+	font-size: 12px;
+	padding: 0;
+	margin: 0;
+	background: #f0f0f0;
+	line-height: 20px;
+	background: url(pre-bg.gif) repeat-y left top;
+	width: 600px;
+	overflow: auto;
+	overflow-Y:hidden;
+}
+pre code {
+	margin: 0 0 0 40px;
+	padding: 20px 0;
+	display: block;
+}
+.code {
+	margin: 20px 0;
+}
+.code h2 {
+	margin: 0;
+	font-size: 1.5em;
+	padding: 5px 10px 5px 26px;
+	background: url(icon_code.gif) no-repeat 6px 6px;
+}
+.foot {
+	margin:20px 0;
+	padding:20px;
+	border-top:1px dotted #91a7b4;
+	text-align:center
+}
+/*end pre style*/
+.tablist {
+	position:relative;
+	width:600px;
+	margin:50px auto;
+	height:200px;
+}
+/* this example style begin */
+.tab_content {
+	position: absolute;/*set content box as absolute*/
+	/* content style begin*/
+	width:600px;
+	height:170px;
+	padding:15px;
+	border:1px solid #91a7b4;
+	border-radius:3px;
+	box-shadow:0 2px 3px rgba(0, 0, 0, 0.1);
+	font-size:1.2em;
+	line-height:1.5em;
+	color:#666;
+	background:#fff;
+}
+#tab1:target, #tab2:target, #tab3:target {
+	z-index: 1;
+}
+/* tabmenu style */
+.tabmenu {
+	position:absolute;
+	top:100%;
+	margin:0;
+}
+.tabmenu li {
+	display:inline-block;
+}
+.tabmenu li a {
+	display:block;
+	padding:5px 10px;
+	margin:0 10px 0 0;
+	border:1px solid #91a7b4;
+	border-radius:0 0 5px 5px;
+	background:#e3f1f8;
+	color:#333;
+	text-decoration:none;
+}
+</style>
+
+</head>
+
+<body>
+<h1><span>CSS3 :target</span>伪类实现Tab切换效果<small>BY commy </small></h1>
+
+<div class="container">
+	<div class="tablist">
+        <ul class="tabmenu">
+            <li><a href="#tab1">标签一</a></li>
+            <li><a href="#tab2">标签二</a></li>
+            <li><a href="#tab3">标签三</a></li>
+        </ul>
+        <div id="tab1" class="tab_content">欢迎加设计达人Q群：50063010<br />设计达人以原创和分享一些高质量的设计文章为主，希望喜欢！
+        <!-- end tab1 content --></div>
+      <div id="tab2" class="tab_content"><p>本Tab切换效果纯CSS3制作，无任何JavaScript</p>最新Q群：50063010<br />爱设计，爱分享——设计达人（<a href="http://www.shejidaren.com">http://www.shejidaren.com</a>）
+<!-- end tab2 content--></div>
+        <div id="tab3" class="tab_content"><p style="font-size:24px;">高质量设计文章分享平台</p><p>欢迎加设计达人Q群：50063010<br /><a href="http://www.shejidaren.com">设计达人</a>以原创和分享一些高质量的设计文章为主，希望喜欢</p>
+        <!-- end tab3 content--></div>
+    </div>
+
+<div class="code">
+<h2>CSS样式</h2>
+<pre><code>.tablist {position:relative;margin:50px auto;min-height:200px;}
+/* this example style begin */
+.tab_content {
+	position: absolute;/*set content box as absolute*/
+	/* content style begin*/
+	width:600px;height:170px;padding:15px;border:1px solid #91a7b4;border-radius:3px;box-shadow:0 2px 3px rgba(0,0,0,0.1);font-size:1.2em;line-height:1.5em;color:#666;background:#fff;
+}
+#tab1:target, #tab2:target, #tab3:target {
+	z-index: 1;
+}
+
+
+/* tabmenu style */
+.tabmenu {position:absolute;top:100%;margin:0;}
+	.tabmenu li{display:inline-block;}
+	.tabmenu li a {display:block;padding:5px 10px;margin:0 10px 0 0;border:1px solid #91a7b4;border-radius:0 0 5px 5px;background:#e3f1f8;color:#333;text-decoration:none;}
+</code></pre>
+</div>
+
+
+<div class="code">
+<h2>HTML代码</h2>
+<pre class="gre"><code>&lt;div class=&quot;tablist&quot;&gt;<br />    &lt;ul class=&quot;tabmenu&quot;&gt;<br />        &lt;li&gt;&lt;a href=&quot;#tab1&quot;&gt;标签一&lt;/a&gt;&lt;/li&gt;<br />        &lt;li&gt;&lt;a href=&quot;#tab2&quot;&gt;标签二&lt;/a&gt;&lt;/li&gt;<br />        &lt;li&gt;&lt;a href=&quot;#tab3&quot;&gt;标签三&lt;/a&gt;&lt;/li&gt;<br />    &lt;/ul&gt;<br />    &lt;div id=&quot;tab1&quot; class=&quot;tab_content&quot;&gt;欢迎加设计达人Q群：50063010&lt;br /&gt;设计达人以原创和分享一些高质量的设计文章为主，希望喜欢！<br />    &lt;!-- end tab1 content --&gt;&lt;/div&gt;<br />    &lt;div id=&quot;tab2&quot; class=&quot;tab_content&quot;&gt;&lt;p&gt;本Tab切换效果纯CSS3制作，无任何JavaScript&lt;/p&gt;最新Q群：50063010&lt;br /&gt;爱设计，爱分享——设计达人（http://www.shejidaren.com）<br />    &lt;!-- end tab2 content--&gt;&lt;/div&gt;<br />    &lt;div id=&quot;tab3&quot; class=&quot;tab_content&quot;&gt;&lt;p style=&quot;font-size:24px;&quot;&gt;高质量设计文章分享平台&lt;/p&gt;&lt;p&gt;欢迎加设计达人Q群：50063010&lt;br /&gt;设计达人以原创和分享一些高质量的设计文章为主，希望喜欢&lt;/p&gt;<br />    &lt;!-- end tab3 content--&gt;&lt;/div&gt;<br />&lt;/div&gt;
+</code></pre>
+</div>
+
+	<div class="foot">&copy; 2011 <a href="http://www.shejidaren.com">设计达人</a></div>
+    
+</div>
+
+<span style="display:none"><script src="http://s15.cnzz.com/stat.php?id=2673729&web_id=2673729" language="JavaScript"></script></span>
+
+</body>
+</html>
