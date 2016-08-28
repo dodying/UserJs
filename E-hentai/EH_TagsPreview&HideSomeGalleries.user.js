@@ -19,7 +19,7 @@
 // @include     http*://g.e-hentai.org/favorites.php
 // @include     http*://g.e-hentai.org/favorites.php?*
 // @include     http*://g.e-hentai.org/uploader/*
-// @version     1.050
+// @version     1.06
 // @grant       none
 // @run-at      document-idle
 // ==/UserScript==
@@ -423,7 +423,10 @@ var Doujinshi_Array_Chs = new Array();
 var gidlist = new Array();
 var gmetadata_all = new Array();
 for (var i = 0; i < Div.length; i++) {
-  Div[i].className = 'TagPreview_' + i;
+ if (Div[i].querySelector('img')){
+   Div[i].querySelector('img').className = 'TagPreview_' + i;}else{
+   Div[i].className = 'TagPreview_' + i;
+ }
   var url_array = Div[i].href.split('/');
   gidlist.push([url_array[4],
   url_array[5]]);
@@ -503,7 +506,7 @@ function TagPreview(gmetadata, status) {
   var Box = document.createElement('div');
   Box.id = 'TagPreview';
   Box.style = 'position:absolute;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:black;border-style:solid;color:white;background-color:#34353B;';
-  document.querySelector('.itg').parentNode.onmousemove = function (e) {
+  document.querySelector('.ido').onmousemove = function (e) {
     if (e.target.className.indexOf('TagPreview_') >= 0) {
       var id = e.target.className.replace('TagPreview_', '');
       if (gmetadata_all[id].tags) {
