@@ -48,16 +48,16 @@
 | 搜索引擎跳转-小说版+高亮 | [安装](https://github.com/dodying/UserJs/raw/master/modify/searchEngineJumpForNovel.user.js) |  | × |  | 修改自 [搜索引擎跳转-文科版](https://greasyfork.org/zh-CN/scripts/2739)<br />与[Highlighter](http://userscripts-mirror.org/scripts/show/15637)以及[Sort Search Engine Result](https://greasyfork.org/zh-CN/scripts/10121) |
 | ```lib``` | 文件夹 |  |  |  | 写脚本时，从网上复制来的函数（可能做了修改） |
 | base64 | [代码攻城师的技术博客 - CSDN.NET](http://blog.csdn.net/gumanren/article/details/5870133) |  |  |  | JS实现base64编码与解码 |
-| getHostName | 应该是来自 [SegmentFault](https://segmentfault.com/) 的某个页面... |  |  |  | 获取```网页字符串```域名 |
-| getMousePos | 应该是来自某博客... |  |  |  | 获取鼠标位置 |
-| html2Escape | [Win32FanEx 的专栏 - CSDN.NET](http://blog.csdn.net/win32fanex/article/details/11948659) |  |  |  | web前端关于html转义符的常用js函数 |
-| objArrSort | [脚本之家](http://www.jb51.net/article/24536.htm) |  |  |  | 根据对象的某一属性进行排序的js代码 |
-| objComp | [脚本之家](http://www.jb51.net/article/26372.htm) |  |  |  | js对象的比较 |
-| preZeroFill | [SegmentFault](https://segmentfault.com/q/1010000002607221) |  |  |  | 用0补足指定位数 |
-| sortTable | [脚本之家](http://www.jb51.net/article/46976.htm) |  |  |  | 表格字段排序 |
-| textToImg | [开源中国社区](http://www.oschina.net/code/snippet_84535_10015) |  |  |  | 文字转图片 |
-| gbk | [CSDN.NET](http://download.csdn.net/detail/jdluojing/4297634) |  |  |  | js实现GBK编码 |
-| :target伪类实现Tab切换效果 | [设计达人](http://www.shejidaren.com/examples/css3-target/css3-target.html) |  |  |  | :target伪类实现Tab切换效果 |
+| getHostName.js | 应该是来自 [SegmentFault](https://segmentfault.com/) 的某个页面... |  |  |  | 获取```网页字符串```域名 |
+| getMousePos.js | 应该是来自某博客... |  |  |  | 获取鼠标位置 |
+| html2Escape.js | [Win32FanEx 的专栏 - CSDN.NET](http://blog.csdn.net/win32fanex/article/details/11948659) |  |  |  | web前端关于html转义符的常用js函数 |
+| objArrSort.js | [脚本之家](http://www.jb51.net/article/24536.htm) |  |  |  | 根据对象的某一属性进行排序的js代码 |
+| objComp.js | [脚本之家](http://www.jb51.net/article/26372.htm) |  |  |  | js对象的比较 |
+| preZeroFill.js | [SegmentFault](https://segmentfault.com/q/1010000002607221) |  |  |  | 用0补足指定位数 |
+| sortTable.js | [脚本之家](http://www.jb51.net/article/46976.htm) |  |  |  | 表格字段排序 |
+| textToImg.js | [开源中国社区](http://www.oschina.net/code/snippet_84535_10015) |  |  |  | 文字转图片 |
+| URL-gbk.js | [CSDN.NET](http://download.csdn.net/detail/jdluojing/4297634) |  |  |  | $URL.encode/$URL.decode(GBK编码) |
+| :target伪类实现Tab切换效果.html | [设计达人](http://www.shejidaren.com/examples/css3-target/css3-target.html) |  |  |  | :target伪类实现Tab切换效果 |
 | ```temp``` | 文件夹 | - | - |  | 临时文件 |
 | ```字母拼单词``` | 文件夹 | - | - |  | - |
 
