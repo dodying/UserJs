@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.360.113+329",
-        "changeInfo": "其实还是1.36.113+329，只不过加了个0，删了一条替换规则"
+        "latestVersion": "1.361.113+329",
+        "changeInfo": "其实还是1.36.113+329，只不过加了个1，根据热心网友的建议，更改了一下布局"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*",
