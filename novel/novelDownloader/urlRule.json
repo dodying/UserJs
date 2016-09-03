@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.361.113+329",
-        "changeInfo": "其实还是1.36.113+329，只不过加了个1，根据热心网友的建议，更改了一下布局"
+        "latestVersion": "1.37.113+332",
+        "changeInfo": "取巧增加了一个通用模版(大部分内容选择器来自[小说阅读脚本])，细节变更。"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*",
@@ -1760,7 +1760,7 @@
         "indexRule": "addIRule('www.ryzww.com','若雨中文网','h1','#list>dl>dd>a');",
         "chapterRule": "addCRule('www.ryzww.com','h1','#content>p',0,1);"
     },
-    "greasyfork.org": {
+    "www.miaobige.com": {
         "include1": "http://www.miaobige.com/read/*",
         "indexRule": "addIRule('www.miaobige.com','妙笔阁','h1','#readerlist>ul>li>a');",
         "chapterRule": "addCRule('www.miaobige.com','h1','#content',0,1);"

@@ -6,7 +6,7 @@
 // @include     *
 // @exclude     *.baidu.com*
 // @exclude     *.google.*
-// @version     1.03
+// @version     1.031
 // @grant       GM_setClipboard
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -20,7 +20,7 @@ window.onkeydown = function (e) {
   if (e.altKey || e.ctrlKey || e.metaKey || e.keyCode === 13) return
   info = '';
   if (e.shiftKey && e.keyCode === 72) { //H
-    var gbk = (document.querySelector('meta[content*="charset=gb"]')) ? ',0,1' : '';
+    var gbk = (document.querySelector('meta[content*="charset=gb"],meta[charset*="gb"]')) ? ',0,1' : '';
     var text = '\n'
     + 'addIRule(\'' + location.host + '\',\'' + pretitle.replace(/.*\- /, '') + '\',\'\',\'\');\n'
     + 'addCRule(\'' + location.host + '\',\'\',\'\'' + gbk + ');';
