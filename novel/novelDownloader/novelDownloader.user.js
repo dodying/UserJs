@@ -448,7 +448,7 @@ function init() {
     addRRule('b.faloo.com', '\\s+||| ', '飞卢小说网.*');
     addIRule('www.jjwxc.net', '晋江文学城', 'h1>span', '#oneboolt>tbody>tr>td>span>div>a', '#oneboolt>tbody>tr>td>span>div>a[id^="vip_"]');
     addCRule('www.jjwxc.net', 'h2', '.noveltext', 0, 1);
-    addRRule('www.jjwxc.net', '<font color="#.*?>.*?晋江原创网.*?font>', '\\s+||| ', '<div.*<div style="clear:both;"></div>', '<span.*class="favorite_novel">插入书签</span>');
+    addRRule('www.jjwxc.net', '<font.*?>.*?font>', '\\s+||| ', '<div.*<div style="clear:both;"></div>', '<span.*class="favorite_novel">插入书签</span>');
     addIRule('www.xxsy.net', '潇湘书院', '#ct_title>h1', '#catalog_list>ul>li>a', '#catalog_list>ul>li:has(input)>a');
     addCRule('www.xxsy.net', 'h1>a', '#zjcontentdiv');
     addRRule('www.xxsy.net', '本书由潇湘书院首发，请勿转载！');
@@ -756,7 +756,6 @@ function init() {
           },
           onload: function (response) {
             var json = JSON.parse(response.response);
-            console.log(json);
             var name = json.chapter_title;
             var content = '';
             for (var i = 0; i < json.results.length; i++) {
@@ -1811,7 +1810,6 @@ function downloadTask(fun) { //下载列队
     if (jQuery(window).data('downloadNow') [i].ok) {
       delete jQuery(window).data('downloadNow') [i];
       jQuery(window).data('downloadNow').length--;
-      continue;
     }
     if (!jQuery(window).data('downloadNow') [i].downloading) {
       var href = jQuery(window).data('downloadNow') [i].href;
