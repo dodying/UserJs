@@ -18,15 +18,15 @@
 document.onkeydown = function (e) {
   if (e.target.onblur === null) {
     e.target.onblur = function () {
-      this.value = tranStr(this.value, true);//true×ªÎª·±Ìå,false×ªÎª¼òÌå
+      this.value = tranStr(this.value, true);//trueè½¬ä¸ºç¹ä½“,falseè½¬ä¸ºç®€ä½“
     }
   }
 }
 */
-GM_registerMenuCommand('×ªÎª·±Ìå', function () {
+GM_registerMenuCommand('è½¬ä¸ºç¹ä½“', function () {
   tran(true);
 }, 'T');
-GM_registerMenuCommand('×ªÎª¼òÌå', function () {
+GM_registerMenuCommand('è½¬ä¸ºç®€ä½“', function () {
   tran(false);
 }, 'S');
 function tran(toBig5) {
