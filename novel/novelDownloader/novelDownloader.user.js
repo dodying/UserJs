@@ -15,7 +15,7 @@
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
-// @require     https://greasyfork.org/scripts/21541-chs2sht/code/chs2sht.js?version=137286
+// @require     https://greasyfork.org/scripts/21541/code/chs2cht.js?version=137286
 // @grant       GM_xmlhttpRequest
 // @grant       unsafeWindow
 // @grant       GM_setValue
