@@ -9,8 +9,9 @@
 | ```novel``` | 文件夹 | - | - |  | - |
 | 【小说】下载脚本 | [GitHub](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader) | [GF](https://greasyfork.org/zh-CN/scripts/21515) | ? | √ |  |
 | 【小说】下载脚本助手 | [安装](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloaderHelper.user.js) |  | × | √ | 用来增加```【小说】下载脚本```的规则 |
-| 【小说】起点书签 | [安装](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) |  | × |  | 本地书签 |
+| 【小说】污客自定义 | [安装](https://github.com/dodying/UserJs/raw/master/novel/hbookerCustomize.user.js) |  | × | √ |  |
 | 【小说】目录页侧边分卷导航栏 | [安装](https://github.com/dodying/UserJs/raw/master/novel/SidebarInContent.user.js) |  | × |  |  |
+| 【小说】起点书签 | [安装](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) |  | × |  | 本地书签 |
 | ```HentaiVerse``` | 文件夹 | - | - |  | - |
 | 【HV】打怪 | [GitHub](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvAutoAttack) | [GF](https://greasyfork.org/zh-CN/scripts/18482) | ? |  | 自动打怪 |
 | 【HV】喂食 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoFeed.user.js) |  | × |  | 在 [MonsterLab](http://hentaiverse.org/?s=Bazaar&ss=ml) 页面起作用<br />给饥饿的怪物自动喂食```Happy Pill``` |
