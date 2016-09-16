@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.37.113+332
+// @version     1.37.114+332
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
 // @connect     script.qwsy.com
@@ -58,6 +58,7 @@
 // @include     http://www.8kana.com/book/*
 // @include     http://www.8kana.com/read/*
 // @include     http://www.heiyan.com/book/*/*
+// @include     http://www.sndream.cn/book/*/*
 // @include     http://b.faloo.com/f/*
 // @include     http://b.faloo.com/p/*/*
 // @include     http://www.jjwxc.net/onebook.php*
@@ -441,6 +442,12 @@ function init() {
             thisDownloaded(num, name, content, 0);
           }
         });
+      }
+    };
+    addIRule('www.sndream.cn', '少年dream', 'h1.page-title', 'div.bd>ul>li>a', 'div.bd>ul>li>a.isvip');
+    chapterRule['www.sndream.cn'] = {
+      'Deal': function (num, url) {
+        chapterRule['www.heiyan.com'].Deal(num, url);
       }
     };
     addIRule('b.faloo.com', '飞卢', 'h1.a_24b', '.td_0>a', '.td_0>a[href^="http://b.faloo.com/vip/"]');
@@ -1991,8 +1998,8 @@ function wordFormat(word) { //文本处理-通用版
 }
 function wordSection(word) { //文本强制分段-测试功能
   var symbol = {
-    'lineEnd': '。？！”」', //句子结尾
-    'lineStart': '“「', //句子开头
+    'lineEnd': '。？！”」』', //句子结尾
+    'lineStart': '“「『', //句子开头
     'unbreak': '…，、—（）()·《 》〈 〉．_；： 　', //不包括作为句子开头的标点 //作用是找到【需要断句的标点】后，不断判断之后的字符是否为标点，是则继续找，不是则断句
   };
   var reLineEnd = new RegExp('[' + symbol.lineEnd + ']');
