@@ -1725,7 +1725,7 @@ function downloadTo(bookName, fileType) { //下载到...
 function download(fileType) { //下载
   var host = location.host;
   var chapter = jQuery(indexRule[host].chapter);
-  var bookName = jQuery.trim(jQuery(indexRule[host].name) [0].innerText);
+  var bookName = (jQuery(indexRule[host].name).length > 0) ? jQuery.trim(jQuery(indexRule[host].name) [0].innerText)  : document.title;
   if (jQuery('#nD-Vip') [0].checked === false && indexRule[host].vip !== '') chapter = jQuery(chapter).not(jQuery(indexRule[host].vip));
   if (jQuery('.nD-SplitInput').val() !== '') {
     jQuery(chapter).each(function () {
