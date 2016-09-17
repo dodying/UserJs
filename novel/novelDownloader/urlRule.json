@@ -70,7 +70,8 @@
     "www.lewen8.com": {
         "include1": "http://www.lewen8.com/lw*/*",
         "indexRule": "addIRule('www.lewen8.com', '乐文小说网', 'h1', '.chapterlist>li>a');",
-        "chapterRule": "addCRule('www.lewen8.com', 'h1', '#content');"
+        "chapterRule": "addCRule('www.lewen8.com', 'h1', '#content');",
+        "change": "1474081881624"
     },
     "www.yfzww.com": {
         "include1": "http://www.yfzww.com/Book/*",
