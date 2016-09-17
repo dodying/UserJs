@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.37.113+332",
-        "changeInfo": "取巧增加了一个通用模版(大部分内容选择器来自[小说阅读脚本])，细节变更。"
+        "latestVersion": "1.37.114+332",
+        "changeInfo": ""
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*",
@@ -69,7 +69,7 @@
     },
     "www.lewen8.com": {
         "include1": "http://www.lewen8.com/lw*/*",
-        "indexRule": "addIRule('www.lewen8.com', '乐文小说网', '.infot>h1', '.chapterlist>li>a');",
+        "indexRule": "addIRule('www.lewen8.com', '乐文小说网', 'h1', '.chapterlist>li>a');",
         "chapterRule": "addCRule('www.lewen8.com', 'h1', '#content');"
     },
     "www.yfzww.com": {
