@@ -2,10 +2,10 @@
 // @name        hbookerEnhance
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @name:zh-CN  【小说】污客增强
-// @description 阅读高亮，吐槽楼层提醒、跳转，快速吐槽，查看头像
-// @description:zh-CN  阅读高亮，吐槽楼层提醒、跳转，快速吐槽，查看头像
+// @description 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
+// @description:zh-CN  阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 // @include     http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=*
-// @version     1.01
+// @version     1.02
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -25,7 +25,7 @@ function init() {
   + '.bd>p:hover{background-color:#CDCDCD;}'
   + '.state{right:10px!important;}'
   + '.state>a{margin-left:0!important;}'
-  + '.avatarShow{background-repeat:no-repeat;width:140px;height:140px;display:block;z-index:999999;position:fixed;}'
+  + '.avatarShow{background-repeat:no-repeat;width:140px;height:140px;display:none;z-index:999999;position:fixed;}'
   + '.chapter-comment-page>select{border:solid 1px #000;appearance:none;-moz-appearance:none;-webkit-appearance:none;}'
   + '.quickComment{cursor:pointer;float:left;}'
   + '.selectComment{display:none;position:absolute;z-index:999999;border:solid 1px #000;background-color:white;width:410px;}'
@@ -47,6 +47,65 @@ function init() {
         jQ('p.chapter').not(this).removeClass('reading');
         if (!jQ(this).next().hasClass('chapter-comment-wrap')) jQ('.chapter-comment-wrap').hide();
       });
+      jQ('body').append('<div class="avatarShow"></div>');
+      jQ('body').append(function () {
+        var _html = '<div class="selectComment" title="左键：填充\n右键：删除，刷新后生效"><ul>';
+        if (localStorage.hbookerEnhance) {
+          var set = JSON.parse(localStorage.hbookerEnhance);
+          if (set.del.length > 0) {
+            for (var i = 0; i < set.del.length; i++) {
+              set.comment.splice(set.del[i], 1);
+              set.del.splice(i, 1);
+              i--;
+            }
+          }
+          set.comment.sort(function (a, b) {
+            var val1 = a['count'];
+            var val2 = b['count'];
+            if (val2 < val1) {
+              return - 1;
+            } else if (val2 > val1) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+          localStorage.hbookerEnhance = JSON.stringify(set);
+          for (var i = 0; i < set.comment.length; i++) {
+            _html += '<li name="' + i + '">' + set.comment[i].text + '</li>';
+          }
+        }
+        _html += '<li class="addComment">(添加吐槽，可保存)</li>';
+        _html += '<li>前方高能</li>';
+        _html += '<li>怪我咯</li>';
+        _html += '<li>这个时候我该用什么表情好</li>';
+        _html += '<li>虽然看不明白，但是好像很厉害的样子</li>';
+        _html += '<li>人与人之间最基础的信任呢？</li>';
+        _html += '<li>好书，上交国家</li>';
+        _html += '<li>洪荒之力用完了</li>';
+        _html += '<li>你们城里人真会玩</li>';
+        _html += '<li>来啊，互相伤害啊</li>';
+        _html += '<li>我已经用了洪荒之力</li>';
+        _html += '</ul></div>';
+        return _html;
+      });
+      jQ('.addComment').click(function () {
+        var word = prompt('请输入吐槽');
+        if (!word) return;
+        var set;
+        if (localStorage.hbookerEnhance) {
+          set = JSON.parse(localStorage.hbookerEnhance);
+        } else {
+          set = new Object();
+          set.comment = new Array();
+          set.del = new Array();
+        }
+        var temp = new Object();
+        temp.text = word;
+        temp.count = 0;
+        set.comment.push(temp);
+        localStorage.hbookerEnhance = JSON.stringify(set);
+      });
       var mo = new MutationObserver(checkReview);
       mo.observe(document.all.J_BookRead, {
         childList: true
@@ -59,8 +118,8 @@ function init() {
   }, 200);
 }
 function checkReview() {
+  jQ('.selectComment').hide(); //隐藏快速吐槽
   setTimeout(function () {
-    jQ('.selectComment').hide(); //隐藏快速吐槽
     jQ('.name>a:has(i)').addClass(function () { //Vip高亮
       return jQ(this).children().attr('class');
     }).attr('title', function () {
@@ -92,29 +151,16 @@ function checkReview() {
     });
     jQ('.img').off().on({ //查看头像
       mousemove: function (e) {
-        if (jQ('.avatarShow').length > 0) {
-          jQ('.avatarShow').show();
-          jQ('.avatarShow').css({
-            'left': function () {
-              return (e.screenX + 10) + 'px';
-            },
-            'top': function () {
-              return (e.screenY - 60) + 'px';
-            },
-            'background-image': 'url(' + jQ(this).find('img').attr('src') + ')'
-          });
-        } else {
-          jQ('body').append('<div class="avatarShow"></div>');
-          jQ('.avatarShow').css({
-            'left': function () {
-              return (e.screenX + 10) + 'px';
-            },
-            'top': function () {
-              return (e.screenY - 60) + 'px';
-            },
-            'background-image': 'url(' + jQ(this).find('img').attr('src') + ')'
-          });
-        }
+        jQ('.avatarShow').show();
+        jQ('.avatarShow').css({
+          'left': function () {
+            return (e.screenX + 10) + 'px';
+          },
+          'top': function () {
+            return (e.screenY - 60) + 'px';
+          },
+          'background-image': 'url(' + jQ(this).find('img').attr('src') + ')'
+        });
       },
       mouseout: function () {
         jQ('.avatarShow').hide();
@@ -139,17 +185,7 @@ function checkReview() {
           jQ('.chapter-comment-submit').click();
         }
       });
-      jQ('.chapter-comment-form').append('<span class="quickComment"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAJCAYAAAAGuM1UAAAAIElEQVQYlWNgoDnQ13f7TwiTpIkkm0hyHkl+IloxTQAAXH8o7GbEclEAAAAASUVORK5CYII="></img></span>')
-      if (jQ('.selectComment').length === 0) {
-        jQ('body').append('<div class="selectComment"><ul>'
-        + '<li>签到</li>'
-        + '<li>呸</li>'
-        + '<li>呵呵</li>'
-        + '<li>我从未见过如此厚颜无耻之人</li>'
-        + '<li>喂 妖妖灵 没错 就是上次那个人</li>'
-        + '<li>盖楼</li>'
-        + '</ul></div>');
-      }
+      jQ('.chapter-comment-form').append('<span class="quickComment"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAJCAYAAAAGuM1UAAAAIElEQVQYlWNgoDnQ13f7TwiTpIkkm0hyHkl+IloxTQAAXH8o7GbEclEAAAAASUVORK5CYII="></img></span>');
       jQ('.quickComment').click(function () {
         jQ('.selectComment').css({
           'left': jQ('.chapter-comment-form>input').offset().left + 'px',
@@ -157,8 +193,20 @@ function checkReview() {
         }).toggle();
       });
       jQ('.selectComment li').click(function () {
+        if (this.className === 'addComment') return;
         jQ('.chapter-comment-form>input').val(this.innerText);
+        if (jQ(this).attr('name') !== undefined) {
+          var set = JSON.parse(localStorage.hbookerEnhance);
+          set.comment[jQ(this).attr('name')].count++;
+          localStorage.hbookerEnhance = JSON.stringify(set);
+        }
         jQ('.selectComment').hide();
+      }).contextmenu(function () {
+        if (jQ(this).attr('name') !== undefined) {
+          var set = JSON.parse(localStorage.hbookerEnhance);
+          set.del.push(jQ(this).attr('name'));
+          localStorage.hbookerEnhance = JSON.stringify(set);
+        }
       });
     }
   }, 200);
