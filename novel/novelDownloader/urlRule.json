@@ -1,7 +1,7 @@
 ﻿{
     "updateInfo": {
-        "latestVersion": "1.37.114+332",
-        "changeInfo": ""
+        "latestVersion": "1.38.114+332",
+        "changeInfo": "可选择是否对文本进行处理（原先默认处理），强烈建议勾选，当文本缺失时尝试不勾选"
     },
     "www.blwen.com": {
         "include1": "http://www.blwen.com/*",
