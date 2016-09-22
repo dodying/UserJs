@@ -5,7 +5,7 @@
 // @description 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 // @description:zh-CN  阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 // @include     http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=*
-// @version     1.03
+// @version     1.035
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -48,7 +48,11 @@ function init() {
         jQ('p.chapter').not(this).removeClass('reading');
         if (!jQ(this).next().hasClass('chapter-comment-wrap')) jQ('.chapter-comment-wrap').hide();
       });
-      var mo = new MutationObserver(checkReview);
+      var mo = new MutationObserver(function () {
+        setTimeout(function () {
+          checkReview();
+        }, 200);
+      });
       mo.observe(document.all.J_BookRead, {
         childList: true
       });
@@ -178,7 +182,9 @@ function checkReview() {
     ///*
     var parent = jQ(this).parentsUntil('#J_BookRead');
     parent = jQ(parent[parent.length - 1]); //.prev()
-    checkReview();
+    setTimeout(function () {
+      checkReview();
+    }, 200);
     jQ(document).scrollTop(parent.offset().top - 30);
     //*/
   });
