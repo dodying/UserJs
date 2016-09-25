@@ -6,7 +6,7 @@
 // @description:zh-CN  储存为本地书签
 // @include     http*://exhentai.org/*
 // @include     http*://g.e-hentai.org/*
-// @version     1
+// @version     1.01
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_registerMenuCommand
@@ -51,6 +51,7 @@
         _info.status = status;
         whitelist[gid] = _info;
         GM_setValue('whitelist', whitelist);
+        jQuery('#gd3>div>div').attr('class', 'i' + gid + ' ehLBFav ehLBFav' + status);
         jQuery('#gdf').html('<div class="ehLBFav ehLBFav' + status + '" title="' + intro[status] + '" />' + intro[status]);
       } else if (e.shiftKey && e.keyCode === 66) { //Shift+B
         var blacklist = GM_getValue('blacklist', new Array());
@@ -58,22 +59,64 @@
         if (keyword === '' || keyword === null) return;
         blacklist.push(keyword);
         GM_setValue('blacklist', blacklist);
+        jQuery('#gd3>div>div').attr('class', 'i' + gid + ' ehLBUnlike');
         jQuery('#gdf').html('<div class="ehLBUnlike" />已加入黑名单');
       } else if (e.shiftKey && e.keyCode === 68) { //Shift+D
         var whitelist = GM_getValue('whitelist', new Object());
         delete whitelist[gid];
         GM_setValue('whitelist', whitelist);
+        jQuery('#gd3>div>div').attr('class', 'i' + gid + ' ehLBAdd');
         jQuery('#gdf').html('<div style="float:left;cursor:pointer"id="fav"></div><div style="float:left"><a id="favoritelink"href="#"onclick="return false"><img src="/img/mr.gif">Add to Favorites</a></div><div class="c"></div>');
       }
     }
+    jQuery('#gd3').prepend('<div><div class="ehLBAdd i' + gid + '"></div><a class="ehLBSearch" target="_blank" href="/?f_search=%22' + encodeURIComponent(name.replace(/\[.*?\]|\(.*?\)/g, '').replace(/^\s+|\s+$/g, '')) + '%22"></a></div>');
+    jQuery('.ehLBFav,.ehLBAdd,.ehLBUnlike').mousedown(function (e) {
+      var whitelist = GM_getValue('whitelist', new Object());
+      var blacklist = GM_getValue('blacklist', new Array());
+      if (e.button === 0) { //左键单击(有无Shift)
+        var status = (e.shiftKey) ? prompt('请输入类型\n' + intro.join('\n') + '\n10.从收藏夹移除', GM_getValue('lastAdded', ''))  : GM_getValue('lastAdded', null) || prompt('请输入类型\n' + intro.join('\n') + '\n10.从收藏夹移除', GM_getValue('lastAdded', ''));
+        status = parseInt(status);
+        if (isNaN(status) || status > 10 || status < 0) {
+          return;
+        } else if (status === 10) {
+          delete whitelist[gid];
+          jQuery(this).attr('class', 'i' + gid + ' ehLBUnlike');
+          jQuery('#gdf').html('<div class="ehLBUnlike" />已加入黑名单');
+        } else {
+          _info.status = status;
+          whitelist[gid] = _info;
+          jQuery(this).attr('class', 'i' + gid + ' ehLBFav ehLBFav' + status);
+          jQuery('#gdf').html('<div class="ehLBFav ehLBFav' + status + '" title="' + intro[status] + '" />' + intro[status]);
+        }
+        GM_setValue('whitelist', whitelist);
+        GM_setValue('lastAdded', status);
+      } else if (e.button === 2 && e.shiftKey) { //右键单击+Shift  删除并加入黑名单
+        var whitelist = GM_getValue('whitelist', new Object());
+        delete whitelist[gid];
+        GM_setValue('whitelist', whitelist);
+        jQuery(this).attr('class', 'i' + gid + ' ehLBUnlike');
+        var keyword = prompt('请输入关键词', name.replace(/\[.*?\]|\(.*?\)/g, '').replace(/^\s+|\s+$/g, ''));
+        if (keyword === '' || keyword === null) return;
+        blacklist.push(keyword);
+        GM_setValue('blacklist', blacklist);
+      } else if (e.button === 2) { //右键单击  加入0
+        _info.status = 0;
+        whitelist[gid] = _info;
+        GM_setValue('whitelist', whitelist);
+        jQuery(this).attr('class', 'i' + gid + ' ehLBFav ehLBFav0');
+        jQuery('#gdf').html('<div class="ehLBFav ehLBFav0" title="' + intro[0] + '" />' + intro[0]);
+      }
+    });
     var whitelist = GM_getValue('whitelist', new Object());
     var blacklist = GM_getValue('blacklist', new Array());
     if (gid in whitelist) {
       var status = whitelist[gid].status;
+      jQuery('#gd3>div>div').attr('class', 'i' + gid + ' ehLBFav ehLBFav' + status);
       jQuery('#gdf').html('<div class="ehLBFav ehLBFav' + status + '"></div>' + intro[status]);
     }
     for (var i = 0; i < blacklist.length; i++) {
       if (new RegExp(blacklist[i], 'gi').test(jQuery('#gn').text())) {
+        jQuery('#gd3>div>div').attr('class', 'i' + gid + ' ehLBUnlike');
         jQuery('#gdf').html('<div class="ehLBUnlike" />已加入黑名单');
         break;
       }
@@ -119,20 +162,20 @@
         'thumb': thumb
       };
       if (e.button === 0) { //左键单击(有无Shift)
-        var temp = (e.shiftKey) ? prompt('请输入类型\n' + intro.join('\n') + '\n10.从收藏夹移除', GM_getValue('lastAdded', ''))  : GM_getValue('lastAdded', null) || prompt('请输入类型\n' + intro.join('\n') + '\n10.从收藏夹移除', GM_getValue('lastAdded', ''));
-        temp = parseInt(temp);
-        if (isNaN(temp) || temp > 10 || temp < 0) {
+        var status = (e.shiftKey) ? prompt('请输入类型\n' + intro.join('\n') + '\n10.从收藏夹移除', GM_getValue('lastAdded', ''))  : GM_getValue('lastAdded', null) || prompt('请输入类型\n' + intro.join('\n') + '\n10.从收藏夹移除', GM_getValue('lastAdded', ''));
+        status = parseInt(status);
+        if (isNaN(status) || status > 10 || status < 0) {
           return;
-        } else if (temp === 10) {
+        } else if (status === 10) {
           delete whitelist[gid];
           jQuery(this).attr('class', 'i' + gid + ' ehLBUnlike');
         } else {
-          _info.status = temp;
+          _info.status = status;
           whitelist[gid] = _info;
-          jQuery(this).attr('class', 'i' + gid + ' ehLBFav ehLBFav' + temp);
+          jQuery(this).attr('class', 'i' + gid + ' ehLBFav ehLBFav' + status);
         }
         GM_setValue('whitelist', whitelist);
-        GM_setValue('lastAdded', temp);
+        GM_setValue('lastAdded', status);
       } else if (e.button === 2 && e.shiftKey) { //右键单击+Shift  删除并加入黑名单
         var whitelist = GM_getValue('whitelist', new Object());
         delete whitelist[gid];
@@ -252,6 +295,6 @@ function addStyle() {
   + '.ehLBName{min-width:74px;}'
   + '.ehLBName img{display:none;}'
   + '.ehLBHideBox{color:red;float:right;}'
-  + '.ehLBThumb{background-repeat:no-repeat;width:250px;height:250px;display:none;z-index:999999;position:fixed;}'
+  + '.ehLBThumb{background-repeat:no-repeat;width:250px;height:800px;display:none;z-index:999999;position:fixed;}'
   + '</style>');
 }
