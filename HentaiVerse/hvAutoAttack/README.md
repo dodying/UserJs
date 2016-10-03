@@ -27,10 +27,6 @@
 
 ![自动打怪演示](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Screenshot.gif)
 
-##### 战斗中，选择攻击模式
-
-![战斗中，选择攻击模式](https://greasyfork.org/system/screenshots/screenshots/000/003/736/original/%E6%A8%A1%E5%BC%8F%E9%80%89%E6%8B%A9.png?1459739319)
-
 ## HV AutoAttack Help
 
 ### 设置说明
