@@ -28,15 +28,17 @@ if (id < 30000) {
 function xhr(id, reward) {
   var xhr = new XMLHttpRequest();
   xhr.open('POST', window.location.href);
-  xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  xhr.responseType = 'document';
   var parm = 'select_item=' + id + '&select_reward=' + reward;
   xhr.send(parm);
-  xhr.onload = function () {
-    var output = xhr.responseText.replace(/[\r\n]/g, '').replace(/.*<!-- \/stuffbox -->/, '').replace(/<.*?>/g, '').replace(/\s+/g, ' ').replace(/Exquisite/g, '5精致的').replace(/Magnificent/g, '6华丽的').replace(/Legendary/g, '7传奇的').replace(/Peerless/g, '8无双的');
-    var check = confirm(output);
-    if (check == true || check == false) {
-      document.location = document.location;
-    }
+  xhr.onload = function (e) {
+    var data = e.target.response;
+    var messagebox = data.querySelector('#messagebox');
+    messagebox.innerHTML = messagebox.innerHTML.replace(/Exquisite/g, '5精致的').replace(/Magnificent/g, '6华丽的').replace(/Legendary/g, '7传奇的').replace(/Peerless/g, '8无双的');
+    document.body.appendChild(messagebox);
+    setTimeout(function () {
+      location = location.href;
+    }, 1000);
   }
 }
