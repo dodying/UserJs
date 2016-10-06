@@ -16,7 +16,6 @@
 // @run-at      document-end
 // ==/UserScript==
 (function () {
-  if (g('option').version !== '2.53') alert('请仔细看完\n请仔细看完\n请仔细看完\n暑假搞了个小说下载脚本，后来想弄个漫画下载脚本的，虽然研究了一会，但太懒太麻烦，就放弃了。\n不过还是学到了一些，比如说图片的获取保存。\n重点来了，要自动答题，可以匹配图片的大小或是base64值来确定是哪张图片。\n各位网友有空请把【记录Riddle的图片地址与答案。】的开关开启，然后将记录的地址反馈到这里，我好方便写脚本。');
   if (gE('form[name="ipb_login_form"]')) return;
   if (gE('img[src="http://ehgt.org/g/derpy.gif"]')) reload();
   optionButton();
@@ -33,6 +32,7 @@
     gE('#hvAABox').style.display = 'block';
     return;
   }
+  if (g('option').version !== '2.53') alert('请仔细看完\n请仔细看完\n请仔细看完\n暑假搞了个小说下载脚本，后来想弄个漫画下载脚本的，虽然研究了一会，但太懒太麻烦，就放弃了。\n不过还是学到了一些，比如说图片的获取保存。\n重点来了，要自动答题，可以匹配图片的大小或是base64值来确定是哪张图片。\n各位网友有空请把【记录Riddle的图片地址与答案。】的开关开启，然后将记录的地址反馈到这里，我好方便写脚本。');
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
   } else if (gE('#togpane_log')) { //战斗中
