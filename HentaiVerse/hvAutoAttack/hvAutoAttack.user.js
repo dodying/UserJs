@@ -11,12 +11,12 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://*hentaiverse.org/*
 // @exclude     http://*hentaiverse.org/pages/showequip.php?*
-// @version     2.541
+// @version     2.531
 // @grant       unsafeWindow
 // @run-at      document-end
 // ==/UserScript==
 (function () {
-  if (GM_info.script.version.substring(0, 4)!=='2.53')alert('请仔细看完\n请仔细看完\n请仔细看完\n暑假搞了个小说下载脚本，后来想弄个漫画下载脚本的，虽然研究了一会，但太懒太麻烦，就放弃了。\n不过还是学到了一些，比如说图片的获取保存。\n重点来了，要自动答题，可以匹配图片的大小或是base64值来确定是哪张图片。\n各位网友有空请把【记录Riddle的图片地址与答案。】的开关开启，然后将记录的地址反馈到这里，我好方便写脚本。');
+  if (GM_info.script.version!=='2.531')alert('请仔细看完\n请仔细看完\n请仔细看完\n暑假搞了个小说下载脚本，后来想弄个漫画下载脚本的，虽然研究了一会，但太懒太麻烦，就放弃了。\n不过还是学到了一些，比如说图片的获取保存。\n重点来了，要自动答题，可以匹配图片的大小或是base64值来确定是哪张图片。\n各位网友有空请把【记录Riddle的图片地址与答案。】的开关开启，然后将记录的地址反馈到这里，我好方便写脚本。');
   if (gE('form[name="ipb_login_form"]')) return;
   if (gE('img[src="http://ehgt.org/g/derpy.gif"]')) reload();
   optionButton();
