@@ -21,7 +21,7 @@
   optionButton();
   if (getValue('hvAAOption')) {
     g('option', getValue('hvAAOption', true));
-    if (g('option').version !== GM_info.script.version.substring(0, 4)) {
+    if (GM_info && g('option').version !== GM_info.script.version.substring(0, 4)) {
       alert('hvAutoAttack版本更新，请重新设置\r\n强烈推荐【重置设置】后再设置。');
       gE('#hvAABox').style.display = 'block';
       gE('.hvAAOptionRestore').focus();
@@ -215,7 +215,7 @@ function optionButton() { //配置
       return;
     }
     var _option = new Object();
-    _option.version = GM_info.script.version.substring(0, 4);
+    _option.version = (GM_info) ? GM_info.script.version.substring(0, 4)  : 1;
     var inputs = gE('input,select', 'all', optionBox);
     for (var i = 0; i < inputs.length; i = i + 1) {
       if (inputs[i].className === 'hvAADebug') continue;
@@ -727,7 +727,7 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
       gE('.bti3>div[onmouseover*="Mana Draught"]').click();
       g('end', true);
       return;
-    } else if (!gE('div.bte>img[src*="spiritpot"]') && g('sp') < 0.8 && g('option').buffSkill_SD && gE('.bti3>div[onmouseover*="Spirit Draught"]')) {
+    } else if (!gE('div.bte>img[src*="spiritpot"]') && g('sp') < 1 && g('option').buffSkill_SD && gE('.bti3>div[onmouseover*="Spirit Draught"]')) {
       gE('.bti3>div[onmouseover*="Spirit Draught"]').click();
       g('end', true);
       return;
