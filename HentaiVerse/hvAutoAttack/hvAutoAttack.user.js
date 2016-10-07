@@ -11,7 +11,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項
 // @include     http://*hentaiverse.org/*
 // @exclude     http://*hentaiverse.org/pages/showequip.php?*
-// @version     2.531
+// @version     2.532
 // @grant       unsafeWindow
 // @run-at      document-end
 // ==/UserScript==
@@ -719,15 +719,15 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
         }
       }
     }
-    if (!gE('div.bte>img[src*="healthpot"]') && window.HP < 1 && g('option').buffSkill_HD && gE('.bti3>div[onmouseover*="Health Draught"]')) {
+    if (!gE('div.bte>img[src*="healthpot"]') && g('hp') < 1 && g('option').buffSkill_HD && gE('.bti3>div[onmouseover*="Health Draught"]')) {
       gE('.bti3>div[onmouseover*="Health Draught"]').click();
       g('end', true);
       return;
-    } else if (!gE('div.bte>img[src*="manapot"]') && window.MP < 1 && g('option').buffSkill_MD && gE('.bti3>div[onmouseover*="Mana Draught"]')) {
+    } else if (!gE('div.bte>img[src*="manapot"]') && g('mp') < 1 && g('option').buffSkill_MD && gE('.bti3>div[onmouseover*="Mana Draught"]')) {
       gE('.bti3>div[onmouseover*="Mana Draught"]').click();
       g('end', true);
       return;
-    } else if (!gE('div.bte>img[src*="spiritpot"]') && window.SP < 0.8 && g('option').buffSkill_SD && gE('.bti3>div[onmouseover*="Spirit Draught"]')) {
+    } else if (!gE('div.bte>img[src*="spiritpot"]') && g('sp') < 0.8 && g('option').buffSkill_SD && gE('.bti3>div[onmouseover*="Spirit Draught"]')) {
       gE('.bti3>div[onmouseover*="Spirit Draught"]').click();
       g('end', true);
       return;
@@ -898,7 +898,7 @@ function autoUseDeSkill() { //自动施法De技能
   }
 }
 function autoAttack() { //自动打怪
-  if (g('option').spiritStance && g('oc') >= g('option').spiritStance_oc && !gE('#ckey_spirit[src*="spirit_a"]')) {
+  if (g('option').spiritStance && g('oc') >= parseInt(g('option').spiritStance_oc) && !gE('#ckey_spirit[src*="spirit_a"]')) {
     gE('#ckey_spirit').click();
   }
   g('monsterStatus').sort(objArrSort('finWeight'));
