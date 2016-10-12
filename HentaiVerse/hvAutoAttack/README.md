@@ -48,6 +48,13 @@
 
 #### Latest
 
+##### 2.54
+
+1. 修复了卷轴的问题，因为涉及配置的变更，所以推进一个版本号
+2. 内置了[RiddleLimiter Plus](https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982)，同时绑定了keydown事件，当按下ABC/123时自动答题并提交。
+3. 上个版本后增加了【本地储存】页面，方便导出，编辑。
+4. 接下来可能将内置[HV Random Encounter Notification](http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345)
+
 ##### 2.53
 
 2.51-2.52的版本说明忘了、忘了、忘了。
