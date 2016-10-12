@@ -12,7 +12,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.533
+// @version      2.534
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome + Tampermonkey
 // @compatible   Android + Firefox + usi
@@ -112,11 +112,11 @@ function main() { //主程序
   if (g('end')) return;
   deadSoon(); //自动回血回魔
   if (g('end')) return;
-  if (g('option').scroll && g('roundNow') >= g('option').scrollRound && g('option') ['scrollRoundType_' + g('roundType')]) autoUseScroll(); //自动使用卷轴
+  if (g('option').scroll && g('roundNow') >= g('option').scrollRoundNow && g('option') ['scrollRoundType_' + g('roundType')]) autoUseScroll(); //自动使用卷轴
   if (g('end')) return;
   if (g('option').buffSkill) autoUseBuffSkill(); //自动使用药水、施法增益技能
   if (g('end')) return;
-  if (g('option').infusion && g('roundNow') >= g('option').infusionRound && g('option') ['infusionRoundType_' + g('roundType')]) autoUseInfusions(); //自动使用魔药
+  if (g('option').infusion && g('roundNow') >= g('option').infusionRoundNow && g('option') ['infusionRoundType_' + g('roundType')]) autoUseInfusions(); //自动使用魔药
   if (g('end')) return;
   if (g('option').debuffSkill && ((g('bossAlive') > 0 && g('option').debuffSkillBoss) || g('option').debuffSkillAll)) autoUseDeSkill(); //自动施法De技能
   if (g('end')) return;
@@ -174,8 +174,8 @@ function optionButton() { //配置
   '<div id="hvAATab-Self"class="hvAATab"><input type="checkbox"id="buffSkill"><label for="buffSkill"><span class="hvAATitle">对自身技能</span></label><br>施放条件（有一个成立就行）：<br>1、总回合数≥<input name="buffSkillAllRound"placeholder="12"type="text">。2、存活≥<input name="buffSkillBoss"placeholder="1"type="text">只Boss。3、遭遇战中，存在≥<input name="buffSkillMonster"placeholder="6"type="text">只怪物。<br><b>增益技能</b>（Buff不存在就施放的技能，按【施放顺序】排序）：<br><input type="checkbox"id="buffSkill_HD"><label for="buffSkill_HD">Health Draught</label><input type="checkbox"id="buffSkill_MD"><label for="buffSkill_MD">Mana Draught</label><input type="checkbox"id="buffSkill_SD"><label for="buffSkill_SD">Spirit Draught</label><br><input type="checkbox"id="buffSkill_Pr"><label for="buffSkill_Pr">Protection</label><input type="checkbox"id="buffSkill_SL"><label for="buffSkill_SL">Spark of Life</label><input type="checkbox"id="buffSkill_SS"><label for="buffSkill_SS">Spirit Shield</label><input type="checkbox"id="buffSkill_Ha"><label for="buffSkill_Ha">Haste</label><br><input type="checkbox"id="buffSkill_AF"><label for="buffSkill_AF">Arcane Focus</label><input type="checkbox"id="buffSkill_He"><label for="buffSkill_He">Heartseeker</label><input type="checkbox"id="buffSkill_Re"><label for="buffSkill_Re">Regen</label><input type="checkbox"id="buffSkill_SV"><label for="buffSkill_SV">Shadow Veil</label><input type="checkbox"id="buffSkill_Ab"><label for="buffSkill_Ab">Absorb</label><div></div>当<b>获得Channel时</b>，即施法只需1点MP，<br><b>先ReBuff</b>：buff存在≤<input name="channelReBuff"placeholder="5"type="text">回合时，重新使用该技能。<br><b>再施放Channel技能</b>（按【施放顺序】排序）：<br><input type="checkbox"id="channelSkill_Pr"><label for="channelSkill_Pr">Protection</label><input type="checkbox"id="channelSkill_SL"><label for="channelSkill_SL">Spark of Life</label><input type="checkbox"id="channelSkill_SS"><label for="channelSkill_SS">Spirit Shield</label><input type="checkbox"id="channelSkill_Ha"><label for="channelSkill_Ha">Haste</label><br><input type="checkbox"id="channelSkill_AF"><label for="channelSkill_AF">Arcane Focus</label><input type="checkbox"id="channelSkill_He"><label for="channelSkill_He">Heartseeker</label><input type="checkbox"id="channelSkill_Re"><label for="channelSkill_Re">Regen</label><input type="checkbox"id="channelSkill_SV"><label for="channelSkill_SV">Shadow Veil</label><input type="checkbox"id="channelSkill_Ab"><label for="channelSkill_Ab">Absorb</label></div>' +
   '<div id="hvAATab-Debuff"class="hvAATab"><input type="checkbox"id="debuffSkill"><label for="debuffSkill"><span class="hvAATitle">De技能</span>（按【施放顺序】排序，模式优先度1>2）：</label><br><input type="checkbox"id="debuffSkillBoss"><label for="debuffSkillBoss">模式1、<b>只对Boss施放</b>：</label><br><input type="checkbox"id="debuffSkillBoss_Im"><label for="debuffSkillBoss_Im">Imperil</label><input type="checkbox"id="debuffSkillBoss_MN"><label for="debuffSkillBoss_MN">MagNet</label><input type="checkbox"id="debuffSkillBoss_Si"><label for="debuffSkillBoss_Si">Silence</label><input type="checkbox"id="debuffSkillBoss_Dr"><label for="debuffSkillBoss_Dr">Drain</label><input type="checkbox"id="debuffSkillBoss_We"><label for="debuffSkillBoss_We">Weaken</label><input type="checkbox"id="debuffSkillBoss_Co"><label for="debuffSkillBoss_Co">Confuse</label><br>存活≥<input name="debuffSkillBossCount"placeholder="5"type="text">只怪物时，施放<input type="checkbox"id="debuffSkillBoss_Sle"><label for="debuffSkillBoss_Sle">Sleep</label><input type="checkbox"id="debuffSkillBoss_Bl"><label for="debuffSkillBoss_Bl">Blind</label><input type="checkbox"id="debuffSkillBoss_Slo"><label for="debuffSkillBoss_Slo">Slow</label><br><input type="checkbox"id="debuffSkillAll"><label for="debuffSkillAll"><b>模式2、对所有怪施放</b>：</label><br><input type="checkbox"id="debuffSkillAll_Im"><label for="debuffSkillAll_Im">Imperil</label><input type="checkbox"id="debuffSkillAll_MN"><label for="debuffSkillAll_MN">MagNet</label><input type="checkbox"id="debuffSkillAll_Si"><label for="debuffSkillAll_Si">Silence</label><input type="checkbox"id="debuffSkillAll_Dr"><label for="debuffSkillAll_Dr">Drain</label><input type="checkbox"id="debuffSkillAll_We"><label for="debuffSkillAll_We">Weaken</label><input type="checkbox"id="debuffSkillAll_Co"><label for="debuffSkillAll_Co">Confuse</label></div>' +
   '<div id="hvAATab-Special"class="hvAATab"><input id="specialSkill"type="checkbox"><label for="specialSkill"><span class="hvAATitle">特殊技能</span>：</label><br><input id="specialSkill_OFC"type="checkbox"><label for="specialSkill_OFC">Orbital Friendship Cannon：当存在≥<input name="specialSkillMonster_OFC"placeholder="8"type="text">只怪兽或存在≥<input name="specialSkillBoss_OFC"placeholder="1"type="text">Boss，使用该技能。</label><br><input id="specialSkill_FUS"type="checkbox"><label for="specialSkill_FUS">FUS RO DAH（跪求元素ID）：当存在≥<input name="specialSkillMonster_FUS"placeholder="8"type="text">只怪兽或存在≥<input name="specialSkillBoss_FUS"placeholder="1"type="text">Boss，使用该技能。</label></div>' +
-  '<div id="hvAATab-Scroll"class="hvAATab"><input type="checkbox"id="scroll"><label for="scroll"><span class="hvAATitle">使用卷轴</span></label><br>战役模式：<input type="checkbox"id="scrollRoundType_ar"><label for="scrollRoundType_ar">竞技场</label><input type="checkbox"id="scrollRoundType_rb"><label for="scrollRoundType_rb">浴血擂台</label><input type="checkbox"id="scrollRoundType_gr"><label for="scrollRoundType_gr">压榨界</label><input type="checkbox"id="scrollRoundType_iw"><label for="scrollRoundType_iw">物品界</label><input type="checkbox"id="scrollRoundType_ba"><label for="scrollRoundType_ba">遭遇战</label><br>总体条件：当前回合数≥<input name="scrollNowRound"placeholder="100"type="text">。<br><input id="scrollFirst"type="checkbox"><label for="scrollFirst">存在技能生成的Buff时，仍然使用卷轴。</label><br><input type="checkbox"id="scroll_Go"><label for="scroll_Go">Scroll of the Gods&nbsp;当前回合数≥<input name="scrollRound_Go"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Av"><label for="scroll_Av">Scroll of the Avatar&nbsp;当前回合数≥<input name="scrollRound_Av"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Pr"><label for="scroll_Pr">Scroll of Protection&nbsp;当前回合数≥<input name="scrollRound_Pr"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Sw"><label for="scroll_Sw">Scroll of Swiftness&nbsp;当前回合数≥<input name="scrollRound_Sw"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Li"><label for="scroll_Li">Scroll of Life&nbsp;当前回合数≥<input name="scrollRound_Li"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Sh"><label for="scroll_Sh">Scroll of Shadows&nbsp;当前回合数≥<input name="scrollRound_Sh"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Ab"><label for="scroll_Ab">Scroll of Absorption&nbsp;当前回合数≥<input name="scrollRound_Ab"placeholder="0"type="text"></label></div>' +
-  '<div id="hvAATab-Infusion"class="hvAATab"><input type="checkbox"id="infusion"><label for="infusion"><span class="hvAATitle">使用魔药：</span></label><select name="infusionStatus"><option value="1">Infusion of Flames</option><option value="2">Infusion of Frost</option><option value="3">Infusion of Lightning</option><option value="4">Infusion of Storms</option><option value="5">Infusion of Divinity</option><option value="6">Infusion of Darkness</option></select><br>战役模式：<input type="checkbox"id="infusionRoundType_ar"><label for="infusionRoundType_ar">竞技场</label><input type="checkbox"id="infusionRoundType_rb"><label for="infusionRoundType_rb">浴血擂台</label><input type="checkbox"id="infusionRoundType_gr"><label for="infusionRoundType_gr">压榨界</label><input type="checkbox"id="infusionRoundType_iw"><label for="infusionRoundType_iw">物品界</label><input type="checkbox"id="infusionRoundType_ba"><label for="infusionRoundType_ba">遭遇战</label><br>使用条件：当前回合数≥<input name="infusionRound"placeholder="100"type="text">。</div>' +
+  '<div id="hvAATab-Scroll"class="hvAATab"><input type="checkbox"id="scroll"><label for="scroll"><span class="hvAATitle">使用卷轴</span></label><br>战役模式：<input type="checkbox"id="scrollRoundType_ar"><label for="scrollRoundType_ar">竞技场</label><input type="checkbox"id="scrollRoundType_rb"><label for="scrollRoundType_rb">浴血擂台</label><input type="checkbox"id="scrollRoundType_gr"><label for="scrollRoundType_gr">压榨界</label><input type="checkbox"id="scrollRoundType_iw"><label for="scrollRoundType_iw">物品界</label><input type="checkbox"id="scrollRoundType_ba"><label for="scrollRoundType_ba">遭遇战</label><br>总体条件：当前回合数≥<input name="scrollRoundNow"placeholder="100"type="text">。<br><input id="scrollFirst"type="checkbox"><label for="scrollFirst">存在技能生成的Buff时，仍然使用卷轴。</label><br><input type="checkbox"id="scroll_Go"><label for="scroll_Go">Scroll of the Gods&nbsp;当前回合数≥<input name="scrollRound_Go"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Av"><label for="scroll_Av">Scroll of the Avatar&nbsp;当前回合数≥<input name="scrollRound_Av"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Pr"><label for="scroll_Pr">Scroll of Protection&nbsp;当前回合数≥<input name="scrollRound_Pr"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Sw"><label for="scroll_Sw">Scroll of Swiftness&nbsp;当前回合数≥<input name="scrollRound_Sw"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Li"><label for="scroll_Li">Scroll of Life&nbsp;当前回合数≥<input name="scrollRound_Li"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Sh"><label for="scroll_Sh">Scroll of Shadows&nbsp;当前回合数≥<input name="scrollRound_Sh"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Ab"><label for="scroll_Ab">Scroll of Absorption&nbsp;当前回合数≥<input name="scrollRound_Ab"placeholder="0"type="text"></label></div>' +
+  '<div id="hvAATab-Infusion"class="hvAATab"><input type="checkbox"id="infusion"><label for="infusion"><span class="hvAATitle">使用魔药：</span></label><select name="infusionStatus"><option value="1">Infusion of Flames</option><option value="2">Infusion of Frost</option><option value="3">Infusion of Lightning</option><option value="4">Infusion of Storms</option><option value="5">Infusion of Divinity</option><option value="6">Infusion of Darkness</option></select><br>战役模式：<input type="checkbox"id="infusionRoundType_ar"><label for="infusionRoundType_ar">竞技场</label><input type="checkbox"id="infusionRoundType_rb"><label for="infusionRoundType_rb">浴血擂台</label><input type="checkbox"id="infusionRoundType_gr"><label for="infusionRoundType_gr">压榨界</label><input type="checkbox"id="infusionRoundType_iw"><label for="infusionRoundType_iw">物品界</label><input type="checkbox"id="infusionRoundType_ba"><label for="infusionRoundType_ba">遭遇战</label><br>使用条件：当前回合数≥<input name="infusionRoundNow"placeholder="100"type="text">。</div>' +
   '<div id="hvAATab-Weight"class="hvAATab hvAACenter"><span class="hvAATitle">权重规则</span>&nbsp;<a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#权重规则"target="_blank">示例</a><br>1、每回合计算怪物当前血量，血量最低的设置初始血量为10，其他怪物为当前血量倍数*10<br>2、初始权重与下述各Buff权重相加<br>Sleep:<input name="weight_Sle"placeholder="+5"type="text">&nbsp;Blind:<input name="weight_Bl"placeholder="+3"type="text">&nbsp;Slow:<input name="weight_Slo"placeholder="+3"type="text">&nbsp;Imperil:<input name="weight_Im"placeholder="-5"type="text">&nbsp;Coalesced Mana:<input name="weight_CM"placeholder="-5"type="text"><br>MagNet:<input name="weight_MN"placeholder="-4"type="text">&nbsp;Silence:<input name="weight_Si"placeholder="-4"type="text">&nbsp;Drain:<input name="weight_Dr"placeholder="-4"type="text">&nbsp;Weaken:<input name="weight_We"placeholder="-4"type="text">&nbsp;Confuse:<input name="weight_Co"placeholder="-1"type="text"><br>3、计算出最终权重，攻击权重最小的怪物<br>4、如果你对各Buff权重有特别见解，请务必<a href="https://github.com/dodying/UserJs/issues/2"target="_blank">告诉我</a></div>' +
   '<div id="hvAATab-Storage"class="hvAATab"></div>' +
   '<div id="hvAATab-Other"class="hvAATab"><span>反馈：<a href="https://github.com/dodying/UserJs/issues/"target="_blank">GitHub</a>或<a href="https://greasyfork.org/scripts/18482/feedback"target="_blank">GreasyFork</a>或<a href="http://e-hentai.org/dmspublic/karma.php?u=2565471"target="_blank">+K</a>或<a href="https://gitter.im/dodying/UserJs"target="_blank">聊天室</a>或<a href="https://forums.e-hentai.org/index.php?act=Msg&CODE=4&MID=2565471"target="_blank">论坛私信</a>&nbsp;&nbsp;</span><div class="hvAASeparate"></div><div class="hvAACenter"><span class="hvAATitle">当前状况</span>：<br>如果脚本长期暂停且网络无问题，请点击【临时修复】<br>战役模式：<select class="hvAADebug"name="roundType"><option></option><option value="ar">竞技场</option><option value="rb">浴血擂台</option><option value="gr">压榨界</option><option value="iw">物品界</option><option value="ba">遭遇战</option></select><br>当前回合：<input name="roundNow"class="hvAADebug"type="text"placeholder="1">&nbsp;总回合：<input name="roundAll"class="hvAADebug"type="text"placeholder="1"><br><b>各怪物及状况</b>：<div id="hvAAFixMonster"></div><button id="hvAAFix">临时修复</button></div></div>' +
@@ -332,6 +332,33 @@ function optionButton() { //配置
   gE('body').appendChild(optionBox);
 }
 function riddleAlert() { //答题警报
+  function riddleSubmit(answer) {
+    gE('#riddlemaster').value = answer;
+    gE('#riddleform').submit();
+  }
+  if (true) {
+    var options = [
+      'A',
+      'B',
+      'C'
+    ];
+    var bar = gE('body').appendChild(cE('div'));
+    bar.style.cssText = 'z-index:1000;width:710px;height:40px;position:absolute;top:50px;left:345px;display:table;border-spacing:5px;';
+    for (var i in options) {
+      var button = bar.appendChild(cE('div'));
+      button.style.cssText = 'border:red solid 4px;10px; display: table-cell; cursor:pointer';
+      button.value = options[i];
+      button.onclick = function () {
+        riddleSubmit(this.value);
+      };
+      button.onmouseover = function () {
+        this.style.background = 'rgba(63,207,208,0.20)';
+      };
+      button.onmouseout = function () {
+        this.style.background = '';
+      };
+    }
+  }
   var img = cE('img');
   img.src = '/pages/ponychart.jpg';
   gE('.csp').appendChild(img);
@@ -339,8 +366,15 @@ function riddleAlert() { //答题警报
   document.onmousemove = function () {
     audio.pause();
   }
-  document.onkeydown = function () {
+  document.onkeydown = function (e) {
     audio.pause();
+    if (e.keyCode >= 49 && e.keyCode <= 51) {
+      riddleSubmit(String.fromCharCode(e.keyCode + 16));
+    } else if (e.keyCode >= 65 && e.keyCode <= 67) {
+      riddleSubmit(String.fromCharCode(e.keyCode));
+    } else if (e.keyCode >= 97 && e.keyCode <= 99) {
+      riddleSubmit(String.fromCharCode(e.keyCode - 32));
+    }
   }
   audio.src = 'https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/Riddle' + ((/Chrome|Safari/.test(window.navigator.userAgent)) ? '.mp3' : '.wav');
   audio.loop = true;
