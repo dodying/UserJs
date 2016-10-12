@@ -12,7 +12,7 @@
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.534
+// @version      2.54
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome + Tampermonkey
 // @compatible   Android + Firefox + usi
@@ -336,7 +336,7 @@ function riddleAlert() { //答题警报
     gE('#riddlemaster').value = answer;
     gE('#riddleform').submit();
   }
-  if (true) {
+  (function () {
     var options = [
       'A',
       'B',
@@ -358,7 +358,7 @@ function riddleAlert() { //答题警报
         this.style.background = '';
       };
     }
-  }
+  })();
   var img = cE('img');
   img.src = '/pages/ponychart.jpg';
   gE('.csp').appendChild(img);
