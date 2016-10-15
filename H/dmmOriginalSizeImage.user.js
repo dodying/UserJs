@@ -7,10 +7,6 @@
 // @version     1
 // @grant       none
 // ==/UserScript==
-var img = document.querySelectorAll('img');
-for (var i = 0; i < img.length; i++) {
-  img[i].src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==';
-}
 if (location.href.indexOf('detail/=/cid=') >= 0 && location.href.indexOf('dmm.co.jp') >= 0) {
   var code = location.href.split(/\/|=/) [10];
   var date = document.querySelector('table.mg-b20').innerHTML.replace(/[\r\n]/g, '').replace(/ /g, '').replace(/.*日：<\/td>.*?>/, '').replace(/<.*/, '');
