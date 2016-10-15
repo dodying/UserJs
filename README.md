@@ -32,7 +32,6 @@
 | 【EH】标签预览+隐藏画集 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_TagsPreview%26HideSomeGalleries.user.js) | [GF](https://greasyfork.org/zh-CN/scripts/19667) |  |  |  |
 | 【EH】里站跳转 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/ExHentai2E-Hantai.user.js) |  | × |  | 里站自动跳转到表站。<br>如果表站无该本子，<br />则跳转回里站，之后不再跳转。 |
 | ```H``` | 文件夹 | - | - |  | - |
-| 【BT】助手 | [安装](https://github.com/dodying/UserJs/raw/master/H/btHelper.user.js) |  |  |  |  |
 | 【DMM】原始图片大小 | [安装](https://github.com/dodying/UserJs/raw/master/H/dmmOriginalSizeImage.user.js) |  |  |  |  |
 | 【H】屏蔽已拥有AV | [安装](https://github.com/dodying/UserJs/raw/master/H/hBlockOwnedAV.user.js) |  |  |  |  |
 | 【nH】下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  | × |  | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
