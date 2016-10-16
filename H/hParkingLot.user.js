@@ -14,7 +14,7 @@
 // include     *.10musume.com/*
 // include     *.heyzo.com/*
 // include     *.1pondo.tv/*
-// @version     1
+// @version     1.01
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @author      Dodying
@@ -27,34 +27,48 @@
 // ==/UserScript==
 (function ($) {
   var linkLib = {
-    btsow: {
-      url: 'http://btso.pw/search/',
-      img: 'https://btso.pw/app/bts/View/img/favicon.ico'
+    'btso.pw': {
+      url: 'http://btso.pw/search/{searchTerms}',
+      fav: 'https://btso.pw/app/bts/View/img/favicon.ico',
+      text: 'h3,.file',
+      img: ''
     },
-    jav: {
-      url: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword=',
-      img: 'http://www.javlibrary.com/favicon.ico'
+    'www.javlibrary.com': {
+      url: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
+      fav: 'http://www.javlibrary.com/favicon.ico',
+      name: '.post-title',
+      time: '.text:eq(2)',
+      text: '.text:lt(2),.id',
+      img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a'
     },
-    dmm: {
-      url: 'http://www.dmm.co.jp/search/=/searchstr=',
-      img: 'http://www.dmm.co.jp/favicon.ico'
+    'www.dmm.co.jp': {
+      url: 'http://www.dmm.co.jp/search/=/searchstr={searchTerms}',
+      fav: 'http://www.dmm.co.jp/favicon.ico',
+      name: '#title',
+      text: '.txt,table.mg-b20 td',
+      img: '.img img,.tdmm,.crs_full>img'
     },
-    google: {
-      url: 'https://www.google.co.jp/search?q=',
-      img: 'https://www.google.co.jp/images/branding/product/ico/googleg_lodp.ico'
+    'www.google.co.jp': {
+      url: 'https://www.google.co.jp/search?q={searchTerms}',
+      fav: 'https://www.google.co.jp/images/branding/product/ico/googleg_lodp.ico',
+      text: 'h3.r>a,span.st',
+      img: ''
     },
-    baidu: {
-      url: 'https://www.baidu.com/baidu?wd=',
-      img: 'https://www.baidu.com/img/baidu.svg'
+    'www.baidu.com': {
+      url: 'https://www.baidu.com/baidu?wd={searchTerms}',
+      fav: 'https://www.baidu.com/img/baidu.svg',
+      text: 'h3.t>a,.c-abstract',
+      img: ''
     },
-    av28: {
-      url: 'https://www.av28.com/cn/search/',
-      img: 'https://cdn3.iconfinder.com/data/icons/block/32/letter-24.png'
+    'www.av28.com': {
+      url: 'https://www.av28.com/cn/search/{searchTerms}',
+      fav: 'https://cdn3.iconfinder.com/data/icons/block/32/letter-24.png',
+      text: '.item>div>a,.item>div>span,.row-fluid>h3,.info>p>span',
+      img: '.img,.bigImage>img,.sample-box img'
     }
   };
   var imgLib = {
     add: 'https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519691-199_CircledPlus-24.png',
-    move: 'https://cdn4.iconfinder.com/data/icons/social-messaging-productivity-4/128/move-24.png',
     del: 'https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/trash-24.png',
     import: 'https://cdn1.iconfinder.com/data/icons/design-2d-cad-solid-set-2/60/079-Import-24.png',
     show: 'https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519904-098_Spreadsheet-24.png'
@@ -91,32 +105,6 @@
       color: 'red'
     }
   ];
-  var seleLib = {
-    'btso.pw': {
-      text: 'h3,.file',
-      img: ''
-    },
-    'www.javlibrary.com': {
-      text: '.text:lt(2),.id',
-      img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a'
-    },
-    'www.dmm.co.jp': {
-      text: '.txt,table.mg-b20 td',
-      img: '.img img,.tdmm,.crs_full>img'
-    },
-    'www.google.co.jp': {
-      text: 'h3.r>a,span.st',
-      img: ''
-    },
-    'www.baidu.com': {
-      text: 'h3.t>a,.c-abstract',
-      img: ''
-    },
-    'www.av28.com': {
-      text: '.item>div>a,.item>div>span,.row-fluid>h3,.info>p>span',
-      img: '.img,.bigImage>img,.sample-box img'
-    }
-  };
   init();
   markAdded();
   function init() {
@@ -129,10 +117,10 @@
     '.hBanner>*{cursor:pointer;float:left;margin:0 5px;}' +
     '.switcher{width:32px;height:24px;background:#333;border-radius:12px;position:relative;}' +
     '.switcher>span{position:absolute;left:6px;top:2px;height:2px;color:#26CA28;font-size:16px;text-transform:Capitalize;}' +
-    '.links,.addCode,.moveCode,.delCode,.importCode,.showCode{width:24px;height:24px;}' +
-    '.links img,.addCode img,.moveCode img{background-color:white;}' +
-    '.links>*,.addCode>*,.moveCode>*{display:none;}' +
-    '.links>*:nth-child(1),.addCode>*:nth-child(1),.moveCode>*:nth-child(1){display:inline;}' +
+    '.links,.addCode,.delCode,.importCode,.showCode{width:24px;height:24px;}' +
+    '.links img,.addCode img{background-color:white;}' +
+    '.links>*,.addCode>*{display:none;}' +
+    '.links>*:nth-child(1),.addCode>*:nth-child(1){display:inline;}' +
     '.showTable{background-color:white;position:fixed;top:40px;height:400px;overflow:auto;left:10px;}');
     $('<div class="hBanner right top"></div>').dblclick(function () {
       if ($(this).is('.left.top') || $(this).is('.right.bottom')) {
@@ -153,12 +141,11 @@
     $('<div class="links"></div>').html(function () {
       var _html = '';
       for (var i in linkLib) {
-        _html += '<span onclick="window.open(\'' + linkLib[i].url + '\'+this.title)"title="' + getCode() + '"><img src="' + linkLib[i].img + '" width=24></img></a></span>';
+        _html += '<span onclick="window.open(\'' + linkLib[i].url + '\'.replace(\'{searchTerms}\',this.title))"title="' + getCode() + '"><img src="' + linkLib[i].fav + '" width=24></img></a></span>';
       }
       return _html;
     }).appendTo('.hBanner');
-    $('<div class="addCode"title="添加到数据库"></div>').html('<img src="' + imgLib.add + '"></img>').appendTo('.hBanner');
-    $('<div class="moveCode"title="数据库中移动"></div>').html('<img src="' + imgLib.move + '"></img>').appendTo('.hBanner');
+    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + imgLib.add + '"></img>').appendTo('.hBanner');
     $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + imgLib.del + '"></img>').click(function () {
       delValue();
     }).appendTo('.hBanner');
@@ -177,11 +164,8 @@
       $('<img src="' + markLib[i].img + '"title="' + markLib[i].name + '"></img>').val(i).click(function () {
         addValue($(this).val());
       }).appendTo('.addCode');
-      $('<img src="' + markLib[i].img + '"title="' + markLib[i].name + '"></img>').val(i).click(function () {
-        moveValue($(this).val());
-      }).appendTo('.moveCode');
     }
-    $('.links,.addCode,.moveCode').on({
+    $('.links,.addCode').on({
       mouseover: function () {
         $(this).children(':gt(0)').show();
       },
@@ -193,7 +177,7 @@
   function markAdded() {
     var lib = GM_getValue('lib', null);
     if (!lib) return;
-    $(seleLib[location.host].img).removeAttr('onerror').attr({
+    $(linkLib[location.host].img).removeAttr('onerror').attr({
       realSrc: function () {
         return $(this).attr('src');
       },
@@ -206,7 +190,7 @@
           keyword = new RegExp(i, 'gi');
           keyword2 = new RegExp(i.replace('-', ''), 'gi');
           if (keyword.test(_src) || keyword2.test(_src)) {
-            output += '<a href="' + linkLib.jav.url + i + '"target="_blank">' + i + '</a> ';
+            output += '<a href="' + linkLib['www.javlibrary.com'].url + i + '"target="_blank">' + i + '</a> ';
             _src = markLib[lib[i].mark].img;
           }
         }
@@ -214,7 +198,7 @@
         return _src;
       }
     });
-    $(seleLib[location.host].text).html(function () {
+    $(linkLib[location.host].text).html(function () {
       var output = '(文)：';
       var keyword;
       var keyword2;
@@ -223,7 +207,7 @@
         keyword = new RegExp(i, 'gi');
         keyword2 = new RegExp(i.replace('-', ''), 'gi');
         if (keyword.test(_html) || keyword2.test(_html)) {
-          output += '<a href="' + linkLib.jav.url + i + '"target="_blank">' + i + '</a> ';
+          output += '<a href="' + linkLib['www.javlibrary.com'].url + i + '"target="_blank">' + i + '</a> ';
           _html = _html.replace(keyword, '<span style="background-color:' + markLib[lib[i].mark].color + ';">' + i + '</span>').replace(keyword2, '<span style="background-color:' + markLib[lib[i].mark].color + ';">' + i + '</span>');
         }
       }
@@ -234,7 +218,7 @@
   function undoMarkAdded() {
     var lib = GM_getValue('lib', null);
     if (!lib) return;
-    $(seleLib[location.host].img).attr({
+    $(linkLib[location.host].img).attr({
       src: function () {
         return $(this).attr('realSrc');
       }
@@ -244,10 +228,10 @@
     var lib = GM_getValue('lib', null) || new Object();
     var code = code || getCode();
     if (!code) return;
-    var name = getName();
     lib[code] = {
       mark: mark,
-      name: name //选填
+      name: $(linkLib[location.host].text).text(),
+      time: $(linkLib[location.host].time).text()
     };
     GM_setValue('lib', lib);
     markAdded();
@@ -259,11 +243,6 @@
     if (!code) return;
     delete lib[code];
     GM_setValue('lib', lib);
-  }
-  function moveValue(mark, code) { //可选参数code
-    var code = code || getCode();
-    delValue(code);
-    addValue(mark, code);
   }
   function importValue() {
     var notice = '请输入车位\n';
@@ -279,17 +258,21 @@
     var code;
     for (var i = 0; i < codeArr.length; i++) {
       code = codeArr[i];
-      lib[code] = {
-        mark: mark
-      };
+      if (lib[code] === undefined) {
+        lib[code] = {
+          mark: mark
+        };
+      } else {
+        lib[code].mark = mark;
+      }
     }
     GM_setValue('lib', lib);
   }
   function showValue() {
     var lib = GM_getValue('lib', null) || new Object();
-    var _html = '<table class="tablesorter"><thead><tr><th>数字</th><th>标记</th><th>代码</th><th>标题</th></tr></thead><tbody>';
+    var _html = '<table class="tablesorter"><thead><tr><th>数字</th><th>标记</th><th>代码</th><th>标题</th><th>时间</th></tr></thead><tbody>';
     for (var i in lib) {
-      _html += '<tr><td>' + lib[i].mark + '</td><td><img src="' + markLib[lib[i].mark].img + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib.jav.url + i + '"target="_blank">' + i + '</a></td><td>' + (lib[i].name || '') + '</td></tr>';
+      _html += '<tr><td>' + lib[i].mark + '</td><td><img src="' + markLib[lib[i].mark].img + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].url + i + '"target="_blank">' + i + '</a></td><td>' + (lib[i].name || '') + '</td><td>' + (lib[i].time || '') + '</td></tr>';
     }
     _html += '</tbody></table>';
     $('<div class="showTable"></div>').html(_html).appendTo('body');
@@ -311,25 +294,6 @@
         break;
       case 'btso.pw':
         return url.replace(/.*search\//, '');
-        break;
-      case 'www.caribbeancom.com':
-        return url.replace(/.*moviepages\/(.*)\/index.html/, 'Carib-$1');
-        break;
-      case 'www.heyzo.com':
-        return url.replace(/.*moviepages\/(.*)\/index.html/, 'Heyzo-$1');
-        break;
-      default:
-        return '';
-        break;
-    }
-  }
-  function getName() {
-    switch (location.host) {
-      case 'www.dmm.co.jp':
-        return $('#title').text();
-        break;
-      case 'www.javlibrary.com':
-        return $('.post-title').text().replace(/.*? /, '');
         break;
       default:
         return '';
