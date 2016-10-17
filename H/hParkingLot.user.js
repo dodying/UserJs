@@ -149,9 +149,9 @@
         e.preventDefault();
         $(this).toggleClass('left').toggleClass('right');
       },
-      mousedown: function () {
-        $('body').mouseup(function (e) {
-          $('.hBanner').css('top', e.clientY + 'px');
+      mousedown: function (e1) {
+        $('body').mouseup(function (e2) {
+          $('.hBanner').css('top', e2.clientY - e1.offsetY + 'px');
           $(this).off('mouseup');
         });
       }
