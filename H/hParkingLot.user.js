@@ -126,6 +126,7 @@
   function init() {
     $('<style></style>').appendTo('head').html('' +
     '.hBanner{position:fixed;background-color:white;z-index:9999;top:0;}' +
+    '.hBanner{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}' +
     '.left{left:0;}' +
     '.right{right:0;}' +
     '.hBanner>*{cursor:pointer;float:left;margin:0 1px0 1px;}' +
