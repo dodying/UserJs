@@ -15,7 +15,7 @@
 // include     *.10musume.com/*
 // include     *.heyzo.com/*
 // include     *.1pondo.tv/*
-// @version     1.02
+// @version     1.03
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @author      Dodying
@@ -114,18 +114,21 @@
       name: '超过1年无资源',
       img: 'https://cdn3.iconfinder.com/data/icons/transfers/100/239345-reload_time_delay-24.png',
       color: 'red'
+    },
+    {
+      name: '首次亮相',
+      img: 'https://cdn3.iconfinder.com/data/icons/social-messaging-productivity-5/128/new-label-24.png',
+      color: 'yellow'
     }
   ];
   init();
   markAdded();
   function init() {
     $('<style></style>').appendTo('head').html('' +
-    '.hBanner{position:fixed;background-color:white;z-index:9999;}' +
+    '.hBanner{position:fixed;background-color:white;z-index:9999;top:0;}' +
     '.left{left:0;}' +
     '.right{right:0;}' +
-    '.top{top:0;}' +
-    '.bottom{bottom:0;}' +
-    '.hBanner>*{cursor:pointer;float:left;margin:0 1px;}' +
+    '.hBanner>*{cursor:pointer;float:left;margin:0 1px0 1px;}' +
     '.switcher{width:32px;height:24px;background:#333;border-radius:12px;position:relative;}' +
     '.switcher>span{position:absolute;left:6px;top:2px;height:2px;color:#26CA28;font-size:16px;text-transform:Capitalize;}' +
     '.links,.addCode,.delCode,.importCode,.showCode{width:24px;height:24px;}' +
@@ -133,13 +136,23 @@
     '.links>*,.addCode>*{display:none;}' +
     '.links>*:nth-child(1),.addCode>*:nth-child(1){display:inline;}' +
     '.hasCode>a{margin:0 1px;}' +
-    '.showTable{background-color:white;position:fixed;top:40px;height:400px;overflow:auto;left:10px;}');
-    $('<div class="hBanner right top"></div>').contextmenu(function (e) {
-      e.preventDefault();
-      if ($(this).is('.left.top') || $(this).is('.right.bottom')) {
+    '.showTable{background-color:white;position:absolute;top:60px;}' +
+    '.showTable>table{border-collapse:collapse;}' +
+    '.showTable>table>thead>tr{position:fixed;top:40px;}' +
+    '.showTable td{border:1px solid black;}' +
+    '.showTable>button{float:right;color:red;position:fixed;right:10px;}' +
+    '.showTable>button:nth-child(1){top:70px;}' +
+    '.showTable>button:nth-child(2){top:100px;}');
+    $('<div class="hBanner left"></div>').on({
+      contextmenu: function (e) {
+        e.preventDefault();
         $(this).toggleClass('left').toggleClass('right');
-      } else if ($(this).is('.right.top') || $(this).is('.left.bottom')) {
-        $(this).toggleClass('top').toggleClass('bottom');
+      },
+      mousedown: function () {
+        $('body').mouseup(function (e) {
+          $('.hBanner').css('top', e.clientY + 'px');
+          $(this).off('mouseup');
+        });
       }
     }).appendTo('body');
     $('<div class="switcher"></div>').html('<span>on</span>').appendTo('.hBanner').click(function () {
@@ -292,6 +305,12 @@
     }
     _html += '</tbody></table>';
     $('<div class="showTable"></div>').html(_html).appendTo('body');
+    $('<button>↑</button>').click(function () {
+      $(window) [0].scrollTo(0, 0);
+    }).prependTo('.showTable');
+    $('<button>x</button>').click(function () {
+      $('.showTable').toggle();
+    }).prependTo('.showTable');
     $('.showTable>table').tablesorter();
   }
   function getCode() {
