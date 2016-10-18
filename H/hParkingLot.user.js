@@ -9,13 +9,14 @@
 // @include     https://www.google.co.jp/*
 // @include     https://www.baidu.com/*
 // @include     https://www.av28.com/*
+// @include     http://javpop.com/*
 // include     *.tokyo-hot.com/*
 // include     *.caribbeancom.com/*
 // include     *.1000giri.net/*
 // include     *.10musume.com/*
 // include     *.heyzo.com/*
 // include     *.1pondo.tv/*
-// @version     1.03
+// @version     1.04
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @author      Dodying
@@ -71,6 +72,12 @@
       img: '.img,.bigImage>img,.sample-box img',
       name: '',
       time: ''
+    },
+    'javpop.com': {
+      fav: 'http://javpop.com/favicon.ico',
+      search: 'http://javpop.com/index.php?s={searchTerms}',
+      text: '.thumb_post a:nth-child(2),h1',
+      img: '.thumb_post img,.box-b img'
     }
   };
   var imgLib = {
@@ -125,10 +132,8 @@
   markAdded();
   function init() {
     $('<style></style>').appendTo('head').html('' +
-    '.hBanner{position:fixed;background-color:white;z-index:9999;top:0;}' +
+    '.hBanner{position:fixed;background-color:white;z-index:9999;}' +
     '.hBanner{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}' +
-    '.left{left:0;}' +
-    '.right{right:0;}' +
     '.hBanner>*{cursor:pointer;float:left;margin:0 1px0 1px;}' +
     '.switcher{width:32px;height:24px;background:#333;border-radius:12px;position:relative;}' +
     '.switcher>span{position:absolute;left:6px;top:2px;height:2px;color:#26CA28;font-size:16px;text-transform:Capitalize;}' +
@@ -144,16 +149,30 @@
     '.showTable>button{float:right;color:red;position:fixed;right:10px;}' +
     '.showTable>button:nth-child(1){top:70px;}' +
     '.showTable>button:nth-child(2){top:100px;}');
-    $('<div class="hBanner left"></div>').on({
-      contextmenu: function (e) {
-        e.preventDefault();
-        $(this).toggleClass('left').toggleClass('right');
-      },
-      mousedown: function (e1) {
-        $('body').mouseup(function (e2) {
-          $('.hBanner').css('top', e2.clientY - e1.offsetY + 'px');
-          $(this).off('mouseup');
+    $('<div class="hBanner"></div>').mousedown(function (e1) {
+      if (e1.target !== $('.hasCode') [0]) return;
+      $('body').mouseup(function (e2) {
+        var width = 152;
+        var topBorder = $(window).height() - $('.hBanner').height();
+        var leftBorder = $(window).width() - $('.hBanner').width();
+        var top = (e2.clientY - e1.offsetY > 0) ? e2.clientY - e1.offsetY : 0;
+        top = (top > topBorder) ? topBorder : top;
+        var left = (e2.clientX - e1.offsetX > width) ? e2.clientX - e1.offsetX - width : 0;
+        left = (left > leftBorder) ? leftBorder : left;
+        $('.hBanner').css({
+          top: top + 'px',
+          left: left + 'px'
         });
+        GM_setValue('top', top);
+        GM_setValue('left', left);
+        $(this).off('mouseup');
+      });
+    }).css({
+      'top': function () {
+        return GM_getValue('top', 0);
+      },
+      'left': function () {
+        return GM_getValue('left', 0);
       }
     }).appendTo('body');
     $('<div class="switcher"></div>').html('<span>on</span>').appendTo('.hBanner').click(function () {
