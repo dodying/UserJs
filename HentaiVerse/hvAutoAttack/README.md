@@ -48,6 +48,13 @@
 
 #### Latest
 
+##### 2.56
+
+1. 增加了选项来控制使用Draught级别药水的使用
+1. Added the option to control the use of the Draught
+2. 修改了De技能
+2. Modified the DeSkill
+
 ##### 2.55
 
 1. 增加了脚本语言选项。
