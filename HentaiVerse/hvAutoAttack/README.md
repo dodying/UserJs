@@ -47,6 +47,16 @@
 
 #### Latest
 
+##### 2.58
+
+1. 版本2.57a中，移除了临时攻击模式
+
+   In version 2.57a, the Temporary Attack mode was removed
+   
+2. 为两个特殊技能增加oc阈值
+   
+   Increase the oc threshold for two special skills
+
 ##### 2.57
 
 1. 感谢网友maoboshi，现在支持特殊技能龙吼
