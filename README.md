@@ -33,12 +33,13 @@
 | 【EH】里站跳转 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/ExHentai2E-Hantai.user.js) |  | × |  | 里站自动跳转到表站。<br>如果表站无该本子，<br />则跳转回里站，之后不再跳转。 |
 | ```H``` | 文件夹 | - | - |  | - |
 | 【DMM】原始图片大小 | [安装](https://github.com/dodying/UserJs/raw/master/H/dmmOriginalSizeImage.user.js) |  |  |  |  |
-| 【H】屏蔽已拥有AV | [安装](https://github.com/dodying/UserJs/raw/master/H/hBlockOwnedAV.user.js) |  |  |  |  |
+| 【H】停车场 | [安装](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) |  |  |  |  |
 | 【nH】下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  | × |  | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
 | ```other``` | 文件夹 | - | - |  | 其它 |
 | 163LyricDownloader | [GitHub](https://github.com/dodying/UserJs/blob/master/other/163LyricDownloader.user.js) | [GF](https://greasyfork.org/zh-CN/scripts/23002) | ? | √ |  |
 | 简繁转换-输入框 | [安装](https://github.com/dodying/UserJs/raw/master/other/chs2chtForInputbox.user.js) |  | × | √ |  |
 | 【GitHub】复制Issues里的代码 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyCodeInIssues.user.js) |  | × | √ |  |
+| 【Github】强制Commit | [安装](https://github.com/dodying/UserJs/raw/master/other/githubEnforceCommit.user.js) |  | × | √ |  |
 | 【Github】复制原始链接 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyRawLink.user.js) |  | × | √ |  |
 | 【百度云】分享页复制 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopy.user.js) |  | × |  |  |
 | 【百度云】分享-答题专用 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidao.user.js) |  | × | √ |  |
@@ -111,4 +112,3 @@
 | HV Random Encounter Notification | [E-Hentai Forums](http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345) | 遭遇战提醒 |
 | HV Equipment Comparison | [E-Hentai Forums](http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842) | 装备比较 |
 | HentaiVerse Better Equipment Shop | [E-Hentai Forums](https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319) | 装备高亮 |
-a
