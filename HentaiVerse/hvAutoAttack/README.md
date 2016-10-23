@@ -50,13 +50,16 @@
 ##### 2.57
 
 1. 感谢网友maoboshi，现在支持特殊技能龙吼
+   
    Thanks to maoboshi, now support the special skill FUS RO DAH
 
 ##### 2.56
 
 1. 增加了选项来控制使用Draught级别药水的使用
+   
    Added the option to control the use of the Draught
 2. 修改了De技能
+   
    Modified the DeSkill
 
 ##### 2.55
