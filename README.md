@@ -111,4 +111,4 @@
 | HV Random Encounter Notification | [E-Hentai Forums](http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345) | 遭遇战提醒 |
 | HV Equipment Comparison | [E-Hentai Forums](http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842) | 装备比较 |
 | HentaiVerse Better Equipment Shop | [E-Hentai Forums](https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319) | 装备高亮 |
-
+a
