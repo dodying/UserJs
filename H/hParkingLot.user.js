@@ -6,8 +6,8 @@
 // @include     https://btdb.in/*
 // @include     http://www.javlibrary.com/*
 // @include     http://www.dmm.co.jp/*
-// @include     https://www.google.co.jp/*
-// @include     https://www.baidu.com/*
+// @include     https://www.google.co.jp/search?q=*&status=h
+// @include     https://www.baidu.com/baidu?wd=*&status=h
 // @include     https://www.av28.com/*
 // @include     http://javpop.com/*
 // include     *.tokyo-hot.com/*
@@ -16,7 +16,7 @@
 // include     *.10musume.com/*
 // include     *.heyzo.com/*
 // include     *.1pondo.tv/*
-// @version     1.04
+// @version     1.05
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @author      Dodying
@@ -42,9 +42,8 @@
     'www.javlibrary.com': {
       fav: 'http://www.javlibrary.com/favicon.ico',
       search: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
-      text: '.text:lt(2),.id',
+      text: '.text:lt(2),.id,.video>a:not(:has(img))',
       img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a',
-      name: '.post-title',
       time: '.text:eq(2)'
     },
     'www.dmm.co.jp': {
@@ -52,17 +51,16 @@
       search: 'http://www.dmm.co.jp/search/=/searchstr={searchTerms}',
       text: '.txt,table.mg-b20 td',
       img: '.img img,.tdmm,.crs_full>img',
-      name: '#title',
       time: ''
     },
     'www.google.co.jp': {
       fav: 'https://www.google.co.jp/images/branding/product/ico/googleg_lodp.ico',
-      search: 'https://www.google.co.jp/search?q={searchTerms}',
+      search: 'https://www.google.co.jp/search?q={searchTerms}&status=h',
       text: 'h3.r>a,span.st'
     },
     'www.baidu.com': {
       fav: 'https://www.baidu.com/img/baidu.svg',
-      search: 'https://www.baidu.com/baidu?wd={searchTerms}',
+      search: 'https://www.baidu.com/baidu?wd={searchTerms}&status=h',
       text: 'h3.t>a,.c-abstract'
     },
     'www.av28.com': {
@@ -70,7 +68,6 @@
       search: 'https://www.av28.com/cn/search/{searchTerms}',
       text: '.item>div>a,.item>div>span,.row-fluid>h3,.info>p>span',
       img: '.img,.bigImage>img,.sample-box img',
-      name: '',
       time: ''
     },
     'javpop.com': {
@@ -126,6 +123,11 @@
       name: '首次亮相',
       img: 'https://cdn3.iconfinder.com/data/icons/social-messaging-productivity-5/128/new-label-24.png',
       color: 'yellow'
+    },
+    {
+      name: '无配额',
+      img: 'https://cdn3.iconfinder.com/data/icons/math-physics/512/null-24.png',
+      color: 'gray'
     }
   ];
   init();
@@ -141,7 +143,7 @@
     '.links img,.addCode img{background-color:white;}' +
     '.links>*,.addCode>*{display:none;}' +
     '.links>*:nth-child(1),.addCode>*:nth-child(1){display:inline;}' +
-    '.hasCode>a{margin:0 1px;}' +
+    '.hasCode>a{margin:0 1px;display:none;}' +
     '.showTable{background-color:white;position:absolute;top:60px;}' +
     '.showTable>table{border-collapse:collapse;}' +
     '.showTable>table>thead>tr{position:fixed;top:40px;}' +
@@ -149,24 +151,38 @@
     '.showTable>button{float:right;color:red;position:fixed;right:10px;}' +
     '.showTable>button:nth-child(1){top:70px;}' +
     '.showTable>button:nth-child(2){top:100px;}');
-    $('<div class="hBanner"></div>').mousedown(function (e1) {
-      if (e1.target !== $('.hasCode') [0]) return;
-      $('body').mouseup(function (e2) {
-        var width = 152;
-        var topBorder = $(window).height() - $('.hBanner').height();
-        var leftBorder = $(window).width() - $('.hBanner').width();
-        var top = (e2.clientY - e1.offsetY > 0) ? e2.clientY - e1.offsetY : 0;
-        top = (top > topBorder) ? topBorder : top;
-        var left = (e2.clientX - e1.offsetX > width) ? e2.clientX - e1.offsetX - width : 0;
-        left = (left > leftBorder) ? leftBorder : left;
-        $('.hBanner').css({
-          top: top + 'px',
-          left: left + 'px'
+    $('<div class="hBanner"></div>').on({
+      mousedown: function (e1) {
+        if (e1.target !== $('.hasCode') [0]) return;
+        $(this).off('mouseout');
+        $('body').mouseup(function (e2) {
+          var width = 152;
+          var topBorder = $(window).height() - $('.hBanner').height();
+          var leftBorder = $(window).width() - $('.hBanner').width();
+          var top = (e2.clientY - e1.offsetY > 0) ? e2.clientY - e1.offsetY : 0;
+          top = (top > topBorder) ? topBorder : top;
+          var left = (e2.clientX - e1.offsetX > width) ? e2.clientX - e1.offsetX - width : 0;
+          left = (left > leftBorder) ? leftBorder : left;
+          $('.hBanner').css({
+            top: top + 'px',
+            left: left + 'px'
+          });
+          GM_setValue('top', top);
+          GM_setValue('left', left);
+          $(this).off('mouseup');
+          $('.hBanner').on({
+            mouseout: function () {
+              $('.hasCode>a').hide();
+            }
+          });
         });
-        GM_setValue('top', top);
-        GM_setValue('left', left);
-        $(this).off('mouseup');
-      });
+      },
+      mouseover: function () {
+        $('.hasCode>a').show();
+      },
+      mouseout: function () {
+        $('.hasCode>a').hide();
+      }
     }).css({
       'top': function () {
         return GM_getValue('top', 0);
@@ -220,6 +236,13 @@
         $(this).children(':gt(0)').hide();
       }
     })
+    $(window).keydown(function (e) {
+      if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+        var code = (e.shiftKey) ? prompt('请输入番号', getCode())  : getCode();
+        if (!code) return;
+        addValue(String.fromCharCode(e.keyCode), code);
+      }
+    });
   }
   function markAdded() {
     $('.hasCode a').remove();
@@ -232,12 +255,10 @@
         },
         src: function () {
           var keyword;
-          var keyword2;
           var _src = $(this).attr('src');
           for (var i in lib) {
-            keyword = new RegExp(i, 'gi');
-            keyword2 = new RegExp(i.replace('-', ''), 'gi');
-            if (keyword.test(_src) || keyword2.test(_src)) {
+            keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi');
+            if (keyword.test(_src)) {
               if ($('.' + i).length === 0) $('<a target="_blank"></a>').addClass(i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
               _src = markLib[lib[i].mark].img;
             }
@@ -248,14 +269,12 @@
     }
     $(linkLib[location.host].text).html(function () {
       var keyword;
-      var keyword2;
       var _html = $(this).text();
       for (var i in lib) {
-        keyword = new RegExp(i, 'gi');
-        keyword2 = new RegExp(i.replace('-', ''), 'gi');
-        if (keyword.test(_html) || keyword2.test(_html)) {
+        keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi');
+        if (keyword.test(_html)) {
           if ($('.' + i).length === 0) $('<a target="_blank"></a>').addClass(i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
-          _html = _html.replace(keyword, '<span style="background-color:' + markLib[lib[i].mark].color + ';">' + i + '</span>').replace(keyword2, '<span style="background-color:' + markLib[lib[i].mark].color + ';">' + i + '</span>');
+          _html = _html.replace(keyword, '<span style="background-color:' + markLib[lib[i].mark].color + ';">' + i + '</span>');
         }
       }
       return _html;
@@ -279,10 +298,10 @@
     GM_setValue('lastMark', mark);
     lib[code] = {
       mark: mark,
-      name: $(linkLib[location.host].text).text(),
       time: $(linkLib[location.host].time).text()
     };
     GM_setValue('lib', lib);
+    undoMarkAdded();
     markAdded();
   }
   function delValue(code) { //可选参数code
@@ -319,9 +338,9 @@
   }
   function showValue() {
     var lib = GM_getValue('lib', null) || new Object();
-    var _html = '<table class="tablesorter"><thead><tr><th>数字</th><th>标记</th><th>代码</th><th>标题</th><th>时间</th></tr></thead><tbody>';
+    var _html = '<table class="tablesorter"><thead><tr><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>';
     for (var i in lib) {
-      _html += '<tr><td>' + lib[i].mark + '</td><td><img src="' + markLib[lib[i].mark].img + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].name || '') + '</td><td>' + (lib[i].time || '') + '</td></tr>';
+      _html += '<tr><td>' + lib[i].mark + '</td><td><img src="' + markLib[lib[i].mark].img + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].time || '') + '</td></tr>';
     }
     _html += '</tbody></table>';
     $('<div class="showTable"></div>').html(_html).appendTo('body');
