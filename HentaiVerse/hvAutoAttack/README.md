@@ -1,11 +1,10 @@
 ### 缺陷
 
 1. 内存可能不断增加
-2. 特殊技巧：龙吼(FUS RO DAH)因缺少id而不能使用。
-3. 竞技场：因笔者等级不够，无法自动刷Lv300的竞技场。
-4. 页面停留足够时间长后，触发警报或刷新，此时脚本恢复正常工作时，无法停止警报或刷新。
-5. 待补充
-6. 欢迎提供意见建议
+2. 竞技场：因笔者等级不够，无法自动刷Lv300的竞技场。
+3. 页面停留足够时间长后，触发警报或刷新，此时脚本恢复正常工作时，无法停止警报或刷新。
+4. 待补充
+5. 欢迎提供意见建议
 
 ### 说明
 
@@ -48,12 +47,17 @@
 
 #### Latest
 
+##### 2.57
+
+1. 感谢网友maoboshi，现在支持特殊技能龙吼
+   Thanks to maoboshi, now support the special skill FUS RO DAH
+
 ##### 2.56
 
 1. 增加了选项来控制使用Draught级别药水的使用
-1. Added the option to control the use of the Draught
+   Added the option to control the use of the Draught
 2. 修改了De技能
-2. Modified the DeSkill
+   Modified the DeSkill
 
 ##### 2.55
 
