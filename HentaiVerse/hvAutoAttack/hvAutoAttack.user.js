@@ -14,7 +14,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.56
+// @version      2.56a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome + Tampermonkey
 // @compatible   Android + Firefox + usi
@@ -96,9 +96,9 @@ function main() { //主程序
     gE('#hvAAFix').focus();
   }
   var bar = gE('.cwb2', 'all');
-  g('hp', bar[0].offsetWidth / 120);
-  g('mp', bar[1].offsetWidth / 120);
-  g('sp', bar[2].offsetWidth / 120);
+  g('hp', bar[0].offsetWidth / 120 * 100);
+  g('mp', bar[1].offsetWidth / 120 * 100);
+  g('sp', bar[2].offsetWidth / 120 * 100);
   g('oc', parseInt(gE('.cwbt2').innerText));
   battleInfo(); //战斗战况
   countMonsterHP(); //统计怪物血量
@@ -813,20 +813,18 @@ function riddleAlert() { //答题警报
         time = (parseInt(timeDiv[j].style.backgroundPosition.replace('0px -', '')) / 12).toString() + time;
       }
       document.title = time;
-      if (g('option').riddleAnswer) {
-        if (parseInt(time) <= parseInt(g('option').riddleAnswerTime)) {
-          if (!gE('#riddlemaster').value) {
-            var random = Math.random();
-            if (random < 1 / 3) {
-              gE('#riddlemaster').value = 'A';
-            } else if (random < 2 / 3) {
-              gE('#riddlemaster').value = 'B';
-            } else {
-              gE('#riddlemaster').value = 'C';
-            }
+      if (g('option').riddleAnswer && parseInt(time) <= parseInt(g('option').riddleAnswerTime)) {
+        if (!gE('#riddlemaster').value) {
+          var random = Math.random();
+          if (random < 1 / 3) {
+            gE('#riddlemaster').value = 'A';
+          } else if (random < 2 / 3) {
+            gE('#riddlemaster').value = 'B';
+          } else {
+            gE('#riddlemaster').value = 'C';
           }
-          gE('#riddleform').submit();
         }
+        gE('#riddleform').submit();
       }
     }, i * 1000);
   }
@@ -870,7 +868,7 @@ function statusButton() { //选择模式按钮
   var button = cE('button');
   button.innerHTML = g('lang').all[17];
   button.onclick = function () {
-    var p = parseInt(prompt(g('lang').all[18], ''));
+    var p = parseInt(prompt(g('lang').all[18]));
     if (isNaN(p) || p < 0 || p > 6) return;
     setValue('attackStatus', p);
     reload();
@@ -926,10 +924,6 @@ function reloader() {
   gE('body').appendChild(a);
 }
 function formSubmit() { //基本来自https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894
-  if (gE('#battleaction').value === '0') {
-    reload();
-    return;
-  }
   var inputs = gE('#battleform>input', 'all');
   var serializedForm = '';
   for (var i = 0; i < inputs.length; i = i + 1) {
@@ -1078,15 +1072,15 @@ function battleInfo() { //战斗战况
 }
 function autoUseGem() { //自动使用宝石
   var Gem = gE('#ikey_p').getAttribute('onmouseover').replace(/battle.set_infopane_item\(\'(.*?)\'.*/, '$1');
-  if (Gem === 'Health Gem' && g('hp') <= g('option').hp1 * 0.01) {
+  if (Gem === 'Health Gem' && g('hp') <= g('option').hp1) {
     gE('#ikey_p').click();
     g('end', true);
     return;
-  } else if (Gem === 'Mana Gem' && g('mp') <= g('option').mp1 * 0.01) {
+  } else if (Gem === 'Mana Gem' && g('mp') <= g('option').mp1) {
     gE('#ikey_p').click();
     g('end', true);
     return;
-  } else if (Gem === 'Spirit Gem' && g('sp') <= g('option').sp1 * 0.01) {
+  } else if (Gem === 'Spirit Gem' && g('sp') <= g('option').sp1) {
     gE('#ikey_p').click();
     g('end', true);
     return;
@@ -1097,47 +1091,45 @@ function autoUseGem() { //自动使用宝石
   }
 }
 function deadSoon() { //自动回血回魔
-  if (g('mp') < g('option').mp2 * 0.01) { //自动回魔
+  if (g('mp') < g('option').mp2) { //自动回魔
     gE('#quickbar').style.backgroundColor = 'blue';
     if (gE('.bti3>div[onmouseover*="Mana Potion"]')) {
       gE('.bti3>div[onmouseover*="Mana Potion"]').click();
       g('end', true);
       return;
-    } else if (g('mp') <= g('option').mp3 * 0.01 && gE('.bti3>div[onmouseover*="Mana Elixir"]')) {
+    } else if (g('mp') <= g('option').mp3 && gE('.bti3>div[onmouseover*="Mana Elixir"]')) {
       gE('.bti3>div[onmouseover*="Mana Elixir"]').click();
       g('end', true);
       return;
     }
   }
-  if (g('sp') < g('option').sp2 * 0.01) { //自动回精
+  if (g('sp') < g('option').sp2) { //自动回精
     gE('#quickbar').style.backgroundColor = 'green';
     if (gE('.bti3>div[onmouseover*="Spirit Potion"]')) {
       gE('.bti3>div[onmouseover*="Spirit Potion"]').click();
       g('end', true);
       return;
-    } else if (g('sp') <= g('option').sp3 * 0.01 && gE('.bti3>div[onmouseover*="Spirit Elixir"]')) {
+    } else if (g('sp') <= g('option').sp3 && gE('.bti3>div[onmouseover*="Spirit Elixir"]')) {
       gE('.bti3>div[onmouseover*="Spirit Elixir"]').click();
       g('end', true);
       return;
     }
   }
-  if (g('hp') <= g('option').hp2 * 0.01) { //自动回血
+  if (g('hp') <= g('option').hp2) { //自动回血
     if (!gE('.cwb2[src*="barsilver"]')) gE('#quickbar').style.backgroundColor = 'red';
     if (isOn('311')) {
       gE('311', 'id').click();
       g('end', true);
       return;
-    }
-    if (isOn('313')) {
+    } else if (isOn('313')) {
       gE('313', 'id').click();
       g('end', true);
       return;
-    }
-    if (gE('.bti3>div[onmouseover*="Health Potion"]')) {
+    } else if (gE('.bti3>div[onmouseover*="Health Potion"]')) {
       gE('.bti3>div[onmouseover*="Health Potion"]').click();
       g('end', true);
       return;
-    } else if (g('hp') <= g('option').hp3 * 0.01 && gE('.bti3>div[onmouseover*="Health Elixir"]')) {
+    } else if (g('hp') <= g('option').hp3 && gE('.bti3>div[onmouseover*="Health Elixir"]')) {
       gE('.bti3>div[onmouseover*="Health Elixir"]').click();
       g('end', true);
       return;
@@ -1292,15 +1284,13 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
       }
     }
     for (var i in skillLib) {
-      if (g('option') ['buffSkill_' + i] !== undefined) {
-        if (g('option') ['buffSkill_' + i] && !gE('div.bte>img[src*="' + skillLib[i].img + '"]') && isOn(skillLib[i].id)) {
-          gE(skillLib[i].id, 'id').click();
-          g('end', true);
-          return;
-        }
+      if (g('option') ['buffSkill_' + i] && !gE('div.bte>img[src*="' + skillLib[i].img + '"]') && isOn(skillLib[i].id)) {
+        gE(skillLib[i].id, 'id').click();
+        g('end', true);
+        return;
       }
     }
-    if (!gE('div.bte>img[src*="healthpot"]') && g('hp') <= g('option').hp0 * 0.01 && g('option').buffSkill_HD && gE('.bti3>div[onmouseover*="Health Draught"]')) {
+    if (!gE('div.bte>img[src*="healthpot"]') && g('hp') <= g('option').hp0 && g('option').buffSkill_HD && gE('.bti3>div[onmouseover*="Health Draught"]')) {
       gE('.bti3>div[onmouseover*="Health Draught"]').click();
       g('end', true);
       return;
@@ -1377,23 +1367,18 @@ function countMonsterHP() { //统计怪物血量
 }
 function autoUseDeSkill() { //自动施法De技能
   var skillLib = {
-    /*
     'Sle': {
       'name': 'Sleep',
-      'id': '222',
       'img': 'sleep'
     },
     'Bl': {
       'name': 'Blind',
-      'id': '231',
       'img': 'blind'
     },
     'Slo': {
       'name': 'Slow',
-      'id': '221',
       'img': 'slow'
     },
-    */
     'Im': {
       'name': 'Imperil',
       'id': '213',
@@ -1401,7 +1386,6 @@ function autoUseDeSkill() { //自动施法De技能
     },
     'CM': {
       'name': 'Coalesced Mana',
-      'id': '',
       'img': 'coalescemana'
     },
     'MN': {
@@ -1464,7 +1448,7 @@ function autoAttack() { //自动打怪
       gE('1' + g('attackStatus') + '1', 'id').click();
     }
   }
-  if (g('option').specialSkill && g('oc') >= 210) {
+  if (g('option').specialSkill && g('oc') >= 210 && gE('#ckey_spirit[src*="spirit_a"]')) {
     /*
     if (g('option').specialSkill_FUS && (g('monsterAlive') > g('option').specialSkillMonster_FUS || g('bossAlive') > g('option').specialSkillBoss_FUS) && isOn('')) gE('', 'id').click();
     */
