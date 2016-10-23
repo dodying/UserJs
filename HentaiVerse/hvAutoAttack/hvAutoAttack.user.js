@@ -14,7 +14,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.57
+// @version      2.57a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome + Tampermonkey
 // @compatible   Android + Firefox + usi
@@ -51,10 +51,9 @@
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
   } else if (gE('#togpane_log')) { //战斗中
-    g('attackStatus', getValue('attackStatus') || g('option').attackStatus);
+    g('attackStatus', g('option').attackStatus);
     g('runtime', 0);
     pauseButton();
-    statusButton();
     if (g('option').reloader) reloader();
     main();
   } else { //非战斗
@@ -148,18 +147,11 @@ function langPack(lang) { //语言包
         '继续', //14
         '请点击尝试修复', //15
         '暂停', //16
-        '临时攻击模式', //17
-        '请选择（默认为火）：\n0.物理\n1.火\n2.冰\n3.雷\n4.风\n5.圣\n6.暗', //18
-        '请输入链接，必填', //19
-        '请输入名称，可留空', //20
-        '请输入图标，可留空', //21
-        '回复完成', //22
-        '竞技场开始', //23
-        '运行次数：', //24
-        '回合：', //25
-        '攻击模式：', //26
-        '存活Boss：', //27
-        '怪物：' //28
+        '请输入链接，必填', //17
+        '请输入名称，可留空', //18
+        '请输入图标，可留空', //19
+        '回复完成', //20
+        '竞技场开始' //21
       ],
       option: {
         '000': 'hvAutoAttack设置',
@@ -271,6 +263,13 @@ function langPack(lang) { //语言包
         '字符串，战斗类型',
         '对象数组<br>快捷地址栏',
       ],
+      info: [
+        '运行次数：',
+        '回合：',
+        '攻击模式：',
+        '存活Boss：',
+        '怪物：'
+      ],
       new : [
         '1. 感谢网友maoboshi，现在支持特殊技能龙吼'
       ],
@@ -294,18 +293,11 @@ function langPack(lang) { //语言包
         '繼續',
         '請點擊嘗試修復',
         '暫停',
-        '臨時攻擊模式',
-        '請選擇（默認為火）：\n0.物理\n1.火\n2.冰\n3.雷\n4.風\n5.聖\n6.暗',
         '請輸入鏈接，必填',
         '請輸入名稱，可留空',
         '請輸入圖標，可留空',
         '回复完成',
-        '競技場開始',
-        '運行次數：',
-        '回合：',
-        '攻擊模式：',
-        '存活Boss：',
-        '怪物：'
+        '競技場開始'
       ],
       option: {
         '000': 'hvAutoAttack設置',
@@ -417,6 +409,13 @@ function langPack(lang) { //语言包
         '字符串，戰鬥類型',
         '对象数组<br>快捷地址栏',
       ],
+      info: [
+        '運行次數：',
+        '回合：',
+        '攻擊模式：',
+        '存活Boss：',
+        '怪物：'
+      ],
       new : [
         '1. 感謝網友maoboshi,現在支持特殊技能龍吼'
       ],
@@ -440,18 +439,11 @@ function langPack(lang) { //语言包
         'Continue',
         'Click [Try Fix]',
         'Paused',
-        'Temporary attack mode',
-        'Please select (fire default): \n0. Physical \n1. Fire \n2. Ice \n3. Ray \n4. Wind \n5.',
         'Please enter a link, required',
         'Please enter a name, which can be left blank',
         'Please enter an icon that can be left blank',
         'Recovery',
-        'arena start',
-        'run time:',
-        'round:',
-        'attack status:',
-        'Boss alive:',
-        'monster:'
+        'arena start'
       ],
       option: {
         '000': 'Option for hvAutoAttack',
@@ -562,6 +554,13 @@ function langPack(lang) { //语言包
         'Array，Current turn',
         'String, round type',
         'An array of objects<br>Shortcut bar',
+      ],
+      info: [
+        'run time:',
+        'round:',
+        'attack status:',
+        'Boss alive:',
+        'monster:'
       ],
       new : [
         '1. Thanks to maoboshi, now support the special skill FUS RO DAH'
@@ -861,17 +860,6 @@ function pauseButton() { //暂停按钮
   }
   gE('.clb').insertBefore(button, gE('.clb>.cbl'))
 }
-function statusButton() { //选择模式按钮
-  var button = cE('button');
-  button.innerHTML = g('lang').all[17];
-  button.onclick = function () {
-    var p = parseInt(prompt(g('lang').all[18]));
-    if (isNaN(p) || p < 0 || p > 6) return;
-    setValue('attackStatus', p);
-    reload();
-  }
-  gE('.clb').insertBefore(button, gE('.clb>.cbl'))
-}
 function quickSite() { //待续
   var siteBar = cE('div');
   siteBar.className = 'siteBar';
@@ -892,10 +880,10 @@ function quickSite() { //待续
   }
   gE('.siteBarPlus', siteBar).onclick = function () {
     var quickSite = getValue('quickSite', true) || new Array();
-    var url = prompt(g('lang').all[19]);
+    var url = prompt(g('lang').all[17]);
     if (!url) return;
-    var name = prompt(g('lang').all[20]);
-    var fav = prompt(g('lang').all[21]);
+    var name = prompt(g('lang').all[18]);
+    var fav = prompt(g('lang').all[19]);
     quickSite.push({
       'url': url,
       'name': name,
@@ -975,9 +963,9 @@ function autoArena() { //自动刷竞技场
   if (length === 1) setValue('arenaidOk', true);
   arenaidArr.length = length;
   post(location.href, 'recover=all', function () { //回复
-    document.title = g('lang').all[22];
+    document.title = g('lang').all[20];
     post('?s=Battle&ss=ar', 'arenaid=' + arenaidArr[arenaidArr.length - 1], function () {
-      document.title = g('lang').all[23];
+      document.title = g('lang').all[21];
       arenaidArr.splice( - 1);
       setValue('arenaidArr', arenaidArr);
       reload();
@@ -1064,7 +1052,7 @@ function battleInfo() { //战斗战况
     div.className = 'hvAALog';
     gE('div.clb').insertBefore(div, gE('.cit'));
   }
-  gE('.hvAALog').innerHTML = g('lang').all[24] + g('runtime') + '<br>' + g('lang').all[25] + g('roundNow') + '/' + g('roundAll') + '<br>' + g('lang').all[26] + g('lang').status[g('attackStatus')] + '<br>' + g('lang').all[27] + g('bossAlive') + '<br>' + g('lang').all[28] + g('monsterAlive') + '/' + g('monsterAll');
+  gE('.hvAALog').innerHTML = g('lang').info[0] + g('runtime') + '<br>' + g('lang').info[1] + g('roundNow') + '/' + g('roundAll') + '<br>' + g('lang').info[2] + g('lang').status[g('attackStatus')] + '<br>' + g('lang').info[3] + g('bossAlive') + '<br>' + g('lang').info[4] + g('monsterAlive') + '/' + g('monsterAll');
   document.title = g('runtime') + '||' + g('roundNow') + '/' + g('roundAll') + '||' + g('monsterAlive') + '/' + g('monsterAll');
 }
 function autoUseGem() { //自动使用宝石
@@ -1494,7 +1482,6 @@ function delValue(item) {
       localStorage.removeItem('roundAll');
       localStorage.removeItem('monsterStatus');
       if (item > 1) {
-        localStorage.removeItem('attackStatus');
         localStorage.removeItem('roundType');
       }
     }
