@@ -1186,7 +1186,7 @@ function Battle() {
     }
   };
   this.clear_infopane = function () {
-    console.log(f)
+    console.log(f.toString())
     if (f[1] != undefined) {
       d(f[1])
     } else {
