@@ -32,7 +32,6 @@
 // @run-at       document-end
 // ==/UserScript==
 (function init() {
-  otherAlert('Win');
   if (gE('img[src="http://ehgt.org/g/derpy.gif"]')) {
     setTimeout(function () {
       reload();
@@ -62,9 +61,9 @@
     riddleAlert(); //答题警报
   } else if (gE('#togpane_log')) { //战斗中
     g('attackStatus', g('option').attackStatus);
+    if (g('option').reloader) reloader();
     g('runtime', 0);
     pauseButton();
-    if (g('option').reloader) reloader();
     main();
   } else { //非战斗
     delValue(2);
@@ -612,7 +611,7 @@ function addStyle() {
   '.hvAATab table td:nth-child(2){width:150px;}' +
   '.hvAATab table input{width:200px!important;}' +
   '.hvAATab table textarea{resize:vertical;width:260px;max-height:400px;overflow:hidden;}' +
-  '.hvAAOptionBoxButton{position:relative;top:443px;}' +
+  '.hvAAOptionBoxButton{position:relative;top:440px;}' +
   '.hvAAOptionBoxButton>button{margin:0 1px;}' +
   'button{border-radius:3px;border-style:solid;border-color:gray;}' +
   '.hvAANew{width:25px;height:25px;float:left;background:transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAAcElEQVQ4jbVRSQ4AIQjz/59mTiZIF3twmnCwFAq4FkeFXM+5vCzohYxjPMtfxS8CN6iqQ7TfE0wrODxVbzJNgoaTo4CmbBO1ZWICouQ0DHaL259MEzaU+w8pZOdSjcUgaPJDHCbO0A2kuAiuwPGQ+wBms12x8HExTwAAAABJRU5ErkJggg==) no-repeat;background-position:center;}' +
@@ -951,8 +950,7 @@ function formSubmit() { //基本来自https://forums.e-hentai.org/index.php?show
         existing[i].parentNode.replaceChild(newStuff[i], existing[i]);
       }
     }
-    var popup = gE('.btcp', 'all', data);
-    if (popup.length !== 0) gE('.btt').insertBefore(popup[0], gE('.btt').firstChild);
+    if (gE('.btcp', data)) gE('.btt').insertBefore(gE('.btcp', data), gE('.btt').firstChild);
     unsafeWindow.battle = new unsafeWindow.Battle;
     unsafeWindow.battle.clear_infopane();
     main();
@@ -1068,7 +1066,6 @@ function countRound() { //回合计数及自动前进并获取怪物总HP
       }, 3 * 1000);
     }
     g('end', true);
-    return;
   }
 }
 function battleInfo() { //战斗战况
@@ -1516,10 +1513,11 @@ function reload() {
   location = location.search.replace(/#.*/, '');
 }
 function g(item, key) { //全局变量
+  window.hvAA = window.hvAA || new Object();
   if (key === undefined) {
-    return window[item];
+    return window.hvAA[item];
   } else {
-    window[item] = key;
+    window.hvAA[item] = key;
   }
 }
 function post(href, parm, func) { //post
