@@ -9,13 +9,13 @@
 // @installURL   https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js
 // @downloadURL  https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js
 // @resource default.mp3 https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/default.mp3
-// @resource default.wav https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/default.wav
+// resource default.wav https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/default.wav
 // @resource Failed.mp3 https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Failed.mp3
-// @resource Failed.wav https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Failed.wav
+// resource Failed.wav https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Failed.wav
 // @resource Riddle.mp3 https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Riddle.mp3
-// @resource Riddle.wav https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Riddle.wav
+// resource Riddle.wav https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Riddle.wav
 // @resource Win.mp3 https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Win.mp3
-// @resource Win.wav https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Win.wav
+// resource Win.wav https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/Win.wav
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
