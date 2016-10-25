@@ -31,8 +31,8 @@
 // @grant        GM_getResourceURL
 // @run-at       document-end
 // ==/UserScript==
-otherAlert('Win');
 (function init() {
+  otherAlert('Win');
   if (gE('img[src="http://ehgt.org/g/derpy.gif"]')) {
     setTimeout(function () {
       reload();
