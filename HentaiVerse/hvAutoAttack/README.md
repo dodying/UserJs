@@ -47,6 +47,20 @@
 
 #### Latest
 
+##### 2.59
+
+1. 移除本地储存选项卡
+
+   Remove the Local Storage tab
+
+2. 增加掉落检测功能与对应选项卡
+
+   Add the drop detection function and the corresponding tab
+
+3. 一些改进（？）
+
+   Some improvements(?)
+
 ##### 2.58
 
 1. 版本2.57a中，移除了临时攻击模式
