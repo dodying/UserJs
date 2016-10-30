@@ -47,6 +47,13 @@
 
 #### Latest
 
+
+##### 2.60
+
+1. 掉落监测强化
+
+   Drop monitoring enhanced
+
 ##### 2.59
 
 1. 移除本地储存选项卡
