@@ -22,7 +22,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.60a
+// @version      2.61
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -154,7 +154,8 @@ function langPack(lang) { //语言包
         '请输入图标，可留空', //12
         '回复完成', //13
         '竞技场开始', //14
-        '请输入配置' //15
+        '请输入配置', //15
+        '如果您遭遇了Bug，请确认是否为最新版本（一些Bug可能在新版中被修复）' //16
       ],
       option: {
         //
@@ -181,8 +182,8 @@ function langPack(lang) { //语言包
         '104': '技能施放条件：',
         '105': '中级：怪物存活数',
         '106': '；高级：怪物存活数',
-        '107': '当Overcharge',
-        '108': '，开启Spirit Stance。',
+        '107': '当斗气',
+        '108': '%，开启Spirit Stance。',
         '109': '防止脚本莫名暂停',
         '110': '页面停留',
         '111': '秒后，警报；',
@@ -197,6 +198,7 @@ function langPack(lang) { //语言包
         '120': '减少页面刷新，降低内存使用，感谢网友【zsp40088】提出',
         '121': '答题单选',
         '122': '开启掉落监测功能，记录装备的最低品质',
+        '123': '且SP',
         //对自身技能
         '201': '对自身技能',
         '202': '施放条件（有一个成立就行）：',
@@ -280,7 +282,7 @@ function langPack(lang) { //语言包
         '怪物：'
       ],
       new : [
-        '1. 掉落监测强化'
+        '1. 针对Spirit Stance，增加对于SP的判断'
       ],
     },
     { //繁體中文
@@ -300,7 +302,8 @@ function langPack(lang) { //语言包
         '請輸入圖標，可留空',
         '回复完成',
         '競技場開始',
-        '請輸入配置'
+        '請輸入配置',
+        '如果您遭遇了Bug，請確認是否為最新版本（一些Bug可能在新版中被修復）'
       ],
       option: {
         '000': 'hvAutoAttack設置',
@@ -325,8 +328,8 @@ function langPack(lang) { //语言包
         '104': '技能釋放條件：',
         '105': '中級：怪物存活數',
         '106': '；高級：怪物存活數',
-        '107': '當Overcharge',
-        '108': '，開啟Spirit Stance。',
+        '107': '當鬥氣',
+        '108': '%，開啟Spirit Stance。',
         '109': '防止腳本莫名暫停',
         '110': '頁面停留',
         '111': '秒後，警報；',
@@ -341,6 +344,7 @@ function langPack(lang) { //语言包
         '120': '減少頁面刷新，降低內存使用，感謝網友【zsp40088】提出',
         '121': '答題單選',
         '122': '開啟掉落監測功能，記錄裝備的最低品質',
+        '123': '且SP',
         '201': '對自身技能',
         '202': '施放條件（有一個成立就行）：',
         '203': '1. 總回合數',
@@ -416,7 +420,7 @@ function langPack(lang) { //语言包
         '怪物：'
       ],
       new : [
-        '1. 掉落監測強化'
+        '1. 針對Spirit Stance，增加對於SP的判斷'
       ],
     },
     { //English
@@ -436,7 +440,8 @@ function langPack(lang) { //语言包
         'Please enter an icon that can be left blank',
         'Recovery',
         'arena start',
-        'Please put in the option'
+        'Please put in the option',
+        'If you encounter a bug, check if it is the latest version (some bugs may be fixed in the newer version)'
       ],
       option: {
         '000': 'Option for hvAutoAttack',
@@ -462,7 +467,7 @@ function langPack(lang) { //语言包
         '105': ' middle: monster alive ',
         '106': '; high: monster alive ',
         '107': 'When Overcharge ',
-        '108': ', turn on Spirit Stance.',
+        '108': '%, turn on Spirit Stance.',
         '109': 'To prevent the script inexplicable suspension',
         '110': 'The page stays ',
         '111': 's, alert;',
@@ -477,6 +482,7 @@ function langPack(lang) { //语言包
         '120': 'Reduce page refresh, reduce memory usage, thanks to friends [zsp40088] proposed',
         '121': 'Answer to radio',
         '122': 'Turn on drop monitoring, the minimum quality ',
+        '123': ' and SP ',
         '201': 'toSelf Skill',
         '202': 'toCast(one true)：',
         '203': '1. total number of turns ',
@@ -552,7 +558,7 @@ function langPack(lang) { //语言包
         'monster:'
       ],
       new : [
-        '1. Drop monitoring enhanced'
+        '1. For Spirit Stance, increase the judgment for the SP'
       ],
     }
   ];
@@ -612,7 +618,7 @@ function optionButton() { //配置
   optionBox.innerHTML = '' +
   '<div class="hvAACenter"><h1 style="display:inline;">' + g('lang').option['000'] + '</h1><div style="float:right;">' + g('lang').option['001'] + '<select name="lang"><option value="0">简体中文</option><option value="1">繁體中文</option><option value="2">English</option></select></div></div><div class="hvAATablist">' +
   '<div class="hvAATabmenu"><span><a href="#hvAATab-Main">' + g('lang').option['002'] + '</a></span><span><a href="#hvAATab-Self">' + g('lang').option['003'] + '</a></span><span><a href="#hvAATab-Debuff">' + g('lang').option['004'] + '</a></span><span><a href="#hvAATab-Special">' + g('lang').option['005'] + '</a></span><span><a href="#hvAATab-Scroll">' + g('lang').option['006'] + '</a></span><span><a href="#hvAATab-Infusion">' + g('lang').option['007'] + '</a></span><span><a href="#hvAATab-Weight">' + g('lang').option['008'] + '</a></span><span class="hvAAShowDrop"><a href="#hvAATab-Drop">' + g('lang').option['009'] + '</a></span><span class="hvAAShowOther"><a href="#hvAATab-Other">' + g('lang').option['010'] + '</a></span></div>' +
-  '<div id="hvAATab-Main"class="hvAATab"style="z-index:1;"><div class="hvAACenter"title="' + g('lang').option['101'] + '"><span style="color:green;">HP:0.<input name="hp0"placeholder="95"type="text">%&nbsp;1.<input name="hp1"placeholder="50"type="text">%&nbsp;2.<input name="hp2"placeholder="50"type="text">%&nbsp;3.<input name="hp3"placeholder="5"type="text">%&nbsp;</span><br><span style="color:blue;">MP:0.<input name="mp0"placeholder="95"type="text">%&nbsp;1.<input name="mp1"placeholder="70"type="text">%&nbsp;2.<input name="mp2"placeholder="10"type="text">%&nbsp;3.<input name="mp3"placeholder="5"type="text">%&nbsp;</span><br><span style="color:red;">SP:0.<input name="sp0"placeholder="95"type="text">%&nbsp;1.<input name="sp1"placeholder="75"type="text">%&nbsp;2.<input name="sp2"placeholder="50"type="text">%&nbsp;3.<input name="sp3"placeholder="5"type="text">%&nbsp;</span><br><input id="lastElixir"type="checkbox"><label for="lastElixir">' + g('lang').option['102'] + '</div><div id="attackStatus"class="hvAACenter"style="color:red;"><b>*' + g('lang').option['103'] + '</b><input type="radio"id="aS0"name="attackStatus"value="0"><label for="aS0">' + g('lang').status[0] + '</label><input type="radio"id="aS1"name="attackStatus"value="1"><label for="aS1">' + g('lang').status[1] + '</label><input type="radio"id="aS2"name="attackStatus"value="2"><label for="aS2">' + g('lang').status[2] + '</label><input type="radio"id="aS3"name="attackStatus"value="3"><label for="aS3">' + g('lang').status[3] + '</label><input type="radio"id="aS4"name="attackStatus"value="4"><label for="aS4">' + g('lang').status[4] + '</label><input type="radio"id="aS5"name="attackStatus"value="5"><label for="aS5">' + g('lang').status[5] + '</label><input type="radio"id="aS6"name="attackStatus"value="6"><label for="aS6">' + g('lang').status[6] + '</label></div><div><b>' + g('lang').option['104'] + '</b>' + g('lang').option['105'] + '≥<input name="middleSkill"placeholder="3"type="text">' + g('lang').option['106'] + '≥<input name="highSkill"placeholder="5"type="text"></div><div><input id="spiritStance"type="checkbox"><label for="spiritStance">' + g('lang').option['107'] + '≥<input name="spiritStance_oc"placeholder="50"type="text">' + g('lang').option['108'] + '</label></div><div title="' + g('lang').option['109'] + '"><input id="delayAlert"type="checkbox"><label for="delayAlert">' + g('lang').option['110'] + '<input name="delayAlertTime"placeholder="10"type="text">' + g('lang').option['111'] + '</label><input id="delayReload"type="checkbox"><label for="delayReload">' + g('lang').option['110'] + '<input name="delayReloadTime"placeholder="15"type="text">' + g('lang').option['112'] + '</label></div><div><input id="riddleAnswer"type="checkbox"><label for="riddleAnswer">' + g('lang').option['113'] + '≤<input name="riddleAnswerTime"placeholder="3"type="text">' + g('lang').option['114'] + '</label></div><div><input id="stamina"type="checkbox"><label for="stamina">' + g('lang').option['115'] + '<input name="staminaValue"placeholder="10"type="text">' + g('lang').option['116'] + '</label></div><div><input id="autoArena"type="checkbox"><label for="autoArena">' + g('lang').option['117'] + '<input name="autoArenaTime"placeholder="60"type="text"></input>' + g('lang').option['118'] + '</label></div><div><input id="reloader"type="checkbox"><label for="reloader">' + g('lang').option['119'] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894"target="_blank"title="' + g('lang').option['120'] + '">Reloader</a></label></div><div><input id="riddleRadio"type="checkbox"><label for="riddleRadio">' + g('lang').option['119'] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982"target="_blank"title="' + g('lang').option['121'] + '">RiddleLimiter Plus</a></label></div><div><div class="hvAANew"></div><input id="dropMonitor"type="checkbox"><label for="dropMonitor">' + g('lang').option['122'] + '<select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div></div>' +
+  '<div id="hvAATab-Main"class="hvAATab"style="z-index:1;"><div class="hvAACenter"title="' + g('lang').option['101'] + '"><span style="color:green;">HP:0.<input name="hp0"placeholder="95"type="text">%&nbsp;1.<input name="hp1"placeholder="50"type="text">%&nbsp;2.<input name="hp2"placeholder="50"type="text">%&nbsp;3.<input name="hp3"placeholder="5"type="text">%&nbsp;</span><br><span style="color:blue;">MP:0.<input name="mp0"placeholder="95"type="text">%&nbsp;1.<input name="mp1"placeholder="70"type="text">%&nbsp;2.<input name="mp2"placeholder="10"type="text">%&nbsp;3.<input name="mp3"placeholder="5"type="text">%&nbsp;</span><br><span style="color:red;">SP:0.<input name="sp0"placeholder="95"type="text">%&nbsp;1.<input name="sp1"placeholder="75"type="text">%&nbsp;2.<input name="sp2"placeholder="50"type="text">%&nbsp;3.<input name="sp3"placeholder="5"type="text">%&nbsp;</span><br><input id="lastElixir"type="checkbox"><label for="lastElixir">' + g('lang').option['102'] + '</div><div id="attackStatus"class="hvAACenter"style="color:red;"><b>*' + g('lang').option['103'] + '</b><input type="radio"id="aS0"name="attackStatus"value="0"><label for="aS0">' + g('lang').status[0] + '</label><input type="radio"id="aS1"name="attackStatus"value="1"><label for="aS1">' + g('lang').status[1] + '</label><input type="radio"id="aS2"name="attackStatus"value="2"><label for="aS2">' + g('lang').status[2] + '</label><input type="radio"id="aS3"name="attackStatus"value="3"><label for="aS3">' + g('lang').status[3] + '</label><input type="radio"id="aS4"name="attackStatus"value="4"><label for="aS4">' + g('lang').status[4] + '</label><input type="radio"id="aS5"name="attackStatus"value="5"><label for="aS5">' + g('lang').status[5] + '</label><input type="radio"id="aS6"name="attackStatus"value="6"><label for="aS6">' + g('lang').status[6] + '</label></div><div><b>' + g('lang').option['104'] + '</b>' + g('lang').option['105'] + '≥<input name="middleSkill"placeholder="3"type="text">' + g('lang').option['106'] + '≥<input name="highSkill"placeholder="5"type="text"></div><div><input id="spiritStance"type="checkbox"><label for="spiritStance">' + g('lang').option['107'] + '≥<input name="spiritStance_oc"placeholder="50"type="text">' + g('lang').option['123'] + '≥<input name="spiritStance_sp"placeholder="80"type="text">' + g('lang').option['108'] + '</label></div><div title="' + g('lang').option['109'] + '"><input id="delayAlert"type="checkbox"><label for="delayAlert">' + g('lang').option['110'] + '<input name="delayAlertTime"placeholder="10"type="text">' + g('lang').option['111'] + '</label><input id="delayReload"type="checkbox"><label for="delayReload">' + g('lang').option['110'] + '<input name="delayReloadTime"placeholder="15"type="text">' + g('lang').option['112'] + '</label></div><div><input id="riddleAnswer"type="checkbox"><label for="riddleAnswer">' + g('lang').option['113'] + '≤<input name="riddleAnswerTime"placeholder="3"type="text">' + g('lang').option['114'] + '</label></div><div><input id="stamina"type="checkbox"><label for="stamina">' + g('lang').option['115'] + '<input name="staminaValue"placeholder="10"type="text">' + g('lang').option['116'] + '</label></div><div><input id="autoArena"type="checkbox"><label for="autoArena">' + g('lang').option['117'] + '<input name="autoArenaTime"placeholder="60"type="text"></input>' + g('lang').option['118'] + '</label></div><div><input id="reloader"type="checkbox"><label for="reloader">' + g('lang').option['119'] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894"target="_blank"title="' + g('lang').option['120'] + '">Reloader</a></label></div><div><input id="riddleRadio"type="checkbox"><label for="riddleRadio">' + g('lang').option['119'] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982"target="_blank"title="' + g('lang').option['121'] + '">RiddleLimiter Plus</a></label></div><div><div class="hvAANew"></div><input id="dropMonitor"type="checkbox"><label for="dropMonitor">' + g('lang').option['122'] + '<select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div></div>' +
   '<div id="hvAATab-Self"class="hvAATab"><input type="checkbox"id="buffSkill"><label for="buffSkill"><span class="hvAATitle">' + g('lang').option['201'] + '</span></label><br>' + g('lang').option['202'] + '<br>' + g('lang').option['203'] + '≥<input name="buffSkillAllRound"placeholder="12"type="text"><br>' + g('lang').option['204'] + '≥<input name="buffSkillBoss"placeholder="1"type="text"><br>' + g('lang').option['205'] + '≥<input name="buffSkillMonster"placeholder="6"type="text"><br><b>' + g('lang').option['206'] + '</b>' + g('lang').option['207'] + '<br><input type="checkbox"id="buffSkill_HD"><label for="buffSkill_HD">Health Draught</label><input type="checkbox"id="buffSkill_MD"><label for="buffSkill_MD">Mana Draught</label><input type="checkbox"id="buffSkill_SD"><label for="buffSkill_SD">Spirit Draught</label><br><input type="checkbox"id="buffSkill_Pr"><label for="buffSkill_Pr">Protection</label><input type="checkbox"id="buffSkill_SL"><label for="buffSkill_SL">Spark of Life</label><input type="checkbox"id="buffSkill_SS"><label for="buffSkill_SS">Spirit Shield</label><input type="checkbox"id="buffSkill_Ha"><label for="buffSkill_Ha">Haste</label><br><input type="checkbox"id="buffSkill_AF"><label for="buffSkill_AF">Arcane Focus</label><input type="checkbox"id="buffSkill_He"><label for="buffSkill_He">Heartseeker</label><input type="checkbox"id="buffSkill_Re"><label for="buffSkill_Re">Regen</label><input type="checkbox"id="buffSkill_SV"><label for="buffSkill_SV">Shadow Veil</label><input type="checkbox"id="buffSkill_Ab"><label for="buffSkill_Ab">Absorb</label><div></div><b>' + g('lang').option['208'] + '</b>' + g('lang').option['209'] + '<br><b>' + g('lang').option['210'] + '</b>' + g('lang').option['211'] + '<input name="channelReBuff"placeholder="20"type="text">' + g('lang').option['212'] + '<br><b>' + g('lang').option['213'] + '</b>' + g('lang').option['214'] + '<br><input type="checkbox"id="channelSkill_Pr"><label for="channelSkill_Pr">Protection</label><input type="checkbox"id="channelSkill_SL"><label for="channelSkill_SL">Spark of Life</label><input type="checkbox"id="channelSkill_SS"><label for="channelSkill_SS">Spirit Shield</label><input type="checkbox"id="channelSkill_Ha"><label for="channelSkill_Ha">Haste</label><br><input type="checkbox"id="channelSkill_AF"><label for="channelSkill_AF">Arcane Focus</label><input type="checkbox"id="channelSkill_He"><label for="channelSkill_He">Heartseeker</label><input type="checkbox"id="channelSkill_Re"><label for="channelSkill_Re">Regen</label><input type="checkbox"id="channelSkill_SV"><label for="channelSkill_SV">Shadow Veil</label><input type="checkbox"id="channelSkill_Ab"><label for="channelSkill_Ab">Absorb</label></div>' +
   '<div id="hvAATab-Debuff"class="hvAATab"><input type="checkbox"id="debuffSkill"><label for="debuffSkill"><span class="hvAATitle">' + g('lang').option['301'] + '</span>' + g('lang').option['302'] + '</label><br>' + g('lang').option['303'] + '<select name="debuffSkillMode"><option value="0">' + g('lang').option['304'] + '</option><option value="1">' + g('lang').option['305'] + '</option></select><br><input type="checkbox"id="debuffSkill_Im"><label for="debuffSkill_Im">Imperil</label><input type="checkbox"id="debuffSkill_MN"><label for="debuffSkill_MN">MagNet</label><input type="checkbox"id="debuffSkill_Si"><label for="debuffSkill_Si">Silence</label><input type="checkbox"id="debuffSkill_Dr"><label for="debuffSkill_Dr">Drain</label><input type="checkbox"id="debuffSkill_We"><label for="debuffSkill_We">Weaken</label><input type="checkbox"id="debuffSkill_Co"><label for="debuffSkill_Co">Confuse</label></div>' +
   '<div id="hvAATab-Special"class="hvAATab"><input id="specialSkill"type="checkbox"><label for="specialSkill"><span class="hvAATitle">' + g('lang').option['401'] + '</span></label><br><input id="specialSkill_OFC"type="checkbox"><label for="specialSkill_OFC">' + g('lang').option['402'] + '</label>' + g('lang').option['406'] + '≥<input name="specialSkillOC_OFC"placeholder="210"type="text"><br>' + g('lang').option['404'] + '≥<input name="specialSkillMonster_OFC"placeholder="8"type="text"><br>' + g('lang').option['405'] + '≥<input name="specialSkillBoss_OFC"placeholder="1"type="text"><br><input id="specialSkill_FUS"type="checkbox"><label for="specialSkill_FUS">' + g('lang').option['403'] + '</label>' + g('lang').option['406'] + '≥<input name="specialSkillOC_FUS"placeholder="110"type="text"><br>' + g('lang').option['404'] + '≥<input name="specialSkillMonster_FUS"placeholder="8"type="text"><br>' + g('lang').option['405'] + '≥<input name="specialSkillBoss_FUS"placeholder="1"type="text"></div>' +
@@ -620,7 +626,7 @@ function optionButton() { //配置
   '<div id="hvAATab-Infusion"class="hvAATab"><input type="checkbox"id="infusion"><label for="infusion"><span class="hvAATitle">' + g('lang').option['601'] + '</span></label><select name="infusionStatus"><option value="1">Infusion of Flames</option><option value="2">Infusion of Frost</option><option value="3">Infusion of Lightning</option><option value="4">Infusion of Storms</option><option value="5">Infusion of Divinity</option><option value="6">Infusion of Darkness</option></select><br>' + g('lang').roundType['0'] + '<input type="checkbox"id="infusionRoundType_ar"><label for="infusionRoundType_ar">' + g('lang').roundType['ar'] + '</label><input type="checkbox"id="infusionRoundType_rb"><label for="infusionRoundType_rb">' + g('lang').roundType['rb'] + '</label><input type="checkbox"id="infusionRoundType_gr"><label for="infusionRoundType_gr">' + g('lang').roundType['gr'] + '</label><input type="checkbox"id="infusionRoundType_iw"><label for="infusionRoundType_iw">' + g('lang').roundType['iw'] + '</label><input type="checkbox"id="infusionRoundType_ba"><label for="infusionRoundType_ba">' + g('lang').roundType['ba'] + '</label><br>' + g('lang').option['602'] + '≥<input name="infusionRoundNow"placeholder="100"type="text">。</div>' +
   '<div id="hvAATab-Weight"class="hvAATab hvAACenter"><span class="hvAATitle">' + g('lang').option['701'] + '</span>&nbsp;<a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#权重规则"target="_blank">' + g('lang').option['702'] + '</a><br>' + g('lang').option['703'] + '<br>' + g('lang').option['704'] + '<br>Sleep:<input name="weight_Sle"placeholder="+5"type="text">&nbsp;Blind:<input name="weight_Bl"placeholder="+3"type="text">&nbsp;Slow:<input name="weight_Slo"placeholder="+3"type="text">&nbsp;Imperil:<input name="weight_Im"placeholder="-5"type="text">&nbsp;Coalesced Mana:<input name="weight_CM"placeholder="-5"type="text"><br>MagNet:<input name="weight_MN"placeholder="-4"type="text">&nbsp;Silence:<input name="weight_Si"placeholder="-4"type="text">&nbsp;Drain:<input name="weight_Dr"placeholder="-4"type="text">&nbsp;Weaken:<input name="weight_We"placeholder="-4"type="text">&nbsp;Confuse:<input name="weight_Co"placeholder="-1"type="text"><br>' + g('lang').option['705'] + '<br>' + g('lang').option['706'] + '<a href="https://github.com/dodying/UserJs/issues/2"target="_blank">' + g('lang').option['707'] + '</a></div>' +
   '<div id="hvAATab-Drop"class="hvAATab"><span class="hvAATitle">' + g('lang').option['801'] + '</span><button class="reMonitor">' + g('lang').option['802'] + '</button></div>' +
-  '<div id="hvAATab-Other"class="hvAATab"><span>' + g('lang').option['901'] + '<a href="https://github.com/dodying/UserJs/issues/"target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback"target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471"target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs"target="_blank">4. Gitter</a></span><div class="hvAASeparate"></div><div class="hvAACenter"><span class="hvAATitle">' + g('lang').option['902'] + '</span><br>' + g('lang').option['903'] + '<br>' + g('lang').roundType['0'] + '<select class="hvAADebug"name="roundType"><option></option><option value="ar">' + g('lang').roundType['ar'] + '</option><option value="rb">' + g('lang').roundType['rb'] + '</option><option value="gr">' + g('lang').roundType['gr'] + '</option><option value="iw">' + g('lang').roundType['iw'] + '</option><option value="ba">' + g('lang').roundType['ba'] + '</option></select><br>' + g('lang').option['904'] + '<input name="roundNow"class="hvAADebug"type="text"placeholder="1">&nbsp;' + g('lang').option['905'] + '<input name="roundAll"class="hvAADebug"type="text"placeholder="1"><br><b>' + g('lang').option['906'] + '</b><div id="hvAAFixMonster"></div><button class="hvAAFix">' + g('lang').option['907'] + '</button></div></div>' +
+  '<div id="hvAATab-Other"class="hvAATab"><span class="hvAAFeedback">' + g('lang').option['901'] + '<a href="https://github.com/dodying/UserJs/issues/"target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback"target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471"target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs"target="_blank">4. Gitter</a></span><div class="hvAASeparate"></div><div class="hvAACenter"><span class="hvAATitle">' + g('lang').option['902'] + '</span><br>' + g('lang').option['903'] + '<br>' + g('lang').roundType['0'] + '<select class="hvAADebug"name="roundType"><option></option><option value="ar">' + g('lang').roundType['ar'] + '</option><option value="rb">' + g('lang').roundType['rb'] + '</option><option value="gr">' + g('lang').roundType['gr'] + '</option><option value="iw">' + g('lang').roundType['iw'] + '</option><option value="ba">' + g('lang').roundType['ba'] + '</option></select><br>' + g('lang').option['904'] + '<input name="roundNow"class="hvAADebug"type="text"placeholder="1">&nbsp;' + g('lang').option['905'] + '<input name="roundAll"class="hvAADebug"type="text"placeholder="1"><br><b>' + g('lang').option['906'] + '</b><div id="hvAAFixMonster"></div><button class="hvAAFix">' + g('lang').option['907'] + '</button></div></div>' +
   '</div><div class="hvAAOptionBoxButton hvAACenter"><button class="hvAAOptionExport">' + g('lang').option['014'] + '</button><button class="hvAAOptionImport">' + g('lang').option['015'] + '</button><button class="hvAAOptionRestore">' + g('lang').option['011'] + '</button><button class="optionApply">' + g('lang').option['012'] + '</button><button class="optionCancel">' + g('lang').option['013'] + '</button></div>';
   gE('.hvAAShowDrop', optionBox).onclick = function () {
     var drop = getValue('drop', true) || new Object();
@@ -649,6 +655,10 @@ function optionButton() { //配置
       }
     }
     this.onclick = null;
+  }
+  gE('.hvAAFeedback', optionBox).onclick = function (e) {
+    e.preventDefault();
+    if (confirm()) window.open(e.target.href);
   }
   gE('.reMonitor', optionBox).onclick = function () {
     if (confirm(g('lang').all[1])) {
@@ -1408,7 +1418,7 @@ function autoUseDeSkill() { //自动施法De技能
   }
 }
 function autoAttack() { //自动打怪
-  if (g('option').spiritStance && g('oc') >= parseInt(g('option').spiritStance_oc) && g('sp') >= 10 && !gE('#ckey_spirit[src*="spirit_a"]')) {
+  if (g('option').spiritStance && g('oc') >= parseInt(g('option').spiritStance_oc) && g('sp') >= parseInt(g('option').spiritStance_sp) && !gE('#ckey_spirit[src*="spirit_a"]')) {
     gE('#ckey_spirit').click();
     g('end', true);
     return;
