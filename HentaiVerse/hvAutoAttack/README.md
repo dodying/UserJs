@@ -47,6 +47,11 @@
 
 #### Latest
 
+##### 2.61
+
+1. 针对Spirit Stance，增加对于SP的判断
+
+   For Spirit Stance, increase the judgment for the SP
 
 ##### 2.60
 
