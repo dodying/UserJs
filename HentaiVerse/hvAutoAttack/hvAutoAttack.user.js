@@ -22,7 +22,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.61
+// @version      2.61a
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -658,7 +658,7 @@ function optionButton() { //配置
   }
   gE('.hvAAFeedback', optionBox).onclick = function (e) {
     e.preventDefault();
-    if (confirm()) window.open(e.target.href);
+    if (confirm(g('lang').all[16])) window.open(e.target.href);
   }
   gE('.reMonitor', optionBox).onclick = function () {
     if (confirm(g('lang').all[1])) {
@@ -806,7 +806,7 @@ function riddleAlert() { //答题警报
       };
     }
   }
-  alert(1);
+  //alert(1);
   function riddleSubmit(answer) {
     gE('#riddlemaster').value = answer;
     gE('#riddleform').submit();
@@ -1086,7 +1086,6 @@ function autoUseGem() { //自动使用宝石
 }
 function deadSoon() { //自动回血回魔
   if (g('mp') < g('option').mp2) { //自动回魔
-    gE('#quickbar').style.backgroundColor = 'blue';
     if (gE('.bti3>div[onmouseover*="Mana Potion"]')) {
       gE('.bti3>div[onmouseover*="Mana Potion"]').click();
       g('end', true);
@@ -1098,7 +1097,6 @@ function deadSoon() { //自动回血回魔
     }
   }
   if (g('sp') < g('option').sp2) { //自动回精
-    gE('#quickbar').style.backgroundColor = 'green';
     if (gE('.bti3>div[onmouseover*="Spirit Potion"]')) {
       gE('.bti3>div[onmouseover*="Spirit Potion"]').click();
       g('end', true);
@@ -1110,7 +1108,6 @@ function deadSoon() { //自动回血回魔
     }
   }
   if (g('hp') <= g('option').hp2) { //自动回血
-    if (!gE('.cwb2[src*="barsilver"]')) gE('#quickbar').style.backgroundColor = 'red';
     if (isOn('311')) {
       gE('311', 'id').click();
       g('end', true);
@@ -1242,26 +1239,36 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
       'img': 'absorb',
     }
   };
+  var name2Skill = {
+    'Protection': 'Pr',
+    'Spark of Life': 'SL',
+    'Spirit Shield': 'SS',
+    'Hastened': 'Ha',
+    'Arcane Focus': 'AF',
+    'Heartseeker': 'He',
+    'Regen': 'Re',
+    'Shadow Veil': 'SV'
+  };
   if (gE('div.bte>img[src*="channeling"]')) {
     var buff = gE('div.bte>img', 'all');
     if (buff.length > 0) {
       for (var n = 0; n < buff.length; n++) {
-        var spellName = buff[n].getAttribute('onmouseover').match(/\('(.*?)'/) [1];
+        var spellName = buff[n].getAttribute('onmouseover').replace(/battle.set_infopane_effect\(\'(.*?)\'.*/, '$1');
         if (spellName === 'Absorbing Ward') continue;
-        var buffLastTime = parseInt(buff[n].getAttribute('onmouseover').match(/ (\d+)\)/) [1]);
+        var buffLastTime = parseInt(buff[n].getAttribute('onmouseover').replace(/.*\'\,(.*?)\)/g, '$1'));
         if (buffLastTime <= g('option').channelReBuff) {
           if (spellName === 'Cloak of the Fallen' && g('option') ['channelSkill_' + 'SL'] && !gE('div.bte>img[src*="sparklife"]') && isOn('422')) {
             gE('422', 'id').click();
             g('end', true);
             return;
           }
-          for (var i in skillLib) {
-            if (spellName === skillLib[i].name && isOn(skillLib[i].id)) {
-              gE(skillLib[i].id, 'id').click();
-              g('end', true);
-              return;
-            }
+          if (spellName in name2Skill && isOn(skillLib[name2Skill[spellName]].id)) {
+            gE(skillLib[name2Skill[spellName]].id, 'id').click();
+            g('end', true);
+            return;
           }
+        } else {
+          break;
         }
       }
       for (var i in skillLib) {
