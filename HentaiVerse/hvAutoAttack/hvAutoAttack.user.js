@@ -57,6 +57,7 @@
     window.open('https://greasyfork.org/zh-CN/forum/discussion/comment/27107/#Comment_27107');
     return;
   }
+  //g('debug', true);
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
   } else if (gE('#togpane_log')) { //战斗中
@@ -806,7 +807,7 @@ function riddleAlert() { //答题警报
       };
     }
   }
-  alert(1);
+  if (g('debug')) alert(1);
   function riddleSubmit(answer) {
     gE('#riddlemaster').value = answer;
     gE('#riddleform').submit();
