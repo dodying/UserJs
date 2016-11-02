@@ -22,7 +22,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.61a
+// @version      2.61b
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -806,7 +806,7 @@ function riddleAlert() { //答题警报
       };
     }
   }
-  //alert(1);
+  alert(1);
   function riddleSubmit(answer) {
     gE('#riddlemaster').value = answer;
     gE('#riddleform').submit();
@@ -1256,6 +1256,7 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
         var spellName = buff[n].getAttribute('onmouseover').replace(/battle.set_infopane_effect\(\'(.*?)\'.*/, '$1');
         if (spellName === 'Absorbing Ward') continue;
         var buffLastTime = parseInt(buff[n].getAttribute('onmouseover').replace(/.*\'\,(.*?)\)/g, '$1'));
+        alert(spellName + '\n' + buffLastTime);
         if (buffLastTime <= g('option').channelReBuff) {
           if (spellName === 'Cloak of the Fallen' && g('option') ['channelSkill_' + 'SL'] && !gE('div.bte>img[src*="sparklife"]') && isOn('422')) {
             gE('422', 'id').click();
@@ -1271,6 +1272,7 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
           break;
         }
       }
+    } else {
       for (var i in skillLib) {
         if (g('option') ['channelSkill_' + i] && !gE('div.bte>img[src*="' + skillLib[i].img + '"]') && isOn(skillLib[i].id)) {
           gE(skillLib[i].id, 'id').click();
