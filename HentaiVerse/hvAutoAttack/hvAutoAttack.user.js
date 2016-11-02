@@ -22,7 +22,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.61b
+// @version      2.61c
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -56,8 +56,8 @@
   if (gE('.f2rb') && confirm(g('lang').all[5])) {
     window.open('https://greasyfork.org/zh-CN/forum/discussion/comment/27107/#Comment_27107');
     return;
-  }
-  //g('debug', true);
+  } //g('debug', true);
+
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
   } else if (gE('#togpane_log')) { //战斗中
@@ -1255,9 +1255,8 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
     if (buff.length > 0) {
       for (var n = 0; n < buff.length; n++) {
         var spellName = buff[n].getAttribute('onmouseover').replace(/battle.set_infopane_effect\(\'(.*?)\'.*/, '$1');
-        if (spellName === 'Absorbing Ward') continue;
         var buffLastTime = parseInt(buff[n].getAttribute('onmouseover').replace(/.*\'\,(.*?)\)/g, '$1'));
-        alert(spellName + '\n' + buffLastTime);
+        if (isNaN(buffLastTime)) continue;
         if (buffLastTime <= g('option').channelReBuff) {
           if (spellName === 'Cloak of the Fallen' && g('option') ['channelSkill_' + 'SL'] && !gE('div.bte>img[src*="sparklife"]') && isOn('422')) {
             gE('422', 'id').click();
@@ -1273,13 +1272,12 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
           break;
         }
       }
-    } else {
-      for (var i in skillLib) {
-        if (g('option') ['channelSkill_' + i] && !gE('div.bte>img[src*="' + skillLib[i].img + '"]') && isOn(skillLib[i].id)) {
-          gE(skillLib[i].id, 'id').click();
-          g('end', true);
-          return;
-        }
+    }
+    for (var i in skillLib) {
+      if (g('option') ['channelSkill_' + i] && !gE('div.bte>img[src*="' + skillLib[i].img + '"]') && isOn(skillLib[i].id)) {
+        gE(skillLib[i].id, 'id').click();
+        g('end', true);
+        return;
       }
     }
   } else {
