@@ -22,7 +22,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.62
+// @version      2.62a
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -288,7 +288,7 @@ function langPack(lang) { //语言包
       ],
       notification: {
         win: {
-          tilie: '胜利',
+          title: '胜利',
           text: '游戏胜利\n页面将在3秒后刷新'
         },
         fail: {
@@ -449,7 +449,7 @@ function langPack(lang) { //语言包
       ],
       notification: {
         win: {
-          tilie: '勝利',
+          title: '勝利',
           text: '遊戲勝利\n頁面將在3秒後刷新'
         },
         fail: {
@@ -610,7 +610,7 @@ function langPack(lang) { //语言包
       ],
       notification: {
         win: {
-          tilie: 'Victory',
+          title: 'Victory',
           text: 'You\'re Victory.\nThe page will refresh in 3 seconds.'
         },
         fail: {
@@ -1624,10 +1624,10 @@ function objSort(obj) {
   return objNew;
 }
 function setNotice(title, text, time) { //桌面通知
-  if (g('option').notification && window.Notification && Notification.permission !== 'denied') {
-    Notification.requestPermission(function (status) { // 请求权限
+  if (window.Notification && Notification.permission !== 'denied') {
+    Notification.requestPermission(function (status) {
+      if (!g('option').notification) return;
       if (status === 'granted') {
-        // 弹出一个通知
         var n = new Notification(title, {
           body: text
         });
