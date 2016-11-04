@@ -57,7 +57,6 @@
     window.open('https://greasyfork.org/zh-CN/forum/discussion/comment/27107/#Comment_27107');
     return;
   }
-  g('debug', true);
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
   } else if (gE('#togpane_log')) { //战斗中
@@ -67,8 +66,6 @@
     if (g('option').reloader) reloader();
     main();
   } else { //非战斗
-    setAlert('Riddle', 'loop');
-    setNotice(g('lang').notification.riddle.title, g('lang').notification.riddle.text, 10);
     delValue(2);
     quickSite();
     if (/^\?s=Battle&ss=ar/.test(location.search) && g('option').autoArena && (!g('option').stamina || parseInt(gE('.fd4>div').innerHTML.match(/\d+/) [0]) > parseInt(g('option').staminaValue))) {
@@ -886,7 +883,6 @@ function riddleAlert() { //答题警报
       };
     }
   }
-  if (g('debug')) alert(1);
   function riddleSubmit(answer) {
     gE('#riddlemaster').value = answer;
     gE('#riddleform').submit();
