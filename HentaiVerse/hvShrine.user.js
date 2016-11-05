@@ -6,15 +6,17 @@
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @include     http://hentaiverse.org/?s=Bazaar&ss=ss
-// @version     1
+// @version     1.01
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
-var id = document.querySelector('.idp').getAttribute('id').replace('item_pane', '');
-if (id < 30000) {
-  xhr(id, '0');
-} else {
-  /*
+main();
+function main() {
+  var id = document.querySelector('.idp').getAttribute('id').replace('item_pane', '');
+  if (id < 30000) {
+    xhr(id, '0');
+  } else {
+    /*
   1 One-Handed
   2 Two-Handed
   3 Staffs
@@ -23,7 +25,8 @@ if (id < 30000) {
   6 Light Armor
   7 Heavy Armor
   */
-  xhr(id, '5');
+    xhr(id, '5');
+  }
 }
 function xhr(id, reward) {
   var xhr = new XMLHttpRequest();
@@ -34,11 +37,17 @@ function xhr(id, reward) {
   xhr.send(parm);
   xhr.onload = function (e) {
     var data = e.target.response;
-    var messagebox = data.querySelector('#messagebox');
-    messagebox.innerHTML = messagebox.innerHTML.replace(/Exquisite/g, '5精致的').replace(/Magnificent/g, '6华丽的').replace(/Legendary/g, '7传奇的').replace(/Peerless/g, '8无双的');
-    document.body.appendChild(messagebox);
-    setTimeout(function () {
-      location = location.href;
-    }, 1000);
+    var messageBoxNew = data.querySelector('#messagebox');
+    messageBoxNew.innerHTML = messageBoxNew.innerHTML.replace(/Exquisite/g, '5精致的').replace(/Magnificent/g, '6华丽的').replace(/Legendary/g, '7传奇的').replace(/Peerless/g, '8无双的');
+    if (document.querySelector('#messagebox')) {
+      var messageBox = document.querySelector('#messagebox');
+      messageBox.parentNode.replaceChild(messageBoxNew, messageBox);
+    } else {
+      document.body.appendChild(messageBoxNew);
+    }
+    var itemBoxNew = data.querySelector('#item_pane');
+    var itemBox = document.querySelector('#item_pane');
+    itemBox.parentNode.replaceChild(itemBoxNew, itemBox);
+    if (document.querySelector('.idp')) main();
   }
 }
