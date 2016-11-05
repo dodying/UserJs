@@ -7,18 +7,21 @@
 // @include     https://btdb.in/*
 // @include     http://www.javlibrary.com/*
 // @include     http://www.dmm.co.jp/*
-// @include     https://www.google.co.jp/search?q=*&status=h
-// @include     https://www.baidu.com/baidu?wd=*&status=h
-// @include     https://www.av28.com/*
+// @include     https://www.google.co.jp/*q=*
+// @include     https://www.baidu.com/*wd=*
 // @include     http://javpop.com/*
 // @include     http://www.abase.me/*
+// @include     http://www.jav007.com/*
+// @include     http://avpapa.co/*
+// @include     http://av99.us/*
+// @include     https://www.javbus.com/*
 // include     *.tokyo-hot.com/*
 // include     *.caribbeancom.com/*
 // include     *.1000giri.net/*
 // include     *.10musume.com/*
 // include     *.heyzo.com/*
 // include     *.1pondo.tv/*
-// @version     1.06
+// @version     1.06a
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @author      Dodying
@@ -39,13 +42,15 @@
       text: 选择器-要标记的文本,
       img: 选择器-要标记的图片,
       time: 选择器-发布日期,
-      code: 选择器-番号
+      code: 选择器-番号,
+      delay: 布尔，是否要按键后在启用脚本
     },
     */
+    /*
     'btdb.in': {
       name: 'BTDB',
       fav: 'https://btdb.in/favicon.ico',
-      search: 'https://btdb.in/q/{searchTerms}/',
+      search: 'https://btdb.in/q/{searchTerms}/?sort=size',
       text: 'h1.torrent-name,.file-name,.item-title>a',
       code: '#search-input'
     },
@@ -56,15 +61,25 @@
       text: 'h3,.file',
       code: '.form-control:visible'
     },
+    */
     'www.javlibrary.com': {
       name: 'JAVLibrary',
       fav: 'http://www.javlibrary.com/favicon.ico',
       search: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
-      text: '.text:lt(2),.id,.video>a:not(:has(img))',
+      text: '.text:lt(2),.id,.title,.video>a:not(:has(img)),.cast>.star>a',
       img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a',
       time: '.text:eq(2)',
       code: '#video_id .text'
     },
+    'www.javbus.com': {
+      name: 'JavBus',
+      fav: 'https://www.javbus.com/favicon.ico',
+      search: 'https://www.javbus.com/{searchTerms}',
+      text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,.item-tag+date',
+      time: '.info>p:eq(1)',
+      code: '.info>p>span:eq(1)'
+    },
+    /*
     'www.dmm.co.jp': {
       name: 'DMM',
       fav: 'http://www.dmm.co.jp/favicon.ico',
@@ -79,25 +94,18 @@
     'www.google.co.jp': {
       name: 'Google',
       fav: 'https://www.google.co.jp/images/branding/product/ico/googleg_lodp.ico',
-      search: 'https://www.google.co.jp/search?q={searchTerms}&status=h',
+      search: 'https://www.google.co.jp/search?q={searchTerms}',
       text: 'h3.r>a,span.st',
-      code: '#lst-ib'
+      code: '#lst-ib',
+      delay: true
     },
     'www.baidu.com': {
       name: 'Baidu',
       fav: 'https://www.baidu.com/img/baidu.svg',
-      search: 'https://www.baidu.com/baidu?wd={searchTerms}&status=h',
+      search: 'https://www.baidu.com/baidu?wd={searchTerms}',
       text: 'h3.t>a,.c-abstract',
-      code: '#kw'
-    },
-    'www.av28.com': {
-      name: 'AV28',
-      fav: 'https://cdn3.iconfinder.com/data/icons/block/32/letter-24.png',
-      search: 'https://www.av28.com/cn/search/{searchTerms}',
-      text: '.item>div>a,.item>div>span,.row-fluid>h3,.info>p>span',
-      img: '.img,.bigImage>img,.sample-box img',
-      time: '.info>p:eq(1)',
-      code: '.info>p>.header+span'
+      code: '#kw',
+      delay: true
     },
     'javpop.com': {
       name: 'JavPOP',
@@ -106,9 +114,10 @@
       text: '.thumb_post a:nth-child(2),h1',
       img: '.thumb_post img,.box-b img',
       code: function () {
-        return $('h1').text().replace(/\[(.*?)\].*/, '$1');
+        return $('h1').text().match(/\[(.*?)\]/) [1];
       }
     },
+    */
     'www.abase.me': {
       name: 'ABase A基地',
       fav: 'http://www.abase.me/favicon.ico',
@@ -117,6 +126,36 @@
       img: '.col-md-9 img',
       time: '.col-md-3 strong:eq(1)',
       code: '.col-md-3 strong:eq(0)'
+    },
+    'www.jav007.com': {
+      name: 'Jav007',
+      fav: 'https://cdn2.iconfinder.com/data/icons/smartphone-interface-ver-2/100/smartphone-37-24.png',
+      search: 'http://www.jav007.com/searchpage.php?a=1&code={searchTerms}',
+      text: '.viewimfor>li:eq(8),.view-code',
+      img: '.photo,.cell>a>img',
+      time: '.viewimfor>li:eq(1)',
+      code: '.viewimfor>li:eq(8)'
+    },
+    'avpapa.co': {
+      name: 'Avpapa-可在线观看',
+      fav: 'http://avpapa.co/assets/favicon-cce4d9c4feec996b085c0baf9dd0fa0e9771333225ff0da8a2105e1c292f507e.ico',
+      search: 'http://avpapa.co/search?q={searchTerms}',
+      text: '.tit,h4',
+      img: '.thumbs>a>img,#click_to_show>img',
+      code: function () {
+        return $('h4').text().match(/^\[(.*?)\]/) [1];
+      }
+    },
+    'av99.us': {
+      name: 'AV99免費A片-可在线观看',
+      fav: 'http://av99.us/favicon.ico',
+      search: 'http://tw.search.yahoo.com/search?p={searchTerms}&vs=av99.us',
+      text: 'h1,.list>li>a,.dd>a,.fl>a>span',
+      img: '.pic>a>img',
+      time: '.viewimfor>li:eq(1)',
+      code: function () {
+        return $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/) [1];
+      }
     },
   };
   var imgLib = {
@@ -172,8 +211,18 @@
       color: 'gray'
     }
   ];
-  init();
-  markAdded();
+  if (linkLib[location.host].delay) {
+    $(window).keydown(function (e) {
+      if (e.keyCode === 65 && e.shiftKey) {
+        init();
+        markAdded();
+        $(window).off('keydown');
+      }
+    });
+  } else {
+    init();
+    markAdded();
+  }
   function init() {
     $('<style></style>').appendTo('head').html('' +
     '.hBanner{position:fixed;background-color:white;z-index:999999;}' +
@@ -186,7 +235,7 @@
     '.links>*,.addCode>*{display:none;}' +
     '.links>*:nth-child(1),.addCode>*:nth-child(1){display:inline;}' +
     '.hasCode>a{margin:0 1px;display:none;}' +
-    '.showTable{background-color:white;position:absolute;top:60px;}' +
+    '.showTable{background-color:white;position:absolute;top:60px;z-index:999999;}' +
     '.showTable>table{border-collapse:collapse;}' +
     '.showTable>table>thead>tr{position:fixed;top:40px;}' +
     '.showTable td{border:1px solid black;}' +
@@ -273,14 +322,14 @@
         addValue($(this).val());
       }).appendTo('.addCode');
     }
-    $('.links,.addCode').on({
+    $('.links>img,.addCode>img').on({
       mouseover: function () {
-        $(this).children(':gt(0)').show();
+        $(this).parent().children().show();
       },
       mouseout: function () {
-        $(this).children(':gt(0)').hide();
+        $(this).parent().children(':gt(0)').hide();
       }
-    })
+    });
     $(window).keydown(function (e) {
       if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
         var code = (e.shiftKey) ? prompt('请输入番号', getCode())  : getCode();
@@ -371,22 +420,17 @@
     var lib = GM_getValue('lib', null) || new Object();
     var code;
     for (var i = 0; i < codeArr.length; i++) {
-      code = codeArr[i];
-      if (lib[code] === undefined) {
-        lib[code] = {
-          mark: mark
-        };
-      } else {
-        lib[code].mark = mark;
-      }
+      lib[codeArr[i]].mark = mark;
     }
     GM_setValue('lib', lib);
   }
   function showValue() {
     var lib = GM_getValue('lib', null) || new Object();
-    var _html = '<table class="tablesorter"><thead><tr><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>';
+    var _html = '<table class="tablesorter"><thead><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>';
+    var num = 0;
     for (var i in lib) {
-      _html += '<tr><td>' + lib[i].mark + '</td><td><img src="' + markLib[lib[i].mark].img + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].time || '') + '</td></tr>';
+      num++;
+      _html += '<tr><td>' + num + '</td><td>' + lib[i].mark + '</td><td><img src="' + markLib[lib[i].mark].img + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].time || '') + '</td></tr>';
     }
     _html += '</tbody></table>';
     $('<div class="showTable"></div>').html(_html).appendTo('body');
@@ -403,12 +447,17 @@
     var code;
     if (typeof linkLib[location.host].code === 'string') {
       var temp = $(linkLib[location.host].code);
-      code = ((temp[0].tagName === 'INPUT')) ? temp.val()  : temp.text();
+      if (temp.length > 0) {
+        code = (temp[0].tagName === 'INPUT') ? temp.val()  : temp.text();
+      } else {
+        code = '';
+      }
     } else if (typeof linkLib[location.host].code === 'function') {
       code = linkLib[location.host].code();
     } else {
       code = '';
     }
+    code = code.toUpperCase();
     $(window).data('code', code);
     return code;
   }
