@@ -4,8 +4,8 @@
 // @name:zh-CN  【小说】污客增强
 // @description 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 // @description:zh-CN  阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
-// @include     http://www.hbooker.com/chapter/book_chapter_detail?chapter_id=*
-// @version     1.036
+// @include     http://www.hbooker.com/chapter/book_chapter_detail/*
+// @version     1.037
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
