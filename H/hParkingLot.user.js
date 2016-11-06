@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name        hParkingLot-Rider
-// @name:zh-CN  【H】停车场-骑兵版
+// @name        hParkingLot
+// @name:zh-CN  【H】停车场
 // @namespace   https://github.com/dodying/Dodying-UserJs
-// @description 此为骑兵版，步兵版等待推出
+// @description 
 // @include     https://btso.pw/*
 // @include     https://btdb.in/*
 // @include     http://www.javlibrary.com/*
@@ -21,7 +21,7 @@
 // include     *.10musume.com/*
 // include     *.heyzo.com/*
 // include     *.1pondo.tv/*
-// @version     1.06a
+// @version     1.07
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @author      Dodying
@@ -75,7 +75,7 @@
       name: 'JavBus',
       fav: 'https://www.javbus.com/favicon.ico',
       search: 'https://www.javbus.com/{searchTerms}',
-      text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,.item-tag+date',
+      text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,date',
       time: '.info>p:eq(1)',
       code: '.info>p>span:eq(1)'
     },
@@ -171,49 +171,34 @@
       color: 'gray'
     },
     { //1
+      name: '有种子无配额',
+      img: 'https://cdn3.iconfinder.com/data/icons/math-physics/512/null-24.png',
+      color: 'gray'
+    },
+    { //2
       name: '下载中',
       img: 'https://cdn4.iconfinder.com/data/icons/education-bold-line-1/49/34-24.png',
       color: 'blue'
     },
-    { //2
-      name: '已出已下-骑兵',
+    { //3
+      name: '已下-骑兵',
       img: 'https://cdn3.iconfinder.com/data/icons/chess-8/512/horse-game-role-chess-24.png',
       color: 'green'
     },
-    { //3
-      name: '已出已下-步兵',
+    { //4
+      name: '已下-步兵',
       img: 'https://cdn3.iconfinder.com/data/icons/chess-8/154/chess-pawn-24.png',
       color: 'green'
     },
-    { //4
-      name: '已出已下已删-不喜欢的',
+    { //5
+      name: '已删-不喜欢的',
       img: 'https://cdn1.iconfinder.com/data/icons/lightly-icons/24/heart-broken-24.png',
       color: 'black'
     },
-    { //5
-      name: '女同',
-      img: 'https://cdn2.iconfinder.com/data/icons/gender-and-feminism-solid/100/lesbian-24.png',
-      color: 'pink'
-    },
-    { //6
-      name: '超过1年无资源',
-      img: 'https://cdn3.iconfinder.com/data/icons/transfers/100/239345-reload_time_delay-24.png',
-      color: 'red'
-    },
-    { //7
-      name: '无H-首次亮相',
-      img: 'https://cdn3.iconfinder.com/data/icons/social-messaging-productivity-5/128/new-label-24.png',
-      color: 'yellow'
-    },
-    { //8
-      name: '有种子无配额',
-      img: 'https://cdn3.iconfinder.com/data/icons/math-physics/512/null-24.png',
-      color: 'gray'
-    }
   ];
   if (linkLib[location.host].delay) {
     $(window).keydown(function (e) {
-      if (e.keyCode === 65 && e.shiftKey) {
+      if (e.keyCode === 65 && e.shiftKey) { //Shift+A
         init();
         markAdded();
         $(window).off('keydown');
@@ -384,6 +369,9 @@
         }
       }).removeAttr('realSrc');
     }
+    $(linkLib[location.host].text).html(function () {
+      return $(this).text();
+    });
   }
   function addValue(mark, code) { //可选参数code
     mark = parseInt(mark);
@@ -406,6 +394,8 @@
     if (!code) return;
     delete lib[code];
     GM_setValue('lib', lib);
+    undoMarkAdded();
+    markAdded();
   }
   function importValue() {
     var notice = '请输入车位\n';
@@ -414,15 +404,19 @@
     }
     var mark = prompt(notice);
     if (!mark) return;
+    mark = parseInt(mark);
     var codeArr = prompt('请输入车牌号，以|为分割');
     if (!codeArr) return;
     codeArr = codeArr.split('|');
     var lib = GM_getValue('lib', null) || new Object();
-    var code;
     for (var i = 0; i < codeArr.length; i++) {
-      lib[codeArr[i]].mark = mark;
+      lib[codeArr[i]] = {
+        mark: mark
+      };
     }
     GM_setValue('lib', lib);
+    undoMarkAdded();
+    markAdded();
   }
   function showValue() {
     var lib = GM_getValue('lib', null) || new Object();
