@@ -5,7 +5,7 @@
 // @description:zh-CN  
 // @include     http://www.javlibrary.com/*
 // @include     https://www.javbus.com/*
-// @version     1.00
+// @version     1.01
 // @grant       GM_setClipboard
 // @author      Dodying
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
@@ -23,7 +23,7 @@
       name: '.post-title',
       star: '.star>a',
       genre: '.genre>a',
-      score: '.score',
+      score: '.scores',
       length: '#video_length'
     },
     'www.javbus.com': {
@@ -53,11 +53,11 @@
   });
   var info = [
     $(rule.code).text(), //code
-    $(rule.name).text().replace(/(.*?) /, ''), //name
+    $(rule.name).text().replace(/(.*?) /, '').replace(/\n/g, ''), //name
     stars.join(' '), //star
     genres.join(' '), //genre
   ];
-  if ($(rule.score).length > 0) info.push($(rule.score).text().match(/[\d\.]+/) [0]), //score
+  if ($(rule.score).length > 0) info.push($(rule.score).text().match(/[\d\.]+/) [0]); //score
   info.push($(rule.length).text().match(/\d+/) [0]); //length
   document.onkeydown = function (e) {
     if (e.keyCode === 67) GM_setClipboard(info.join('\t'));
