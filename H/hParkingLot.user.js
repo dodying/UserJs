@@ -3,25 +3,33 @@
 // @name:zh-CN  【H】停车场
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description 
+// 种子站点
 // @include     https://btso.pw/*
 // @include     https://btdb.in/*
-// @include     http://www.javlibrary.com/*
+// 正规站点
 // @include     http://www.dmm.co.jp/*
+// @include     http://www.tokyo-hot.com/*
+// @include     http://cn.caribbeancom.com/*
+// @include     http://www.1pondo.tv/*
+// @include     http://www.heyzo.com/*
+// @include     http://cn.10musume.com/*
+// 搜索引擎
 // @include     https://www.google.co.jp/*q=*
 // @include     https://www.baidu.com/*wd=*
+// JAVLibrary
+// @include     http://www.javlibrary.com/*
+// @include     https://www.javbus.com/*
 // @include     http://javpop.com/*
 // @include     http://www.abase.me/*
 // @include     http://www.jav007.com/*
+// @include     https://avso.pw/*
+// @include     https://avmo.pw/*
+// 在线观看
 // @include     http://avpapa.co/*
 // @include     http://av99.us/*
-// @include     https://www.javbus.com/*
-// include     *.tokyo-hot.com/*
-// include     *.caribbeancom.com/*
-// include     *.1000giri.net/*
-// include     *.10musume.com/*
-// include     *.heyzo.com/*
-// include     *.1pondo.tv/*
-// @version     1.07
+// @include     http://www.doojav69.com/*
+// @include     http://bejav.me/*
+// @version     1.08
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @author      Dodying
@@ -33,9 +41,12 @@
 // @run-at      document-end
 // ==/UserScript==
 (function ($) {
+  var defaultImg = 'https://cdn2.iconfinder.com/data/icons/designers-and-developers-icon-set/32/image-24.png';
   var linkLib = {
     /*
     'example.com': {
+      on: 布尔，是否开启,
+      online: 布尔，是否在线播放,
       cn: 标识,
       fav: 网站，图标地址,
       search: 网站，搜索地址，搜索字样用{searchTerms}代替,
@@ -46,8 +57,9 @@
       delay: 布尔，是否要按键后在启用脚本
     },
     */
-    /*
+    // 种子站点
     'btdb.in': {
+      on: true,
       name: 'BTDB',
       fav: 'https://btdb.in/favicon.ico',
       search: 'https://btdb.in/q/{searchTerms}/?sort=size',
@@ -55,32 +67,16 @@
       code: '#search-input'
     },
     'btso.pw': {
+      on: false,
       name: 'BTSOW',
       fav: 'https://btso.pw/app/bts/View/img/favicon.ico',
       search: 'http://btso.pw/search/{searchTerms}/',
       text: 'h3,.file',
       code: '.form-control:visible'
     },
-    */
-    'www.javlibrary.com': {
-      name: 'JAVLibrary',
-      fav: 'http://www.javlibrary.com/favicon.ico',
-      search: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
-      text: '.text:lt(2),.id,.title,.video>a:not(:has(img)),.cast>.star>a',
-      img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a',
-      time: '.text:eq(2)',
-      code: '#video_id .text'
-    },
-    'www.javbus.com': {
-      name: 'JavBus',
-      fav: 'https://www.javbus.com/favicon.ico',
-      search: 'https://www.javbus.com/{searchTerms}',
-      text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,date',
-      time: '.info>p:eq(1)',
-      code: '.info>p>span:eq(1)'
-    },
-    /*
+    // 正规站点
     'www.dmm.co.jp': {
+      on: false,
       name: 'DMM',
       fav: 'http://www.dmm.co.jp/favicon.ico',
       search: 'http://www.dmm.co.jp/search/=/searchstr={searchTerms}',
@@ -91,7 +87,63 @@
         return prompt('请输入番号', $('.nw:contains(品番)+td').text());
       }
     },
+    'www.tokyo-hot.com': {
+      on: false,
+      name: 'Tokyo-Hot',
+      search: 'http://www.tokyo-hot.com/product/?q={searchTerms}',
+      text: '.actor,.info:eq(1)>dd:eq(0)',
+      img: '.rm>img,.popular img,.free img,.ranking img',
+      time: '.info:eq(1)>dd:eq(0)',
+      code: '.info:eq(1)>dd:eq(2)'
+    },
+    'cn.caribbeancom.com': {
+      on: false,
+      name: '加勒比',
+      fav: 'http://cn.caribbeancom.com/favicon.ico',
+      search: 'http://cn.caribbeancom.com/moviepages/{searchTerms}/index.html',
+      img: 'img[itemprop=thumbnail]',
+      time: 'dd[itemprop=uploadDate]',
+      code: function () {
+        return location.pathname.match(/[\d\-]+/) [0];
+      }
+    },
+    'www.1pondo.tv': {
+      on: false,
+      name: '一本道',
+      fav: 'http://www.1pondo.tv/images/favicons/favicon-16.png',
+      search: 'http://www.1pondo.tv/movies/{searchTerms}/',
+      img: '.figure>img,.ng-scope>a>img,img.ng-scope',
+      time: 'dd.ng-binding:eq(1)',
+      code: function () {
+        return location.pathname.match(/[\d\_]+/) [0];
+      },
+      delay: true
+    },
+    'www.heyzo.com': {
+      on: false,
+      name: 'HEYZO',
+      fav: 'http://www.heyzo.com/images/favicon.ico',
+      search: 'http://www.heyzo.com/search/{searchTerms}/1.html?sort=pop',
+      //img: '.soundplay>img,.sample-images img,.relateive-movie img,.ranking-img>img,.withInfo>img,.new-movies>img,.actor>img',
+      time: '.dataInfo:eq(0)',
+      code: function () {
+        return 'HEYZO-' + location.pathname.match(/\d+/) [0];
+      }
+    },
+    'cn.10musume.com': {
+      on: false,
+      name: '10musume.com',
+      fav: 'http://cn.10musume.com/favicon.ico',
+      search: 'http://cn.10musume.com/cn/moviepages/{searchTerms}/index.html',
+      img: 'img',
+      time: '#movie-table1:eq(5)',
+      code: function () {
+        return location.pathname.match(/[\d\_]+/) [0];
+      }
+    },
+    // 搜索引擎
     'www.google.co.jp': {
+      on: false,
       name: 'Google',
       fav: 'https://www.google.co.jp/images/branding/product/ico/googleg_lodp.ico',
       search: 'https://www.google.co.jp/search?q={searchTerms}',
@@ -100,6 +152,7 @@
       delay: true
     },
     'www.baidu.com': {
+      on: false,
       name: 'Baidu',
       fav: 'https://www.baidu.com/img/baidu.svg',
       search: 'https://www.baidu.com/baidu?wd={searchTerms}',
@@ -107,7 +160,28 @@
       code: '#kw',
       delay: true
     },
+    // JAVLibrary
+    'www.javlibrary.com': {
+      on: true,
+      name: 'JAVLibrary',
+      fav: 'http://www.javlibrary.com/favicon.ico',
+      search: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
+      text: '.text:lt(2),.id,.title,.video>a:not(:has(img)),.cast>.star>a',
+      img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a',
+      time: '.text:eq(2)',
+      code: '#video_id .text'
+    },
+    'www.javbus.com': {
+      on: true,
+      name: 'JavBus',
+      fav: 'https://www.javbus.com/favicon.ico',
+      search: 'https://www.javbus.com/{searchTerms}',
+      text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,date',
+      time: '.info>p:eq(1)',
+      code: '.info>p>span:eq(1)'
+    },
     'javpop.com': {
+      on: false,
       name: 'JavPOP',
       fav: 'http://javpop.com/favicon.ico',
       search: 'http://javpop.com/index.php?s={searchTerms}',
@@ -117,8 +191,8 @@
         return $('h1').text().match(/\[(.*?)\]/) [1];
       }
     },
-    */
     'www.abase.me': {
+      on: true,
       name: 'ABase A基地',
       fav: 'http://www.abase.me/favicon.ico',
       search: 'http://www.abase.me/{searchTerms}',
@@ -128,6 +202,7 @@
       code: '.col-md-3 strong:eq(0)'
     },
     'www.jav007.com': {
+      on: true,
       name: 'Jav007',
       fav: 'https://cdn2.iconfinder.com/data/icons/smartphone-interface-ver-2/100/smartphone-37-24.png',
       search: 'http://www.jav007.com/searchpage.php?a=1&code={searchTerms}',
@@ -136,8 +211,31 @@
       time: '.viewimfor>li:eq(1)',
       code: '.viewimfor>li:eq(8)'
     },
+    'avso.pw': {
+      on: false,
+      name: 'AVSOX',
+      fav: 'https://avso.pw/app/javu/View/img/favicon.ico',
+      search: 'https://avso.pw/cn/search/{searchTerms}',
+      text: 'date,h3',
+      img: '.photo-frame>img,.bigImage>img',
+      time: '.info>p:eq(1)',
+      code: '.info>p>span:eq(1)'
+    },
+    'avmo.pw': {
+      on: false,
+      name: 'AVMOO',
+      fav: 'https://avmo.pw/app/jav/View/img/favicon.ico',
+      search: 'https://avmo.pw/cn/search/{searchTerms}',
+      text: 'date,h3',
+      img: '.photo-frame>img,.bigImage>img',
+      time: '.info>p:eq(1)',
+      code: '.info>p>span:eq(1)'
+    },
+    // 在线观看
     'avpapa.co': {
-      name: 'Avpapa-可在线观看',
+      on: true,
+      online: true,
+      name: 'Avpapa',
       fav: 'http://avpapa.co/assets/favicon-cce4d9c4feec996b085c0baf9dd0fa0e9771333225ff0da8a2105e1c292f507e.ico',
       search: 'http://avpapa.co/search?q={searchTerms}',
       text: '.tit,h4',
@@ -147,7 +245,9 @@
       }
     },
     'av99.us': {
-      name: 'AV99免費A片-可在线观看',
+      on: true,
+      online: true,
+      name: 'AV99免費A片',
       fav: 'http://av99.us/favicon.ico',
       search: 'http://tw.search.yahoo.com/search?p={searchTerms}&vs=av99.us',
       text: 'h1,.list>li>a,.dd>a,.fl>a>span',
@@ -155,6 +255,28 @@
       time: '.viewimfor>li:eq(1)',
       code: function () {
         return $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/) [1];
+      }
+    },
+    'www.doojav69.com': {
+      on: true,
+      online: true,
+      name: 'Doojav69',
+      fav: 'http://www.doojav69.com/wp-content/uploads/2016/02/favicon-2.ico',
+      search: 'http://www.doojav69.com/?s={searchTerms}',
+      text: 'h2.entry-title>a,h1.entry-title',
+      code: function () {
+        return $('h1.entry-title').text().match(/(.*?) (.*?)/) [1];
+      }
+    },
+    'bejav.me': {
+      on: true,
+      online: true,
+      name: 'BeJav.Me',
+      search: 'http://bejav.me/search/{searchTerms}/',
+      text: '.name>a,.breadcrumb_last,.body>ul>li>a',
+      img: '.img-responsive,.thumbnail>img,.body>ul>li>img',
+      code: function () {
+        return prompt('请输入番号', $('.breadcrumb_last').text());
       }
     },
   };
@@ -217,8 +339,9 @@
     '.switcher>span{position:absolute;left:6px;top:2px;height:2px;color:#26CA28;font-size:16px;text-transform:Capitalize;}' +
     '.links,.addCode,.delCode,.importCode,.showCode{width:24px;height:24px;}' +
     '.links img,.addCode img{background-color:white;}' +
-    '.links>*,.addCode>*{display:none;}' +
+    '.links>*,.addCode>*{display:none;width:24px;height:24px;}' +
     '.links>*:nth-child(1),.addCode>*:nth-child(1){display:inline;}' +
+    '.links>.avOnline{border:solid 1px black;}' +
     '.hasCode>a{margin:0 1px;display:none;}' +
     '.showTable{background-color:white;position:absolute;top:60px;z-index:999999;}' +
     '.showTable>table{border-collapse:collapse;}' +
@@ -279,13 +402,27 @@
     $('<div class="links"></div>').html(function () {
       var _html = '';
       for (var i in linkLib) {
-        _html += '<img src="' + linkLib[i].fav + '" width=24 url="' + linkLib[i].search + '"title="' + linkLib[i].name + '"></img>';
+        if (!linkLib[i].on) continue;
+        _html += '<img ';
+        if (linkLib[i].online) _html += 'class="avOnline"';
+        _html += 'src="' + (linkLib[i].fav || defaultImg) + '"url="' + linkLib[i].search + '"title="' + linkLib[i].name + '"></img>';
       }
       return _html;
     }).click(function (e) {
       var code = getCode();
       window.open($(e.target).attr('url').replace('{searchTerms}', code));
     }).appendTo('.hBanner');
+    $('.links>.avOnline').on({
+      mouseover: function () {
+        $(this).attr({
+          rawSrc: this.src,
+          src: 'https://cdn4.iconfinder.com/data/icons/iconsimple-logotypes/512/youtube-24.png'
+        });
+      },
+      mouseout: function () {
+        $(this).attr('src', $(this).attr('rawSrc'));
+      }
+    });
     $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + imgLib.add + '"></img>').click(function () {
       addValue(GM_getValue('lastMark', 0));
     }).appendTo('.hBanner');
@@ -303,7 +440,7 @@
     }).appendTo('.hBanner');
     $('<div class="hasCode">(已标记)</div>').appendTo('.hBanner');
     for (var i = 0; i < markLib.length; i++) {
-      $('<img src="' + markLib[i].img + '"title="' + markLib[i].name + '"></img>').val(i).click(function () {
+      $('<img src="' + markLib[i].img + '"title="' + i + '|' + markLib[i].name + '"></img>').val(i).click(function () {
         addValue($(this).val());
       }).appendTo('.addCode');
     }
@@ -316,10 +453,12 @@
       }
     });
     $(window).keydown(function (e) {
-      if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+      if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) { //0-9
         var code = (e.shiftKey) ? prompt('请输入番号', getCode())  : getCode();
         if (!code) return;
         addValue(String.fromCharCode(e.keyCode), code);
+      } else if (e.keyCode === 66 && e.shiftKey) { //Shift+B
+        addValue(GM_getValue('lastMark', 0));
       }
     });
   }
@@ -329,7 +468,7 @@
     if (!lib) return;
     if (linkLib[location.host].img) {
       $(linkLib[location.host].img).removeAttr('onerror').attr({
-        realSrc: function () {
+        rawSrc: function () {
           return $(this).attr('src');
         },
         src: function () {
@@ -346,18 +485,20 @@
         }
       });
     }
-    $(linkLib[location.host].text).html(function () {
-      var keyword;
-      var _html = $(this).text();
-      for (var i in lib) {
-        keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi');
-        if (keyword.test(_html)) {
-          if ($('.' + i).length === 0) $('<a target="_blank"></a>').addClass(i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
-          _html = _html.replace(keyword, '<span style="background-color:' + markLib[lib[i].mark].color + ';">' + i + '</span>');
+    if (linkLib[location.host].text) {
+      $(linkLib[location.host].text).html(function () {
+        var keyword;
+        var _html = $(this).text();
+        for (var i in lib) {
+          keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi');
+          if (keyword.test(_html)) {
+            if ($('.' + i).length === 0) $('<a target="_blank"></a>').addClass(i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
+            _html = _html.replace(keyword, '<span style="background-color:' + markLib[lib[i].mark].color + ';">' + i + '</span>');
+          }
         }
-      }
-      return _html;
-    });
+        return _html;
+      });
+    }
   }
   function undoMarkAdded() {
     var lib = GM_getValue('lib', null);
@@ -365,9 +506,9 @@
     if (linkLib[location.host].img) {
       $(linkLib[location.host].img).attr({
         src: function () {
-          return $(this).attr('realSrc');
+          return $(this).attr('rawSrc');
         }
-      }).removeAttr('realSrc');
+      }).removeAttr('rawSrc');
     }
     $(linkLib[location.host].text).html(function () {
       return $(this).text();
@@ -375,6 +516,10 @@
   }
   function addValue(mark, code) { //可选参数code
     mark = parseInt(mark);
+    if (mark >= markLib.length) {
+      alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
+      return;
+    }
     var lib = GM_getValue('lib', null) || new Object();
     var code = code || getCode();
     if (!code) return;
@@ -402,8 +547,11 @@
     for (var i = 0; i < markLib.length; i++) {
       notice += i + markLib[i].name + '\n';
     }
-    var mark = prompt(notice);
-    if (!mark) return;
+    var mark = parseInt(prompt(notice));
+    if (isNaN(mark) || mark >= markLib.length) {
+      alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
+      return;
+    }
     mark = parseInt(mark);
     var codeArr = prompt('请输入车牌号，以|为分割');
     if (!codeArr) return;
