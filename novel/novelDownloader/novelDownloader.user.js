@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.39.114+332
+// @version     1.39.114a+332
 // @connect     read.qidian.com
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
@@ -753,7 +753,7 @@ function init() {
     //////////////////////////////////////////////////轻小说
     addIRule('www.wenku8.com', '轻小说文库', '#title', '.css>tbody>tr>td>a');
     addCRule('www.wenku8.com', '#title', '#content', 0, 1);
-    addIRule('book.sfacg.com', 'SF轻小说', 'h1', '.list_Content>volumeitem>li>a', '.list_Content>volumeitem>li:has(span:contains(VIP))>a');
+    addIRule('book.sfacg.com', 'SF轻小说', 'h1', '.catalog-list>ul>li>a', '.catalog-list>ul>li>a:has(.icn_vip)');
     addCRule('book.sfacg.com', '.list_menu_title', '#ChapterBody');
     addIRule('xs.dmzj.com', '动漫之家', '.novel_cover_text>ol>li>a>h1', '.download_rtx>ul>li>a');
     addCRule('xs.dmzj.com', 'h1', '#novel_contents');
