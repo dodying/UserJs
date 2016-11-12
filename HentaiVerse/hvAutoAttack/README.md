@@ -47,6 +47,16 @@
 
 #### Latest
 
+##### 2.63
+
+1. 增加暂停热键
+
+   Add a pause hotkey
+   
+2. 增加自定义警报
+
+   Add custom alerts
+
 ##### 2.62
 
 1. 可选择是否开启音频通知（推荐开启）
@@ -54,6 +64,7 @@
    Can choose whether to open the audio notification (recommended)
    
 2. 增加桌面通知，可在设置中开启（推荐开启）
+
    Add desktop notifications, which can be turned on in Settings (recommended)
 
 ##### 2.61
