@@ -47,6 +47,12 @@
 
 #### Latest
 
+##### 2.64
+
+1. 增加Stamina减少检测
+
+   Add a detection of Stamina loss
+
 ##### 2.63
 
 1. 增加暂停热键
