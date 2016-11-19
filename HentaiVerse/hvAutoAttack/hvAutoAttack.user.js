@@ -14,7 +14,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.63
+// @version      2.64
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -35,7 +35,7 @@
     if (GM_info && g('option').version !== GM_info.script.version.substring(0, 4)) {
       alert(g('lang').all[4] + g('lang').new .join('\n'));
       gE('#hvAABox').style.display = 'block';
-      gE('.hvAAOptionRestore').focus();
+      gE('.hvAAOptionReset').focus();
       return;
     }
   } else {
@@ -50,7 +50,7 @@
   }
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
-  } else if (gE('#togpane_log')) { //战斗中
+  } else if (!gE('#navbar')) { //战斗中
     g('attackStatus', g('option').attackStatus);
     g('runtime', 0);
     if (g('option').pauseButton) pauseButton();
@@ -60,7 +60,12 @@
   } else { //非战斗
     delValue(2);
     quickSite();
-    if (g('option').autoArena && (!g('option').stamina || parseInt(gE('.fd4>div').innerHTML.match(/\d+/) [0]) > parseInt(g('option').staminaValue))) {
+    if (g('option').damageAlert && gE('div[style="margin:5px 0 0; color:#FA9300"]')) {
+      setAlert('Error', 3);
+      alert(g('lang').all[22]);
+      return;
+    }
+    if (g('option').autoArena && parseInt(gE('.fd4>div').innerHTML.match(/\d+/) [0]) > parseInt(g('option').staminaNow)) {
       setTimeout(function () {
         autoArena();
       }, g('option').autoArenaTime * 1000);
@@ -74,16 +79,18 @@ function main() { //主程序
     return;
   }
   g('end', false);
-  if (g('option').stamina && parseInt(gE('.fd4>div').innerHTML.match(/\d+/) [0]) < parseInt(g('option').staminaValue)) {
-    gE('1001', 'id').click;
+  if (g('option').stamina && parseInt(gE('.fd4>div').innerHTML.match(/\d+/) [0]) <= parseInt(g('option').staminaNow)) {
+    pauseChange();
+    setAlert('Error', 3);
+    alert(g('lang').all[19]);
     return;
   }
   g('runtime', g('runtime') + 1);
   g('monsterAll', gE('div.btm1', 'all').length);
   var monsterDead = gE('img[src*="nbardead"]', 'all').length;
   g('monsterAlive', g('monsterAll') - monsterDead);
-  g('bossAll', gE('div.btm2[style^="background:"]', 'all').length);
-  var bossDead = gE('div.btm1[style*="opacity:"] div.btm2[style*="background:"]', 'all').length;
+  g('bossAll', gE('div.btm2[style^="background"]', 'all').length);
+  var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
   g('bossAlive', g('bossAll') - bossDead);
   countRound(); //回合计数及自动前进并获取怪物总HP
   if (g('end')) return;
@@ -105,7 +112,6 @@ function main() { //主程序
   if (g('option').delayAlert) {
     g('delayAlert', setTimeout(function () {
       setAlert('default', 3);
-      setNotice(g('lang').notification.normal.title, g('lang').notification.normal.text, 5);
     }, g('option').delayAlertTime * 1000));
   }
   if (g('option').delayReload) {
@@ -148,9 +154,13 @@ function langPack(lang) { //语言包
         '回复完成', //13
         '竞技场开始', //14
         '请输入配置', //15
-        '如果您遭遇了Bug，请确认是否为最新版本（一些Bug可能在新版中被修复）\n如果你觉得脚本很棒，那就送作者1Hath作为感谢', //16
+        '如果您遭遇了Bug，请确认是否为最新版本（一些Bug可能在新版中被修复）\n如果你觉得脚本很棒，那就送作者1Hath作为感谢\n是否继续打开网页', //16
         '如果询问是否允许，请选择允许', //17
-        '接下来将测试该音频\n如果该音频无法播放或无法载入，请替换\n请测试完成后再键入另一个音频' //18
+        '接下来将测试该音频\n如果该音频无法播放或无法载入，请替换\n请测试完成后再键入另一个音频', //18
+        '当前Stamina过低\n或Stamina损失过多\n导致脚本暂停', //19
+        '请检查高亮的输入框是否填写正确', //20
+        '请检查音频文件的地址是否正确', //21
+        '装备损坏，请修复' //22
       ],
       option: {
         0: { //
@@ -182,7 +192,7 @@ function langPack(lang) { //语言包
           6: '<b>技能施放条件</b>：',
           7: '中级：怪物存活数',
           8: '；高级：怪物存活数',
-          9: '当斗气',
+          9: '当OC',
           10: '且SP',
           11: '%，开启<b>Spirit Stance</b>',
           12: '防止脚本莫名暂停',
@@ -191,10 +201,10 @@ function langPack(lang) { //语言包
           15: '秒后，<b>刷新页面</b>。',
           16: '当<b>小马</b>答题时间',
           17: '秒，如果输入框为空则随机生成答案。',
-          18: '当<b>Stamina</b>＜',
-          19: '时，自动逃跑。',
+          18: '当Stamina≤',
+          19: '时，脚本暂停并警报。',
           20: '在<b>任意页面</b>停留',
-          21: '秒后，自动开始竞技场。',
+          21: '秒后，开始竞技场',
           22: '开启',
           23: '减少页面刷新，降低内存使用，感谢网友【zsp40088】提出',
           24: '答题单选',
@@ -202,6 +212,10 @@ function langPack(lang) { //语言包
           26: '开启<b>音频警报</b>；',
           27: '开启<b>桌面通知</b>',
           28: '测试',
+          29: '或损失Stamina≥',
+          30: '重置竞技场',
+          31: '；选填，竞技场对应的等级(以,分隔)：',
+          32: '当装备损坏时，警报。'
         },
         2: { //对自身技能
           0: '对自身技能',
@@ -232,7 +246,7 @@ function langPack(lang) { //语言包
           2: '龙吼：',
           3: '1. 怪兽存活数',
           4: '2. Boss存活数',
-          5: ' 当oc'
+          5: ' 当OC'
         },
         5: { //卷轴
           0: '使用卷轴',
@@ -264,7 +278,7 @@ function langPack(lang) { //语言包
         },
         9: { //掉落监测
           0: '掉落监测',
-          1: '重新监测',
+          1: '重置',
           2: '名称',
           3: '数目'
         },
@@ -303,26 +317,36 @@ function langPack(lang) { //语言包
         '怪物：'
       ],
       notification: {
-        win: {
-          title: '胜利',
-          text: '游戏胜利\n页面将在3秒后刷新'
-        },
-        fail: {
-          title: '失败',
-          text: '游戏失败\n玩家可自行查看战斗Log寻找失败原因'
-        },
-        riddle: {
-          title: '答题',
-          text: '小马答题\n紧急！\n紧急！\n紧急！'
-        },
-        normal: {
+        'default': {
           title: '未知',
-          text: '页面停留过长时间'
+          text: '页面停留过长时间',
+          time: 5
+        },
+        Error: {
+          title: '错误',
+          text: '某些错误发生了',
+          time: 10
+        },
+        Failed: {
+          title: '失败',
+          text: '游戏失败\n玩家可自行查看战斗Log寻找失败原因',
+          time: 5
+        },
+        Riddle: {
+          title: '答题',
+          text: '小马答题\n紧急！\n紧急！\n紧急！',
+          time: 30
+        },
+        Win: {
+          title: '胜利',
+          text: '游戏胜利\n页面将在3秒后刷新',
+          time: 3
         }
       },
       new : [
-        '1. 增加暂停热键',
-        '2. 增加自定义警报'
+        '1. 增加Stamina减少检测',
+        '2. 自定义要进行的竞技场',
+        '3. 自定义当装备损坏时，是否提醒'
       ],
     },
     { //繁體中文
@@ -343,9 +367,13 @@ function langPack(lang) { //语言包
         '回复完成',
         '競技場開始',
         '請輸入配置',
-        '如果您遭遇了Bug，請確認是否為最新版本（一些Bug可能在新版中被修復）\n如果你覺得腳本很棒，那就送作者1Hath作為感謝',
+        '如果您遭遇了Bug，請確認是否為最新版本（一些Bug可能在新版中被修復）\n如果你覺得腳本很棒，那就送作者1Hath作為感謝\n是否繼續打開網頁',
         '如果詢問是否允許，請選擇允許',
-        '接下來將測試該音頻\n如果該音頻無法播放或無法載入，請替換\n請測試完成後再鍵入另一個音頻'
+        '接下來將測試該音頻\n如果該音頻無法播放或無法載入，請替換\n請測試完成後再鍵入另一個音頻',
+        '當前Stamina過低\n或Stamina損失過多\n導致腳本暫停',
+        '請檢查高亮的輸入框是否填寫正確',
+        '請檢查音頻文件的地址是否正確',
+        '裝備損壞，請修復'
       ],
       option: {
         0: { //
@@ -377,7 +405,7 @@ function langPack(lang) { //语言包
           6: '<b>技能施放條件</b>：',
           7: '中級：怪物存活數',
           8: '；高級：怪物存活數',
-          9: '當鬥氣',
+          9: '當OC',
           10: '且SP',
           11: '%，開啟<b>Spirit Stance</b>',
           12: '防止腳本莫名暫停',
@@ -386,10 +414,10 @@ function langPack(lang) { //语言包
           15: '秒後，<b>刷新頁面</b>。',
           16: '當<b>小馬</b>答題時間',
           17: '秒，如果輸入框為空則隨機生成答案。',
-          18: '當<b>Stamina</b>＜',
-          19: '時，自動逃跑。',
+          18: '當Stamina＜',
+          19: '時，腳本暫停並警報。',
           20: '在<b>任意頁面</b>停留',
-          21: '秒後，自動開始競技場。',
+          21: '秒後，開始競技場',
           22: '開啟',
           23: '減少頁面刷新，降低內存使用，感謝網友【zsp40088】提出',
           24: '答題單選',
@@ -397,6 +425,10 @@ function langPack(lang) { //语言包
           26: '開啟<b>音頻警報</b>；',
           27: '開啟<b>桌面通知</b>',
           28: '測試',
+          29: '或損失Stamina≥',
+          30: '重置競技場',
+          31: '；選填，競技場對應的等級(以,分隔)：',
+          32: '當裝備損壞時，警報。'
         },
         2: { //對自身技能
           0: '對自身技能',
@@ -427,7 +459,7 @@ function langPack(lang) { //语言包
           2: '龍吼：',
           3: '1. 怪獸存活數',
           4: '2. Boss存活數',
-          5: ' 當oc'
+          5: ' 當OC'
         },
         5: { //捲軸
           0: '使用捲軸',
@@ -459,7 +491,7 @@ function langPack(lang) { //语言包
         },
         9: { //掉落監測
           0: '掉落監測',
-          1: '重新監測',
+          1: '重置',
           2: '名稱',
           3: '數目'
         },
@@ -498,26 +530,36 @@ function langPack(lang) { //语言包
         '怪物：'
       ],
       notification: {
-        win: {
-          title: '勝利',
-          text: '遊戲勝利\n頁面將在3秒後刷新'
-        },
-        fail: {
-          title: '失敗',
-          text: '遊戲失敗\n玩家可自行查看戰鬥Log尋找失敗原因'
-        },
-        riddle: {
-          title: '答題',
-          text: '小馬答題\n緊急！\n緊急！\n緊急！'
-        },
-        normal: {
+        'default': {
           title: '未知',
-          text: '頁面停留過長時間'
+          text: '頁面停留過長時間',
+          time: 5
+        },
+        Error: {
+          title: '錯誤',
+          text: '某些錯誤發生了',
+          time: 10
+        },
+        Failed: {
+          title: '失敗',
+          text: '遊戲失敗\n玩家可自行查看戰鬥Log尋找失敗原因',
+          time: 5
+        },
+        Riddle: {
+          title: '答題',
+          text: '小馬答題\n緊急！\n緊急！\n緊急！',
+          time: 30
+        },
+        Win: {
+          title: '勝利',
+          text: '遊戲勝利\n頁面將在3秒後刷新',
+          time: 3
         }
       },
       new : [
-        '1. 增加暫停熱鍵',
-        '2. 增加自定義警報'
+        '1. 增加Stamina減少檢測',
+        '2. 自定義要進行的競技場',
+        '3. 自定義當裝備損壞時，是否提醒'
       ],
     },
     { //English
@@ -538,9 +580,13 @@ function langPack(lang) { //语言包
         'Recovery',
         'arena start',
         'Please put in the option',
-        'If you encounter a bug, check if it is the latest version (some bugs may be fixed in the newer version)\nIf you think the script is great, then send the author 1Hath as thanks',
+        'If you encounter a bug, check if it is the latest version (some bugs may be fixed in the newer version)\nIf you think the script is great, then send the author 1Hath as thanks\nWhether to continue to open the page',
         'If asked if you want to allow, select Allow',
-        'The audio will be tested next\nIf the audio can not be played or can not be loaded, replace\nPlease type another audio after the test is complete'
+        'The audio will be tested next\nIf the audio can not be played or can not be loaded, replace\nPlease type another audio after the test is complete',
+        'Current Stamina is too low\nor Stamina is too many\nto cause script to pause',
+        'Please check whether the highlighted input box is filled in correctly',
+        'Please check the audio file address is correct',
+        'Equipment damage, please repair'
       ],
       option: {
         0: { //
@@ -563,8 +609,8 @@ function langPack(lang) { //语言包
           16: 'Cancel'
         },
         1: { //main
-          0: '0.use draught\n1.use Gem\n2.use potion( and skill)\n3.use Elixir',
-          1: 'When skills and drug countdown, use <b>Last Elixir</b>.',
+          0: '0.to use draught\n1.to use Gem\n2.to use potion( and skill)\n3.to use Elixir',
+          1: 'If skills and drug countdown, use <b>Last Elixir</b>.',
           2: '<b>*Attack Status</b>: ',
           3: '<b>About Pause</b>: ',
           4: 'Use the button; ',
@@ -572,7 +618,7 @@ function langPack(lang) { //语言包
           6: '<b>to Spell</b>: ',
           7: 'middle: monster alive ',
           8: '; high: monster alive ',
-          9: 'When Overcharge ',
+          9: 'If OC ',
           10: ' and SP ',
           11: '%, turn on <b>Spirit Stance</b>.',
           12: 'To prevent the script inexplicable suspension',
@@ -581,17 +627,21 @@ function langPack(lang) { //语言包
           15: 's, <b>page reload</b>.',
           16: 'If <b>riddle</b> last time ',
           17: 's and the answer is empty, It\'d be generated.',
-          18: 'When <b>Stamina</b> <',
-          19: ', flee.',
+          18: 'If Stamina ≤',
+          19: ', the script paused and alarm.',
           20: 'Stay in <b>Any Page</b> ',
-          21: 's, start Arena.',
+          21: 's, start Arena',
           22: 'Turn on ',
           23: 'Reduce page refresh, reduce memory usage, thanks to friends [zsp40088] proposed',
           24: 'Answer to radio',
           25: 'Turn on <b>drop monitoring</b>, the minimum quality ',
           26: 'Turn on <b>alarms</b>; ',
           27: 'Turn on <b>notifications</b>. ',
-          28: 'test'
+          28: 'test',
+          29: ' or lose Stamina ≥',
+          30: 'Reset arena',
+          31: '; optional, the level corresponding to (comma-delimited): ',
+          32: 'When the equipment is damaged, alarm.'
         },
         2: { //toSelf Skill
           0: 'toSelf Skill',
@@ -622,7 +672,7 @@ function langPack(lang) { //语言包
           2: 'FUS RO DAH:',
           3: '1. monster alive ',
           4: '2. Boss alive ',
-          5: ' when oc '
+          5: ' when OC '
         },
         5: { //Scroll
           0: 'Use Scroll',
@@ -654,7 +704,7 @@ function langPack(lang) { //语言包
         },
         9: { //Drop monitoring
           0: 'Drop monitoring',
-          1: 'Re-monitor',
+          1: 'Reset',
           2: 'name',
           3: 'number'
         },
@@ -693,26 +743,36 @@ function langPack(lang) { //语言包
         'monster:'
       ],
       notification: {
-        win: {
-          title: 'Victory',
-          text: 'You\'re Victory.\nThe page will refresh in 3 seconds.'
-        },
-        fail: {
-          title: 'Failure',
-          text: 'You\'re Failure.\nYou can find the reason from the battle log.'
-        },
-        riddle: {
-          title: 'Riddle',
-          text: 'Riddle\nURGENT\nURGENT\nURGENT'
-        },
-        normal: {
+        'default': {
           title: 'unknown',
-          text: 'The page stays too long'
+          text: 'The page stays too long',
+          time: 5
+        },
+        Error: {
+          title: 'Error',
+          text: 'Some errors have occurred',
+          time: 10
+        },
+        Failed: {
+          title: 'Failure',
+          text: 'You\'re Failure.\nYou can find the reason from the battle log.',
+          time: 5
+        },
+        Riddle: {
+          title: 'Riddle',
+          text: 'Riddle\nURGENT\nURGENT\nURGENT',
+          time: 30
+        },
+        Win: {
+          title: 'Victory',
+          text: 'You\'re Victory.\nThe page will refresh in 3 seconds.',
+          time: 3
         }
       },
       new : [
-        '1. Add a pause hotkey',
-        '2. Add custom alerts'
+        '1. Add a detection of Stamina loss',
+        '2. Customize the arena to be performed',
+        '3. Customize whether remind if the equipment is damaged'
       ],
     }
   ];
@@ -723,9 +783,9 @@ function langPack(lang) { //语言包
 function addStyle() {
   var globalStyle = cE('style');
   globalStyle.innerHTML = '' +
-  '.csp{height:auto!important;}' +
+  '.stuffbox{height:auto!important;}' +
   '.hvAALog{font-size:20px;}' +
-  '.hvAAButton{top:4px;left:' + (gE('.stuffbox').offsetWidth - 24 - 50) + 'px;position:absolute;z-index:9999;cursor:pointer;background-color:#EDEBDF;}' +
+  '.hvAAButton{top:4px;left:' + (gE('.stuffbox').offsetWidth - 24 - 50) + 'px;position:absolute;z-index:9999;cursor:pointer;}' +
   '#hvAABox{left:' + (gE('body').offsetWidth / 2 - 350) + 'px;top:50px;font-size:12pt!important;z-index:9999;width:700px;height:510px;display:none;position:absolute;text-align:justify;background-color:white;border:4px solid black;border-radius:10px;}' +
   '#hvAABox .hvAACenter{text-align:center;}' +
   '#hvAABox .hvAASeparate{height:1px;background-color:black;}' +
@@ -754,7 +814,8 @@ function addStyle() {
   '.answerBar>div{border:4px solid red;display:table-cell;cursor:pointer;}' +
   '.answerBar>div:hover{background:rgba(63,207,208,0.20);}' +
   '#hvAATab-Alarm input[type=text]{width:512px;}' +
-  '.testAlarms>div{border:2px solid black;}';
+  '.testAlarms>div{border:2px solid black;}' +
+  '.hvAABorder{border:1px solid gray;}';
   gE('head').appendChild(globalStyle);
 }
 function optionButton() { //配置
@@ -771,7 +832,7 @@ function optionButton() { //配置
   optionBox.innerHTML = '' +
   '<div class="hvAACenter"><h1 style="display:inline;">' + g('lang').option[0][0] + '</h1><div style="float:right;">' + g('lang').option[0][1] + '<select name="lang"><option value="0">简体中文</option><option value="1">繁體中文</option><option value="2">English</option></select></div></div><div class="hvAATablist">' +
   '<div class="hvAATabmenu"><span><a href="#hvAATab-Main">' + g('lang').option[0][2] + '</a></span><span><a href="#hvAATab-Self">' + g('lang').option[0][3] + '</a></span><span><a href="#hvAATab-Debuff">' + g('lang').option[0][4] + '</a></span><span><a href="#hvAATab-Special">' + g('lang').option[0][5] + '</a></span><span><a href="#hvAATab-Scroll">' + g('lang').option[0][6] + '</a></span><span><a href="#hvAATab-Infusion">' + g('lang').option[0][7] + '</a></span><span><a href="#hvAATab-Alarm">' + g('lang').option[0][8] + '</a></span><span><a href="#hvAATab-Weight">' + g('lang').option[0][9] + '</a></span><span class="hvAAShowDrop"><a href="#hvAATab-Drop">' + g('lang').option[0][10] + '</a></span><span class="hvAAShowOther"><a href="#hvAATab-Other">' + g('lang').option[0][11] + '</a></span></div>' +
-  '<div id="hvAATab-Main"class="hvAATab"style="z-index:1;"><div class="hvAACenter"title="' + g('lang').option[1][0] + '"><span style="color:green;">HP:0.<input name="hp0"placeholder="95"type="text">% 1.<input name="hp1"placeholder="50"type="text">% 2.<input name="hp2"placeholder="50"type="text">% 3.<input name="hp3"placeholder="5"type="text">% </span><br><span style="color:blue;">MP:0.<input name="mp0"placeholder="95"type="text">% 1.<input name="mp1"placeholder="70"type="text">% 2.<input name="mp2"placeholder="10"type="text">% 3.<input name="mp3"placeholder="5"type="text">% </span><br><span style="color:red;">SP:0.<input name="sp0"placeholder="95"type="text">% 1.<input name="sp1"placeholder="75"type="text">% 2.<input name="sp2"placeholder="50"type="text">% 3.<input name="sp3"placeholder="5"type="text">% </span><br><input id="lastElixir"type="checkbox"><label for="lastElixir">' + g('lang').option[1][1] + '</div><div id="attackStatus"class="hvAACenter"style="color:red;">' + g('lang').option[1][2] + '<input type="radio"id="aS0"name="attackStatus"value="0"><label for="aS0">' + g('lang').status[0] + '</label><input type="radio"id="aS1"name="attackStatus"value="1"><label for="aS1">' + g('lang').status[1] + '</label><input type="radio"id="aS2"name="attackStatus"value="2"><label for="aS2">' + g('lang').status[2] + '</label><input type="radio"id="aS3"name="attackStatus"value="3"><label for="aS3">' + g('lang').status[3] + '</label><input type="radio"id="aS4"name="attackStatus"value="4"><label for="aS4">' + g('lang').status[4] + '</label><input type="radio"id="aS5"name="attackStatus"value="5"><label for="aS5">' + g('lang').status[5] + '</label><input type="radio"id="aS6"name="attackStatus"value="6"><label for="aS6">' + g('lang').status[6] + '</label></div><div><div class="hvAANew"></div>' + g('lang').option[1][3] + '<input id="pauseButton"type="checkbox"><label for="pauseButton">' + g('lang').option[1][4] + '</label><input id="pauseHotkey"type="checkbox"><label for="pauseHotkey">' + g('lang').option[1][5] + '<input name="pauseHotkeyStr"placeholder="A"type="text"> <input name="pauseHotkeyCode"placeholder="65"type="text"disabled="true"></label></div><div>' + g('lang').option[1][6] + g('lang').option[1][7] + '≥<input name="middleSkill"placeholder="3"type="text">' + g('lang').option[1][8] + '≥<input name="highSkill"placeholder="5"type="text"></div><div><input id="spiritStance"type="checkbox"><label for="spiritStance">' + g('lang').option[1][9] + '≥<input name="spiritStance_oc"placeholder="50"type="text">' + g('lang').option[1][10] + '≥<input name="spiritStance_sp"placeholder="80"type="text">' + g('lang').option[1][11] + '</label></div><div title="' + g('lang').option[1][12] + '"><input id="delayAlert"type="checkbox"><label for="delayAlert">' + g('lang').option[1][13] + '<input name="delayAlertTime"placeholder="10"type="text">' + g('lang').option[1][14] + '</label><input id="delayReload"type="checkbox"><label for="delayReload">' + g('lang').option[1][13] + '<input name="delayReloadTime"placeholder="15"type="text">' + g('lang').option[1][15] + '</label></div><div><input id="riddleAnswer"type="checkbox"><label for="riddleAnswer">' + g('lang').option[1][16] + '≤<input name="riddleAnswerTime"placeholder="3"type="text">' + g('lang').option[1][17] + '</label></div><div><input id="stamina"type="checkbox"><label for="stamina">' + g('lang').option[1][18] + '<input name="staminaValue"placeholder="10"type="text">' + g('lang').option[1][19] + '</label></div><div><input id="autoArena"type="checkbox"><label for="autoArena">' + g('lang').option[1][20] + '<input name="autoArenaTime"placeholder="60"type="text"></input>' + g('lang').option[1][21] + '</label></div><div><input id="reloader"type="checkbox"><label for="reloader">' + g('lang').option[1][22] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894"target="_blank"title="' + g('lang').option[1][23] + '">Reloader</a></label><input id="riddleRadio"type="checkbox"><label for="riddleRadio">' + g('lang').option[1][22] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982"target="_blank"title="' + g('lang').option[1][24] + '">RiddleLimiter Plus</a></label></div><div><input id="dropMonitor"type="checkbox"><label for="dropMonitor">' + g('lang').option[1][25] + '<select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div><div><input id="alert"type="checkbox"><label for="alert">' + g('lang').option[1][26] + '</label><input id="notification"type="checkbox"><label for="notification">' + g('lang').option[1][27] + '</label><button class="testNotification">' + g('lang').option[1][28] + '</button></div></div>' +
+  '<div id="hvAATab-Main"class="hvAATab"style="z-index:1;"><div class="hvAACenter hvAABorder"title="' + g('lang').option[1][0] + '"><span style="color:green;">HP:0.<input name="hp0"placeholder="95"type="text">% 1.<input name="hp1"placeholder="50"type="text">% 2.<input name="hp2"placeholder="50"type="text">% 3.<input name="hp3"placeholder="5"type="text">% </span><br><span style="color:blue;">MP:0.<input name="mp0"placeholder="95"type="text">% 1.<input name="mp1"placeholder="70"type="text">% 2.<input name="mp2"placeholder="10"type="text">% 3.<input name="mp3"placeholder="5"type="text">% </span><br><span style="color:red;">SP:0.<input name="sp0"placeholder="95"type="text">% 1.<input name="sp1"placeholder="75"type="text">% 2.<input name="sp2"placeholder="50"type="text">% 3.<input name="sp3"placeholder="5"type="text">% </span><br><input id="lastElixir"type="checkbox"><label for="lastElixir">' + g('lang').option[1][1] + '</div><div id="attackStatus"class="hvAACenter"style="color:red;">' + g('lang').option[1][2] + '<input type="radio"id="aS0"name="attackStatus"value="0"><label for="aS0">' + g('lang').status[0] + '</label><input type="radio"id="aS1"name="attackStatus"value="1"><label for="aS1">' + g('lang').status[1] + '</label><input type="radio"id="aS2"name="attackStatus"value="2"><label for="aS2">' + g('lang').status[2] + '</label><input type="radio"id="aS3"name="attackStatus"value="3"><label for="aS3">' + g('lang').status[3] + '</label><input type="radio"id="aS4"name="attackStatus"value="4"><label for="aS4">' + g('lang').status[4] + '</label><input type="radio"id="aS5"name="attackStatus"value="5"><label for="aS5">' + g('lang').status[5] + '</label><input type="radio"id="aS6"name="attackStatus"value="6"><label for="aS6">' + g('lang').status[6] + '</label></div><div>' + g('lang').option[1][3] + '<input id="pauseButton"type="checkbox"><label for="pauseButton">' + g('lang').option[1][4] + '</label><input id="pauseHotkey"type="checkbox"><label for="pauseHotkey">' + g('lang').option[1][5] + '<input name="pauseHotkeyStr"placeholder="A"type="text"> <input name="pauseHotkeyCode"placeholder="65"type="text"disabled="true"></label></div><div>' + g('lang').option[1][6] + g('lang').option[1][7] + '≥<input name="middleSkill"placeholder="3"type="text">' + g('lang').option[1][8] + '≥<input name="highSkill"placeholder="5"type="text"></div><div><input id="spiritStance"type="checkbox"><label for="spiritStance">' + g('lang').option[1][9] + '≥<input name="spiritStance_oc"placeholder="50"type="text">' + g('lang').option[1][10] + '≥<input name="spiritStance_sp"placeholder="80"type="text">' + g('lang').option[1][11] + '</label></div><div title="' + g('lang').option[1][12] + '"><input id="delayAlert"type="checkbox"><label for="delayAlert">' + g('lang').option[1][13] + '<input name="delayAlertTime"placeholder="10"type="text">' + g('lang').option[1][14] + '</label><input id="delayReload"type="checkbox"><label for="delayReload">' + g('lang').option[1][13] + '<input name="delayReloadTime"placeholder="15"type="text">' + g('lang').option[1][15] + '</label></div><div><input id="riddleAnswer"type="checkbox"><label for="riddleAnswer">' + g('lang').option[1][16] + '≤<input name="riddleAnswerTime"placeholder="3"type="text">' + g('lang').option[1][17] + '</label></div><div><div class="hvAANew"></div><input id="stamina"type="checkbox"><label for="stamina">' + g('lang').option[1][18] + '<input name="staminaNow"placeholder="30"type="text">' + g('lang').option[1][29] + '<input name="staminaLose"placeholder="5"type="text">' + g('lang').option[1][19] + '</label></div><div class="hvAABorder"><div class="hvAANew"></div><input id="autoArena"type="checkbox"><label for="autoArena">' + g('lang').option[1][20] + '<input name="autoArenaTime"placeholder="60"type="text">' + g('lang').option[1][21] + '<button class="autoArenaReset">' + g('lang').option[1][30] + '</button>' + g('lang').option[1][31] + '<input name="autoArenaLevels"check="^[\\d,]+$"type="text"style="width:390px;"></label></div><div><input id="reloader"type="checkbox"><label for="reloader">' + g('lang').option[1][22] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894"target="_blank"title="' + g('lang').option[1][23] + '">Reloader</a></label><input id="riddleRadio"type="checkbox"><label for="riddleRadio">' + g('lang').option[1][22] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982"target="_blank"title="' + g('lang').option[1][24] + '">RiddleLimiter Plus</a></label></div><div><input id="dropMonitor"type="checkbox"><label for="dropMonitor">' + g('lang').option[1][25] + '<select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div><div><input id="alert"type="checkbox"><label for="alert">' + g('lang').option[1][26] + '</label><input id="notification"type="checkbox"><label for="notification">' + g('lang').option[1][27] + '</label><button class="testNotification">' + g('lang').option[1][28] + '</button></div><div></div><div class="hvAANew"></div><input id="damageAlert"type="checkbox"><label for="damageAlert">' + g('lang').option[1][32] + '</label></div>' +
   '<div id="hvAATab-Self"class="hvAATab"><input type="checkbox"id="buffSkill"><label for="buffSkill"><span class="hvAATitle">' + g('lang').option[2][0] + '</span></label><br>' + g('lang').option[2][1] + '<br>' + g('lang').option[2][2] + '≥<input name="buffSkillAllRound"placeholder="12"type="text"><br>' + g('lang').option[2][3] + '≥<input name="buffSkillBoss"placeholder="1"type="text"><br>' + g('lang').option[2][4] + '≥<input name="buffSkillMonster"placeholder="6"type="text"><br><b>' + g('lang').option[2][5] + '</b>' + g('lang').option[2][6] + '<br><input type="checkbox"id="buffSkill_HD"><label for="buffSkill_HD">Health Draught</label><input type="checkbox"id="buffSkill_MD"><label for="buffSkill_MD">Mana Draught</label><input type="checkbox"id="buffSkill_SD"><label for="buffSkill_SD">Spirit Draught</label><br><input type="checkbox"id="buffSkill_Pr"><label for="buffSkill_Pr">Protection</label><input type="checkbox"id="buffSkill_SL"><label for="buffSkill_SL">Spark of Life</label><input type="checkbox"id="buffSkill_SS"><label for="buffSkill_SS">Spirit Shield</label><input type="checkbox"id="buffSkill_Ha"><label for="buffSkill_Ha">Haste</label><br><input type="checkbox"id="buffSkill_AF"><label for="buffSkill_AF">Arcane Focus</label><input type="checkbox"id="buffSkill_He"><label for="buffSkill_He">Heartseeker</label><input type="checkbox"id="buffSkill_Re"><label for="buffSkill_Re">Regen</label><input type="checkbox"id="buffSkill_SV"><label for="buffSkill_SV">Shadow Veil</label><input type="checkbox"id="buffSkill_Ab"><label for="buffSkill_Ab">Absorb</label><div></div><b>' + g('lang').option[2][7] + '</b>' + g('lang').option[2][8] + '<br><b>' + g('lang').option[2][9] + '</b>' + g('lang').option[2][10] + '<input name="channelReBuff"placeholder="20"type="text">' + g('lang').option[2][11] + '<br><b>' + g('lang').option[2][12] + '</b>' + g('lang').option[2][13] + '<br><input type="checkbox"id="channelSkill_Pr"><label for="channelSkill_Pr">Protection</label><input type="checkbox"id="channelSkill_SL"><label for="channelSkill_SL">Spark of Life</label><input type="checkbox"id="channelSkill_SS"><label for="channelSkill_SS">Spirit Shield</label><input type="checkbox"id="channelSkill_Ha"><label for="channelSkill_Ha">Haste</label><br><input type="checkbox"id="channelSkill_AF"><label for="channelSkill_AF">Arcane Focus</label><input type="checkbox"id="channelSkill_He"><label for="channelSkill_He">Heartseeker</label><input type="checkbox"id="channelSkill_Re"><label for="channelSkill_Re">Regen</label><input type="checkbox"id="channelSkill_SV"><label for="channelSkill_SV">Shadow Veil</label><input type="checkbox"id="channelSkill_Ab"><label for="channelSkill_Ab">Absorb</label></div>' +
   '<div id="hvAATab-Debuff"class="hvAATab"><input type="checkbox"id="debuffSkill"><label for="debuffSkill"><span class="hvAATitle">' + g('lang').option[3][0] + '</span>' + g('lang').option[3][1] + '</label><br>' + g('lang').option[3][2] + '<select name="debuffSkillMode"><option value="0">' + g('lang').option[3][3] + '</option><option value="1">' + g('lang').option[3][4] + '</option></select><br><input type="checkbox"id="debuffSkill_Im"><label for="debuffSkill_Im">Imperil</label><input type="checkbox"id="debuffSkill_MN"><label for="debuffSkill_MN">MagNet</label><input type="checkbox"id="debuffSkill_Si"><label for="debuffSkill_Si">Silence</label><input type="checkbox"id="debuffSkill_Dr"><label for="debuffSkill_Dr">Drain</label><input type="checkbox"id="debuffSkill_We"><label for="debuffSkill_We">Weaken</label><input type="checkbox"id="debuffSkill_Co"><label for="debuffSkill_Co">Confuse</label></div>' +
   '<div id="hvAATab-Special"class="hvAATab"><input id="specialSkill"type="checkbox"><label for="specialSkill"><span class="hvAATitle">' + g('lang').option[4][0] + '</span></label><br><input id="specialSkill_OFC"type="checkbox"><label for="specialSkill_OFC">' + g('lang').option[4][1] + '</label>' + g('lang').option[4][5] + '≥<input name="specialSkillOC_OFC"placeholder="210"type="text"><br>' + g('lang').option[4][3] + '≥<input name="specialSkillMonster_OFC"placeholder="8"type="text"><br>' + g('lang').option[4][4] + '≥<input name="specialSkillBoss_OFC"placeholder="1"type="text"><br><input id="specialSkill_FUS"type="checkbox"><label for="specialSkill_FUS">' + g('lang').option[4][2] + '</label>' + g('lang').option[4][5] + '≥<input name="specialSkillOC_FUS"placeholder="110"type="text"><br>' + g('lang').option[4][3] + '≥<input name="specialSkillMonster_FUS"placeholder="8"type="text"><br>' + g('lang').option[4][4] + '≥<input name="specialSkillBoss_FUS"placeholder="1"type="text"></div>' +
@@ -781,10 +842,10 @@ function optionButton() { //配置
   '<div id="hvAATab-Weight"class="hvAATab"><span class="hvAATitle">' + g('lang').option[8][0] + '</span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#权重规则"target="_blank">' + g('lang').option[8][1] + '</a><br>' + g('lang').option[8][2] + '<br>' + g('lang').option[8][3] + '<br>Sleep:<input name="weight_Sle"placeholder="+5"type="text"> Blind:<input name="weight_Bl"placeholder="+3"type="text"> Slow:<input name="weight_Slo"placeholder="+3"type="text"> Imperil:<input name="weight_Im"placeholder="-5"type="text"> Coalesced Mana:<input name="weight_CM"placeholder="-5"type="text"><br>MagNet:<input name="weight_MN"placeholder="-4"type="text"> Silence:<input name="weight_Si"placeholder="-4"type="text"> Drain:<input name="weight_Dr"placeholder="-4"type="text"> Weaken:<input name="weight_We"placeholder="-4"type="text"> Confuse:<input name="weight_Co"placeholder="-1"type="text"><br>' + g('lang').option[8][4] + '<br>' + g('lang').option[8][5] + '<a href="https://github.com/dodying/UserJs/issues/2"target="_blank">' + g('lang').option[8][6] + '</a></div>' +
   '<div id="hvAATab-Drop"class="hvAATab"><span class="hvAATitle">' + g('lang').option[9][0] + '</span><button class="reMonitor">' + g('lang').option[9][1] + '</button></div>' +
   '<div id="hvAATab-Other"class="hvAATab"><span class="hvAAFeedback">' + g('lang').option[10][0] + '<a href="https://github.com/dodying/UserJs/issues/"target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback"target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471"target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs"target="_blank">4. Gitter</a></span><div class="hvAASeparate"></div><div class="hvAACenter"><span class="hvAATitle">' + g('lang').option[10][1] + '</span><br>' + g('lang').option[10][2] + '<br>' + g('lang').roundType[0] + '<select class="hvAADebug"name="roundType"><option></option><option value="ar">' + g('lang').roundType['ar'] + '</option><option value="rb">' + g('lang').roundType['rb'] + '</option><option value="gr">' + g('lang').roundType['gr'] + '</option><option value="iw">' + g('lang').roundType['iw'] + '</option><option value="ba">' + g('lang').roundType['ba'] + '</option></select><br>' + g('lang').option[10][3] + '<input name="roundNow"class="hvAADebug"type="text"placeholder="1"> ' + g('lang').option[10][4] + '<input name="roundAll"class="hvAADebug"type="text"placeholder="1"><br><b>' + g('lang').option[10][5] + '</b><div id="hvAAFixMonster"></div><button class="hvAAFix">' + g('lang').option[10][6] + '</button></div></div>' +
-  '</div><div class="hvAAOptionBoxButton hvAACenter"><button class="hvAAOptionExport">' + g('lang').option[0][12] + '</button><button class="hvAAOptionImport">' + g('lang').option[0][13] + '</button><button class="hvAAOptionRestore">' + g('lang').option[0][14] + '</button><button class="optionApply">' + g('lang').option[0][15] + '</button><button class="optionCancel">' + g('lang').option[0][16] + '</button></div>';
+  '</div><div class="hvAAOptionBoxButton hvAACenter"><button class="hvAAOptionExport">' + g('lang').option[0][12] + '</button><button class="hvAAOptionImport">' + g('lang').option[0][13] + '</button><button class="hvAAOptionReset">' + g('lang').option[0][14] + '</button><button class="optionApply">' + g('lang').option[0][15] + '</button><button class="optionCancel">' + g('lang').option[0][16] + '</button></div>';
   gE('.hvAAShowDrop', optionBox).onclick = function () {
     var drop = getValue('drop', true) || new Object();
-    var _html = '<tbody><tr><td>' + g('lang').option['803'] + '</td><td>' + g('lang').option['804'] + '</td></tr>';
+    var _html = '<tbody><tr><td>' + g('lang').option[9][2] + '</td><td>' + g('lang').option[9][3] + '</td></tr>';
     for (var i in drop) {
       _html += '<tr><td>' + i + '</td><td>' + drop[i] + '</td></tr>';
     }
@@ -801,7 +862,7 @@ function optionButton() { //配置
     }
     if (getValue('monsterStatus')) {
       var monsterStatus = getValue('monsterStatus', true);
-      for (var i = 0; i < monsterStatus.length; i = i + 1) {
+      for (var i = 0; i < monsterStatus.length; i++) {
         var span = cE('span');
         span.innerHTML = 'id:' + monsterStatus[i].id + ' <input name="monsterStatus_' + i + '_HP"class="hvAADebug"type="text"style="width:60px;"><br>';
         gE('input', span).value = monsterStatus[i].hp;
@@ -814,6 +875,11 @@ function optionButton() { //配置
     this.value = (e.keyCode >= 65 && e.keyCode <= 90) ? e.key.toUpperCase()  : e.key;
     gE('input[name=pauseHotkeyCode]', optionBox).value = e.keyCode;
   }
+  gE('.autoArenaReset', optionBox).onclick = function () {
+    if (confirm(g('lang').all[1])) {
+      delValue('arena');
+    }
+  }
   gE('.testNotification', optionBox).onclick = function () {
     alert(g('lang').all[17]);
     setNotice('testTitle', 'testBody', 3);
@@ -822,6 +888,10 @@ function optionButton() { //配置
   for (var i = 0; i < alarms.length; i++) {
     alarms[i].onchange = function () {
       if (this.value === '') return;
+      if (!/^http(s)?:|^ftp:/.test(this.value)) {
+        alert(g('lang').all[21]);
+        return;
+      }
       alert(g('lang').all[18]);
       var box = cE('div');
       box.innerHTML = this.value;
@@ -840,18 +910,17 @@ function optionButton() { //配置
   gE('.reMonitor', optionBox).onclick = function () {
     if (confirm(g('lang').all[1])) {
       delValue('drop');
-      reload();
     }
   }
   gE('.hvAAFix', optionBox).onclick = function () {
     if (confirm(g('lang').all[2])) {
       var inputs = gE('.hvAADebug[name^="round"]', 'all', optionBox);
-      for (var i = 0; i < inputs.length; i = i + 1) {
+      for (var i = 0; i < inputs.length; i++) {
         setValue(inputs[i].name, inputs[i].value || inputs[i].placeholder);
       }
       var monsterStatus = new Array();
       var inputs = gE('#hvAAFixMonster input.hvAADebug', 'all', optionBox);
-      for (var i = 0; i < gE('div.btm1', 'all').length; i = i + 1) {
+      for (var i = 0; i < gE('div.btm1', 'all').length; i++) {
         monsterStatus.push({
           'id': i + 1,
           'hp': (inputs[i]) ? inputs[i].value : '100000'
@@ -862,43 +931,68 @@ function optionButton() { //配置
     }
   }
   gE('.hvAAOptionExport', optionBox).onclick = function () {
-    var input = cE('input');
-    input.value = getValue('option');
-    input.onclick = function () {
+    var textarea = cE('textarea');
+    textarea.style.width = '100%';
+    textarea.value = getValue('option');
+    textarea.onclick = function () {
       this.select();
     }
-    gE('body').appendChild(input);
+    textarea.oncopy = function () {
+      setTimeout(function () {
+        textarea.parentNode.removeChild(textarea);
+      }, 100);
+    }
+    textarea.oncut = function () {
+      setTimeout(function () {
+        textarea.parentNode.removeChild(textarea);
+      }, 100);
+    }
+    gE('.stuffbox').appendChild(textarea);
+    textarea.style.height = textarea.scrollHeight + 'px';
   }
   gE('.hvAAOptionImport', optionBox).onclick = function () {
     var option = prompt(g('lang').all[15]);
     if (!option) return;
     if (confirm(g('lang').all[1])) setValue('option', option);
   }
-  gE('.hvAAOptionRestore', optionBox).onclick = function () {
+  gE('.hvAAOptionReset', optionBox).onclick = function () {
     if (confirm(g('lang').all[1])) {
       delValue('option');
       reload();
     }
   }
   gE('.optionApply', optionBox).onclick = function () {
+    function highlight(ele, time) {
+      gE(ele, optionBox).style.border = '1px solid red';
+      setTimeout(function () {
+        gE(ele, optionBox).style.border = '';
+      }, time * 1000);
+    }
     if (!gE('input[name=attackStatus]:checked', optionBox)) {
       alert(g('lang').all[3]);
-      gE('#attackStatus', optionBox).style.border = '1px solid';
-      setTimeout(function () {
-        gE('#attackStatus', optionBox).style.border = '';
-      }, 0.5 * 1000);
+      highlight('#attackStatus', 0.5);
       return;
     }
     var _option = new Object();
     _option.version = (GM_info) ? GM_info.script.version.substring(0, 4)  : 1;
     var inputs = gE('input,select', 'all', optionBox);
-    for (var i = 0; i < inputs.length; i = i + 1) {
+    for (var i = 0; i < inputs.length; i++) {
       if (inputs[i].className === 'hvAADebug') continue;
-      if (inputs[i].type === 'text' || inputs[i].type === 'select-one') {
-        _option[inputs[i].name] = inputs[i].value || inputs[i].placeholder;
+      if (inputs[i].type === 'text') {
+        if (inputs[i].outerHTML.match(/check="(.*?)"/)) {
+          if (new RegExp(inputs[i].outerHTML.match(/check="(.*?)"/) [1]).test(inputs[i].value) || inputs[i].value === '') {
+            _option[inputs[i].name] = inputs[i].value || inputs[i].placeholder;
+          } else {
+            alert(g('lang').all[20]);
+            highlight(inputs[i], 10);
+            return;
+          }
+        } else {
+          _option[inputs[i].name] = inputs[i].value || inputs[i].placeholder;
+        }
       } else if (inputs[i].type === 'checkbox') {
         _option[inputs[i].id] = inputs[i].checked;
-      } else if (inputs[i].type === 'radio' && inputs[i].checked) {
+      } else if ((inputs[i].type === 'radio' && inputs[i].checked) || inputs[i].type === 'select-one') {
         _option[inputs[i].name] = inputs[i].value;
       }
     }
@@ -913,7 +1007,7 @@ function optionButton() { //配置
   if (getValue('option')) {
     var _option = getValue('option', true);
     var inputs = gE('input,select', 'all', optionBox);
-    for (var i = 0; i < inputs.length; i = i + 1) {
+    for (var i = 0; i < inputs.length; i++) {
       if (_option[inputs[i].name] || _option[inputs[i].id]) {
         if (inputs[i].type === 'text' || inputs[i].type === 'select-one') {
           inputs[i].value = _option[inputs[i].name];
@@ -937,9 +1031,8 @@ function riddleAlert() { //答题警报
     riddleImg.src = riddleImg.title;
   }
   setAlert('Riddle', 'loop');
-  setNotice(g('lang').notification.riddle.title, g('lang').notification.riddle.text, 30);
   document.onkeydown = function (e) {
-    gE('#hvAAAlert').pause();
+    gE('#hvAAAlert').parentNode.removeChild(gE('#hvAAAlert'));
     if (e.keyCode >= 49 && e.keyCode <= 51) {
       riddleSubmit(String.fromCharCode(e.keyCode + 16));
     } else if (e.keyCode >= 65 && e.keyCode <= 67) {
@@ -1017,25 +1110,32 @@ function pauseChange() { //暂停状态更改
   } else {
     gE('.pauseChange').innerHTML = g('lang').all[7];
     setValue('disabled', true);
+    g('end', true);
   }
 }
-function quickSite() { //待续
+function quickSite() { //快捷站点
   var siteBar = cE('div');
   siteBar.className = 'siteBar';
-  siteBar.innerHTML = '<span><a href="javascript:"class="siteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
+  siteBar.innerHTML = '<span><a href="javascript:void()"class="siteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
   if (getValue('quickSite')) {
     var quickSite = getValue('quickSite', true);
     for (var i = 0; i < quickSite.length; i++) {
       siteBar.innerHTML += '<span><a href="' + quickSite[i].url + '"target="_blank">' + ((quickSite[i].fav) ? '<img src="' + quickSite[i].fav + '"class="favicon"></img>' : '') + quickSite[i].name + '</a></span>';
     }
   }
-  siteBar.innerHTML += '<span><a href="javascript:"class="siteBarPlus">+++</a></span>';
+  siteBar.innerHTML += '<span><a href="javascript:void()"class="siteBarReset">Reset</a></span><span><a href="javascript:void()"class="siteBarPlus">+++</a></span>';
   gE('.siteBarToggle', siteBar).onclick = function () {
     var spans = gE('span', 'all', siteBar);
     for (var i = 1; i < spans.length; i++) {
       spans[i].style.display = (this.innerText === '<<') ? 'none' : 'block';
     }
     this.innerText = (this.innerText === '<<') ? '>>' : '<<';
+  }
+  gE('.siteBarReset', siteBar).onclick = function () {
+    if (confirm(g('lang').all[1])) {
+      delValue('quickSite');
+      reload();
+    }
   }
   gE('.siteBarPlus', siteBar).onclick = function () {
     var quickSite = getValue('quickSite', true) || new Array();
@@ -1070,7 +1170,7 @@ function reloader() {
 function formSubmit() { //基本来自https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894
   var inputs = gE('#battleform>input', 'all');
   var serializedForm = '';
-  for (var i = 0; i < inputs.length; i = i + 1) {
+  for (var i = 0; i < inputs.length; i++) {
     if (i !== 0) serializedForm += '&';
     serializedForm += inputs[i].id + '=' + inputs[i].value;
   }
@@ -1111,27 +1211,43 @@ function autoArena() { //自动刷竞技场
     setValue('arena', arena);
   }
   if (arena.isOk) return;
-  var myLevel = parseInt(gE('.clb>.cit:nth-child(12) .fd4>div').innerHTML.match(/\d+/) [0]);
-  var levelArr = new Array(1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 165, 180, 200, 225, 250, 500);
-  for (var i = 0; i < levelArr.length; i = i + 1) {
-    if (myLevel <= levelArr[i]) break;
+  if (arena.array) {
+    arena.array = arena.array;
+  } else {
+    arena.array = new Array();
+    var levelArr = new Array(1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 165, 180, 200, 225, 250, 300, 501);
+    var arenaidArr = new Array(1, 3, 5, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20, 21, 23, 24, 26, 27, 28, 29, 32, 33);
+    if (!g('option').autoArenaLevels) {
+      var myLevel = parseInt(gE('.clb>.cit:nth-child(12) .fd4>div').innerHTML.match(/\d+/) [0]);
+      for (var i = 0; i < levelArr.length; i++) {
+        if (myLevel < levelArr[i]) break;
+      }
+      arena.array = arenaidArr;
+      var length = levelArr.indexOf(levelArr[i]);
+      length = (length > arena.array.length) ? arena.array.length : length;
+      arena.array.length = length;
+    } else {
+      var targetArr = g('option').autoArenaLevels.split(',');
+      var isTarget;
+      for (var i = 0; i < targetArr.length; i++) {
+        isTarget = levelArr.indexOf(parseInt(targetArr[i]));
+        if (isTarget >= 1) arena.array.push(arenaidArr[isTarget]);
+      }
+    }
   }
-  arena.array = arena.array || new Array(1, 3, 5, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20, 21, 23, 24, 26, 27, 28, 29, 32);
-  var length = levelArr.indexOf(levelArr[i]);
-  length = (length > arena.array.length) ? arena.array.length : length;
-  if (length === 1) arena.isOk = true;
-  arena.array.length = length;
   post(location.href, 'recover=all', function () { //回复
     document.title = g('lang').all[13];
     post('?s=Battle&ss=ar', 'arenaid=' + arena.array[arena.array.length - 1], function () {
       document.title = g('lang').all[14];
       arena.array.splice( - 1);
+      if (arena.array.length === 0) arena.isOk = true;
       setValue('arena', arena);
       reload();
     });
   });
 }
 function setAlert(e, times) { //其他警报
+  setNotice(g('lang').notification[e].title, g('lang').notification[e].text, g('lang').notification[e].time);
   if (!g('option').alert) return;
   var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
   //var fileType = '.mp3';
@@ -1146,7 +1262,7 @@ function setAlert(e, times) { //其他警报
     audio.addEventListener('ended', function () {
       _time = _time + 1;
       if (_time === times) {
-        audio.pause();
+        audio.parentNode.removeChild(audio);
         return;
       }
       audio.play();
@@ -1157,7 +1273,7 @@ function setAlert(e, times) { //其他警报
   audio.play();
   gE('body').appendChild(audio);
   document.onmousemove = function () {
-    gE('#hvAAAlert').pause();
+    audio.parentNode.removeChild(audio);
   }
 }
 function countRound() { //回合计数及自动前进并获取怪物总HP
@@ -1168,6 +1284,15 @@ function countRound() { //回合计数及自动前进并获取怪物总HP
     setValue('roundType', g('roundType'));
   }
   var battleLog = gE('#togpane_log>table>tbody>tr>td:nth-child(3)', 'all');
+  if (g('option').stamina && /You lose \d+ Stamina/.test(battleLog[0].innerText)) {
+    var losedStamina = parseInt(battleLog[0].innerText.match(/\d+/) [0]);
+    if (losedStamina >= g('option').staminaLose) {
+      pauseChange();
+      setAlert('Error', 3);
+      alert(g('lang').all[19]);
+      return;
+    }
+  }
   if (battleLog[battleLog.length - 1].innerHTML === 'Battle Start!') delValue(1);
   if (!getValue('roundNow')) {
     var monsterStatus = new Array();
@@ -1206,13 +1331,15 @@ function countRound() { //回合计数及自动前进并获取怪物总HP
     if (g('monsterAlive') === 0 && g('option').dropMonitor) {
       var drop = getValue('drop', true) || {
         '#startTime': new Date().toLocaleString(),
-        '#Round': 0,
-        '#Turn': 0,
+        '#0_Turn': 0,
+        '#1_Round': 0,
+        '#2_Battle': 0,
         '#EXP': 0,
         '#Credit': 0
       };
-      drop['#Round'] += 1;
-      if (g('roundNow') === g('roundAll')) drop['#Turn'] += 1;
+      drop['#0_Turn'] = ('#0_Turn' in drop) ? drop['#0_Turn'] + g('runtime')  : 1;
+      drop['#1_Round'] = ('#1_Round' in drop) ? drop['#1_Round'] + 1 : 1;
+      if (g('roundNow') === g('roundAll')) drop['#2_Battle'] = ('#2_Battle' in drop) ? drop['#2_Battle'] + 1 : 1;
       var text;
       var item;
       for (var i = 0; ; i++) {
@@ -1242,15 +1369,13 @@ function countRound() { //回合计数及自动前进并获取怪物总HP
       setValue('drop', drop);
     }
     if (g('monsterAlive') > 0) {
-      setAlert('Failed');
-      setNotice(g('lang').notification.fail.title, g('lang').notification.fail.text, 5);
+      setAlert('Failed', 3);
       delValue(2);
     } else if (g('roundNow') !== g('roundAll')) {
       delValue(1);
       reload();
     } else if (g('roundNow') === g('roundAll')) {
       setAlert('Win');
-      setNotice(g('lang').notification.win.title, g('lang').notification.win.text, 3);
       delValue(2);
       setTimeout(function () {
         reload();
@@ -1314,11 +1439,11 @@ function deadSoon() { //自动回血回魔
   }
   if (g('hp') <= g('option').hp2) { //自动回血
     if (isOn('311')) {
-      gE('311', 'id').click();
+      gE('311').click();
       g('end', true);
       return;
     } else if (isOn('313')) {
-      gE('313', 'id').click();
+      gE('313').click();
       g('end', true);
       return;
     } else if (gE('.bti3>div[onmouseover*="Health Potion"]')) {
@@ -1463,12 +1588,12 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
         if (isNaN(buffLastTime)) continue;
         if (buffLastTime <= g('option').channelReBuff) {
           if (spellName === 'Cloak of the Fallen' && g('option') ['channelSkill_' + 'SL'] && !gE('div.bte>img[src*="sparklife"]') && isOn('422')) {
-            gE('422', 'id').click();
+            gE('422').click();
             g('end', true);
             return;
           }
           if (spellName in name2Skill && isOn(skillLib[name2Skill[spellName]].id)) {
-            gE(skillLib[name2Skill[spellName]].id, 'id').click();
+            gE(skillLib[name2Skill[spellName]].id).click();
             g('end', true);
             return;
           }
@@ -1479,7 +1604,7 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
     }
     for (var i in skillLib) {
       if (g('option') ['channelSkill_' + i] && !gE('div.bte>img[src*="' + skillLib[i].img + '"]') && isOn(skillLib[i].id)) {
-        gE(skillLib[i].id, 'id').click();
+        gE(skillLib[i].id).click();
         g('end', true);
         return;
       }
@@ -1487,7 +1612,7 @@ function autoUseBuffSkill() { //自动使用药水、施法增益技能
   } else {
     for (var i in skillLib) {
       if (g('option') ['buffSkill_' + i] && !gE('div.bte>img[src*="' + skillLib[i].img + '"]') && isOn(skillLib[i].id)) {
-        gE(skillLib[i].id, 'id').click();
+        gE(skillLib[i].id).click();
         g('end', true);
         return;
       }
@@ -1622,7 +1747,7 @@ function autoUseDeSkill() { //自动施法De技能
   monsterStatus.sort(objArrSort('finWeight'));
   for (var i in skillLib) {
     if (g('option') ['debuffSkill_' + i] && isOn(skillLib[i].id) && !gE('#mkey_' + monsterStatus[0].id + '>.btm6>img[src*="' + skillLib[i].img + '"]')) {
-      gE(skillLib[i].id, 'id').click();
+      gE(skillLib[i].id).click();
       gE('#mkey_' + monsterStatus[0].id).click();
       g('end', true);
       return;
@@ -1639,18 +1764,18 @@ function autoAttack() { //自动打怪
   var minNum = g('monsterStatus') [0].id;
   if (g('attackStatus') !== 0) {
     if (g('monsterAlive') >= g('option').highSkill && isOn('1' + g('attackStatus') + '3')) {
-      gE('1' + g('attackStatus') + '3', 'id').click();
+      gE('1' + g('attackStatus') + '3').click();
     } else if (g('monsterAlive') >= g('option').middleSkill && isOn('1' + g('attackStatus') + '2')) {
-      gE('1' + g('attackStatus') + '2', 'id').click();
+      gE('1' + g('attackStatus') + '2').click();
     } else if (isOn('1' + g('attackStatus') + '1')) {
-      gE('1' + g('attackStatus') + '1', 'id').click();
+      gE('1' + g('attackStatus') + '1').click();
     }
   }
   if (g('option').specialSkill && gE('#ckey_spirit[src*="spirit_a"]')) {
     if (g('oc') >= g('option').specialSkillOC_FUS && g('option').specialSkill_FUS && (g('monsterAlive') > g('option').specialSkillMonster_FUS || g('bossAlive') > g('option').specialSkillBoss_FUS) && isOn('1101')) {
-      gE('1101', 'id').click();
+      gE('1101').click();
     } else if (g('oc') >= g('option').specialSkillOC_OFC && g('option').specialSkill_OFC && (g('monsterAlive') > g('option').specialSkillMonster_OFC || g('bossAlive') > g('option').specialSkillBoss_OFC) && isOn('1111')) {
-      gE('1111', 'id').click();
+      gE('1111').click();
     }
   }
   if (minNum === 10) minNum = 0;
@@ -1659,13 +1784,13 @@ function autoAttack() { //自动打怪
   return;
 }
 function gE(ele, mode, parent) { //获取元素
-  if (mode === undefined) {
-    return document.querySelector(ele);
+  if (typeof ele === 'object') {
+    return ele;
+  } else if (mode === undefined && parent === undefined) {
+    return (isNaN(parseInt(ele))) ? document.querySelector(ele)  : document.getElementById(ele);
   } else if (mode === 'all') {
     return (parent === undefined) ? document.querySelectorAll(ele)  : parent.querySelectorAll(ele);
-  } else if (mode === 'id') {
-    return document.getElementById(ele);
-  } else if (typeof mode === 'object') {
+  } else if (typeof mode === 'object' && parent === undefined) {
     return mode.querySelector(ele);
   }
 }
@@ -1673,7 +1798,7 @@ function cE(name) { //创建元素
   return document.createElement(name);
 }
 function isOn(id) {
-  if (gE(id, 'id') && gE(id, 'id').style.opacity !== '0.5') {
+  if (gE(id) && gE(id).style.opacity !== '0.5') {
     return true;
   } else {
     return false;
@@ -1756,7 +1881,7 @@ function setNotice(title, text, time) { //桌面通知
           body: text
         });
         n.onclick = function () {
-          if (gE('#hvAAAlert')) gE('#hvAAAlert').pause();
+          if (gE('#hvAAAlert')) gE('#hvAAAlert').parentNode.removeChild(gE('#hvAAAlert'));
           n.close();
         }
         setTimeout(function () {
