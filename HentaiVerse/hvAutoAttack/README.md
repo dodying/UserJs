@@ -1,10 +1,8 @@
 ### 缺陷
 
 1. 内存可能不断增加
-2. 竞技场：因笔者等级不够，无法自动刷Lv300的竞技场。
-3. 页面停留足够时间长后，触发警报或刷新，此时脚本恢复正常工作时，无法停止警报或刷新。
-4. 待补充
-5. 欢迎提供意见建议
+2. 待补充
+3. 欢迎提供意见建议
 
 ### 说明
 
@@ -52,6 +50,14 @@
 1. 增加Stamina减少检测
 
    Add a detection of Stamina loss
+   
+2. 自定义要进行的竞技场
+
+   Customize the arena to be performed
+   
+3. 自定义当装备损坏时，是否提醒
+
+   Customize whether remind if the equipment is damaged
 
 ##### 2.63
 
