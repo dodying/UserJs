@@ -45,6 +45,12 @@
 
 #### Latest
 
+##### 2.65
+
+1. 感谢[Koko191](https://greasyfork.org/forum/profile/18194)帮助翻译了英文版本
+
+   Thanks to [Koko191](https://greasyfork.org/forum/profile/18194) help to translate the English version
+
 ##### 2.64
 
 1. 增加Stamina减少检测
