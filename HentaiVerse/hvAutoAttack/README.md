@@ -34,12 +34,14 @@
 
 <table>
 <tbody>
-<tr><td>怪物id</td><td>当前血量</td><td>初始权重</td><td>技能1<br>（权重：+2）</td><td>技能2<br>（权重：+1）</td><td>技能3<br>（权重：-2）</td><td>最终权重</td></tr>
-<tr><td>1</td><td>10</td><td>10</td><td>√</td><td></td><td>√</td><td>10</td></tr>
-<tr><td>2</td><td>15</td><td>15</td><td></td><td>√</td><td></td><td>16</td></tr>
-<tr><td>3</td><td>20</td><td>20</td><td>√</td><td></td><td></td><td>22</td></tr>
+<tr><td>monster id</td><td>now hp</td><td>init priority</td><td>has deprecating spells 1<br>(+2)</td><td>has deprecating spells 2<br>(+1)</td><td>has deprecating spells 3<br>(-2)</td><td>finnal priority</td></tr>
+<tr><td>1</td><td>200</td><td>10</td><td>√</td><td></td><td>√</td><td>10</td></tr>
+<tr><td>2</td><td>300</td><td>15</td><td></td><td>√</td><td></td><td>16</td></tr>
+<tr><td>3</td><td>400</td><td>20</td><td>√</td><td></td><td></td><td>22</td></tr>
 </tbody>
 </table>
+
+In this example the script will attack monster 1.
 
 ### 更新历史
 
@@ -50,6 +52,10 @@
 1. 感谢[Koko191](https://greasyfork.org/forum/profile/18194)帮助翻译了英文版本
 
    Thanks to [Koko191](https://greasyfork.org/forum/profile/18194) help to translate the English version
+
+2. 增加了武器技能
+
+   add weapon skills
 
 ##### 2.64
 
