@@ -14,7 +14,7 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http://*hentaiverse.org/*
 // @exclude      http://*hentaiverse.org/pages/showequip.php?*
-// @version      2.64
+// @version      2.65
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -169,7 +169,7 @@ function langPack(lang) { //语言包
           2: '主要选项',
           3: '对自身技能',
           4: 'De技能',
-          5: '特殊技能',
+          5: '其他技能',
           6: '卷轴',
           7: '魔药',
           8: '警报',
@@ -240,13 +240,15 @@ function langPack(lang) { //语言包
           3: '0. 对所有怪施放',
           4: '1. 只对Boss施放'
         },
-        4: { //特殊技能
-          0: '特殊技能（按【施放顺序】排序）',
-          1: '友情小马炮：',
-          2: '龙吼：',
-          3: '1. 怪兽存活数',
-          4: '2. Boss存活数',
-          5: ' 当OC'
+        4: { //其他技能
+          0: '注：本标签所有输入框皆表示阈值<br>1. OC值 2. 怪兽存活数 3. Boss存活数',
+          1: '其他技能（按【施放顺序】排序）',
+          2: '友情小马炮：',
+          3: '龙吼：',
+          4: '请选择战斗风格：',
+          5: '1阶：',
+          6: '2阶（如果有）：',
+          7: '3阶（如果有）：'
         },
         5: { //卷轴
           0: '使用卷轴',
@@ -343,10 +345,16 @@ function langPack(lang) { //语言包
           time: 3
         }
       },
+      fightingStyle: {
+        1: '二天一流',
+        2: '单手',
+        3: '双手',
+        4: '双持',
+        5: '法杖',
+      },
       new : [
-        '1. 增加Stamina减少检测',
-        '2. 自定义要进行的竞技场',
-        '3. 自定义当装备损坏时，是否提醒'
+        '1. 感谢Koko191帮助翻译了英文版本',
+        '2. 增加了武器技能'
       ],
     },
     { //繁體中文
@@ -382,7 +390,7 @@ function langPack(lang) { //语言包
           2: '主要選項',
           3: '對自身技能',
           4: 'De技能',
-          5: '特殊技能',
+          5: '其他技能',
           6: '捲軸',
           7: '魔藥',
           8: '警報',
@@ -453,13 +461,15 @@ function langPack(lang) { //语言包
           3: '0. 對所有怪施放',
           4: '1. 只對Boss施放'
         },
-        4: { //特殊技能
-          0: '特殊技能（按【施放順序】排序）',
-          1: '友情小馬炮：',
-          2: '龍吼：',
-          3: '1. 怪獸存活數',
-          4: '2. Boss存活數',
-          5: ' 當OC'
+        4: { //其他技能
+          0: '注：本標籤所有輸入框皆表示閾值<br>1. OC值 2. 怪獸存活數 3. Boss存活數',
+          1: '其他技能（按【施放順序】排序）',
+          2: '友情小馬炮：',
+          3: '龍吼：',
+          4: '請選擇戰鬥風格：',
+          5: '1階：',
+          6: '2階（如果有）：',
+          7: '3階（如果有）：'
         },
         5: { //捲軸
           0: '使用捲軸',
@@ -556,10 +566,16 @@ function langPack(lang) { //语言包
           time: 3
         }
       },
+      fightingStyle: {
+        1: '二天一流',
+        2: '單手',
+        3: '雙手',
+        4: '雙持',
+        5: '法杖',
+      },
       new : [
-        '1. 增加Stamina減少檢測',
-        '2. 自定義要進行的競技場',
-        '3. 自定義當裝備損壞時，是否提醒'
+        '1. 感謝Koko191幫助翻譯了英文版本',
+        '2. 增加了武器技能'
       ],
     },
     { //English
@@ -595,7 +611,7 @@ function langPack(lang) { //语言包
           2: 'Main',
           3: 'toSelf Skill',
           4: 'DeSkill',
-          5: 'Special Skill',
+          5: 'other Skill',
           6: 'Scroll',
           7: 'Infusion',
           8: 'Alarm',
@@ -666,13 +682,15 @@ function langPack(lang) { //语言包
           3: '0. cast to all',
           4: '1. only cast to Boss'
         },
-        4: { //Special Skill
-          0: 'Special Skill (Sort by cast order):',
-          1: 'Orbital Friendship Cannon:',
-          2: 'FUS RO DAH:',
-          3: '1. monster alive ',
-          4: '2. Boss alive ',
-          5: ' when OC '
+        4: { //other Skill
+          0: 'Note: All input fields in this label indicate thresholds<br>1. OC value 2. Monster survival number 3. Boss survival number',
+          1: 'Other Skills (Sort by cast order)',
+          2: 'OFC: ',
+          3: 'FUS: ',
+          4: 'Please select the fighting style: ',
+          5: 'T1: ',
+          6: 'T2(if exist): ',
+          7: 'T3(if exist): '
         },
         5: { //Scroll
           0: 'Use Scroll',
@@ -696,11 +714,11 @@ function langPack(lang) { //语言包
         8: { //Weight Rule
           0: 'Weight Rule',
           1: 'Example',
-          2: '1. Each round to calculate the current monster blood, set the minimum blood volume of the initial 10, other monsters for the current blood multiple * 10',
-          3: '2. The initial weights are added to the following Buff weights',
-          4: '3. Calculate the final weight, attack the smallest weight of the monster',
-          5: 'ps. If you have a special opinion on the weight of the Buff, please ',
-          6: 'let me know'
+          2: '1. Each monster is assigned a number which is used to determine the target to attack, let\'s call that number Priority Weight or PW.',
+          3: '2. PW(X) = 10 * Max_HP(X) / Min(Max_HP(All_monsters)) + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)',
+          4: '3. Whichever monster has the lowest PW will be the target.',
+          5: 'If you have any suggestions, please ',
+          6: 'let me know.'
         },
         9: { //Drop monitoring
           0: 'Drop monitoring',
@@ -769,15 +787,21 @@ function langPack(lang) { //语言包
           time: 3
         }
       },
+      fightingStyle: {
+        1: 'Niten Ichiryu',
+        2: 'One-Handed',
+        3: '2-Handed Weapon',
+        4: 'Dual Wielding',
+        5: 'Staff'
+      },
       new : [
-        '1. Add a detection of Stamina loss',
-        '2. Customize the arena to be performed',
-        '3. Customize whether remind if the equipment is damaged'
+        '1. Thanks to Koko191 help to translate the English version',
+        '2. add weapon skills'
       ],
     }
   ];
   g('lang', packs[lang]);
-  optionButton();
+  optionBox();
   gE('select[name=lang]').value = lang;
 }
 function addStyle() {
@@ -818,7 +842,7 @@ function addStyle() {
   '.hvAABorder{border:1px solid gray;}';
   gE('head').appendChild(globalStyle);
 }
-function optionButton() { //配置
+function optionBox() { //配置界面
   addStyle();
   var optionButton = cE('div');
   optionButton.className = 'hvAAButton';
@@ -831,15 +855,15 @@ function optionButton() { //配置
   optionBox.id = 'hvAABox';
   optionBox.innerHTML = '' +
   '<div class="hvAACenter"><h1 style="display:inline;">' + g('lang').option[0][0] + '</h1><div style="float:right;">' + g('lang').option[0][1] + '<select name="lang"><option value="0">简体中文</option><option value="1">繁體中文</option><option value="2">English</option></select></div></div><div class="hvAATablist">' +
-  '<div class="hvAATabmenu"><span><a href="#hvAATab-Main">' + g('lang').option[0][2] + '</a></span><span><a href="#hvAATab-Self">' + g('lang').option[0][3] + '</a></span><span><a href="#hvAATab-Debuff">' + g('lang').option[0][4] + '</a></span><span><a href="#hvAATab-Special">' + g('lang').option[0][5] + '</a></span><span><a href="#hvAATab-Scroll">' + g('lang').option[0][6] + '</a></span><span><a href="#hvAATab-Infusion">' + g('lang').option[0][7] + '</a></span><span><a href="#hvAATab-Alarm">' + g('lang').option[0][8] + '</a></span><span><a href="#hvAATab-Weight">' + g('lang').option[0][9] + '</a></span><span class="hvAAShowDrop"><a href="#hvAATab-Drop">' + g('lang').option[0][10] + '</a></span><span class="hvAAShowOther"><a href="#hvAATab-Other">' + g('lang').option[0][11] + '</a></span></div>' +
-  '<div id="hvAATab-Main"class="hvAATab"style="z-index:1;"><div class="hvAACenter hvAABorder"title="' + g('lang').option[1][0] + '"><span style="color:green;">HP:0.<input name="hp0"placeholder="95"type="text">% 1.<input name="hp1"placeholder="50"type="text">% 2.<input name="hp2"placeholder="50"type="text">% 3.<input name="hp3"placeholder="5"type="text">% </span><br><span style="color:blue;">MP:0.<input name="mp0"placeholder="95"type="text">% 1.<input name="mp1"placeholder="70"type="text">% 2.<input name="mp2"placeholder="10"type="text">% 3.<input name="mp3"placeholder="5"type="text">% </span><br><span style="color:red;">SP:0.<input name="sp0"placeholder="95"type="text">% 1.<input name="sp1"placeholder="75"type="text">% 2.<input name="sp2"placeholder="50"type="text">% 3.<input name="sp3"placeholder="5"type="text">% </span><br><input id="lastElixir"type="checkbox"><label for="lastElixir">' + g('lang').option[1][1] + '</div><div id="attackStatus"class="hvAACenter"style="color:red;">' + g('lang').option[1][2] + '<input type="radio"id="aS0"name="attackStatus"value="0"><label for="aS0">' + g('lang').status[0] + '</label><input type="radio"id="aS1"name="attackStatus"value="1"><label for="aS1">' + g('lang').status[1] + '</label><input type="radio"id="aS2"name="attackStatus"value="2"><label for="aS2">' + g('lang').status[2] + '</label><input type="radio"id="aS3"name="attackStatus"value="3"><label for="aS3">' + g('lang').status[3] + '</label><input type="radio"id="aS4"name="attackStatus"value="4"><label for="aS4">' + g('lang').status[4] + '</label><input type="radio"id="aS5"name="attackStatus"value="5"><label for="aS5">' + g('lang').status[5] + '</label><input type="radio"id="aS6"name="attackStatus"value="6"><label for="aS6">' + g('lang').status[6] + '</label></div><div>' + g('lang').option[1][3] + '<input id="pauseButton"type="checkbox"><label for="pauseButton">' + g('lang').option[1][4] + '</label><input id="pauseHotkey"type="checkbox"><label for="pauseHotkey">' + g('lang').option[1][5] + '<input name="pauseHotkeyStr"placeholder="A"type="text"> <input name="pauseHotkeyCode"placeholder="65"type="text"disabled="true"></label></div><div>' + g('lang').option[1][6] + g('lang').option[1][7] + '≥<input name="middleSkill"placeholder="3"type="text">' + g('lang').option[1][8] + '≥<input name="highSkill"placeholder="5"type="text"></div><div><input id="spiritStance"type="checkbox"><label for="spiritStance">' + g('lang').option[1][9] + '≥<input name="spiritStance_oc"placeholder="50"type="text">' + g('lang').option[1][10] + '≥<input name="spiritStance_sp"placeholder="80"type="text">' + g('lang').option[1][11] + '</label></div><div title="' + g('lang').option[1][12] + '"><input id="delayAlert"type="checkbox"><label for="delayAlert">' + g('lang').option[1][13] + '<input name="delayAlertTime"placeholder="10"type="text">' + g('lang').option[1][14] + '</label><input id="delayReload"type="checkbox"><label for="delayReload">' + g('lang').option[1][13] + '<input name="delayReloadTime"placeholder="15"type="text">' + g('lang').option[1][15] + '</label></div><div><input id="riddleAnswer"type="checkbox"><label for="riddleAnswer">' + g('lang').option[1][16] + '≤<input name="riddleAnswerTime"placeholder="3"type="text">' + g('lang').option[1][17] + '</label></div><div><div class="hvAANew"></div><input id="stamina"type="checkbox"><label for="stamina">' + g('lang').option[1][18] + '<input name="staminaNow"placeholder="30"type="text">' + g('lang').option[1][29] + '<input name="staminaLose"placeholder="5"type="text">' + g('lang').option[1][19] + '</label></div><div class="hvAABorder"><div class="hvAANew"></div><input id="autoArena"type="checkbox"><label for="autoArena">' + g('lang').option[1][20] + '<input name="autoArenaTime"placeholder="60"type="text">' + g('lang').option[1][21] + '<button class="autoArenaReset">' + g('lang').option[1][30] + '</button>' + g('lang').option[1][31] + '<input name="autoArenaLevels"check="^[\\d,]+$"type="text"style="width:390px;"></label></div><div><input id="reloader"type="checkbox"><label for="reloader">' + g('lang').option[1][22] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894"target="_blank"title="' + g('lang').option[1][23] + '">Reloader</a></label><input id="riddleRadio"type="checkbox"><label for="riddleRadio">' + g('lang').option[1][22] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982"target="_blank"title="' + g('lang').option[1][24] + '">RiddleLimiter Plus</a></label></div><div><input id="dropMonitor"type="checkbox"><label for="dropMonitor">' + g('lang').option[1][25] + '<select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div><div><input id="alert"type="checkbox"><label for="alert">' + g('lang').option[1][26] + '</label><input id="notification"type="checkbox"><label for="notification">' + g('lang').option[1][27] + '</label><button class="testNotification">' + g('lang').option[1][28] + '</button></div><div></div><div class="hvAANew"></div><input id="damageAlert"type="checkbox"><label for="damageAlert">' + g('lang').option[1][32] + '</label></div>' +
+  '<div class="hvAATabmenu"><span><a href="#hvAATab-Main">' + g('lang').option[0][2] + '</a></span><span><a href="#hvAATab-Self">' + g('lang').option[0][3] + '</a></span><span><a href="#hvAATab-Debuff">' + g('lang').option[0][4] + '</a></span><span><a href="#hvAATab-Skill">' + g('lang').option[0][5] + '</a></span><span><a href="#hvAATab-Scroll">' + g('lang').option[0][6] + '</a></span><span><a href="#hvAATab-Infusion">' + g('lang').option[0][7] + '</a></span><span><a href="#hvAATab-Alarm">' + g('lang').option[0][8] + '</a></span><span><a href="#hvAATab-Rule">' + g('lang').option[0][9] + '</a></span><span class="hvAAShowDrop"><a href="#hvAATab-Drop">' + g('lang').option[0][10] + '</a></span><span class="hvAAShowOther"><a href="#hvAATab-Other">' + g('lang').option[0][11] + '</a></span></div>' +
+  '<div id="hvAATab-Main"class="hvAATab"style="z-index:1;"><div class="hvAACenter hvAABorder"title="' + g('lang').option[1][0] + '"><span style="color:green;">HP:0.<input name="hp0"placeholder="95"type="text">% 1.<input name="hp1"placeholder="50"type="text">% 2.<input name="hp2"placeholder="50"type="text">% 3.<input name="hp3"placeholder="5"type="text">% </span><br><span style="color:blue;">MP:0.<input name="mp0"placeholder="95"type="text">% 1.<input name="mp1"placeholder="70"type="text">% 2.<input name="mp2"placeholder="10"type="text">% 3.<input name="mp3"placeholder="5"type="text">% </span><br><span style="color:red;">SP:0.<input name="sp0"placeholder="95"type="text">% 1.<input name="sp1"placeholder="75"type="text">% 2.<input name="sp2"placeholder="50"type="text">% 3.<input name="sp3"placeholder="5"type="text">% </span><br><input id="lastElixir"type="checkbox"><label for="lastElixir">' + g('lang').option[1][1] + '</div><div id="attackStatus"class="hvAACenter"style="color:red;">' + g('lang').option[1][2] + '<input type="radio"id="aS0"name="attackStatus"value="0"><label for="aS0">' + g('lang').status[0] + '</label><input type="radio"id="aS1"name="attackStatus"value="1"><label for="aS1">' + g('lang').status[1] + '</label><input type="radio"id="aS2"name="attackStatus"value="2"><label for="aS2">' + g('lang').status[2] + '</label><input type="radio"id="aS3"name="attackStatus"value="3"><label for="aS3">' + g('lang').status[3] + '</label><input type="radio"id="aS4"name="attackStatus"value="4"><label for="aS4">' + g('lang').status[4] + '</label><input type="radio"id="aS5"name="attackStatus"value="5"><label for="aS5">' + g('lang').status[5] + '</label><input type="radio"id="aS6"name="attackStatus"value="6"><label for="aS6">' + g('lang').status[6] + '</label></div><div>' + g('lang').option[1][3] + '<input id="pauseButton"type="checkbox"><label for="pauseButton">' + g('lang').option[1][4] + '</label><input id="pauseHotkey"type="checkbox"><label for="pauseHotkey">' + g('lang').option[1][5] + '<input name="pauseHotkeyStr"placeholder="A"type="text"> <input name="pauseHotkeyCode"placeholder="65"type="text"disabled="true"></label></div><div>' + g('lang').option[1][6] + g('lang').option[1][7] + '≥<input name="middleSkill"placeholder="3"type="text">' + g('lang').option[1][8] + '≥<input name="highSkill"placeholder="5"type="text"></div><div><input id="spiritStance"type="checkbox"><label for="spiritStance">' + g('lang').option[1][9] + '≥<input name="spiritStance_oc"placeholder="50"type="text">' + g('lang').option[1][10] + '≥<input name="spiritStance_sp"placeholder="80"type="text">' + g('lang').option[1][11] + '</label></div><div title="' + g('lang').option[1][12] + '"><input id="delayAlert"type="checkbox"><label for="delayAlert">' + g('lang').option[1][13] + '<input name="delayAlertTime"placeholder="10"type="text">' + g('lang').option[1][14] + '</label><input id="delayReload"type="checkbox"><label for="delayReload">' + g('lang').option[1][13] + '<input name="delayReloadTime"placeholder="15"type="text">' + g('lang').option[1][15] + '</label></div><div><input id="riddleAnswer"type="checkbox"><label for="riddleAnswer">' + g('lang').option[1][16] + '≤<input name="riddleAnswerTime"placeholder="3"type="text">' + g('lang').option[1][17] + '</label></div><div><input id="stamina"type="checkbox"><label for="stamina">' + g('lang').option[1][18] + '<input name="staminaNow"placeholder="30"type="text">' + g('lang').option[1][29] + '<input name="staminaLose"placeholder="5"type="text">' + g('lang').option[1][19] + '</label></div><div class="hvAABorder"><input id="autoArena"type="checkbox"><label for="autoArena">' + g('lang').option[1][20] + '<input name="autoArenaTime"placeholder="60"type="text">' + g('lang').option[1][21] + '<button class="autoArenaReset">' + g('lang').option[1][30] + '</button>' + g('lang').option[1][31] + '<input name="autoArenaLevels"check="^[\\d,]+$"type="text"style="width:390px;"></label></div><div><input id="reloader"type="checkbox"><label for="reloader">' + g('lang').option[1][22] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894"target="_blank"title="' + g('lang').option[1][23] + '">Reloader</a></label><input id="riddleRadio"type="checkbox"><label for="riddleRadio">' + g('lang').option[1][22] + '<a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982"target="_blank"title="' + g('lang').option[1][24] + '">RiddleLimiter Plus</a></label></div><div><input id="dropMonitor"type="checkbox"><label for="dropMonitor">' + g('lang').option[1][25] + '<select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div><div><input id="alert"type="checkbox"><label for="alert">' + g('lang').option[1][26] + '</label><input id="notification"type="checkbox"><label for="notification">' + g('lang').option[1][27] + '</label><button class="testNotification">' + g('lang').option[1][28] + '</button></div><div></div><input id="damageAlert"type="checkbox"><label for="damageAlert">' + g('lang').option[1][32] + '</label></div>' +
   '<div id="hvAATab-Self"class="hvAATab"><input type="checkbox"id="buffSkill"><label for="buffSkill"><span class="hvAATitle">' + g('lang').option[2][0] + '</span></label><br>' + g('lang').option[2][1] + '<br>' + g('lang').option[2][2] + '≥<input name="buffSkillAllRound"placeholder="12"type="text"><br>' + g('lang').option[2][3] + '≥<input name="buffSkillBoss"placeholder="1"type="text"><br>' + g('lang').option[2][4] + '≥<input name="buffSkillMonster"placeholder="6"type="text"><br><b>' + g('lang').option[2][5] + '</b>' + g('lang').option[2][6] + '<br><input type="checkbox"id="buffSkill_HD"><label for="buffSkill_HD">Health Draught</label><input type="checkbox"id="buffSkill_MD"><label for="buffSkill_MD">Mana Draught</label><input type="checkbox"id="buffSkill_SD"><label for="buffSkill_SD">Spirit Draught</label><br><input type="checkbox"id="buffSkill_Pr"><label for="buffSkill_Pr">Protection</label><input type="checkbox"id="buffSkill_SL"><label for="buffSkill_SL">Spark of Life</label><input type="checkbox"id="buffSkill_SS"><label for="buffSkill_SS">Spirit Shield</label><input type="checkbox"id="buffSkill_Ha"><label for="buffSkill_Ha">Haste</label><br><input type="checkbox"id="buffSkill_AF"><label for="buffSkill_AF">Arcane Focus</label><input type="checkbox"id="buffSkill_He"><label for="buffSkill_He">Heartseeker</label><input type="checkbox"id="buffSkill_Re"><label for="buffSkill_Re">Regen</label><input type="checkbox"id="buffSkill_SV"><label for="buffSkill_SV">Shadow Veil</label><input type="checkbox"id="buffSkill_Ab"><label for="buffSkill_Ab">Absorb</label><div></div><b>' + g('lang').option[2][7] + '</b>' + g('lang').option[2][8] + '<br><b>' + g('lang').option[2][9] + '</b>' + g('lang').option[2][10] + '<input name="channelReBuff"placeholder="20"type="text">' + g('lang').option[2][11] + '<br><b>' + g('lang').option[2][12] + '</b>' + g('lang').option[2][13] + '<br><input type="checkbox"id="channelSkill_Pr"><label for="channelSkill_Pr">Protection</label><input type="checkbox"id="channelSkill_SL"><label for="channelSkill_SL">Spark of Life</label><input type="checkbox"id="channelSkill_SS"><label for="channelSkill_SS">Spirit Shield</label><input type="checkbox"id="channelSkill_Ha"><label for="channelSkill_Ha">Haste</label><br><input type="checkbox"id="channelSkill_AF"><label for="channelSkill_AF">Arcane Focus</label><input type="checkbox"id="channelSkill_He"><label for="channelSkill_He">Heartseeker</label><input type="checkbox"id="channelSkill_Re"><label for="channelSkill_Re">Regen</label><input type="checkbox"id="channelSkill_SV"><label for="channelSkill_SV">Shadow Veil</label><input type="checkbox"id="channelSkill_Ab"><label for="channelSkill_Ab">Absorb</label></div>' +
   '<div id="hvAATab-Debuff"class="hvAATab"><input type="checkbox"id="debuffSkill"><label for="debuffSkill"><span class="hvAATitle">' + g('lang').option[3][0] + '</span>' + g('lang').option[3][1] + '</label><br>' + g('lang').option[3][2] + '<select name="debuffSkillMode"><option value="0">' + g('lang').option[3][3] + '</option><option value="1">' + g('lang').option[3][4] + '</option></select><br><input type="checkbox"id="debuffSkill_Im"><label for="debuffSkill_Im">Imperil</label><input type="checkbox"id="debuffSkill_MN"><label for="debuffSkill_MN">MagNet</label><input type="checkbox"id="debuffSkill_Si"><label for="debuffSkill_Si">Silence</label><input type="checkbox"id="debuffSkill_Dr"><label for="debuffSkill_Dr">Drain</label><input type="checkbox"id="debuffSkill_We"><label for="debuffSkill_We">Weaken</label><input type="checkbox"id="debuffSkill_Co"><label for="debuffSkill_Co">Confuse</label></div>' +
-  '<div id="hvAATab-Special"class="hvAATab"><input id="specialSkill"type="checkbox"><label for="specialSkill"><span class="hvAATitle">' + g('lang').option[4][0] + '</span></label><br><input id="specialSkill_OFC"type="checkbox"><label for="specialSkill_OFC">' + g('lang').option[4][1] + '</label>' + g('lang').option[4][5] + '≥<input name="specialSkillOC_OFC"placeholder="210"type="text"><br>' + g('lang').option[4][3] + '≥<input name="specialSkillMonster_OFC"placeholder="8"type="text"><br>' + g('lang').option[4][4] + '≥<input name="specialSkillBoss_OFC"placeholder="1"type="text"><br><input id="specialSkill_FUS"type="checkbox"><label for="specialSkill_FUS">' + g('lang').option[4][2] + '</label>' + g('lang').option[4][5] + '≥<input name="specialSkillOC_FUS"placeholder="110"type="text"><br>' + g('lang').option[4][3] + '≥<input name="specialSkillMonster_FUS"placeholder="8"type="text"><br>' + g('lang').option[4][4] + '≥<input name="specialSkillBoss_FUS"placeholder="1"type="text"></div>' +
+  '<div id="hvAATab-Skill"class="hvAATab"><div class="hvAANew"></div>' + g('lang').option[4][0] + '<br><input id="skill"type="checkbox"><label for="skill"><span class="hvAATitle">' + g('lang').option[4][1] + '</span></label><br><input id="skill_OFC"type="checkbox"><label for="skill_OFC">' + g('lang').option[4][2] + '</label><input name="skillOC_OFC"placeholder="210"type="text"><input name="skillMonster_OFC"placeholder="8"type="text"><input name="skillBoss_OFC"placeholder="1"type="text"><br><input id="skill_FUS"type="checkbox"><label for="skill_FUS">' + g('lang').option[4][3] + '</label><input name="skillOC_FUS"placeholder="110"type="text"><input name="skillMonster_FUS"placeholder="8"type="text"><input name="skillBoss_FUS"placeholder="1"type="text"><br>' + g('lang').option[4][4] + '<select name="fightingStyle"><option value="1">' + g('lang').fightingStyle[1] + '</option><option value="2">' + g('lang').fightingStyle[2] + '</option><option value="3">' + g('lang').fightingStyle[3] + '</option><option value="4">' + g('lang').fightingStyle[4] + '</option><option value="5">' + g('lang').fightingStyle[5] + '</option></select><br><input id="skill_3"type="checkbox"><label for="skill_3">' + g('lang').option[4][7] + '</label><input name="skillOC_3"type="text"><input name="skillMonster_3"type="text"><input name="skillOCBoss_3"type="text"><br><input id="skill_2"type="checkbox"><label for="skill_2">' + g('lang').option[4][6] + '</label><input name="skillOC_2"type="text"><input name="skillMonster_2"type="text"><input name="skillOCBoss_2"type="text"><br><input id="skill_1"type="checkbox"><label for="skill_1">' + g('lang').option[4][5] + '</label><input name="skillOC_1"type="text"><input name="skillMonster_1"type="text"><input name="skillOCBoss_1"type="text"></div>' +
   '<div id="hvAATab-Scroll"class="hvAATab"><input type="checkbox"id="scroll"><label for="scroll"><span class="hvAATitle">' + g('lang').option[5][0] + '</span></label><br>' + g('lang').roundType[0] + '<input type="checkbox"id="scrollRoundType_ar"><label for="scrollRoundType_ar">' + g('lang').roundType['ar'] + '</label><input type="checkbox"id="scrollRoundType_rb"><label for="scrollRoundType_rb">' + g('lang').roundType['rb'] + '</label><input type="checkbox"id="scrollRoundType_gr"><label for="scrollRoundType_gr">' + g('lang').roundType['gr'] + '</label><input type="checkbox"id="scrollRoundType_iw"><label for="scrollRoundType_iw">' + g('lang').roundType['iw'] + '</label><input type="checkbox"id="scrollRoundType_ba"><label for="scrollRoundType_ba">' + g('lang').roundType['ba'] + '</label><br>' + g('lang').option[5][1] + '≥<input name="scrollRoundNow"placeholder="100"type="text">。<br><input id="scrollFirst"type="checkbox"><label for="scrollFirst">' + g('lang').option[5][2] + '</label><br><input type="checkbox"id="scroll_Go"><label for="scroll_Go">Scroll of the Gods ' + g('lang').option[5][3] + '≥<input name="scrollRound_Go"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Av"><label for="scroll_Av">Scroll of the Avatar ' + g('lang').option[5][3] + '≥<input name="scrollRound_Av"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Pr"><label for="scroll_Pr">Scroll of Protection ' + g('lang').option[5][3] + '≥<input name="scrollRound_Pr"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Sw"><label for="scroll_Sw">Scroll of Swiftness ' + g('lang').option[5][3] + '≥<input name="scrollRound_Sw"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Li"><label for="scroll_Li">Scroll of Life ' + g('lang').option[5][3] + '≥<input name="scrollRound_Li"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Sh"><label for="scroll_Sh">Scroll of Shadows ' + g('lang').option[5][3] + '≥<input name="scrollRound_Sh"placeholder="0"type="text"></label><br><input type="checkbox"id="scroll_Ab"><label for="scroll_Ab">Scroll of Absorption ' + g('lang').option[5][3] + '≥<input name="scrollRound_Ab"placeholder="0"type="text"></label></div>' +
   '<div id="hvAATab-Infusion"class="hvAATab"><input type="checkbox"id="infusion"><label for="infusion"><span class="hvAATitle">' + g('lang').option[6][0] + '</span></label><select name="infusionStatus"><option value="1">Infusion of Flames</option><option value="2">Infusion of Frost</option><option value="3">Infusion of Lightning</option><option value="4">Infusion of Storms</option><option value="5">Infusion of Divinity</option><option value="6">Infusion of Darkness</option></select><br>' + g('lang').roundType[0] + '<input type="checkbox"id="infusionRoundType_ar"><label for="infusionRoundType_ar">' + g('lang').roundType['ar'] + '</label><input type="checkbox"id="infusionRoundType_rb"><label for="infusionRoundType_rb">' + g('lang').roundType['rb'] + '</label><input type="checkbox"id="infusionRoundType_gr"><label for="infusionRoundType_gr">' + g('lang').roundType['gr'] + '</label><input type="checkbox"id="infusionRoundType_iw"><label for="infusionRoundType_iw">' + g('lang').roundType['iw'] + '</label><input type="checkbox"id="infusionRoundType_ba"><label for="infusionRoundType_ba">' + g('lang').roundType['ba'] + '</label><br>' + g('lang').option[6][1] + '≥<input name="infusionRoundNow"placeholder="100"type="text">。</div>' +
   '<div id="hvAATab-Alarm"class="hvAATab"title="' + g('lang').option[7][1] + '"><span class="hvAATitle">' + g('lang').option[7][0] + '</span><br>' + g('lang').option[7][2] + '<input name="audio-default"type="text"><br>' + g('lang').option[7][3] + '<input name="audio-Error"type="text"><br>' + g('lang').option[7][4] + '<input name="audio-Failed"type="text"><br>' + g('lang').option[7][5] + '<input name="audio-Riddle"type="text"><br>' + g('lang').option[7][6] + '<input name="audio-Win"type="text"><div class="testAlarms"></div></div>' +
-  '<div id="hvAATab-Weight"class="hvAATab"><span class="hvAATitle">' + g('lang').option[8][0] + '</span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#权重规则"target="_blank">' + g('lang').option[8][1] + '</a><br>' + g('lang').option[8][2] + '<br>' + g('lang').option[8][3] + '<br>Sleep:<input name="weight_Sle"placeholder="+5"type="text"> Blind:<input name="weight_Bl"placeholder="+3"type="text"> Slow:<input name="weight_Slo"placeholder="+3"type="text"> Imperil:<input name="weight_Im"placeholder="-5"type="text"> Coalesced Mana:<input name="weight_CM"placeholder="-5"type="text"><br>MagNet:<input name="weight_MN"placeholder="-4"type="text"> Silence:<input name="weight_Si"placeholder="-4"type="text"> Drain:<input name="weight_Dr"placeholder="-4"type="text"> Weaken:<input name="weight_We"placeholder="-4"type="text"> Confuse:<input name="weight_Co"placeholder="-1"type="text"><br>' + g('lang').option[8][4] + '<br>' + g('lang').option[8][5] + '<a href="https://github.com/dodying/UserJs/issues/2"target="_blank">' + g('lang').option[8][6] + '</a></div>' +
+  '<div id="hvAATab-Rule"class="hvAATab"><span class="hvAATitle">' + g('lang').option[8][0] + '</span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#权重规则"target="_blank">' + g('lang').option[8][1] + '</a><br>' + g('lang').option[8][2] + '<br>' + g('lang').option[8][3] + '<br>Sleep:<input name="weight_Sle"placeholder="+5"type="text"> Blind:<input name="weight_Bl"placeholder="+3"type="text"> Slow:<input name="weight_Slo"placeholder="+3"type="text"> Imperil:<input name="weight_Im"placeholder="-5"type="text"> Coalesced Mana:<input name="weight_CM"placeholder="-5"type="text"><br>MagNet:<input name="weight_MN"placeholder="-4"type="text"> Silence:<input name="weight_Si"placeholder="-4"type="text"> Drain:<input name="weight_Dr"placeholder="-4"type="text"> Weaken:<input name="weight_We"placeholder="-4"type="text"> Confuse:<input name="weight_Co"placeholder="-1"type="text"><br>' + g('lang').option[8][4] + '<br>' + g('lang').option[8][5] + '<a href="#hvAATab-Other">' + g('lang').option[8][6] + '</a></div>' +
   '<div id="hvAATab-Drop"class="hvAATab"><span class="hvAATitle">' + g('lang').option[9][0] + '</span><button class="reMonitor">' + g('lang').option[9][1] + '</button></div>' +
   '<div id="hvAATab-Other"class="hvAATab"><span class="hvAAFeedback">' + g('lang').option[10][0] + '<a href="https://github.com/dodying/UserJs/issues/"target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback"target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471"target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs"target="_blank">4. Gitter</a></span><div class="hvAASeparate"></div><div class="hvAACenter"><span class="hvAATitle">' + g('lang').option[10][1] + '</span><br>' + g('lang').option[10][2] + '<br>' + g('lang').roundType[0] + '<select class="hvAADebug"name="roundType"><option></option><option value="ar">' + g('lang').roundType['ar'] + '</option><option value="rb">' + g('lang').roundType['rb'] + '</option><option value="gr">' + g('lang').roundType['gr'] + '</option><option value="iw">' + g('lang').roundType['iw'] + '</option><option value="ba">' + g('lang').roundType['ba'] + '</option></select><br>' + g('lang').option[10][3] + '<input name="roundNow"class="hvAADebug"type="text"placeholder="1"> ' + g('lang').option[10][4] + '<input name="roundAll"class="hvAADebug"type="text"placeholder="1"><br><b>' + g('lang').option[10][5] + '</b><div id="hvAAFixMonster"></div><button class="hvAAFix">' + g('lang').option[10][6] + '</button></div></div>' +
   '</div><div class="hvAAOptionBoxButton hvAACenter"><button class="hvAAOptionExport">' + g('lang').option[0][12] + '</button><button class="hvAAOptionImport">' + g('lang').option[0][13] + '</button><button class="hvAAOptionReset">' + g('lang').option[0][14] + '</button><button class="optionApply">' + g('lang').option[0][15] + '</button><button class="optionCancel">' + g('lang').option[0][16] + '</button></div>';
@@ -904,6 +928,7 @@ function optionButton() { //配置
     }
   }
   gE('.hvAAFeedback', optionBox).onclick = function (e) {
+    if (e.target.tagName !== 'A') return;
     e.preventDefault();
     if (confirm(g('lang').all[16])) window.open(e.target.href);
   }
@@ -1096,6 +1121,7 @@ function pauseButton() { //暂停按钮
 }
 function pauseHotkey() { //暂停热键
   document.addEventListener('keydown', function pause(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.keyCode === parseInt(g('option').pauseHotkeyCode)) {
       pauseChange();
       if (!g('option').reloader) document.removeEventListener('keydown', pause, false);
@@ -1246,7 +1272,7 @@ function autoArena() { //自动刷竞技场
     });
   });
 }
-function setAlert(e, times) { //其他警报
+function setAlert(e, times) { //发出警报
   setNotice(g('lang').notification[e].title, g('lang').notification[e].text, g('lang').notification[e].time);
   if (!g('option').alert) return;
   var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
@@ -1771,11 +1797,17 @@ function autoAttack() { //自动打怪
       gE('1' + g('attackStatus') + '1').click();
     }
   }
-  if (g('option').specialSkill && gE('#ckey_spirit[src*="spirit_a"]')) {
-    if (g('oc') >= g('option').specialSkillOC_FUS && g('option').specialSkill_FUS && (g('monsterAlive') > g('option').specialSkillMonster_FUS || g('bossAlive') > g('option').specialSkillBoss_FUS) && isOn('1101')) {
-      gE('1101').click();
-    } else if (g('oc') >= g('option').specialSkillOC_OFC && g('option').specialSkill_OFC && (g('monsterAlive') > g('option').specialSkillMonster_OFC || g('bossAlive') > g('option').specialSkillBoss_OFC) && isOn('1111')) {
+  if (g('option').skill) {
+    if (gE('#ckey_spirit[src*="spirit_a"]') && g('option').skill_OFC && g('oc') >= g('option').skillOC_OFC && (g('monsterAlive') > g('option').skillMonster_OFC || g('bossAlive') > g('option').skillBoss_OFC) && isOn('1111')) {
       gE('1111').click();
+    } else if (gE('#ckey_spirit[src*="spirit_a"]') && g('option').skill_FUS && g('oc') >= g('option').skillOC_FUS && (g('monsterAlive') > g('option').skillMonster_FUS || g('bossAlive') > g('option').skillBoss_FUS) && isOn('1101')) {
+      gE('1101').click();
+    } else if (g('option').skill_3 && g('oc') >= g('option').skillOC_3 && (g('monsterAlive') > g('option').skillMonster_3 || g('bossAlive') > g('option').skillBoss_3) && isOn('2' + g('option').fightingStyle + '03')) {
+      gE('2' + g('option').fightingStyle + '03').click();
+    } else if (g('option').skill_2 && g('oc') >= g('option').skillOC_2 && (g('monsterAlive') > g('option').skillMonster_2 || g('bossAlive') > g('option').skillBoss_2) && isOn('2' + g('option').fightingStyle + '02')) {
+      gE('2' + g('option').fightingStyle + '02').click();
+    } else if (g('option').skill_1 && g('oc') >= g('option').skillOC_1 && (g('monsterAlive') > g('option').skillMonster_1 || g('bossAlive') > g('option').skillBoss_1) && isOn('2' + g('option').fightingStyle + '01')) {
+      gE('2' + g('option').fightingStyle + '01').click();
     }
   }
   if (minNum === 10) minNum = 0;
