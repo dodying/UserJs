@@ -49,9 +49,9 @@ In this example the script will attack monster 1.
 
 ##### 2.65
 
-1. 感谢[Koko191](https://greasyfork.org/forum/profile/18194)帮助翻译了英文版本
+1. 感谢[Koko191](https://greasyfork.org/forum/profile/18194/Koko191)帮助翻译了英文版本
 
-   Thanks to [Koko191](https://greasyfork.org/forum/profile/18194) help to translate the English version
+   Thanks to [Koko191](https://greasyfork.org/forum/profile/18194/Koko191) help to translate the English version
 
 2. 增加了武器技能
 
