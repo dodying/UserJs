@@ -5,11 +5,9 @@
 3. 攻击规则：攻击血量减少最大的怪兽
 4. 攻击模式：**可能**增加多重攻击模式，以前[syaofox](https://github.com/syaofox)提出过，但是被我否决。最近换了武器，有几种元素的攻击加成相近，尴尬
 
-### 说明
+### Note
 
 #### Android上可用Firefox配合Usi食用，其他安卓浏览器未测试。
-
-#### 不要长期使用该脚本，不要使用该脚本打一些难度过高的关卡
 
 ##### 首次使用，或脚本更新后，请先设置好配置。
 
@@ -20,6 +18,8 @@
 ![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
 ##### 自动打怪演示
+
+###### GIF利用GifCam录制，帧率33FPS，110帧，文件大小100多K，录制鼠标模式（只是一直放在录制按钮上）
 
 ![自动打怪演示](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Screenshot.gif)
 
