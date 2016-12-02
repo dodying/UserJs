@@ -1,8 +1,9 @@
-### 缺陷
+### TODO
 
-1. 内存可能不断增加
-2. 待补充
-3. 欢迎提供意见建议
+1. Boss判断：一次攻击对怪的血量减少百分比
+2. De技能：这一功能**可能**将退回到以前版本
+3. 攻击规则：攻击血量减少最大的怪兽
+4. 攻击模式：**可能**增加多重攻击模式，以前[syaofox](https://github.com/syaofox)提出过，但是被我否决。最近换了武器，有几种元素的攻击加成相近，尴尬
 
 ### 说明
 
@@ -10,13 +11,7 @@
 
 #### 不要长期使用该脚本，不要使用该脚本打一些难度过高的关卡
 
-#### 使用前请确认hv字体
-
-##### HV自动打怪，懒人专用，适度使用
-
 ##### 首次使用，或脚本更新后，请先设置好配置。
-
-#### 话说真的有人玩这游戏吗，手动滑稽
 
 #### 图片演示
 
@@ -28,9 +23,9 @@
 
 ![自动打怪演示](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Screenshot.gif)
 
-### 权重规则
+### Attack_Rule
 
-示例，脚本会选择权重**最小**的进行攻击
+The script will automatically attack monsters who have the least priority.
 
 <table>
 <tbody>
