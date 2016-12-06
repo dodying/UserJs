@@ -1,6 +1,6 @@
 ### UserJs [GF地址](https://greasyfork.org/zh-CN/users/4000)
 
-#### 不负责任的说明：有些脚本是很久很久以前写的，所以可能失效...
+#### 说明：有些脚本是很久很久以前写的，所以可能失效...
 
 #### 目录说明
 
@@ -13,14 +13,13 @@
 | 【小说】目录页侧边分卷导航栏 | [安装](https://github.com/dodying/UserJs/raw/master/novel/SidebarInContent.user.js) |  | × |  |  |
 | 【小说】起点书签 | [安装](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) |  | × |  | 本地书签 |
 | ```HentaiVerse``` | 文件夹 | - | - |  | - |
-| 【HV】打怪 | [GitHub](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvAutoAttack) | [GF](https://greasyfork.org/zh-CN/scripts/18482) | ? |  | 自动打怪 |
-| 【HV】喂食 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoFeed.user.js) |  | × |  | 在 [MonsterLab](http://hentaiverse.org/?s=Bazaar&ss=ml) 页面起作用<br />给饥饿的怪物自动喂食```Happy Pill``` |
-| 【HV】补充物品 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBuyItem.user.js) |  | × |  | 在 [ItemShop](http://hentaiverse.org/?s=Bazaar&ss=is) 页面起作用<br />使用前，一定要按照示例填写 |
-| 【HV】修复装备 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvRepairEpument.user.js) |  | × |  | 在 [Repair](http://hentaiverse.org/?s=Forge&ss=re) 页面起作用 |
-| 【HV】出售装备 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js) |  | × |  | 在```首页```起作用 |
-| 【HV】祭坛 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvShrine.user.js) |  | × |  | 在 [The Shrine](http://hentaiverse.org/?s=Bazaar&ss=ss)页面起作用<br />使用前，一定要按照示例填写  |
-| 【HV】训练 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvTrainer.user.js) |  | × |  | 训练计时器而已... |
-| 【HV】翻译 | [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) |  | × |  | 修改自 [ReplaceText On Webpages](http://userscripts-mirror.org/scripts/show/41369) |
+| 【HV】打怪 | [GitHub](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvAutoAttack) | [GF](https://greasyfork.org/zh-CN/scripts/18482) | √ | √ | 自动打怪 |
+| 【HV】喂食 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoFeed.user.js) |  | × | √ | 在 [MonsterLab](http://hentaiverse.org/?s=Bazaar&ss=ml) 页面起作用<br />给饥饿的怪物自动喂食```Happy Pill``` |
+| 【HV】修复装备 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvRepairEpument.user.js) |  | × | √ | 在 [Repair](http://hentaiverse.org/?s=Forge&ss=re) 页面起作用 |
+| 【HV】出售装备 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js) |  | × | √ | 在```首页```起作用 |
+| 【HV】祭坛 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvShrine.user.js) |  | × | √ | 在 [The Shrine](http://hentaiverse.org/?s=Bazaar&ss=ss)页面起作用<br />使用前，一定要按照示例填写  |
+| 【HV】训练 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvTrainer.user.js) |  | × | √ | 训练计时器 |
+| 【HV】翻译 | [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) |  | × | √ | 修改自 [ReplaceText On Webpages](http://userscripts-mirror.org/scripts/show/41369) |
 | ```E-hentai``` | 文件夹 | - | - |  | - |
 | 【EHD】合并压缩卷 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EHD_CombineArchive2One.user.js) |  |  |  | 需要安装 [E-Hentai Downloader](https://greasyfork.org/zh-CN/scripts/10379) 与```7z命令行版本``` |
 | 【EH】批列表 | [安装](https://github.com/dodying/UserJs/raw/master/E-hentai/EH_BatchList.user.js) |  |  |  |  |
