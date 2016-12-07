@@ -14,6 +14,7 @@
 | 【小说】起点书签 | [安装](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) |  | × |  | 本地书签 |
 | ```HentaiVerse``` | 文件夹 | - | - |  | - |
 | 【HV】打怪 | [GitHub](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvAutoAttack) | [GF](https://greasyfork.org/zh-CN/scripts/18482) | √ | √ | 自动打怪 |
+| 【HV】购物清单 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js) |  | × | √ | 在 [Bazaar](http://hentaiverse.org/?s=Bazaar&ss=is) 页面起作用 |
 | 【HV】喂食 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoFeed.user.js) |  | × | √ | 在 [MonsterLab](http://hentaiverse.org/?s=Bazaar&ss=ml) 页面起作用<br />给饥饿的怪物自动喂食```Happy Pill``` |
 | 【HV】修复装备 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvRepairEpument.user.js) |  | × | √ | 在 [Repair](http://hentaiverse.org/?s=Forge&ss=re) 页面起作用 |
 | 【HV】出售装备 | [安装](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js) |  | × | √ | 在```首页```起作用 |
