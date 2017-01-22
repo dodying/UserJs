@@ -48,6 +48,7 @@ In this example the script will attack enemy 1.
 4. 自动修复: 当敌人状况缺失或数量不对，自行修复
 5. 快捷链接: 可在"关于本脚本"中进行相关设置
 6. 攻击规则: 如果敌人相邻两只敌人已死（或不存在），则给其权重增加0.5（相当于不优先攻击这些敌人）
+
 ###### English
 1. Options Removed: equal to been checked, such as Reloader
 2. Options Changed: such as "Damaged Equippment", "Idle Arena"
@@ -59,6 +60,7 @@ In this example the script will attack enemy 1.
 ##### 2.65
 1. 感谢[Koko191](https://greasyfork.org/forum/profile/18194/Koko191)帮助翻译了英文版本
 2. 增加了武器技能
+
 ###### English
 1. Thanks to [Koko191](https://greasyfork.org/forum/profile/18194/Koko191) help to translate the English version
 2. add weapon skills
@@ -67,6 +69,7 @@ In this example the script will attack enemy 1.
 1. 增加Stamina减少检测
 2. 自定义要进行的竞技场
 3. 自定义当装备损坏时，是否提醒
+
 ###### English
 1. Add a detection of Stamina loss
 2. Customize the arena to be performed
@@ -75,6 +78,7 @@ In this example the script will attack enemy 1.
 ##### 2.63
 1. 增加暂停热键
 2. 增加自定义警报
+
 ###### English
 1. Add a pause hotkey
 2. Add custom alerts
@@ -82,23 +86,27 @@ In this example the script will attack enemy 1.
 ##### 2.62
 1. 可选择是否开启音频通知（推荐开启）
 2. 增加桌面通知，可在设置中开启（推荐开启）
+
 ###### English
 1. Can choose whether to open the audio notification (recommended)
 2. Add desktop notifications, which can be turned on in Settings (recommended)
 
 ##### 2.61
 1. 针对Spirit Stance，增加对于SP的判断
+
 ###### English
 1. For Spirit Stance, increase the judgment for the SP
 
 ##### 2.60
 1. 掉落监测强化
+
 ###### English
 1. Drop monitoring enhanced
 
 ##### 2.59
 1. 移除本地储存选项卡
 2. 增加掉落检测功能与对应选项卡
+
 ###### English
 1. Remove the Local Storage tab
 2. Add the drop detection function and the corresponding tab
@@ -106,18 +114,21 @@ In this example the script will attack enemy 1.
 ##### 2.58
 1. 版本2.57a中，移除了临时攻击模式
 2. 为两个特殊技能增加oc阈值
+
 ###### English
 1. In version 2.57a, the Temporary Attack mode was removed
 2. Increase the oc threshold for two special skills
 
 ##### 2.57
 1. 感谢网友maoboshi，现在支持特殊技能龙吼
+
 ###### English
 Thanks to maoboshi, now support the special skill FUS RO DAH
 
 ##### 2.56
 1. 增加了选项来控制使用Draught级别药水的使用
 2. 修改了De技能
+
 ###### English
 1. Added the option to control the use of the Draught
 2. Modified the DeSkill
