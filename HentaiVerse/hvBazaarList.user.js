@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description:zh-CN  
 // @include     http://hentaiverse.org/?s=Bazaar&ss=is*
-// @version     1
+// @version     1.00a
 // @grant       unsafeWindow
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -14,7 +14,7 @@
 // @run-at      document-end
 // ==/UserScript==
 (function ($) {
-  $('<div class="listBox"></div>').html('ID:<input name="itemId"type="text"><br>名字:<input name="itemName"type="text"><br>数量:<input name="itemAmount"type="text"><br>取整:<input name="itemFix"type="text"><br><button class="listHide">X</button> <button class="listDel">去除</button> <button class="listSave">保存</button>').attr('style', 'position:absolute;top:120px;left:550px;z-index:9;background-color:#EDEBDF;border:1px solid black;display:none;').appendTo('body');
+  $('<div class="listBox"></div>').html('ID:<input name="itemId"type="text"><br>Name:<input name="itemName"type="text"><br>Amount:<input name="itemAmount"type="text" placeholder="1000"><br>Round:<input name="itemFix"type="text" placeholder="100"><br><button class="listHide">X</button> <button class="listDel">REMOVE</button> <button class="listSave">SAVE</button>').attr('style', 'position:absolute;top:120px;left:550px;z-index:9;background-color:#EDEBDF;border:1px solid black;display:none;').appendTo('body');
   $('.listHide').click(function () {
     $('.listBox').hide();
   });
@@ -50,7 +50,7 @@
     }
     $('.listBox').show();
   });
-  $('<button></button>').text('生成清单').click(function () {
+  $('<button></button>').text('Generate List').click(function () {
     var info = getValue('BazaarList', true);
     if (!info) return;
     var _html = '';
