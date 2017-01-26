@@ -6,7 +6,7 @@
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @include     http://hentaiverse.org/?s=Bazaar&ss=ml
-// @version     1.01
+// @version     1.01a
 // @grant       none
 // @run-at      document-idle
 // ==/UserScript==
@@ -32,10 +32,10 @@ function feed(refer, moraleBar) {
   xhr.onload = function (e) {
     var data = e.target.response;
     if (!data.querySelector('div[style*="moralebar.png"]>img[src*="bar_green.png"]')) {
-      document.title = '开心药丸已经耗尽';
+      document.title = 'Happy Pill has been uesd up.';
       return;
     } else {
-      document.title = '第' + refer + '个怪兽喂食完毕';
+      document.title = 'No.' + refer + ' Monster has been fed.';
       moraleBar[refer - 1].parentNode.replaceChild(data.querySelector('div[style*="moralebar.png"]'), moraleBar[refer - 1]);
       init();
     }
