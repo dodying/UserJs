@@ -11,7 +11,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.66d
+// @version      2.66e
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -272,9 +272,17 @@ function optionBox() {
       var table = cE('table');
       table.innerHTML = _html;
       gE('.hvAAQuickSite').appendChild(table);
-      var button = cE('button');
-      button.innerHTML = '<l01>保存</l01><l2>Save</l2>';
-      button.onclick = function () {
+      var buttonAdd = cE('button');
+      buttonAdd.innerHTML = '<l01>新增</l01><l2>Add</l2>';
+      buttonAdd.onclick = function () {
+        var tr = cE('tr');
+        tr.innerHTML = '<td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td>';
+        gE('.hvAAQuickSite>table>tbody').appendChild(tr);
+      }
+      gE('.hvAAQuickSite').appendChild(buttonAdd);
+      var buttonSave = cE('button');
+      buttonSave.innerHTML = '<l01>保存</l01><l2>Save</l2>';
+      buttonSave.onclick = function () {
         var inputs = gE('.hvAAQuickSite input', 'all');
         var items = gE('.hvAAQuickSite tr', 'all');
         var quickSite = new Array();
@@ -289,7 +297,7 @@ function optionBox() {
         setValue('quickSite', quickSite);
         goto();
       }
-      gE('.hvAAQuickSite').appendChild(button);
+      gE('.hvAAQuickSite').appendChild(buttonSave);
     }
     this.onclick = null;
   }
@@ -855,7 +863,7 @@ function deadSoon() { //自动回血回魔
       return;
     }
   }
-  if (g('option').lastElixir && gE('.bti3>div[onmouseover*="Last Elixir"]')) {
+  if ((g('mp') < g('option').mp3 || g('sp') < g('option').sp3 || g('hp') <= g('option').hp3) && g('option').lastElixir && gE('.bti3>div[onmouseover*="Last Elixir"]')) {
     gE('.bti3>div[onmouseover*="Last Elixir"]').click();
     g('end', true);
     return;
@@ -1507,6 +1515,7 @@ function fixMonsterStatus() { //修复monsterStatus
   goto();
 }
 function allImperiled() { //给所有敌人施放Imperil
+  if (gE('div.btm6 img[src*="imperil"]', 'all').length === g('monsterAlive')) return;
   g('monsterStatus').sort(objArrSort('order'));
   var monsterBuff = gE('div.btm6', 'all');
   var j;
