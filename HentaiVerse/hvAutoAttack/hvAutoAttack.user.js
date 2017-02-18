@@ -5,13 +5,13 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @include      http://hentaiverse.org/*
-// @exclude      http://hentaiverse.org/pages/showequip.php?*
+// @include      http*://hentaiverse.org/*
+// @exclude      http*://hentaiverse.org/pages/showequip.php?*
 // @author       Dodying
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.66e
+// @version      2.66f
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -262,43 +262,25 @@ function optionBox() {
     for (i = 0; i < inputs.length; i++) {
       if (getValue(inputs[i].name)) inputs[i].value = getValue(inputs[i].name);
     }
-    if (getValue('quickSite')) {
-      var quickSite = getValue('quickSite', true);
-      var _html = '<tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr>';
+    var quickSiteTable = cE('table');
+    var _html = '<tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr>';
+    if (g('option').quickSite) {
+      var quickSite = g('option').quickSite;
       for (i = 0; i < quickSite.length; i++) {
         _html += '<tr><td><input class="hvAADebug" type="text" value="' + quickSite[i].fav + '"></td><td><input class="hvAADebug" type="text" value="' + quickSite[i].name + '"></td><td><input class="hvAADebug" type="text" value="' + quickSite[i].url + '"></td></tr>';
       }
-      _html += '</tbody>';
-      var table = cE('table');
-      table.innerHTML = _html;
-      gE('.hvAAQuickSite').appendChild(table);
-      var buttonAdd = cE('button');
-      buttonAdd.innerHTML = '<l01>新增</l01><l2>Add</l2>';
-      buttonAdd.onclick = function () {
-        var tr = cE('tr');
-        tr.innerHTML = '<td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td>';
-        gE('.hvAAQuickSite>table>tbody').appendChild(tr);
-      }
-      gE('.hvAAQuickSite').appendChild(buttonAdd);
-      var buttonSave = cE('button');
-      buttonSave.innerHTML = '<l01>保存</l01><l2>Save</l2>';
-      buttonSave.onclick = function () {
-        var inputs = gE('.hvAAQuickSite input', 'all');
-        var items = gE('.hvAAQuickSite tr', 'all');
-        var quickSite = new Array();
-        for (i = 1; i < items.length; i++) {
-          if (inputs[i * 3 - 2].value === '') continue;
-          quickSite.push({
-            fav: inputs[i * 3 - 3].value,
-            name: inputs[i * 3 - 2].value,
-            url: inputs[i * 3 - 1].value
-          });
-        }
-        setValue('quickSite', quickSite);
-        goto();
-      }
-      gE('.hvAAQuickSite').appendChild(buttonSave);
     }
+    _html += '</tbody>';
+    quickSiteTable.innerHTML = _html;
+    gE('.hvAAQuickSite').appendChild(quickSiteTable);
+    var quickSiteAdd = cE('button');
+    quickSiteAdd.innerHTML = '<l01>新增</l01><l2>Add</l2>';
+    quickSiteAdd.onclick = function () {
+      var tr = cE('tr');
+      tr.innerHTML = '<td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td>';
+      gE('.hvAAQuickSite>table>tbody').appendChild(tr);
+    }
+    gE('.hvAAQuickSite').appendChild(quickSiteAdd);
     this.onclick = null;
   }
   gE('input[name="pauseHotkeyStr"]', optionBox).onkeyup = function (e) {
@@ -414,6 +396,16 @@ function optionBox() {
         _option[inputs[i].name] = inputs[i].value;
       }
     }
+    inputs = gE('.hvAAQuickSite input', 'all', optionBox);
+    for (i = 0; 3 * i < inputs.length; i++) {
+      if (i === 0) _option.quickSite = new Array();
+      if (inputs[3 * i + 1].value === '') continue;
+      _option.quickSite.push({
+        fav: inputs[3 * i].value,
+        name: inputs[3 * i + 1].value,
+        url: inputs[3 * i + 2].value
+      });
+    }
     setValue('option', _option);
     optionBox.style.display = 'none';
     goto();
@@ -511,8 +503,8 @@ function quickSite() { //快捷站点
   var siteBar = cE('div');
   siteBar.className = 'siteBar';
   siteBar.innerHTML = '<span><a href="javascript:void(0);"class="siteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
-  if (getValue('quickSite')) {
-    var quickSite = getValue('quickSite', true);
+  if (g('option').quickSite) {
+    var quickSite = g('option').quickSite;
     for (var i = 0; i < quickSite.length; i++) {
       siteBar.innerHTML += '<span><a href="' + quickSite[i].url + '"target="_blank">' + ((quickSite[i].fav) ? '<img src="' + quickSite[i].fav + '"class="favicon"></img>' : '') + quickSite[i].name + '</a></span>';
     }
