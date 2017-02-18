@@ -11,7 +11,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.66f
+// @version      2.66g
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -235,7 +235,7 @@ function optionBox() {
   '<div class="hvAATab" id="hvAATab-Alarm"><span class="hvAATitle"><l0>自定义警报</l0><l1>自定義警報</l1><l2>Alarm</l2></span><br><l0>注意：留空则使用默认音频，建议每个用户使用自定义音频</l0><l1>注意：留空則使用默認音頻，建議每個用戶使用自定義音頻</l1><l2>Note: Leave the box blank to use default audio, it\'s recommended for all user to use custom audio.</l2><div><l01>通用</l01><l2>Common</l2>: <input name="audio-default" type="text"><br><l0>错误</l0><l1>錯誤</l1><l2>Error</l2>: <input name="audio-Error" type="text"><br><l0>失败</l0><l1>失敗</l1><l2>Defeat</l2>: <input name="audio-Failed" type="text"><br><l0>答题</l0><l1>答題</l1><l2>Riddle</l2>: <input name="audio-Riddle" type="text"><br><l0>胜利</l0><l1>勝利</l1><l2>Victory</l2>: <input name="audio-Win" type="text"></div><div><l0>请将将要测试的音频文件的地址填入这里</l0><l1>請將將要測試的音頻文件的地址填入這裡</l1><l2>Plz put in the audio file address you want to test</l2>:<br><input class="hvAADebug" name="audio-Text" type="text"></div></div>' +
   '<div class="hvAATab" id="hvAATab-Rule"><span class="hvAATitle"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#attack_rule" target="_blank"><l01>示例</l01><l2>Example</l2></a><div>1. <l0>每回合计算敌人当前血量，血量最低的设置初始血量为10，其他敌人为当前血量倍数*10</l0><l1>每回合計算敌人當前血量，血量最低的設置初始血量為10，其他敌人為當前血量倍數*10</l1><l2>Each enemiy is assigned a number which is used to determine the target to attack, let\'s call that number Priority Weight or PW.</l2></div><div>2. <l0>初始权重与下述各Buff权重相加</l0><l1>初始權重與下述各Buff權重相加</l1><l2>PW(X) = 10 * Max_HP(X) / Min(Max_HP(All_enemies)) + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)</l2><br>Sleep: <input class="hvAANumber" name="weight_Sle" placeholder="5" step="0.1" type="text"> Blind: <input class="hvAANumber" name="weight_Bl" placeholder="3" step="0.1" type="text"> Slow: <input class="hvAANumber" name="weight_Slo" placeholder="3" step="0.1" type="text"> Imperil: <input class="hvAANumber" name="weight_Im" placeholder="-5" step="0.1" type="text"><br>MagNet: <input class="hvAANumber" name="weight_MN" placeholder="-4" step="0.1" type="text"> Silence: <input class="hvAANumber" name="weight_Si" placeholder="-4" step="0.1" type="text"> Drain: <input class="hvAANumber" name="weight_Dr" placeholder="-4" step="0.1" type="text"> Weaken: <input class="hvAANumber" name="weight_We" placeholder="-4" step="0.1" type="text"><br>Confuse: <input class="hvAANumber" name="weight_Co" placeholder="-1" step="0.1" type="text">Coalesced Mana: <input class="hvAANumber" name="weight_CM" placeholder="-5" step="0.1" type="text"> Stunned: <input class="hvAANumber" name="weight_Stun" placeholder="-4" step="0.1" type="text"></div><div><div class="hvAANew"></div>3. <l0>如果敌人相邻两只敌人已死（或不存在），则给其权重增加</l0><l1>如果敵人相鄰兩隻敵人已死（或不存在），則給其權重增加</l1><l2>If the enemy of which adjacent two enemies dead (or does not exist), then its PW increased</l2> <input class="hvAANumber" name="weight_Wall" placeholder="0.5" step="0.1" type="text"></div><div>4. <l0>计算出最终权重，攻击权重最小的敌人</l0><l1>計算出最終權重，攻擊權重最小的敌人</l1><l2>Whichever enemy has the lowest PW will be the target.</l2></div><div>5. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a href="#hvAATab-About"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.</div></div>' +
   '<div class="hvAATab hvAACenter" id="hvAATab-Drop"><span class="hvAATitle"><l01>掉落监测</l01><l2>Drops Tracking</l2></span><button class="reMonitor"><l01>重置</l01><l2>Reset</l2></button></div>' +
-  '<div class="hvAATab hvAACenter" id="hvAATab-About"><div><span class="hvAAFeedback"><l0>反馈</l0><l1>反饋</l1><l2>Feedback</l2>: <a href="https://github.com/dodying/UserJs/issues/" target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback" target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471" target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs" target="_blank">4. Gitter</a></span></div><div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2>: </span><br><l0>如果脚本长期暂停且网络无问题，请点击【临时修复】</l0><l1>如果腳本長期暫停且網絡無問題，請點擊【臨時修復】</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click [Try to fix]</l2><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Random Encounter</option></select><br><l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug" placeholder="1" type="text"><br><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button></div><div class="hvAAQuickSite"><span class="hvAATitle"><div class="hvAANew"></div><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><br><l0>留空“姓名”输入框则会表示删除，修改完成后请及时保存</l0><l1>留空“姓名”輸入框則會表示刪除，修改完成後請及時保存</l1><l2> The input box left "name" blank will be deleted, after change please save in time.</l2></div><div><button class="hvAAExport"><l0>导出设置</l0><l1>導出設置</l1><l2>Export Confiuration</l2></button><button class="hvAAImport"><l0>导入设置</l0><l1>導入設置</l1><l2>Import Confiuration</l2></button><textarea class="hvAAConfig"></textarea></div></div>' +
+  '<div class="hvAATab hvAACenter" id="hvAATab-About"><div><span class="hvAAFeedback"><l0>反馈</l0><l1>反饋</l1><l2>Feedback</l2>: <a href="https://github.com/dodying/UserJs/issues/" target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback" target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471" target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs" target="_blank">4. Gitter</a></span></div><div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2>: </span><br><l0>如果脚本长期暂停且网络无问题，请点击【临时修复】</l0><l1>如果腳本長期暫停且網絡無問題，請點擊【臨時修復】</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click [Try to fix]</l2><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Random Encounter</option></select><br><l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug" placeholder="1" type="text"><br><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button></div><div class="hvAAQuickSite"><span class="hvAATitle"><div class="hvAANew"></div><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><br><l0>留空“姓名”输入框则会表示删除，修改完成后请及时保存</l0><l1>留空“姓名”輸入框則會表示刪除，修改完成後請及時保存</l1><l2> The input box left "name" blank will be deleted, after change please save in time.</l2><table><tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr></table><button class="quickSiteAdd"><l01>新增</l01><l2>Add</l2></button></div><div><button class="hvAAExport"><l0>导出设置</l0><l1>導出設置</l1><l2>Export Confiuration</l2></button><button class="hvAAImport"><l0>导入设置</l0><l1>導入設置</l1><l2>Import Confiuration</l2></button><textarea class="hvAAConfig"></textarea></div></div>' +
   '<div class="hvAATab hvAACenter" id="hvAATab-Recommend"><span class="hvAATitle"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></span><table><tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>应用到</l0><l1>應用到</l1><l2>Applies to</l2></td><td><l0>说明</l0><l1>說明</l1><l2>Description</l2></td><td>URL</td></tr><tr><td><l0>【HV】购物清单</l0><l1>【HV】購物清單</l1><l2>hvBazaarList</l2></td><td><a href="?s=Bazaar&ss=is" target="_blank">Bazaar</a></td><td><l0>快速生成购物清单</l0><l1>快速生成購物清單</l1><l2>Quickly generate shopping lists</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】喂食</l0><l1>【HV】餵食</l1><l2>hvFeed</l2></td><td><a href="?s=Bazaar&ss=ml" target="_blank">Monster Lab</a></td><td><l0>自动给大于100级的怪物喂开心药丸</l0><l1>自動給大於100級的怪物餵開心藥丸</l1><l2>Automatically feed monster of which level more than 100 on happy pills</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvFeed.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】出售装备</l0><l1>【HV】出售裝備</l1><l2>hvSellEquipment</l2></td><td><a href="?s=Character&ss=ch" target="_blank">Character</a></td><td></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js" target="_blank">Install</a></td></tr><tr><td>Reloader</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894" target="_blank">E-Hentai Forums</a></td></tr><tr><td>RiddleLimiter Plus</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Random Encounter Notification</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Equipment Comparison</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HentaiVerse Better Equipment Shop</td><td></td><td></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319" target="_blank">E-Hentai Forums</a></td></tr></tboby></table></div>' +
   '<div class="hvAATab" id="hvAATab-ChangeLog"><span class="hvAATitle"><l0>更新日志</l0><l1>更新日誌</l1><l2>Change log</l2></span><div>v2.66<br>1. <l0>选项去除: 相当于默认勾选，如Reloader</l0><l1>選項去除: 相當於默認勾選，如Reloader</l1><l2>Options Removed: equal to been checked, such as Reloader</l2><br>2. <l0>选项变更: 装备损坏、任意页面停留竞技场</l0><l1>選項變更: 裝備損壞、任意頁面停留競技場</l1><l2>Options Changed: such as "Damaged Equippment", "Idle Arena"</l2><br>3. <l0>选择新增: 小马弹警框、所有敌人Imperil</l0><l1>選擇新增: 小馬彈警框、所有敵人Imperil</l1><l2>Options Added: "Riddle Alert", "All Enemies Imperil"</l2><br>4. <l0>自动修复: 当敌人状况缺失或数量不对，自行修复</l0><l1>自動修復: 當敵人狀況缺失或數量不對，自行修復</l1><l2>Auto Fix: If some ERROR happened with Enemy Status, auto fix it</l2><br>5. <l0>快捷链接: 可在"关于本脚本"中进行相关设置</l0><l1>快捷鏈接: 可在"關於本腳本"中進行相關設置</l1><l2>Quick Site: can config in tab "About this"</l2><br>6. <l0>攻击规则: 如果敌人相邻两只敌人已死（或不存在），则给其权重增加0.5（相当于不优先攻击这些敌人）</l0><l1>攻擊規則: 如果敵人相鄰兩隻敵人已死（或不存在），則給其權重增加0.5（相當於不優先攻擊這些敵人）</l1><l2>Attack Rule: If the enemy of which adjacent two enemies dead (or does not exist), then its PW increased 0.5 (equal to dont attack these enemies later)</l2></div></div>' +
   '</div><div class="hvAAButtonBox hvAACenter"><button class="hvAAReset"><l0>重置设置</l0><l1>重置設置</l1><l2>Reset</l2></button><button class="hvAAApply"><l0>应用</l0><l1>應用</l1><l2>Apply</l2></button><button class="hvAACancel"><l01>取消</l01><l2>Cancel</l2></button></div>';
@@ -262,25 +262,6 @@ function optionBox() {
     for (i = 0; i < inputs.length; i++) {
       if (getValue(inputs[i].name)) inputs[i].value = getValue(inputs[i].name);
     }
-    var quickSiteTable = cE('table');
-    var _html = '<tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr>';
-    if (g('option').quickSite) {
-      var quickSite = g('option').quickSite;
-      for (i = 0; i < quickSite.length; i++) {
-        _html += '<tr><td><input class="hvAADebug" type="text" value="' + quickSite[i].fav + '"></td><td><input class="hvAADebug" type="text" value="' + quickSite[i].name + '"></td><td><input class="hvAADebug" type="text" value="' + quickSite[i].url + '"></td></tr>';
-      }
-    }
-    _html += '</tbody>';
-    quickSiteTable.innerHTML = _html;
-    gE('.hvAAQuickSite').appendChild(quickSiteTable);
-    var quickSiteAdd = cE('button');
-    quickSiteAdd.innerHTML = '<l01>新增</l01><l2>Add</l2>';
-    quickSiteAdd.onclick = function () {
-      var tr = cE('tr');
-      tr.innerHTML = '<td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td>';
-      gE('.hvAAQuickSite>table>tbody').appendChild(tr);
-    }
-    gE('.hvAAQuickSite').appendChild(quickSiteAdd);
     this.onclick = null;
   }
   gE('input[name="pauseHotkeyStr"]', optionBox).onkeyup = function (e) {
@@ -345,6 +326,11 @@ function optionBox() {
     for (var i = 0; i < inputs.length; i++) {
       setValue(inputs[i].name, inputs[i].value || inputs[i].placeholder);
     }
+  }
+  gE('.quickSiteAdd', optionBox).onclick = function () {
+    var tr = cE('tr');
+    tr.innerHTML = '<td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td>';
+    gE('.hvAAQuickSite>table>tbody', optionBox).appendChild(tr);
   }
   gE('.hvAAConfig', optionBox).onclick = function () {
     this.style.height = 0;
@@ -414,16 +400,24 @@ function optionBox() {
     optionBox.style.display = 'none';
   }
   gE('body').appendChild(optionBox);
-  if (getValue('option')) {
-    var _option = getValue('option', true);
+  if (g('option')) {
     var inputs = gE('input,select', 'all', optionBox);
     for (var i = 0; i < inputs.length; i++) {
-      if (_option[inputs[i].name] || _option[inputs[i].id]) {
+      if (g('option') [inputs[i].name] || g('option') [inputs[i].id]) {
         if (inputs[i].type === 'text' || inputs[i].type === 'select-one' || inputs[i].type === 'number') {
-          inputs[i].value = _option[inputs[i].name];
+          inputs[i].value = g('option') [inputs[i].name];
         } else if (inputs[i].type === 'checkbox') {
-          inputs[i].checked = _option[inputs[i].id];
+          inputs[i].checked = g('option') [inputs[i].id];
         }
+      }
+    }
+    if (g('option').quickSite) {
+      var quickSite = g('option').quickSite;
+      var tr;
+      for (i = 0; i < quickSite.length; i++) {
+        tr = cE('tr');
+        tr.innerHTML = '<td><input class="hvAADebug" type="text" value="' + quickSite[i].fav + '"></td><td><input class="hvAADebug" type="text" value="' + quickSite[i].name + '"></td><td><input class="hvAADebug" type="text" value="' + quickSite[i].url + '"></td>';
+        gE('.hvAAQuickSite>table>tbody', optionBox).appendChild(tr);
       }
     }
   }
