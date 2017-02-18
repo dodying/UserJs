@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.39.114b+332
+// @version     1.39.114c+332
 // @connect     read.qidian.com
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
@@ -45,7 +45,6 @@
 // @include     http://book.qidian.com/info/*
 // @include     http://read.qidian.com/chapter/*/*
 // @include     http://vipreader.qidian.com/BookReader/vip,*,*.aspx
-// @include     http://free.qidian.com/Free/ChapterList.aspx*
 // @include     http://www.qdmm.com/BookReader/*.aspx
 // @include     http://chuangshi.qq.com/bk/*/*-*.html
 // @include     http://yunqi.qq.com/bk/*/*-*.html
@@ -225,10 +224,9 @@ function init() {
     addIRule('book.qidian.com', '起点主站', 'h1>em', '.volume>ul>li>a', '.volume>ul>li:has(.iconfont)>a');
     addCRule('book.qidian.com');
     addCRule('read.qidian.com', '.j_chapterName', '.read-content');
-    addIRule('vipreader.qidian.com', '', '.booktitle>h1', '.box_cont>div.list>ul>li>a', '.box_title:contains(\'VIP\')+.box_cont>div.list>ul>li>a');
-    addCRule('vipreader.qidian.com', '.story_title>h1', '#chaptercontent');
-    addIRule('free.qidian.com', '起点免费', '.book_title>h2>strong', '#book_box>div>div>ul>li>a');
-    chapterRule['free.qidian.com'] = {
+    addCRule('vipreader.qidian.com', '.j_chapterName', '.read-content');
+    addIRule('www.qdmm.com', '起点女生', '.booktitle>h1', 'div.list a', '.box_title:contains(\'VIP\')+.box_cont>div.list>ul>li>a');
+    chapterRule['www.qdmm.com'] = {
       'Deal': function (num, url) {
         GM_xmlhttpRequest({
           method: 'GET',
@@ -256,12 +254,6 @@ function init() {
             thisDownloaded(num, name, content, 0);
           }
         });
-      }
-    };
-    addIRule('www.qdmm.com', '起点女生', '.booktitle>h1', 'div.list a', '.box_title:contains(\'VIP\')+.box_cont>div.list>ul>li>a');
-    chapterRule['www.qdmm.com'] = {
-      'Deal': function (num, url) {
-        chapterRule['free.qidian.com'].Deal(num, url);
       }
     };
     addIRule('chuangshi.qq.com', '创世中文网', '.title>a>b', 'div.list>ul>li>a', 'div.list:has(span.f900)>ul>li>a');
