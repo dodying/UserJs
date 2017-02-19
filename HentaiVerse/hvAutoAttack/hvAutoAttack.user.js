@@ -11,7 +11,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.66g
+// @version      2.66h
 // @compatible   Firefox with Greasemonkey
 // @compatible   Chrome with Tampermonkey
 // @compatible   Android with Firefox and usi
@@ -196,9 +196,9 @@ function addStyle(lang) {
   '.hvAAConfig{width:100%;height:16px;}' +
   '.hvAAButtonBox{position:relative;top:440px;}' +
   '.hvAAButtonBox>button{margin:0 1px;}' +
-  '.siteBar{position:absolute;top:100px;left:' + (boxWidth + 2) + 'px;font-size:12pt;text-align:left;}' +
-  '.siteBar>span{display:block;}' +
-  '.siteBar>span>a{text-decoration:none;}' +
+  '.quickSiteBar{position:absolute;top:100px;left:' + (boxWidth + 2) + 'px;font-size:12pt;text-align:left;}' +
+  '.quickSiteBar>span{display:block;}' +
+  '.quickSiteBar>span>a{text-decoration:none;}' +
   '.favicon{width:16px;height:16px;margin:-3px 1px;border:1px solid #000;border-radius:3px;}' +
   '.answerBar{z-index:1000;width:710px;height:40px;position:absolute;top:50px;left:345px;display:table;border-spacing:5px;}' +
   '.answerBar>div{border:4px solid red;display:table-cell;cursor:pointer;}' +
@@ -494,23 +494,23 @@ function pauseChange() { //暂停状态更改
   }
 }
 function quickSite() { //快捷站点
-  var siteBar = cE('div');
-  siteBar.className = 'siteBar';
-  siteBar.innerHTML = '<span><a href="javascript:void(0);"class="siteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
+  var quickSiteBar = cE('div');
+  quickSiteBar.className = 'quickSiteBar';
+  quickSiteBar.innerHTML = '<span><a href="javascript:void(0);"class="quickSiteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
   if (g('option').quickSite) {
     var quickSite = g('option').quickSite;
     for (var i = 0; i < quickSite.length; i++) {
-      siteBar.innerHTML += '<span><a href="' + quickSite[i].url + '"target="_blank">' + ((quickSite[i].fav) ? '<img src="' + quickSite[i].fav + '"class="favicon"></img>' : '') + quickSite[i].name + '</a></span>';
+      quickSiteBar.innerHTML += '<span><a href="' + quickSite[i].url + '"target="_blank">' + ((quickSite[i].fav) ? '<img src="' + quickSite[i].fav + '"class="favicon"></img>' : '') + quickSite[i].name + '</a></span>';
     }
   }
-  gE('.siteBarToggle', siteBar).onclick = function () {
-    var spans = gE('span', 'all', siteBar);
+  gE('.quickSiteBarToggle', quickSiteBar).onclick = function () {
+    var spans = gE('span', 'all', quickSiteBar);
     for (var i = 1; i < spans.length; i++) {
       spans[i].style.display = (this.textContent === '<<') ? 'none' : 'block';
     }
     this.textContent = (this.textContent === '<<') ? '>>' : '<<';
   }
-  gE('body').appendChild(siteBar);
+  gE('body').appendChild(quickSiteBar);
 }
 function reloader() {
   var script = cE('script');
@@ -1454,7 +1454,7 @@ function setNotice(e) { //桌面通知
               time: 3
             }
           }
-        ][gE('select[name="lang"]').value][e];
+        ][g('lang')][e];
         var n = new Notification(notification.title, {
           body: notification.text,
           icon: '/y/hentaiverse.png'
