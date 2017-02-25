@@ -41,6 +41,12 @@ In this example the script will attack enemy 1.
 
 #### Latest
 
+##### 2.67
+1. 选择新增: Ether Tap
+
+###### English
+1. Options Added: "Ether Tap"
+
 ##### 2.66
 1. 选项去除: 相当于默认勾选，如Reloader
 2. 选项变更: 装备损坏、任意页面停留竞技场
