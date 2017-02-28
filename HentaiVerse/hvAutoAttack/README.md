@@ -41,6 +41,14 @@ In this example the script will attack enemy 1.
 
 #### Latest
 
+##### 2.68
+1. 功能移除: 掉落监测（已独立为一个脚本，可通过`推荐脚本`添加）
+2. 选项变更: 自动竞技场
+
+###### 2.68-English
+1. Options Removed: "dropMonitor"
+2. Options Changed: "Idle Arena"
+
 ##### 2.67
 1. 选择新增: Ether Tap
 
@@ -49,7 +57,7 @@ In this example the script will attack enemy 1.
 
 ##### 2.66
 1. 选项去除: 相当于默认勾选，如Reloader
-2. 选项变更: 装备损坏、任意页面停留竞技场
+2. 选项变更: 装备损坏、闲置竞技场
 3. 选择新增: 小马弹警框、所有敌人Imperil
 4. 自动修复: 当敌人状况缺失或数量不对，自行修复
 5. 快捷链接: 可在"关于本脚本"中进行相关设置
