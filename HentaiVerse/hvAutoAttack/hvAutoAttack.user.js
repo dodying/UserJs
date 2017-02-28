@@ -11,10 +11,11 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.67
-// @compatible   Firefox with Greasemonkey
-// @compatible   Chrome with Tampermonkey
-// @compatible   Android with Firefox and usi
+// @version      2.68
+// @compatible   Firefox + Greasemonkey
+// @compatible   Chrome + Tampermonkey
+// @compatible   Android + Firefox + Usi
+// @compatible   iPhone/iPad(Jailbroken) + UserscriptLoader
 // @grant        unsafeWindow
 // @run-at       document-end
 // ==/UserScript==
@@ -23,11 +24,12 @@
     setTimeout(goto, 5 * 60 * 1000);
     return;
   }
+  g('version', '2.68');
   if (getValue('option')) {
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
     addStyle(g('lang'));
-    if (GM_info && g('option').version !== GM_info.script.version.substring(0, 4)) {
+    if (g('option').version !== g('version')) {
       gE('.hvAAButton').click();
       gE('#hvAATab-ChangeLog').style.zIndex = 1;
       _alert(0, 'hvAutoAttack版本更新，请重新设置\n强烈推荐【重置设置】后再设置。', 'hvAutoAttack版本更新，請重新設置\n強烈推薦【重置設置】後再設置。', 'hvAutoAttack version update, please reset\nIt\'s recommended to reset all configuration.');
@@ -130,12 +132,6 @@ function main() { //主程序
   g('oc', parseInt(gE('.cwbt2').textContent));
   battleInfo(); //战斗战况
   countMonsterHP(); //统计敌人血量
-  if (g('option').delayAlert) {
-    g('delayAlert', setTimeout(function () {
-      setAlert('default', 3);
-    }, g('option').delayAlertTime * 1000));
-  }
-  if (g('option').delayReload) g('delayReload', setTimeout(goto, g('option').delayReloadTime * 1000));
   if (gE('#ikey_p')) autoUseGem(); //自动使用宝石
   if (g('end')) return;
   if (g('mp') < g('option').mp2 || g('sp') < g('option').sp2 || g('hp') <= g('option').hp2) deadSoon(); //自动回血回魔
@@ -161,34 +157,34 @@ function addStyle(lang) {
   gE('head').appendChild(langStyle);
   var globalStyle = cE('style');
   var boxWidth = gE('.stuffbox').offsetWidth;
-  globalStyle.textContent = '' +
+  var cssContent = '' +
   'button{border-radius:3px;border:2px solid #808080;}' +
   'l0,l1,l01,l2{display:none;}' + //l0: 简体 l1: 繁体 l01:简繁体共用 l2: 英文
   '#riddleform>div:nth-child(3)>img{width:700px;}' +
   '.hvAALog{font-size:20px;}' +
   '.hvAAButton{top:4px;left:' + (boxWidth - 24 - 50) + 'px;position:absolute;z-index:9999;cursor:pointer;}' +
-  '#hvAABox{left:calc(50% - 350px);top:50px;font-size:12pt!important;z-index:9999;width:700px;height:510px;position:absolute;text-align:justify;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;}' +
+  '#hvAABox{left:calc(50% - 350px);top:50px;font-size:18px!important;z-index:9999;width:700px;height:510px;position:absolute;text-align:justify;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;}' +
   '.hvAATablist{position:relative;left:14px;}' +
   '.hvAATabmenu{position:absolute;left:-9px;}' +
   '.hvAATabmenu>span>a{display:block;padding:5px 10px;margin:0 10px 0 0;border:1px solid #91a7b4;border-radius:5px;background-color:#E3F1F8;color:#000;text-decoration:none;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}' +
   '.hvAATabmenu:hover{z-index:999999!important;}' +
   '.hvAATabmenu>span:hover{left:-5px;position:relative;}' +
-  '.hvAATabmenu>span:hover>a{color:#0000FF;font-size:large;}' +
-  '.hvAATab{position:absolute;width:605px;height:400px;left:36px;padding:15px;border:1px solid #91A7B4;border-radius:3px;box-shadow:0 2px 3px rgba(0,0,0,0.1);font-size:14pt;color:#666;background:#EDEBDF;overflow:auto;}' +
+  '.hvAATabmenu>span:hover>a{color:#0000FF;}' +
+  '.hvAATab{position:absolute;width:605px;height:400px;left:36px;padding:15px;border:1px solid #91A7B4;border-radius:3px;box-shadow:0 2px 3px rgba(0,0,0,0.1);color:#666;background-color:#EDEBDF;overflow:auto;}' +
   '.hvAATab>div:nth-child(2n){border:1px solid #EAEAEA;background-color:#FAFAFA;}' +
   '.hvAATab>div:nth-child(2n+1){border:1px solid #808080;}' +
   '.hvAATab a{margin:0 2px;}' +
-  '.hvAATab b{font-family:"Times New Roman",Georgia,Serif;font-size:20px;}' +
+  '.hvAATab b{font-family:Georgia,Serif;font-size:larger;}' +
   '.hvAATab:target{z-index:1!important;}' +
   '.hvAATab:not(:target){z-index:0!important;}' +
   '.hvAATab input{margin:0 4px;}' +
   '.hvAATab input.hvAANumber{width:24px;text-align:right;}' +
   '.hvAATab label{cursor:pointer;}' +
-  '.hvAATab table{font-size:smaller;border:2px solid #000;border-collapse:collapse;margin:0 auto;}' +
-  '.hvAATab table>tbody>tr:nth-child(1)>*{font-weight:bold;font-size:18px;}' +
+  '.hvAATab table{border:2px solid #000;border-collapse:collapse;margin:0 auto;}' +
+  '.hvAATab table>tbody>tr:nth-child(1)>*{font-weight:bold;font-size:larger;}' +
   '.hvAATab table>tbody>tr>*{border:1px solid #000;}' +
   '.hvAACenter{text-align:center;}' +
-  '.hvAATitle{font-weight:bolder;font-size:larger;}' +
+  '.hvAATitle{font-weight:bolder;}' +
   '.hvAANew{width:25px;height:25px;float:left;background:transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAAcElEQVQ4jbVRSQ4AIQjz/59mTiZIF3twmnCwFAq4FkeFXM+5vCzohYxjPMtfxS8CN6iqQ7TfE0wrODxVbzJNgoaTo4CmbBO1ZWICouQ0DHaL259MEzaU+w8pZOdSjcUgaPJDHCbO0A2kuAiuwPGQ+wBms12x8HExTwAAAABJRU5ErkJggg==) no-repeat;background-position:center;}' +
   '#hvAATab-Alarm input[type="text"]{width:512px;}' +
   '.testAlarms>div{border:2px solid #000;}' +
@@ -196,13 +192,18 @@ function addStyle(lang) {
   '.hvAAConfig{width:100%;height:16px;}' +
   '.hvAAButtonBox{position:relative;top:440px;}' +
   '.hvAAButtonBox>button{margin:0 1px;}' +
-  '.quickSiteBar{position:absolute;top:100px;left:' + (boxWidth + 2) + 'px;font-size:12pt;text-align:left;}' +
+  '.quickSiteBar{position:absolute;top:100px;left:' + (boxWidth + 2) + 'px;font-size:18px;text-align:left;}' +
   '.quickSiteBar>span{display:block;}' +
   '.quickSiteBar>span>a{text-decoration:none;}' +
   '.favicon{width:16px;height:16px;margin:-3px 1px;border:1px solid #000;border-radius:3px;}' +
   '.answerBar{z-index:1000;width:710px;height:40px;position:absolute;top:50px;left:345px;display:table;border-spacing:5px;}' +
   '.answerBar>div{border:4px solid red;display:table-cell;cursor:pointer;}' +
   '.answerBar>div:hover{background:rgba(63,207,208,0.20);}';
+  if (/Android|iPhone|iPad/.test(navigator.userAgent)) {
+    cssContent += '.hvAAButton>img{width:150%;height:150%;}' +
+    '#hvAABox{font-size:22px!important;}';
+  }
+  globalStyle.textContent = cssContent;
   gE('head').appendChild(globalStyle);
   optionButton(lang);
 }
@@ -225,36 +226,23 @@ function optionBox() {
   optionBox.id = 'hvAABox';
   optionBox.innerHTML = '' +
   '<div class="hvAACenter"><h1 style="display:inline;"><l0>hvAutoAttack设置</l0><l1>hvAutoAttack設置</l1><l2>hvAutoAttack Configuration</l2></h1> <l0>语言</l0><l1>語言</l1><l2></l2><select name="lang"><option value="0">简体中文</option><option value="1">繁體中文</option><option value="2">English</option></select></div><div class="hvAATablist">' +
-  '<div class="hvAATabmenu"><span><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a></span><span><a href="#hvAATab-Self"><l0>对自身技能</l0><l1>對自身技能</l1><l2>Supportive Spells</l2></a></span><span><a href="#hvAATab-Debuff"><l01>De技能</l01><l2>Deprecating Spells</l2></a></span><span><a href="#hvAATab-Skill"><l01>其他技能</l01><l2>Other Spells</l2></a></span><span><a href="#hvAATab-Scroll"><l0>卷轴</l0><l1>捲軸</l1><l2>Scroll</l2></a></span><span><a href="#hvAATab-Infusion"><l0>魔药</l0><l1>魔藥</l1><l2>Infusion</l2></a></span><span><a href="#hvAATab-Alarm"><l0>警报</l0><l1>警報</l1><l2>Alarm</l2></a></span><span><a href="#hvAATab-Rule"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></a></span><span class="hvAAShowDrop"><a href="#hvAATab-Drop"><l0>掉落监测</l0><l1>掉落監測</l1><l2>Drops Tracking</l2></a></span><span class="hvAAShowAbout"><a href="#hvAATab-About"><l0>关于本脚本</l0><l1>關於本腳本</l1><l2>About This</l2></a></span><span><a href="#hvAATab-Recommend"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></a></span><span><a href="#hvAATab-ChangeLog"><l0>更新日志</l0><l1>更新日誌</l1><l2>ChangeLog</l2></a></span></div>' +
-  '<div class="hvAATab" id="hvAATab-Main"><div class="hvAACenter" title="0. Draughts\n1. Gems\n2. Potions (Or Cure/Full-Cure)\n3. Elixirs"><span style="color:green;">HP: 0.<input class="hvAANumber" name="hp0" placeholder="95" type="text">% 1.<input class="hvAANumber" name="hp1" placeholder="50" type="text">% 2.<input class="hvAANumber" name="hp2" placeholder="50" type="text">% 3.<input class="hvAANumber" name="hp3" placeholder="5" type="text">%</span><br><span style="color:blue;">MP: 0.<input class="hvAANumber" name="mp0" placeholder="95" type="text">% 1.<input class="hvAANumber" name="mp1" placeholder="70" type="text">% 2.<input class="hvAANumber" name="mp2" placeholder="10" type="text">% 3.<input class="hvAANumber" name="mp3" placeholder="5" type="text">%</span><br><span style="color:red;">SP: 0.<input class="hvAANumber" name="sp0" placeholder="95" type="text">% 1.<input class="hvAANumber" name="sp1" placeholder="75" type="text">% 2.<input class="hvAANumber" name="sp2" placeholder="50" type="text">% 3.<input class="hvAANumber" name="sp3" placeholder="5" type="text">%</span><br><input id="lastElixir" type="checkbox"><label for="lastElixir"><l0>当技能与药水CD时，使用</l0><l1>當技能與藥水CD時，使用</l1><l2>If all spells and potions are still in countdown, use </l2><b>Last Elixir</b>.</label></div><div class="hvAACenter" id="attackStatus" style="color:red;"><b>*<l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2></b>: <select name="attackStatus"><option value="-1"></option><option value="0">物理 / Physical</option><option value="1">火 / Fire</option><option value="2">冰 / Cold</option><option value="3">雷 / Elec</option><option value="4">风 / Wind</option><option value="5">圣 / Divine</option><option value="6">暗 / Forbidden</option></select></div><div><b><l0>暂停相关</l0><l1>暫停相關</l1><l2>Pause with</l2></b>: <input id="pauseButton" type="checkbox"><label for="pauseButton"><l0>使用按钮</l0><l1>使用按鈕</l1><l2>Button</l2>; </label><input id="pauseHotkey" type="checkbox"><label for="pauseHotkey"><l0>使用热键</l0><l1>使用熱鍵</l1><l2>Hotkey</l2>: <input name="pauseHotkeyStr" placeholder="Shift" style="width:30px;" type="text"><input class="hvAANumber" name="pauseHotkeyCode" placeholder="16" disabled="true" type="text"></label></div><div><b><l0>警报相关</l0><l1>警報相關</l1><l2>To Warn</l2></b>: <input id="alert" type="checkbox"><label for="alert"><l0>开启</l0><l1>開啟</l1><l2>Turn on </l2><b><l0>音频警报</l0><l1>音頻警報</l1><l2>Alarms</l2></b>; </label><input id="notification" type="checkbox"><label for="notification"><l0>开启</l0><l1>開啟</l1><l2>Turn on </l2><b><l01>桌面通知</l01><l2>Notifications</l2></b></label> <button class="testNotification"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div><div><b><l01>内置插件</l01><l2>Built-in Plugin</l2></b>: <l0>开启</l0><l1>開啟</l1><l2>Use </l2><a href="https://forums.e-hentai.org/index.php?showtopic=65126&amp;st=2660&amp;p=4384894&amp;#entry4384894" target="_blank">Reloader</a>; <input id="riddleRadio" type="checkbox"><label for="riddleRadio"><l0>开启</l0><l1>開啟</l1><l2>Use </l2><a href="https://forums.e-hentai.org/index.php?showtopic=65126&amp;st=1020&amp;p=3000982&amp;#entry3000982" target="_blank">RiddleLimiter Plus</a>.</label></div><div><b><l0>技能施放条件</l0><l1>技能施放條件</l1><l2>Offensive Spells Conditions</l2></b>: <l0>中级: 敌人存活数</l0><l1>中級: 敌人存活數</l1><l2 title="eg: Inferno"> 2nd Tier: Enemies alive</l2> ≥ <input class="hvAANumber" name="middleSkill" placeholder="3" type="text">; <l0>高级: 敌人存活数</l0><l1>高級: 敌人存活數</l1><l2 title="eg: Flames of Loki">3rd Tier: Enemies alive</l2> ≥ <input class="hvAANumber" name="highSkill" placeholder="5" type="text"></div><div><input id="spiritStance" type="checkbox"><label for="spiritStance"><l0>当OC</l0><l1>當OC</l1><l2>If OC</l2> ≥ <input class="hvAANumber" name="spiritStance_oc" placeholder="50" type="text"><l01>且SP</l01><l2>and SP</l2> ≥ <input class="hvAANumber" name="spiritStance_sp" placeholder="80" type="text">%<l0>，开启</l0><l1>，開啟</l1><l2>, activate </l2><b>Spirit Stance</b>.</label></div><div title="防止脚本莫名暂停\nTo prevent the script from stopping due to unforeseen problems"><input id="delayAlert" type="checkbox"><label for="delayAlert"><l0>页面停留</l0><l1>頁面停留</l1><l2>If the page stays idle for </l2><input class="hvAANumber" name="delayAlertTime" placeholder="10" type="text"><l0>秒后，</l0><l1>秒後，</l1><l2>s, </l2><b><l0>警报</l0><l1>警報</l1><l2>alarm</l2></b>; </label><input id="delayReload" type="checkbox"><label for="delayReload"><l0>页面停留</l0><l1>頁面停留</l1><l2>If the page stays idle for</l2><input class="hvAANumber" name="delayReloadTime" placeholder="15" type="text"><l0>秒后，</l0><l1>秒後，</l1><l2>s, </l2><b><l0>刷新页面</l0><l1>刷新頁面</l1><l2>reload page</l2></b>.</label></div><div><l0>当</l0><l1>當</l1><l2>If </l2><b><l0>小马</l0><l1>小馬</l1><l2>riddle </l2></b><l0>答题时间</l0><l1>答題時間</l1><l2>ETR</l2> ≤ <input class="hvAANumber" name="riddleAnswerTime" placeholder="3" type="text"><l0>秒，如果输入框为空则随机生成答案并提交</l0><l1>秒，如果輸入框為空則隨機生成答案並提交</l1><l2>s and no answer has been chosen yet, a random answer will be generated and submitted</l2>.</div><div><input id="riddleAlert" type="checkbox"><label for="riddleAlert"><l0>当遇小马答题时，弹出警告框</l0><l1>當遇小馬答題時，彈出警告框</l1><l2>If RIDDLE, ALERT</l2></label> <button class="testAlert"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button><br><l0>说明: 1.Firefox: 聚焦本标签页 2.Chrome: 锁定全部标签页</l0><l1>說明: 1.Firefox: 聚焦本標籤頁 2.Chrome: 鎖定全部標籤頁</l1><l2>Description: 1.Firefox: Focus this tab 2.Chrome: Lock all tabs</l2></div><div><l0>当</l0><l1>當</l1><l2>If </l2>Stamina ≤ <input class="hvAANumber" name="staminaNow" placeholder="30" type="text"><l0>或损失</l0><l1>或損失</l1><l2> or lost </l2>Stamina ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text"><l0>时，脚本暂停并警报</l0><l1>時，腳本暫停並警報</l1><l2>, pause script and alarm</l2>.</div><div><input id="autoArena" type="checkbox"><label for="autoArena"><l01>在</l01><l2>Idle in </l2><b><l0>任意页面</l0><l1>任意頁面</l1><l2>any page </l2></b><l01>停留</l01><l2>for </l2><input class="hvAANumber" name="autoArenaTime" placeholder="60" type="text"><l0>秒后，开始竞技场</l0><l1>秒後，開始競技場</l1><l2>s, start Arena</l2></label> <button class="autoArenaReset"><l01>重置</l01><l2>Reset</l2></button>;<br><l0>进行的竞技场相对应等级</l0><l1>進行的競技場相對應等級</l1><l2>The levels of the Arena you want to complete</l2>:  <a class="hvAAShowLevels" href="javascript:void(0);"><l0>显示更多</l0><l1>顯示更多</l1><l2>Show more</l2></a><br><div class="hvAAArenaLevels"><input id="arLevel_1" name="1" type="checkbox"><label for="arLevel_1">1</label> <input id="arLevel_10" name="10" type="checkbox"><label for="arLevel_10">10</label> <input id="arLevel_20" name="20" type="checkbox"><label for="arLevel_20">20</label> <input id="arLevel_30" name="30" type="checkbox"><label for="arLevel_30">30</label> <input id="arLevel_40" name="40" type="checkbox"><label for="arLevel_40">40</label> <input id="arLevel_50" name="50" type="checkbox"><label for="arLevel_50">50</label> <input id="arLevel_60" name="60" type="checkbox"><label for="arLevel_60">60</label> <input id="arLevel_70" name="70" type="checkbox"><label for="arLevel_70">70</label> <input id="arLevel_80" name="80" type="checkbox"><label for="arLevel_80">80</label> <input id="arLevel_90" name="90" type="checkbox"><label for="arLevel_90">90</label> <input id="arLevel_100" name="100" type="checkbox"><label for="arLevel_100">100</label> <input id="arLevel_110" name="110" type="checkbox"><label for="arLevel_110">110</label> <input id="arLevel_120" name="120" type="checkbox"><label for="arLevel_120">120</label> <input id="arLevel_130" name="130" type="checkbox"><label for="arLevel_130">130</label> <input id="arLevel_140" name="140" type="checkbox"><label for="arLevel_140">140</label> <input id="arLevel_150" name="150" type="checkbox"><label for="arLevel_150">150</label> <input id="arLevel_165" name="165" type="checkbox"><label for="arLevel_165">165</label> <input id="arLevel_180" name="180" type="checkbox"><label for="arLevel_180">180</label> <input id="arLevel_200" name="200" type="checkbox"><label for="arLevel_200">200</label> <input id="arLevel_225" name="225" type="checkbox"><label for="arLevel_225">225</label> <input id="arLevel_250" name="250" type="checkbox"><label for="arLevel_250">250</label> <input id="arLevel_300" name="300" type="checkbox"><label for="arLevel_300">300</label></div><input name="autoArenaLevels" style="width:100%;" type="text" disabled="true"></div><div><input id="dropMonitor" type="checkbox"><label for="dropMonitor"><l0>开启</l0><l1>開啟</l1><l2>Turn on </l2><b><l0>掉落监测</l0><l1>掉落監測</l1><l2>Drops Tracking</l2></b>; <l0>记录装备的最低品质</l0><l1>記錄裝備的最低品質</l1><l2>Minimum drop quality</l2>: <select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div><div><l0>当装备损坏时，</l0><l1>當裝備損壞時，</l1><l2>If equipments damaged, </l2><input id="damageFix" type="checkbox"><label for="damageFix"><b><l0>尝试修复</l0><l1>嘗試修復</l1><l2>try to repair</l2></b></label>; <input id="damageAlert" type="checkbox"><label for="damageAlert"><b><l0>警报</l0><l1>警報</l1><l2>alarm</l2></b></label>.</div><div><div class="hvAANew"></div><input id="etherTap" type="checkbox"><label for="etherTap">Ether Tap: <l0>对魔力合流的敌人进行物理攻击</l0><l1>對魔力合流的敵人進行物理攻擊</l1><l2>Arcane Blow enemy which has Coalesced Mana</l2></label></div></div>' +
-  '<div class="hvAATab" id="hvAATab-Self"><input id="buffSkill" type="checkbox"><label for="buffSkill"><span class="hvAATitle"><l0>对自身技能</l0><l1>對自身技能</l1><l2>Supportive Spells</l2></span></label><div><l0>施放条件（有一个成立就行）</l0><l1>施放條件（有一個成立就行）</l1><l2>Conditions (cast when at least 1 in 3 is satisfied) </l2>: <br>1. <l0>总回合数</l0><l1>總回合數</l1><l2>Total number of turns</l2> ≥ <input class="hvAANumber" name="buffSkillAllRound" placeholder="12" type="text"><br>2. <l0>Boss存活数</l0><l1>Boss存活數</l1><l2>Number of bosses alive</l2> ≥ <input class="hvAANumber" name="buffSkillBoss" placeholder="1" type="text"><br>3. <l0>敌人存活数</l0><l1>敌人存活數</l1><l2>Number of enemies alive</l2> ≥ <input class="hvAANumber" name="buffSkillMonster" placeholder="6" type="text"></div><div><b><l01>增益技能</l01><l2>Spells </l2></b><l0>（Buff不存在就施放的技能，按【施放顺序】排序）</l0><l1>（Buff不存在就施放的技能，按【施放順序】排序）</l1><l2>(Cast or recast spells if the buff is not present, sorted in cast order)</l2>: <br><input id="buffSkill_HD" type="checkbox"><label for="buffSkill_HD">Health Draught</label><input id="buffSkill_MD" type="checkbox"><label for="buffSkill_MD">Mana Draught</label><input id="buffSkill_SD" type="checkbox"><label for="buffSkill_SD">Spirit Draught</label><br><input id="buffSkill_Pr" type="checkbox"><label for="buffSkill_Pr">Protection</label><input id="buffSkill_SL" type="checkbox"><label for="buffSkill_SL">Spark of Life</label><input id="buffSkill_SS" type="checkbox"><label for="buffSkill_SS">Spirit Shield</label><input id="buffSkill_Ha" type="checkbox"><label for="buffSkill_Ha">Haste</label><br><input id="buffSkill_AF" type="checkbox"><label for="buffSkill_AF">Arcane Focus</label><input id="buffSkill_He" type="checkbox"><label for="buffSkill_He">Heartseeker</label><input id="buffSkill_Re" type="checkbox"><label for="buffSkill_Re">Regen</label><input id="buffSkill_SV" type="checkbox"><label for="buffSkill_SV">Shadow Veil</label><input id="buffSkill_Ab" type="checkbox"><label for="buffSkill_Ab">Absorb</label></div><div><b><l0>获得Channel时</l0><l1>獲得Channel時</l1><l2>During Channeling effect</l2></b><l0>，此时1点MP施法与150%伤害，</l0><l1>，此時1點MP施法與150%傷害，</l1><l2>, which means 1mp spell cost and 150% spell damage,</l2><br><b><l01>先ReBuff</l01><l2> Recast if</l2></b>: <l01>buff存在</l01><l2>spell effect expires in</l2> ≤ <input class="hvAANumber" name="channelReBuff" placeholder="20" type="text"><l0>回合时，重新使用该技能</l0><l1>回合時，重新使用該技能</l1><l2> turns</l2>.<br><b><l01>再施放Channel技能</l01><l2>These skills will be casted during Channeling effect </l2></b><l0>（按【施放顺序】排序）</l0><l1>（按【施放順序】排序）</l1><l2>(sorted in cast order)</l2>: <br><input id="channelSkill_Pr" type="checkbox"><label for="channelSkill_Pr">Protection</label><input id="channelSkill_SL" type="checkbox"><label for="channelSkill_SL">Spark of Life</label><input id="channelSkill_SS" type="checkbox"><label for="channelSkill_SS">Spirit Shield</label><input id="channelSkill_Ha" type="checkbox"><label for="channelSkill_Ha">Haste</label><br><input id="channelSkill_AF" type="checkbox"><label for="channelSkill_AF">Arcane Focus</label><input id="channelSkill_He" type="checkbox"><label for="channelSkill_He">Heartseeker</label><input id="channelSkill_Re" type="checkbox"><label for="channelSkill_Re">Regen</label><input id="channelSkill_SV" type="checkbox"><label for="channelSkill_SV">Shadow Veil</label><input id="channelSkill_Ab" type="checkbox"><label for="channelSkill_Ab">Absorb</label></div></div>' +
+  '<div class="hvAATabmenu"><span><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a></span><span><a href="#hvAATab-Self"><l0>对自身技能</l0><l1>對自身技能</l1><l2>Supportive Spells</l2></a></span><span><a href="#hvAATab-Debuff"><l01>De技能</l01><l2>Deprecating Spells</l2></a></span><span><a href="#hvAATab-Skill"><l01>其他技能</l01><l2>Other Spells</l2></a></span><span><a href="#hvAATab-Scroll"><l0>卷轴</l0><l1>捲軸</l1><l2>Scroll</l2></a></span><span><a href="#hvAATab-Infusion"><l0>魔药</l0><l1>魔藥</l1><l2>Infusion</l2></a></span><span><a href="#hvAATab-Alarm"><l0>警报</l0><l1>警報</l1><l2>Alarm</l2></a></span><span><a href="#hvAATab-Rule"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></a></span><span class="hvAAShowAbout"><a href="#hvAATab-About"><l0>关于本脚本</l0><l1>關於本腳本</l1><l2>About This</l2></a></span><span><a href="#hvAATab-Recommend"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></a></span><span><a href="#hvAATab-ChangeLog"><l0>更新日志</l0><l1>更新日誌</l1><l2>ChangeLog</l2></a></span></div>' +
+  '<div class="hvAATab" id="hvAATab-Main"><div class="hvAACenter" title="0. Draughts\n1. Gems\n2. Potions (Or Cure/Full-Cure)\n3. Elixirs"><span style="color:green;">HP: 0.<input class="hvAANumber" name="hp0" placeholder="95" type="text">% 1.<input class="hvAANumber" name="hp1" placeholder="50" type="text">% 2.<input class="hvAANumber" name="hp2" placeholder="50" type="text">% 3.<input class="hvAANumber" name="hp3" placeholder="5" type="text">%</span><br><span style="color:blue;">MP: 0.<input class="hvAANumber" name="mp0" placeholder="95" type="text">% 1.<input class="hvAANumber" name="mp1" placeholder="70" type="text">% 2.<input class="hvAANumber" name="mp2" placeholder="10" type="text">% 3.<input class="hvAANumber" name="mp3" placeholder="5" type="text">%</span><br><span style="color:red;">SP: 0.<input class="hvAANumber" name="sp0" placeholder="95" type="text">% 1.<input class="hvAANumber" name="sp1" placeholder="75" type="text">% 2.<input class="hvAANumber" name="sp2" placeholder="50" type="text">% 3.<input class="hvAANumber" name="sp3" placeholder="5" type="text">%</span><br><input id="lastElixir" type="checkbox"><label for="lastElixir"><l0>当技能与药水CD时，使用</l0><l1>當技能與藥水CD時，使用</l1><l2>If all spells and potions are still in countdown, use </l2><b>Last Elixir</b>.</label></div><div class="hvAACenter" id="attackStatus" style="color:red;"><b>*<l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2></b>: <select name="attackStatus"><option value="-1"></option><option value="0">物理 / Physical</option><option value="1">火 / Fire</option><option value="2">冰 / Cold</option><option value="3">雷 / Elec</option><option value="4">风 / Wind</option><option value="5">圣 / Divine</option><option value="6">暗 / Forbidden</option></select></div><div><b><l0>暂停相关</l0><l1>暫停相關</l1><l2>Pause with</l2></b>: <input id="pauseButton" type="checkbox"><label for="pauseButton"><l0>使用按钮</l0><l1>使用按鈕</l1><l2>Button</l2>; </label><input id="pauseHotkey" type="checkbox"><label for="pauseHotkey"><l0>使用热键</l0><l1>使用熱鍵</l1><l2>Hotkey</l2>: <input name="pauseHotkeyStr" placeholder=" " style="width:30px;" type="text"><input class="hvAANumber" name="pauseHotkeyCode" placeholder="32" disabled="true" type="text"></label></div><div><b><l0>警报相关</l0><l1>警報相關</l1><l2>To Warn</l2></b>: <input id="alert" type="checkbox"><label for="alert"><l0>开启<b>音频警报</b></l0><l1>開啟<b>音頻警報</b></l1><l2>Turn on <b>Alarms</b></l2>; </label><input id="notification" type="checkbox"><label for="notification"><l0>开启<b>桌面通知</b></l0><l1>開啟<b>桌面通知</b></l1><l2>Turn on <b>Notifications</b></l2></label> <button class="testNotification"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div><div><b><l01>内置插件</l01><l2>Built-in Plugin</l2></b>: <l0>开启</l0><l1>開啟</l1><l2>Use </l2><a href="https://forums.e-hentai.org/index.php?showtopic=65126&amp;st=2660&amp;p=4384894&amp;#entry4384894" target="_blank">Reloader</a>; <input id="riddleRadio" type="checkbox"><label for="riddleRadio"><l0>开启</l0><l1>開啟</l1><l2>Use </l2><a href="https://forums.e-hentai.org/index.php?showtopic=65126&amp;st=1020&amp;p=3000982&amp;#entry3000982" target="_blank">RiddleLimiter Plus</a>.</label></div><div><b><l0>技能施放条件</l0><l1>技能施放條件</l1><l2>Offensive Spells Conditions</l2></b>: <l0>中级: 敌人存活数</l0><l1>中級: 敌人存活數</l1><l2 title="eg: Inferno"> 2nd Tier: Enemies alive</l2> ≥ <input class="hvAANumber" name="middleSkill" placeholder="3" type="text">; <l0>高级: 敌人存活数</l0><l1>高級: 敌人存活數</l1><l2 title="eg: Flames of Loki">3rd Tier: Enemies alive</l2> ≥ <input class="hvAANumber" name="highSkill" placeholder="5" type="text"></div><div><input id="spiritStance" type="checkbox"><label for="spiritStance"><l0>当OC</l0><l1>當OC</l1><l2>If OC</l2> ≥ <input class="hvAANumber" name="spiritStance_oc" placeholder="50" type="text"><l01>且SP</l01><l2>and SP</l2> ≥ <input class="hvAANumber" name="spiritStance_sp" placeholder="80" type="text">%<l0>，开启</l0><l1>，開啟</l1><l2>, activate </l2><b>Spirit Stance</b>.</label></div><div title="防止脚本莫名暂停\nTo prevent the script from stopping due to unforeseen problems"><input id="delayAlert" type="checkbox"><label for="delayAlert"><l0>页面停留</l0><l1>頁面停留</l1><l2>If the page stays idle for </l2><input class="hvAANumber" name="delayAlertTime" placeholder="10" type="text"><l0>秒后，<b>警报</b></l0><l1>秒後，<b>警報</b></l1><l2>s, <b>alarm</b></l2>; </label><input id="delayReload" type="checkbox"><label for="delayReload"><l0>页面停留</l0><l1>頁面停留</l1><l2>If the page stays idle for</l2><input class="hvAANumber" name="delayReloadTime" placeholder="15" type="text"><l0>秒后，<b>刷新页面</b></l0><l1>秒後，<b>刷新頁面</b></l1><l2>s, <b>reload page</b></l2>.</label></div><div><l0>当<b>小马答题</b>时间</l0><l1>當<b>小馬答題</b>時間</l1><l2>If <b>riddle</b> ETR</l2><l0></l0><l1></l1><l2></l2> ≤ <input class="hvAANumber" name="riddleAnswerTime" placeholder="3" type="text"><l0>秒，如果输入框为空则随机生成答案并提交</l0><l1>秒，如果輸入框為空則隨機生成答案並提交</l1><l2>s and no answer has been chosen yet, a random answer will be generated and submitted</l2>.</div><div><input id="riddleAlert" type="checkbox"><label for="riddleAlert"><l0>当遇小马答题时，弹出警告框</l0><l1>當遇小馬答題時，彈出警告框</l1><l2>If RIDDLE, ALERT</l2></label> <button class="testAlert"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button><br><l0>说明: 1.Firefox: 聚焦本标签页 2.Chrome: 锁定全部标签页</l0><l1>說明: 1.Firefox: 聚焦本標籤頁 2.Chrome: 鎖定全部標籤頁</l1><l2>Description: 1.Firefox: Focus this tab 2.Chrome: Lock all tabs</l2></div><div><l0>当</l0><l1>當</l1><l2>If </l2>Stamina ≤ <input class="hvAANumber" name="staminaNow" placeholder="30" type="text"><l0>或损失</l0><l1>或損失</l1><l2> or lost </l2>Stamina ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text"><l0>时，脚本暂停并警报</l0><l1>時，腳本暫停並警報</l1><l2>, pause script and alarm</l2>.</div><div><div class="hvAANew"></div><input id="autoArena" type="checkbox"><label for="autoArena"><b><l0>闲置竞技场</l0><l1>閒置競技場</l1><l2>Auto Arena</l2></b>: <l0>在任意页面停留</l0><l1>在任意頁面停留</l1><l2>Idle in any page for </l2><input class="hvAANumber" name="autoArenaTime" placeholder="60" type="text"><l0>秒后，开始竞技场</l0><l1>秒後，開始競技場</l1><l2>s, start Arena</l2></label> <button class="autoArenaReset"><l01>重置</l01><l2>Reset</l2></button>;<br><l0>进行的竞技场相对应等级</l0><l1>進行的競技場相對應等級</l1><l2>The levels of the Arena you want to complete</l2>:  <a class="hvAAShowLevels" href="javascript:void(0);"><l0>显示更多</l0><l1>顯示更多</l1><l2>Show more</l2></a><br><div class="hvAAArenaLevels"><input id="arLevel_1" value="1,1" type="checkbox"><label for="arLevel_1">1</label> <input id="arLevel_10" value="10,3" type="checkbox"><label for="arLevel_10">10</label> <input id="arLevel_20" value="20,5" type="checkbox"><label for="arLevel_20">20</label> <input id="arLevel_30" value="30,8" type="checkbox"><label for="arLevel_30">30</label> <input id="arLevel_40" value="40,9" type="checkbox"><label for="arLevel_40">40</label> <input id="arLevel_50" value="50,11" type="checkbox"><label for="arLevel_50">50</label> <input id="arLevel_60" value="60,12" type="checkbox"><label for="arLevel_60">60</label> <input id="arLevel_70" value="70,13" type="checkbox"><label for="arLevel_70">70</label> <input id="arLevel_80" value="80,15" type="checkbox"><label for="arLevel_80">80</label> <input id="arLevel_90" value="90,16" type="checkbox"><label for="arLevel_90">90</label> <input id="arLevel_100" value="100,17" type="checkbox"><label for="arLevel_100">100</label> <input id="arLevel_110" value="110,19" type="checkbox"><label for="arLevel_110">110</label><br><input id="arLevel_120" value="120,20" type="checkbox"><label for="arLevel_120">120</label> <input id="arLevel_130" value="130,21" type="checkbox"><label for="arLevel_130">130</label> <input id="arLevel_140" value="140,23" type="checkbox"><label for="arLevel_140">140</label> <input id="arLevel_150" value="150,24" type="checkbox"><label for="arLevel_150">150</label> <input id="arLevel_165" value="165,26" type="checkbox"><label for="arLevel_165">165</label> <input id="arLevel_180" value="180,27" type="checkbox"><label for="arLevel_180">180</label> <input id="arLevel_200" value="200,28" type="checkbox"><label for="arLevel_200">200</label> <input id="arLevel_225" value="225,29" type="checkbox"><label for="arLevel_225">225</label> <input id="arLevel_250" value="250,32" type="checkbox"><label for="arLevel_250">250</label> <input id="arLevel_300" value="300,33" type="checkbox"><label for="arLevel_300">300</label><br><input id="arLevel_RB50" value="RB50,105" type="checkbox"><label for="arLevel_RB50">RB50</label> <input id="arLevel_RB75A" value="RB75A,106" type="checkbox"><label for="arLevel_RB75A">RB75A</label> <input id="arLevel_RB75B" value="RB75B,107" type="checkbox"><label for="arLevel_RB75B">RB75B</label> <input id="arLevel_RB75C" value="RB75C,108" type="checkbox"><label for="arLevel_RB75C">RB75C</label><br><input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label></div><input name="autoArenaLevels" style="width:98%;" type="text" disabled="true"><input name="autoArenaValue" style="width:98%;" type="text" disabled="true"></div><div><l0>当<b>装备损坏</b>时，</l0><l1>當<b>裝備損壞</b>時，</l1><l2>If <b>equipments damaged</b>, </l2><input id="damageFix" type="checkbox"><label for="damageFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>try to repair</l2></label>; <input id="damageAlert" type="checkbox"><label for="damageAlert"><l0>警报</l0><l1>警報</l1><l2>alarm</l2></label>.</div><div><input id="etherTap" type="checkbox"><label for="etherTap"><b>Ether Tap</b>: <l0>对魔力合流的敌人进行物理攻击</l0><l1>對魔力合流的敵人進行物理攻擊</l1><l2>Arcane Blow enemy which has Coalesced Mana</l2></label></div></div>' +
+  '<div class="hvAATab" id="hvAATab-Self"><input id="buffSkill" type="checkbox"><label for="buffSkill"><span class="hvAATitle"><l0>对自身技能</l0><l1>對自身技能</l1><l2>Supportive Spells</l2></span></label><div><l0>施放条件（有一个成立就行）</l0><l1>施放條件（有一個成立就行）</l1><l2>Conditions (cast when at least 1 in 3 is satisfied) </l2>: <br>1. <l0>总回合数</l0><l1>總回合數</l1><l2>Total number of turns</l2> ≥ <input class="hvAANumber" name="buffSkillAllRound" placeholder="12" type="text"><br>2. <l0>Boss存活数</l0><l1>Boss存活數</l1><l2>Number of bosses alive</l2> ≥ <input class="hvAANumber" name="buffSkillBoss" placeholder="1" type="text"><br>3. <l0>敌人存活数</l0><l1>敌人存活數</l1><l2>Number of enemies alive</l2> ≥ <input class="hvAANumber" name="buffSkillMonster" placeholder="6" type="text"></div><div><l0><b>增益技能</b>（Buff不存在就施放的技能，按【施放顺序】排序）</l0><l1><b>增益技能</b>（Buff不存在就施放的技能，按【施放順序】排序）</l1><l2><b>Spells</b> (Cast or recast spells if the buff is not present, sorted in cast order)</l2>: <br><input id="buffSkill_HD" type="checkbox"><label for="buffSkill_HD">Health Draught</label><input id="buffSkill_MD" type="checkbox"><label for="buffSkill_MD">Mana Draught</label><input id="buffSkill_SD" type="checkbox"><label for="buffSkill_SD">Spirit Draught</label><br><input id="buffSkill_Pr" type="checkbox"><label for="buffSkill_Pr">Protection</label><input id="buffSkill_SL" type="checkbox"><label for="buffSkill_SL">Spark of Life</label><input id="buffSkill_SS" type="checkbox"><label for="buffSkill_SS">Spirit Shield</label><input id="buffSkill_Ha" type="checkbox"><label for="buffSkill_Ha">Haste</label><br><input id="buffSkill_AF" type="checkbox"><label for="buffSkill_AF">Arcane Focus</label><input id="buffSkill_He" type="checkbox"><label for="buffSkill_He">Heartseeker</label><input id="buffSkill_Re" type="checkbox"><label for="buffSkill_Re">Regen</label><input id="buffSkill_SV" type="checkbox"><label for="buffSkill_SV">Shadow Veil</label><input id="buffSkill_Ab" type="checkbox"><label for="buffSkill_Ab">Absorb</label></div><div><l0><b>获得Channel时</b>，此时1点MP施法与150%伤害，</l0><l1><b>獲得Channel時</b>，此時1點MP施法與150%傷害，</l1><l2><b>During Channeling effect</b>, which means 1mp spell cost and 150% spell damage,</l2><br><l01><b>先ReBuff</b>: buff存在</l01><l2><b>Recast</b>: if spell effect expires in</l2> ≤ <input class="hvAANumber" name="channelReBuff" placeholder="20" type="text"><l0>回合时，重新使用该技能</l0><l1>回合時，重新使用該技能</l1><l2> turns</l2>.<br><l0><b>再施放Channel技能</b>（按【施放顺序】排序）</l0><l1><b>再施放Channel技能</b>（按【施放順序】排序）</l1><l2><b>These skills will be casted during Channeling effect</b> (sorted in cast order)</l2>: <br><input id="channelSkill_Pr" type="checkbox"><label for="channelSkill_Pr">Protection</label><input id="channelSkill_SL" type="checkbox"><label for="channelSkill_SL">Spark of Life</label><input id="channelSkill_SS" type="checkbox"><label for="channelSkill_SS">Spirit Shield</label><input id="channelSkill_Ha" type="checkbox"><label for="channelSkill_Ha">Haste</label><br><input id="channelSkill_AF" type="checkbox"><label for="channelSkill_AF">Arcane Focus</label><input id="channelSkill_He" type="checkbox"><label for="channelSkill_He">Heartseeker</label><input id="channelSkill_Re" type="checkbox"><label for="channelSkill_Re">Regen</label><input id="channelSkill_SV" type="checkbox"><label for="channelSkill_SV">Shadow Veil</label><input id="channelSkill_Ab" type="checkbox"><label for="channelSkill_Ab">Absorb</label></div></div>' +
   '<div id="hvAATab-Debuff" class="hvAATab"><input id="debuffSkill" type="checkbox"><label for="debuffSkill"><span class="hvAATitle"><l01>De技能</l01><l2>Deprecating Spells</l2></span><l0>（按【施放顺序】排序）</l0><l1>（按【施放順序】排序）</l1><l2> (sort in cast order)</l2></label><div><l01>特殊</l01><l2>Special</l2><input id="debuffSkill_All_Im" type="checkbox"><label for="debuffSkill_All_Im"><l0>给所有敌人上Imperil</l0><l1>給所有敵人上Imperil</l1><l2>Imperiled all enemies.</l2></label></div><div><l0>攻击目标</l0><l1>攻擊目標</l1><l2>Spell targets</l2>: <select name="debuffSkillMode"><option value="-1"></option><option value="0">0. 所有敌人 / All enemies</option><option value="1">1. Bosses only</option></select><br><input id="debuffSkill_Im" type="checkbox"><label for="debuffSkill_Im">Imperil</label><input id="debuffSkill_MN" type="checkbox"><label for="debuffSkill_MN">MagNet</label><input id="debuffSkill_Si" type="checkbox"><label for="debuffSkill_Si">Silence</label><input id="debuffSkill_Dr" type="checkbox"><label for="debuffSkill_Dr">Drain</label><input id="debuffSkill_We" type="checkbox"><label for="debuffSkill_We">Weaken</label><input id="debuffSkill_Co" type="checkbox"><label for="debuffSkill_Co">Confuse</label></div></div>' +
-  '<div class="hvAATab" id="hvAATab-Skill"><l0>注：本标签所有输入框皆表示阈值</l0><l1>注：本標籤所有輸入框皆表示閾值</l1><l2>Note: All input fields in this label indicate thresholds</l2><br><l0>1. OC值 2. 敌人存活数 3. Boss存活数</l0><l1>1. OC值 2. 怪獸存活數 3. Boss存活數</l1><l2>1. OC value 2. Enemies survival number 3. Boss survival number</l2><br><input id="skill" type="checkbox"><label for="skill"><span class="hvAATitle"><l01>其他技能</l01><l2>Other Spells</l2></span> <l0>（按【施放顺序】排序）</l0><l1>（按【施放順序】排序）</l1><l2>(Sort by cast order)</l2></label><br><input id="skill_OFC" type="checkbox"><label for="skill_OFC"><l0>友情小马砲</l0><l1>友情小馬砲</l1><l2>OFC</l2>: </label><input class="hvAANumber" name="skillOC_OFC" type="text"><input class="hvAANumber" name="skillMonster_OFC" type="text"><input class="hvAANumber" name="skillBoss_OFC" type="text"><br><input id="skill_FRD" type="checkbox"><label for="skill_FRD"><l0>龙吼</l0><l1>龍吼</l1><l2>FRD</l2>: </label><input class="hvAANumber" name="skillOC_FRD" type="text"><input class="hvAANumber" name="skillMonster_FRD" type="text"><input class="hvAANumber" name="skillBoss_FRD" type="text"><br><l0>战斗风格</l0><l1>戰鬥風格</l1><l2>Fighting style</l2>: <select name="fightingStyle"><option value="1">二天一流 / Niten Ichiryu</option><option value="2">单手 / One-Handed</option><option value="3">双手 / 2-Handed Weapon</option><option value="4">双持 / Dual Wielding</option><option value="5">法杖 / Staff</option></select><br><input id="skill_3" type="checkbox"><label for="skill_3"><l0>3阶（如果有）</l0><l1>3階（如果有）</l1><l2>T3(if exist)</l2>: </label><input class="hvAANumber" name="skillOC_3" type="text"><input class="hvAANumber" name="skillMonster_3" type="text"><input class="hvAANumber" name="skillOCBoss_3" type="text"><br><input id="skill_2" type="checkbox"><label for="skill_2"><l0>2阶（如果有）</l0><l1>2階（如果有）</l1><l2>T2(if exist)</l2>: </label><input class="hvAANumber" name="skillOC_2" type="text"><input class="hvAANumber" name="skillMonster_2" type="text"><input class="hvAANumber" name="skillOCBoss_2" type="text"><br><input id="skill_1" type="checkbox"><label for="skill_1"><l0>1阶</l0><l1>1階</l1><l2>T1</l2>: </label><input class="hvAANumber" name="skillOC_1" type="text"><input class="hvAANumber" name="skillMonster_1" type="text"><input class="hvAANumber" name="skillOCBoss_1" type="text"></div>' +
+  '<div class="hvAATab" id="hvAATab-Skill"><l0>注：本标签所有输入框皆表示最小值</l0><l1>注：本標籤所有輸入框皆表示最小值</l1><l2>Note: All input fields in this label means Minimum</l2><br><l0>1. OC值 2. 敌人存活数 3. Boss存活数(1前提，2/3满足一个)</l0><l1>1. OC值 2. 怪獸存活數 3. Boss存活數(1前提，2/3滿足一個)</l1><l2>1. OC value 2. Enemies survival number 3. Boss survival number(1 precondition, 2/3 one true)</l2><br><input id="skill" type="checkbox"><label for="skill"><span class="hvAATitle"><l01>其他技能</l01><l2>Other Spells</l2></span> <l0>（按【施放顺序】排序）</l0><l1>（按【施放順序】排序）</l1><l2>(Sort by cast order)</l2></label><br><input id="skill_OFC" type="checkbox"><label for="skill_OFC"><l0>友情小马砲</l0><l1>友情小馬砲</l1><l2>OFC</l2>: </label><input class="hvAANumber" name="skillOC_OFC" type="text"><input class="hvAANumber" name="skillMonster_OFC" type="text"><input class="hvAANumber" name="skillBoss_OFC" type="text"><br><input id="skill_FRD" type="checkbox"><label for="skill_FRD"><l0>龙吼</l0><l1>龍吼</l1><l2>FRD</l2>: </label><input class="hvAANumber" name="skillOC_FRD" type="text"><input class="hvAANumber" name="skillMonster_FRD" type="text"><input class="hvAANumber" name="skillBoss_FRD" type="text"><br><l0>战斗风格</l0><l1>戰鬥風格</l1><l2>Fighting style</l2>: <select name="fightingStyle"><option value="1">二天一流 / Niten Ichiryu</option><option value="2">单手 / One-Handed</option><option value="3">双手 / 2-Handed Weapon</option><option value="4">双持 / Dual Wielding</option><option value="5">法杖 / Staff</option></select><br><input id="skill_3" type="checkbox"><label for="skill_3"><l0>3阶（如果有）</l0><l1>3階（如果有）</l1><l2>T3(if exist)</l2>: </label><input class="hvAANumber" name="skillOC_3" type="text"><input class="hvAANumber" name="skillMonster_3" type="text"><input class="hvAANumber" name="skillOCBoss_3" type="text"><br><input id="skill_2" type="checkbox"><label for="skill_2"><l0>2阶（如果有）</l0><l1>2階（如果有）</l1><l2>T2(if exist)</l2>: </label><input class="hvAANumber" name="skillOC_2" type="text"><input class="hvAANumber" name="skillMonster_2" type="text"><input class="hvAANumber" name="skillOCBoss_2" type="text"><br><input id="skill_1" type="checkbox"><label for="skill_1"><l0>1阶</l0><l1>1階</l1><l2>T1</l2>: </label><input class="hvAANumber" name="skillOC_1" type="text"><input class="hvAANumber" name="skillMonster_1" type="text"><input class="hvAANumber" name="skillOCBoss_1" type="text"></div>' +
   '<div class="hvAATab" id="hvAATab-Scroll"><input id="scroll" type="checkbox"><label for="scroll"><span class="hvAATitle"><l0>使用卷轴</l0><l1>使用捲軸</l1><l2>Use Scrolls</l2></span></label><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Random Encounter</label><br><l0>总体条件：当前回合数</l0><l1>總體條件：當前回合數</l1><l2>Conditions: Number of turns</l2> ≥ <input class="hvAANumber" name="scrollRoundNow" type="text"><br><l0>以下输入框为使用相应卷轴的最小回合数</l0><l1>以下輸入框為使用相應捲軸的最小回合數</l1><l2>The following input fields indicate the min round to use the scroll</l2>.<br><input id="scrollFirst" type="checkbox"><label for="scrollFirst"><l0>存在技能生成的Buff时，仍然使用卷轴</l0><l1>存在技能生成的Buff時，仍然使用捲軸</l1><l2>Use Scrolls even when there are effects from spells</l2>.</label><br><input id="scroll_Go" type="checkbox"><label for="scroll_Go">Scroll of the Gods <input class="hvAANumber" name="scrollRound_Go" type="text"></label><br><input id="scroll_Av" type="checkbox"><label for="scroll_Av">Scroll of the Avatar <input class="hvAANumber" name="scrollRound_Av" type="text"></label><br><input id="scroll_Pr" type="checkbox"><label for="scroll_Pr">Scroll of Protection <input class="hvAANumber" name="scrollRound_Pr" type="text"></label><br><input id="scroll_Sw" type="checkbox"><label for="scroll_Sw">Scroll of Swiftness <input class="hvAANumber" name="scrollRound_Sw" type="text"></label><br><input id="scroll_Li" type="checkbox"><label for="scroll_Li">Scroll of Life <input class="hvAANumber" name="scrollRound_Li" type="text"></label><br><input id="scroll_Sh" type="checkbox"><label for="scroll_Sh">Scroll of Shadows <input class="hvAANumber" name="scrollRound_Sh" type="text"></label><br><input id="scroll_Ab" type="checkbox"><label for="scroll_Ab">Scroll of Absorption <input class="hvAANumber" name="scrollRound_Ab" type="text"></label></div>' +
   '<div class="hvAATab" id="hvAATab-Infusion"><input id="infusion" type="checkbox"><label for="infusion"><span class="hvAATitle"><l0>使用魔药</l0><l1>使用魔藥</l1><l2>Use Infusion</l2></span><br><l0>魔药属性与</l0><l1>魔藥屬性與</l1><l2>The style of infusion is the same as Attack Mode in </l2><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a><l0>里的攻击模式相同</l0><l1>裡的攻擊模式相同</l1><l2></l2></label><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="infusionRoundType_ar" type="checkbox"><label for="infusionRoundType_ar">The Arena</label><input id="infusionRoundType_rb" type="checkbox"><label for="infusionRoundType_rb">Ring of Blood</label><input id="infusionRoundType_gr" type="checkbox"><label for="infusionRoundType_gr">GrindFest</label><input id="infusionRoundType_iw" type="checkbox"><label for="infusionRoundType_iw">Item World</label><input id="infusionRoundType_ba" type="checkbox"><label for="infusionRoundType_ba">Random Encounter</label><br><l01>使用条件：当前回合数</l01><l2>Conditions: Number of turns</l2> ≥ <input class="hvAANumber" name="infusionRoundNow" type="text"></div>' +
   '<div class="hvAATab" id="hvAATab-Alarm"><span class="hvAATitle"><l0>自定义警报</l0><l1>自定義警報</l1><l2>Alarm</l2></span><br><l0>注意：留空则使用默认音频，建议每个用户使用自定义音频</l0><l1>注意：留空則使用默認音頻，建議每個用戶使用自定義音頻</l1><l2>Note: Leave the box blank to use default audio, it\'s recommended for all user to use custom audio.</l2><div><l01>通用</l01><l2>Common</l2>: <input name="audio-default" type="text"><br><l0>错误</l0><l1>錯誤</l1><l2>Error</l2>: <input name="audio-Error" type="text"><br><l0>失败</l0><l1>失敗</l1><l2>Defeat</l2>: <input name="audio-Failed" type="text"><br><l0>答题</l0><l1>答題</l1><l2>Riddle</l2>: <input name="audio-Riddle" type="text"><br><l0>胜利</l0><l1>勝利</l1><l2>Victory</l2>: <input name="audio-Win" type="text"></div><div><l0>请将将要测试的音频文件的地址填入这里</l0><l1>請將將要測試的音頻文件的地址填入這裡</l1><l2>Plz put in the audio file address you want to test</l2>:<br><input class="hvAADebug" name="audio-Text" type="text"></div></div>' +
   '<div class="hvAATab" id="hvAATab-Rule"><span class="hvAATitle"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#attack_rule" target="_blank"><l01>示例</l01><l2>Example</l2></a><div>1. <l0>每回合计算敌人当前血量，血量最低的设置初始血量为10，其他敌人为当前血量倍数*10</l0><l1>每回合計算敌人當前血量，血量最低的設置初始血量為10，其他敌人為當前血量倍數*10</l1><l2>Each enemiy is assigned a number which is used to determine the target to attack, let\'s call that number Priority Weight or PW.</l2></div><div>2. <l0>初始权重与下述各Buff权重相加</l0><l1>初始權重與下述各Buff權重相加</l1><l2>PW(X) = 10 * Max_HP(X) / Min(Max_HP(All_enemies)) + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)</l2><br>Sleep: <input class="hvAANumber" name="weight_Sle" placeholder="5" step="0.1" type="text"> Blind: <input class="hvAANumber" name="weight_Bl" placeholder="3" step="0.1" type="text"> Slow: <input class="hvAANumber" name="weight_Slo" placeholder="3" step="0.1" type="text"> Imperil: <input class="hvAANumber" name="weight_Im" placeholder="-5" step="0.1" type="text"><br>MagNet: <input class="hvAANumber" name="weight_MN" placeholder="-4" step="0.1" type="text"> Silence: <input class="hvAANumber" name="weight_Si" placeholder="-4" step="0.1" type="text"> Drain: <input class="hvAANumber" name="weight_Dr" placeholder="-4" step="0.1" type="text"> Weaken: <input class="hvAANumber" name="weight_We" placeholder="-4" step="0.1" type="text"><br>Confuse: <input class="hvAANumber" name="weight_Co" placeholder="-1" step="0.1" type="text">Coalesced Mana: <input class="hvAANumber" name="weight_CM" placeholder="-5" step="0.1" type="text"> Stunned: <input class="hvAANumber" name="weight_Stun" placeholder="-4" step="0.1" type="text"></div><div>3. <l0>如果敌人相邻两只敌人已死（或不存在），则给其权重增加</l0><l1>如果敵人相鄰兩隻敵人已死（或不存在），則給其權重增加</l1><l2>If the enemy of which adjacent two enemies dead (or does not exist), then its PW increased</l2> <input class="hvAANumber" name="weight_Wall" placeholder="0.5" step="0.1" type="text"></div><div>4. <l0>计算出最终权重，攻击权重最小的敌人</l0><l1>計算出最終權重，攻擊權重最小的敌人</l1><l2>Whichever enemy has the lowest PW will be the target.</l2></div><div>5. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a href="#hvAATab-About"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.</div></div>' +
-  '<div class="hvAATab hvAACenter" id="hvAATab-Drop"><span class="hvAATitle"><l01>掉落监测</l01><l2>Drops Tracking</l2></span><button class="reMonitor"><l01>重置</l01><l2>Reset</l2></button></div>' +
-  '<div class="hvAATab hvAACenter" id="hvAATab-About"><div><span class="hvAAFeedback"><l0>反馈</l0><l1>反饋</l1><l2>Feedback</l2>: <a href="https://github.com/dodying/UserJs/issues/" target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback" target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471" target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs" target="_blank">4. Gitter</a></span></div><div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2>: </span><br><l0>如果脚本长期暂停且网络无问题，请点击【临时修复】</l0><l1>如果腳本長期暫停且網絡無問題，請點擊【臨時修復】</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click [Try to fix]</l2><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Random Encounter</option></select><br><l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug" placeholder="1" type="text"><br><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button></div><div class="hvAAQuickSite"><span class="hvAATitle"><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><br><l0>留空“姓名”输入框则会表示删除，修改完成后请及时保存</l0><l1>留空“姓名”輸入框則會表示刪除，修改完成後請及時保存</l1><l2> The input box left "name" blank will be deleted, after change please save in time.</l2><table><tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr></table><button class="quickSiteAdd"><l01>新增</l01><l2>Add</l2></button></div><div><button class="hvAAExport"><l0>导出设置</l0><l1>導出設置</l1><l2>Export Confiuration</l2></button><button class="hvAAImport"><l0>导入设置</l0><l1>導入設置</l1><l2>Import Confiuration</l2></button><textarea class="hvAAConfig"></textarea></div></div>' +
-  '<div class="hvAATab hvAACenter" id="hvAATab-Recommend"><span class="hvAATitle"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></span><table><tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>应用到</l0><l1>應用到</l1><l2>Applies to</l2></td><td><l0>说明</l0><l1>說明</l1><l2>Description</l2></td><td>URL</td></tr><tr><td><l0>【HV】购物清单</l0><l1>【HV】購物清單</l1><l2>hvBazaarList</l2></td><td><a href="?s=Bazaar&ss=is" target="_blank">Bazaar</a></td><td><l0>快速生成购物清单</l0><l1>快速生成購物清單</l1><l2>Quickly generate shopping lists</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】喂食</l0><l1>【HV】餵食</l1><l2>hvFeed</l2></td><td><a href="?s=Bazaar&ss=ml" target="_blank">Monster Lab</a></td><td><l0>自动给大于100级的怪物喂开心药丸</l0><l1>自動給大於100級的怪物餵開心藥丸</l1><l2>Automatically feed monster of which level more than 100 on happy pills</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvFeed.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】出售装备</l0><l1>【HV】出售裝備</l1><l2>hvSellEquipment</l2></td><td><a href="?s=Character&ss=ch" target="_blank">Character</a></td><td></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js" target="_blank">Install</a></td></tr><tr><td>Reloader</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894" target="_blank">E-Hentai Forums</a></td></tr><tr><td>RiddleLimiter Plus</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Random Encounter Notification</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Equipment Comparison</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HentaiVerse Better Equipment Shop</td><td></td><td></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319" target="_blank">E-Hentai Forums</a></td></tr></tboby></table></div>' +
-  '<div class="hvAATab" id="hvAATab-ChangeLog"><span class="hvAATitle"><l0>更新日志</l0><l1>更新日誌</l1><l2>Change log</l2></span><div>v2.67<br>1. Ether Tap: <l0>对魔力合流的敌人进行物理攻击</l0><l1>對魔力合流的敵人進行物理攻擊</l1><l2>Arcane Blow enemy which has Coalesced Mana</l2></div></div>' +
+  '<div class="hvAATab hvAACenter" id="hvAATab-About"><div><span><l0>反馈</l0><l1>反饋</l1><l2>Feedback</l2>: <a href="https://github.com/dodying/UserJs/issues/" target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback" target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471" target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs" target="_blank">4. Gitter</a></span></div><div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2>: </span><br><l0>如果脚本长期暂停且网络无问题，请点击【临时修复】</l0><l1>如果腳本長期暫停且網絡無問題，請點擊【臨時修復】</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click [Try to fix]</l2><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Random Encounter</option></select><br><l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug" placeholder="1" type="text"><br><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button></div><div class="hvAAQuickSite"><span class="hvAATitle"><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><br><l0>留空“姓名”输入框则会表示删除，修改完成后请及时保存</l0><l1>留空“姓名”輸入框則會表示刪除，修改完成後請及時保存</l1><l2> The input box left "name" blank will be deleted, after change please save in time.</l2><table><tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr></table><button class="quickSiteAdd"><l01>新增</l01><l2>Add</l2></button></div><div><button class="hvAAExport"><l0>导出设置</l0><l1>導出設置</l1><l2>Export Confiuration</l2></button><button class="hvAAImport"><l0>导入设置</l0><l1>導入設置</l1><l2>Import Confiuration</l2></button><textarea class="hvAAConfig"></textarea></div></div>' +
+  '<div class="hvAATab hvAACenter" id="hvAATab-Recommend"><span class="hvAATitle"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></span><table><tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>应用到</l0><l1>應用到</l1><l2>Applies to</l2></td><td><l0>说明</l0><l1>說明</l1><l2>Description</l2></td><td>URL</td></tr><tr><td><l0>【HV】购物清单</l0><l1>【HV】購物清單</l1><l2>hvBazaarList</l2></td><td><a href="?s=Bazaar&ss=is" target="_blank">Bazaar</a></td><td><l0>快速生成购物清单</l0><l1>快速生成購物清單</l1><l2>Quickly generate shopping lists</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】喂食</l0><l1>【HV】餵食</l1><l2>hvFeed</l2></td><td><a href="?s=Bazaar&ss=ml" target="_blank">Monster Lab</a></td><td><l0>自动给大于100级的怪物喂开心药丸</l0><l1>自動給大於100級的怪物餵開心藥丸</l1><l2>Automatically feed monster of which level more than 100 on happy pills</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvFeed.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】出售装备</l0><l1>【HV】出售裝備</l1><l2>hvSellEquipment</l2></td><td><a href="?s=Character&ss=ch" target="_blank">Character</a></td><td></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】掉落监测</l0><l1>【HV】掉落監測</l1><l2>hvDropMonitor</l2></td><td></td><td></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvDropMonitor.user.js" target="_blank">Install</a></td></tr><tr><td>Reloader</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894" target="_blank">E-Hentai Forums</a></td></tr><tr><td>RiddleLimiter Plus</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Random Encounter Notification</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Equipment Comparison</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HentaiVerse Better Equipment Shop</td><td></td><td></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319" target="_blank">E-Hentai Forums</a></td></tr></tboby></table></div>' +
+  '<div class="hvAATab" id="hvAATab-ChangeLog"><span class="hvAATitle"><l0>更新日志</l0><l1>更新日誌</l1><l2>Change log</l2></span><div>v2.68<br>1. <l0>功能移除: 掉落监测（已独立为一个脚本，可通过<a href="#hvAATab-Recommend">推荐脚本</a>添加）</l0><l1>功能移除: 掉落監測（已獨立為一個腳本，可通過<a href="#hvAATab-Recommend">推薦腳本</a>添加）</l1><l2>Feature Removed: "dropMonitor" (You can INSTALL it in <a href="#hvAATab-Recommend">Recommend</a>)</l2><br>2. <l0>选项变更: 自动竞技场</l0><l1>選項變更: 自動競技場</l1><l2>Options Changed: "Idle Arena"</l2></div></div>' +
   '</div><div class="hvAAButtonBox hvAACenter"><button class="hvAAReset"><l0>重置设置</l0><l1>重置設置</l1><l2>Reset</l2></button><button class="hvAAApply"><l0>应用</l0><l1>應用</l1><l2>Apply</l2></button><button class="hvAACancel"><l01>取消</l01><l2>Cancel</l2></button></div>';
   gE('select[name="lang"]', optionBox).onchange = function () {
     gE('.hvAA-LangStyle').textContent = 'l' + this.value + '{display:inline!important;}';
     if (this.value === '0' || this.value === '1') gE('.hvAA-LangStyle').textContent += 'l01{display:inline!important;}';
     g('lang', this.value);
-  }
-  gE('.hvAAShowDrop', optionBox).onclick = function () {
-    var drop = getValue('drop', true) || new Object();
-    var _html = '<tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>数量</l0><l1>數量</l1><l2>Amount</l2></td></tr>';
-    for (var i in drop) {
-      _html += '<tr><td>' + i + '</td><td>' + drop[i] + '</td></tr>';
-    }
-    _html += '</tbody>';
-    var table = cE('table');
-    table.innerHTML = _html;
-    gE('#hvAATab-Drop').appendChild(table);
-    this.onclick = null;
   }
   gE('.hvAAShowAbout', optionBox).onclick = function () {
     var i;
@@ -288,12 +276,18 @@ function optionBox() {
   }
   gE('.hvAAArenaLevels', optionBox).onclick = function (e) {
     if (e.target.tagName !== 'INPUT') return;
-    var levelsInput = gE('.hvAAArenaLevels input[type="checkbox"]', 'all');
-    var out = new Array();
-    for (var i = 0; i < levelsInput.length; i++) {
-      if (levelsInput[i].checked) out.push(levelsInput[i].name);
+    var valueArray = e.target.value.split(',');
+    var levels = gE('input[name="autoArenaLevels"]').value;
+    var value = gE('input[name="autoArenaValue"]').value;
+    if (e.target.checked) {
+      levels += (levels) ? ',' + valueArray[0] : valueArray[0];
+      value += (value) ? ',' + valueArray[1] : valueArray[1];
+    } else {
+      levels = levels.replace(new RegExp('(^|,)' + valueArray[0] + '(,|$)'), '$2').replace(/^,/, '');
+      value = value.replace(new RegExp('(^|,)' + valueArray[1] + '(,|$)'), '$2').replace(/^,/, '');
     }
-    gE('input[name="autoArenaLevels"]').value = out.join();
+    gE('input[name="autoArenaLevels"]').value = levels;
+    gE('input[name="autoArenaValue"]').value = value;
   }
   gE('input[name="audio-Text"]', optionBox).onchange = function () {
     if (this.value === '') return;
@@ -310,16 +304,6 @@ function optionBox() {
     box.appendChild(audio);
     gE('#hvAATab-Alarm').appendChild(box);
     audio.play();
-  }
-  gE('.hvAAFeedback', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'A') return;
-    e.preventDefault();
-    if (_alert(1, '如果您遭遇了Bug，请确认是否为最新版本（一些Bug可能在新版中被修复）\n如果你觉得脚本很棒，那就送作者1Hath作为感谢\n是否继续打开网页', '如果您遭遇了Bug，請確認是否為最新版本（一些Bug可能在新版中被修復）\n如果你覺得腳本很棒，那就送作者1Hath作為感謝\n是否繼續打開網頁', 'If you encounter a bug, check if you have the latest version (it may have been fixed in recent updates)\nIf you think the script is great, send the author 1 Hath as a thank you\nContinue?')) unsafeWindow.open(e.target.href);
-  }
-  gE('.reMonitor', optionBox).onclick = function () {
-    if (_alert(1, '是否继续？', '是否繼續？', 'Continue?')) {
-      delValue('drop');
-    }
   }
   gE('.hvAAFix', optionBox).onclick = function () {
     var inputs = gE('.hvAADebug[name^="round"]', 'all', optionBox);
@@ -366,8 +350,9 @@ function optionBox() {
       highlight('#attackStatus', 0.5);
       return;
     }
-    var _option = new Object();
-    _option.version = (GM_info) ? GM_info.script.version.substring(0, 4)  : 1;
+    var _option = {
+      version: g('version')
+    };
     var inputs = gE('input,select', 'all', optionBox);
     for (var i = 0; i < inputs.length; i++) {
       if (inputs[i].className === 'hvAADebug') {
@@ -529,11 +514,11 @@ function reloader() {
       if (i !== 0) serializedForm += '&';
       serializedForm += inputs[i].id + '=' + inputs[i].value;
     }
-    var reloadTimeout = setTimeout(goto, 3 * 1000);
+    if (g('option').delayAlert) var delayAlert = setTimeout(setAlert, g('option').delayAlertTime * 1000);
+    if (g('option').delayReload) var delayReload = setTimeout(goto, g('option').delayReloadTime * 1000);
     post(location.href, serializedForm, function (e) {
-      clearTimeout(reloadTimeout);
-      if (g('option').delayAlert) clearTimeout(g('delayAlert'));
-      if (g('option').delayReload) clearTimeout(g('delayReload'));
+      if (g('option').delayAlert) clearTimeout(delayAlert);
+      if (g('option').delayReload) clearTimeout(delayReload);
       var data = e.target.response;
       var replacements = '.cwbdv, .bte, #ckey_spirit, #ckey_defend, #togpane_magico, #togpane_magict, #togpane_item, #quickbar, #togpane_log';
       var monsterReplacements = '#mkey_0, #mkey_1, #mkey_2, #mkey_3, #mkey_4, #mkey_5, #mkey_6, #mkey_7, #mkey_8, #mkey_9';
@@ -570,35 +555,11 @@ function autoArena() { //自动刷竞技场
     setValue('arena', arena);
   }
   if (arena.isOk) return;
-  if (arena.array) {
-    arena.array = arena.array;
-  } else {
-    arena.array = new Array();
-    var levelArr = new Array(1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 165, 180, 200, 225, 250, 300, 501);
-    var arenaidArr = new Array(1, 3, 5, 8, 9, 11, 12, 13, 15, 16, 17, 19, 20, 21, 23, 24, 26, 27, 28, 29, 32, 33);
-    if (!g('option').autoArenaLevels) {
-      var myLevel = parseInt(gE('.clb>.cit:nth-child(12) .fd4>div').textContent.match(/\d+/) [0]);
-      for (var i = 0; i < levelArr.length; i++) {
-        if (myLevel < levelArr[i]) break;
-      }
-      arena.array = arenaidArr;
-      var length = levelArr.indexOf(levelArr[i]);
-      length = (length > arena.array.length) ? arena.array.length : length;
-      arena.array.length = length;
-    } else {
-      var targetArr = g('option').autoArenaLevels.split(',');
-      var isTarget;
-      for (var i = 0; i < targetArr.length; i++) {
-        isTarget = levelArr.indexOf(parseInt(targetArr[i]));
-        if (isTarget >= 1) arena.array.push(arenaidArr[isTarget]);
-      }
-    }
-  }
+  arena.array = arena.array || g('option').autoArenaValue.split(',');
   post(location.href, 'recover=all', function () { //回复
-    document.title = _alert( - 1, '恢复完成', '恢復完成', 'Recover success');
-    post('?s=Battle&ss=ar', 'arenaid=' + arena.array[arena.array.length - 1], function () {
+    post('?s=Battle&ss=ar', 'arenaid=' + arena.array[0], function () {
       document.title = _alert( - 1, '竞技场开始', '競技場開始', 'Arena start');
-      arena.array.splice( - 1);
+      arena.array.splice(0, 1);
       if (arena.array.length === 0) arena.isOk = true;
       setValue('arena', arena);
       goto();
@@ -606,6 +567,7 @@ function autoArena() { //自动刷竞技场
   });
 }
 function setAlert(e, times) { //发出警报
+  e = e || 'default';
   if (g('option').notification) setNotice(e);
   if (!g('option').alert) return;
   var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
@@ -636,47 +598,6 @@ function setAlert(e, times) { //发出警报
   }
 }
 function continueBattle() { //自动前进
-  if (g('monsterAlive') === 0 && g('option').dropMonitor) {
-    var battleLog = gE('#togpane_log>table>tbody>tr>td:nth-child(3)', 'all');
-    var drop = getValue('drop', true) || {
-      '#startTime': new Date().toLocaleString(),
-      '#0_Turn': 0,
-      '#1_Round': 0,
-      '#2_Battle': 0,
-      '#EXP': 0,
-      '#Credit': 0
-    };
-    drop['#0_Turn'] = ('#0_Turn' in drop) ? drop['#0_Turn'] + parseInt(gE('#togpane_log>table>tbody>tr>td').textContent)  : 1;
-    drop['#1_Round'] = ('#1_Round' in drop) ? drop['#1_Round'] + 1 : 1;
-    if (g('roundNow') === g('roundAll')) drop['#2_Battle'] = ('#2_Battle' in drop) ? drop['#2_Battle'] + 1 : 1;
-    var text;
-    var item;
-    for (var i = 0; ; i++) {
-      text = battleLog[i].textContent;
-      if (text === 'You are Victorious!') {
-        break;
-      } else if (/^You gain \d+ EXP!$/.test(text)) {
-        drop['#EXP'] += parseInt(text.match(/\d+/) [0]);
-      } else if (/dropped \[(\d+) Credits\]$/.test(text)) {
-        drop['#Credit'] += parseInt(text.match(/\[(\d+) Credits\]$/) [1]);
-      } else if (/dropped \[(.*?)\]$/.test(text)) {
-        item = text.match(/\[(.*?)\]$/) [1];
-        if (battleLog[i].children[0].style.color === 'rgb(255, 0, 0)') {
-          var quality = new Array('Crude', 'Fair', 'Average', 'Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless');
-          for (var j = g('option').dropQuality; j < quality.length; j++) {
-            if (text.match(quality[j])) {
-              drop[item] = (item in drop) ? drop[item] + 1 : 1;
-              break;
-            }
-          }
-        } else {
-          drop[item] = (item in drop) ? drop[item] + 1 : 1;
-        }
-      }
-    }
-    drop = objSort(drop);
-    setValue('drop', drop);
-  }
   if (g('monsterAlive') > 0) {
     setAlert('Failed', 3);
     delValue(2);
@@ -1240,15 +1161,15 @@ function autoAttack() { //自动打怪
     }
   }
   if (g('option').skill && gE('#ckey_spirit[src*="spirit_a"]')) {
-    if (g('option').skill_OFC && g('oc') >= g('option').skillOC_OFC && (g('monsterAlive') > g('option').skillMonster_OFC || g('bossAlive') > g('option').skillBoss_OFC) && isOn('1111')) {
+    if (g('option').skill_OFC && g('oc') >= g('option').skillOC_OFC && (g('monsterAlive') >= g('option').skillMonster_OFC || g('bossAlive') >= g('option').skillBoss_OFC) && isOn('1111')) {
       gE('1111').click();
-    } else if (g('option').skill_FRD && g('oc') >= g('option').skillOC_FRD && (g('monsterAlive') > g('option').skillMonster_FRD || g('bossAlive') > g('option').skillBoss_FRD) && isOn('1101')) {
+    } else if (g('option').skill_FRD && g('oc') >= g('option').skillOC_FRD && (g('monsterAlive') >= g('option').skillMonster_FRD || g('bossAlive') >= g('option').skillBoss_FRD) && isOn('1101')) {
       gE('1101').click();
-    } else if (g('option').skill_3 && g('oc') >= g('option').skillOC_3 && (g('monsterAlive') > g('option').skillMonster_3 || g('bossAlive') > g('option').skillBoss_3) && isOn('2' + g('option').fightingStyle + '03')) {
+    } else if (g('option').skill_3 && g('oc') >= g('option').skillOC_3 && (g('monsterAlive') >= g('option').skillMonster_3 || g('bossAlive') >= g('option').skillBoss_3) && isOn('2' + g('option').fightingStyle + '03')) {
       gE('2' + g('option').fightingStyle + '03').click();
-    } else if (g('option').skill_2 && g('oc') >= g('option').skillOC_2 && (g('monsterAlive') > g('option').skillMonster_2 || g('bossAlive') > g('option').skillBoss_2) && isOn('2' + g('option').fightingStyle + '02')) {
+    } else if (g('option').skill_2 && g('oc') >= g('option').skillOC_2 && (g('monsterAlive') >= g('option').skillMonster_2 || g('bossAlive') >= g('option').skillBoss_2) && isOn('2' + g('option').fightingStyle + '02')) {
       gE('2' + g('option').fightingStyle + '02').click();
-    } else if (g('option').skill_1 && g('oc') >= g('option').skillOC_1 && (g('monsterAlive') > g('option').skillMonster_1 || g('bossAlive') > g('option').skillBoss_1) && isOn('2' + g('option').fightingStyle + '01')) {
+    } else if (g('option').skill_1 && g('oc') >= g('option').skillOC_1 && (g('monsterAlive') >= g('option').skillMonster_1 || g('bossAlive') >= g('option').skillBoss_1) && isOn('2' + g('option').fightingStyle + '01')) {
       gE('2' + g('option').fightingStyle + '01').click();
     }
   }
@@ -1339,18 +1260,6 @@ function objArrSort(propertyName) { //对象数组排序函数，从小到大排
       return 0;
     }
   }
-}
-function objSort(obj) {
-  var arr = new Array();
-  for (var i in obj) {
-    arr.push(i);
-  }
-  arr.sort();
-  var objNew = new Object();
-  for (var i = 0; i < arr.length; i++) {
-    objNew[arr[i]] = obj[arr[i]];
-  }
-  return objNew;
 }
 function setNotice(e) { //桌面通知
   if (window.Notification && Notification.permission !== 'denied') {
