@@ -4,21 +4,23 @@
 1. ? De技能：这一功能**可能**将退回到以前版本
 2. ? 攻击规则: 1.攻击血量减少最大的怪兽，判断条件：Boss数≥2
 
-### Note
+### Usage
+
+#### Firefox + Greasemonkey
+
+#### Chrome/Chromium + Tampermonkey
 
 #### Android + Firefox + Usi
 
 #### iPhone/iPad(Jailbroken) + UserscriptLoader
 
-##### 首次使用，或脚本更新后，请先设置好配置
+### Screenshots
 
-#### Screenshots
-
-##### 自定义设置
+#### 自定义设置
 
 ![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
-##### 自动打怪演示
+#### 自动打怪演示
 
 ###### GIF利用GifCam录制，帧率33FPS，110帧，文件大小100多K，录制鼠标模式（只是一直放在录制按钮上）
 
