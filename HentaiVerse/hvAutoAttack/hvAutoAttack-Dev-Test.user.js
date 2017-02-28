@@ -23,11 +23,12 @@
     setTimeout(goto, 5 * 60 * 1000);
     return;
   }
+  g('version', 2.67);
   if (getValue('option')) {
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
     addStyle(g('lang'));
-    if (GM_info && g('option').version !== GM_info.script.version.substring(0, 4)) {
+    if (g('option').version !== g('version')) {
       gE('.hvAAButton').click();
       gE('#hvAATab-ChangeLog').style.zIndex = 1;
       _alert(0, 'hvAutoAttack版本更新，请重新设置\n强烈推荐【重置设置】后再设置。', 'hvAutoAttack版本更新，請重新設置\n強烈推薦【重置設置】後再設置。', 'hvAutoAttack version update, please reset\nIt\'s recommended to reset all configuration.');
@@ -343,10 +344,9 @@ function optionBox() {
       highlight('#attackStatus', 0.5);
       return;
     }
-    var _option = new Object();
-    alert(1);
-    _option.version = (GM_info) ? GM_info.script.version.substring(0, 4)  : 1;
-    alert(2);
+    var _option = {
+      version: g('version')
+    };
     var inputs = gE('input,select', 'all', optionBox);
     for (var i = 0; i < inputs.length; i++) {
       if (inputs[i].className === 'hvAADebug') {
