@@ -23,7 +23,7 @@
     setTimeout(goto, 5 * 60 * 1000);
     return;
   }
-  g('version', 2.67);
+  g('version', '2.67');
   if (getValue('option')) {
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
