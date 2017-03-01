@@ -13,6 +13,7 @@
 // @run-at      document-end
 // ==/UserScript==
 (function () {
+  alert(navigator);
   var d = document;
   var t = d.createElement('table');
   var h = '<tbody><tr><td>名</td><td>类型</td><td>值</td></tr>';
