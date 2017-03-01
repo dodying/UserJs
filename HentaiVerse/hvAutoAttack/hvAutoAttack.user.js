@@ -11,7 +11,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.68a
+// @version      2.68b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -46,6 +46,14 @@
   if (gE('.f2rb') && _alert(1, '请设置字体\n使用默认字体可能使某些功能失效\n是否查看相关说明？', '請設置字體\n使用默認字體可能使某些功能失效\n是否查看相關說明？', 'Please set the font\nThe default font may make some functions fail to work\nDo you want to see instructions?')) {
     unsafeWindow.open('https://greasyfork.org/zh-CN/forum/discussion/comment/27107/#Comment_27107');
     return;
+  }
+  if (/Android|iPhone|iPad/gi.test(navigator.userAgent)) {
+    setAlert('Riddle');
+    function autoPlay() {
+      gE('.hvAAAlert').play();
+      unsafeWindow.removeEventListener('touchstart', autoPlay, false);
+    }
+    unsafeWindow.addEventListener('touchstart', autoPlay, false);
   }
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
@@ -191,10 +199,6 @@ function addStyle(lang) {
   '.answerBar{z-index:1000;width:710px;height:40px;position:absolute;top:50px;left:345px;display:table;border-spacing:5px;}' +
   '.answerBar>div{border:4px solid red;display:table-cell;cursor:pointer;}' +
   '.answerBar>div:hover{background:rgba(63,207,208,0.20);}';
-  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
-    cssContent += '.hvAAButton>img{width:150%;height:150%;}' +
-    '#hvAABox{font-size:22px!important;}';
-  }
   globalStyle.textContent = cssContent;
   gE('head').appendChild(globalStyle);
   optionButton(lang);
@@ -411,7 +415,7 @@ function riddleAlert() { //答题警报
     'C'
   ];
   document.onkeydown = function (e) {
-    if (gE('.hvAAAlert')) gE('.hvAAAlert').parentNode.removeChild(gE('.hvAAAlert'));
+    if (gE('.hvAAAlert')) gE('.hvAAAlert').stop();
     if (/^[abc]$/i.test(e.key)) {
       riddleSubmit(e.key.toUpperCase());
     } else if (/^[123]$/.test(e.key)) {
@@ -513,6 +517,7 @@ function reloader() {
       if (g('option').delayReload) clearTimeout(delayReload);
       var data = e.target.response;
       if (gE('#battleaction').value === '0' && gE('#riddlecounter', data)) {
+        if (gE('.hvAAAlert')) gE('.hvAAAlert').play();
         goto();
         return;
       }
@@ -592,6 +597,7 @@ function setAlert(e, times) { //发出警报
   var audio = cE('audio');
   audio.className = 'hvAAAlert';
   audio.src = (g('option') ['audio-' + e]) ? g('option') ['audio-' + e] : 'https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/' + e + fileType;
+  audio.controls = true;
   if (typeof times === 'undefined') {
     audio.loop = false;
   } else if (typeof times === 'number') {
@@ -599,7 +605,7 @@ function setAlert(e, times) { //发出警报
     audio.addEventListener('ended', function () {
       _time = _time + 1;
       if (_time === times) {
-        audio.parentNode.removeChild(audio);
+        audio.pause();
         return;
       }
       audio.play();
@@ -610,7 +616,7 @@ function setAlert(e, times) { //发出警报
   audio.play();
   gE('body').appendChild(audio);
   document.onmousemove = function () {
-    if (gE('.hvAAAlert')) gE('.hvAAAlert').parentNode.removeChild(gE('.hvAAAlert'));
+    if (gE('.hvAAAlert')) gE('.hvAAAlert').stop();
     this.onmousemove = null;
   }
 }
@@ -1378,7 +1384,7 @@ function setNotice(e) { //桌面通知
           icon: '/y/hentaiverse.png'
         });
         n.onclick = function () {
-          if (gE('.hvAAAlert')) gE('.hvAAAlert').parentNode.removeChild(gE('.hvAAAlert'));
+          if (gE('.hvAAAlert')) gE('.hvAAAlert').stop();
           n.close();
         }
         setTimeout(function () {
