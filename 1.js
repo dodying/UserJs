@@ -593,6 +593,7 @@ function setAlert(e, times) { //发出警报
   var audio = cE('audio');
   audio.className = 'hvAAAlert';
   audio.src = (g('option') ['audio-' + e]) ? g('option') ['audio-' + e] : 'https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/' + e + fileType;
+  audio.controls = true;
   if (typeof times === 'undefined') {
     audio.loop = false;
   } else if (typeof times === 'number') {
@@ -608,7 +609,7 @@ function setAlert(e, times) { //发出警报
   } else if (times === 'loop') {
     audio.loop = true;
   }
-  if (!/Android|iPhone|iPad/gi.test(navigator.userAgent)) audio.play();
+  if (!/Android|iPhone|iPad/gi.test(navigator.userAgent)) {audio.play();}else{alert(1);}
   gE('body').appendChild(audio);
   document.onmousemove = function () {
     if (gE('.hvAAAlert'))gE('.hvAAAlert').stop();
