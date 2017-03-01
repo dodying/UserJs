@@ -16,4 +16,7 @@
 if (/Android|iPhone|iPad/i.test(navigator.userAgent)) { //mobile 待续
     alert(1)
   }
+if (/mobile/.test(navigator.userAgent)) { //mobile 待续
+    alert(2)
+  }
 }) ();
