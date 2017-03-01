@@ -608,7 +608,7 @@ function setAlert(e, times) { //发出警报
   } else if (times === 'loop') {
     audio.loop = true;
   }
-  audio.play();
+  if (!/Android|iPhone|iPad/gi.test(navigator.userAgent)) audio.play();
   gE('body').appendChild(audio);
   document.onmousemove = function () {
     if (gE('.hvAAAlert'))gE('.hvAAAlert').stop();
