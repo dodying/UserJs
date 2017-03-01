@@ -47,7 +47,7 @@
     unsafeWindow.open('https://greasyfork.org/zh-CN/forum/discussion/comment/27107/#Comment_27107');
     return;
   }
-  if (!/Android|iPhone|iPad/gi.test(navigator.userAgent)){
+  if (/Android|iPhone|iPad/gi.test(navigator.userAgent)){
     setAlert('Riddle');//待续
     unsafeWindow.addEventListener('touchstart', function (){//待续g
       E('.hvAAAlert').play();
