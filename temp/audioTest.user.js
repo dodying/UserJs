@@ -15,17 +15,12 @@
 (function () {
   var audio = document.createElement('audio');
   audio.src = 'http://zjyd.sc.chinaz.com/files/download/sound1/201601/6796.wav';
+  audio.controls = true;
   document.body.appendChild(audio);
-  var img = new Image();
-  img.onload = function () {
-    alert(1);
-    audio.play();
-    alert(2);
-  };
-  img.onerror = function () {
-    alert(1);
-    audio.play();
-    alert(2);
-  };
-  img.src = '/y/hentaiverse.png';
+  window.addEventListener('touchstart', function () {
+    setTimeout(function () {
+      audio.play();
+    }, 3000);
+  }, false);
 }) ();
+
