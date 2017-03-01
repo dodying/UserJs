@@ -18,10 +18,14 @@
   document.body.appendChild(audio);
   var img = new Image();
   img.onload = function () {
+    alert(1);
     audio.play();
+    alert(2);
   };
   img.onerror = function () {
+    alert(1);
     audio.play();
+    alert(2);
   };
   img.src = '/y/hentaiverse.png';
 }) ();
