@@ -13,16 +13,7 @@
 // @run-at      document-end
 // ==/UserScript==
 (function () {
-  alert(navigator);
-  var d = document;
-  var t = d.createElement('table');
-  var h = '<tbody><tr><td>名</td><td>类型</td><td>值</td></tr>';
-  var n = navigator;
-  var i;
-  for (i in n) {
-    h += '<tr><td>' + i + '</td><td>' + (typeof n[i]) + '</td><td>' + n[i] + '</td></tr>';
+if (/Android|iPhone|iPad/.test(navigator.userAgent)) { //mobile 待续
+    alert(1)
   }
-  h += '</tbody>';
-  t.innerHTML = h;
-  d.body.appendChild(t);
 }) ();
