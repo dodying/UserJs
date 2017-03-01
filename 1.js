@@ -11,7 +11,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.68b
+// @version      2.68a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -49,8 +49,11 @@
   }
   if (/Android|iPhone|iPad/gi.test(navigator.userAgent)){
     setAlert('Riddle');//待续
-    unsafeWindow.addEventListener('touchstart', function (){//待续
-      gE('.hvAAAlert').play();
+    unsafeWindow.addEventListener('touchstart', function (){
+      setTimeout(function (){
+        gE('.hvAAAlert').play();
+      }, 5000);
+      //goto();
     }, false);
   }
   if (gE('#riddlecounter')) { //需要答题
@@ -123,7 +126,6 @@ function main() { //主程序
     fixMonsterStatus();
   }
   g('runtime', g('runtime') + 1);
-  if (g('runtime')===10)gE('.hvAAAlert').play();//待续
   var bar = gE('.cwb2', 'all');
   g('hp', bar[0].offsetWidth / 120 * 100);
   g('mp', bar[1].offsetWidth / 120 * 100);
@@ -516,6 +518,7 @@ function reloader() {
       if (g('option').delayReload) clearTimeout(delayReload);
       var data = e.target.response;
       if (gE('#battleaction').value === '0' && gE('#riddlecounter', data)) {
+        gE('.hvAAAlert').play();
         goto();
         return;
       }
