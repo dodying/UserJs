@@ -16,6 +16,7 @@
   var audio = document.createElement('audio');
   audio.src = 'http://zjyd.sc.chinaz.com/files/download/sound1/201601/6796.wav';
   audio.controls = true;
+  audio.preload="auto";
   document.body.appendChild(audio);
   window.addEventListener('touchstart', function () {
     setTimeout(function () {
