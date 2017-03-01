@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         hvAutoAttack
+// @name         hvAutoAttack-test
 // @name:zh-TW   【HV】打怪
 // @name:zh-CN   【HV】打怪
 // @description  HV auto attack script, for the first user, should configure before use it.
