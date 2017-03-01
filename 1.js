@@ -47,10 +47,12 @@
     unsafeWindow.open('https://greasyfork.org/zh-CN/forum/discussion/comment/27107/#Comment_27107');
     return;
   }
-  setAlert('Riddle');//待续
-  unsafeWindow.addEventListener('touchstart', function (){//待续
-    gE('.hvAAAlert').play();
-  }, false);
+  if (!/Android|iPhone|iPad/gi.test(navigator.userAgent)){
+    setAlert('Riddle');//待续
+    unsafeWindow.addEventListener('touchstart', function (){//待续g
+      E('.hvAAAlert').play();
+    }, false);
+  }
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
   } else if (!gE('#navbar')) { //战斗中
@@ -609,7 +611,7 @@ function setAlert(e, times) { //发出警报
   } else if (times === 'loop') {
     audio.loop = true;
   }
-  if (!/Android|iPhone|iPad/gi.test(navigator.userAgent)) {audio.play();}else{alert(1);}
+  audio.play();
   gE('body').appendChild(audio);
   document.onmousemove = function () {
     if (gE('.hvAAAlert'))gE('.hvAAAlert').stop();
