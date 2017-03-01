@@ -13,7 +13,7 @@
 // @run-at      document-end
 // ==/UserScript==
 (function () {
-if (/Android|iPhone|iPad/.test(navigator.userAgent)) { //mobile 待续
+if (/Android|iPhone|iPad/g.test(navigator.userAgent)) { //mobile 待续
     alert(1)
   }
 }) ();
