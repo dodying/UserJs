@@ -11,9 +11,9 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.68
+// @version      2.68a
 // @compatible   Firefox + Greasemonkey
-// @compatible   Chrome + Tampermonkey
+// @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
 // @compatible   iPhone/iPad(Jailbroken) + UserscriptLoader
 // @grant        unsafeWindow
@@ -44,16 +44,12 @@
     return;
   }
   if (gE('.f2rb') && _alert(1, '请设置字体\n使用默认字体可能使某些功能失效\n是否查看相关说明？', '請設置字體\n使用默認字體可能使某些功能失效\n是否查看相關說明？', 'Please set the font\nThe default font may make some functions fail to work\nDo you want to see instructions?')) {
-    unsafeunsafeWindow.open('https://greasyfork.org/zh-CN/forum/discussion/comment/27107/#Comment_27107');
+    unsafeWindow.open('https://greasyfork.org/zh-CN/forum/discussion/comment/27107/#Comment_27107');
     return;
   }
   if (gE('#riddlecounter')) { //需要答题
     riddleAlert(); //答题警报
   } else if (!gE('#navbar')) { //战斗中
-    g('attackStatus', g('option').attackStatus);
-    g('runtime', 0);
-    g('monsterAll', gE('div.btm1', 'all').length);
-    g('bossAll', gE('div.btm2[style^="background"]', 'all').length);
     if (g('option').pauseButton) {
       var button = cE('button');
       button.innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
@@ -73,7 +69,9 @@
       }, false);
     }
     reloader();
-    battleStart();
+    g('attackStatus', g('option').attackStatus);
+    g('runtime', 0);
+    newRound();
     main();
   } else { //非战斗
     delValue(2);
@@ -113,18 +111,12 @@ function main() { //主程序
       return;
     }
   }
-  g('runtime', g('runtime') + 1);
-  var monsterDead = gE('img[src*="nbardead"]', 'all').length;
-  g('monsterAlive', g('monsterAll') - monsterDead);
-  var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
-  g('bossAlive', g('bossAll') - bossDead);
-  if (gE('.btcp')) continueBattle(); //回合计数及自动前进并获取敌人总HP
-  if (g('end')) return;
   if (getValue('monsterStatus') && getValue('monsterStatus', true).length === g('monsterAll')) {
     g('monsterStatus', getValue('monsterStatus', true));
   } else {
     fixMonsterStatus();
   }
+  g('runtime', g('runtime') + 1);
   var bar = gE('.cwb2', 'all');
   g('hp', bar[0].offsetWidth / 120 * 100);
   g('mp', bar[1].offsetWidth / 120 * 100);
@@ -190,7 +182,7 @@ function addStyle(lang) {
   '.testAlarms>div{border:2px solid #000;}' +
   '.hvAAArenaLevels{display:none;}' +
   '.hvAAConfig{width:100%;height:16px;}' +
-  '.hvAAButtonBox{position:relative;top:440px;}' +
+  '.hvAAButtonBox{position:relative;top:436px;}' +
   '.hvAAButtonBox>button{margin:0 1px;}' +
   '.quickSiteBar{position:absolute;top:100px;left:' + (boxWidth + 2) + 'px;font-size:18px;text-align:left;}' +
   '.quickSiteBar>span{display:block;}' +
@@ -199,7 +191,7 @@ function addStyle(lang) {
   '.answerBar{z-index:1000;width:710px;height:40px;position:absolute;top:50px;left:345px;display:table;border-spacing:5px;}' +
   '.answerBar>div{border:4px solid red;display:table-cell;cursor:pointer;}' +
   '.answerBar>div:hover{background:rgba(63,207,208,0.20);}';
-  if (/Android|iPhone|iPad/.test(navigator.userAgent)) {
+  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
     cssContent += '.hvAAButton>img{width:150%;height:150%;}' +
     '#hvAABox{font-size:22px!important;}';
   }
@@ -233,7 +225,7 @@ function optionBox() {
   '<div class="hvAATab" id="hvAATab-Skill"><l0>注：本标签所有输入框皆表示最小值</l0><l1>注：本標籤所有輸入框皆表示最小值</l1><l2>Note: All input fields in this label means Minimum</l2><br><l0>1. OC值 2. 敌人存活数 3. Boss存活数(1前提，2/3满足一个)</l0><l1>1. OC值 2. 怪獸存活數 3. Boss存活數(1前提，2/3滿足一個)</l1><l2>1. OC value 2. Enemies survival number 3. Boss survival number(1 precondition, 2/3 one true)</l2><br><input id="skill" type="checkbox"><label for="skill"><span class="hvAATitle"><l01>其他技能</l01><l2>Other Spells</l2></span> <l0>（按【施放顺序】排序）</l0><l1>（按【施放順序】排序）</l1><l2>(Sort by cast order)</l2></label><br><input id="skill_OFC" type="checkbox"><label for="skill_OFC"><l0>友情小马砲</l0><l1>友情小馬砲</l1><l2>OFC</l2>: </label><input class="hvAANumber" name="skillOC_OFC" type="text"><input class="hvAANumber" name="skillMonster_OFC" type="text"><input class="hvAANumber" name="skillBoss_OFC" type="text"><br><input id="skill_FRD" type="checkbox"><label for="skill_FRD"><l0>龙吼</l0><l1>龍吼</l1><l2>FRD</l2>: </label><input class="hvAANumber" name="skillOC_FRD" type="text"><input class="hvAANumber" name="skillMonster_FRD" type="text"><input class="hvAANumber" name="skillBoss_FRD" type="text"><br><l0>战斗风格</l0><l1>戰鬥風格</l1><l2>Fighting style</l2>: <select name="fightingStyle"><option value="1">二天一流 / Niten Ichiryu</option><option value="2">单手 / One-Handed</option><option value="3">双手 / 2-Handed Weapon</option><option value="4">双持 / Dual Wielding</option><option value="5">法杖 / Staff</option></select><br><input id="skill_3" type="checkbox"><label for="skill_3"><l0>3阶（如果有）</l0><l1>3階（如果有）</l1><l2>T3(if exist)</l2>: </label><input class="hvAANumber" name="skillOC_3" type="text"><input class="hvAANumber" name="skillMonster_3" type="text"><input class="hvAANumber" name="skillOCBoss_3" type="text"><br><input id="skill_2" type="checkbox"><label for="skill_2"><l0>2阶（如果有）</l0><l1>2階（如果有）</l1><l2>T2(if exist)</l2>: </label><input class="hvAANumber" name="skillOC_2" type="text"><input class="hvAANumber" name="skillMonster_2" type="text"><input class="hvAANumber" name="skillOCBoss_2" type="text"><br><input id="skill_1" type="checkbox"><label for="skill_1"><l0>1阶</l0><l1>1階</l1><l2>T1</l2>: </label><input class="hvAANumber" name="skillOC_1" type="text"><input class="hvAANumber" name="skillMonster_1" type="text"><input class="hvAANumber" name="skillOCBoss_1" type="text"></div>' +
   '<div class="hvAATab" id="hvAATab-Scroll"><input id="scroll" type="checkbox"><label for="scroll"><span class="hvAATitle"><l0>使用卷轴</l0><l1>使用捲軸</l1><l2>Use Scrolls</l2></span></label><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Random Encounter</label><br><l0>总体条件：当前回合数</l0><l1>總體條件：當前回合數</l1><l2>Conditions: Number of turns</l2> ≥ <input class="hvAANumber" name="scrollRoundNow" type="text"><br><l0>以下输入框为使用相应卷轴的最小回合数</l0><l1>以下輸入框為使用相應捲軸的最小回合數</l1><l2>The following input fields indicate the min round to use the scroll</l2>.<br><input id="scrollFirst" type="checkbox"><label for="scrollFirst"><l0>存在技能生成的Buff时，仍然使用卷轴</l0><l1>存在技能生成的Buff時，仍然使用捲軸</l1><l2>Use Scrolls even when there are effects from spells</l2>.</label><br><input id="scroll_Go" type="checkbox"><label for="scroll_Go">Scroll of the Gods <input class="hvAANumber" name="scrollRound_Go" type="text"></label><br><input id="scroll_Av" type="checkbox"><label for="scroll_Av">Scroll of the Avatar <input class="hvAANumber" name="scrollRound_Av" type="text"></label><br><input id="scroll_Pr" type="checkbox"><label for="scroll_Pr">Scroll of Protection <input class="hvAANumber" name="scrollRound_Pr" type="text"></label><br><input id="scroll_Sw" type="checkbox"><label for="scroll_Sw">Scroll of Swiftness <input class="hvAANumber" name="scrollRound_Sw" type="text"></label><br><input id="scroll_Li" type="checkbox"><label for="scroll_Li">Scroll of Life <input class="hvAANumber" name="scrollRound_Li" type="text"></label><br><input id="scroll_Sh" type="checkbox"><label for="scroll_Sh">Scroll of Shadows <input class="hvAANumber" name="scrollRound_Sh" type="text"></label><br><input id="scroll_Ab" type="checkbox"><label for="scroll_Ab">Scroll of Absorption <input class="hvAANumber" name="scrollRound_Ab" type="text"></label></div>' +
   '<div class="hvAATab" id="hvAATab-Infusion"><input id="infusion" type="checkbox"><label for="infusion"><span class="hvAATitle"><l0>使用魔药</l0><l1>使用魔藥</l1><l2>Use Infusion</l2></span><br><l0>魔药属性与</l0><l1>魔藥屬性與</l1><l2>The style of infusion is the same as Attack Mode in </l2><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a><l0>里的攻击模式相同</l0><l1>裡的攻擊模式相同</l1><l2></l2></label><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="infusionRoundType_ar" type="checkbox"><label for="infusionRoundType_ar">The Arena</label><input id="infusionRoundType_rb" type="checkbox"><label for="infusionRoundType_rb">Ring of Blood</label><input id="infusionRoundType_gr" type="checkbox"><label for="infusionRoundType_gr">GrindFest</label><input id="infusionRoundType_iw" type="checkbox"><label for="infusionRoundType_iw">Item World</label><input id="infusionRoundType_ba" type="checkbox"><label for="infusionRoundType_ba">Random Encounter</label><br><l01>使用条件：当前回合数</l01><l2>Conditions: Number of turns</l2> ≥ <input class="hvAANumber" name="infusionRoundNow" type="text"></div>' +
-  '<div class="hvAATab" id="hvAATab-Alarm"><span class="hvAATitle"><l0>自定义警报</l0><l1>自定義警報</l1><l2>Alarm</l2></span><br><l0>注意：留空则使用默认音频，建议每个用户使用自定义音频</l0><l1>注意：留空則使用默認音頻，建議每個用戶使用自定義音頻</l1><l2>Note: Leave the box blank to use default audio, it\'s recommended for all user to use custom audio.</l2><div><l01>通用</l01><l2>Common</l2>: <input name="audio-default" type="text"><br><l0>错误</l0><l1>錯誤</l1><l2>Error</l2>: <input name="audio-Error" type="text"><br><l0>失败</l0><l1>失敗</l1><l2>Defeat</l2>: <input name="audio-Failed" type="text"><br><l0>答题</l0><l1>答題</l1><l2>Riddle</l2>: <input name="audio-Riddle" type="text"><br><l0>胜利</l0><l1>勝利</l1><l2>Victory</l2>: <input name="audio-Win" type="text"></div><div><l0>请将将要测试的音频文件的地址填入这里</l0><l1>請將將要測試的音頻文件的地址填入這裡</l1><l2>Plz put in the audio file address you want to test</l2>:<br><input class="hvAADebug" name="audio-Text" type="text"></div></div>' +
+  '<div class="hvAATab" id="hvAATab-Alarm"><span class="hvAATitle"><l0>自定义警报</l0><l1>自定義警報</l1><l2>Alarm</l2></span><br><l0>注意：留空则使用默认音频，建议每个用户使用自定义音频</l0><l1>注意：留空則使用默認音頻，建議每個用戶使用自定義音頻</l1><l2>Note: Leave the box blank to use default audio, it\'s recommended for all user to use custom audio.</l2><div><l01>通用</l01><l2>Common</l2>: <input name="audio-Common" type="text"><br><l0>错误</l0><l1>錯誤</l1><l2>Error</l2>: <input name="audio-Error" type="text"><br><l0>失败</l0><l1>失敗</l1><l2>Defeat</l2>: <input name="audio-Defeat" type="text"><br><l0>答题</l0><l1>答題</l1><l2>Riddle</l2>: <input name="audio-Riddle" type="text"><br><l0>胜利</l0><l1>勝利</l1><l2>Victory</l2>: <input name="audio-Victory" type="text"></div><div><l0>请将将要测试的音频文件的地址填入这里</l0><l1>請將將要測試的音頻文件的地址填入這裡</l1><l2>Plz put in the audio file address you want to test</l2>:<br><input class="hvAADebug" name="audio-Text" type="text"></div></div>' +
   '<div class="hvAATab" id="hvAATab-Rule"><span class="hvAATitle"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#attack_rule" target="_blank"><l01>示例</l01><l2>Example</l2></a><div>1. <l0>每回合计算敌人当前血量，血量最低的设置初始血量为10，其他敌人为当前血量倍数*10</l0><l1>每回合計算敌人當前血量，血量最低的設置初始血量為10，其他敌人為當前血量倍數*10</l1><l2>Each enemiy is assigned a number which is used to determine the target to attack, let\'s call that number Priority Weight or PW.</l2></div><div>2. <l0>初始权重与下述各Buff权重相加</l0><l1>初始權重與下述各Buff權重相加</l1><l2>PW(X) = 10 * Max_HP(X) / Min(Max_HP(All_enemies)) + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)</l2><br>Sleep: <input class="hvAANumber" name="weight_Sle" placeholder="5" step="0.1" type="text"> Blind: <input class="hvAANumber" name="weight_Bl" placeholder="3" step="0.1" type="text"> Slow: <input class="hvAANumber" name="weight_Slo" placeholder="3" step="0.1" type="text"> Imperil: <input class="hvAANumber" name="weight_Im" placeholder="-5" step="0.1" type="text"><br>MagNet: <input class="hvAANumber" name="weight_MN" placeholder="-4" step="0.1" type="text"> Silence: <input class="hvAANumber" name="weight_Si" placeholder="-4" step="0.1" type="text"> Drain: <input class="hvAANumber" name="weight_Dr" placeholder="-4" step="0.1" type="text"> Weaken: <input class="hvAANumber" name="weight_We" placeholder="-4" step="0.1" type="text"><br>Confuse: <input class="hvAANumber" name="weight_Co" placeholder="-1" step="0.1" type="text">Coalesced Mana: <input class="hvAANumber" name="weight_CM" placeholder="-5" step="0.1" type="text"> Stunned: <input class="hvAANumber" name="weight_Stun" placeholder="-4" step="0.1" type="text"></div><div>3. <l0>如果敌人相邻两只敌人已死（或不存在），则给其权重增加</l0><l1>如果敵人相鄰兩隻敵人已死（或不存在），則給其權重增加</l1><l2>If the enemy of which adjacent two enemies dead (or does not exist), then its PW increased</l2> <input class="hvAANumber" name="weight_Wall" placeholder="0.5" step="0.1" type="text"></div><div>4. <l0>计算出最终权重，攻击权重最小的敌人</l0><l1>計算出最終權重，攻擊權重最小的敌人</l1><l2>Whichever enemy has the lowest PW will be the target.</l2></div><div>5. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a href="#hvAATab-About"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.</div></div>' +
   '<div class="hvAATab hvAACenter" id="hvAATab-About"><div><span><l0>反馈</l0><l1>反饋</l1><l2>Feedback</l2>: <a href="https://github.com/dodying/UserJs/issues/" target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback" target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471" target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs" target="_blank">4. Gitter</a></span></div><div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2>: </span><br><l0>如果脚本长期暂停且网络无问题，请点击【临时修复】</l0><l1>如果腳本長期暫停且網絡無問題，請點擊【臨時修復】</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click [Try to fix]</l2><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Random Encounter</option></select><br><l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug" placeholder="1" type="text"><br><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button></div><div class="hvAAQuickSite"><span class="hvAATitle"><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><br><l0>留空“姓名”输入框则会表示删除，修改完成后请及时保存</l0><l1>留空“姓名”輸入框則會表示刪除，修改完成後請及時保存</l1><l2> The input box left "name" blank will be deleted, after change please save in time.</l2><table><tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr></table><button class="quickSiteAdd"><l01>新增</l01><l2>Add</l2></button></div><div><button class="hvAAExport"><l0>导出设置</l0><l1>導出設置</l1><l2>Export Confiuration</l2></button><button class="hvAAImport"><l0>导入设置</l0><l1>導入設置</l1><l2>Import Confiuration</l2></button><textarea class="hvAAConfig"></textarea></div></div>' +
   '<div class="hvAATab hvAACenter" id="hvAATab-Recommend"><span class="hvAATitle"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></span><table><tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>应用到</l0><l1>應用到</l1><l2>Applies to</l2></td><td><l0>说明</l0><l1>說明</l1><l2>Description</l2></td><td>URL</td></tr><tr><td><l0>【HV】购物清单</l0><l1>【HV】購物清單</l1><l2>hvBazaarList</l2></td><td><a href="?s=Bazaar&ss=is" target="_blank">Bazaar</a></td><td><l0>快速生成购物清单</l0><l1>快速生成購物清單</l1><l2>Quickly generate shopping lists</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】喂食</l0><l1>【HV】餵食</l1><l2>hvFeed</l2></td><td><a href="?s=Bazaar&ss=ml" target="_blank">Monster Lab</a></td><td><l0>自动给大于100级的怪物喂开心药丸</l0><l1>自動給大於100級的怪物餵開心藥丸</l1><l2>Automatically feed monster of which level more than 100 on happy pills</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvFeed.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】出售装备</l0><l1>【HV】出售裝備</l1><l2>hvSellEquipment</l2></td><td><a href="?s=Character&ss=ch" target="_blank">Character</a></td><td></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】掉落监测</l0><l1>【HV】掉落監測</l1><l2>hvDropMonitor</l2></td><td></td><td></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvDropMonitor.user.js" target="_blank">Install</a></td></tr><tr><td>Reloader</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894" target="_blank">E-Hentai Forums</a></td></tr><tr><td>RiddleLimiter Plus</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Random Encounter Notification</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Equipment Comparison</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HentaiVerse Better Equipment Shop</td><td></td><td></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319" target="_blank">E-Hentai Forums</a></td></tr></tboby></table></div>' +
@@ -520,25 +512,49 @@ function reloader() {
       if (g('option').delayAlert) clearTimeout(delayAlert);
       if (g('option').delayReload) clearTimeout(delayReload);
       var data = e.target.response;
+      if (gE('#battleaction').value === '0' && gE('#riddlecounter', data)) {
+        goto();
+        return;
+      }
       var replacements = '.cwbdv, .bte, #ckey_spirit, #ckey_defend, #togpane_magico, #togpane_magict, #togpane_item, #quickbar, #togpane_log';
-      var monsterReplacements = '#mkey_0, #mkey_1, #mkey_2, #mkey_3, #mkey_4, #mkey_5, #mkey_6, #mkey_7, #mkey_8, #mkey_9';
       var existing = gE(replacements, 'all');
       var newStuff = gE(replacements, 'all', data);
-      var i = existing.length;
-      while (i--) {
+      var i;
+      for (i = 0; i < existing.length; i++) {
         existing[i].parentNode.replaceChild(newStuff[i], existing[i]);
       }
-      var existing = gE(monsterReplacements, 'all');
-      var newStuff = gE(monsterReplacements, 'all', data);
-      var i = existing.length;
-      while (i--) {
-        if (existing[i].hasAttribute('onclick') || newStuff[i].hasAttribute('onclick')) {
-          existing[i].parentNode.replaceChild(newStuff[i], existing[i]);
+      if (gE('#battleaction').value === '0') {
+        gE('#monsterpane').parentNode.replaceChild(gE('#monsterpane', data), gE('#monsterpane'));
+        newRound();
+      } else {
+        var monsterReplacements = '#mkey_0, #mkey_1, #mkey_2, #mkey_3, #mkey_4, #mkey_5, #mkey_6, #mkey_7, #mkey_8, #mkey_9';
+        existing = gE(monsterReplacements, 'all');
+        newStuff = gE(monsterReplacements, 'all', data);
+        for (i = 0; i < newStuff.length; i++) {
+          if (existing[i].hasAttribute('onclick') || newStuff[i].hasAttribute('onclick')) existing[i].parentNode.replaceChild(newStuff[i], existing[i]);
         }
       }
-      if (gE('.btcp', data)) gE('.btt').insertBefore(gE('.btcp', data), gE('.btt').firstChild);
+      var monsterDead = gE('img[src*="nbardead"]', 'all').length;
+      g('monsterAlive', g('monsterAll') - monsterDead);
+      var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
+      g('bossAlive', g('bossAll') - bossDead);
       unsafeWindow.battle = new unsafeWindow.Battle;
       unsafeWindow.battle.clear_infopane();
+      if (gE('.btcp', data)) {
+        if (g('monsterAlive') > 0) { //Defeat
+          gE('.btt').insertBefore(gE('.btcp', data), gE('.btt').firstChild);
+          setAlert('Defeat', 3);
+          delValue(2);
+        } else if (g('roundNow') !== g('roundAll')) { //Next Round
+          delValue(1);
+          unsafeWindow.battle.battle_continue();
+        } else if (g('roundNow') === g('roundAll')) { //Victory
+          setAlert('Victory');
+          delValue(2);
+          setTimeout(goto, 3 * 1000);
+        }
+        return;
+      }
       main();
     });
   }
@@ -557,7 +573,8 @@ function autoArena() { //自动刷竞技场
   if (arena.isOk) return;
   arena.array = arena.array || g('option').autoArenaValue.split(',');
   post(location.href, 'recover=all', function () { //回复
-    post('?s=Battle&ss=ar', 'arenaid=' + arena.array[0], function () {
+    var href = (parseInt(arena.array[0]) >= 105) ? '?s=Battle&ss=rb' : '?s=Battle&ss=ar';
+    post(href, 'arenaid=' + arena.array[0], function () {
       document.title = _alert( - 1, '竞技场开始', '競技場開始', 'Arena start');
       arena.array.splice(0, 1);
       if (arena.array.length === 0) arena.isOk = true;
@@ -567,7 +584,7 @@ function autoArena() { //自动刷竞技场
   });
 }
 function setAlert(e, times) { //发出警报
-  e = e || 'default';
+  e = e || 'Common';
   if (g('option').notification) setNotice(e);
   if (!g('option').alert) return;
   var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
@@ -597,22 +614,12 @@ function setAlert(e, times) { //发出警报
     this.onmousemove = null;
   }
 }
-function continueBattle() { //自动前进
-  if (g('monsterAlive') > 0) {
-    setAlert('Failed', 3);
-    delValue(2);
-  } else if (g('roundNow') !== g('roundAll')) {
-    delValue(1);
-    goto();
-  } else if (g('roundNow') === g('roundAll')) {
-    setAlert('Win');
-    delValue(2);
-    setTimeout(goto, 3 * 1000);
-  }
-  g('end', true);
-  return;
-}
-function battleStart() { //New Round
+function newRound() { //New Round
+  g('goIgnoreError', false);
+  g('monsterAll', gE('div.btm1', 'all').length);
+  g('monsterAlive', g('monsterAll'));
+  g('bossAll', gE('div.btm2[style^="background"]', 'all').length);
+  g('bossAll', g('bossAll'));
   var battleLog = gE('#togpane_log>table>tbody>tr>td:nth-child(3)', 'all');
   g('roundType', (function () {
     if (getValue('roundType') && getValue('roundType') !== '') {
@@ -1136,10 +1143,13 @@ function autoUseDeSkill() { //自动施法De技能
         g('end', true);
         return;
       } else {
-        pauseChange();
-        _alert(0, '无法正常施放De技能，请手动打怪一些回合', '無法正常施放De技能，請手動打怪一些回合', 'Can not cast de-skills normally, please manually attack some turns');
-        g('end', true);
-        return;
+        if (g('goIgnoreError') || _alert(1, '无法正常施放De技能，是否继续运行脚本（当前回合有效）', '無法正常施放De技能，是否繼續運行腳本（當前回合有效）', 'Can not cast de-skills normally, continue the script?\nNOTE: It just effect this round.')) {
+          g('goIgnoreError', true);
+        } else {
+          pauseChange();
+          g('end', true);
+          return;
+        }
       }
     }
   }
@@ -1150,7 +1160,7 @@ function autoAttack() { //自动打怪
     g('end', true);
     return;
   }
-  if (g('option').etherTap && gE('#mkey_' + g('monsterStatus') [0].id + '>div.btm6>img[src*="coalescemana"]') && (!gE('div.bte>img[onmouseover*="Ether Tap (x2)"]') || gE('div.bte>img[src*="wpn_et"][id*="effect_expire"]'))) { //待续
+  if (g('option').etherTap && gE('#mkey_' + g('monsterStatus') [0].id + '>div.btm6>img[src*="coalescemana"]') && (!gE('div.bte>img[onmouseover*="Ether Tap (x2)"]') || gE('div.bte>img[src*="wpn_et"][id*="effect_expire"]'))) {
   } else if (g('attackStatus') !== 0) {
     if (g('monsterAlive') >= g('option').highSkill && isOn('1' + g('attackStatus') + '3')) {
       gE('1' + g('attackStatus') + '3').click();
@@ -1267,7 +1277,7 @@ function setNotice(e) { //桌面通知
       if (status === 'granted') {
         var notification = [
           {
-            'default': {
+            Common: {
               title: '未知',
               text: '页面停留过长时间',
               time: 5
@@ -1277,7 +1287,7 @@ function setNotice(e) { //桌面通知
               text: '某些错误发生了',
               time: 10
             },
-            Failed: {
+            Defeat: {
               title: '失败',
               text: '游戏失败\n玩家可自行查看战斗Log寻找失败原因',
               time: 5
@@ -1287,7 +1297,7 @@ function setNotice(e) { //桌面通知
               text: '小马答题\n紧急！\n紧急！\n紧急！',
               time: 30
             },
-            Win: {
+            Victory: {
               title: '胜利',
               text: '游戏胜利\n页面将在3秒后刷新',
               time: 3
@@ -1299,7 +1309,7 @@ function setNotice(e) { //桌面通知
             }
           },
           {
-            'default': {
+            Common: {
               title: '未知',
               text: '頁面停留過長時間',
               time: 5
@@ -1309,7 +1319,7 @@ function setNotice(e) { //桌面通知
               text: '某些錯誤發生了',
               time: 10
             },
-            Failed: {
+            Defeat: {
               title: '失敗',
               text: '遊戲失敗\n玩家可自行查看戰鬥Log尋找失敗原因',
               time: 5
@@ -1319,7 +1329,7 @@ function setNotice(e) { //桌面通知
               text: '小馬答題\n緊急！\n緊急！\n緊急！',
               time: 30
             },
-            Win: {
+            Victory: {
               title: '勝利',
               text: '遊戲勝利\n頁面將在3秒後刷新',
               time: 3
@@ -1331,7 +1341,7 @@ function setNotice(e) { //桌面通知
             }
           },
           {
-            'default': {
+            Common: {
               title: 'unknown',
               text: 'The page stays idle for too long',
               time: 5
@@ -1341,7 +1351,7 @@ function setNotice(e) { //桌面通知
               text: 'Some errors have occurred',
               time: 10
             },
-            Failed: {
+            Defeat: {
               title: 'Defeated',
               text: 'You have been defeated.\nYou can check the battle log.',
               time: 5
@@ -1351,7 +1361,7 @@ function setNotice(e) { //桌面通知
               text: 'Riddle\nURGENT\nURGENT\nURGENT',
               time: 30
             },
-            Win: {
+            Victory: {
               title: 'Victory',
               text: 'You\'re victorious.\nThis page will refresh in 3 seconds.',
               time: 3
@@ -1432,10 +1442,13 @@ function allImperiled() { //给所有敌人施放Imperil
         g('end', true);
         return;
       } else {
-        pauseChange();
-        _alert(0, '无法正常施放De技能，请手动打怪一些回合', '無法正常施放De技能，請手動打怪一些回合', 'Can not cast de-skills normally, please manually attack some turns');
-        g('end', true);
-        return;
+        if (g('goIgnoreError') || _alert(1, '无法正常施放De技能，是否继续运行脚本（当前回合有效）', '無法正常施放De技能，是否繼續運行腳本（當前回合有效）', 'Can not cast de-skills normally, continue the script?\nNOTE: It just effect this round.')) {
+          g('goIgnoreError', true);
+        } else {
+          pauseChange();
+          g('end', true);
+          return;
+        }
       }
     }
   }
