@@ -11,7 +11,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.68a
+// @version      2.68b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -50,10 +50,7 @@
   if (/Android|iPhone|iPad/gi.test(navigator.userAgent)){
     setAlert('Riddle');//待续
     unsafeWindow.addEventListener('touchstart', function (){
-      setTimeout(function (){
-        gE('.hvAAAlert').play();
-      }, 5000);
-      //goto();
+      gE('.hvAAAlert').play();
     }, false);
   }
   if (gE('#riddlecounter')) { //需要答题
@@ -125,6 +122,7 @@ function main() { //主程序
   } else {
     fixMonsterStatus();
   }
+  if (g('runtime')===20&&gE('.hvAAAlert'))gE('.hvAAAlert').play();//待续
   g('runtime', g('runtime') + 1);
   var bar = gE('.cwb2', 'all');
   g('hp', bar[0].offsetWidth / 120 * 100);
