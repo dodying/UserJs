@@ -45,6 +45,14 @@ In this example the script will attack enemy 1.
 
 #### Latest
 
+##### 2.69
+1. 功能回归: 掉落监测(WoC，因为函数Reloader变更，原先的独立脚本失效了...)
+2. 移动端优化
+
+###### 2.69-English
+1. Feature Regression: "dropMonitor" (WTF, because the function Reloader changed, the script I separated before invalid.)
+2. Phone optimization
+
 ##### 2.68
 1. 功能移除: 掉落监测（已独立为一个脚本，可通过`推荐脚本`添加）
 2. 选项变更: 自动竞技场
