@@ -5,9 +5,11 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @include     http://hentaiverse.org/?s=Character&ss=ch
-// @include     http://hentaiverse.org/
-// @version     1.00a
+// @include     http*://hentaiverse.org/
+// @include     http*://alt.hentaiverse.org/
+// @include     http*://hentaiverse.org/?s=Character&ss=ch
+// @include     http*://alt.hentaiverse.org/?s=Character&ss=ch
+// @version     1.00b
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -73,7 +75,7 @@ document.querySelectorAll('#ShowEquip button') [2].addEventListener('click', fun
 function Sell(refer) {
   var xhr = 'xhr_Sell' + Math.random().toString();
   xhr = new XMLHttpRequest();
-  xhr.open('POST', 'http://hentaiverse.org/?s=Bazaar&ss=es&filter=' + refer);
+  xhr.open('POST', location.origin + '/?s=Bazaar&ss=es&filter=' + refer);
   var parm = 'sell_all=1dca93d84fffb8614cb251bbe9a4e37571c7ff0c';
   xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -82,9 +84,9 @@ function Sell(refer) {
 function CreateEquipDIV() {
   var xhr = 'xhr_CreateEquipDIV' + Math.random().toString();
   xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://hentaiverse.org/?s=Character&ss=in');
+  xhr.open('GET', location.origin + '/?s=Character&ss=in');
   xhr.onload = function () {
-    var Equip_html = xhr.responseText.replace(/[\r\n]/g, '').replace(/.*?<div class="eqp/, '<div class="eqp').replace(/<\/div><div class="csps".*/, '').replace(/<div class="(eqp|eqpp)" style="width:630px"><div class="il.*?<div class="c"><\/div><\/div><\/div><\/div><\/div>/g, '').replace(/on(mouseout|mouseover)=".*?"/g, '').replace(/equips\.lock/g, 'Equiplock').replace(/Crude/g, '1-☆').replace(/Fair/g, '2-★').replace(/Average/g, '3-★☆').replace(/Superior/g, '4-★★').replace(/Exquisite/g, '5-★★☆').replace(/Magnificent/g, '<b>6-★★★</b>').replace(/Legendary/g, '<b>7-★★★☆</b>').replace(/Peerless/g, '<b>8-★★★★</b>');
+    var Equip_html = xhr.responseText.replace(/[\r\n]/g, '').replace(/.*?<div class="eqp/, '<div class="eqp').replace(/<\/div><div class="csps".*/, '').replace(/<div class="(eqp|eqpp)" style="width:630px"><div class="il.*?<div class="c"><\/div><\/div><\/div><\/div><\/div>/g, '').replace(/on(mouseout|mouseover)=".*?"/g, '').replace(/equips\.lock/g, 'Equiplock').replace(/Crude/g, '1-☆').replace(/Fair/g, '2-★').replace(/Average/g, '3-★☆').replace(/Superior/g, '4-★★').replace(/Exquisite/g, '<span style="background:#d7e698">5-★★☆</span>').replace(/Magnificent/g, '<span style="background:#a6daf6;font-weight:bold;" >6-★★★</span>').replace(/Legendary/g, '<span style="background:#f5b9cd;font-weight:bold;" >7-★★★☆</span>').replace(/Peerless/g, '<span style="background:#fbc93e;font-weight:bold;" >8-★★★★</span>');
     //alert(Equip_html);
     var div1 = document.createElement('div');
     div1.id = 'Equip';
