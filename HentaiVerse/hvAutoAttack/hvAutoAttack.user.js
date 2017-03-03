@@ -11,7 +11,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.69
+// @version      2.69a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -318,6 +318,11 @@ function optionBox() {
     gE('#hvAATab-Alarm').appendChild(box);
     audio.play();
   }
+  gE('.reMonitor', optionBox).onclick = function () {
+    if (_alert(1, '是否继续？', '是否繼續？', 'Continue?')) {
+      delValue('drop');
+    }
+  }
   gE('.hvAAFix', optionBox).onclick = function () {
     var inputs = gE('.hvAADebug[name^="round"]', 'all', optionBox);
     for (var i = 0; i < inputs.length; i++) {
@@ -537,7 +542,7 @@ function reloader() {
       g('dateNow', dateNow);
       var data = e.target.response;
       if (gE('#battleaction').value === '0' && gE('#riddlecounter', data)) {
-        dropMonitor();
+        if (g('option').dropMonitor) dropMonitor();
         if (gE('.hvAAAlert')) gE('.hvAAAlert').play();
         goto();
         return;
@@ -572,11 +577,11 @@ function reloader() {
           setAlert('Defeat', 3);
           delValue(2);
         } else if (g('roundNow') !== g('roundAll')) { //Next Round
-          dropMonitor();
+          if (g('option').dropMonitor) dropMonitor();
           delValue(1);
           unsafeWindow.battle.battle_continue();
         } else if (g('roundNow') === g('roundAll')) { //Victory
-          dropMonitor();
+          if (g('option').dropMonitor) dropMonitor();
           setAlert('Victory');
           delValue(2);
           setTimeout(goto, 3 * 1000);
