@@ -4,7 +4,9 @@
 // @author		sigo8, LangTuTaiHoa, GaryMcNabb
 // @version		1.3.4
 // @include		http*://hentaiverse.org/*
+// @include		http*://alt.hentaiverse.org/*
 // @exclude		http*://hentaiverse.org/pages/showequip*
+// @exclude		http*://alt.hentaiverse.org/pages/showequip*
 // @include		https://e-hentai.org/news.php
 // @grant     none
 // @run-at		document-end
@@ -13,7 +15,7 @@ if (window.location.host === 'e-hentai.org') {
   if (document.querySelector('#eventpane>div>a')) {
     location = document.querySelector('#eventpane>div>a').getAttribute('onclick').replace(/^window\.open\(\'|\'.*/g, '');
   } else {
-    location = 'http://hentaiverse.org/';
+    location = 'http://alt.hentaiverse.org/';
   }
   return;
 }
