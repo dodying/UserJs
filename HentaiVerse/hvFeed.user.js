@@ -5,8 +5,8 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @include     http://hentaiverse.org/?s=Bazaar&ss=ml
-// @version     1.01a
+// @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=ml
+// @version     1.01b
 // @grant       none
 // @run-at      document-idle
 // ==/UserScript==
@@ -23,7 +23,7 @@ function init() {
 function feed(refer, moraleBar) {
   var xhr;
   xhr = new XMLHttpRequest();
-  xhr.open('POST', 'http://hentaiverse.org/?s=Bazaar&ss=ml&slot=' + refer);
+  xhr.open('POST', location + '&slot=' + refer);
   var parm = 'food_action=happyhappyjoyjoy';
   xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
