@@ -3,8 +3,9 @@
 // @name:zh-CN  【HV】购物清单
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description:zh-CN  
-// @include     http://hentaiverse.org/?s=Bazaar&ss=is*
-// @version     1.00a
+// @include     http*://hentaiverse.org/?s=Bazaar&ss=is*
+// @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=is*
+// @version     1.00b
 // @grant       unsafeWindow
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
