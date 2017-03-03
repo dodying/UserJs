@@ -5,13 +5,15 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @include     http://hentaiverse.org/?s=Bazaar&ss=ss
-// @version     1.01
+// @include     http*://hentaiverse.org/?s=Bazaar&ss=ss
+// @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=ss
+// @version     1.01a
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
 main();
 function main() {
+  if (document.querySelector('.idp').innerText !== 'Precursor Artifact') return;
   var id = document.querySelector('.idp').getAttribute('id').replace('item_pane', '');
   if (id < 30000) {
     xhr(id, '0');
