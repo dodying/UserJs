@@ -5,14 +5,10 @@
 2. ? 攻击规则: 1.攻击血量减少最大的怪兽，判断条件：Boss数≥2
 
 ### Usage
-
-#### Firefox + Greasemonkey
-
-#### Chrome/Chromium + Tampermonkey
-
-#### Android + Firefox + Usi
-
-#### iPhone/iPad(Jailbroken) + UserscriptLoader
+1. Firefox + Greasemonkey
+2. Chrome/Chromium + Tampermonkey
+3. Android + Firefox + Usi
+4. iPhone/iPad (Jailbroken) + UserscriptLoader (Compatible with iOS 5, 6, 7, 8, 9, 10)
 
 ### Screenshots
 
@@ -28,17 +24,6 @@
 
 ### 攻击规则-示例
 
-<table><tbody>
-<tr><td>敌人 id</td><td>现有HP</td><td>初始 PW</td><td>Imperil 生效<br>(-2)</td><td>Drain 生效<br>(-1)</td><td>Confuse 生效<br>(+2)</td><td>PW</td></tr>
-<tr><td>1</td><td>20K</td><td>10</td><td>√</td><td></td><td>√</td><td>10</td></tr>
-<tr><td>2</td><td>30K</td><td>15</td><td></td><td>√</td><td></td><td>14</td></tr>
-<tr><td>3</td><td>40K</td><td>20</td><td>√</td><td></td><td></td><td>18</td></tr>
-</tbody></table>
-
-**注意**: 脚本优先攻击最小PW值的敌人。
-
-在这个例子中，脚本接下来先攻击敌人1
-
 ##### Attack_Rule-Example-English
 
 <table><tbody>
@@ -48,7 +33,11 @@
 <tr><td>3</td><td>40K</td><td>20</td><td>√</td><td></td><td></td><td>18</td></tr>
 </tbody></table>
 
+**注意**: 脚本优先攻击最小PW值的敌人。
+
 **NOTE**: The script will attack enemy who has the least PW first.
+
+在这个例子中，脚本接下来先攻击敌人1
 
 In this example, the script will attack enemy 1 next.
 
