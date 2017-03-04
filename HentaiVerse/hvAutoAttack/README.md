@@ -28,7 +28,7 @@ PS. GifCam录制，帧率33FPS，110帧，文件大小100多K，录制鼠标模�
 
 ### 攻击规则-示例
 
-##### Attack_Rule-Example-English
+##### Attack Rule Example (English)
 
 <table><tbody>
 <tr><td>Enemy id</td><td>now hp</td><td>init PW</td><td>Imperil Effective<br>(-2)</td><td>Drain Effective<br>(-1)</td><td>Confuse Effective<br>(+2)</td><td>PW</td></tr>
@@ -41,11 +41,31 @@ PS. GifCam录制，帧率33FPS，110帧，文件大小100多K，录制鼠标模�
 
 **NOTE**: The script will attack enemy who has the least PW first.
 
-在这个例子中，脚本接下来先攻击敌人1
+在这个例子中，脚本接下来先攻击敌人1。
 
 In this example, the script will attack enemy 1 next.
 
+### 关于字体的说明
+
+##### About Font
+
+脚本通过文字获取信息，如果尚未修改字体，可能使某些信息无法获取，使一些错误发生。
+
+Scripts get information through text, and if you have not yet modified the font, some information may not be available, causing some errors to occur.
+
+#### 字体方案（仅供参考）
+
+###### Font Preference (for reference only)
+
+1. font-family(字形体系): Times New Roman
+2. font-size(字体大小，数字，范围5~20): 12
+3. font-weight(字体加粗，normal, bold, bolder, lighter): normal
+4. font-style(字形，normal, italic, oblique): normal
+5. vertical adjust(竖行间距，数字，范围-8~8): -5
+
 ### 更新历史
+
+##### ChangeLog
 
 #### Latest
 
@@ -53,7 +73,7 @@ In this example, the script will attack enemy 1 next.
 1. 功能回归: 掉落监测(WoC，因为函数Reloader变更，原先的独立脚本失效了...)
 2. 移动端优化
 
-###### 2.69-English
+###### 2.69 (English)
 1. Feature Regression: "dropMonitor" (WTF, because the function Reloader changed, the script I separated before invalid.)
 2. Phone optimization
 
@@ -61,14 +81,14 @@ In this example, the script will attack enemy 1 next.
 1. 功能移除: 掉落监测（已独立为一个脚本，可通过`推荐脚本`添加）
 2. 选项变更: 自动竞技场
 
-###### 2.68-English
+###### 2.68 (English)
 1. Feature Removed: "dropMonitor" (You can INSTALL it in Recommend)
 2. Options Changed: "Idle Arena"
 
 ##### 2.67
 1. 选择新增: Ether Tap
 
-###### 2.67-English
+###### 2.67 (English)
 1. Options Added: "Ether Tap"
 
 ##### 2.66
@@ -79,7 +99,7 @@ In this example, the script will attack enemy 1 next.
 5. 快捷链接: 可在"关于本脚本"中进行相关设置
 6. 攻击规则: 如果敌人相邻两只敌人已死（或不存在），则给其权重增加0.5（相当于不优先攻击这些敌人）
 
-###### 2.66-English
+###### 2.66 (English)
 1. Options Removed: equal to been checked, such as Reloader
 2. Options Changed: such as "Damaged Equippment", "Idle Arena"
 3. Options Added: "Riddle Alert", "All Enemies Imperil"
@@ -91,7 +111,7 @@ In this example, the script will attack enemy 1 next.
 1. 感谢[Koko191](https://greasyfork.org/forum/profile/18194/Koko191)帮助翻译了英文版本
 2. 增加了武器技能
 
-###### 2.65-English
+###### 2.65 (English)
 1. Thanks to [Koko191](https://greasyfork.org/forum/profile/18194/Koko191) help to translate the English version
 2. add weapon skills
 
@@ -100,7 +120,7 @@ In this example, the script will attack enemy 1 next.
 2. 自定义要进行的竞技场
 3. 自定义当装备损坏时，是否提醒
 
-###### 2.64-English
+###### 2.64 (English)
 1. Add a detection of Stamina loss
 2. Customize the arena to be performed
 3. Customize whether remind if the equipment is damaged
@@ -109,7 +129,7 @@ In this example, the script will attack enemy 1 next.
 1. 增加暂停热键
 2. 增加自定义警报
 
-###### 2.63-English
+###### 2.63 (English)
 1. Add a pause hotkey
 2. Add custom alerts
 
@@ -117,27 +137,27 @@ In this example, the script will attack enemy 1 next.
 1. 可选择是否开启音频通知（推荐开启）
 2. 增加桌面通知，可在设置中开启（推荐开启）
 
-###### 2.62-English
+###### 2.62 (English)
 1. Can choose whether to open the audio notification (recommended)
 2. Add desktop notifications, which can be turned on in Settings (recommended)
 
 ##### 2.61
 1. 针对Spirit Stance，增加对于SP的判断
 
-###### 2.61-English
+###### 2.61 (English)
 1. For Spirit Stance, increase the judgment for the SP
 
 ##### 2.60
 1. 掉落监测强化
 
-###### 2.60-English
+###### 2.60 (English)
 1. Drop monitoring enhanced
 
 ##### 2.59
 1. 移除本地储存选项卡
 2. 增加掉落检测功能与对应选项卡
 
-###### 2.59-English
+###### 2.59 (English)
 1. Remove the Local Storage tab
 2. Add the drop detection function and the corresponding tab
 
@@ -145,21 +165,21 @@ In this example, the script will attack enemy 1 next.
 1. 版本2.57a中，移除了临时攻击模式
 2. 为两个特殊技能增加oc阈值
 
-###### 2.58-English
+###### 2.58 (English)
 1. In version 2.57a, the Temporary Attack mode was removed
 2. Increase the oc threshold for two special skills
 
 ##### 2.57
 1. 感谢网友maoboshi，现在支持特殊技能龙吼
 
-###### 2.57-English
+###### 2.57 (English)
 Thanks to maoboshi, now support the special skill FUS RO DAH
 
 ##### 2.56
 1. 增加了选项来控制使用Draught级别药水的使用
 2. 修改了De技能
 
-###### 2.56-English
+###### 2.56 (English)
 1. Added the option to control the use of the Draught
 2. Modified the DeSkill
 
