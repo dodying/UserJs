@@ -7,7 +7,7 @@
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include     http*://hentaiverse.org/*
 // @include     http*://alt.hentaiverse.org/*
-// @version     1.01a
+// @version     1.01b
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
@@ -20,8 +20,8 @@
   if (!$('#progress_counter_1')) { //不位于训练界面或训练完成
     var timeEnd = localStorage.timeEnd || '';
     if (timeEnd === '' || timeEnd <= dateObj.getTime()) { //训练完成
-      $('.trainCountdown').innerHTML = '<a href="http://hentaiverse.org/?s=Character&ss=tr">训练已完成</a>';
-      document.title = '训练已完成';
+      $('.trainCountdown').innerHTML = '<a href="/?s=Character&ss=tr">Train Completed</a>';
+      document.title = 'Train Completed';
     } else { //不位于训练界面
       var timeLast = parseInt((timeEnd - dateObj.getTime()) / 1000);
       $('.trainCountdown').innerHTML = timeLast;
@@ -45,8 +45,8 @@
   function timeUpdate() {
     timeDecrease++;
     if (timeLast <= timeDecrease) {
-      $('.trainCountdown').innerHTML = '<a href="http://hentaiverse.org/?s=Character&ss=tr">训练已完成</a>';
-      document.title = '训练已完成';
+      $('.trainCountdown').innerHTML = '<a href="/?s=Character&ss=tr">Train Completed</a>';
+      document.title = 'Train Completed';
       clearInterval(timeUpdateIntarval);
     } else {
       var timeCountdownNow = timeLast - timeDecrease;
