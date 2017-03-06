@@ -13,7 +13,7 @@
 // ==/UserScript==
 if (window.location.host === 'e-hentai.org') {
   if (document.querySelector('#eventpane>div>a')) {
-    location = document.querySelector('#eventpane>div>a').getAttribute('onclick').replace(/^window\.open\(\'|\'.*/g, '');
+    location = document.querySelector('#eventpane>div>a').href.replace('hentaiverse.org', 'alt.hentaiverse.org');
   } else {
     location = 'http://alt.hentaiverse.org/';
   }
