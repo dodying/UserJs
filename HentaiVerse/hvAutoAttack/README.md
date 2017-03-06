@@ -71,7 +71,17 @@ Scripts get information through text, and if you have not yet modified the font,
 
 ##### ChangeLog
 
-#### Latest
+##### 最新版
+
+###### Latest
+
+##### 2.70
+1. 选项新增: 自定义施放顺序
+2. 大部分的选项名称变更，所以原先的设置大部分失效，推荐先导出设置，然后在对照一一设置，抱歉
+
+###### 2.70 (English)
+1. Options Added: "Custom Cast Order"
+2. Most of the option name changes, so the original set most of the failure, it is recommended to first set out the settings, and then set in the control one by one, sorry
 
 ##### 2.69
 1. 功能回归: 掉落监测(WoC，因为函数Reloader变更，原先的独立脚本失效了...)
@@ -90,7 +100,7 @@ Scripts get information through text, and if you have not yet modified the font,
 2. Options Changed: "Idle Arena"
 
 ##### 2.67
-1. 选择新增: Ether Tap
+1. 选项新增: Ether Tap
 
 ###### 2.67 (English)
 1. Options Added: "Ether Tap"
@@ -98,7 +108,7 @@ Scripts get information through text, and if you have not yet modified the font,
 ##### 2.66
 1. 选项去除: 相当于默认勾选，如Reloader
 2. 选项变更: 装备损坏、闲置竞技场
-3. 选择新增: 小马弹警框、所有敌人Imperil
+3. 选项新增: 小马弹警框、所有敌人Imperil
 4. 自动修复: 当敌人状况缺失或数量不对，自行修复
 5. 快捷链接: 可在"关于本脚本"中进行相关设置
 6. 攻击规则: 如果敌人相邻两只敌人已死（或不存在），则给其权重增加0.5（相当于不优先攻击这些敌人）
