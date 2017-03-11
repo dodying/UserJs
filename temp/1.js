@@ -10,12 +10,12 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @run-at      document-start
+// @run-at      document-end
 // @require http://cdn.staticfile.org/jquery/2.1.1/jquery.min.js
 // ==/UserScript==
 //const unsafeWindow.d8top = null;
 //const unsafeWindow.d8mid = null;
 //const unsafeWindow.d8bot = null;
-//$('article')
-//$('.intro').prev();$('div.footer').next();
-alert(1);
+$('article').hide();
+$('.intro').prev().hide();
+$('div.footer').next().hide();
