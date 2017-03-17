@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description:zh-CN  
 // @include     *
-// @version     1
+// @version     2
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -72,10 +72,9 @@
     prev: $(Rule.prevSelector).attr('href') || null,
     next: $(Rule.nextSelector).attr('href') || null
   };
-  //console.log(reader);
   document.title = reader.title;
   $('style, link[rel=\'stylesheet\'], script').remove();
-  $('<style>h1,.btn{text-align:center;}.btn>a{display:inline-block;text-align:center;padding:5px 5px;background-color:rgb(244,240,233);color:rgb(0,128,0);border:1px solid rgb(236,230,218);}</style>').appendTo('head');
+  $('head').append('<style>h1,.btn{text-align:center;}.btn>a{display:inline-block;text-align:center;padding:5px 5px;background-color:rgb(244,240,233);color:rgb(0,128,0);border:1px solid rgb(236,230,218);}</style>').append('<link rel="next">')
   $('body').html(function () {
     return '<h1>' + reader.title + '</h1>' +
     '<div>' + reader.content + '</div>' +
@@ -84,6 +83,7 @@
     color: 'rgb(0, 0, 0)',
     'background-color': 'RGB(204, 232, 207)'
   });
+  $('link[rel=\'next\']').attr('href', reader.next);
 }) ();
 
 
