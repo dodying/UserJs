@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name        myNovelReaderForMobile
-// @name:zh-CN  
+// @name:zh-CN  【小说】阅读脚本-移动版
 // @namespace   https://github.com/dodying/Dodying-UserJs
-// @description:zh-CN  
+// @description Read novel easily.
+// @description:zh-CN  一些代码来自ywzhaiqi大大的My Novel Reader
 // @include     *
 // @version     1.00
 // @grant       none
