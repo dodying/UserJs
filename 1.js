@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description:zh-CN  
 // @include     *
-// @version     3
+// @version     1.00
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -14,6 +14,16 @@
 // @run-at      document-end
 // ==/UserScript==
 (function () {
+  $('style, link[rel=\'stylesheet\'], script').remove();
+  $('head').append(function () {
+    return '<style>h1,.btn{text-align:center;}.btn>a{display:inline-block;text-align:center;padding:5px 5px;background-color:rgb(244,240,233);color:rgb(0,128,0);border:1px solid rgb(236,230,218);}</style>' +
+    '<meta name="MobileOptimized" content="240">' +
+    '<meta name="applicable-device" content="mobile">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">';
+  });
+  newChapter(document);
+}) ();
+function newChapter(doc) {
   var Rule = {
     titleReplace: /^章节目录|^文章正文|^正文|全文免费阅读|最新章节|\(文\)|_.*$/g,
     nextSelector: 'a[rel=\'next\'], a:contains(\'下一页\'), a:contains(\'下一章\'), a:contains(\'下一节\'), a:contains(\'下页\')',
@@ -58,37 +68,69 @@
     replaceBrs: /(<br[^>]*>[ \n\r\t]*){1,}/gi, // 替换为<p>
   };
   var reader = {
-    title: $('title').text().replace(Rule.titleReplace, '').trim(),
+    title: $('title', doc).text().replace(Rule.titleReplace, '').trim(),
     content: (function () {
       var i,
       target;
       for (i = 0; i < Rule.contentSelectors.length; i++) {
-        target = $(Rule.contentSelectors[i]);
+        target = $(Rule.contentSelectors[i], doc);
         if (target.length > 0 && target.text().length >= 50) return target.html();
       }
       return '无法找到文本';
     }) (),
-    index: $(Rule.indexSelectors).attr('href') || location.href.replace(/\/\d+\.html$/, ''),
-    prev: $(Rule.prevSelector).attr('href') || null,
-    next: $(Rule.nextSelector).attr('href') || null
+    index: $(Rule.indexSelectors, doc).attr('href') || location.href.replace(/\/\d+\.html$/, ''),
+    prev: $(Rule.prevSelector, doc).attr('href') || null,
+    next: $(Rule.nextSelector, doc).attr('href') || null
   };
+  //console.log(reader);
+  if (doc === document) {
+    $('body').empty('').css({
+      color: 'rgb(0, 0, 0)',
+      'background-color': 'RGB(204, 232, 207)'
+    });
+  }
   document.title = reader.title;
-  $('style, link[rel=\'stylesheet\'], script').remove();
-  $('head').append(function () {
-    return '<style>h1,.btn{text-align:center;}.btn>a{display:inline-block;text-align:center;padding:5px 5px;background-color:rgb(244,240,233);color:rgb(0,128,0);border:1px solid rgb(236,230,218);}</style>' +
-    '<meta name="MobileOptimized" content="240">' +
-    '<meta name="applicable-device" content="mobile">' +
-    '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">';
-  });
-  $('body').html(function () {
-    return '<h1>' + reader.title + '</h1>' +
+  $('body').append(function () {
+    return '<div><h1>' + reader.title + '</h1>' +
     '<div>' + reader.content + '</div>' +
-    '<div class="btn"><a href="' + reader.prev + '">上一章</a> <a href="' + reader.index + '">章节目录</a> <a href="' + reader.next + '">下一章</a></div>';
-  }).css({
-    color: 'rgb(0, 0, 0)',
-    'background-color': 'RGB(204, 232, 207)'
+    '<div class="btn"><a href="' + reader.prev + '">上一章</a> <a href="' + reader.index + '">章节目录</a> <a href="' + reader.next + '">下一章</a></div></div>';
   });
-}) ();
+  $(window).off().on('scroll', function () {
+    if (reader.next !== null && getRemain() <= 100) {
+      $(window).off('scroll');
+      get(reader.next, function (e) {
+        newChapter(e.target.response);
+        history.pushState(null, null, reader.next);
+      });
+    }
+  })
+}
+function get(href, func) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', href);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  xhr.responseType = 'document';
+  xhr.timeout = 10 * 1000;
+  xhr.onerror = function () {
+    xhr = null;
+    get(href, func);
+  }
+  xhr.ontimeout = function () {
+    xhr = null;
+    get(href, func);
+  }
+  xhr.onload = function (e) {
+    if (e.target.status >= 200 && e.target.status < 400) func(e);
+    xhr = null;
+  }
+  xhr.send();
+}
+function getRemain() {
+  var scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+  var remain = scrollHeight - window.innerHeight - window.scrollY;
+  return remain;
+}
+
 
 
 /*! jQuery v2.1.4 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */
