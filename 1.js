@@ -5,13 +5,12 @@
 // @description Read novel easily.
 // @description:zh-CN  一些代码来自ywzhaiqi大大的My Novel Reader
 // @include     *
-// @version     1.01a
+// @version     1.01b
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @run-at      document-end
 // ==/UserScript==
 (function () {
@@ -61,14 +60,10 @@
     removeLineRegExp: /<p>[　\s。;，！\.∷〖]*<\/p>/g, // 移除只有一个字符的行
     replaceBrs: /(<br[^>]*>[ \n\r\t]*){1,}/gi, // 替换为<p>
   };
-  alert(1)
-  if (/Android|iPhone|iPad/gi.test(navigator.userAgent)) {
-    var script = document.createElement('script');
-    script.id = 'jQuery';
-    script.src = 'http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js';
-    document.head.appendChild(script);
-    
-  }
+  var script = document.createElement('script');
+  script.id = 'jQuery';
+  script.src = 'http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js';
+  document.head.appendChild(script);
   document.addEventListener('DOMContentLoaded', function () {
     $(window).off();
     $(document).off();
