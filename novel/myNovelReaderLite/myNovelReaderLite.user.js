@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name        myNovelReaderLite
 // @name:zh-CN  【小说】阅读脚本-简版
-// @namespace   https://github.com/dodying/Dodying-UserJs
+// @namespace   https://github.com/dodying/UserJs
 // @description Read novel easily.
 // @description:zh-CN  一些代码来自ywzhaiqi大大的My Novel Reader
 // @include     *
-// @version     1.01
+// @version     1.01a
 // @grant       none
 // @author      Dodying
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
+// @namespace   https://github.com/dodying/UserJs
+// @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @run-at      document-end
@@ -54,17 +54,24 @@
       '#contentts',
       '#content',
       '.content',
-      '#nr1'
+      '#nr1',
+      '.TxtContent'
     ],
     contentRemove: 'script, iframe',
     removeLineRegExp: /<p>[　\s。;，！\.∷〖]*<\/p>/g, // 移除只有一个字符的行
     replaceBrs: /(<br[^>]*>[ \n\r\t]*){1,}/gi, // 替换为<p>
   };
+  if (/Android|iPhone|iPad/gi.test(navigator.userAgent)) {
+    var script = document.createElement('script');
+    script.id = 'jQuery';
+    script.src = 'http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js';
+    document.head.appendChild(script);
+  }
   document.addEventListener('DOMContentLoaded', function () {
     $(window).off();
     $(document).off();
     newChapter(Rule, document, location.href, 0);
-    $('style, link[rel=\'stylesheet\'], script').remove();
+    $('style, link[rel=\'stylesheet\'], script:not(#jQuery)').remove();
     $('head').append(function () {
       return '<style>' +
       'a {color:RGB(6,84,136);}' +
