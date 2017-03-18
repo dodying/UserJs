@@ -61,12 +61,13 @@
     removeLineRegExp: /<p>[　\s。;，！\.∷〖]*<\/p>/g, // 移除只有一个字符的行
     replaceBrs: /(<br[^>]*>[ \n\r\t]*){1,}/gi, // 替换为<p>
   };
+  alert(1)
   if (/Android|iPhone|iPad/gi.test(navigator.userAgent)) {
     var script = document.createElement('script');
     script.id = 'jQuery';
     script.src = 'http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js';
     document.head.appendChild(script);
-    alert(1)
+    
   }
   document.addEventListener('DOMContentLoaded', function () {
     $(window).off();
