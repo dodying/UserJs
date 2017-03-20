@@ -13,7 +13,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.71
+// @version      2.71a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -826,8 +826,11 @@ function main() { //主程序
   } else {
     fixMonsterStatus();
   }
-  if (g('runTime') >= g('option').turnReload) {
+  if (g('option').turnReloadCheck && g('runTime') >= g('option').turnReload) {
     goto();
+    return;
+  } else if (g('option').roundFleeCheck && g('roundNow') >= g('option').roundFlee) {
+    gE('1001').click();
     return;
   }
   g('runTime', g('runTime') + 1);
