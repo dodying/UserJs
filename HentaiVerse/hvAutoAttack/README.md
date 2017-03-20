@@ -75,6 +75,14 @@ Scripts get information through text, and if you have not yet modified the font,
 
 ###### Latest
 
+##### 2.71
+1. 选项变更: 闲置竞技场
+2. 选项新增: Turn自动刷新，自动逃跑，持续Turns
+
+###### 2.71 (English)
+1. Options Changed: "Idle Arena"
+2. Options Added: "Turn Reload", "Round Flee", "Expire Turns"
+
 ##### 2.70
 1. 选项新增: 自定义施放顺序
 2. 大部分的选项名称变更，所以原先的设置大部分失效，推荐先导出设置，然后在对照一一设置，抱歉
@@ -93,7 +101,7 @@ Scripts get information through text, and if you have not yet modified the font,
 
 ##### 2.68
 1. 功能移除: 掉落监测（已独立为一个脚本，可通过`推荐脚本`添加）
-2. 选项变更: 自动竞技场
+2. 选项变更: 闲置竞技场
 
 ###### 2.68 (English)
 1. Feature Removed: "dropMonitor" (You can INSTALL it in Recommend)
