@@ -13,7 +13,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.71a
+// @version      2.71b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -758,6 +758,16 @@ function riddleAlert() { //答题警报
     }, i * 1000);
   }
   function riddleSubmit(answer) {
+    var answerCount = getValue('answerCount', true) || {
+      A: 0,
+      B: 0,
+      C: 0,
+      _A: 0,
+      _B: 0,
+      _C: 0
+    };
+    answerCount.lastAnswer = answer;
+    setValue('answerCount', answerCount);
     gE('#riddlemaster').value = answer;
     gE('#riddleform').submit();
   }
@@ -831,6 +841,7 @@ function main() { //主程序
     return;
   } else if (g('option').roundFleeCheck && g('roundNow') >= g('option').roundFlee) {
     gE('1001').click();
+    setTimeout(goto, 3 * 1000);
     return;
   }
   g('runTime', g('runTime') + 1);
@@ -979,6 +990,9 @@ function newRound() { //New Round
     }
   }) ());
   if (/You lose \d+ Stamina/.test(battleLog[0].textContent)) {
+    var answerCount = getValue('answerCount', true);
+    answerCount['_' + answerCount.lastAnswer]++;
+    setValue('answerCount', answerCount);
     var losedStamina = parseInt(battleLog[0].textContent.match(/\d+/) [0]);
     if (losedStamina >= g('option').staminaLose) {
       setAlarm('Error');
@@ -987,6 +1001,10 @@ function newRound() { //New Round
         return;
       }
     }
+  } else if (/Time Bonus/.test(battleLog[0].textContent)) {
+    var answerCount = getValue('answerCount', true);
+    answerCount[answerCount.lastAnswer]++;
+    setValue('answerCount', answerCount);
   }
   if (battleLog[battleLog.length - 1].textContent === 'Battle Start!') {
     delValue(1);
@@ -1329,7 +1347,7 @@ function useBuffSkill() { //自动使用药水、施法增益技能
     Regen: 'Re',
     'Shadow Veil': 'SV'
   };
-  var skillPack = g('option').buffSkillOrderValue.split(',');
+  var skillPack = (g('option').buffSkillOrderValue) ? g('option').buffSkillOrderValue.split(',')  : 'Pr,SL,SS,Ha,AF,He,Re,SV,Ab'.split(',');
   var i;
   var j;
   if (gE('div.bte>img[src*="channeling"]')) {
@@ -1506,7 +1524,7 @@ function useDeSkill() { //自动施法De技能
       img: 'confuse'
     }
   };
-  var skillPack = g('option').debuffSkillOrderValue.split(',');
+  var skillPack = (g('option').debuffSkillOrderValue) ? g('option').debuffSkillOrderValue.split(',')  : 'Im,MN,Si,Dr,We,Co'.split(',');
   var i;
   var j;
   var monsterBuff = gE('#mkey_' + g('monsterStatus') [0].id + '>.btm6');
