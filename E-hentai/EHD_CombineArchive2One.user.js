@@ -9,7 +9,7 @@
 // @description:zh-CN 合并下载自EHD的压缩包
 // @include     http*://g.e-hentai.org/g/*
 // @include     http*://exhentai.org/g/*
-// @version     1.00
+// @version     1.00a
 // @grant       none
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @run-at      document-idle
@@ -86,8 +86,7 @@ function download(name, amount) {
   content += 'del "' + name + '.bat"';
   console.log(content);
   var blob = new Blob([content], {
-    type: 'text/plain;charset=utf-8'
+    type: 'application/bat;charset=utf-8'
   });
-  //saveAs(blob, name + '.bat');
-  saveAs(blob, name + '.txt');
+  saveAs(blob, name + '.bat');
 }
