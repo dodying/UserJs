@@ -13,7 +13,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.71b
+// @version      2.71c
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -960,9 +960,11 @@ function reloader() {
 function newRound() { //New Round
   if (location.hash !== '') location.hash = '';
   g('monsterAll', gE('div.btm1', 'all').length);
-  g('monsterAlive', g('monsterAll'));
+  var monsterDead = gE('img[src*="nbardead"]', 'all').length;
+  g('monsterAlive', g('monsterAll') - monsterDead);
   g('bossAll', gE('div.btm2[style^="background"]', 'all').length);
-  g('bossAll', g('bossAll'));
+  var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
+  g('bossAlive', g('bossAll') - bossDead);
   var battleLog = gE('#togpane_log>table>tbody>tr>td:nth-child(3)', 'all');
   g('roundType', (function () {
     if (getValue('roundType') && getValue('roundType') !== '') {
