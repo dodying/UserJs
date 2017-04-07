@@ -1,13 +1,14 @@
 ### TODO
 
-1. [浮动防封(时间与层数)](https://greasyfork.org/zh-CN/forum/discussion/20804/x)@HV打怪腳本吼棒吼棒的
-2. [如果`闲置竞技场开启`同时`GF在输入框末尾`，那么当闲置任务只剩下GF时循环GF无限次](https://greasyfork.org/zh-CN/forum/discussion/20818/x)@kevinlooo
-3. [卷轴的使用的时机问题-多项判断](https://greasyfork.org/zh-CN/forum/discussion/21206/x)@乔越
-4. [小马staminaLog](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
-5. [其他技能判断-仅Boss](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
-6. [当可以施放特殊技能时才开启Spirit Stance](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
+1. √ [浮动防封(时间与层数)](https://greasyfork.org/zh-CN/forum/discussion/20804/x)@HV打怪腳本吼棒吼棒的
+2. √ [如果`闲置竞技场开启`同时`GF在输入框末尾`，那么当闲置任务只剩下GF时循环GF无限次](https://greasyfork.org/zh-CN/forum/discussion/20818/x)@kevinlooo
+3. ○ [卷轴的使用的时机问题-多项判断](https://greasyfork.org/zh-CN/forum/discussion/21206/x)@乔越
+4. √ [小马staminaLog](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
+5. √ [其他技能判断-仅Boss](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
+6. ? [当可以施放特殊技能时才开启Spirit Stance](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
 7. 感谢以上同学的建议
-8. 更加自定义的判断条件
+8. √ 更加自定义的判断条件
+9. 随机遭遇战通知
 
 ##### 搁置的TODO
 
