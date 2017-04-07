@@ -32,12 +32,6 @@
 
 ![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
-###### 自动打怪演示
-
-PS. GifCam录制，帧率33FPS，110帧，文件大小100多K，录制鼠标模式（只是一直放在录制按钮上）
-
-![自动打怪演示](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Screenshot.gif)
-
 ### 攻击规则-示例
 
 ##### Attack Rule Example (English)
@@ -74,6 +68,27 @@ Scripts get information through text, and if you have not yet modified the font,
 3. font-weight(字体加粗，normal, bold, bolder, lighter): normal
 4. font-style(字形，normal, italic, oblique): normal
 5. vertical adjust(竖行间距，数字，范围-8~8): -5
+
+### 自定义判断条件
+
+##### Customize Condition
+如图，每一个可以自定义判断条件的行动（假设行动A），都由红色边框包裹
+
+当鼠标在红色边框内移动时，右上角会显示一个可以设置判断条件的容器（当鼠标红色边框，容器消失）
+
+容器内可见四个下拉列表和一个按钮
+
+下拉列表1. 这个条件插入的位置
+
+下拉列表2. 比较值A
+
+下拉列表3. 暂时只有比较运算符
+
+下拉列表4. 比较值B
+
+按钮 添加作用...
+待续
+
 
 ### 更新历史
 
