@@ -85,7 +85,17 @@ Scripts get information through text, and if you have not yet modified the font,
 
 下拉列表2、4: 比较值A、比较值B
 
+###### 比较值
+
+1. hp/mp/sp 代表自身各数值的百分比
+2. oc 如250%就是250
+3. monsterAll/monsterAlive/bossAll/bossAlive 代表怪兽/Boss的总数目/存活数目
+4. roundNow/roundAll 代表当前回合数/总回合数
+5. 空格 自己输入
+
 下拉列表3: 暂时只有比较运算符（1:大于, 2:小于, 3: 大于等于, 4: 小于等于, 5:等于, 6:不等于）
+
+ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
 
 #### 示例
 
