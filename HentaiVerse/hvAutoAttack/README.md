@@ -34,7 +34,7 @@
 
 ### 攻击规则-示例
 
-##### Attack Rule Example (English)
+##### Attack Rule Example
 
 <table><tbody>
 <tr><td>Enemy id</td><td>now hp</td><td>init PW</td><td>Imperil Effective<br>(-2)</td><td>Drain Effective<br>(-1)</td><td>Confuse Effective<br>(+2)</td><td>PW</td></tr>
@@ -63,6 +63,8 @@ Scripts get information through text, and if you have not yet modified the font,
 
 ###### Font Preference (for reference only)
 
+![字体方案（仅供参考）](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Font.gif)
+
 1. font-family(字形体系): Times New Roman
 2. font-size(字体大小，数字，范围5~20): 12
 3. font-weight(字体加粗，normal, bold, bolder, lighter): normal
@@ -72,23 +74,36 @@ Scripts get information through text, and if you have not yet modified the font,
 ### 自定义判断条件
 
 ##### Customize Condition
+
 如图，每一个可以自定义判断条件的行动（假设行动A），都由红色边框包裹
 
 当鼠标在红色边框内移动时，右上角会显示一个可以设置判断条件的容器（当鼠标红色边框，容器消失）
 
 容器内可见四个下拉列表和一个按钮
 
-下拉列表1. 这个条件插入的位置
+下拉列表1: 这个条件插入的位置（具体作用请看示例）
 
-下拉列表2. 比较值A
+下拉列表2、4: 比较值A、比较值B
 
-下拉列表3. 暂时只有比较运算符
+下拉列表3: 暂时只有比较运算符（1:大于, 2:小于, 3: 大于等于, 4: 小于等于, 5:等于, 6:不等于）
 
-下拉列表4. 比较值B
+#### 示例
 
-按钮 添加作用...
-待续
+![示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
 
+图中，我设置了三个大条件（2中有两个小条件）
+
+条件1: 总回合数大于12
+
+条件2: Boss数大于1、hp大于hp
+
+条件3: 怪物数大于6
+
+只要任一大条件下所有小条件判断为真，总体就为真
+
+以下为电路图示意图
+
+![电路图示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
 
 ### 更新历史
 
