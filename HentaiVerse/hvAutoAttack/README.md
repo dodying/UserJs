@@ -1,17 +1,7 @@
 ### TODO
 
-1. √ [浮动防封(时间与层数)](https://greasyfork.org/zh-CN/forum/discussion/20804/x)@HV打怪腳本吼棒吼棒的
-2. √ [如果`闲置竞技场开启`同时`GF在输入框末尾`，那么当闲置任务只剩下GF时循环GF无限次](https://greasyfork.org/zh-CN/forum/discussion/20818/x)@kevinlooo
-3. ○ [卷轴的使用的时机问题-多项判断](https://greasyfork.org/zh-CN/forum/discussion/21206/x)@乔越
-4. √ [小马staminaLog](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
-5. √ [其他技能判断-仅Boss](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
-6. ? [当可以施放特殊技能时才开启Spirit Stance](https://github.com/dodying/UserJs/issues/11#issuecomment-289787393)@WinAu
-7. 感谢以上同学的建议
-8. √ 更加自定义的判断条件
-9. 随机遭遇战通知
-
-##### 搁置的TODO
-
+1. 随机遭遇战通知
+---------------------
 0. Boss判断(2选1)：a.一次攻击对怪的血量减少百分比  b.怪hp接近于Bosshp的百分之几(自定，默认值未确定)
 1. De技能：这一功能**可能**将退回到以前版本
 2. 攻击规则: 1.攻击血量减少最大的怪兽，判断条件：Boss数≥2
@@ -122,6 +112,14 @@ ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
 ##### 最新版
 
 ###### Latest
+
+##### 2。72
+1. 自定义判断条件
+2. 其他一些变更
+
+###### 2.72 (English)
+1. Customize conditions
+2. Some other changes
 
 ##### 2.71
 1. 选项变更: 闲置竞技场
