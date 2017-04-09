@@ -1,16 +1,13 @@
 ### TODO
-
-0. during Channeling effect, first cast and then re-cast (re-cast no matter the buff expire in much turns)
-1. 对自身技能的单一技能做施放条件
-2. 随机遭遇战通知
 ---------------------
-0. Boss判断(2选1)：a.一次攻击对怪的血量减少百分比  b.怪hp接近于Bosshp的百分之几(自定，默认值未确定)
-1. De技能：这一功能**可能**将退回到以前版本
-2. 攻击规则: 1.攻击血量减少最大的怪兽，判断条件：Boss数≥2
+##### Low-priority TODO
+1. Boss判断(2选1)：a.一次攻击对怪的血量减少百分比  b.怪hp接近于Bosshp的百分之几(自定，默认值未确定)
+2. De技能：这一功能**可能**将退回到以前版本
+3. 攻击规则: 1.攻击血量减少最大的怪兽，判断条件：Boss数≥2
 
-### 使用方法
+### 兼容性
 
-##### Usage
+##### Compatible
 1. Firefox + Greasemonkey
 2. Chrome/Chromium + Tampermonkey
 3. Android + Firefox + Usi
@@ -67,34 +64,54 @@ Scripts get information through text, and if you have not yet modified the font,
 
 ##### Customize Condition
 
-每一个可以自定义判断条件的行动（假设行动A），都由红色边框包裹
+每一个拥有红色虚线边框的区域，都可以设置自定义判断条件。
 
-###### 注意：如果可以设置自定义判断条件，而留空（一个条件也没设置），那么就相当于真
+Each area with a red dotted border can be set to a customize condition.
 
-当鼠标在红色边框内移动时，右上角会显示一个可以设置判断条件的容器（当鼠标不在红色边框内，容器消失）
+###### 注意：如果这些区域留空（一个条件也没设置），那么就相当于真。
 
-容器内可见四个下拉列表和一个按钮
+###### If these areas are left blank (a condition is not set), then it's equivalent to true.
+
+当鼠标在这些区域内移动时，右上角会显示一个盒子（当鼠标不在这些区域内，盒子消失）
+
+When the mouse moves in these areas, a box is displayed in the upper right corner. (When the mouse out, the box disappears)
+
+盒子内可见四个下拉列表和一个按钮
+
+Four drop down lists and one button are visible in the box
 
 ##### 下拉列表1: 这个条件插入的位置（具体作用请看示例）
 
-##### 下拉列表2、4: 比较值A、比较值B
+##### Drop-down List 1: the location of this condition inserted (see the example for specific effects)
+
+##### 下拉列表2/4: 比较值A/比较值B
+
+##### Drop-down List 2/4: comparison value A / comparison value B
 
 ###### 比较值
 
-1. hp/mp/sp 自身各数值的百分比
-2. oc Overcharge,如250%就是250
-3. monsterAll/monsterAlive/bossAll/bossAlive 怪兽/Boss的总数目/存活数目
-4. roundNow/roundAll 当前回合数/总回合数
-5. roundType 战役模式(ar: The Arena, rb: Ring of Blood, gf: GrindFest, iw: Item World, ba: Random Encounter，由于是字符串的比较，请加上引号，如"ar"/'ar')
-6. attackStatus 攻击模式(0: Physical, 1: Fire, 2: Cold, 3: Elec, 4: Wind, 5: Divine, 6: Forbidden)
-7. turn Turns
-5. 空格 自己输入
+###### Comparison Value
 
-##### 下拉列表3: 暂时只有比较运算符（1:大于, 2:小于, 3: 大于等于, 4: 小于等于, 5:等于, 6:不等于）
+1. `hp`/`mp`/`sp`: hp/mp/sp的**百分比 (percent)**
+2. `oc`: Overcharge, 250==>250%
+3. `monsterAll`/`monsterAlive`/`bossAll`/`bossAlive`: 怪兽/Boss的总数目/存活数目
+4. `roundNow`/`roundAll`: 当前回合数/总回合数
+5. `roundType`: 战役模式 (`ar`: The Arena, `rb`: Ring of Blood, `gf`: GrindFest, `iw`: Item World, `ba`: Random Encounter)，由于是字符串之间的比较，所以请加上引号，如"ar"/'ar' (Because comparison between strings, please add quotation, such as `"ar"`/`'ar'`)
+6. `attackStatus`: 攻击模式 (`0`: Physical, `1`: Fire, `2`: Cold, `3`: Elec, `4`: Wind, `5`: Divine, `6`: Forbidden)
+7. `turn`: Turns
+8. 空白(blank): 自己输入 (the value you want to put in)
+
+##### 下拉列表3: 暂时只支持比较运算符（1:大于, 2:小于, 3: 大于等于, 4: 小于等于, 5:等于, 6:不等于）
+
+##### Drop-down List 3: temporarily only support comparison operator (1: >, 2: <, 3: ≥, 4: ≤, 5: =, 6: ≠)
 
 ##### ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
 
+##### Button ADD: Generates an input box with a value of `A,Comparison-Operator,B`
+
 #### 示例
+
+#### example
 
 ![示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
 
@@ -120,6 +137,11 @@ Scripts get information through text, and if you have not yet modified the font,
 
 ###### Latest
 
+##### 2.73
+1. 更多自定义判断条件
+2. 内置Random Encounter Notification(并不，其实是自己写的简陋的版本)
+3. 其他一些变更
+
 ##### 2.72
 1. 自定义判断条件
 2. 其他一些变更
@@ -132,39 +154,20 @@ Scripts get information through text, and if you have not yet modified the font,
 1. 选项变更: 闲置竞技场
 2. 选项新增: Turn自动刷新，自动逃跑，持续Turns
 
-###### 2.71 (English)
-1. Options Changed: "Idle Arena"
-2. Options Added: "Turn Reload", "Round Flee", "Expire Turns"
-
 ##### 2.70
 1. 选项新增: 自定义施放顺序
 2. 大部分的选项名称变更，所以原先的设置大部分失效，推荐先导出设置，然后在对照一一设置，抱歉
-
-###### 2.70 (English)
-1. Options Added: "Custom Cast Order"
-2. Most of the option name changes, so the original set most of the failure, it is recommended to first set out the settings, and then set in the control one by one, sorry
 
 ##### 2.69
 1. 功能回归: 掉落监测(WoC，因为函数Reloader变更，原先的独立脚本失效了...)
 2. 移动端优化
 
-###### 2.69 (English)
-1. Feature Regression: "dropMonitor" (WTF, because the function Reloader changed, the script I separated before invalid.)
-2. Phone optimization
-
 ##### 2.68
 1. 功能移除: 掉落监测（已独立为一个脚本，可通过`推荐脚本`添加）
 2. 选项变更: 闲置竞技场
 
-###### 2.68 (English)
-1. Feature Removed: "dropMonitor" (You can INSTALL it in Recommend)
-2. Options Changed: "Idle Arena"
-
 ##### 2.67
 1. 选项新增: Ether Tap
-
-###### 2.67 (English)
-1. Options Added: "Ether Tap"
 
 ##### 2.66
 1. 选项去除: 相当于默认勾选，如Reloader
@@ -174,89 +177,43 @@ Scripts get information through text, and if you have not yet modified the font,
 5. 快捷链接: 可在"关于本脚本"中进行相关设置
 6. 攻击规则: 如果敌人相邻两只敌人已死（或不存在），则给其权重增加0.5（相当于不优先攻击这些敌人）
 
-###### 2.66 (English)
-1. Options Removed: equal to been checked, such as Reloader
-2. Options Changed: such as "Damaged Equippment", "Idle Arena"
-3. Options Added: "Riddle Alert", "All Enemies Imperil"
-4. Auto Fix: If some ERROR happened with Enemy Status, auto fix it
-5. Quick Site: can config in tab "About this"
-6. Attack Rule: If the enemy of which adjacent two enemies dead (or does not exist), then its PW increased 0.5 (equal to dont attack these enemies later)
-
 ##### 2.65
 1. 感谢[Koko191](https://greasyfork.org/forum/profile/18194/Koko191)帮助翻译了英文版本
 2. 增加了武器技能
-
-###### 2.65 (English)
-1. Thanks to [Koko191](https://greasyfork.org/forum/profile/18194/Koko191) help to translate the English version
-2. add weapon skills
 
 ##### 2.64
 1. 增加Stamina减少检测
 2. 自定义要进行的竞技场
 3. 自定义当装备损坏时，是否提醒
 
-###### 2.64 (English)
-1. Add a detection of Stamina loss
-2. Customize the arena to be performed
-3. Customize whether remind if the equipment is damaged
-
 ##### 2.63
 1. 增加暂停热键
 2. 增加自定义警报
-
-###### 2.63 (English)
-1. Add a pause hotkey
-2. Add custom alerts
 
 ##### 2.62
 1. 可选择是否开启音频通知（推荐开启）
 2. 增加桌面通知，可在设置中开启（推荐开启）
 
-###### 2.62 (English)
-1. Can choose whether to open the audio notification (recommended)
-2. Add desktop notifications, which can be turned on in Settings (recommended)
-
 ##### 2.61
 1. 针对Spirit Stance，增加对于SP的判断
 
-###### 2.61 (English)
-1. For Spirit Stance, increase the judgment for the SP
-
 ##### 2.60
 1. 掉落监测强化
-
-###### 2.60 (English)
-1. Drop monitoring enhanced
 
 ##### 2.59
 1. 移除本地储存选项卡
 2. 增加掉落检测功能与对应选项卡
 
-###### 2.59 (English)
-1. Remove the Local Storage tab
-2. Add the drop detection function and the corresponding tab
-
 ##### 2.58
 1. 版本2.57a中，移除了临时攻击模式
 2. 为两个特殊技能增加oc阈值
 
-###### 2.58 (English)
-1. In version 2.57a, the Temporary Attack mode was removed
-2. Increase the oc threshold for two special skills
-
 ##### 2.57
 1. 感谢网友maoboshi，现在支持特殊技能龙吼
-
-###### 2.57 (English)
-Thanks to maoboshi, now support the special skill FUS RO DAH
 
 ##### 2.56
 1. 增加了选项来控制使用Draught级别药水的使用
 2. 修改了De技能
-
-###### 2.56 (English)
-1. Added the option to control the use of the Draught
-2. Modified the DeSkill
 
 ##### 2.55
 1. 增加了脚本语言选项
