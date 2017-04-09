@@ -1,6 +1,8 @@
 ### TODO
 
-1. 随机遭遇战通知
+0. during Channeling effect, first cast and then re-cast (re-cast no matter the buff expire in much turns)
+1. 对自身技能的单一技能做施放条件
+2. 随机遭遇战通知
 ---------------------
 0. Boss判断(2选1)：a.一次攻击对怪的血量减少百分比  b.怪hp接近于Bosshp的百分之几(自定，默认值未确定)
 1. De技能：这一功能**可能**将退回到以前版本
@@ -67,25 +69,27 @@ Scripts get information through text, and if you have not yet modified the font,
 
 如图，每一个可以自定义判断条件的行动（假设行动A），都由红色边框包裹
 
-当鼠标在红色边框内移动时，右上角会显示一个可以设置判断条件的容器（当鼠标红色边框，容器消失）
+当鼠标在红色边框内移动时，右上角会显示一个可以设置判断条件的容器（当鼠标不在红色边框内，容器消失）
 
 容器内可见四个下拉列表和一个按钮
 
-下拉列表1: 这个条件插入的位置（具体作用请看示例）
+##### 下拉列表1: 这个条件插入的位置（具体作用请看示例）
 
-下拉列表2、4: 比较值A、比较值B
+##### 下拉列表2、4: 比较值A、比较值B
 
 ###### 比较值
 
-1. hp/mp/sp 代表自身各数值的百分比
-2. oc 如250%就是250
-3. monsterAll/monsterAlive/bossAll/bossAlive 代表怪兽/Boss的总数目/存活数目
-4. roundNow/roundAll 代表当前回合数/总回合数
+1. hp/mp/sp 自身各数值的百分比
+2. oc Overcharge,如250%就是250
+3. monsterAll/monsterAlive/bossAll/bossAlive 怪兽/Boss的总数目/存活数目
+4. roundNow/roundAll 当前回合数/总回合数
+5. roundType 战役模式(ar: The Arena, rb: Ring of Blood, gf: GrindFest, iw: Item World, ba: Random Encounter，由于是字符串的比较，请加上引号，如"ar"/'ar')
+6. attackStatus 攻击模式(0: Physical, 1: Fire, 2: Cold, 3: Elec, 4: Wind, 5: Divine, 6: Forbidden)
 5. 空格 自己输入
 
-下拉列表3: 暂时只有比较运算符（1:大于, 2:小于, 3: 大于等于, 4: 小于等于, 5:等于, 6:不等于）
+##### 下拉列表3: 暂时只有比较运算符（1:大于, 2:小于, 3: 大于等于, 4: 小于等于, 5:等于, 6:不等于）
 
-ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
+##### ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
 
 #### 示例
 
