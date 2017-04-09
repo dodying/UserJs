@@ -101,9 +101,9 @@ Four drop down lists and one button are visible in the box
 7. `turn`: Turns
 8. 空白(blank): 自己输入 (the value you want to put in)
 
-##### 下拉列表3: 暂时只支持比较运算符（1:大于, 2:小于, 3: 大于等于, 4: 小于等于, 5:等于, 6:不等于）
+##### 下拉列表3: 暂时只支持比较运算符（`1`:大于, `2`:小于, `3`: 大于等于, `4`: 小于等于, `5`:等于, `6`:不等于）
 
-##### Drop-down List 3: temporarily only support comparison operator (1: >, 2: <, 3: ≥, 4: ≤, 5: =, 6: ≠)
+##### Drop-down List 3: temporarily only support comparison operator (`1`: >, `2`: <, `3`: ≥, `4`: ≤, `5`: =, `6`: ≠)
 
 ##### ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
 
@@ -117,15 +117,21 @@ Four drop down lists and one button are visible in the box
 
 图中，我设置了三个大条件（2中有两个小条件）
 
-条件1: 总回合数大于12
+In the picture, I set three big conditions (2 contains two small conditions)
 
-条件2: Boss数大于1、hp大于hp
+1. Condition 1: 总回合数大于12 (total rounds more than 12)
 
-条件3: 怪物数大于6
+2. Condition 2: Boss数大于1、hp大于hp (bosses more than 1 and hp more than hp)
+
+3. Condition 3: 怪物数大于6 (monsters more than 6)
 
 只要任一大条件下所有小条件判断为真，总体就为真
 
+It's TRUE, when any big condition is true (To judge big condition is true, all small condition must true)
+
 以下为电路图示意图
+
+The following is a schematic diagram of the circuit diagram
 
 ![电路图示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
 
