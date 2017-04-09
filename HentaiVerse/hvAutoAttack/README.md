@@ -67,7 +67,9 @@ Scripts get information through text, and if you have not yet modified the font,
 
 ##### Customize Condition
 
-如图，每一个可以自定义判断条件的行动（假设行动A），都由红色边框包裹
+每一个可以自定义判断条件的行动（假设行动A），都由红色边框包裹
+
+###### 注意：如果可以设置自定义判断条件，而留空（一个条件也没设置），那么就相当于真
 
 当鼠标在红色边框内移动时，右上角会显示一个可以设置判断条件的容器（当鼠标不在红色边框内，容器消失）
 
@@ -85,6 +87,7 @@ Scripts get information through text, and if you have not yet modified the font,
 4. roundNow/roundAll 当前回合数/总回合数
 5. roundType 战役模式(ar: The Arena, rb: Ring of Blood, gf: GrindFest, iw: Item World, ba: Random Encounter，由于是字符串的比较，请加上引号，如"ar"/'ar')
 6. attackStatus 攻击模式(0: Physical, 1: Fire, 2: Cold, 3: Elec, 4: Wind, 5: Divine, 6: Forbidden)
+7. turn Turns
 5. 空格 自己输入
 
 ##### 下拉列表3: 暂时只有比较运算符（1:大于, 2:小于, 3: 大于等于, 4: 小于等于, 5:等于, 6:不等于）
