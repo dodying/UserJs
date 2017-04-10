@@ -148,13 +148,14 @@ The following is a schematic diagram of the circuit diagram
 2. 内置Random Encounter Notification(并不，其实是自己写的简陋的版本)
 3. 其他一些变更
 
+###### 2.73 (English)
+1. Customize conditions
+2. New Built-in Plugin: Random Encounter Notification
+3. Some other changes
+
 ##### 2.72
 1. 自定义判断条件
 2. 其他一些变更
-
-###### 2.72 (English)
-1. Customize conditions
-2. Some other changes
 
 ##### 2.71
 1. 选项变更: 闲置竞技场
