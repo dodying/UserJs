@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.73
+// @version      2.73a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -1249,6 +1249,7 @@ function countMonsterHP() { //统计敌人血量
   var monsterHp = gE('div.btm4>div.btm5:nth-child(1)', 'all');
   var monsterStatus = g('monsterStatus');
   var i;
+  var hpArray = new Array();
   for (i = 0; i < monsterHp.length; i++) {
     if (gE('img[src="/y/s/nbardead.png"]', monsterHp[i])) {
       monsterStatus[i].isDead = true;
@@ -1256,6 +1257,7 @@ function countMonsterHP() { //统计敌人血量
     } else {
       monsterStatus[i].isDead = false;
       monsterStatus[i].hpNow = Math.floor(monsterStatus[i].hp * parseFloat(gE('div.chbd>img.chb2', monsterHp[i]).style.width) / 120) + 1;
+      hpArray.push(monsterStatus[i].hpNow);
     }
     monsterStatus[i].wall = (i === 0 || i === monsterHp.length - 1) ? 1 : 0;
   }
@@ -1273,9 +1275,10 @@ function countMonsterHP() { //统计敌人血量
   }
   setValue('monsterStatus', monsterStatus);
   monsterStatus.sort(objArrSort('hpNow'));
-  var hpLowest = monsterStatus[0].hpNow;
+  var hpLowest = Math.min.apply(null, hpArray);
+  var hpMost = Math.max.apply(null, hpArray);
   for (i = 0; i < monsterStatus.length; i++) {
-    monsterStatus[i].initWeight = (monsterStatus[i].isDead) ? Infinity : monsterStatus[i].hpNow / hpLowest * 10;
+    monsterStatus[i].initWeight = (monsterStatus[i].isDead) ? Infinity : ((g('option').ruleReverse) ? hpMost / monsterStatus[i].hpNow * 10 : monsterStatus[i].hpNow / hpLowest * 10);
     monsterStatus[i].finWeight = monsterStatus[i].initWeight - monsterStatus[i].wall * g('option').weight.Wall;
   }
   monsterStatus.sort(objArrSort('order'));
@@ -1336,7 +1339,7 @@ function countMonsterHP() { //统计敌人血量
   var monsterBuff = gE('div.btm6', 'all');
   for (i = 0; i < monsterBuff.length; i++) {
     for (j in skillLib) {
-      monsterStatus[i].finWeight += (gE('img[src*="' + skillLib[j].img + '"]', monsterBuff[i])) ? g('option').weight[j] : 0;
+      monsterStatus[i].finWeight += (gE('img[src*="' + skillLib[j].img + '"]', monsterBuff[i])) ? ((g('option').ruleReverse) ? - g('option').weight[j] : g('option').weight[j])  : 0;
     }
   }
   monsterStatus.sort(objArrSort('finWeight'));
@@ -1800,11 +1803,7 @@ function attack() { //自动打怪
       }
     }
   }
-  if (g('option').ruleReverse) {
-    gE('#mkey_' + g('monsterStatus') [g('monsterStatus').length - 1].id).click();
-  } else {
-    gE('#mkey_' + g('monsterStatus') [0].id).click();
-  }
+  gE('#mkey_' + g('monsterStatus') [0].id).click();
   g('end', true);
   return;
 };
