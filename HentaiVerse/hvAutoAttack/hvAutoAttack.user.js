@@ -7,14 +7,14 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http*://hentaiverse.org/*
 // @include      http*://alt.hentaiverse.org/*
-// @include      https://e-hentai.org/news.php
+// @include      https://e-hentai.org/news.php#randomEncounter
 // @exclude      http*://hentaiverse.org/pages/showequip.php?*
 // @exclude      http*://alt.hentaiverse.org/pages/showequip.php?*
 // @author       Dodying
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.73b
+// @version      2.73c
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -23,7 +23,7 @@
 // @run-at       document-end
 // ==/UserScript==
 (function init() {
-  if (location.href === 'https://e-hentai.org/news.php') {
+  if (location.href === 'https://e-hentai.org/news.php#randomEncounter') {
     var host = (document.referrer) ? document.referrer.split('/') [0] + '//' + document.referrer.split('/') [2] : getValue('hvHost') || prompt('From hvAutoAttack\n请输入你常用的hentaiver网站的域名，如\nPlease put in the hentaiverse domain you usually use, for example\n\nhttp://hentaiverse.org\nhttps://hentaiverse.org\nhttp://alt.hentaiverse.org\nhttps://alt.hentaiverse.org');
     setValue('hvHost', host);
     location = host + ((gE('#eventpane>div>a')) ? '/' + gE('#eventpane>div>a').href.split('/') [3] : '');
@@ -134,7 +134,7 @@ function setValue(item, value) { //储存数据
   localStorage['hvAA-' + item] = (typeof value === 'string') ? value : JSON.stringify(value);
 };
 function getValue(item, toJSON) { //读取数据
-  return (localStorage['hvAA-' + item]) ? ((toJSON) ? JSON.parse(localStorage['hvAA-' + item])  : localStorage['hvAA-' + item])  : null;
+  return (localStorage['hvAA-' + item] && localStorage['hvAA-' + item] !== 'undefined') ? ((toJSON) ? JSON.parse(localStorage['hvAA-' + item])  : localStorage['hvAA-' + item])  : null;
 };
 function delValue(item) { //删除数据
   if (typeof item === 'string') {
@@ -237,7 +237,7 @@ function addStyle(lang) { //CSS
     '#riddleform>div:nth-child(3)>img{width:700px;}',
     '.hvAALog{font-size:20px;}',
     '.hvAAButton{top:4px;left:' + (boxWidth - 24 - 50) + 'px;position:absolute;z-index:9999;cursor:pointer;}',
-    '#hvAABox{left:calc(50% - 350px);top:50px;font-size:18px!important;z-index:4;width:700px;height:510px;position:absolute;text-align:justify;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;}',
+    '#hvAABox{left:calc(50% - 350px);top:50px;font-size:16px!important;z-index:4;width:700px;height:510px;position:absolute;text-align:justify;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
     '.hvAATablist{position:relative;left:14px;}',
     '.hvAATabmenu{position:absolute;left:-9px;}',
     '.hvAATabmenu>span>a{display:block;padding:5px 10px;margin:0 10px 0 0;border:1px solid #91a7b4;border-radius:5px;background-color:#E3F1F8;color:#000;text-decoration:none;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}',
@@ -309,7 +309,7 @@ function optionBox() { //配置界面
     '<div class="hvAATab" id="hvAATab-Scroll"><input id="scrollSwitch" type="checkbox"><label for="scrollSwitch"><span class="hvAATitle"><l0>使用卷轴</l0><l1>使用捲軸</l1><l2>Use Scrolls</l2></span></label><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Random Encounter</label><div class="customize" name="scrollCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div><input id="scrollFirst" type="checkbox"><label for="scrollFirst"><l0>存在技能生成的Buff时，仍然使用卷轴</l0><l1>存在技能生成的Buff時，仍然使用捲軸</l1><l2>Use Scrolls even when there are effects from spells</l2>.</label><div><input id="scroll_Go" type="checkbox"><label for="scroll_Go">Scroll of the Gods</label><div class="customize" name="scrollGoCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Av" type="checkbox"><label for="scroll_Av">Scroll of the Avatar</label><div class="customize" name="scrollAvCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Pr" type="checkbox"><label for="scroll_Pr">Scroll of Protection</label><div class="customize" name="scrollPrCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Sw" type="checkbox"><label for="scroll_Sw">Scroll of Swiftness</label><div class="customize" name="scrollSwCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Li" type="checkbox"><label for="scroll_Li">Scroll of Life</label><div class="customize" name="scrollLiCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Sh" type="checkbox"><label for="scroll_Sh">Scroll of Shadows</label><div class="customize" name="scrollShCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Ab" type="checkbox"><label for="scroll_Ab">Scroll of Absorption</label><div class="customize" name="scrollAbCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div>',
     '<div class="hvAATab" id="hvAATab-Infusion"><input id="infusion" type="checkbox"><label for="infusion"><span class="hvAATitle"><l0>使用魔药</l0><l1>使用魔藥</l1><l2>Use Infusion</l2></span><br><l0>魔药属性与</l0><l1>魔藥屬性與</l1><l2>The style of infusion is the same as Attack Mode in </l2><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a><l0>里的攻击模式相同</l0><l1>裡的攻擊模式相同</l1><l2></l2></label><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="infusionRoundType_ar" type="checkbox"><label for="infusionRoundType_ar">The Arena</label><input id="infusionRoundType_rb" type="checkbox"><label for="infusionRoundType_rb">Ring of Blood</label><input id="infusionRoundType_gr" type="checkbox"><label for="infusionRoundType_gr">GrindFest</label><input id="infusionRoundType_iw" type="checkbox"><label for="infusionRoundType_iw">Item World</label><input id="infusionRoundType_ba" type="checkbox"><label for="infusionRoundType_ba">Random Encounter</label><div class="customize" name="infusionCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div></div>',
     '<div class="hvAATab" id="hvAATab-Alarm"><span class="hvAATitle"><l0>自定义警报</l0><l1>自定義警報</l1><l2>Alarm</l2></span><br><l0>注意：留空则使用默认音频，建议每个用户使用自定义音频</l0><l1>注意：留空則使用默認音頻，建議每個用戶使用自定義音頻</l1><l2>Note: Leave the box blank to use default audio, it\'s recommended for all user to use custom audio.</l2><div><input id="audioEnable_Common" type="checkbox"><label for="audioEnable_Common"><l01>通用</l01><l2>Common</l2>: <input name="audio_Common" type="text"></label><br><input id="audioEnable_Error" type="checkbox"><label for="audioEnable_Error"><l0>错误</l0><l1>錯誤</l1><l2>Error</l2>: <input name="audio_Error" type="text"></label><br><input id="audioEnable_Defeat" type="checkbox"><label for="audioEnable_Defeat"><l0>失败</l0><l1>失敗</l1><l2>Defeat</l2>: <input name="audio_Defeat" type="text"></label><br><input id="audioEnable_Riddle" type="checkbox"><label for="audioEnable_Riddle"><l0>答题</l0><l1>答題</l1><l2>Riddle</l2>: <input name="audio_Riddle" type="text"></label><br><input id="audioEnable_Victory" type="checkbox"><label for="audioEnable_Victory"><l0>胜利</l0><l1>勝利</l1><l2>Victory</l2>: <input name="audio_Victory" type="text"></label></div><div><l0>请将将要测试的音频文件的地址填入这里</l0><l1>請將將要測試的音頻文件的地址填入這裡</l1><l2>Plz put in the audio file address you want to test</l2>:<br><input class="hvAADebug" name="audio_Text" type="text"></div></div>',
-    '<div class="hvAATab" id="hvAATab-Rule"><span class="hvAATitle"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/#攻击规则-示例" target="_blank"><l01>示例</l01><l2>Example</l2></a><div>1. <l0>每回合计算敌人当前血量，血量最低的设置初始血量为10，其他敌人为当前血量倍数*10</l0><l1>每回合計算敌人當前血量，血量最低的設置初始血量為10，其他敌人為當前血量倍數*10</l1><l2>Each enemiy is assigned a number which is used to determine the target to attack, let\'s call that number Priority Weight or PW.</l2></div><div>2. <l0>初始权重与下述各Buff权重相加</l0><l1>初始權重與下述各Buff權重相加</l1><l2>PW(X) = 10 * HP(X) / Min_HP + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)</l2><br>Sleep: <input class="hvAANumber" name="weight_Sle" placeholder="5" type="text"> Blind: <input class="hvAANumber" name="weight_Bl" placeholder="3" type="text"> Slow: <input class="hvAANumber" name="weight_Slo" placeholder="3" type="text"> Imperil: <input class="hvAANumber" name="weight_Im" placeholder="-5" type="text"><br>MagNet: <input class="hvAANumber" name="weight_MN" placeholder="-4" type="text"> Silence: <input class="hvAANumber" name="weight_Si" placeholder="-4" type="text"> Drain: <input class="hvAANumber" name="weight_Dr" placeholder="-4" type="text"> Weaken: <input class="hvAANumber" name="weight_We" placeholder="-4" type="text"><br>Confuse: <input class="hvAANumber" name="weight_Co" placeholder="-1" type="text">Coalesced Mana: <input class="hvAANumber" name="weight_CM" placeholder="-5" type="text"><br>Stunned: <input class="hvAANumber" name="weight_Stun" placeholder="-4" type="text"> Penetrated Armor: <input class="hvAANumber" name="weight_PA" placeholder="-4" type="text"> Bleeding Wound: <input class="hvAANumber" name="weight_BW" placeholder="-4" type="text"></div><div>3. <l0>如果敌人相邻两只敌人已死（或不存在），则给其权重增加</l0><l1>如果敵人相鄰兩隻敵人已死（或不存在），則給其權重增加</l1><l2>If the enemy of which adjacent two enemies dead (or does not exist), then its PW increased</l2> <input class="hvAANumber" name="weight_Wall" placeholder="0.5" type="text"></div><div>4. <input id="ruleReverse" type="checkbox"><label for="ruleReverse"><l0>计算出最终权重，攻击权重最小/最大的敌人(勾选: 最大)</l0><l1>計算出最終權重，攻擊權重最小/最大的敌人(勾選: 最大)</l1><l2>Whichever enemy has the lowest/highest PW will be the target. (ON means highest)</l2></label></div><div>5. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a href="#hvAATab-About"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.</div></div>',
+    '<div class="hvAATab" id="hvAATab-Rule"><span class="hvAATitle"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/#攻击规则-示例" target="_blank"><l01>示例</l01><l2>Example</l2></a><div>1. <l0>每回合计算敌人当前血量，血量最低的设置初始血量为10，其他敌人为当前血量倍数*10</l0><l1>每回合計算敌人當前血量，血量最低的設置初始血量為10，其他敌人為當前血量倍數*10</l1><l2>Each enemiy is assigned a number which is used to determine the target to attack, let\'s call that number Priority Weight or PW.</l2></div><div>2. <l0>初始权重与下述各Buff权重相加</l0><l1>初始權重與下述各Buff權重相加</l1><l2>PW(X) = 10 * HP(X) / Min_HP + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)</l2><br>Sleep: <input class="hvAANumber" name="weight_Sle" placeholder="5" type="text"> Blind: <input class="hvAANumber" name="weight_Bl" placeholder="3" type="text"> Slow: <input class="hvAANumber" name="weight_Slo" placeholder="3" type="text"> Imperil: <input class="hvAANumber" name="weight_Im" placeholder="-5" type="text"><br>MagNet: <input class="hvAANumber" name="weight_MN" placeholder="-4" type="text"> Silence: <input class="hvAANumber" name="weight_Si" placeholder="-4" type="text"> Drain: <input class="hvAANumber" name="weight_Dr" placeholder="-4" type="text"> Weaken: <input class="hvAANumber" name="weight_We" placeholder="-4" type="text"><br>Confuse: <input class="hvAANumber" name="weight_Co" placeholder="-1" type="text">Coalesced Mana: <input class="hvAANumber" name="weight_CM" placeholder="-5" type="text"><br>Stunned: <input class="hvAANumber" name="weight_Stun" placeholder="-4" type="text"> Penetrated Armor: <input class="hvAANumber" name="weight_PA" placeholder="-4" type="text"> Bleeding Wound: <input class="hvAANumber" name="weight_BW" placeholder="-4" type="text"></div><div>3. <input id="ruleReverse" type="checkbox"><label for="ruleReverse"><l0>计算出最终权重，攻击权重最小/最大的敌人(勾选: 最大)</l0><l1>計算出最終權重，攻擊權重最小/最大的敌人(勾選: 最大)</l1><l2>Whichever enemy has the lowest/highest PW will be the target. (ON means highest)</l2></label></div><div>PS. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a href="#hvAATab-About"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.</div></div>',
     '<div class="hvAATab hvAACenter" id="hvAATab-Drop"><span class="hvAATitle"><l01>掉落监测</l01><l2>Drops Tracking</l2></span><button class="reMonitor"><l01>重置</l01><l2>Reset</l2></button></div>',
     '<div class="hvAATab hvAACenter" id="hvAATab-About"><div><span><l0>反馈</l0><l1>反饋</l1><l2>Feedback</l2>: <a href="https://github.com/dodying/UserJs/issues/" target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback" target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471" target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs" target="_blank">4. Gitter</a></span></div><div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2>: </span><br><l0>如果脚本长期暂停且网络无问题，请点击【临时修复】</l0><l1>如果腳本長期暫停且網絡無問題，請點擊【臨時修復】</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click [Try to fix]</l2><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Random Encounter</option></select><br><l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug" placeholder="1" type="text"><br><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button></div><div class="hvAAQuickSite"><span class="hvAATitle"><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><br><l0>留空“姓名”输入框则会表示删除，修改完成后请及时保存</l0><l1>留空“姓名”輸入框則會表示刪除，修改完成後請及時保存</l1><l2> The input box left "name" blank will be deleted, after change please save in time.</l2><table><tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr></table><button class="quickSiteAdd"><l01>新增</l01><l2>Add</l2></button></div><div><button class="hvAAExport"><l0>导出设置</l0><l1>導出設置</l1><l2>Export Confiuration</l2></button><button class="hvAAImport"><l0>导入设置</l0><l1>導入設置</l1><l2>Import Confiuration</l2></button><textarea class="hvAAConfig"></textarea></div></div>',
     '<div class="hvAATab hvAACenter" id="hvAATab-Recommend"><span class="hvAATitle"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></span><table><tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>应用到</l0><l1>應用到</l1><l2>Applies to</l2></td><td><l0>说明</l0><l1>說明</l1><l2>Description</l2></td><td>URL</td></tr><tr><td><l0>【HV】购物清单</l0><l1>【HV】購物清單</l1><l2>hvBazaarList</l2></td><td><a href="?s=Bazaar&ss=is" target="_blank">Bazaar</a></td><td><l0>快速生成购物清单</l0><l1>快速生成購物清單</l1><l2>Quickly generate shopping lists</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】喂食</l0><l1>【HV】餵食</l1><l2>hvFeed</l2></td><td><a href="?s=Bazaar&ss=ml" target="_blank">Monster Lab</a></td><td><l0>自动给大于100级的怪物喂开心药丸</l0><l1>自動給大於100級的怪物餵開心藥丸</l1><l2>Automatically feed monster of which level more than 100 on happy pills</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvFeed.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】出售装备</l0><l1>【HV】出售裝備</l1><l2>hvSellEquipment</l2></td><td><a href="?s=Character&ss=ch" target="_blank">Character</a></td><td></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js" target="_blank">Install</a></td></tr><tr><td>Reloader</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894" target="_blank">E-Hentai Forums</a></td></tr><tr><td>RiddleLimiter Plus</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Random Encounter Notification</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Equipment Comparison</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HentaiVerse Better Equipment Shop</td><td></td><td></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319" target="_blank">E-Hentai Forums</a></td></tr></tboby></table></div>',
@@ -872,10 +872,11 @@ function riddleAlert() { //答题警报
     gE('#hvAAAlert-Riddle').pause();
     if (/^[abc]$/i.test(e.key)) {
       riddleSubmit(e.key.toUpperCase());
+      this.onkeydown = null;
     } else if (/^[123]$/.test(e.key)) {
       riddleSubmit(answers[e.key - 1]);
+      this.onkeydown = null;
     }
-    this.onkeydown = null;
   }
   if (g('option').riddleRadio) {
     var bar = gE('body').appendChild(cE('div'));
@@ -983,7 +984,7 @@ function randomEncounterCheck() { //Random Encounter Notification
     randomEncounter.lastTime = timeNow;
     setValue('randomEncounter', randomEncounter);
     var a = cE('a');
-    a.href = 'https://e-hentai.org/news.php';
+    a.href = 'https://e-hentai.org/news.php#randomEncounter';
     gE('body').appendChild(a);
     a.click();
   }
@@ -1029,15 +1030,15 @@ function main() { //主程序
   if (g('end')) return;
   if (g('mp') < g('option').mp2 || g('sp') < g('option').sp2 || g('hp') <= g('option').hp2) deadSoon(); //自动回血回魔
   if (g('end')) return;
-  if (g('option').scrollSwitch && checkCondition(g('option').scrollCondition) && g('option').scrollRoundType && g('option').scrollRoundType[g('roundType')]) useScroll(); //自动使用卷轴
+  if (g('option').scrollSwitch && g('option').scroll && checkCondition(g('option').scrollCondition) && g('option').scrollRoundType && g('option').scrollRoundType[g('roundType')]) useScroll(); //自动使用卷轴
   if (g('end')) return;
-  if (g('option').buffSkillSwitch && checkCondition(g('option').buffSkillCondition)) useBuffSkill(); //自动使用药水、施法增益技能
+  if (g('option').buffSkillSwitch && (g('option').buffSkill || g('option').channelSkill)) useBuffSkill(); //自动使用药水、施法增益技能
   if (g('end')) return;
   if (g('attackStatus') !== 0 && g('option').infusion && checkCondition(g('option').infusionCondition) && g('option').infusionRoundType && g('option').infusionRoundType[g('roundType')]) useInfusions(); //自动使用魔药
   if (g('end')) return;
   if (g('option').debuffSkillSwitch && g('option').debuffSkillAllIm && gE('div.btm6 img[src*="imperil"]', 'all').length < g('monsterAlive')) allImperiled(); //给所有敌人上Imperil
   if (g('end')) return;
-  if (g('option').debuffSkillSwitch && checkCondition(g('option').debuffSkillCondition)) useDeSkill(); //自动施法De技能
+  if (g('option').debuffSkillSwitch && g('option').debuffSkill && checkCondition(g('option').debuffSkillCondition)) useDeSkill(); //自动施法De技能
   if (g('end')) return;
   attack(); //自动打怪
   if (g('end')) return;
@@ -1262,26 +1263,12 @@ function countMonsterHP() { //统计敌人血量
       monsterStatus[i].hpNow = Math.floor(monsterStatus[i].hp * parseFloat(gE('div.chbd>img.chb2', monsterHp[i]).style.width) / 120) + 1;
       hpArray.push(monsterStatus[i].hpNow);
     }
-    monsterStatus[i].wall = (i === 0 || i === monsterHp.length - 1) ? 1 : 0;
-  }
-  for (i = 0; i < monsterStatus.length; i++) {
-    if (monsterStatus[i].isDead) {
-      if (i === 0) {
-        monsterStatus[i + 1].wall++;
-      } else if (i === monsterHp.length - 1) {
-        monsterStatus[i - 1].wall++;
-      } else {
-        monsterStatus[i + 1].wall++;
-        monsterStatus[i - 1].wall++;
-      }
-    }
   }
   setValue('monsterStatus', monsterStatus);
   var hpLowest = Math.min.apply(null, hpArray);
   var hpMost = Math.max.apply(null, hpArray);
   for (i = 0; i < monsterStatus.length; i++) {
-    monsterStatus[i].initWeight = (monsterStatus[i].isDead) ? Infinity : ((g('option').ruleReverse) ? hpMost / monsterStatus[i].hpNow * 10 : monsterStatus[i].hpNow / hpLowest * 10);
-    monsterStatus[i].finWeight = monsterStatus[i].initWeight - monsterStatus[i].wall * g('option').weight.Wall;
+    monsterStatus[i].finWeight = (monsterStatus[i].isDead) ? Infinity : ((g('option').ruleReverse) ? hpMost / monsterStatus[i].hpNow * 10 : monsterStatus[i].hpNow / hpLowest * 10);
   }
   var skillLib = {
     Sle: {
@@ -1457,7 +1444,7 @@ function useScroll() { //自动使用卷轴
   };
   var scrollFirst = (g('option').scrollFirst) ? '_scroll' : '';
   for (var i in scrollLib) {
-    if (g('option').scroll && g('option').scroll[i] && gE('.bti3>div[onmouseover*="' + scrollLib[i].name + '"]') && checkCondition(g('option') ['scroll' + i + 'Condition'])) {
+    if (g('option').scroll[i] && gE('.bti3>div[onmouseover*="' + scrollLib[i].name + '"]') && checkCondition(g('option') ['scroll' + i + 'Condition'])) {
       for (var j = 1; j <= scrollLib[i].mult; j++) {
         if (gE('div.bte>img[src*="' + scrollLib[i]['img' + j] + scrollFirst + '"]')) {
           var isUsed = true;
@@ -1535,12 +1522,14 @@ function useBuffSkill() { //自动使用药水、施法增益技能
   var i;
   var j;
   if (gE('div.bte>img[src*="channeling"]')) {
-    for (i = 0; i < skillPack.length; i++) {
-      j = skillPack[i];
-      if (g('option').channelSkill && g('option').channelSkill[j] && !gE('div.bte>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
-        gE(skillLib[j].id).click();
-        g('end', true);
-        return;
+    if (g('option').channelSkill) {
+      for (i = 0; i < skillPack.length; i++) {
+        j = skillPack[i];
+        if (g('option').channelSkill[j] && !gE('div.bte>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
+          gE(skillLib[j].id).click();
+          g('end', true);
+          return;
+        }
       }
     }
     var buff = gE('div.bte>img', 'all');
@@ -1563,10 +1552,10 @@ function useBuffSkill() { //自动使用药水、施法增益技能
         }
       }
     }
-  } else {
+  } else if (checkCondition(g('option').buffSkillCondition) && g('option').buffSkill) {
     for (i = 0; i < skillPack.length; i++) {
       j = skillPack[i];
-      if (g('option').buffSkill && g('option').buffSkill[j] && checkCondition(g('option') ['buffSkill' + j + 'Condition']) && !gE('div.bte>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
+      if (g('option').buffSkill[j] && checkCondition(g('option') ['buffSkill' + j + 'Condition']) && !gE('div.bte>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
         gE(skillLib[j].id).click();
         g('end', true);
         return;
@@ -1723,7 +1712,7 @@ function useDeSkill() { //自动施法De技能
   var monsterBuff = gE('#mkey_' + g('monsterStatus') [0].id + '>.btm6');
   for (i = 0; i < skillPack.length; i++) {
     j = skillPack[i];
-    if (g('option').debuffSkill && g('option').debuffSkill[j] && isOn(skillLib[j].id) && checkCondition(g('option') ['debuffSkill' + j + 'Condition']) && !gE('img[src*="' + skillLib[j].img + '"]', monsterBuff)) {
+    if (g('option').debuffSkill[j] && isOn(skillLib[j].id) && checkCondition(g('option') ['debuffSkill' + j + 'Condition']) && !gE('img[src*="' + skillLib[j].img + '"]', monsterBuff)) {
       var imgs = gE('img', 'all', monsterBuff);
       if (imgs.length < 6 || g('option').debuffSkillTurn && parseInt(imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/) [1]) >= g('option').debuffSkillTurn[j] || !g('option').debuffSkillTurnAlert) {
         gE(skillLib[j].id).click();
