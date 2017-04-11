@@ -96,7 +96,7 @@ Four drop down lists and one button are visible in the box
 2. `oc`: Overcharge, 250==>250%
 3. `monsterAll`/`monsterAlive`/`bossAll`/`bossAlive`: 怪兽/Boss的总数目/存活数目
 4. `roundNow`/`roundAll`: 当前回合数/总回合数
-5. `roundType`: 战役模式 (`ar`: The Arena, `rb`: Ring of Blood, `gf`: GrindFest, `iw`: Item World, `ba`: Random Encounter)，由于是字符串之间的比较，所以请加上引号，如"ar"/'ar' (Because comparison between strings, please add quotation, such as `"ar"`/`'ar'`)
+5. `roundType`: 战役模式 (`ar`: The Arena, `rb`: Ring of Blood, `gr`: GrindFest, `iw`: Item World, `ba`: Random Encounter)，由于是字符串之间的比较，所以请加上引号，如"ar"/'ar' (Because comparison between strings, please add quotation, such as `"ar"`/`'ar'`)
 6. `attackStatus`: 攻击模式 (`0`: Physical, `1`: Fire, `2`: Cold, `3`: Elec, `4`: Wind, `5`: Divine, `6`: Forbidden)
 7. `turn`: Turns
 8. 空白(blank): 自己输入 (the value you want to put in)
