@@ -6,7 +6,8 @@
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=ml
-// @version     1.01b
+// @include     http*://hentaiverse.org/?s=Bazaar&ss=ml
+// @version     1.01c
 // @grant       none
 // @run-at      document-idle
 // ==/UserScript==
