@@ -18,12 +18,12 @@
   countdownBox.style.cssText = 'font-weight:bold;font-size:large;';
   $('div.clb').appendChild(countdownBox);
   if (!$('#progress_counter_1')) { //不位于训练界面或训练完成
-    var timeEnd = localStorage.timeEnd || '';
-    if (timeEnd === '' || timeEnd <= dateObj.getTime()) { //训练完成
+    var trainTimeEnd = localStorage.trainTimeEnd || '';
+    if (trainTimeEnd === '' || trainTimeEnd <= dateObj.getTime()) { //训练完成
       $('.trainCountdown').innerHTML = '<a href="/?s=Character&ss=tr">Train Completed</a>';
       document.title = 'Train Completed';
     } else { //不位于训练界面
-      var timeLast = parseInt((timeEnd - dateObj.getTime()) / 1000);
+      var timeLast = parseInt((trainTimeEnd - dateObj.getTime()) / 1000);
       $('.trainCountdown').innerHTML = timeLast;
       var timeDecrease = 0;
       var timeUpdateIntarval = setInterval(timeUpdate, 1000);
@@ -37,7 +37,7 @@
     }
     var timeAll = parseInt($('#trainform tbody>tr:nth-child(' + (i + 2) + ')>td:nth-child(4) .fd4>div').innerText);
     var timeLast = parseInt(timeAll * (1 - 0.01 * nowTrainingProcess) * 60 * 60);
-    localStorage.timeEnd = dateObj.getTime() + timeLast * 1000;
+    localStorage.trainTimeEnd = dateObj.getTime() + timeLast * 1000;
     $('.trainCountdown').innerHTML = timeLast;
     var timeDecrease = 0;
     var timeUpdateIntarval = setInterval(timeUpdate, 1000);
