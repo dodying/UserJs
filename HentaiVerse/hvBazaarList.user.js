@@ -30,8 +30,8 @@
     var info = getValue('BazaarList', true) || new Object();
     info[$('input[name=itemId]').val()] = {
       name: $('input[name=itemName]').val(),
-      amount: $('input[name=itemAmount]').val(),
-      fix: $('input[name=itemFix]').val()
+      amount: $('input[name=itemAmount]').val() || 1000,
+      fix: $('input[name=itemFix]').val() || 100
     };
     setValue('BazaarList', info);
     $('.listBox').hide();
@@ -50,6 +50,7 @@
       $('input[name=itemFix]').val('');
     }
     $('.listBox').show();
+    $('.listSave').focus();
   });
   $('<button></button>').text('Generate List').click(function () {
     var info = getValue('BazaarList', true);
