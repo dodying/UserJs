@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.74
+// @version      2.75
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -33,7 +33,7 @@
     setTimeout(goto, 5 * 60 * 1000);
     return;
   }
-  g('version', '2.74');
+  g('version', '2.75');
   if (getValue('option')) {
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
@@ -309,16 +309,17 @@ function optionBox() { //配置界面
   optionBox.id = 'hvAABox';
   optionBox.innerHTML = [
     '<div class="hvAACenter"><h1 style="display:inline;"><l0>hvAutoAttack设置</l0><l1>hvAutoAttack設置</l1><l2>hvAutoAttack Configuration</l2></h1> <l0>语言</l0><l1>語言</l1><l2></l2><select name="lang"><option value="0">简体中文</option><option value="1">繁體中文</option><option value="2">English</option></select></div><div class="hvAATablist">',
-    '<div class="hvAATabmenu"><span><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a></span><span><a href="#hvAATab-Self"><l0>对自身技能</l0><l1>對自身技能</l1><l2>Supportive Spells</l2></a></span><span><a href="#hvAATab-Debuff"><l01>De技能</l01><l2>Deprecating Spells</l2></a></span><span><a href="#hvAATab-Skill"><l01>其他技能</l01><l2>Other Spells</l2></a></span><span><a href="#hvAATab-Scroll"><l0>卷轴</l0><l1>捲軸</l1><l2>Scroll</l2></a></span><span><a href="#hvAATab-Infusion"><l0>魔药</l0><l1>魔藥</l1><l2>Infusion</l2></a></span><span><a href="#hvAATab-Alarm"><l0>警报</l0><l1>警報</l1><l2>Alarm</l2></a></span><span><a href="#hvAATab-Rule"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></a></span><span class="hvAAShowDrop"><a href="#hvAATab-Drop"><l0>掉落监测</l0><l1>掉落監測</l1><l2>Drops Tracking</l2></a></span><span class="hvAAShowAbout"><a href="#hvAATab-About"><l0>关于本脚本</l0><l1>關於本腳本</l1><l2>About This</l2></a></span><span><a href="#hvAATab-Recommend"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></a></span></div>',
-    '<div class="hvAATab" id="hvAATab-Main"><div class="hvAACenter" title="1. Gems\n2. Potions (Or Cure/Full-Cure)\n3. Elixirs"><span style="color:green;">HP: 1.<input class="hvAANumber" name="hp1" placeholder="50" type="text">% 2.<input class="hvAANumber" name="hp2" placeholder="50" type="text">% 3.<input class="hvAANumber" name="hp3" placeholder="5" type="text">%</span><br><span style="color:blue;">MP: 1.<input class="hvAANumber" name="mp1" placeholder="70" type="text">% 2.<input class="hvAANumber" name="mp2" placeholder="10" type="text">% 3.<input class="hvAANumber" name="mp3" placeholder="5" type="text">%</span><br><span style="color:red;">SP: 1.<input class="hvAANumber" name="sp1" placeholder="75" type="text">% 2.<input class="hvAANumber" name="sp2" placeholder="50" type="text">% 3.<input class="hvAANumber" name="sp3" placeholder="5" type="text">%</span><br><input id="lastElixir" type="checkbox"><label for="lastElixir"><l0>当技能与药水CD时，使用</l0><l1>當技能與藥水CD時，使用</l1><l2>If all spells and potions are still in countdown, use </l2><b>Last Elixir</b>.</label></div><div class="hvAACenter" id="attackStatus" style="color:red;"><b>*<l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2></b>: <select class="hvAANumber" name="attackStatus"><option value="-1"></option><option value="0">物理 / Physical</option><option value="1">火 / Fire</option><option value="2">冰 / Cold</option><option value="3">雷 / Elec</option><option value="4">风 / Wind</option><option value="5">圣 / Divine</option><option value="6">暗 / Forbidden</option></select></div><div><b><l0>暂停相关</l0><l1>暫停相關</l1><l2>Pause with</l2></b>: <input id="pauseButton" type="checkbox"><label for="pauseButton"><l0>使用按钮</l0><l1>使用按鈕</l1><l2>Button</l2>; </label><input id="pauseHotkey" type="checkbox"><label for="pauseHotkey"><l0>使用热键</l0><l1>使用熱鍵</l1><l2>Hotkey</l2>: <input name="pauseHotkeyStr" style="width:30px;" type="text"><input class="hvAANumber" name="pauseHotkeyCode" type="hidden" disabled="true"></label></div><div><b><l0>警报相关</l0><l1>警報相關</l1><l2>To Warn</l2></b>: <input id="alert" type="checkbox"><label for="alert"><l0>开启<b>音频警报</b></l0><l1>開啟<b>音頻警報</b></l1><l2>Turn on <b>Audio Alarms</b></l2>; </label><input id="notification" type="checkbox"><label for="notification"><l0>开启<b>桌面通知</b></l0><l1>開啟<b>桌面通知</b></l1><l2>Turn on <b>Notifications</b></l2></label> <button class="testNotification"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div><div><b><l01>内置插件</l01><l2>Built-in Plugin</l2></b>: <input id="riddleRadio" type="checkbox"><label for="riddleRadio"><l0>开启</l0><l1>開啟</l1><l2>Use </l2><a href="#hvAATab-Recommend">RiddleLimiter Plus</a></label>; <input id="randomEncounter" type="checkbox"><label for="randomEncounter"><l0>开启自动遭遇战</l0><l1>開啟自動遭遇戰</l1><l2>Auto Random Encounter</l2></label>.</div><div><b><l0>技能施放条件</l0><l1>技能施放條件</l1><l2>Offensive Spells Conditions</l2></b>: <l0>中级: 敌人存活数</l0><l1>中級: 敌人存活數</l1><l2 title="eg: Inferno"> 2nd Tier: Enemies alive</l2> ≥ <input class="hvAANumber" name="middleSkill" placeholder="3" type="text">; <l0>高级: 敌人存活数</l0><l1>高級: 敌人存活數</l1><l2 title="eg: Flames of Loki">3rd Tier: Enemies alive</l2> ≥ <input class="hvAANumber" name="highSkill" placeholder="5" type="text"></div><div><input id="spiritStance" type="checkbox"><label for="spiritStance"><l0>当</l0><l1>當</l1><l2>If </l2>OC ≥ <input class="hvAANumber" name="spiritStanceOC" type="text"><l01>且SP</l01><l2>and SP</l2> ≥ <input class="hvAANumber" name="spiritStanceSP" type="text">%<l0>，开启</l0><l1>，開啟</l1><l2>, activate </l2><b>Spirit Stance</b>.</label></div><div><l2>If the page </l2><b><l0>页面停留</l0><l1>頁面停留</l1><l2>stays idle</l2></b><l2> for </l2>: <input id="delayAlert" type="checkbox"><label for="delayAlert"><input class="hvAANumber" name="delayAlertTime" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2>; </label><input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2>.</label></div><div><l0>当<b>小马答题</b>时间</l0><l1>當<b>小馬答題</b>時間</l1><l2>If <b>RIDDLE</b> ETR</l2><l0></l0><l1></l1><l2></l2> ≤ <input class="hvAANumber" name="riddleAnswerTime" placeholder="3" type="text"><l0>秒，如果输入框为空则随机生成答案并提交</l0><l1>秒，如果輸入框為空則隨機生成答案並提交</l1><l2>s and no answer has been chosen yet, a random answer will be generated and submitted</l2>.</div><div><input id="riddleAlert" type="checkbox"><label for="riddleAlert"><l0>当<b>小马答题</b>时，弹出警告框</l0><l1>當<b>小馬答題</b>時，彈出警告框</l1><l2>If <b>RIDDLE</b>, ALERT</l2></label> <button class="testAlert"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button><br><l0>说明: 仅Firefox生效，造成聚焦本标签页</l0><l1>說明: 僅Firefox生效，造成聚焦本標籤頁</l1><l2>Note: It only effect in Firefox and cause focusing this tab.</l2></div><div><b>Stamina</b>: <l0>当</l0><l1>當</l1><l2>If </l2>Stamina ≤ <input class="hvAANumber" name="staminaNow" placeholder="30" type="text"><l0>或损失</l0><l1>或損失</l1><l2> or lost </l2>Stamina ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text"><l0>时，脚本暂停并警报</l0><l1>時，腳本暫停並警報</l1><l2>, pause script and alarm</l2>.<button class="staminaLostLog"><l0>stamina损失日志</l0><l1>stamina損失日誌</l1><l2>staminaLostLog</l2></button></div><div><input id="idleArena" type="checkbox"><label for="idleArena"><b><l0>闲置竞技场</l0><l1>閒置競技場</l1><l2>Idle Arena</l2></b>: <l0>在任意页面停留</l0><l1>在任意頁面停留</l1><l2>Idle in any page for </l2><input class="hvAANumber" name="idleArenaTime" type="text"><l0>秒后，开始竞技场</l0><l1>秒後，開始競技場</l1><l2>s, start Arena</l2></label> <button class="idleArenaReset"><l01>重置</l01><l2>Reset</l2></button>;<br><l0>进行的竞技场相对应等级</l0><l1>進行的競技場相對應等級</l1><l2>The levels of the Arena you want to complete</l2>:  <button class="hvAAShowLevels"><l0>显示更多</l0><l1>顯示更多</l1><l2>Show more</l2></button><button class="hvAALevelsClear"><l01>清空</l01><l2>Clear</l2></button><br><input name="idleArenaLevels" style="width:98%;" type="text" disabled="true"><input name="idleArenaValue" style="width:98%;" type="hidden" disabled="true"><div class="hvAAArenaLevels"><input id="arLevel_1" value="1,1" type="checkbox"><label for="arLevel_1">1</label> <input id="arLevel_10" value="10,3" type="checkbox"><label for="arLevel_10">10</label> <input id="arLevel_20" value="20,5" type="checkbox"><label for="arLevel_20">20</label> <input id="arLevel_30" value="30,8" type="checkbox"><label for="arLevel_30">30</label> <input id="arLevel_40" value="40,9" type="checkbox"><label for="arLevel_40">40</label> <input id="arLevel_50" value="50,11" type="checkbox"><label for="arLevel_50">50</label> <input id="arLevel_60" value="60,12" type="checkbox"><label for="arLevel_60">60</label> <input id="arLevel_70" value="70,13" type="checkbox"><label for="arLevel_70">70</label> <input id="arLevel_80" value="80,15" type="checkbox"><label for="arLevel_80">80</label> <input id="arLevel_90" value="90,16" type="checkbox"><label for="arLevel_90">90</label> <input id="arLevel_100" value="100,17" type="checkbox"><label for="arLevel_100">100</label> <input id="arLevel_110" value="110,19" type="checkbox"><label for="arLevel_110">110</label><br><input id="arLevel_120" value="120,20" type="checkbox"><label for="arLevel_120">120</label> <input id="arLevel_130" value="130,21" type="checkbox"><label for="arLevel_130">130</label> <input id="arLevel_140" value="140,23" type="checkbox"><label for="arLevel_140">140</label> <input id="arLevel_150" value="150,24" type="checkbox"><label for="arLevel_150">150</label> <input id="arLevel_165" value="165,26" type="checkbox"><label for="arLevel_165">165</label> <input id="arLevel_180" value="180,27" type="checkbox"><label for="arLevel_180">180</label> <input id="arLevel_200" value="200,28" type="checkbox"><label for="arLevel_200">200</label> <input id="arLevel_225" value="225,29" type="checkbox"><label for="arLevel_225">225</label> <input id="arLevel_250" value="250,32" type="checkbox"><label for="arLevel_250">250</label> <input id="arLevel_300" value="300,33" type="checkbox"><label for="arLevel_300">300</label><br><input id="arLevel_RB50" value="RB50,105" type="checkbox"><label for="arLevel_RB50">RB50</label> <input id="arLevel_RB75A" value="RB75A,106" type="checkbox"><label for="arLevel_RB75A">RB75A</label> <input id="arLevel_RB75B" value="RB75B,107" type="checkbox"><label for="arLevel_RB75B">RB75B</label> <input id="arLevel_RB75C" value="RB75C,108" type="checkbox"><label for="arLevel_RB75C">RB75C</label><br><input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,1" type="checkbox"><label for="arLevel_GF">GrindFest</label></div></div><div><input id="dropMonitor" type="checkbox"><label for="dropMonitor"><l0>开启</l0><l1>開啟</l1><l2>Turn on </l2><b><l0>掉落监测</l0><l1>掉落監測</l1><l2>Drops Tracking</l2></b>; <l0>记录装备的最低品质</l0><l1>記錄裝備的最低品質</l1><l2>Minimum drop quality</l2>: <select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div><div><div class="hvAANew"></div><l0>当<b>装备损坏</b>时，</l0><l1>當<b>裝備損壞</b>時，</l1><l2>If <b>equipments damaged</b>, </l2><input id="damageFix" type="checkbox"><label for="damageFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>try to repair</l2></label>; <input id="damageIgnore" type="checkbox"><label for="damageIgnore"><l01>忽略</l01><l2>ignore</l2></label>.</div><div><input id="etherTap" type="checkbox"><label for="etherTap"><b>Ether Tap</b>: <l0>对魔力合流的敌人进行物理攻击</l0><l1>對魔力合流的敵人進行物理攻擊</l1><l2>Arcane Blow enemy which has Coalesced Mana</l2></label></div><div><input id="turnReloadCheck" type="checkbox"><label for="turnReloadCheck"><l01>如果</l01><l2>If </l2>Turns ≥ <input class="hvAANumber" name="turnReload" type="text">, <l0>页面刷新</l0><l1>頁面刷新</l1><l2>, page reload</l2></label>; <input id="roundFleeCheck" type="checkbox"><label for="roundFleeCheck"><l01>如果</l01><l2>If </l2>Round ≥ <input class="hvAANumber" name="roundFlee" type="text">, <l0>自动逃跑</l0><l1>自動逃跑</l1><l2>, flee</l2></label>.</div></div>',
-    '<div class="hvAATab" id="hvAATab-Self"><input id="buffSkillSwitch" type="checkbox"><label for="buffSkillSwitch"><span class="hvAATitle"><l0>对自身技能</l0><l1>對自身技能</l1><l2>Supportive Spells</l2></span></label><div class="customize" name="buffSkillCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div><div class="buffSkillOrder"><l0>施放顺序</l0><l1>施放順序</l1><l2>Cast Order</l2>: <input name="buffSkillOrderValue" style="width:80%;" type="text" disabled="true"><br><input id="buffSkillOrder_Pr" type="checkbox"><label for="buffSkillOrder_Pr">Protection</label><input id="buffSkillOrder_SL" type="checkbox"><label for="buffSkillOrder_SL">Spark of Life</label><input id="buffSkillOrder_SS" type="checkbox"><label for="buffSkillOrder_SS">Spirit Shield</label><input id="buffSkillOrder_Ha" type="checkbox"><label for="buffSkillOrder_Ha">Haste</label><br><input id="buffSkillOrder_AF" type="checkbox"><label for="buffSkillOrder_AF">Arcane Focus</label><input id="buffSkillOrder_He" type="checkbox"><label for="buffSkillOrder_He">Heartseeker</label><input id="buffSkillOrder_Re" type="checkbox"><label for="buffSkillOrder_Re">Regen</label><input id="buffSkillOrder_SV" type="checkbox"><label for="buffSkillOrder_SV">Shadow Veil</label><input id="buffSkillOrder_Ab" type="checkbox"><label for="buffSkillOrder_Ab">Absorb</label></div><div><l0><b>增益技能</b>（Buff不存在就施放的技能）</l0><l1><b>增益技能</b>（Buff不存在就施放的技能）</l1><l2><b>Spells</b> (Cast or re-cast spells if the buff is not present)</l2>: <div><input id="buffSkill_HD" type="checkbox"><label for="buffSkill_HD">Health Draught</label><div class="customize" name="buffSkillHDCondition">Health Draught <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_MD" type="checkbox"><label for="buffSkill_MD">Mana Draught</label><div class="customize" name="buffSkillMDCondition">Mana Draught <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_SD" type="checkbox"><label for="buffSkill_SD">Spirit Draught</label><div class="customize" name="buffSkillSDCondition">Spirit Draught <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_Pr" type="checkbox"><label for="buffSkill_Pr">Protection</label><div class="customize" name="buffSkillPrCondition">Protection <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_SL" type="checkbox"><label for="buffSkill_SL">Spark of Life</label><div class="customize" name="buffSkillSLCondition">Spark of Life <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_SS" type="checkbox"><label for="buffSkill_SS">Spirit Shield</label><div class="customize" name="buffSkillSSCondition">Spirit Shield <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_Ha" type="checkbox"><label for="buffSkill_Ha">Haste</label><div class="customize" name="buffSkillHaCondition">Haste <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_AF" type="checkbox"><label for="buffSkill_AF">Arcane Focus</label><div class="customize" name="buffSkillAFCondition">Arcane Focus <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_He" type="checkbox"><label for="buffSkill_He">Heartseeker</label><div class="customize" name="buffSkillHeCondition">Heartseeker <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_Re" type="checkbox"><label for="buffSkill_Re">Regen</label><div class="customize" name="buffSkillReCondition">Regen <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_SV" type="checkbox"><label for="buffSkill_SV">Shadow Veil</label><div class="customize" name="buffSkillSVCondition">Shadow Veil <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_Ab" type="checkbox"><label for="buffSkill_Ab">Absorb</label><div class="customize" name="buffSkillAbCondition">Absorb <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div><div><l0><b>获得Channel时</b>（此时1点MP施法与150%伤害）</l0><l1><b>獲得Channel時</b>（此時1點MP施法與150%傷害）</l1><l2><b>During Channeling effect</b> (1 mp spell cost and 150% spell damage)</l2><br><b><l0>先施放Channel技能</l0><l1>先施放Channel技能</l1><l2>First cast</l2></b>: <br><input id="channelSkill_Pr" type="checkbox"><label for="channelSkill_Pr">Protection</label><input id="channelSkill_SL" type="checkbox"><label for="channelSkill_SL">Spark of Life</label><input id="channelSkill_SS" type="checkbox"><label for="channelSkill_SS">Spirit Shield</label><input id="channelSkill_Ha" type="checkbox"><label for="channelSkill_Ha">Haste</label><br><input id="channelSkill_AF" type="checkbox"><label for="channelSkill_AF">Arcane Focus</label><input id="channelSkill_He" type="checkbox"><label for="channelSkill_He">Heartseeker</label><input id="channelSkill_Re" type="checkbox"><label for="channelSkill_Re">Regen</label><input id="channelSkill_SV" type="checkbox"><label for="channelSkill_SV">Shadow Veil</label><input id="channelSkill_Ab" type="checkbox"><label for="channelSkill_Ab">Absorb</label><br><div class="hvAANew"></div><input id="channelSkill2" type="checkbox"><label for="channelSkill2"><l0><b>再使用技能</b>: 技能ID</l0><l1><b>再使用技能</b>: 技能ID</l1><l2><b>Then use spell</b>: spell ID</l2>: <input name="channelSkill2Id" type="text"></label><br><l0><b>最后ReBuff</b>: 重新使用该技能</l0><l1><b>最後ReBuff</b>: 重新使用該技能</l1><l2><b>At last, re-cast</b></l2>.</div></div>',
-    '<div id="hvAATab-Debuff" class="hvAATab"><input id="debuffSkillSwitch" type="checkbox"><label for="debuffSkillSwitch"><span class="hvAATitle"><l01>De技能</l01><l2>Deprecating Spells</l2></span></label><div class="debuffSkillOrder"><l0>施放顺序</l0><l1>施放順序</l1><l2>Cast Order</l2>: <input name="debuffSkillOrderValue" style="width:80%;" type="text" disabled="true"><br><input id="debuffSkillOrder_Im" type="checkbox"><label for="debuffSkillOrder_Im">Imperil</label><input id="debuffSkillOrder_MN" type="checkbox"><label for="debuffSkillOrder_MN">MagNet</label><input id="debuffSkillOrder_Si" type="checkbox"><label for="debuffSkillOrder_Si">Silence</label><input id="debuffSkillOrder_Dr" type="checkbox"><label for="debuffSkillOrder_Dr">Drain</label><input id="debuffSkillOrder_We" type="checkbox"><label for="debuffSkillOrder_We">Weaken</label><input id="debuffSkillOrder_Co" type="checkbox"><label for="debuffSkillOrder_Co">Confuse</label></div><div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillAllIm" type="checkbox"><label for="debuffSkillAllIm"><l0>给所有敌人上Imperil</l0><l1>給所有敵人上Imperil</l1><l2>Imperiled all enemies.</l2></label></div><div class="customize" name="debuffSkillCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div><div><div><input id="debuffSkill_Im" type="checkbox"><label for="debuffSkill_Im">Imperil</label><div class="customize" name="debuffSkillImCondition">Imperil <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_MN" type="checkbox"><label for="debuffSkill_MN">MagNet</label><div class="customize" name="debuffSkillMNCondition">MagNet <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_Si" type="checkbox"><label for="debuffSkill_Si">Silence</label><div class="customize" name="debuffSkillSiCondition">Silence <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_Dr" type="checkbox"><label for="debuffSkill_Dr">Drain</label><div class="customize" name="debuffSkillDrCondition">Drain <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_We" type="checkbox"><label for="debuffSkill_We">Weaken</label><div class="customize" name="debuffSkillWeCondition">Weaken <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_Co" type="checkbox"><label for="debuffSkill_Co">Confuse</label><div class="customize" name="debuffSkillCoCondition">Confuse <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div><div><l0>持续</l0><l1>持續</l1><l2>Expire</l2> Turns: <input id="debuffSkillTurnAlert" type="checkbox"><label for="debuffSkillTurnAlert"><l0>无法正常施放De技能时，警报</l0><l1>無法正常施放De技能時，警報</l1><l2>If it can not cast de-skills normally, alert.</l2></label><br>Imperil: <input class="hvAANumber" name="debuffSkillTurn_Im" type="text"> MagNet: <input class="hvAANumber" name="debuffSkillTurn_MN" type="text"> Silence: <input class="hvAANumber" name="debuffSkillTurn_Si" type="text"><br>Drain: <input class="hvAANumber" name="debuffSkillTurn_Dr" type="text"> Weaken: <input class="hvAANumber" name="debuffSkillTurn_We" type="text"> Confuse: <input class="hvAANumber" name="debuffSkillTurn_Co" type="text"></div></div>',
-    '<div class="hvAATab" id="hvAATab-Skill"><input id="skillSwitch" type="checkbox"><label for="skillSwitch"><span class="hvAATitle"><l01>其他技能</l01><l2>Other Spells</l2></span> <l0>（按【施放顺序】排序）</l0><l1>（按【施放順序】排序）</l1><l2>(Sort by cast order)</l2></label><br><input id="ssForSkill" type="checkbox"><label for="ssForSkill"><l0>仅当以下技能可以施放时开启Spirit Stance，否则关闭Spirit Stance<br>注意: 以下脚本给出的OC设定框为开启Spirit Stance的条件，而非技能使用条件</l0><l1>僅當以下技能可以施放時開啟Spirit Stance，否則關閉Spirit Stance<br>注意: 以下腳本給出的OC設定框為開啟Spirit Stance的條件，而非技能使用條件</l1><l2>Open Spirit Stance only if the following skills can be cast, otherwise turn off Spirit Stance<br> Note: The OC input boxes are the condition to open Spirit Stance, not to use skill</l2></label><div><input id="skill_OFC" type="checkbox"><label for="skill_OFC"><l0>友情小马砲</l0><l1>友情小馬砲</l1><l2>OFC</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_OFC" type="text"><div class="customize" name="skillOFCCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="skill_FRD" type="checkbox"><label for="skill_FRD"><l0>龙吼</l0><l1>龍吼</l1><l2>FRD</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_FRD" type="text"><div class="customize" name="skillFRDCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><l0>战斗风格</l0><l1>戰鬥風格</l1><l2>Fighting style</l2>: <select name="fightingStyle"><option value="1">二天一流 / Niten Ichiryu</option><option value="2">单手 / One-Handed</option><option value="3">双手 / 2-Handed Weapon</option><option value="4">双持 / Dual Wielding</option><option value="5">法杖 / Staff</option></select></div><div><input id="skill_3" type="checkbox"><label for="skill_3"><l0>3阶（如果有）</l0><l1>3階（如果有）</l1><l2>T3(if exist)</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_3" type="text"><div class="customize" name="skill3Condition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="skill_2" type="checkbox"><label for="skill_2"><l0>2阶（如果有）</l0><l1>2階（如果有）</l1><l2>T2(if exist)</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_2" type="text"><div class="customize" name="skill2Condition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="skill_1" type="checkbox"><label for="skill_1"><l0>1阶</l0><l1>1階</l1><l2>T1</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_1" type="text"><div class="customize" name="skill1Condition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div>',
-    '<div class="hvAATab" id="hvAATab-Scroll"><input id="scrollSwitch" type="checkbox"><label for="scrollSwitch"><span class="hvAATitle"><l0>使用卷轴</l0><l1>使用捲軸</l1><l2>Use Scrolls</l2></span></label><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Random Encounter</label><div class="customize" name="scrollCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div><input id="scrollFirst" type="checkbox"><label for="scrollFirst"><l0>存在技能生成的Buff时，仍然使用卷轴</l0><l1>存在技能生成的Buff時，仍然使用捲軸</l1><l2>Use Scrolls even when there are effects from spells</l2>.</label><div><input id="scroll_Go" type="checkbox"><label for="scroll_Go">Scroll of the Gods</label><div class="customize" name="scrollGoCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Av" type="checkbox"><label for="scroll_Av">Scroll of the Avatar</label><div class="customize" name="scrollAvCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Pr" type="checkbox"><label for="scroll_Pr">Scroll of Protection</label><div class="customize" name="scrollPrCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Sw" type="checkbox"><label for="scroll_Sw">Scroll of Swiftness</label><div class="customize" name="scrollSwCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Li" type="checkbox"><label for="scroll_Li">Scroll of Life</label><div class="customize" name="scrollLiCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Sh" type="checkbox"><label for="scroll_Sh">Scroll of Shadows</label><div class="customize" name="scrollShCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Ab" type="checkbox"><label for="scroll_Ab">Scroll of Absorption</label><div class="customize" name="scrollAbCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div>',
-    '<div class="hvAATab" id="hvAATab-Infusion"><input id="infusion" type="checkbox"><label for="infusion"><span class="hvAATitle"><l0>使用魔药</l0><l1>使用魔藥</l1><l2>Use Infusion</l2></span><br><l0>魔药属性与</l0><l1>魔藥屬性與</l1><l2>The style of infusion is the same as Attack Mode in </l2><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a><l0>里的攻击模式相同</l0><l1>裡的攻擊模式相同</l1><l2></l2></label><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="infusionRoundType_ar" type="checkbox"><label for="infusionRoundType_ar">The Arena</label><input id="infusionRoundType_rb" type="checkbox"><label for="infusionRoundType_rb">Ring of Blood</label><input id="infusionRoundType_gr" type="checkbox"><label for="infusionRoundType_gr">GrindFest</label><input id="infusionRoundType_iw" type="checkbox"><label for="infusionRoundType_iw">Item World</label><input id="infusionRoundType_ba" type="checkbox"><label for="infusionRoundType_ba">Random Encounter</label><div class="customize" name="infusionCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div></div>',
+    '<div class="hvAATabmenu"><span><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a></span><span><a class="buttonToggle" name="channelSkill" href="#hvAATab-Channel"><input id="channelSkillSwitch" type="checkbox">Channel<l01>技能</l01><l2> Spells</l2></a></span><span><a class="buttonToggle" name="buffSkill" href="#hvAATab-Buff"><input id="buffSkillSwitch" type="checkbox">BUFF<l01>技能</l01><l2> Spells</l2></a></span><span><a class="buttonToggle" name="debuffSkill" href="#hvAATab-Debuff"><input id="debuffSkillSwitch" type="checkbox">DEBUFF<l01>技能</l01><l2> Spells</l2></a></span><span><a class="buttonToggle" name="skill" href="#hvAATab-Skill"><input id="skillSwitch" type="checkbox"><l01>其他技能</l01><l2>Other Spells</l2></a></span><span><a class="buttonToggle" name="scroll" href="#hvAATab-Scroll"><input id="scrollSwitch" type="checkbox"><l0>卷轴</l0><l1>捲軸</l1><l2>Scroll</l2></a></span><span><a class="buttonToggle" name="infusion" href="#hvAATab-Infusion"><input id="infusionSwitch" type="checkbox"><l0>魔药</l0><l1>魔藥</l1><l2>Infusion</l2></a></span><span><a href="#hvAATab-Alarm"><l0>警报</l0><l1>警報</l1><l2>Alarm</l2></a></span><span><a href="#hvAATab-Rule"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></a></span><span><a class="hvAAShowDrop" href="#hvAATab-Drop"><l0>掉落监测</l0><l1>掉落監測</l1><l2>Drops Tracking</l2></a></span><span><a class="hvAAShowAbout" href="#hvAATab-About"><l0>关于本脚本</l0><l1>關於本腳本</l1><l2>About This</l2></a></span><span><a href="#hvAATab-Recommend"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></a></span></div>',
+    '<div class="hvAATab" id="hvAATab-Main"><div class="hvAACenter" title="1. Gems\n2. Potions (Or Cure/Full-Cure)\n3. Elixirs"><span style="color:green;">HP: 1.<input class="hvAANumber" name="hp1" placeholder="50" type="text">% 2.<input class="hvAANumber" name="hp2" placeholder="50" type="text">% 3.<input class="hvAANumber" name="hp3" placeholder="5" type="text">%</span><br><span style="color:blue;">MP: 1.<input class="hvAANumber" name="mp1" placeholder="70" type="text">% 2.<input class="hvAANumber" name="mp2" placeholder="10" type="text">% 3.<input class="hvAANumber" name="mp3" placeholder="5" type="text">%</span><br><span style="color:red;">SP: 1.<input class="hvAANumber" name="sp1" placeholder="75" type="text">% 2.<input class="hvAANumber" name="sp2" placeholder="50" type="text">% 3.<input class="hvAANumber" name="sp3" placeholder="5" type="text">%</span><br><input id="lastElixir" type="checkbox"><label for="lastElixir"><l0>当技能与药水CD时，使用</l0><l1>當技能與藥水CD時，使用</l1><l2>If all spells and potions are still in countdown, use </l2><b>Last Elixir</b>.</label></div><div class="hvAACenter" id="attackStatus" style="color:red;"><b>*<l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2></b>: <select class="hvAANumber" name="attackStatus"><option value="-1"></option><option value="0">物理 / Physical</option><option value="1">火 / Fire</option><option value="2">冰 / Cold</option><option value="3">雷 / Elec</option><option value="4">风 / Wind</option><option value="5">圣 / Divine</option><option value="6">暗 / Forbidden</option></select></div><div><b><l0>暂停相关</l0><l1>暫停相關</l1><l2>Pause with</l2></b>: <input id="pauseButton" type="checkbox"><label for="pauseButton"><l0>使用按钮</l0><l1>使用按鈕</l1><l2>Button</l2>; </label><input id="pauseHotkey" type="checkbox"><label for="pauseHotkey"><l0>使用热键</l0><l1>使用熱鍵</l1><l2>Hotkey</l2>: <input name="pauseHotkeyStr" style="width:30px;" type="text"><input class="hvAANumber" name="pauseHotkeyCode" type="hidden" disabled="true"></label></div><div><b><l0>警报相关</l0><l1>警報相關</l1><l2>To Warn</l2></b>: <input id="alert" type="checkbox"><label for="alert"><l0>开启<b>音频警报</b></l0><l1>開啟<b>音頻警報</b></l1><l2>Turn on <b>Audio Alarms</b></l2>; </label><input id="notification" type="checkbox"><label for="notification"><l0>开启<b>桌面通知</b></l0><l1>開啟<b>桌面通知</b></l1><l2>Turn on <b>Notifications</b></l2></label> <button class="testNotification"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div><div><b><l01>内置插件</l01><l2>Built-in Plugin</l2></b>: <input id="riddleRadio" type="checkbox"><label for="riddleRadio"><l0>开启</l0><l1>開啟</l1><l2>Use </l2><a href="#hvAATab-Recommend">RiddleLimiter Plus</a></label>; <input id="randomEncounter" type="checkbox"><label for="randomEncounter"><l0>开启自动遭遇战</l0><l1>開啟自動遭遇戰</l1><l2>Auto Random Encounter</l2></label>.</div><div><b><l0>技能施放条件</l0><l1>技能施放條件</l1><l2>Offensive Spells Conditions</l2></b>: <l0>中级: 敌人存活数</l0><l1>中級: 敌人存活數</l1><l2 title="eg: Inferno"> 2nd Tier: Enemies alive</l2> ≥ <input class="hvAANumber" name="middleSkill" placeholder="3" type="text">; <l0>高级: 敌人存活数</l0><l1>高級: 敌人存活數</l1><l2 title="eg: Flames of Loki">3rd Tier: Enemies alive</l2> ≥ <input class="hvAANumber" name="highSkill" placeholder="5" type="text"></div><div><input id="spiritStance" type="checkbox"><label for="spiritStance"><l0>当</l0><l1>當</l1><l2>If </l2>OC ≥ <input class="hvAANumber" name="spiritStanceOC" type="text"><l01>且SP</l01><l2>and SP</l2> ≥ <input class="hvAANumber" name="spiritStanceSP" type="text">%<l0>，开启</l0><l1>，開啟</l1><l2>, activate </l2><b>Spirit Stance</b>.</label></div><div><l2>If the page </l2><b><l0>页面停留</l0><l1>頁面停留</l1><l2>stays idle</l2></b><l2> for </l2>: <input id="delayAlert" type="checkbox"><label for="delayAlert"><input class="hvAANumber" name="delayAlertTime" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2>; </label><input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2>.</label></div><div><l0>当<b>小马答题</b>时间</l0><l1>當<b>小馬答題</b>時間</l1><l2>If <b>RIDDLE</b> ETR</l2><l0></l0><l1></l1><l2></l2> ≤ <input class="hvAANumber" name="riddleAnswerTime" placeholder="3" type="text"><l0>秒，如果输入框为空则随机生成答案并提交</l0><l1>秒，如果輸入框為空則隨機生成答案並提交</l1><l2>s and no answer has been chosen yet, a random answer will be generated and submitted</l2>.</div><div><input id="riddleAlert" type="checkbox"><label for="riddleAlert"><l0>当<b>小马答题</b>时，弹出警告框</l0><l1>當<b>小馬答題</b>時，彈出警告框</l1><l2>If <b>RIDDLE</b>, ALERT</l2></label> <button class="testAlert"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button><br><l0>说明: 仅Firefox生效，造成聚焦本标签页</l0><l1>說明: 僅Firefox生效，造成聚焦本標籤頁</l1><l2>Note: It only effect in Firefox and cause focusing this tab.</l2></div><div><b>Stamina</b>: <l0>当</l0><l1>當</l1><l2>If </l2>Stamina ≤ <input class="hvAANumber" name="staminaNow" placeholder="30" type="text"><l0>或损失</l0><l1>或損失</l1><l2> or lost </l2>Stamina ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text"><l0>时，脚本暂停并警报</l0><l1>時，腳本暫停並警報</l1><l2>, pause script and alarm</l2>.<button class="staminaLostLog"><l0>stamina损失日志</l0><l1>stamina損失日誌</l1><l2>staminaLostLog</l2></button></div><div><input id="idleArena" type="checkbox"><label for="idleArena"><b><l0>闲置竞技场</l0><l1>閒置競技場</l1><l2>Idle Arena</l2></b>: <l0>在任意页面停留</l0><l1>在任意頁面停留</l1><l2>Idle in any page for </l2><input class="hvAANumber" name="idleArenaTime" type="text"><l0>秒后，开始竞技场</l0><l1>秒後，開始競技場</l1><l2>s, start Arena</l2></label> <button class="idleArenaReset"><l01>重置</l01><l2>Reset</l2></button>;<br><l0>进行的竞技场相对应等级</l0><l1>進行的競技場相對應等級</l1><l2>The levels of the Arena you want to complete</l2>:  <button class="hvAAShowLevels"><l0>显示更多</l0><l1>顯示更多</l1><l2>Show more</l2></button><button class="hvAALevelsClear"><l01>清空</l01><l2>Clear</l2></button><br><input name="idleArenaLevels" style="width:98%;" type="text" disabled="true"><input name="idleArenaValue" style="width:98%;" type="hidden" disabled="true"><div class="hvAAArenaLevels"><input id="arLevel_1" value="1,1" type="checkbox"><label for="arLevel_1">1</label> <input id="arLevel_10" value="10,3" type="checkbox"><label for="arLevel_10">10</label> <input id="arLevel_20" value="20,5" type="checkbox"><label for="arLevel_20">20</label> <input id="arLevel_30" value="30,8" type="checkbox"><label for="arLevel_30">30</label> <input id="arLevel_40" value="40,9" type="checkbox"><label for="arLevel_40">40</label> <input id="arLevel_50" value="50,11" type="checkbox"><label for="arLevel_50">50</label> <input id="arLevel_60" value="60,12" type="checkbox"><label for="arLevel_60">60</label> <input id="arLevel_70" value="70,13" type="checkbox"><label for="arLevel_70">70</label> <input id="arLevel_80" value="80,15" type="checkbox"><label for="arLevel_80">80</label> <input id="arLevel_90" value="90,16" type="checkbox"><label for="arLevel_90">90</label> <input id="arLevel_100" value="100,17" type="checkbox"><label for="arLevel_100">100</label> <input id="arLevel_110" value="110,19" type="checkbox"><label for="arLevel_110">110</label><br><input id="arLevel_120" value="120,20" type="checkbox"><label for="arLevel_120">120</label> <input id="arLevel_130" value="130,21" type="checkbox"><label for="arLevel_130">130</label> <input id="arLevel_140" value="140,23" type="checkbox"><label for="arLevel_140">140</label> <input id="arLevel_150" value="150,24" type="checkbox"><label for="arLevel_150">150</label> <input id="arLevel_165" value="165,26" type="checkbox"><label for="arLevel_165">165</label> <input id="arLevel_180" value="180,27" type="checkbox"><label for="arLevel_180">180</label> <input id="arLevel_200" value="200,28" type="checkbox"><label for="arLevel_200">200</label> <input id="arLevel_225" value="225,29" type="checkbox"><label for="arLevel_225">225</label> <input id="arLevel_250" value="250,32" type="checkbox"><label for="arLevel_250">250</label> <input id="arLevel_300" value="300,33" type="checkbox"><label for="arLevel_300">300</label><br><input id="arLevel_RB50" value="RB50,105" type="checkbox"><label for="arLevel_RB50">RB50</label> <input id="arLevel_RB75A" value="RB75A,106" type="checkbox"><label for="arLevel_RB75A">RB75A</label> <input id="arLevel_RB75B" value="RB75B,107" type="checkbox"><label for="arLevel_RB75B">RB75B</label> <input id="arLevel_RB75C" value="RB75C,108" type="checkbox"><label for="arLevel_RB75C">RB75C</label><br><input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,1" type="checkbox"><label for="arLevel_GF">GrindFest</label></div></div><div><input id="dropMonitor" type="checkbox"><label for="dropMonitor"><l0>开启</l0><l1>開啟</l1><l2>Turn on </l2><b><l0>掉落监测</l0><l1>掉落監測</l1><l2>Drops Tracking</l2></b>; <l0>记录装备的最低品质</l0><l1>記錄裝備的最低品質</l1><l2>Minimum drop quality</l2>: <select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></label></div><div><l0>当<b>装备损坏</b>时，</l0><l1>當<b>裝備損壞</b>時，</l1><l2>If <b>equipments damaged</b>, </l2><input id="damageFix" type="checkbox"><label for="damageFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>try to repair</l2></label>; <input id="damageIgnore" type="checkbox"><label for="damageIgnore"><l01>忽略</l01><l2>ignore</l2></label>.</div><div><input id="etherTap" type="checkbox"><label for="etherTap"><b>Ether Tap</b>: <l0>对魔力合流的敌人进行物理攻击</l0><l1>對魔力合流的敵人進行物理攻擊</l1><l2>Arcane Blow enemy which has Coalesced Mana</l2></label></div><div><input id="turnReloadCheck" type="checkbox"><label for="turnReloadCheck"><l01>如果</l01><l2>If </l2>Turns ≥ <input class="hvAANumber" name="turnReload" type="text">, <l0>页面刷新</l0><l1>頁面刷新</l1><l2>, page reload</l2></label>; <input id="roundFleeCheck" type="checkbox"><label for="roundFleeCheck"><l01>如果</l01><l2>If </l2>Round ≥ <input class="hvAANumber" name="roundFlee" type="text">, <l0>自动逃跑</l0><l1>自動逃跑</l1><l2>, flee</l2></label>.</div></div>',
+    '<div class="hvAATab" id="hvAATab-Channel"><l0><b>获得Channel时</b>（此时1点MP施法与150%伤害）</l0><l1><b>獲得Channel時</b>（此時1點MP施法與150%傷害）</l1><l2><b>During Channeling effect</b> (1 mp spell cost and 150% spell damage)</l2><div><b><l0>先施放Channel技能</l0><l1>先施放Channel技能</l1><l2>First cast</l2></b>:<br><l0>注意: 此处的施放顺序与</l0><l1>注意: 此處的施放順序与</l1><l2>Note: The cast order here is the same as in</l2><a href="#hvAATab-Buff">BUFF<l01>技能</l01><l2> Spells</l2></a><l0>里的相同</l0><l1>裡的相同</l1><br><input id="channelSkill_Pr" type="checkbox"><label for="channelSkill_Pr">Protection</label><input id="channelSkill_SL" type="checkbox"><label for="channelSkill_SL">Spark of Life</label><input id="channelSkill_SS" type="checkbox"><label for="channelSkill_SS">Spirit Shield</label><input id="channelSkill_Ha" type="checkbox"><label for="channelSkill_Ha">Haste</label><br><input id="channelSkill_AF" type="checkbox"><label for="channelSkill_AF">Arcane Focus</label><input id="channelSkill_He" type="checkbox"><label for="channelSkill_He">Heartseeker</label><input id="channelSkill_Re" type="checkbox"><label for="channelSkill_Re">Regen</label><input id="channelSkill_SV" type="checkbox"><label for="channelSkill_SV">Shadow Veil</label><input id="channelSkill_Ab" type="checkbox"><label for="channelSkill_Ab">Absorb</label></div><div><input id="channelSkill2" type="checkbox"><label for="channelSkill2"><l0><b>再使用技能</b>: </label><div class="channelSkill2Order"><input name="channelSkill2OrderName" style="width:80%;" type="text" disabled="true"><input name="channelSkill2OrderValue" style="width:80%;" type="hidden" disabled="true"><br><input id="channelSkill2Order_Cu" value="Cu,311" type="checkbox"><label for="channelSkill2Order_Cu">Cure</label><input id="channelSkill2Order_FC" value="FC,313" type="checkbox"><label for="channelSkill2Order_FC">Full-Cure</label><input id="channelSkill2Order_Pr" value="Pr,411" type="checkbox"><label for="channelSkill2Order_Pr">Protection</label><input id="channelSkill2Order_SL" value="SL,422" type="checkbox"><label for="channelSkill2Order_SL">Spark of Life</label><input id="channelSkill2Order_SS" value="SS,423" type="checkbox"><label for="channelSkill2Order_SS">Spirit Shield</label><input id="channelSkill2Order_Ha" value="Ha,412" type="checkbox"><label for="channelSkill2Order_Ha">Haste</label><br><input id="channelSkill2Order_AF" value="AF,432" type="checkbox"><label for="channelSkill2Order_AF">Arcane Focus</label><input id="channelSkill2Order_He" value="He,431" type="checkbox"><label for="channelSkill2Order_He">Heartseeker</label><input id="channelSkill2Order_Re" value="Re,312" type="checkbox"><label for="channelSkill2Order_Re">Regen</label><input id="channelSkill2Order_SV" value="SV,413" type="checkbox"><label for="channelSkill2Order_SV">Shadow Veil</label><input id="channelSkill2Order_Ab" value="Ab,421" type="checkbox"><label for="channelSkill2Order_Ab">Absorb</label></div></div><div><l0><b>最后ReBuff</b>: 重新施放最先消失的Buff</l0><l1><b>最後ReBuff</b>: 重新施放最先消失的Buff</l1><l2><b>At last, re-cast the spells which will expire first</b></l2>.</div></div>',
+    '<div class="hvAATab" id="hvAATab-Buff"><div class="customize" name="buffSkillCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div><div class="buffSkillOrder"><l0>施放顺序</l0><l1>施放順序</l1><l2>Cast Order</l2>: <input name="buffSkillOrderValue" style="width:80%;" type="text" disabled="true"><br><input id="buffSkillOrder_Pr" type="checkbox"><label for="buffSkillOrder_Pr">Protection</label><input id="buffSkillOrder_SL" type="checkbox"><label for="buffSkillOrder_SL">Spark of Life</label><input id="buffSkillOrder_SS" type="checkbox"><label for="buffSkillOrder_SS">Spirit Shield</label><input id="buffSkillOrder_Ha" type="checkbox"><label for="buffSkillOrder_Ha">Haste</label><br><input id="buffSkillOrder_AF" type="checkbox"><label for="buffSkillOrder_AF">Arcane Focus</label><input id="buffSkillOrder_He" type="checkbox"><label for="buffSkillOrder_He">Heartseeker</label><input id="buffSkillOrder_Re" type="checkbox"><label for="buffSkillOrder_Re">Regen</label><input id="buffSkillOrder_SV" type="checkbox"><label for="buffSkillOrder_SV">Shadow Veil</label><input id="buffSkillOrder_Ab" type="checkbox"><label for="buffSkillOrder_Ab">Absorb</label></div><div><l0>Buff不存在就施放的技能</l0><l1>Buff不存在就施放的技能</l1><l2>Cast spells if the buff is not present</l2>: <div><input id="buffSkill_HD" type="checkbox"><label for="buffSkill_HD">Health Draught</label><div class="customize" name="buffSkillHDCondition">Health Draught <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_MD" type="checkbox"><label for="buffSkill_MD">Mana Draught</label><div class="customize" name="buffSkillMDCondition">Mana Draught <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_SD" type="checkbox"><label for="buffSkill_SD">Spirit Draught</label><div class="customize" name="buffSkillSDCondition">Spirit Draught <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_Pr" type="checkbox"><label for="buffSkill_Pr">Protection</label><div class="customize" name="buffSkillPrCondition">Protection <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_SL" type="checkbox"><label for="buffSkill_SL">Spark of Life</label><div class="customize" name="buffSkillSLCondition">Spark of Life <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_SS" type="checkbox"><label for="buffSkill_SS">Spirit Shield</label><div class="customize" name="buffSkillSSCondition">Spirit Shield <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_Ha" type="checkbox"><label for="buffSkill_Ha">Haste</label><div class="customize" name="buffSkillHaCondition">Haste <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_AF" type="checkbox"><label for="buffSkill_AF">Arcane Focus</label><div class="customize" name="buffSkillAFCondition">Arcane Focus <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_He" type="checkbox"><label for="buffSkill_He">Heartseeker</label><div class="customize" name="buffSkillHeCondition">Heartseeker <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_Re" type="checkbox"><label for="buffSkill_Re">Regen</label><div class="customize" name="buffSkillReCondition">Regen <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_SV" type="checkbox"><label for="buffSkill_SV">Shadow Veil</label><div class="customize" name="buffSkillSVCondition">Shadow Veil <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="buffSkill_Ab" type="checkbox"><label for="buffSkill_Ab">Absorb</label><div class="customize" name="buffSkillAbCondition">Absorb <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div></div>',
+    '<div id="hvAATab-Debuff" class="hvAATab"><div class="debuffSkillOrder"><l0>施放顺序</l0><l1>施放順序</l1><l2>Cast Order</l2>: <input name="debuffSkillOrderValue" style="width:80%;" type="text" disabled="true"><br><input id="debuffSkillOrder_Im" type="checkbox"><label for="debuffSkillOrder_Im">Imperil</label><input id="debuffSkillOrder_MN" type="checkbox"><label for="debuffSkillOrder_MN">MagNet</label><input id="debuffSkillOrder_Si" type="checkbox"><label for="debuffSkillOrder_Si">Silence</label><input id="debuffSkillOrder_Dr" type="checkbox"><label for="debuffSkillOrder_Dr">Drain</label><input id="debuffSkillOrder_We" type="checkbox"><label for="debuffSkillOrder_We">Weaken</label><input id="debuffSkillOrder_Co" type="checkbox"><label for="debuffSkillOrder_Co">Confuse</label></div><div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillAllIm" type="checkbox"><label for="debuffSkillAllIm"><l0>给所有敌人上Imperil</l0><l1>給所有敵人上Imperil</l1><l2>Imperiled all enemies.</l2></label></div><div class="customize" name="debuffSkillCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div><div><div><input id="debuffSkill_Im" type="checkbox"><label for="debuffSkill_Im">Imperil</label><div class="customize" name="debuffSkillImCondition">Imperil <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_MN" type="checkbox"><label for="debuffSkill_MN">MagNet</label><div class="customize" name="debuffSkillMNCondition">MagNet <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_Si" type="checkbox"><label for="debuffSkill_Si">Silence</label><div class="customize" name="debuffSkillSiCondition">Silence <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_Dr" type="checkbox"><label for="debuffSkill_Dr">Drain</label><div class="customize" name="debuffSkillDrCondition">Drain <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_We" type="checkbox"><label for="debuffSkill_We">Weaken</label><div class="customize" name="debuffSkillWeCondition">Weaken <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="debuffSkill_Co" type="checkbox"><label for="debuffSkill_Co">Confuse</label><div class="customize" name="debuffSkillCoCondition">Confuse <l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div><div><l0>持续</l0><l1>持續</l1><l2>Expire</l2> Turns: <input id="debuffSkillTurnAlert" type="checkbox"><label for="debuffSkillTurnAlert"><l0>无法正常施放DEBUFF技能时，警报</l0><l1>無法正常施放DEBUFF技能時，警報</l1><l2>If it can not cast de-skills normally, alert.</l2></label><br>Imperil: <input class="hvAANumber" name="debuffSkillTurn_Im" type="text"> MagNet: <input class="hvAANumber" name="debuffSkillTurn_MN" type="text"> Silence: <input class="hvAANumber" name="debuffSkillTurn_Si" type="text"><br>Drain: <input class="hvAANumber" name="debuffSkillTurn_Dr" type="text"> Weaken: <input class="hvAANumber" name="debuffSkillTurn_We" type="text"> Confuse: <input class="hvAANumber" name="debuffSkillTurn_Co" type="text"></div></div>',
+    '<div class="hvAATab" id="hvAATab-Skill"><l0>（按【施放顺序】排序）</l0><l1>（按【施放順序】排序）</l1><l2>(Sort by cast order)</l2><br><input id="ssForSkill" type="checkbox"><label for="ssForSkill"><l0>仅当以下技能可以施放时开启Spirit Stance，否则关闭Spirit Stance<br>注意: 以下脚本给出的OC设定框为开启Spirit Stance的条件，而非技能使用条件</l0><l1>僅當以下技能可以施放時開啟Spirit Stance，否則關閉Spirit Stance<br>注意: 以下腳本給出的OC設定框為開啟Spirit Stance的條件，而非技能使用條件</l1><l2>Open Spirit Stance only if the following skills can be cast, otherwise turn off Spirit Stance<br> Note: The OC input boxes are the condition to open Spirit Stance, not to use skill</l2></label><div><input id="skill_OFC" type="checkbox"><label for="skill_OFC"><l0>友情小马砲</l0><l1>友情小馬砲</l1><l2>OFC</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_OFC" type="text"><div class="customize" name="skillOFCCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="skill_FRD" type="checkbox"><label for="skill_FRD"><l0>龙吼</l0><l1>龍吼</l1><l2>FRD</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_FRD" type="text"><div class="customize" name="skillFRDCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><l0>战斗风格</l0><l1>戰鬥風格</l1><l2>Fighting style</l2>: <select name="fightingStyle"><option value="1">二天一流 / Niten Ichiryu</option><option value="2">单手 / One-Handed</option><option value="3">双手 / 2-Handed Weapon</option><option value="4">双持 / Dual Wielding</option><option value="5">法杖 / Staff</option></select></div><div><input id="skill_3" type="checkbox"><label for="skill_3"><l0>3阶（如果有）</l0><l1>3階（如果有）</l1><l2>T3(if exist)</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_3" type="text"><div class="customize" name="skill3Condition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="skill_2" type="checkbox"><label for="skill_2"><l0>2阶（如果有）</l0><l1>2階（如果有）</l1><l2>T2(if exist)</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_2" type="text"><div class="customize" name="skill2Condition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="skill_1" type="checkbox"><label for="skill_1"><l0>1阶</l0><l1>1階</l1><l2>T1</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_1" type="text"><div class="customize" name="skill1Condition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div>',
+    '<div class="hvAATab" id="hvAATab-Scroll"><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Random Encounter</label><div class="customize" name="scrollCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div><input id="scrollFirst" type="checkbox"><label for="scrollFirst"><l0>存在技能生成的Buff时，仍然使用卷轴</l0><l1>存在技能生成的Buff時，仍然使用捲軸</l1><l2>Use Scrolls even when there are effects from spells</l2>.</label><div><input id="scroll_Go" type="checkbox"><label for="scroll_Go">Scroll of the Gods</label><div class="customize" name="scrollGoCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Av" type="checkbox"><label for="scroll_Av">Scroll of the Avatar</label><div class="customize" name="scrollAvCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Pr" type="checkbox"><label for="scroll_Pr">Scroll of Protection</label><div class="customize" name="scrollPrCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Sw" type="checkbox"><label for="scroll_Sw">Scroll of Swiftness</label><div class="customize" name="scrollSwCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Li" type="checkbox"><label for="scroll_Li">Scroll of Life</label><div class="customize" name="scrollLiCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Sh" type="checkbox"><label for="scroll_Sh">Scroll of Shadows</label><div class="customize" name="scrollShCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div><div><input id="scroll_Ab" type="checkbox"><label for="scroll_Ab">Scroll of Absorption</label><div class="customize" name="scrollAbCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div>',
+    '<div class="hvAATab" id="hvAATab-Infusion"><l0>注意：魔药属性与</l0><l1>注意：魔藥屬性與</l1><l2>Note: The style of infusion is the same as Attack Mode in </l2><a href="#hvAATab-Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></a><l0>里的攻击模式相同</l0><l1>裡的攻擊模式相同</l1><l2></l2><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <input id="infusionRoundType_ar" type="checkbox"><label for="infusionRoundType_ar">The Arena</label><input id="infusionRoundType_rb" type="checkbox"><label for="infusionRoundType_rb">Ring of Blood</label><input id="infusionRoundType_gr" type="checkbox"><label for="infusionRoundType_gr">GrindFest</label><input id="infusionRoundType_iw" type="checkbox"><label for="infusionRoundType_iw">Item World</label><input id="infusionRoundType_ba" type="checkbox"><label for="infusionRoundType_ba">Random Encounter</label><div class="customize" name="infusionCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div></div>',
     '<div class="hvAATab" id="hvAATab-Alarm"><span class="hvAATitle"><l0>自定义警报</l0><l1>自定義警報</l1><l2>Alarm</l2></span><br><l0>注意：留空则使用默认音频，建议每个用户使用自定义音频</l0><l1>注意：留空則使用默認音頻，建議每個用戶使用自定義音頻</l1><l2>Note: Leave the box blank to use default audio, it\'s recommended for all user to use custom audio.</l2><div><input id="audioEnable_Common" type="checkbox"><label for="audioEnable_Common"><l01>通用</l01><l2>Common</l2>: <input name="audio_Common" type="text"></label><br><input id="audioEnable_Error" type="checkbox"><label for="audioEnable_Error"><l0>错误</l0><l1>錯誤</l1><l2>Error</l2>: <input name="audio_Error" type="text"></label><br><input id="audioEnable_Defeat" type="checkbox"><label for="audioEnable_Defeat"><l0>失败</l0><l1>失敗</l1><l2>Defeat</l2>: <input name="audio_Defeat" type="text"></label><br><input id="audioEnable_Riddle" type="checkbox"><label for="audioEnable_Riddle"><l0>答题</l0><l1>答題</l1><l2>Riddle</l2>: <input name="audio_Riddle" type="text"></label><br><input id="audioEnable_Victory" type="checkbox"><label for="audioEnable_Victory"><l0>胜利</l0><l1>勝利</l1><l2>Victory</l2>: <input name="audio_Victory" type="text"></label></div><div><l0>请将将要测试的音频文件的地址填入这里</l0><l1>請將將要測試的音頻文件的地址填入這裡</l1><l2>Plz put in the audio file address you want to test</l2>:<br><input class="hvAADebug" name="audio_Text" type="text"></div></div>',
     '<div class="hvAATab" id="hvAATab-Rule"><span class="hvAATitle"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></span> <a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/#攻击规则-示例" target="_blank"><l01>示例</l01><l2>Example</l2></a><div>1. <l0>每回合计算敌人当前血量，血量最低的设置初始血量为10，其他敌人为当前血量倍数*10</l0><l1>每回合計算敌人當前血量，血量最低的設置初始血量為10，其他敌人為當前血量倍數*10</l1><l2>Each enemiy is assigned a number which is used to determine the target to attack, let\'s call that number Priority Weight or PW.</l2></div><div>2. <l0>初始权重与下述各Buff权重相加</l0><l1>初始權重與下述各Buff權重相加</l1><l2>PW(X) = 10 * HP(X) / Min_HP + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)</l2><br>Sleep: <input class="hvAANumber" name="weight_Sle" placeholder="5" type="text"> Blind: <input class="hvAANumber" name="weight_Bl" placeholder="3" type="text"> Slow: <input class="hvAANumber" name="weight_Slo" placeholder="3" type="text"> Imperil: <input class="hvAANumber" name="weight_Im" placeholder="-5" type="text"><br>MagNet: <input class="hvAANumber" name="weight_MN" placeholder="-4" type="text"> Silence: <input class="hvAANumber" name="weight_Si" placeholder="-4" type="text"> Drain: <input class="hvAANumber" name="weight_Dr" placeholder="-4" type="text"> Weaken: <input class="hvAANumber" name="weight_We" placeholder="-4" type="text"><br>Confuse: <input class="hvAANumber" name="weight_Co" placeholder="-1" type="text">Coalesced Mana: <input class="hvAANumber" name="weight_CM" placeholder="-5" type="text"><br>Stunned: <input class="hvAANumber" name="weight_Stun" placeholder="-4" type="text"> Penetrated Armor: <input class="hvAANumber" name="weight_PA" placeholder="-4" type="text"> Bleeding Wound: <input class="hvAANumber" name="weight_BW" placeholder="-4" type="text"></div><div>3. <input id="ruleReverse" type="checkbox"><label for="ruleReverse"><l0>计算出最终权重，攻击权重最小/最大的敌人(勾选: 最大)</l0><l1>計算出最終權重，攻擊權重最小/最大的敌人(勾選: 最大)</l1><l2>Whichever enemy has the lowest/highest PW will be the target. (ON means highest)</l2></label></div><div>PS. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a href="#hvAATab-About"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.</div></div>',
-    '<div class="hvAATab hvAACenter" id="hvAATab-Drop"><span class="hvAATitle"><l01>掉落监测</l01><l2>Drops Tracking</l2></span><button class="reMonitor"><l01>重置</l01><l2>Reset</l2></button></div>',
+    '<div class="hvAATab hvAACenter" id="hvAATab-Drop"><span class="hvAATitle"><l01>掉落监测</l01><l2>Drops Tracking</l2></span><button class="reMonitor"><l01>重置</l01><l2>Reset</l2></button><table></table></div>',
     '<div class="hvAATab hvAACenter" id="hvAATab-About"><div><span><l0>反馈</l0><l1>反饋</l1><l2>Feedback</l2>: <a href="https://github.com/dodying/UserJs/issues/" target="_blank">1. GitHub</a><a href="https://greasyfork.org/scripts/18482/feedback" target="_blank">2. GreasyFork</a><a href="http://e-hentai.org/dmspublic/karma.php?u=2565471" target="_blank">3. +K</a><a href="https://gitter.im/dodying/UserJs" target="_blank">4. Gitter</a></span></div><div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2>: </span><br><l0>如果脚本长期暂停且网络无问题，请点击【临时修复】</l0><l1>如果腳本長期暫停且網絡無問題，請點擊【臨時修復】</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click [Try to fix]</l2><br><l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Random Encounter</option></select><br><l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug" placeholder="1" type="text"><br><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button></div><div class="hvAAQuickSite"><span class="hvAATitle"><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><br><l0>留空“姓名”输入框则会表示删除，修改完成后请及时保存</l0><l1>留空“姓名”輸入框則會表示刪除，修改完成後請及時保存</l1><l2> The input box left "name" blank will be deleted, after change please save in time.</l2><table><tbody><tr><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr></table><button class="quickSiteAdd"><l01>新增</l01><l2>Add</l2></button></div><div><button class="hvAAExport"><l0>导出设置</l0><l1>導出設置</l1><l2>Export Confiuration</l2></button><button class="hvAAImport"><l0>导入设置</l0><l1>導入設置</l1><l2>Import Confiuration</l2></button><textarea class="hvAAConfig"></textarea></div></div>',
     '<div class="hvAATab hvAACenter" id="hvAATab-Recommend"><span class="hvAATitle"><l0>推荐脚本</l0><l1>推薦腳本</l1><l2>Recommend</l2></span><table><tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>应用到</l0><l1>應用到</l1><l2>Applies to</l2></td><td><l0>说明</l0><l1>說明</l1><l2>Description</l2></td><td>URL</td></tr><tr><td><l0>【HV】购物清单</l0><l1>【HV】購物清單</l1><l2>hvBazaarList</l2></td><td><a href="?s=Bazaar&ss=is" target="_blank">Bazaar</a></td><td><l0>快速生成购物清单</l0><l1>快速生成購物清單</l1><l2>Quickly generate shopping lists</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】喂食</l0><l1>【HV】餵食</l1><l2>hvFeed</l2></td><td><a href="?s=Bazaar&ss=ml" target="_blank">Monster Lab</a></td><td><l0>自动给大于100级的怪物喂开心药丸</l0><l1>自動給大於100級的怪物餵開心藥丸</l1><l2>Automatically feed monster of which level more than 100 on happy pills</l2></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvFeed.user.js" target="_blank">Install</a></td></tr><tr><td><l0>【HV】出售装备</l0><l1>【HV】出售裝備</l1><l2>hvSellEquipment</l2></td><td><a href="?s=Character&ss=ch" target="_blank">Character</a></td><td></td><td><a href="https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js" target="_blank">Install</a></td></tr><tr><td>Reloader</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=2660&p=4384894&#entry4384894" target="_blank">E-Hentai Forums</a></td></tr><tr><td>RiddleLimiter Plus</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=1020&p=3000982&#entry3000982" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Random Encounter Notification</td><td></td><td><l01>已内置</l01><l2>Built-in</l2></td><td><a href="http://forums.e-hentai.org/index.php?showtopic=65126&st=1000&p=2990345&#entry2990345" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HV Equipment Comparison</td><td></td><td></td><td><a href="http://forums.e-hentai.org/index.php?s=&showtopic=65126&view=findpost&p=4492842" target="_blank">E-Hentai Forums</a></td></tr><tr><td>HentaiVerse Better Equipment Shop</td><td></td><td></td><td><a href="https://forums.e-hentai.org/index.php?showtopic=65126&st=800&p=2750319&#entry2750319" target="_blank">E-Hentai Forums</a></td></tr></tboby></table></div>',
     '</div>',
@@ -330,28 +331,33 @@ function optionBox() { //配置界面
     if (this.value === '0' || this.value === '1') gE('.hvAA-LangStyle').textContent += 'l01{display:inline!important;}';
     g('lang', this.value);
   };
-  gE('.hvAAShowDrop', optionBox).onclick = function () {
-    var drop = getValue('drop', true) || new Object();
-    drop = objSort(drop);
-    var _html = '<tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>数量</l0><l1>數量</l1><l2>Amount</l2></td></tr>';
-    for (var i in drop) {
-      _html += '<tr><td>' + i + '</td><td>' + drop[i] + '</td></tr>';
+  gE('.hvAATabmenu', optionBox).onclick = function (e) { //标签页事件
+    var target = (e.target.tagName === 'A') ? e.target : e.target.parentNode;
+    var intX = unsafeWindow.scrollX;
+    var intY = unsafeWindow.scrollY;
+    e.preventDefault();
+    location.hash = target.hash;
+    window.scrollTo(intX, intY);
+    if (target.className === 'hvAAShowDrop') {
+      var drop = getValue('drop', true) || new Object();
+      drop = objSort(drop);
+      var _html = '<tbody><tr><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>数量</l0><l1>數量</l1><l2>Amount</l2></td></tr>';
+      for (var i in drop) {
+        _html += '<tr><td>' + i + '</td><td>' + drop[i] + '</td></tr>';
+      }
+      _html += '</tbody>';
+      gE('#hvAATab-Drop table').innerHTML = _html;
+    } else if (target.className === 'hvAAShowAbout') {
+      var i;
+      var inputs = gE('.hvAADebug', 'all', optionBox);
+      for (i = 0; i < inputs.length; i++) {
+        if (getValue(inputs[i].name)) inputs[i].value = getValue(inputs[i].name);
+      }
+    } else if (target.className === 'buttonToggle') {
+      gE('#' + target.name + 'Switch').checked = (gE('#' + target.name + 'Switch').checked) ? false : true;
     }
-    _html += '</tbody>';
-    var table = cE('table');
-    table.innerHTML = _html;
-    gE('#hvAATab-Drop').appendChild(table);
-    this.onclick = null;
-  };
-  gE('.hvAAShowAbout', optionBox).onclick = function () {
-    var i;
-    var inputs = gE('.hvAADebug', 'all', optionBox);
-    for (i = 0; i < inputs.length; i++) {
-      if (getValue(inputs[i].name)) inputs[i].value = getValue(inputs[i].name);
-    }
-    this.onclick = null;
-  };
-  optionBox.onmousemove = function (e) {
+  }
+  optionBox.onmousemove = function (e) { //自定义条件相关事件
     var target = (e.target.className === 'customize') ? e.target : (e.target.parentNode.className === 'customize') ? e.target.parentNode : e.target.parentNode.parentNode;
     if (!gE('.customizeBox')) customizeBox();
     if (target.className !== 'customize' && target.parentNode.className !== 'customize') {
@@ -406,7 +412,7 @@ function optionBox() { //配置界面
     }
   };
   gE('.hvAAArenaLevels', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT') return;
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
     if (e.target.id === 'arLevel_GF' && e.target.checked) _alert(0, '如果GF在末尾，当闲置竞技场只剩下GF时，将不断循环GF', '如果GF在末尾，當閒置競技場只剩下GF時，將不斷循環GF', 'If GF is at the end and the idle arena tasks only left GF, it will do GF unlimited times');
     var valueArray = e.target.value.split(',');
     var levels = gE('input[name="idleArenaLevels"]').value;
@@ -421,9 +427,9 @@ function optionBox() { //配置界面
     gE('input[name="idleArenaLevels"]').value = levels;
     gE('input[name="idleArenaValue"]').value = value;
   };
-  //标签页-对自身技能
+  //标签页-BUFF技能
   gE('.buffSkillOrder', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'checkbox') return;
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
     var name = e.target.id.match(/_(.*)/) [1];
     var value = gE('input[name="buffSkillOrderValue"]').value;
     if (e.target.checked) {
@@ -433,9 +439,25 @@ function optionBox() { //配置界面
     }
     gE('input[name="buffSkillOrderValue"]').value = value;
   };
-  //标签页-De技能
+  //标签页-Channel技能
+  gE('.channelSkill2Order', optionBox).onclick = function (e) {
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+    var valueArray = e.target.value.split(',');
+    var name = gE('input[name="channelSkill2OrderName"]').value;
+    var value = gE('input[name="channelSkill2OrderValue"]').value;
+    if (e.target.checked) {
+      name += (name) ? ',' + valueArray[0] : valueArray[0];
+      value += (value) ? ',' + valueArray[1] : valueArray[1];
+    } else {
+      name = name.replace(new RegExp('(^|,)' + valueArray[0] + '(,|$)'), '$2').replace(/^,/, '');
+      value = value.replace(new RegExp('(^|,)' + valueArray[1] + '(,|$)'), '$2').replace(/^,/, '');
+    }
+    gE('input[name="channelSkill2OrderName"]').value = name;
+    gE('input[name="channelSkill2OrderValue"]').value = value;
+  };
+  //标签页-DEBUFF技能
   gE('.debuffSkillOrder', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'checkbox') return;
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
     var name = e.target.id.match(/_(.*)/) [1];
     var value = gE('input[name="debuffSkillOrderValue"]').value;
     if (e.target.checked) {
@@ -1036,13 +1058,15 @@ function main() { //主程序
   if (g('end')) return;
   if (g('option').scrollSwitch && g('option').scroll && checkCondition(g('option').scrollCondition) && g('option').scrollRoundType && g('option').scrollRoundType[g('roundType')]) useScroll(); //自动使用卷轴
   if (g('end')) return;
-  if (g('option').buffSkillSwitch && (g('option').buffSkill || g('option').channelSkill)) useBuffSkill(); //自动使用药水、施法增益技能
+  if (g('option').channelSkillSwitch && g('option').channelSkill && gE('div.bte>img[src*="channeling"]')) useChannelSkill(); //自动施法Channel技能
   if (g('end')) return;
-  if (g('attackStatus') !== 0 && g('option').infusion && checkCondition(g('option').infusionCondition) && g('option').infusionRoundType && g('option').infusionRoundType[g('roundType')]) useInfusions(); //自动使用魔药
+  if (g('option').buffSkillSwitch && g('option').buffSkill && checkCondition(g('option').buffSkillCondition)) useBuffSkill(); //自动施法BUFF技能
+  if (g('end')) return;
+  if (g('attackStatus') !== 0 && g('option').infusionSwicth && checkCondition(g('option').infusionCondition) && g('option').infusionRoundType && g('option').infusionRoundType[g('roundType')]) useInfusions(); //自动使用魔药
   if (g('end')) return;
   if (g('option').debuffSkillSwitch && g('option').debuffSkillAllIm && gE('div.btm6 img[src*="imperil"]', 'all').length < g('monsterAlive')) allImperiled(); //给所有敌人上Imperil
   if (g('end')) return;
-  if (g('option').debuffSkillSwitch && g('option').debuffSkill && checkCondition(g('option').debuffSkillCondition)) useDeSkill(); //自动施法De技能
+  if (g('option').debuffSkillSwitch && g('option').debuffSkill && checkCondition(g('option').debuffSkillCondition)) useDeSkill(); //自动施法DEBUFF技能
   if (g('end')) return;
   attack(); //自动打怪
   if (g('end')) return;
@@ -1464,7 +1488,7 @@ function useScroll() { //自动使用卷轴
     }
   }
 };
-function useBuffSkill() { //自动使用药水、施法增益技能
+function useChannelSkill() { //自动施法Channel技能
   var skillLib = {
     Pr: {
       name: 'Protection',
@@ -1512,91 +1536,138 @@ function useBuffSkill() { //自动使用药水、施法增益技能
       img: 'absorb',
     }
   };
-  var name2Skill = {
-    Protection: 'Pr',
-    'Spark of Life': 'SL',
-    'Spirit Shield': 'SS',
-    Hastened: 'Ha',
-    'Arcane Focus': 'AF',
-    Heartseeker: 'He',
-    Regen: 'Re',
-    'Shadow Veil': 'SV'
-  };
   var skillPack = (g('option').buffSkillOrderValue) ? g('option').buffSkillOrderValue.split(',')  : 'Pr,SL,SS,Ha,AF,He,Re,SV,Ab'.split(',');
   var i;
   var j;
-  if (gE('div.bte>img[src*="channeling"]')) {
-    if (g('option').channelSkill) {
-      for (i = 0; i < skillPack.length; i++) {
-        j = skillPack[i];
-        if (g('option').channelSkill[j] && !gE('div.bte>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
-          gE(skillLib[j].id).click();
-          g('end', true);
-          return;
-        }
-      }
-    }
-    if (g('option').channelSkill2 && g('option').channelSkill2Id && isOn(g('option').channelSkill2Id)) {
-      if (g('option').channelSkill2Id.match(/^1|^2/)) { //1:攻击技能 2:De技能
-        gE(g('option').channelSkill2Id).click();
-        gE('#mkey_' + g('monsterStatus') [0].id).click();
-        g('end', true);
-        return;
-      } else if (g('option').channelSkill2Id.match(/^3|^4/)) { //3,4:增益技能
-        gE(g('option').channelSkill2Id).click();
-        g('end', true);
-        return;
-      }
-    }
-    var buff = gE('div.bte>img', 'all');
-    if (buff.length > 0) {
-      for (i = 0; i < buff.length; i++) {
-        var spellName = buff[i].getAttribute('onmouseover').match(/'(.*?)'/) [1];
-        var buffLastTime = parseInt(buff[i].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/) [1]);
-        if (isNaN(buffLastTime) || buff[i].src.match(/_scroll.png$/)) {
-          continue;
-        } else {
-          if (spellName === 'Cloak of the Fallen' && !gE('div.bte>img[src*="sparklife"]') && isOn('422')) {
-            gE('422').click();
-            g('end', true);
-            return;
-          } else if (spellName in name2Skill && isOn(skillLib[name2Skill[spellName]].id)) {
-            gE(skillLib[name2Skill[spellName]].id).click();
-            g('end', true);
-            return;
-          }
-        }
-      }
-    }
-  } else if (checkCondition(g('option').buffSkillCondition) && g('option').buffSkill) {
+  if (g('option').channelSkill) {
     for (i = 0; i < skillPack.length; i++) {
       j = skillPack[i];
-      if (g('option').buffSkill[j] && checkCondition(g('option') ['buffSkill' + j + 'Condition']) && !gE('div.bte>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
+      if (g('option').channelSkill[j] && !gE('div.bte>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
         gE(skillLib[j].id).click();
         g('end', true);
         return;
       }
     }
-    var draughtPack = {
-      HD: {
-        name: 'Health',
-        img: 'health'
-      },
-      MD: {
-        name: 'Mana',
-        img: 'mana'
-      },
-      SD: {
-        name: 'Spirit',
-        img: 'spirit'
-      }
-    };
-    for (i in draughtPack) {
-      if (!gE('div.bte>img[src*="' + draughtPack[i].img + 'pot"]') && g('option').buffSkill && g('option').buffSkill[i] && checkCondition(g('option') ['buffSkill' + i + 'Condition']) && gE('.bti3>div[onmouseover*="' + draughtPack[i].name + ' Draught"]')) {
-        gE('.bti3>div[onmouseover*="' + draughtPack[i].name + ' Draught"]').click();
+  }
+  if (g('option').channelSkill2 && g('option').channelSkill2OrderValue) {
+    var order = g('option').channelSkill2OrderValue.split(',');
+    for (i = 0; i < order.length; i++) {
+      if (isOn(order[i])) {
+        gE(order[i]).click();
         g('end', true);
         return;
       }
+    }
+  }
+  var buff = gE('div.bte>img', 'all');
+  if (buff.length > 0) {
+    var name2Skill = {
+      Protection: 'Pr',
+      'Spark of Life': 'SL',
+      'Spirit Shield': 'SS',
+      Hastened: 'Ha',
+      'Arcane Focus': 'AF',
+      Heartseeker: 'He',
+      Regen: 'Re',
+      'Shadow Veil': 'SV'
+    };
+    for (i = 0; i < buff.length; i++) {
+      var spellName = buff[i].getAttribute('onmouseover').match(/'(.*?)'/) [1];
+      var buffLastTime = parseInt(buff[i].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/) [1]);
+      if (isNaN(buffLastTime) || buff[i].src.match(/_scroll.png$/)) {
+        continue;
+      } else {
+        if (spellName === 'Cloak of the Fallen' && !gE('div.bte>img[src*="sparklife"]') && isOn('422')) {
+          gE('422').click();
+          g('end', true);
+          return;
+        } else if (spellName in name2Skill && isOn(skillLib[name2Skill[spellName]].id)) {
+          gE(skillLib[name2Skill[spellName]].id).click();
+          g('end', true);
+          return;
+        }
+      }
+    }
+  }
+};
+function useBuffSkill() { //自动施法BUFF技能
+  var skillLib = {
+    Pr: {
+      name: 'Protection',
+      id: '411',
+      img: 'protection'
+    },
+    SL: {
+      name: 'Spark of Life',
+      id: '422',
+      img: 'sparklife'
+    },
+    SS: {
+      name: 'Spirit Shield',
+      id: '423',
+      img: 'spiritshield'
+    },
+    Ha: {
+      name: 'Haste',
+      id: '412',
+      img: 'haste'
+    },
+    AF: {
+      name: 'Arcane Focus',
+      id: '432',
+      img: 'arcanemeditation',
+    },
+    He: {
+      name: 'Heartseeker',
+      id: '431',
+      img: 'heartseeker'
+    },
+    Re: {
+      name: 'Regen',
+      id: '312',
+      img: 'regen'
+    },
+    SV: {
+      name: 'Shadow Veil',
+      id: '413',
+      img: 'shadowveil'
+    },
+    Ab: {
+      name: 'Absorb',
+      id: '421',
+      img: 'absorb',
+    }
+  };
+  var skillPack = (g('option').buffSkillOrderValue) ? g('option').buffSkillOrderValue.split(',')  : 'Pr,SL,SS,Ha,AF,He,Re,SV,Ab'.split(',');
+  var i;
+  var j;
+  for (i = 0; i < skillPack.length; i++) {
+    j = skillPack[i];
+    if (g('option').buffSkill[j] && checkCondition(g('option') ['buffSkill' + j + 'Condition']) && !gE('div.bte>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
+      gE(skillLib[j].id).click();
+      g('end', true);
+      return;
+    }
+  }
+  var draughtPack = {
+    HD: {
+      name: 'Health',
+      img: 'health'
+    },
+    MD: {
+      name: 'Mana',
+      img: 'mana'
+    },
+    SD: {
+      name: 'Spirit',
+      img: 'spirit'
+    }
+  };
+  for (i in draughtPack) {
+    if (!gE('div.bte>img[src*="' + draughtPack[i].img + 'pot"]') && g('option').buffSkill && g('option').buffSkill[i] && checkCondition(g('option') ['buffSkill' + i + 'Condition']) && gE('.bti3>div[onmouseover*="' + draughtPack[i].name + ' Draught"]')) {
+      gE('.bti3>div[onmouseover*="' + draughtPack[i].name + ' Draught"]').click();
+      g('end', true);
+      return;
     }
   }
 };
@@ -1662,7 +1733,7 @@ function allImperiled() { //给所有敌人施放Imperil
         g('end', true);
         return;
       } else {
-        _alert(0, '无法正常施放De技能，请尝试手动打怪', '無法正常施放De技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
+        _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
         pauseChange();
         g('end', true);
         return;
@@ -1671,7 +1742,7 @@ function allImperiled() { //给所有敌人施放Imperil
   }
   g('monsterStatus').sort(objArrSort('finWeight'));
 };
-function useDeSkill() { //自动施法De技能
+function useDeSkill() { //自动施法DEBUFF技能
   var skillLib = {
     Sle: {
       name: 'Sleep',
@@ -1740,7 +1811,7 @@ function useDeSkill() { //自动施法De技能
         g('end', true);
         return;
       } else {
-        _alert(0, '无法正常施放De技能，请尝试手动打怪', '無法正常施放De技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
+        _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
         pauseChange();
         g('end', true);
         return;
