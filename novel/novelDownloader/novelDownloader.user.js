@@ -4,7 +4,8 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.39.114e+332
+// @version     1.39.114f+332
+// @connect     www.googleapis.com
 // @connect     read.qidian.com
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
