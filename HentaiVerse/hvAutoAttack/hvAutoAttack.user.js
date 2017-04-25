@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.75
+// @version      2.75a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -1062,7 +1062,7 @@ function main() { //主程序
   if (g('end')) return;
   if (g('option').buffSkillSwitch && g('option').buffSkill && checkCondition(g('option').buffSkillCondition)) useBuffSkill(); //自动施法BUFF技能
   if (g('end')) return;
-  if (g('attackStatus') !== 0 && g('option').infusionSwicth && checkCondition(g('option').infusionCondition) && g('option').infusionRoundType && g('option').infusionRoundType[g('roundType')]) useInfusions(); //自动使用魔药
+  if (g('attackStatus') !== 0 && g('option').infusionSwitch && checkCondition(g('option').infusionCondition) && g('option').infusionRoundType && g('option').infusionRoundType[g('roundType')]) useInfusions(); //自动使用魔药
   if (g('end')) return;
   if (g('option').debuffSkillSwitch && g('option').debuffSkillAllIm && gE('div.btm6 img[src*="imperil"]', 'all').length < g('monsterAlive')) allImperiled(); //给所有敌人上Imperil
   if (g('end')) return;
@@ -1699,8 +1699,9 @@ function useInfusions() { //自动使用魔药
       img: 'darkinfusion'
     }
   ];
-  if (gE('.bti3>div[onmouseover*="' + infusionLib[g('attackStatus')].name + '"]') && !gE('div.bte>img[src*="' + infusionLib[[g('attackStatus')]].img + '"]')) {
-    gE('.bti3>div[onmouseover*="' + infusionLib[g('attackStatus')].name + '"]').click();
+  var infusion = infusionLib[g('attackStatus')];
+  if (gE('.bti3>div[onmouseover*="' + infusion.name + '"]') && !gE('div.bte>img[src*="' + infusion.img + '"]')) {
+    gE('.bti3>div[onmouseover*="' + infusion.name + '"]').click();
     g('end', true);
     return;
   }
