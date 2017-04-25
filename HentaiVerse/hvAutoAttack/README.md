@@ -1,4 +1,5 @@
 ### TODO
+1. 战前回复
 ---------------------
 ##### Low-priority TODO
 1. Boss判断(2选1)：a.一次攻击对怪的血量减少百分比  b.怪hp接近于Bosshp的百分之几(自定，默认值未确定)
@@ -143,15 +144,18 @@ The following is a schematic diagram of the circuit diagram
 
 ###### Latest
 
+##### 2.75
+1. 功能变更: Channel技能
+
+##### 2.74
+1. 移除脚本里的更新日志（太懒，每次更新都要先写这个，主要是翻译成英文，很烦）
+2. 功能增加: 装备损坏忽略、Channel时使用某技能
+3. 功能移除: 装备损坏警报
+
 ##### 2.73
 1. 更多自定义判断条件
 2. 内置Random Encounter Notification(并不，其实是自己写的简陋的版本)
 3. 其他一些变更
-
-###### 2.73 (English)
-1. Customize conditions
-2. New Built-in Plugin: Random Encounter Notification
-3. Some other changes
 
 ##### 2.72
 1. 自定义判断条件
