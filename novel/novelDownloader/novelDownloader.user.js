@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.39.114d+332
+// @version     1.39.114e+332
 // @connect     read.qidian.com
 // @connect     files.qidian.com
 // @connect     a.heiyan.com
@@ -202,7 +202,7 @@ var script = document.createElement('script');
 script.src = 'http://libs.baidu.com/jquery/1.9.1/jquery.min.js';
 document.head.appendChild(script);
 */
-//var debug = true;
+var debug = false;
 var indexRule = new Object();
 var chapterRule = new Object();
 var reRule = new Object();
@@ -2033,7 +2033,7 @@ function addDownloadLogStart(num, url, status) { //下载进度-开始
 }
 function addDownloadLogEnd(num, name, url, status, addclass) { //下载进度-结束
   jQuery('#nD-LogDiv_' + num).html(num + ' <a href="' + url + '" target="_blank">' + name + '</a> ' + status + '<br/>').addClass('nD-Status' + addclass);
-  jQuery('.nD-LogDiv') [0].scrollBy(0, 10);
+  //jQuery('.nD-LogDiv') [0].scrollBy(0, 10);
 }
 function download2Zip(name) { //下载到1个zip
   jQuery(window).data('blob', new JSZip());
