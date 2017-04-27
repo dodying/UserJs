@@ -1,5 +1,6 @@
 ### TODO
-1. 战前回复
+1. 战前回复(hp/mp/sp/energy drink)
+2. Stamina: 逃跑
 ---------------------
 ##### Low-priority TODO
 1. Boss判断(2选1)：a.一次攻击对怪的血量减少百分比  b.怪hp接近于Bosshp的百分之几(自定，默认值未确定)
