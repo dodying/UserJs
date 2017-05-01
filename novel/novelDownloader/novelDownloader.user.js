@@ -4,7 +4,8 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.39.114f+332
+// @version     1.39.115g+332
+// @connect     raw.githubusercontent.com
 // @connect     www.googleapis.com
 // @connect     read.qidian.com
 // @connect     files.qidian.com
@@ -30,10 +31,6 @@
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
-//开始-自定义站点规则
-// @include     http://www.lwxs520.com/books/*
-// @include     http://www.biquku.com/*
-//结束-自定义站点规则
 //              搜索引擎
 // @include     http*://www.baidu.com/s?*wd=*
 // @include     http*://www.baidu.com/s?*word=*
@@ -125,6 +122,7 @@
 // @include     http://www.chuangbie.com/book/read/book_id/*
 // @include     http://www.nsnovel.com/book/*
 // @include     http://www.msxf.net/book/*
+// @include     http*://www.popo.tw/books/*/articles*
 //              轻小说
 // @include     http://www.wenku8.com/novel/*/*/*
 // @include     http://book.sfacg.com/Novel/*
@@ -150,6 +148,7 @@
 // @include     http://www.3zcn.org/3z/*
 // @include     http://www.tanxshu.net/*
 // @include     http://www.booksrc.net/book/*
+// @include     http://www.yushuwu.net/read/*
 //              18X
 // @include     http://www.haiax.net/files/article/html/*
 // @include     http://www.lewenxs.net/files/article/html/*
@@ -734,6 +733,8 @@ function init() {
     addIRule('www.msxf.net', '陌上香坊言情小说网', 'h1>a', '.chaptertable>tbody>tr>td>a', '.chaptertable>tbody>tr>td:has(font.ico_vip)>a');
     addCRule('www.msxf.net', 'h3', '#article-content');
     addRRule('www.msxf.net', '\\s+||| ', '<p .*?net</p>', '<p> 看正版言情小说，来陌上香坊小说网.*?</p>', '<p .*?</p>');
+    addIRule('www.popo.tw', 'POPO原創市集', '.BookName', '.aarti>a');
+    addCRule('www.popo.tw', '.read-content>h1', '.read-content>dl', 1);
     //////////////////////////////////////////////////轻小说
     addIRule('www.wenku8.com', '轻小说文库', '#title', '.css>tbody>tr>td>a');
     addCRule('www.wenku8.com', '#title', '#content', 0, 1);
@@ -1029,6 +1030,25 @@ function init() {
     chapterRule['www.booksrc.net'] = {
       'Deal': function (num, url) {
         chapterRule['www.xiaoshuokan.com'].Deal(num, url);
+      }
+    };
+    addIRule('www.yushuwu.net', '御宅屋', '.infotitle>h1', '.chapter_list>a', false, true);
+    chapterRule['www.yushuwu.net'] = {
+      'Deal': function (num, url) {
+        if (url.match('javascript')) {
+          var para = url.match(/\d+/g);
+          url = location.protocol + '//www.yushuwu.net/read/' + para[0] + '/' + para[1] + '/';
+        }
+        GM_xmlhttpRequest({
+          method: 'GET',
+          overrideMimeType: 'text/html; charset=gb2312',
+          url: url,
+          onload: function (response) {
+            var name = jQuery('#main h1', response.response).text();
+            var content = jQuery('#main>div>div:eq(1)', response.response).html();
+            thisDownloaded(num, name, content, 0);
+          }
+        });
       }
     };
     //////////////////////////////////////////////////18X
@@ -2257,8 +2277,8 @@ function base64_raw() { //base64,来自http://blog.csdn.net/gumanren/article/det
 var base64 = new base64_raw();
 function objArrSort(propertyName) { //稍作修改，对象数组排序函数，从小到大排序，来自http://www.jb51.net/article/24536.htm
   return function (object1, object2) {
-    var value1 = parseInt(object1[propertyName].replace(/.*\//, ''));
-    var value2 = parseInt(object2[propertyName].replace(/.*\//, ''));
+    var value1 = object1[propertyName];
+    var value2 = object2[propertyName];
     if (value2 < value1) {
       return 1;
     } else if (value2 > value1) {
