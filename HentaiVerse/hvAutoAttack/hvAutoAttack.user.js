@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.77
+// @version      2.77a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -1891,7 +1891,7 @@ function attack() { //自动打怪
 function fixMonsterStatus() { //修复monsterStatus
   document.title = _alert( - 1, 'monsterStatus错误，正在尝试修复', 'monsterStatus錯誤，正在嘗試修復', 'monsterStatus Error, trying to fix');
   var monsterStatus = new Array();
-  gE('div.btm2', 'all').forEach(function (monster) {
+  gE('div.btm2', 'all').forEach(function (monster, i) {
     monsterStatus.push({
       order: i,
       id: (i === 9) ? 0 : i + 1,
