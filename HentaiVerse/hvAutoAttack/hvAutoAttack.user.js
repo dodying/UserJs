@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.77a
+// @version      2.77b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -947,7 +947,11 @@ function riddleAlert() { //答题警报
 };
 //战斗外//
 function restoreBeforeBattle(func) { //战前回复
-  post(location.href, 'recover=all', func);
+  if (g('option').restore) {
+    post(location.href, 'recover=all', func);
+  } else {
+    func();
+  }
 }
 function quickSite() { //快捷站点
   var quickSiteBar = cE('div');
@@ -979,7 +983,7 @@ function idleArena() { //闲置竞技场
   }
   if (arena.isOk) return;
   arena.array = arena.array || g('option').idleArenaValue.split(',');
-  if (g('option').restore) restoreBeforeBattle(function () {
+  restoreBeforeBattle(function () {
     var href = '?s=Battle&ss=';
     href += (parseInt(arena.array[0]) >= 105) ? 'rb' : (parseInt(arena.array[0]) === 1) ? 'gr' : 'ar';
     post(href, 'arenaid=' + arena.array[0], function () {
@@ -1000,7 +1004,7 @@ function randomEncounterCheck() { //Random Encounter
     time: 0
   };
   if (!randomEncounter.lastTime || timeNow - randomEncounter.lastTime >= (30 + Math.random() * 5) * 60 * 1000 && randomEncounter.time < 24) {
-    if (g('option').restore) restoreBeforeBattle(function () {
+    restoreBeforeBattle(function () {
       randomEncounter.lastTime = timeNow;
       setValue('randomEncounter', randomEncounter);
       openUrl('https://e-hentai.org/news.php?randomEncounter');
