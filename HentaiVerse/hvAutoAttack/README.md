@@ -1,6 +1,5 @@
 ### TODO
-1. 战前回复(hp/mp/sp/energy drink)
-2. Stamina: 逃跑
+
 ---------------------
 ##### Low-priority TODO
 1. Boss判断(2选1)：a.一次攻击对怪的血量减少百分比  b.怪hp接近于Bosshp的百分之几(自定，默认值未确定)
@@ -141,9 +140,19 @@ The following is a schematic diagram of the circuit diagram
 
 ##### ChangeLog
 
-##### 最新版
-
 ###### Latest
+
+##### 2.78
+1. 功能增加: Ether Tap相关MP
+
+##### 2.77
+1. 功能增加: 关闭Spirit Stance
+2. 功能变更: 开启Spirit Stance
+3. 功能移除: 战前回复Stamina
+
+##### 2.76
+1. 功能变更: 自动逃跑/Stamina相关/其他技能中一回合只使用一次
+2. 功能增加: 战前回复
 
 ##### 2.75
 1. 功能变更: Channel技能
