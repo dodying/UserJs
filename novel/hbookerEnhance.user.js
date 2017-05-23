@@ -5,7 +5,7 @@
 // @description 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 // @description:zh-CN  阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 // @include     http://www.hbooker.com/chapter/book_chapter_detail/*
-// @version     1.037
+// @version     1.038
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -25,7 +25,7 @@ function init() {
   + '.bd>p:hover{background-color:#CDCDCD;}'
   + '.state{right:10px!important;}'
   + '.state>a{margin-left:0!important;}'
-  + '.avatarShow{background-repeat:no-repeat;width:140px;height:140px;display:none;z-index:999999;position:fixed;}'
+  + '.avatarShow{background-repeat:no-repeat;width:600px;height:600px;display:none;z-index:999999;position:fixed;}'
   + '.chapter-comment-page>select{border:solid 1px #000;appearance:none;-moz-appearance:none;-webkit-appearance:none;}'
   + '.quickComment{cursor:pointer;float:left;}'
   + '.selectComment{display:none;position:absolute;z-index:999999;border:solid 1px #000;background-color:white;width:410px;}'
@@ -144,6 +144,12 @@ function checkReview() {
   jQ('.img').after(function (i) { //楼层提醒
     return 'L' + (commentCount - i - pageNow * 10);
   });
+  jQ('.J_TsukkomiOpt i').each(function () { //热评
+    if (parseInt(this.textContent) > 20) $(this).addClass('hot');
+  });
+  jQ('.bd:has(.J_TsukkomiOpt>.J_Zan>.hot)').css('color', 'red');
+  jQ('.bd:has(.J_TsukkomiOpt>.J_Hei>.hot)').css('color', 'blue');
+  jQ('.bd:has(.J_TsukkomiOpt>.J_Zan>.hot):has(.J_TsukkomiOpt>.J_Hei>.hot)').css('color', 'green');
   jQ('.chapter-comment-page').append(function () { //跳转选项
     var _html = '上车<select>';
     var temp;
@@ -171,7 +177,7 @@ function checkReview() {
         'top': function () {
           return (e.screenY - 60) + 'px';
         },
-        'background-image': 'url(' + jQ(this).find('img').attr('src') + ')'
+        'background-image': 'url(' + jQ(this).find('img').attr('src').replace('thumb_', '') + ')'
       });
     },
     mouseout: function () {
@@ -185,7 +191,7 @@ function checkReview() {
     setTimeout(function () {
       checkReview();
     }, 200);
-    jQ(document).scrollTop(parent.offset().top - 30);
+    jQ(document).scrollTop(parent.prev().offset().top - 30);
     //*/
   });
   jQ('.date').html(function () { //处理吐槽时间
