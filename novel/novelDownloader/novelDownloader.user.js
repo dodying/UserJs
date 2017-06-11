@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.40
+// @version     1.40a
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -1904,7 +1904,7 @@ function xhr(num, url) { //xhr
               for (var i in img) {
                 if (img.ing >= 10) return;
                 if (i === 'ing' || i === 'ok' || img[i].data) continue;
-                downloadImage(img[i].url, i);
+                downloadImage(img[i].url, img[i].num, img[i].i);
                 img.ing++;
                 jQuery(window).data('img', img);
               }
@@ -1916,9 +1916,7 @@ function xhr(num, url) { //xhr
             }, 800);
           }
           raw.find('img').each(function (i) {
-            var newName = num + '-' + i;
-            threadImg(this.src, newName);
-            content = content.replace('src="' + this.src, 'src="' + newName + '.jpg');
+            threadImg(this.src, num, i);
           });
         }
       } else {
@@ -1977,19 +1975,22 @@ function thisDownloaded(num, name, content, lang) { //下载完成，包括文�
   jQuery('.bookDownladerChapter').html(jQuery(window).data('numberOk'));
   jQuery('.bookDownladerProgress').val(jQuery(window).data('numberOk'));
 }
-function threadImg(url, name) {
+function threadImg(url, num, i) {
   var img = jQuery(window).data('img');
-  img[name] = {
-    url: url
+  img[num + '_' + i] = {
+    url: url,
+    num: num,
+    i: i
   };
   jQuery(window).data('img', img);
 }
-function downloadImage(url, name) {
+function downloadImage(url, num, i) {
+  var name = num + '_' + i;
   GM_xmlhttpRequest({
     method: 'GET',
     url: url,
     responseType: 'arraybuffer',
-    timeout: 30000,
+    timeout: 10000,
     onload: function (response) {
       var type = response.responseHeaders.match(/Content-Type: (.*?)[\r\n]/) [1];
       var img = jQuery(window).data('img');
@@ -1997,7 +1998,23 @@ function downloadImage(url, name) {
         type: type
       });
       img.ing--;
+      jQuery(window).data('dataDownload') [num].content = jQuery(window).data('dataDownload') [num].content.replace(img[name].url, name + '.jpg');
       jQuery(window).data('img', img);
+    },
+    ontimeout: function () {
+      downloadImage(url, num, i);
+    },
+    onerror: function () {
+      if (confirm('一张图片下载错误，请检查\n网络是否正常，或是否网站地址错误\n图片地址: ' + url + '\n是否重试下载\n是则在5秒后重新发送下载请求')) {
+        setTimeout(function () {
+          downloadImage(url, num, i);
+        }, 5000);
+      } else {
+        var img = jQuery(window).data('img');
+        img[name].data = true;
+        img.ing--;
+        jQuery(window).data('img', img);
+      }
     }
   });
 }
