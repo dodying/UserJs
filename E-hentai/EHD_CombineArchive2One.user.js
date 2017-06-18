@@ -7,9 +7,9 @@
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @description Combine the Archive from EHD A too One Archive
 // @description:zh-CN 合并下载自EHD的压缩包
-// @include     http*://g.e-hentai.org/g/*
+// @include     http*://e-hentai.org/g/*
 // @include     http*://exhentai.org/g/*
-// @version     1.00a
+// @version     1.00b
 // @grant       none
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @run-at      document-idle
@@ -45,8 +45,7 @@ div.querySelectorAll('button') [0].onclick = function () {
     return;
   } else {
     this.innerHTML = '第' + eval(time + 1) + '次下载';
-  }
-  //document.querySelector('div.g2:nth-child(5) > a:nth-child(2) > label:nth-child(1) > input:nth-child(1)').focus();
+  }  //document.querySelector('div.g2:nth-child(5) > a:nth-child(2) > label:nth-child(1) > input:nth-child(1)').focus();
   //document.querySelector('div.g2:nth-child(3)').click();
 
   document.querySelector('div.g2:nth-child(5) > a:nth-child(2) > label:nth-child(1) > input:nth-child(1)').value = page[time - 1];
@@ -73,7 +72,7 @@ function download(name, amount) {
   for (var i = 1; i < amount; i++) {
     content += '"' + Directory_7z + '"' + ' x -r -x!info.txt "' + name + '(' + i + ').zip" -o"%cd%\\' + name + '\\"\r\n';
   }
-  content += '"C:\\Program Files\\WinRAR\\RAR.exe" a -r -m0 "' + name + '.rar" "' + name + '\\"\r\n';
+  content += '"' + Directory_7z + '" a "' + name + '.rar" "' + name + '\\" -r -mx0\r\n';
   content += 'rd /s /q "' + name + '\\"\r\n';
   content += 'for /f "tokens=* delims=" %%a in (\'dir /s /b "' + name + '.zip"\') do (set /a PreSize=%%~za/1024/1024)\r\n';
   for (var i = 1; i < amount; i++) {
