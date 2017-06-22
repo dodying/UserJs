@@ -14,9 +14,12 @@
 // @include     https://e-hentai.org/favorites.php*
 // @include     https://e-hentai.org/?*
 // @include     https://e-hentai.org/g/*
-// @version     1.00
+// @version     1.01
+// @grant       unsafeWindow
 // @grant       GM_openInTab
 // @grant       GM_setClipboard
+// @grant       GM_setValue
+// @grant       GM_getValue
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
@@ -28,8 +31,11 @@
 (function () {
   jQuery('<div class="ehNavBar"><div></div><div></div><div></div></div>').appendTo('body');
   addStyle();
-  if (!localStorage.downloadInffo) localStorage.downloadInfo = '{}';
   if (location.href.match('/g/')) { //信息页
+    if (!GM_getValue('apikey')) {
+      GM_setValue('apikey', unsafeWindow.apikey);
+      GM_setValue('apiuid', unsafeWindow.apiuid);
+    }
     checkImageSize();
     btnAddFav();
     btnSearch();
@@ -46,6 +52,7 @@
     btnSearch2();
     keywordFunction();
     batchDown();
+    rateInSearchPage();
   }
   showInfo();
   exportRule();
@@ -86,7 +93,6 @@ function add2Fav(gid, token, i, target) {
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.onload = function () {
     target = jQuery(target);
-    console.log(target);
     if (i === 'favdel') {
       target.attr('class', 'btnAddFav').removeAttr('id').removeAttr('style');
     } else {
@@ -120,7 +126,7 @@ function addStyle() {
 }
 function autoClose() {
   setTimeout(function () {
-    if (jQuery('.ehD-dialog>.ehD-pt-gen-filename+button').text() === 'Not download? Click here to download') {
+    if (jQuery('.ehD-dialog>.ehD-pt-gen-filename+button').text() === 'Not download? Click here to download' || jQuery('.ehD-dialog span:contains("Not download or file is broken? "):has(a[href^="filesystem:https://"])').length > 0) {
       setTimeout(function () {
         self.close();
       }, 3000);
@@ -145,7 +151,7 @@ function batchDown() {
   jQuery('.itg').on('contextmenu', function (e) { //右键：下载
     e.preventDefault();
     if (e.target.className.indexOf('TagPreview_') >= 0) {
-      GM_openInTab(e.target.href + '#0', true); //待续
+      openUrl(e.target.href + '#0', true); //待续
     } else if (window.batchTime > 0 && jQuery(e.target).hasClass('EH_QuickAddToFav') || jQuery(e.target).hasClass('ehLBAdd')) {
       window.batchTime--;
     }
@@ -214,10 +220,10 @@ function batchDown() {
       jQuery('.itg>tbody>tr:visible>td>input:checked').each(function (i) {
         var href = jQuery(this).parents().eq(1).find('.itd>div>.it5>a').attr('href');
         var target = jQuery(this).parents().eq(1).find('.it3').find('.btnAddFav,.i[id^="favicon_"]') [0];
-        GM_openInTab(href + '#' + e.button, true);
+        openUrl(href + '#' + e.button, true);
         if (e.button === 0) { //待续
           var arr = href.split('/');
-          add2Fav(arr[4], arr[5], localStorage.lastFavcat, target);
+          add2Fav(arr[4], arr[5], GM_getValue('lastFavcat', 0), target);
           window.batchTime--;
         }
       });
@@ -249,12 +255,12 @@ function btnAddFav() {
       } else if (e.button === 1) {
         var favcat = prompt('请选择：\n0.未下载\n1.连载-系列\n2.CG-COS-画集-女同\n3.东方-LL-舰娘-偶像大师\n4.同人\n5.大师-萝莉\n6.纯爱-Np-1♂\n7.纯爱-乱伦\n8.纯爱-2p-♂♀\n9.难定-杂志\n10.从收藏中移除');
         if (!favcat) return;
-        localStorage.lastFavcat = favcat;
+        GM_setValue('lastFavcat', favcat);
         add2Fav(arr[4], arr[5], favcat, target);
       } else if (e.button === 2 && e.shiftKey) {
         add2Fav(arr[4], arr[5], '10', target);
       } else if (e.button === 2) {
-        add2Fav(arr[4], arr[5], localStorage.lastFavcat, target);
+        add2Fav(arr[4], arr[5], GM_getValue('lastFavcat', 0), target);
       }
     }
   });
@@ -279,12 +285,12 @@ function btnAddFav2() {
       } else if (e.button === 1) {
         var favcat = prompt('请选择：\n0.未下载\n1.连载-系列\n2.CG-COS-画集-女同\n3.东方-LL-舰娘-偶像大师\n4.同人\n5.大师-萝莉\n6.纯爱-Np-1♂\n7.纯爱-乱伦\n8.纯爱-2p-♂♀\n9.难定-杂志\n10.从收藏中移除');
         if (!favcat) return;
-        localStorage.lastFavcat = favcat;
+        GM_setValue('lastFavcat', favcat);
         add2Fav(arr[4], arr[5], favcat, target);
       } else if (e.button === 2 && e.shiftKey) {
         add2Fav(arr[4], arr[5], '10', target);
       } else if (e.button === 2) {
-        add2Fav(arr[4], arr[5], localStorage.lastFavcat, target);
+        add2Fav(arr[4], arr[5], GM_getValue('lastFavcat', 0), target);
       }
     }
   });
@@ -306,7 +312,7 @@ function btnSearch() {
     jQuery('.ehSearch input:checked+label').each(function () {
       keyword.push(this.textContent);
     })
-    GM_openInTab('/?f_search=%22' + encodeURIComponent(keyword.join('" "')) + '%22', true);
+    if (keyword.length > 0) openUrl('/?f_search=%22' + encodeURIComponent(keyword.join('" "')) + '%22');
   });
 }
 function btnSearch2() {
@@ -319,7 +325,7 @@ function btnSearch2() {
       name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】/g, '').replace(/!/g, '').replace(/\|.*/, '').trim();
       name = '"' + name + '"';
       if (e.button === 2) name += ' language:chinese$';
-      GM_openInTab('/?f_search=' + encodeURIComponent(name), true);
+      openUrl('/?f_search=' + encodeURIComponent(name));
     }
   });
 }
@@ -346,11 +352,11 @@ function changeName(e) {
   });
 }
 function checkImageSize() {
-  if (!localStorage.imageSize) {
+  if (!GM_getValue('imageSize', false)) {
     changeConfig('xr', '780');
-    localStorage.imageSize = '780';
+    GM_setValue('imageSize', '780');
   }
-  var imageSize = localStorage.imageSize;
+  var imageSize = GM_getValue('imageSize');
   var rate;
   var num0 = 0; //单页
   var num1 = 0; //双页
@@ -366,13 +372,13 @@ function checkImageSize() {
     if (imageSize !== '1280') {
       document.title = '1280|' + document.title;
       changeConfig('xr', '1280');
-      localStorage.imageSize = '1280';
+      GM_setValue('imageSize', '1280');
       return true;
     }
   } else if (imageSize !== '780') {
     document.title = '780|' + document.title;
     changeConfig('xr', '780');
-    localStorage.imageSize = '780';
+    GM_setValue('imageSize', '780');
     return true;
   }
 }
@@ -402,13 +408,14 @@ function downloadInfo() {
       var name = location.href.split('/') [4];
       setInterval(function () {
         var info = jQuery('.ehD-status').text().match(/\d+/g);
-        var download = JSON.parse(localStorage.downloadInfo);
+        var download = GM_getValue('downloadInfo', {
+        });
         download[name] = [
           info[2],
           info[0]
         ];
         if (info[0] === info[2]) delete download[name];
-        localStorage.downloadInfo = JSON.stringify(download);
+        GM_setValue('downloadInfo', download);
       }, 800);
     }
   });
@@ -417,8 +424,8 @@ function exportRule() {
   jQuery('<button>Export Rule</button>').appendTo('.ehNavBar>div:eq(1)').click(function () {
     var record = (localStorage.record) ? JSON.parse(localStorage.record)  : [
     ];
-    var exportRule = (localStorage.exportRule) ? JSON.parse(localStorage.exportRule)  : [
-    ];
+    var exportRule = GM_getValue('exportRule', [
+    ]);
     exportRule = exportRule.concat(record).sort();
     for (var i = 1; i < exportRule.length; i++) {
       if (exportRule[i - 1] === exportRule[i]) {
@@ -427,7 +434,7 @@ function exportRule() {
       }
     }
     localStorage.record = '[]';
-    localStorage.exportRule = JSON.stringify(exportRule);
+    GM_setValue('exportRule', exportRule);
     saveAs(new Blob(['[AutoProxy 0.2.9]\r\n' + exportRule.join('\r\n')], {
       type: 'text/plain;charset=utf-8'
     }), 'e-hentai.txt');
@@ -454,11 +461,65 @@ function keywordFunction() {
     });
   }
 }
+function openUrl(url, newWindow) {
+  url = (url.match('//') ? '' : location.origin) + url;
+  if (newWindow && navigator.userAgent.match('Chrome')) {
+    window.open(url, '', 'resizable,scrollbars,status');
+  } else {
+    GM_openInTab(url, true);
+  }
+}
+function rateInSearchPage() {
+  jQuery('.it4>.ir.it4r').on({
+    mousemove: function (e) {
+      var _ = jQuery(this);
+      if (!_.attr('rawRate')) _.attr('rawRate', _.css('background-position'));
+      var star = Math.round(e.offsetX / 8);
+      _.attr('title', star);
+      var x = - 80 + Math.ceil(star / 2) * 16;
+      var y = star % 2 == 1 ? - 21 : - 1;
+      _.css('background-position', x + 'px ' + y + 'px');
+    },
+    mouseout: function () {
+      jQuery(this).css('background-position', jQuery(this).attr('rawRate'));
+    },
+    click: function (e) {
+      var apikey = GM_getValue('apikey');
+      if (!apikey) {
+        alert('请在任意信息页获取到apikey与apiuid后再尝试');
+        return;
+      }
+      var apiuid = GM_getValue('apiuid');
+      var _ = jQuery(this);
+      var href = _.parent().prev().find('a').attr('href').split('/');
+      var star = Math.round(e.offsetX / 8);
+      var xhr = 'xhr_' + Math.random().toString();
+      xhr = new XMLHttpRequest();
+      xhr.open('POST', location.origin + '/api.php', true);
+      xhr.onload = function () {
+        var x = - 80 + Math.ceil(star / 2) * 16;
+        var y = star % 2 == 1 ? - 21 : - 1;
+        _.attr('rawRate', x + 'px ' + y + 'px');
+        _.addClass('irb');
+      }
+      var parm = {
+        apikey: apikey,
+        apiuid: apiuid,
+        gid: href[4],
+        method: 'rategallery',
+        rating: star,
+        token: href[5]
+      };
+      xhr.send(JSON.stringify(parm));
+    }
+  });
+}
 function showInfo() {
   jQuery('<button class="showInfo">Show Info</button>').appendTo('.ehNavBar>div:eq(1)').click(function () {
     jQuery(this).remove();
     var showInfoInterval = setInterval(function () {
-      var download = JSON.parse(localStorage.downloadInfo);
+      var download = GM_getValue('downloadInfo', {
+      });
       if (Object.keys(download).length === 0) return;
       var body = [
       ];
@@ -486,14 +547,14 @@ function setNotification(title, body) { //发出桌面通知
 function tagSearch() {
   jQuery('#taglist a').on({
     contextmenu: function () {
-      GM_openInTab(this.href, true);
+      openUrl(this.href);
       return false;
     },
     click: function () { //标签
       var keyword = this.innerText.replace(/\s+\|.*/, '');
       if (/\s+/.test(keyword)) keyword = '"' + keyword + '"';
       if (/:/.test(this.id)) keyword = this.id.replace(/ta_(.*?):.*/, '$1') + ':' + keyword + '$';
-      GM_openInTab('/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0&f_search=' + encodeURIComponent(keyword) + '+language%3Achinese%24&f_apply=Apply+Filter', true);
+      openUrl('/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0&f_search=' + encodeURIComponent(keyword) + '+language%3Achinese%24&f_apply=Apply+Filter');
     }
   });
 }
