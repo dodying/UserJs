@@ -5,7 +5,7 @@
 // @description:zh-CN  
 // @include     http*://hentaiverse.org/?s=Bazaar&ss=is*
 // @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=is*
-// @version     1.00b
+// @version     1.00c
 // @grant       unsafeWindow
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -36,8 +36,8 @@
     setValue('BazaarList', info);
     $('.listBox').hide();
   });
-  $('<span></span>').html('+').prependTo('.iop,.io').attr('style', 'cursor:pointer;font-size:large;').on('click', function () {
-    var id = parseInt($(this).next().attr('id'));
+  $('<span></span>').html('+').prependTo('.nosel.itemlist tr>td:nth-child(1)').attr('style', 'cursor:pointer;font-size:large;').on('click', function () {
+    var id = parseInt($(this).next().attr('onclick').match(/\d+/) [0]);
     $('input[name=itemId]').val(id);
     if (getValue('BazaarList') && id in getValue('BazaarList', true)) {
       var info = getValue('BazaarList', true);
@@ -55,12 +55,13 @@
   $('<button></button>').text('Generate List').click(function () {
     var info = getValue('BazaarList', true);
     if (!info) return;
+    console.log(info);
     var _html = '';
     var itemPane;
     var amount;
     var i;
     for (i in info) {
-      itemPane = $('#' + i + 'item_pane');
+      itemPane = $('#item_pane div[onclick*="' + i + '"]');
       if (itemPane.length !== 0) {
         amount = parseInt(info[i].amount) - parseInt(itemPane.parent().next().text());
         if (amount < 0) continue;
@@ -73,7 +74,7 @@
     var OpenWindow = unsafeWindow.open('', 'newwin', 'height=250,width=250,toolbar=no,menubar=no');
     OpenWindow.document.write(_html);
     OpenWindow.document.close();
-  }).appendTo('.clb');
+  }).appendTo('#navbar');
   function setValue(item, value) {
     localStorage[item] = (typeof value === 'string') ? value : JSON.stringify(value);
   }
