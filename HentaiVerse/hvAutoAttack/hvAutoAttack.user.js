@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.79
+// @version      2.79a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -1101,16 +1101,16 @@ function reloader() {
       g('dateNow', dateNow);
       if (g('option').delayAlert) clearTimeout(delayAlert);
       if (g('option').delayReload) clearTimeout(delayReload);
+      var monsterDead = gE('img[src*="nbardead"]', 'all').length;
+      g('monsterAlive', g('monsterAll') - monsterDead);
+      var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
+      g('bossAlive', g('bossAll') - bossDead);
       if (gE('#btcp')) {
         if (g('option').dropMonitor) dropMonitor(gE('#textlog>tbody>tr>td', 'all'));
-        var monsterDead = gE('img[src*="nbardead"]', 'all').length;
-        g('monsterAlive', g('monsterAll') - monsterDead);
         if (g('monsterAlive') > 0) { //Defeat
           setAlarm('Defeat');
           delValue(2);
         } else if (g('roundNow') !== g('roundAll')) { //Next Round
-          var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
-          g('bossAlive', g('bossAll') - bossDead);
           gE('#pane_completion').removeChild(gE('#btcp'));
           post(location.href, '', function (event) {
             var data = event.target.response;
