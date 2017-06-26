@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.80
+// @version      2.80a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -1108,7 +1108,7 @@ function main() { //主程序
   g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
   g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100);
   g('sp', gE('#vbs>div>img').offsetWidth / 210 * 100);
-  g('oc', gE('#voc>div') ? gE('#voc>div').offsetWidth / 13 : 0);
+  g('oc', gE('#vcp>div') ? gE('#voc>div').offsetWidth / 13 : 0);
   battleInfo(); //战斗战况
   countMonsterHP(); //统计敌人血量
   if (gE('#ikey_p')) useGem(); //自动使用宝石
@@ -1479,6 +1479,11 @@ function useGem() { //自动使用宝石
   }
 };
 function deadSoon() { //自动回血回魔
+  if (g('option').lastElixir && checkCondition(g('option').lastElixirCondition) && gE('.bti3>div[onmouseover*="11501"]')) {
+    gE('.bti3>div[onmouseover*="11501"]').click();
+    g('end', true);
+    return;
+  }
   if (g('mp') < g('option').mp2 && gE('.bti3>div[onmouseover*="11295"]')) { //自动回魔
     gE('.bti3>div[onmouseover*="11295"]').click();
     g('end', true);
@@ -1516,11 +1521,6 @@ function deadSoon() { //自动回血回魔
   }
   if (g('hp') <= g('option').hp3 && gE('.bti3>div[onmouseover*="11199"]')) {
     gE('.bti3>div[onmouseover*="11199"]').click();
-    g('end', true);
-    return;
-  }
-  if (g('option').lastElixir && checkCondition(g('option').lastElixirCondition) && gE('.bti3>div[onmouseover*="11501"]')) {
-    gE('.bti3>div[onmouseover*="11501"]').click();
     g('end', true);
     return;
   }
