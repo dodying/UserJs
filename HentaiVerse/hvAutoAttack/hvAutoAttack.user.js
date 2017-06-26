@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.80a
+// @version      2.80b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -1108,7 +1108,7 @@ function main() { //主程序
   g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
   g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100);
   g('sp', gE('#vbs>div>img').offsetWidth / 210 * 100);
-  g('oc', gE('#vcp>div') ? gE('#voc>div').offsetWidth / 13 : 0);
+  g('oc', gE('#vcp>div>div') ? gE('#vcp>div>div', 'all').length - gE('#vcp>div>div#vcr', 'all').length : 0);
   battleInfo(); //战斗战况
   countMonsterHP(); //统计敌人血量
   if (gE('#ikey_p')) useGem(); //自动使用宝石
@@ -2132,7 +2132,7 @@ function recordUsage(parm) {
       }
     } else if (text.match(/for \d+ .* damage/)) {
       reg = text.match(/for (\d+) .* damage/);
-      magic = text.match(/^Your spike shield/) ? 'spike shield' : (text.match(/^(.*) [a-z]+s [\w+ \-]+ for/)?text.match(/^(.*) [a-z]+s [\w+ \-]+ for/)[1]:text.match(/^(.*) [a-z]+s for/)[1]);
+      magic = text.match(/^Your spike shield/) ? 'spike shield' : (text.match(/^(.*) [a-z]+s [\w+ \-]+ for/) ? text.match(/^(.*) [a-z]+s [\w+ \-]+ for/) [1] : text.match(/^(.*) [a-z]+s for/) [1]);
       point = parseInt(reg[1]);
       stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point;
     } else if (text.match(/You (evade|parry) the attack|misses the attack against you/)) {
@@ -2156,7 +2156,7 @@ function recordUsage(parm) {
       point = parseInt(reg[3]);
       magic = reg[1].replace('Your ', '') + '_' + reg[4];
       stats.hurt[magic] = (magic in stats.hurt) ? stats.hurt[magic] + point : point;
-    }    /*
+    } /*
     else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious)/) || text.match(/(Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat )/) || text.match(/ drop(ped|s) /)) {
     } else {
       log=true;
@@ -2165,7 +2165,7 @@ function recordUsage(parm) {
     }
     */
 
-  }  /*
+  } /*
   if (log) {
     console.table(stats);
     pauseChange();
