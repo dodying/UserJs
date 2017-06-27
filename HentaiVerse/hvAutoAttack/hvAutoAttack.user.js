@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.81a
+// @version      2.81b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -2134,7 +2134,7 @@ function recordUsage(parm) {
       }
     } else if (text.match(/for \d+ .* damage/)) {
       reg = text.match(/for (\d+) .* damage/);
-      magic = text.match(/^Your spike shield/) ? 'spike shield' : (text.match(/^(.*) [a-z]+s [\w+ \-]+ for/) ? text.match(/^(.*) [a-z]+s [\w+ \-]+ for/) [1] : text.match(/^(.*) [a-z]+s for/) [1]);
+      magic = text.match(/^Your spike shield/) ? 'spike shield' : (text.match(/^You counter/) ? 'counter' : (text.match(/^(.*) [a-z]+s [\w+ \-]+ for/) ? text.match(/^(.*) [a-z]+s [\w+ \-]+ for/) [1] : text.match(/^(.*) [a-z]+s for/) [1]));
       point = parseInt(reg[1]);
       stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point;
     } else if (text.match(/You (evade|parry) the attack|misses the attack against you/)) {
