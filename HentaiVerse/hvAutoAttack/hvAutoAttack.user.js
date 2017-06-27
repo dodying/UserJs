@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.81
+// @version      2.81a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -367,6 +367,7 @@ function optionBox() { //配置界面
         html += '<tr class="hvAATh"><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td>';
         html += (i === 'items' || i === 'magic' || i === 'self') ? '<td><l0>次数</l0><l1>次數</l1><l2>Frequency</l2></td>' : '<td><l0>总量</l0><l1>總量</l1><l2>Amount</l2></td>';
         html += '</tr>';
+        stats[i] = objSort(stats[i]);
         for (var j in stats[i]) {
           html += '<tr><td>' + j + '</td><td>' + stats[i][j] + '</td></tr>';
         }
@@ -992,7 +993,7 @@ function riddleAlert() { //答题警报
     answerCount.lastAnswer = answer;
     setValue('answerCount', answerCount);
     gE('#riddleanswer').value = answer;
-    gE('#riddleform').submit();
+    gE('#riddleanswer+img').click();
   }
 };
 //战斗外//
