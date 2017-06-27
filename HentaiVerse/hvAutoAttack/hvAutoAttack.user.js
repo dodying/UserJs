@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.80b
+// @version      2.81
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -33,23 +33,17 @@
     openUrl(href);
     return;
   }
-  if (!getValue('host')) {
-    var host = prompt('From hvAutoAttack\n请输入你常用的hentaiver网站的域名，如\nPlease put in the hentaiverse domain you usually use, for example\n\nhttp://hentaiverse.org\nhttps://hentaiverse.org\nhttp://alt.hentaiverse.org', location.origin);
-    setValue('host', host);
-    goto();
-  } else if (getValue('host') !== location.origin) {
-    openUrl(getValue('host') + '/' + location.search);
-  }
   if (gE('img[src*="derpy.gif"]')) {
     setTimeout(goto, 5 * 60 * 1000);
     return;
   }
-  g('version', '2.80');
+  g('version', '2.81');
   if (getValue('option')) {
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
     addStyle(g('lang'));
     if (g('option').version !== g('version')) {
+      _alert(0, '我很抱歉\n我又将OC的取值改回了以前的方式\n即OC最大为250\n请大家自行修改相关设置', '我很抱歉\n我又將OC的取值改回了以前的方式\n即OC最大為250\n請大家自行修改相關設置', 'I am so sorry.\nI have changed the value about OC to former style\nIt means that the max value of OC is 250,not 10\nPlease change the setting about OC.');
       gE('.hvAAButton').click();
       if (_alert(1, 'hvAutoAttack版本更新，请重新设置\n强烈推荐【重置设置】后再设置。\n是否查看更新说明？', 'hvAutoAttack版本更新，請重新設置\n強烈推薦【重置設置】後再設置。\n是否查看更新說明？', 'hvAutoAttack version update, please reset\nIt\'s recommended to reset all configuration.\nDo you want to read the changelog?')) openUrl('https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js', true);
       gE('.hvAAReset').focus();
@@ -1105,10 +1099,17 @@ function main() { //主程序
     fixMonsterStatus();
   }
   g('turn', g('turn') + 1);
-  g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
-  g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100);
-  g('sp', gE('#vbs>div>img').offsetWidth / 210 * 100);
-  g('oc', gE('#vcp>div>div') ? gE('#vcp>div>div', 'all').length - gE('#vcp>div>div#vcr', 'all').length : 0);
+  if (gE('#vbh')) {
+    g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
+    g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100);
+    g('sp', gE('#vbs>div>img').offsetWidth / 210 * 100);
+    g('oc', gE('#vcp>div>div') ? (gE('#vcp>div>div', 'all').length - gE('#vcp>div>div#vcr', 'all').length) * 25 : 0);
+  } else {
+    g('hp', gE('#dvbh>div>img').offsetWidth / 418 * 100);
+    g('mp', gE('#dvbm>div>img').offsetWidth / 418 * 100);
+    g('sp', gE('#dvbs>div>img').offsetWidth / 418 * 100);
+    g('oc', gE('#dvrc').textContent);
+  }
   battleInfo(); //战斗战况
   countMonsterHP(); //统计敌人血量
   if (gE('#ikey_p')) useGem(); //自动使用宝石
