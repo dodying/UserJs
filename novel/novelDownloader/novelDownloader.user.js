@@ -16,6 +16,7 @@
 // @grant       GM_listValues
 // @grant       GM_deleteValue
 // @grant       GM_setClipboard
+// @grant       GM_registerMenuCommand
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
@@ -195,6 +196,10 @@ var debug = false;
 var indexRule = new Object();
 var chapterRule = new Object();
 var reRule = new Object();
+GM_registerMenuCommand('download novel', () => {
+  init();
+  jQuery('.nD-Main').toggle();
+}, null);
 jQuery(window).on('keydown', function (e) {
   if (e.shiftKey && e.keyCode === 68) { //Shift+D
     jQuery(window).off('keydown');
@@ -2274,13 +2279,13 @@ function base64_raw() { //base64,来自http://blog.csdn.net/gumanren/article/det
     while (i < len) {
       do {
         c1 = base64DecodeChars[str.charCodeAt(i++) & 255];
-      } 
+      }
       while (i < len && c1 == - 1);
       if (c1 == - 1)
       break;
       do {
         c2 = base64DecodeChars[str.charCodeAt(i++) & 255];
-      } 
+      }
       while (i < len && c2 == - 1);
       if (c2 == - 1)
       break;
@@ -2290,7 +2295,7 @@ function base64_raw() { //base64,来自http://blog.csdn.net/gumanren/article/det
         if (c3 == 61)
         return out;
         c3 = base64DecodeChars[c3];
-      } 
+      }
       while (i < len && c3 == - 1);
       if (c3 == - 1)
       break;
@@ -2300,7 +2305,7 @@ function base64_raw() { //base64,来自http://blog.csdn.net/gumanren/article/det
         if (c4 == 61)
         return out;
         c4 = base64DecodeChars[c4];
-      } 
+      }
       while (i < len && c4 == - 1);
       if (c4 == - 1)
       break;
