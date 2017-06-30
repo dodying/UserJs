@@ -2,20 +2,11 @@
 
 ##### Index
 
-1. [兼容性(Compatible)](#兼容性)
-2. [截图(Screenshots)](#截图)
-3. [攻击规则-示例(Attack Rule Example)](#攻击规则-示例)
-4. [关于字体的说明(About Font)](#关于字体的说明)
-5. 必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件)
-6. [更新历史(ChangeLog)](#更新历史)
-
-### 兼容性
-
-##### Compatible
-1. Firefox + Greasemonkey
-2. Chrome/Chromium + Tampermonkey
-3. Android + Firefox + Usi
-4. iPhone/iPad (Jailbroken) + UserscriptLoader (Compatible with iOS 5, 6, 7, 8, 9, 10)
+1. [截图(Screenshots)](#截图)
+2. [攻击规则-示例(Attack Rule Example)](#攻击规则-示例)
+3. [关于字体的说明(About Font)](#关于字体的说明)
+4. 必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件)
+3. [更新历史(ChangeLog)](#更新历史)
 
 ### 截图
 
