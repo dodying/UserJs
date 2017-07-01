@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.82
+// @version      2.82a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -69,8 +69,9 @@
       } else {
         riddleAlert(); //答题警报
       }
+    } else {
+      riddleAlert(); //答题警报
     }
-    riddleAlert(); //答题警报
   } else if (!gE('#navbar')) { //战斗中
     if (g('option').riddlePopup && window.opener) {
       window.opener.document.location = location.href;
@@ -1239,10 +1240,11 @@ function reloader() {
             if (g('option').riddlePopup) {
               window.open(location.href, '', 'resizable,scrollbars');
               return;
+            } else {
+              goto('riddleAlert', true);
+              if (g('option').riddleAlert && /Firefox/g.test(navigator.userAgent)) alert('RIDDLE');
+              return;
             }
-            goto('riddleAlert', true);
-            if (g('option').riddleAlert && /Firefox/g.test(navigator.userAgent)) alert('RIDDLE');
-            return;
           }
           gE('#battle_main').replaceChild(gE('#battle_right', data), gE('#battle_right'));
           gE('#battle_main').replaceChild(gE('#battle_left', data), gE('#battle_left'));
@@ -2169,7 +2171,7 @@ function recordUsage(parm) {
     stats.items[parm.item] = (parm.item in stats.items) ? stats.items[parm.item] + 1 : 1;
   } else {
     stats.self[parm.mode] = (parm.mode in stats.self) ? stats.self[parm.mode] + 1 : 1;
-  }  //var log=false;
+  } //var log=false;
 
   for (var i = 0; i < parm.log.length - parm.before; i++) {
     text = parm.log[i].textContent;
