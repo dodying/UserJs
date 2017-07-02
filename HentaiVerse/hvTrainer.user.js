@@ -7,13 +7,13 @@
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include     http*://hentaiverse.org/*
 // @include     http*://alt.hentaiverse.org/*
-// @version     1.01c
+// @version     1.01d
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
 (function () {
   if (!$('#navbar')) return;
-  var trainItem = 'Scavenger';
+  var trainItem = '';
   var dateObj = new Date();
   var countdownBox = document.createElement('div');
   countdownBox.className = 'trainCountdown';
@@ -21,7 +21,7 @@
   $('body').appendChild(countdownBox);
   if (!$('#progress_counter_1')) { //不位于训练界面或训练完成
     var trainTimeEnd = localStorage.trainTimeEnd || '';
-    if (trainTimeEnd === '' || trainTimeEnd <= dateObj.getTime()) { //训练完成
+    if (trainTimeEnd === '' || trainTimeEnd <= dateObj.getTime() || $('#train_table')) { //训练完成
       countdownBox.innerHTML = '<a href="/?s=Character&ss=tr">Train Completed</a>';
       document.title = 'Train Completed';
       if (trainItem) autoTrain(trainItem); //自动训练
