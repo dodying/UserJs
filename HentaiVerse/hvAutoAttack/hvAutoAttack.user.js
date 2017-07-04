@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/UserJs
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.82a
+// @version      2.82b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -64,7 +64,7 @@
   if (gE('#riddlecounter')) { //需要答题
     if (g('option').riddlePopup) {
       if (!window.opener) {
-        window.open(location.href, '', 'resizable,scrollbars');
+        window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
         return;
       } else {
         riddleAlert(); //答题警报
@@ -1016,7 +1016,7 @@ function riddleAlert() { //答题警报
         time--;
         g('time', time);
       }
-      document.title = time;
+      document.title = 'RIDDLE'; //time
       if (time <= g('option').riddleAnswerTime) {
         if (!gE('#riddleanswer').value) gE('#riddleanswer').value = answers[parseInt(Math.random() * 3)];
         gE('#riddleform').submit();
@@ -1238,7 +1238,7 @@ function reloader() {
           var data = event.target.response;
           if (gE('#riddlecounter', data)) {
             if (g('option').riddlePopup) {
-              window.open(location.href, '', 'resizable,scrollbars');
+              window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
               return;
             } else {
               goto('riddleAlert', true);
@@ -2080,6 +2080,7 @@ function dropMonitor(battleLog) { //掉落监测
   };
   var item;
   var name;
+  var amount;
   var regexp;
   for (var i = 0; ; i++) {
     if (/^You gain \d+ (EXP|Credit)/.test(battleLog[i].textContent)) {
@@ -2107,8 +2108,14 @@ function dropMonitor(battleLog) { //掉落监测
         }
       } else if (item.style.color === 'rgb(186, 5, 180)') {
         regexp = name.match(/^(\d+)x (Crystal of \w+)$/);
-        name = regexp[2];
-        drop[name] = (name in drop) ? drop[name] + regexp[1] * 1 : regexp[1] * 1;
+        if (regexp) {
+          name = regexp[2];
+          amount = regexp[1] * 1;
+        } else {
+          name = name.match(/^(Crystal of \w+)$/);
+          amount = 1;
+        }
+        drop[name] = (name in drop) ? drop[name] + amount : amount;
       } else if (item.style.color === 'rgb(168, 144, 0)') {
         drop['#Credit'] += name.match(/\d+/) [0] * 1;
       } else {
