@@ -22,7 +22,7 @@
         document.querySelector('#riddleanswer+img').addEventListener('click', function () {
           saveAs(new Blob([e.response], {
             type: 'image/jpeg'
-          }), document.getElementById('riddleanswer').value + '.jpg');
+          }), new Date().getTime() + '.jpg');
         });
       }
     });
