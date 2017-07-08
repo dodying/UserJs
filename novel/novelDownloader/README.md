@@ -4,11 +4,13 @@
 
 #### 在目录页或是章节页使用。
 
-#### 按```Shift+D```来显示下载选项。
+#### 按```Shift+D```或```download novel```来显示下载选项。
 
 #### 如果某章节长时间无法下载，请刷新重试。<s>浏览器会从缓存中提取数据。</s>
 
 #### 失败重试、超时重试只对```非特殊站点```有效
+
+#### vip下载只对起点有效
 
 ### 意见、建议、Bug
 
@@ -22,12 +24,6 @@
 ![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Log.png)
 ![搜索引擎提示](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Search.png)
 ![Google自定义搜索](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23CSE.png)
-
-### helpWanted 作者需要帮助
-
-iOS：生成的Epub格式电子书在[iBook](https://itunes.apple.com/cn/app/ibooks/id364709193)中只显示每章节**前两页**，在[开卷有益](http://www.kingreader.com/)中显示**【不支持的epub格式】**，在[Anyview](http://www.anyview.net/)中可以正常阅读。
-
-Android：未测试...
 
 ### 自定义站点规则说明
 
@@ -87,6 +83,12 @@ Android：未测试...
 ### 更新历史
 
 #### Latest
+
+##### 1.41
+删除`更新站点规则`
+
+##### 1.40
+支持下载图片（测试网站：轻小说文库）
 
 ##### 1.38.114+332
 
