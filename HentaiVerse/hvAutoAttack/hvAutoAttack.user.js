@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.83a
+// @version      2.83b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -372,6 +372,8 @@ function optionBox() { //配置界面
         <div class="customize" name="turnOnSSCondition"><l0>条件</l0><l1>條件</l1><l2>Conditions</l2>: <br></div></div>\
       <div><input id="turnOffSS" type="checkbox"><label for="turnOffSS"><b><l0>关闭</l0><l1>關閉</l1><l2>Turn off </l2>Spirit Stance</b></label>: \
         <div class="customize" name="turnOffSSCondition"><l0>条件</l0><l1>條件</l1><l2>Conditions</l2>: <br></div></div>\
+      <div><input id="defend" type="checkbox"><label for="defend">Defend</label>: \
+        <div class="customize" name="defendCondition"><l0>条件</l0><l1>條件</l1><l2>Conditions</l2>: <br></div></div>\
       <div><l2>If the page </l2><b><l0>页面停留</l0><l1>頁面停留</l1><l2>stays idle</l2></b><l2> for </l2>: \
         <input id="delayAlert" type="checkbox"><label for="delayAlert"><input class="hvAANumber" name="delayAlertTime" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2></label>; \
         <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label></div>\
@@ -1022,12 +1024,17 @@ function setAlarm(e) { //发出警报
 }
 
 function setAudioAlarm(e) { //发出音频警报
-  var fileType = '.ogg'; //var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
-  var audio = gE('body').appendChild(cE('audio'));
-  audio.id = 'hvAAAlert-' + e;
-  audio.src = (g('option').audio && g('option').audio[e]) ? g('option').audio[e] : 'https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/' + e + fileType;
-  audio.controls = true;
-  audio.loop = (e === 'Riddle') ? true : false;
+  var audio;
+  if (gE('#hvAAAlert-' + e)){
+    audio = gE('#hvAAAlert-' + e);
+  } else {
+    audio = gE('body').appendChild(cE('audio'));
+    audio.id = 'hvAAAlert-' + e;
+    var fileType = '.ogg'; //var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
+    audio.src = (g('option').audio && g('option').audio[e]) ? g('option').audio[e] : 'https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/' + e + fileType;
+    audio.controls = true;
+    audio.loop = (e === 'Riddle') ? true : false;
+  }
   audio.play();
 
   function pauseAudio(e) {
@@ -1408,6 +1415,10 @@ function main() { //主程序
   if (g('end')) return;
   if (g('option').item && g('option').itemOrderValue) deadSoon(); //自动回血回魔
   if (g('end')) return;
+  if (g('option').defend && checkCondition(g('option').defendCondition)) {
+    gE('#ckey_defend').click();
+    return;
+  }
   if (g('option').scrollSwitch && g('option').scroll && checkCondition(g('option').scrollCondition) && g('option').scrollRoundType && g('option').scrollRoundType[g('roundType')]) useScroll(); //自动使用卷轴
   if (g('end')) return;
   if (g('option').channelSkillSwitch && g('option').channelSkill && gE('#pane_effects>img[src*="channeling"]')) useChannelSkill(); //自动施法Channel技能
@@ -1782,7 +1793,7 @@ function deadSoon() { //自动回血回魔
   var name = g('option').itemOrderName.split(',');
   var order = g('option').itemOrderValue.split(',');
   for (var i = 0; i < name.length; i++) {
-    if (g('option').item[name[i]] && checkCondition(g('option')['item_' + name[i] + 'Condition']) && isOn(order[i])) {
+    if (g('option').item[name[i]] && checkCondition(g('option')['item' + name[i] + 'Condition']) && isOn(order[i])) {
       isOn(order[i]).click();
       g('end', true);
       return;
@@ -2390,8 +2401,8 @@ function recordUsage(parm) {
     stats.items[parm.item] = (parm.item in stats.items) ? stats.items[parm.item] + 1 : 1;
   } else {
     stats.self[parm.mode] = (parm.mode in stats.self) ? stats.self[parm.mode] + 1 : 1;
-  } //var log=false;
-
+  }
+  //var log = false;
   for (var i = 0; i < parm.log.length - parm.before; i++) {
     text = parm.log[i].textContent;
     console.log(text);
@@ -2417,9 +2428,9 @@ function recordUsage(parm) {
       magic = text.match(/^Your spike shield/) ? 'spike shield' : (text.match(/^You/) ? text.match(/^You (\w+)/)[1] : (text.match(/^(.*) [a-z]+s [\w+ \-]+ for/) ? text.match(/^(.*) [a-z]+s [\w+ \-]+ for/)[1] : text.match(/^(.*) [a-z]+s for/)[1]));
       point = reg[1] * 1;
       stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point;
-    } else if (text.match(/You (evade|parry) the attack|misses the attack against you/)) {
+    } else if (text.match(/You (evade|parry|block) the attack|misses the attack against you|(casts|uses) .* misses the attack/)) {
       stats.self.evade++;
-    } else if (text.match(/(resists your spell|Your spell is absorbed|(evades|parries) your attack)/)) {
+    } else if (text.match(/(resists your spell|Your spell is absorbed|(evades|parries) your attack)|Your attack misses its mark/)) {
       stats.self.miss++;
     } else if (text.match(/^Recovered \d+ points of/) || text.match(/You are healed for \d+ Health Points/)) {
       magic = parm.magic || parm.item;
@@ -2443,23 +2454,15 @@ function recordUsage(parm) {
       magic = reg[2];
       point = reg[1] * 1;
       stats.proficiency[magic] = (magic in stats.proficiency) ? stats.proficiency[magic] + point : point;
+    }/* else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious|have reached Level)/) || text.match(/(Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat )/) || text.match(/ drop(ped|s) /)||text.match(/defeated/)) {} else {
+      log = true;
+      setAudioAlarm('Defeat');
+      console.log(text);
     }
-    /*
-       else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious)/) || text.match(/(Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat )/) || text.match(/ drop(ped|s) /)) {
-       } else {
-         log=true;
-         setAudioAlarm('Error');
-         console.log(text);
-       }
-       */
-
   }
-  /*
-   if (log) {
-     console.table(stats);
-     pauseChange();
-   }
-   */
-
+  if (log) {
+    console.table(stats);
+    pauseChange();
+  }*/
   setValue('stats', stats);
 }
