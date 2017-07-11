@@ -4,15 +4,15 @@
 2. [攻击规则-示例(Attack Rule Example)](#攻击规则-示例-attack-rule-example)
 3. [关于字体的说明(About Font)](#关于字体的说明-about-font)
 
-  __ [字体方案](#字体方案仅供参考-font-preference-for-reference-only)
+  ______ [字体方案](#字体方案仅供参考-font-preference-for-reference-only)
 
 4. 必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件-customize-condition)
 
-  __ [示例](#示例-example)
+  ______ [示例](#示例-example)
 
 5. [更新历史(ChangeLog)](#更新历史-changelog)
 
-  __ [最新](#最新-latest)
+  ______ [最新](#最新-latest)
 
 ***
 
@@ -24,11 +24,12 @@
 
 ### 攻击规则-示例 Attack Rule Example
 
-| Enemy id | now hp | init PW | Imperiled (-2) | Drained (-1) | Confused (+2) | PW |
-| ***-- |:***:| ***-:|******---:|******-:|******--:|---:|
-| 1        |  20K   | 10      | √              |              | √             | 10 |
-| 2        |  30K   | 15      |                | √            |               | 14 |
-| 3        |  40K   | 20      | √              |              |               | 18 |
+<table><tbody>
+<tr><td>Enemy id</td><td>now hp</td><td>init PW</td><td>Imperiled (-2)</td><td>Drained (-1)</td><td>Confused (+2)</td><td>PW</td></tr>
+<tr><td>1</td><td>20K</td><td>10</td><td>√</td><td></td><td>√</td><td>10</td></tr>
+<tr><td>2</td><td>30K</td><td>15</td><td></td><td>√</td><td></td><td>14</td></tr>
+<tr><td>3</td><td>40K</td><td>20</td><td>√</td><td></td><td></td><td>18</td></tr>
+</tbody></table>
 
 **注意**: 脚本优先攻击最小PW值的敌人。
 
