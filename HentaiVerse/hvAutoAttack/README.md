@@ -1,31 +1,32 @@
-### 目录
+### 目录 Index
 
-##### Index
+1. [截图(Screenshots)](#截图-screenshots)
+2. [攻击规则-示例(Attack Rule Example)](#攻击规则-示例-attack-rule-example)
+3. [关于字体的说明(About Font)](#关于字体的说明-about-font)
 
-1. [截图(Screenshots)](#截图)
-2. [攻击规则-示例(Attack Rule Example)](#攻击规则-示例)
-3. [关于字体的说明(About Font)](#关于字体的说明)
-4. 必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件)
-3. [更新历史(ChangeLog)](#更新历史)
+  __ [字体方案](#字体方案-font-preference-for-reference-only-)
+4. 必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件-customize-condition)
 
-### 截图
+  __ [示例](#示例-example)
+5. [更新历史(ChangeLog)](#更新历史-changelog)
 
-##### Screenshots
+  __ [最新](#最新-latest)
 
-###### 自定义设置
+***
+
+### 截图 Screenshots
 
 ![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
-### 攻击规则-示例
+***
 
-##### Attack Rule Example
+### 攻击规则-示例 Attack Rule Example
 
-<table><tbody>
-<tr><td>Enemy id</td><td>now hp</td><td>init PW</td><td>Imperil Effective<br>(-2)</td><td>Drain Effective<br>(-1)</td><td>Confuse Effective<br>(+2)</td><td>PW</td></tr>
-<tr><td>1</td><td>20K</td><td>10</td><td>√</td><td></td><td>√</td><td>10</td></tr>
-<tr><td>2</td><td>30K</td><td>15</td><td></td><td>√</td><td></td><td>14</td></tr>
-<tr><td>3</td><td>40K</td><td>20</td><td>√</td><td></td><td></td><td>18</td></tr>
-</tbody></table>
+| Enemy id | now hp | init PW | Imperiled (-2) | Drained (-1) | Confused (+2) | PW |
+| ***-- |:***:| ***-:|******---:|******-:|******--:|---:|
+| 1        |  20K   | 10      | √              |              | √             | 10 |
+| 2        |  30K   | 15      |                | √            |               | 14 |
+| 3        |  40K   | 20      | √              |              |               | 18 |
 
 **注意**: 脚本优先攻击最小PW值的敌人。
 
@@ -35,17 +36,15 @@
 
 In this example, the script will attack enemy 1 next.
 
-### 关于字体的说明
+***
 
-##### About Font
+### 关于字体的说明 About Font
 
 脚本通过文字获取信息，如果尚未修改字体，可能使某些信息无法获取，使一些错误发生。
 
 Scripts get information through text, and if you have not yet modified the font, some information may not be available, causing some errors to occur.
 
-#### 字体方案（仅供参考）
-
-###### Font Preference (for reference only)
+#### 字体方案（仅供参考） Font Preference (for reference only)
 
 ![字体方案（仅供参考）](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Font.gif)
 
@@ -55,17 +54,17 @@ Scripts get information through text, and if you have not yet modified the font,
 4. font-style(字形，normal, italic, oblique): normal
 5. vertical adjust(竖行间距，数字，范围-8~8): -5
 
-### 自定义判断条件
+***
 
-##### Customize Condition
+### 自定义判断条件 Customize Condition
 
 每一个拥有红色虚线边框的区域，都可以设置自定义判断条件。
 
 Each area with a red dotted border can be set to a customize condition.
 
-###### 注意：如果这些区域留空（一个条件也没设置），那么就相当于真。
+** 注意：如果这些区域留空（一个条件也没设置），那么就相当于真。 **
 
-###### If these areas are left blank (a condition is not set), then it's equivalent to true.
+** If these areas are left blank (a condition is not set), then it's equivalent to true. **
 
 当鼠标在这些区域内移动时，右上角会显示一个盒子（当鼠标不在这些区域内，盒子消失）
 
@@ -75,17 +74,15 @@ When the mouse moves in these areas, a box is displayed in the upper right corne
 
 Four drop down lists and one button are visible in the box
 
-##### 下拉列表1: 这个条件插入的位置（具体作用请看示例）
+** 下拉列表1: 这个条件插入的位置（具体作用请看示例） **
 
-##### Drop-down List 1: the location of this condition inserted (see the example for specific effects)
+** Drop-down List 1: the location of this condition inserted (see the example for specific effects)  **
 
-##### 下拉列表2/4: 比较值A/比较值B
+** 下拉列表2/4: 比较值A/比较值B **
 
-##### Drop-down List 2/4: comparison value A / comparison value B
+** Drop-down List 2/4: comparison value A / comparison value B **
 
-###### 比较值
-
-###### Comparison Value
+** 比较值 Comparison Value **
 
 1. `hp`/`mp`/`sp`: hp/mp/sp的**百分比 (percent)**
 2. `oc`: Overcharge, 250==>250%
@@ -93,20 +90,23 @@ Four drop down lists and one button are visible in the box
 4. `roundNow`/`roundAll`: 当前回合数/总回合数
 5. `roundType`: 战役模式 (`ar`: The Arena, `rb`: Ring of Blood, `gr`: GrindFest, `iw`: Item World, `ba`: Random Encounter)，由于是字符串之间的比较，所以请加上引号，如"ar"/'ar' (Because comparison between strings, please add quotation, such as `"ar"`/`'ar'`)
 6. `attackStatus`: 攻击模式 (`0`: Physical, `1`: Fire, `2`: Cold, `3`: Elec, `4`: Wind, `5`: Divine, `6`: Forbidden)
-7. `turn`: Turns
-8. 空白(blank): 自己输入 (the value you want to put in)
+7. `isCd`: 技能/物品是否cd，格式`_isCd_id`
 
-##### 下拉列表3: 暂时只支持比较运算符（`1`:大于, `2`:小于, `3`: 大于等于, `4`: 小于等于, `5`:等于, `6`:不等于）
+  __如Protection的id为411，则`_isCd_411,5,0`表示不可施放，`_isCd_411,5,1`表示可以施放
 
-##### Drop-down List 3: temporarily only support comparison operator (`1`: >, `2`: <, `3`: ≥, `4`: ≤, `5`: =, `6`: ≠)
+  __如ManaElixir的id为11295，则`_isCd_11295,5,0`表示不可使用，`_isCd_11295,5,1`表示可以使用
+8. `buffTurn`: 人物Buff剩余时间，格式`_buffTurn_img`<br>如Protection的img为protection，则`_buffTurn_protection,5,0`表示不存在Protection的buff，`_buffTurn_protection,3,10`表示Protection的buff至少剩余10回合
+9. 空白(blank): 自己输入 (the value you want to put in)
 
-##### ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
+** 下拉列表3: 只支持比较运算符（`1`:大于, `2`:小于, `3`: 大于等于, `4`: 小于等于, `5`:等于, `6`:不等于） **
 
-##### Button ADD: Generates an input box with a value of `A,Comparison-Operator,B`
+** Drop-down List 3: only support comparison operator (`1`: >, `2`: <, `3`: ≥, `4`: ≤, `5`: =, `6`: ≠) **
 
-#### 示例
+** ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框 **
 
-#### example
+** Button ADD: Generates an input box with a value of `A,Comparison-Operator,B` **
+
+#### 示例 example
 
 ![示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
 
@@ -130,11 +130,11 @@ The following is a schematic diagram of the circuit diagram
 
 ![电路图示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
 
-### 更新历史
+***
 
-##### ChangeLog
+### 更新历史 ChangeLog
 
-##### 最新-Latest
+##### 最新 Latest
 1. 详见 [History for hvAutoAttack - github](https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js)
 
 ##### ...
