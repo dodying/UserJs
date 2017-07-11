@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.83
+// @version      2.83a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -43,8 +43,6 @@
     g('lang', g('option').lang || '0');
     addStyle(g('lang'));
     if (g('option').version !== g('version')) {
-      delValue('stats');
-      delValue('host');
       gE('.hvAAButton').click();
       if (_alert(1, 'hvAutoAttack版本更新，请重新设置\n强烈推荐【重置设置】后再设置。\n是否查看更新说明？', 'hvAutoAttack版本更新，請重新設置\n強烈推薦【重置設置】後再設置。\n是否查看更新說明？', 'hvAutoAttack version update, please reset\nIt\'s recommended to reset all configuration.\nDo you want to read the changelog?')) openUrl('https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js', true);
       gE('.hvAAReset').focus();
@@ -351,6 +349,10 @@ function optionBox() { //配置界面
       <span name="About"><l0>关于本脚本</l0><l1>關於本腳本</l1><l2>About This</l2></span>\
       <span name="Feedback"><l01>反馈</l01><l2>Feedback</l2></span></div>',
     '<div class="hvAATab" id="hvAATab-Main">\
+      <div class="hvAACenter">\
+        Gem: Health.<input class="hvAANumber" name="hp1" placeholder="50" type="text">%\
+        Mana.<input class="hvAANumber" name="mp1" placeholder="70" type="text">%%\
+        Spirt.<input class="hvAANumber" name="sp1" placeholder="75" type="text">%</div>\
       <div class="hvAACenter" id="attackStatus" style="color:red;"><b>*<l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2></b>:\
         <select class="hvAANumber" name="attackStatus"><option value="-1"></option><option value="0">物理 / Physical</option><option value="1">火 / Fire</option><option value="2">冰 / Cold</option><option value="3">雷 / Elec</option><option value="4">风 / Wind</option><option value="5">圣 / Divine</option><option value="6">暗 / Forbidden</option></select></div>\
       <div><b><l0>暂停相关</l0><l1>暫停相關</l1><l2>Pause with</l2></b>: \
@@ -375,7 +377,7 @@ function optionBox() { //配置界面
         <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label></div>\
       <div><l0>当<b>小马答题</b>时间</l0><l1>當<b>小馬答題</b>時間</l1><l2>If <b>RIDDLE</b> ETR</l2><l0></l0><l1></l1><l2></l2> ≤ <input class="hvAANumber" name="riddleAnswerTime" placeholder="3" type="text"><l0>秒，如果输入框为空则随机生成答案并提交</l0><l1>秒，如果輸入框為空則隨機生成答案並提交</l1><l2>s and no answer has been chosen yet, a random answer will be generated and submitted</l2></div>\
       <div><l0>当<b>小马答题</b>时</l0><l1>當<b>小馬答題</b>時</l1><l2>If <b>RIDDLE</b></l2>: \
-        1. <input id="riddlePopup" type="checkbox"><label for="riddlePopup"><l0>弹窗答题</l0><l1>弹窗答题</l1><l2>POPUP a window to answer</l2></label>; \
+        1. <input id="riddlePopup" type="checkbox"><label for="riddlePopup"><l0>弹窗答题</l0><l1>弹窗答题</l1><l2>POPUP a window to answer</l2></label>; <button class="testPopup"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button>\
         2. <input id="riddleAlert" type="checkbox"><label for="riddleAlert"><l0>弹出警告框</l0><l1>彈出警告框</l1><l2>ALERT</l2><button class="testAlert"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></label><br>\
         <l0>注意: 只有一个功能会生效</l0><l1>注意: 只有一個功能會生效</l1><l2>Note: Only one feature is avilable</l2></div>\
       <div><b>Stamina</b>: <l0>当损失</l0><l1>當損失</l1><l2>If it lost </l2>Stamina ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text">: \
@@ -534,9 +536,9 @@ function optionBox() { //配置界面
       <span class="hvAATitle"><l01>反馈</l01><l2>Feedback</l2></span>\
       <div><l0>链接</l0><l1>鏈接</l1><l2>Links</l2>: <a class="joinQun" target="_blank" href="//shang.qq.com/wpa/qunwpa?idkey=4f789fd3518a9152c83a629cfc6b33f24be1567979f386ea72661ed917576715">1. Group for QQ</a><a href="https://greasyfork.org/forum/post/discussion?script=18482" target="_blank">2. GreasyFork</a><a href="https://github.com/dodying/UserJs/issues/new" target="_blank">3. GitHub</a><a href="mailto:dodying@foxmail.com">4. e-mail</a></div>\
       <div><span class="hvAATitle"><l0>反馈说明</l0><l1>反饋說明</l1><l2>Feedback Note</l2></span>: <br>\
-        <l0>如果你遇见了Bug，想帮助作者修复它<br>你应当提供以下多种资料: <br>1. 场景描述<br>2. 你的配置<br>3. 控制台日志 (按Ctrl+Shift+i打开开发者助手，再选择Console(控制台)面板)<br>4. 战斗日志  (如果是在战斗中)<hr>如果你有一些建议使这个脚本更加有用，那么: <br>1. 请尽量简述你的想法<br>2. 如果可以，请提供一些场景 (方便作者更好理解)</l0>\
-        <l1>如果你遇見了Bug，想幫助作者修復它<br>你應當提供以下多種資料: <br>1. 場景描述<br>2. 你的配置<br>3. 控制台日誌 (按Ctrl+Shift+i打開開發者助手，再選擇Console(控制台)面板)<br>4. 戰鬥日誌 (如果是在戰鬥中)<hr>如果你有一些建議使這個腳本更加有用，那麼: <br>1. 請盡量簡述你的想法<br>2.如果可以，請提供一些場景 (方便作者更好理解)</l1>\
-        <l2>If you encounter a bug and would like to help the author fix it<br>You should provide the following information: <br>1. the Situation<br>2. Your Configuration<br>3. Console Log (press Ctrl + Shift + i to open the Developer Assistant, And then select the Console panel)<br>4. Battle Log (if in combat)<hr>If you have some suggestions to make this script more useful, then: <br>1. Please briefly describe your thoughts<br>2. If you can, please provide some scenes (to facilitate the author to better understand)<br>PS. For English user, please express in basic English (Oh my poor English, thanks for Google Translate)</l2></div></div>',
+        <l0>如果你遇见了Bug，想帮助作者修复它<br>你应当提供以下多种资料: <br>1. 场景描述<br>2. 你的配置<br>3. 控制台日志 (按Ctrl+Shift+i打开开发者助手，再选择Console(控制台)面板)<br>4. 战斗日志  (如果是在战斗中)<br>如果是无法容忍甚至使脚本失效的Bug，请尝试安装旧版本<hr>如果你有一些建议使这个脚本更加有用，那么: <br>1. 请尽量简述你的想法<br>2. 如果可以，请提供一些场景 (方便作者更好理解)</l0>\
+        <l1>如果你遇見了Bug，想幫助作者修復它<br>你應當提供以下多種資料: <br>1. 場景描述<br>2. 你的配置<br>3. 控制台日誌 (按Ctrl+Shift+i打開開發者助手，再選擇Console(控制台)面板)<br>4. 戰鬥日誌 (如果是在戰鬥中)<br>如果是無法容忍甚至使腳本失效的Bug，請嘗試安裝舊版本<hr>如果你有一些建議使這個腳本更加有用，那麼: <br>1. 請盡量簡述你的想法<br>2.如果可以，請提供一些場景 (方便作者更好理解)</l1>\
+        <l2>If you encounter a bug and would like to help the author fix it<br>You should provide the following information: <br>1. the Situation<br>2. Your Configuration<br>3. Console Log (press Ctrl + Shift + i to open the Developer Assistant, And then select the Console panel)<br>4. Battle Log (if in combat)<br>If you are unable to tolerate this bug or even the bug made the script fail, try installing the old version<hr>If you have some suggestions to make this script more useful, then: <br>1. Please briefly describe your thoughts<br>2. If you can, please provide some scenes (to facilitate the author to better understand)<br>PS. For English user, please express in basic English (Oh my poor English, thanks for Google Translate)</l2></div></div>',
     '</div>',
     '<div class="hvAAButtonBox hvAACenter">\
       <button class="hvAAReset"><l0>重置设置</l0><l1>重置設置</l1><l2>Reset</l2></button><button class="hvAAApply"><l0>应用</l0><l1>應用</l1><l2>Apply</l2></button><button class="hvAACancel"><l01>取消</l01><l2>Cancel</l2></button></div>'
@@ -616,6 +618,12 @@ function optionBox() { //配置界面
   gE('.testNotification', optionBox).onclick = function() {
     _alert(0, '接下来开始预处理。\n如果询问是否允许，请选择允许', '接下來開始預處理。\n如果詢問是否允許，請選擇允許', 'Now, pretreat.\nPlease allow to receive notifications if you are asked for permission');
     setNotification('Test');
+  };
+  gE('.testPopup', optionBox).onclick = function() {
+    _alert(0, '接下来开始预处理。\n关闭本警告框之后，请切换到其他标签页，\n并在足够长的时间后再打开本标签页', '接下來開始預處理。\n關閉本警告框之後，請切換到其他標籤頁，\n並在足夠長的時間後再打開本標籤頁', 'Now, pretreat.\nAfter dismissing this alert, focus other tab,\nfocus this tab again after long time.');
+    setTimeout(function() {
+      window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
+    }, 3000);
   };
   gE('.testAlert', optionBox).onclick = function() {
     _alert(0, '接下来开始预处理。\n关闭本警告框之后，请切换到其他标签页，\n并在足够长的时间后再打开本标签页', '接下來開始預處理。\n關閉本警告框之後，請切換到其他標籤頁，\n並在足夠長的時間後再打開本標籤頁', 'Now, pretreat.\nAfter dismissing this alert, focus other tab,\nfocus this tab again after long time.');
@@ -862,7 +870,7 @@ function optionBox() { //配置界面
         }
       }
     }
-    inputs = gE('.hvAAQuickSite input', 'all', optionBox);
+    inputs = gE('.hvAAQuickSite input[type="text"]', 'all', optionBox);
     for (i = 0; 3 * i < inputs.length; i++) {
       if (i === 0 && inputs.length !== 0) _option.quickSite = [];
       if (inputs[3 * i + 1].value === '') continue;
@@ -1164,7 +1172,6 @@ function checkCondition(parms) {
       return str * 1;
     }
   };
-
   var func = {
     isCd: function(id) {
       return isOn(id) ? 0 : 1;
@@ -1774,8 +1781,8 @@ function useGem() { //自动使用宝石
 function deadSoon() { //自动回血回魔
   var name = g('option').itemOrderName.split(',');
   var order = g('option').itemOrderValue.split(',');
-  for (i = 0; i < name.length; i++) {
-    if (g('option').item[name[i]] && checkCondition('item_' + name[i] + 'Condition') && isOn(order[i])) {
+  for (var i = 0; i < name.length; i++) {
+    if (g('option').item[name[i]] && checkCondition(g('option')['item_' + name[i] + 'Condition']) && isOn(order[i])) {
       isOn(order[i]).click();
       g('end', true);
       return;
