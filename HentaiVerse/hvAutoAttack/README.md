@@ -4,10 +4,12 @@
 2. [攻击规则-示例(Attack Rule Example)](#攻击规则-示例-attack-rule-example)
 3. [关于字体的说明(About Font)](#关于字体的说明-about-font)
 
-  __ [字体方案](#字体方案-font-preference-for-reference-only-)
+  __ [字体方案](#字体方案仅供参考-font-preference-for-reference-only)
+
 4. 必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件-customize-condition)
 
   __ [示例](#示例-example)
+
 5. [更新历史(ChangeLog)](#更新历史-changelog)
 
   __ [最新](#最新-latest)
