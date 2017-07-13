@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.83c
+// @version      2.83d
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -97,13 +97,6 @@
     newRound();
     main();
   } else { //战斗外
-    if (location.search.match('s=Battle&ss=') && location.hash.match('#idleArena=') && gE('img[onclick^="init_battle"][onclick*="' + location.hash.match(/#idleArena=(\d+)/)[1] + '"]')) {
-      var parm = gE('img[onclick^="init_battle"][onclick*="' + location.hash.match(/#idleArena=(\d+)/)[1] + '"]').getAttribute('onclick').match(/\((.*)\)/)[1].split(',');
-      post(location.href, 'initid=' + parm[0] + '&inittoken=' + parm[parm.length - 1].match(/'(.*)'/)[1], function() {
-        goto();
-      });
-      return;
-    }
     delValue(2);
     if (g('option').quickSite) quickSite();
     var equipDamege = gE('#stamina_restore div[onclick*="?s=Forge&ss=re"]');
@@ -1056,100 +1049,81 @@ function setNotification(e) { //发出桌面通知
       if (status === 'granted') {
         var notification = [{
           Common: {
-            title: '未知',
-            text: '页面停留过长时间',
+            text: '未知',
             time: 5
           },
           Error: {
-            title: '错误',
             text: '某些错误发生了',
             time: 10
           },
           Defeat: {
-            title: '失败',
             text: '游戏失败\n玩家可自行查看战斗Log寻找失败原因',
             time: 5
           },
           Riddle: {
-            title: '答题',
             text: '小马答题\n紧急！\n紧急！\n紧急！',
             time: 30
           },
           Victory: {
-            title: '胜利',
             text: '游戏胜利\n页面将在3秒后刷新',
             time: 3
           },
           Test: {
-            title: '测试标题',
             text: '测试文本',
             time: 3
           }
         }, {
           Common: {
-            title: '未知',
-            text: '頁面停留過長時間',
+            text: '未知',
             time: 5
           },
           Error: {
-            title: '錯誤',
             text: '某些錯誤發生了',
             time: 10
           },
           Defeat: {
-            title: '失敗',
             text: '遊戲失敗\n玩家可自行查看戰鬥Log尋找失敗原因',
             time: 5
           },
           Riddle: {
-            title: '答題',
             text: '小馬答題\n緊急！\n緊急！\n緊急！',
             time: 30
           },
           Victory: {
-            title: '勝利',
             text: '遊戲勝利\n頁面將在3秒後刷新',
             time: 3
           },
           Test: {
-            title: '測試標題',
             text: '測試文本',
             time: 3
           }
         }, {
           Common: {
-            title: 'unknown',
-            text: 'The page stays idle for too long',
+            text: 'unknown',
             time: 5
           },
           Error: {
-            title: 'Error',
             text: 'Some errors have occurred',
             time: 10
           },
           Defeat: {
-            title: 'Defeated',
             text: 'You have been defeated.\nYou can check the battle log.',
             time: 5
           },
           Riddle: {
-            title: 'Riddle',
             text: 'Riddle\nURGENT\nURGENT\nURGENT',
             time: 30
           },
           Victory: {
-            title: 'Victory',
             text: 'You\'re victorious.\nThis page will refresh in 3 seconds.',
             time: 3
           },
           Test: {
-            title: 'testTitle',
-            text: 'testBody',
+            text: 'testText',
             time: 3
           }
         }][g('lang')][e];
-        var n = new Notification(notification.title, {
-          body: notification.text,
+        var n = new Notification(notification.text, {
           icon: '/y/hentaiverse.png'
         });
         setTimeout(function() {
@@ -1279,10 +1253,7 @@ function riddleAlert() { //答题警报
       g('time', time);
     }
     document.title = time;
-    if (time <= g('option').riddleAnswerTime) {
-      if (!gE('#riddleanswer').value) gE('#riddleanswer').value = answers[parseInt(Math.random() * 3)];
-      gE('#riddleform').submit();
-    }
+    if (time <= g('option').riddleAnswerTime) riddleSubmit(gE('#riddleanswer').value || answers[parseInt(Math.random() * 3)]);
   };
   for (var i = 0; i < 30; i++) {
     setTimeout(checkTime, i * 1000);
@@ -1327,46 +1298,74 @@ function idleArena() { //闲置竞技场
     arena.date = dateNow;
     delete arena.array;
     delete arena.isOk;
-    setValue('arena', arena);
+    arena.token = {
+      length: 0
+    };
+    //iframe打开四个网站，设定四个判断值，同时true才继续
+    var getToken = function(e) {
+      var data = e.target.response;
+      var imgs = gE('img[src*="startchallenge.png"]', 'all', data);
+      if (imgs) {
+        imgs.forEach(function(_) {
+          var temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
+          arena.token[temp[1]] = temp[2];
+        });
+      } else {
+        arena.token.gr = gE('img[src*="startgrindfest.png"]', data).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
+      }
+      arena.token.length++;
+    };
+    post('?s=Battle&ss=gr', null, getToken);
+    post('?s=Battle&ss=ar', null, getToken);
+    post('?s=Battle&ss=ar&page=2', null, getToken);
+    post('?s=Battle&ss=rb', null, getToken);
+    var checkOnload = function() {
+      if (arena.token.length < 4) {
+        setTimeout(checkOnload, 200);
+      } else {
+        setValue('arena', arena);
+        setTimeout(idleArena, 200);
+      }
+    };
+    checkOnload();
+    return;
   }
   if (arena.isOk) return;
   if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
-    post(location.href, 'recover=stamina', function() {
-      goto();
-    });
+    post(location.href, 'recover=stamina', function (){
+    goto();
+  });
     return;
   }
   arena.array = arena.array || g('option').idleArenaValue.split(',');
-  var href = '?s=Battle&ss=';
-  var id = arena.array[0];
-  id = id * 1;
-  if (isNaN(id)) {
-    href += 'gr';
-    id = 1;
-  } else if (id >= 105) {
-    href += 'rb';
-  } else if (id >= 19) {
-    href += 'ar&page=2';
-  } else {
-    href += 'ar';
+  var href, id;
+  while (arena.array.length > 0) {
+    id = arena.array[0] * 1;
+    if (isNaN(id)) {
+      href = 'gr';
+      id = 'gr';
+    } else if (id >= 105) {
+      href = 'rb';
+    } else if (id >= 19) {
+      href = 'ar&page=2';
+    } else {
+      href = 'ar';
+    }
+    if (!(id in arena.token)) {
+      arena.array.splice(0, 1);
+    } else {
+      break;
+    }
   }
   document.title = _alert(-1, '闲置竞技场', '閒置競技場開始', 'Idle Arena start');
   if (arena.array.length > 1 || arena.array[0] !== 'gr') arena.array.splice(0, 1);
   if (arena.array.length === 0) arena.isOk = true;
   setValue('arena', arena);
-  if (location.search === href) {
-    if (gE('img[onclick^="init_battle"][onclick*="' + id + '"]')) {
-      var parm = gE('img[onclick^="init_battle"][onclick*="' + id + '"]').getAttribute('onclick').match(/\((.*)\)/)[1].split(',');
-      post(location.href, 'initid=' + id + '&inittoken=' + parm[parm.length - 1].match(/'(.*)'/)[1], function() {
-        goto();
-      });
-    } else {
-      idleArena();
-    }
-  } else {
-    href += '#idleArena=' + id;
-    openUrl(href);
-  }
+  var token = arena.token[id];
+  if (id === 'gr') id = 1;
+  post('?s=Battle&ss='+ href, 'initid=' + String(id) + '&inittoken=' + token, function (){
+    goto();
+  });
 }
 
 function randomEncounterCheck() { //Random Encounter
@@ -1379,7 +1378,7 @@ function randomEncounterCheck() { //Random Encounter
   };
   if (!randomEncounter.lastTime || timeNow - randomEncounter.lastTime >= (30 + Math.random() * 5) * 60 * 1000 && randomEncounter.time < 24) {
     if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
-      post(location.href, 'recover=stamina', function() {
+      post(location.href, 'recover=stamina', function (){
         goto();
       });
       return;
@@ -2217,7 +2216,9 @@ function attack() { //自动打怪
     g('end', true);
     return;
   }
-  if (g('option').etherTap && gE('#mkey_' + g('monsterStatus')[0].id + '>div.btm6>img[src*="coalescemana"]') && (!gE('#pane_effects>img[onmouseover*="Ether Tap (x2)"]') || gE('#pane_effects>img[src*="wpn_et"][id*="effect_expire"]')) && checkCondition(g('option').etherTapCondition)) {} else if (g('attackStatus') !== 0) {
+  if (g('option').etherTap && gE('#mkey_' + g('monsterStatus')[0].id + '>div.btm6>img[src*="coalescemana"]') && (!gE('#pane_effects>img[onmouseover*="Ether Tap (x2)"]') || gE('#pane_effects>img[src*="wpn_et"][id*="effect_expire"]')) && checkCondition(g('option').etherTapCondition)) {
+    //nothing;
+  } else if (g('attackStatus') !== 0) {
     if (checkCondition(g('option').highSkillCondition) && isOn('1' + g('attackStatus') + '3')) {
       gE('1' + g('attackStatus') + '3').click();
     } else if (checkCondition(g('option').middleSkillCondition) && isOn('1' + g('attackStatus') + '2')) {
@@ -2259,7 +2260,9 @@ function attack() { //自动打怪
       spiritOn = gE('#ckey_spirit[src*="spirit_a"]');
       condition = checkCondition(g('option')['skill' + skill + 'Condition']) && isOn(skillLib[skill].id) && g('oc') >= skillLib[skill].oc;
       if (spiritOn && condition) {
-        if (g('option').skillOTOS && g('option').skillOTOS[skill] && g('skillOTOS')[skill] >= 1) {} else {
+        if (g('option').skillOTOS && g('option').skillOTOS[skill] && g('skillOTOS')[skill] >= 1) {
+          //nothing;
+        } else {
           g('skillOTOS')[skill]++;
           gE(skillLib[skill].id).click();
           if (g('option').mercifulBlow && g('option').fightingStyle === '2' && skill === 'T3') { //Merciful Blow
@@ -2339,7 +2342,7 @@ function dropMonitor(battleLog) { //掉落监测
           name = regexp[2];
           amount = regexp[1] * 1;
         } else {
-          name = name.match(/^(Crystal of \w+)$/);
+          name = name.match(/^(Crystal of \w+)$/)[1];
           amount = 1;
         }
         drop[name] = (name in drop) ? drop[name] + amount : amount;
@@ -2408,7 +2411,8 @@ function recordUsage(parm) {
   } else {
     stats.self[parm.mode] = (parm.mode in stats.self) ? stats.self[parm.mode] + 1 : 1;
   }
-  //var log = false;
+  var debug = fase;
+  var log = false;
   for (var i = 0; i < parm.log.length - parm.before; i++) {
     text = parm.log[i].textContent;
     console.log(text);
@@ -2464,16 +2468,17 @@ function recordUsage(parm) {
       magic = reg[2];
       point = reg[1] * 1;
       stats.proficiency[magic] = (magic in stats.proficiency) ? stats.proficiency[magic] + point : point;
+    } else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious|have reached Level|have obtained the title)/) || text.match(/(Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat )/) || text.match(/ drop(ped|s) /) || text.match(/defeated/)) {
+      //nothing;
+    } else if (debug) {
+      log = true;
+      setAudioAlarm('Error');
+      console.log(text);
     }
-    /* else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious|have reached Level)/) || text.match(/(Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat )/) || text.match(/ drop(ped|s) /) || text.match(/defeated/)) {} else {
-          log = true;
-          setAudioAlarm('Error');
-          console.log(text);
-        }*/
   }
-  /*if (log) {
+  if (debug && log) {
     console.table(stats);
     pauseChange();
-  }*/
+  }
   setValue('stats', stats);
 }
