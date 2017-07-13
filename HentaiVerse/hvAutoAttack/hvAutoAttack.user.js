@@ -2411,7 +2411,7 @@ function recordUsage(parm) {
   } else {
     stats.self[parm.mode] = (parm.mode in stats.self) ? stats.self[parm.mode] + 1 : 1;
   }
-  var debug = fase;
+  var debug = false;
   var log = false;
   for (var i = 0; i < parm.log.length - parm.before; i++) {
     text = parm.log[i].textContent;
