@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.83d
+// @version      2.83e
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -60,16 +60,12 @@
     return;
   }
   if (gE('#riddlecounter')) { //需要答题
-    if (g('option').riddlePopup) {
-      if (!window.opener) {
-        window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
-        return;
-      } else {
-        riddleAlert(); //答题警报
-      }
+    if (g('option').riddlePopup && !window.opener) {
+      window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
     } else {
       riddleAlert(); //答题警报
     }
+    return;
   } else if (!gE('#navbar')) { //战斗中
     var box2 = gE('#battle_main').appendChild(cE('div'));
     box2.id = 'hvAABox2';
@@ -1332,9 +1328,9 @@ function idleArena() { //闲置竞技场
   }
   if (arena.isOk) return;
   if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
-    post(location.href, 'recover=stamina', function (){
-    goto();
-  });
+    post(location.href, 'recover=stamina', function() {
+      goto();
+    });
     return;
   }
   arena.array = arena.array || g('option').idleArenaValue.split(',');
@@ -1363,7 +1359,7 @@ function idleArena() { //闲置竞技场
   setValue('arena', arena);
   var token = arena.token[id];
   if (id === 'gr') id = 1;
-  post('?s=Battle&ss='+ href, 'initid=' + String(id) + '&inittoken=' + token, function (){
+  post('?s=Battle&ss=' + href, 'initid=' + String(id) + '&inittoken=' + token, function() {
     goto();
   });
 }
@@ -1378,7 +1374,7 @@ function randomEncounterCheck() { //Random Encounter
   };
   if (!randomEncounter.lastTime || timeNow - randomEncounter.lastTime >= (30 + Math.random() * 5) * 60 * 1000 && randomEncounter.time < 24) {
     if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
-      post(location.href, 'recover=stamina', function (){
+      post(location.href, 'recover=stamina', function() {
         goto();
       });
       return;
@@ -1505,7 +1501,7 @@ function reloader() {
         post(location.href, '', function(event) {
           var data = event.target.response;
           if (gE('#riddlecounter', data)) {
-            if (g('option').riddlePopup) {
+            if (g('option').riddlePopup && !window.opener) {
               window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
               return;
             } else {
@@ -2415,7 +2411,7 @@ function recordUsage(parm) {
   var log = false;
   for (var i = 0; i < parm.log.length - parm.before; i++) {
     text = parm.log[i].textContent;
-    console.log(text);
+    if (debug) console.log(text);
     if (text.match(/you for \d+ \w+ damage/)) {
       reg = text.match(/you for (\d+) (\w+) damage/);
       magic = reg[2].replace('ing', '');
