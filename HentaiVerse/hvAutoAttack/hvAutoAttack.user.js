@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.83e
+// @version      2.84
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -37,7 +37,7 @@
     setTimeout(goto, 5 * 60 * 1000);
     return;
   }
-  g('version', '2.83');
+  g('version', '2.84');
   if (getValue('option')) {
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
@@ -95,22 +95,43 @@
   } else { //战斗外
     delValue(2);
     if (g('option').quickSite) quickSite();
-    var equipDamege = gE('#stamina_restore div[onclick*="?s=Forge&ss=re"]');
-    if (equipDamege) { //装备损坏
-      if (g('option').damageFix && location.hash !== '#damageFix') {
-        if (location.search !== '?s=Forge&ss=re') {
-          location.search = '?s=Forge&ss=re';
+    if (g('option').repair) {
+      var json, checkOnload, checkLength;
+      var len = 0;
+      var eqps = [];
+      checkOnload = function() {
+        if (json) {
+          setTimeout(checkOnload, 200);
         } else {
-          post(location.href, 'repair_all=1', function() {
-            goto('damageFix', true);
+          post('?s=Forge&ss=re', function(data) {
+            post(gE('#mainpane>script[src]', data).src, function(data1) {
+              json = JSON.parse(data1.match(/{.*}/)[0]);
+              gE('.eqp>[id]', 'all', data).forEach(function(i) {
+                eqps.push(i.id.match(/\d+/)[0]);
+              });
+              eqps.forEach(function(id) {
+                if (json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1] <= g('option').repairValue) {
+                  post('?s=Forge&ss=re', checkLength, 'select_item=' + id);
+                } else {
+                  checkLength();
+                }
+              });
+            }, null, 'text');
           });
         }
-      }
+      };
+      checkLength = function() {
+        len++;
+        if (len === eqps.length) {
+          if (g('option').randomEncounter) randomEncounterCheck();
+          if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
+        }
+      };
+      checkOnload();
+      return;
     }
-    if (!equipDamege || g('option').damageIgnore) {
-      if (g('option').randomEncounter) randomEncounterCheck();
-      if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
-    }
+    if (g('option').randomEncounter) randomEncounterCheck();
+    if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
   }
 })();
 //通用//
@@ -165,13 +186,8 @@ function delValue(item) { //删除数据
   }
 }
 
-function goto(url, reload) { //前进
-  if (typeof url === 'undefined' && typeof reload === 'undefined') {
-    location.href = location.search;
-  } else {
-    history.pushState(null, null, location.search + '#' + url);
-    if (reload) location.reload();
-  }
+function goto() { //前进
+  location.href = location.search;
 }
 
 function g(item, key) { //全局变量
@@ -186,17 +202,27 @@ function g(item, key) { //全局变量
   }
 }
 
-function post(href, parm, func) { //post
+function post(href, func, parm, type) { //post
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', href);
+  xhr.open(parm ? 'POST' : 'GET', href);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-  xhr.responseType = 'document';
+  xhr.responseType = type || 'document';
   xhr.onerror = function() {
     xhr = null;
-    post(href, parm, func);
+    post(href, func, parm, type);
   };
   xhr.onload = function(e) {
-    if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') func(e);
+    if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
+      var data = e.target.response;
+      if (xhr.responseType === 'document' && gE('#messagebox', data)) {
+        if (gE('#messagebox')) {
+          gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
+        } else {
+          gE('#csp').appendChild(gE('#messagebox', data));
+        }
+      }
+      func(data, e);
+    }
     xhr = null;
   };
   xhr.send(parm);
@@ -369,9 +395,7 @@ function optionBox() { //配置界面
         <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label></div>\
       <div><l0>当<b>小马答题</b>时间</l0><l1>當<b>小馬答題</b>時間</l1><l2>If <b>RIDDLE</b> ETR</l2><l0></l0><l1></l1><l2></l2> ≤ <input class="hvAANumber" name="riddleAnswerTime" placeholder="3" type="text"><l0>秒，如果输入框为空则随机生成答案并提交</l0><l1>秒，如果輸入框為空則隨機生成答案並提交</l1><l2>s and no answer has been chosen yet, a random answer will be generated and submitted</l2></div>\
       <div><l0>当<b>小马答题</b>时</l0><l1>當<b>小馬答題</b>時</l1><l2>If <b>RIDDLE</b></l2>: \
-        1. <input id="riddlePopup" type="checkbox"><label for="riddlePopup"><l0>弹窗答题</l0><l1>弹窗答题</l1><l2>POPUP a window to answer</l2></label>; <button class="testPopup"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button>\
-        2. <input id="riddleAlert" type="checkbox"><label for="riddleAlert"><l0>弹出警告框</l0><l1>彈出警告框</l1><l2>ALERT</l2><button class="testAlert"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></label><br>\
-        <l0>注意: 只有一个功能会生效</l0><l1>注意: 只有一個功能會生效</l1><l2>Note: Only one feature is avilable</l2></div>\
+        <input id="riddlePopup" type="checkbox"><label for="riddlePopup"><l0>弹窗答题</l0><l1>弹窗答题</l1><l2>POPUP a window to answer</l2></label>; <button class="testPopup"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div>\
       <div><b>Stamina</b>: <l0>当损失</l0><l1>當損失</l1><l2>If it lost </l2>Stamina ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text">: \
         <input id="staminaPause" type="checkbox"><label for="staminaPause"><l0>脚本暂停</l0><l1>腳本暫停</l1><l2>pause script</l2></label>; \
         <input id="staminaWarn" type="checkbox"><label for="staminaWarn"><l01>警告</l01><l2>warn</l2></label>; \
@@ -386,10 +410,9 @@ function optionBox() { //配置界面
             <input id="arLevel_1" value="1,1" type="checkbox"><label for="arLevel_1">1</label> <input id="arLevel_10" value="10,3" type="checkbox"><label for="arLevel_10">10</label> <input id="arLevel_20" value="20,5" type="checkbox"><label for="arLevel_20">20</label> <input id="arLevel_30" value="30,8" type="checkbox"><label for="arLevel_30">30</label> <input id="arLevel_40" value="40,9" type="checkbox"><label for="arLevel_40">40</label> <input id="arLevel_50" value="50,11" type="checkbox"><label for="arLevel_50">50</label> <input id="arLevel_60" value="60,12" type="checkbox"><label for="arLevel_60">60</label> <input id="arLevel_70" value="70,13" type="checkbox"><label for="arLevel_70">70</label> <input id="arLevel_80" value="80,15" type="checkbox"><label for="arLevel_80">80</label> <input id="arLevel_90" value="90,16" type="checkbox"><label for="arLevel_90">90</label> <input id="arLevel_100" value="100,17" type="checkbox"><label for="arLevel_100">100</label> <input id="arLevel_110" value="110,19" type="checkbox"><label for="arLevel_110">110</label><br>\
             <input id="arLevel_120" value="120,20" type="checkbox"><label for="arLevel_120">120</label> <input id="arLevel_130" value="130,21" type="checkbox"><label for="arLevel_130">130</label> <input id="arLevel_140" value="140,23" type="checkbox"><label for="arLevel_140">140</label> <input id="arLevel_150" value="150,24" type="checkbox"><label for="arLevel_150">150</label> <input id="arLevel_165" value="165,26" type="checkbox"><label for="arLevel_165">165</label> <input id="arLevel_180" value="180,27" type="checkbox"><label for="arLevel_180">180</label> <input id="arLevel_200" value="200,28" type="checkbox"><label for="arLevel_200">200</label> <input id="arLevel_225" value="225,29" type="checkbox"><label for="arLevel_225">225</label> <input id="arLevel_250" value="250,32" type="checkbox"><label for="arLevel_250">250</label> <input id="arLevel_300" value="300,33" type="checkbox"><label for="arLevel_300">300</label><br>\
             <input id="arLevel_RB50" value="RB50,105" type="checkbox"><label for="arLevel_RB50">RB50</label> <input id="arLevel_RB75A" value="RB75A,106" type="checkbox"><label for="arLevel_RB75A">RB75A</label> <input id="arLevel_RB75B" value="RB75B,107" type="checkbox"><label for="arLevel_RB75B">RB75B</label> <input id="arLevel_RB75C" value="RB75C,108" type="checkbox"><label for="arLevel_RB75C">RB75C</label><br>\
-            <input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,gr" type="checkbox"><label for="arLevel_GF">GrindFest</label></div></div>\
-      <div><l0>当<b>装备损坏</b>时</l0><l1>當<b>裝備損壞</b>時</l1><l2>If <b>equipments damaged</b></l2>: \
-        <input id="damageFix" type="checkbox"><label for="damageFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>try to repair</l2></label>; \
-        <input id="damageIgnore" type="checkbox"><label for="damageIgnore"><l01>忽略</l01><l2>ignore</l2></label></div>\
+            <input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,gr" type="checkbox"><label for="arLevel_GF">GrindFest <input class="hvAANumber" name="idleArenaGrTime" placeholder="1" type="text"></label></div></div>\
+      <div><input id="repair" type="checkbox"><label for="repair"><b><l0>修复装备</l0><l1>修復裝備</l1><l2>Repair Equipment</l2></b></label>: \
+        <l0>耐久度</l0><l1>耐久度</l1><l2>Durability</l2> ≤ <input class="hvAANumber" name="repairValue" type="text">%</div>\
       <div><input id="etherTap" type="checkbox"><label for="etherTap"><b>Ether Tap</b></label>: \
         <div class="customize" name="etherTapCondition"><l0>条件</l0><l1>條件</l1><l2>Conditions</l2>: <br></div></div>\
       <div><input id="autoFlee" type="checkbox"><label for="autoFlee"><b><l0>自动逃跑</l0><l1>自動逃跑</l1><l2>Flee</l2></b></label>: \
@@ -622,12 +645,6 @@ function optionBox() { //配置界面
       window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
     }, 3000);
   };
-  gE('.testAlert', optionBox).onclick = function() {
-    _alert(0, '接下来开始预处理。\n关闭本警告框之后，请切换到其他标签页，\n并在足够长的时间后再打开本标签页', '接下來開始預處理。\n關閉本警告框之後，請切換到其他標籤頁，\n並在足夠長的時間後再打開本標籤頁', 'Now, pretreat.\nAfter dismissing this alert, focus other tab,\nfocus this tab again after long time.');
-    setTimeout(function() {
-      _alert(0, '请勾选“允许来自 hentaiverse.org 的对话框将您带往标签页”', '请勾选“允许来自 hentaiverse.org 的对话框带您前往分页”', 'Please check "allow dialogs from hentaiverse.org to take you to their tab"');
-    }, 3000);
-  };
   gE('.staminaLostLog', optionBox).onclick = function() {
     var out = [];
     var staminaLostLog = getValue('staminaLostLog', true);
@@ -651,7 +668,6 @@ function optionBox() { //配置界面
   };
   gE('.hvAAArenaLevels', optionBox).onclick = function(e) {
     if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
-    if (e.target.id === 'arLevel_GF' && e.target.checked) _alert(0, '如果GF在末尾，当闲置竞技场只剩下GF时，将不断循环GF', '如果GF在末尾，當閒置競技場只剩下GF時，將不斷循環GF', 'If GF is at the end and the idle arena tasks only left GF, it will do GF unlimited times');
     var valueArray = e.target.value.split(',');
     var levels = gE('input[name="idleArenaLevels"]').value;
     var value = gE('input[name="idleArenaValue"]').value;
@@ -832,10 +848,8 @@ function optionBox() { //配置界面
       version: g('version')
     };
     var inputs = gE('input,select', 'all', optionBox);
-    var itemName;
-    var itemArray;
-    var itemValue;
-    for (var i = 0; i < inputs.length; i++) {
+    var itemName, itemArray, itemValue, i;
+    for (i = 0; i < inputs.length; i++) {
       if (inputs[i].className === 'hvAADebug') {
         continue;
       } else if (inputs[i].className === 'hvAANumber') {
@@ -885,15 +899,10 @@ function optionBox() { //配置界面
     optionBox.style.display = 'none';
   };
   if (g('option')) {
-    var i;
-    var j;
-    var k;
+    var i, j, k;
     var _option = g('option');
     var inputs = gE('input,select', 'all', optionBox);
-    var itemName;
-    var itemArray;
-    var itemValue;
-    var _html;
+    var itemName, itemArray, itemValue, _html;
     for (i = 0; i < inputs.length; i++) {
       if (inputs[i].className === 'hvAADebug') continue;
       itemName = inputs[i].name || inputs[i].id;
@@ -1139,9 +1148,7 @@ function setNotification(e) { //发出桌面通知
 
 function checkCondition(parms) {
   if (typeof parms === 'undefined') return true;
-  var i;
-  var j;
-  var k;
+  var i, j, k;
   var result = [];
   var returnValue = function(str) {
     if (str.match(/^_/)) {
@@ -1203,10 +1210,6 @@ function checkCondition(parms) {
 //答题//
 function riddleAlert() { //答题警报
   setAlarm('Riddle');
-  if (g('option').riddleAlert && location.hash !== '#riddleAlert') {
-    goto('riddleAlert', true);
-    alert('RIDDLE');
-  }
   var answers = [
     'A',
     'B',
@@ -1260,10 +1263,10 @@ function riddleAlert() { //答题警报
       gE('#riddleanswer').value = answer;
       gE('#riddleanswer+img').click();
     } else {
-      post(location.href, 'riddleanswer=' + answer, function() { //待续
+      post(location.href, function() { //待续
         window.opener.document.location.href = location.href;
         window.close();
-      });
+      }, 'riddleanswer=' + answer);
     }
   }
 }
@@ -1291,30 +1294,30 @@ function idleArena() { //闲置竞技场
   dateNow = dateNow.getUTCFullYear() + '/' + (dateNow.getUTCMonth() + 1) + '/' + dateNow.getUTCDate();
   var arena = getValue('arena', true) || {};
   if (arena.date !== dateNow) {
-    arena.date = dateNow;
-    delete arena.array;
-    delete arena.isOk;
-    arena.token = {
-      length: 0
+    arena = {
+      date: dateNow,
+      gr: g('option').idleArenaGrTime,
+      token: {
+        length: 0
+      }
     };
     //iframe打开四个网站，设定四个判断值，同时true才继续
-    var getToken = function(e) {
-      var data = e.target.response;
+    var getToken = function(data, e) {
       var imgs = gE('img[src*="startchallenge.png"]', 'all', data);
-      if (imgs) {
+      if (e.target.responseURL.match(/ss=gr$/)) {
+        arena.token.gr = gE('img[src*="startgrindfest.png"]', data).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
+      } else {
         imgs.forEach(function(_) {
           var temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
           arena.token[temp[1]] = temp[2];
         });
-      } else {
-        arena.token.gr = gE('img[src*="startgrindfest.png"]', data).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
       }
       arena.token.length++;
     };
-    post('?s=Battle&ss=gr', null, getToken);
-    post('?s=Battle&ss=ar', null, getToken);
-    post('?s=Battle&ss=ar&page=2', null, getToken);
-    post('?s=Battle&ss=rb', null, getToken);
+    post('?s=Battle&ss=gr', getToken);
+    post('?s=Battle&ss=ar', getToken);
+    post('?s=Battle&ss=ar&page=2', getToken);
+    post('?s=Battle&ss=rb', getToken);
     var checkOnload = function() {
       if (arena.token.length < 4) {
         setTimeout(checkOnload, 200);
@@ -1328,9 +1331,7 @@ function idleArena() { //闲置竞技场
   }
   if (arena.isOk) return;
   if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
-    post(location.href, 'recover=stamina', function() {
-      goto();
-    });
+    post(location.href, goto, 'recover=stamina');
     return;
   }
   arena.array = arena.array || g('option').idleArenaValue.split(',');
@@ -1354,14 +1355,21 @@ function idleArena() { //闲置竞技场
     }
   }
   document.title = _alert(-1, '闲置竞技场', '閒置競技場開始', 'Idle Arena start');
-  if (arena.array.length > 1 || arena.array[0] !== 'gr') arena.array.splice(0, 1);
+  if (arena.array[0] === 'gr' && arena.gr <= 0) {
+    arena.array.splice(0, 1);
+    setValue('arena', arena);
+    idleArena();
+    return;
+  } else if (arena.array[0] === 'gr' && arena.gr > 0) {
+    arena.gr--;
+  } else {
+    arena.array.splice(0, 1);
+  }
   if (arena.array.length === 0) arena.isOk = true;
   setValue('arena', arena);
   var token = arena.token[id];
   if (id === 'gr') id = 1;
-  post('?s=Battle&ss=' + href, 'initid=' + String(id) + '&inittoken=' + token, function() {
-    goto();
-  });
+  post('?s=Battle&ss=' + href, goto, 'initid=' + String(id) + '&inittoken=' + token);
 }
 
 function randomEncounterCheck() { //Random Encounter
@@ -1374,16 +1382,14 @@ function randomEncounterCheck() { //Random Encounter
   };
   if (!randomEncounter.lastTime || timeNow - randomEncounter.lastTime >= (30 + Math.random() * 5) * 60 * 1000 && randomEncounter.time < 24) {
     if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
-      post(location.href, 'recover=stamina', function() {
-        goto();
-      });
+      post(location.href, goto, 'recover=stamina');
       return;
     }
     randomEncounter.lastTime = timeNow;
     setValue('randomEncounter', randomEncounter);
     openUrl('https://e-hentai.org/news.php?randomEncounter');
   }
-  setInterval(randomEncounterCheck, 3 * 60 * 1000);
+  setInterval(randomEncounterCheck, 1 * 60 * 1000);
 }
 //战斗中//
 function main() { //主程序
@@ -1449,13 +1455,11 @@ function pauseChange() { //暂停状态更改
 }
 
 function reloader() {
-  var delayAlert;
-  var delayReload;
+  var delayAlert, delayReload, obj, a, cost;
   var eventStart = cE('a');
-  var obj;
   eventStart.id = 'eventStart';
   eventStart.onclick = function() {
-    var a = unsafeWindow.info;
+    a = unsafeWindow.info;
     if (g('option').delayAlert) delayAlert = setTimeout(setAlarm, g('option').delayAlertTime * 1000);
     if (g('option').delayReload) delayReload = setTimeout(goto, g('option').delayReloadTime * 1000);
     if (g('option').recordUsage) {
@@ -1467,7 +1471,7 @@ function reloader() {
         obj.item = gE('#pane_item div[id^="ikey"][onclick*="skill(\'' + a.skill + '\')"]').textContent;
       } else if (a.mode === 'magic') {
         obj.magic = gE(a.skill).textContent;
-        var cost = gE(a.skill).getAttribute('onmouseover').match(/\('.*', '.*', '.*', (\d+), (\d+), \d+\)/);
+        cost = gE(a.skill).getAttribute('onmouseover').match(/\('.*', '.*', '.*', (\d+), (\d+), \d+\)/);
         obj.mp = cost[1] * 1;
         obj.oc = cost[2] * 1;
       }
@@ -1498,21 +1502,19 @@ function reloader() {
         delValue(2);
       } else if (g('roundNow') !== g('roundAll')) { //Next Round
         gE('#pane_completion').removeChild(gE('#btcp'));
-        post(location.href, '', function(event) {
-          var data = event.target.response;
+        post(location.href, function(data) {
           if (gE('#riddlecounter', data)) {
             if (g('option').riddlePopup && !window.opener) {
               window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
               return;
             } else {
-              goto('riddleAlert', true);
-              if (g('option').riddleAlert && /Firefox/g.test(navigator.userAgent)) alert('RIDDLE');
+              goto();
               return;
             }
           }
           gE('#battle_main').replaceChild(gE('#battle_right', data), gE('#battle_right'));
           gE('#battle_main').replaceChild(gE('#battle_left', data), gE('#battle_left'));
-          unsafeWindow.battle = new unsafeWindow.Battle;
+          unsafeWindow.battle = new unsafeWindow.Battle();
           unsafeWindow.battle.clear_infopane();
           newRound();
           main();
@@ -1543,10 +1545,10 @@ function reloader() {
   gE('head').appendChild(api_call);
   var api_response = cE('script');
   api_response.textContent = 'api_response =' + (function(b) {
-    if (b.readyState == 4) {
-      if (b.status == 200) {
+    if (b.readyState === 4) {
+      if (b.status === 200) {
         var a = JSON.parse(b.responseText);
-        if (a.login != undefined) {
+        if (a.login !== undefined) {
           unsafeWindow.top.location.href = unsafeWindow.login_url;
         } else {
           return a;
@@ -1562,7 +1564,7 @@ function reloader() {
 
 function newRound() { //New Round
   g('turn', 0);
-  if (location.hash === '#damageFix' || location.hash === '#riddleAlert') location.hash = '';
+  if (location.hash !== '') goto();
   g('monsterAll', gE('div.btm1', 'all').length);
   var monsterDead = gE('img[src*="nbardead"]', 'all').length;
   g('monsterAlive', g('monsterAll') - monsterDead);
@@ -1633,9 +1635,8 @@ function newRound() { //New Round
     }
     setValue('monsterStatus', monsterStatus);
     g('monsterStatus', monsterStatus);
+    var roundNow, roundAll;
     var round = battleLog[battleLog.length - 1].textContent.match(/\(Round (\d+) \/ (\d+)\)/);
-    var roundNow;
-    var roundAll;
     if (g('roundType') !== 'ba' && round !== null) {
       roundNow = round[1] * 1;
       roundAll = round[2] * 1;
@@ -1918,9 +1919,8 @@ function useChannelSkill() { //自动施法Channel技能
       img: 'absorb',
     }
   };
+  var i, j;
   var skillPack = g('option').buffSkillOrderValue.split(',');
-  var i;
-  var j;
   if (g('option').channelSkill) {
     for (i = 0; i < skillPack.length; i++) {
       j = skillPack[i];
@@ -2021,9 +2021,8 @@ function useBuffSkill() { //自动施法BUFF技能
       img: 'absorb',
     }
   };
+  var i, j;
   var skillPack = g('option').buffSkillOrderValue.split(',');
-  var i;
-  var j;
   for (i = 0; i < skillPack.length; i++) {
     j = skillPack[i];
     if (g('option').buffSkill[j] && checkCondition(g('option')['buffSkill' + j + 'Condition']) && !gE('#pane_effects>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
@@ -2179,9 +2178,8 @@ function useDeSkill() { //自动施法DEBUFF技能
       img: 'confuse'
     }
   };
+  var i, j;
   var skillPack = g('option').debuffSkillOrderValue.split(',');
-  var i;
-  var j;
   var monsterBuff = gE('#mkey_' + g('monsterStatus')[0].id + '>.btm6');
   for (i = 0; i < skillPack.length; i++) {
     j = skillPack[i];
@@ -2224,7 +2222,7 @@ function attack() { //自动打怪
     }
   }
   if (g('option').skillSwitch) {
-    var i;
+    var i, spiritOn, condition, skill;
     var skillOrder = (g('option').skillOrderValue || 'OFC,FRD,T3,T2,T1').split(',');
     var skillLib = {
       OFC: {
@@ -2248,9 +2246,6 @@ function attack() { //自动打怪
         oc: 2
       }
     };
-    var spiritOn;
-    var condition;
-    var skill;
     for (i = 0; i < skillOrder.length; i++) {
       skill = skillOrder[i];
       spiritOn = gE('#ckey_spirit[src*="spirit_a"]');
@@ -2304,10 +2299,7 @@ function dropMonitor(battleLog) { //掉落监测
     '#EXP': 0,
     '#Credit': 0
   };
-  var item;
-  var name;
-  var amount;
-  var regexp;
+  var item, name, amount, regexp;
   for (var i = 0;; i++) {
     if (/^You gain \d+ (EXP|Credit)/.test(battleLog[i].textContent)) {
       regexp = battleLog[i].textContent.match(/^You gain (\d+) (EXP|Credit)/);
@@ -2388,10 +2380,7 @@ function recordUsage(parm) {
     proficiency: { //熟练度
     }
   };
-  var text;
-  var magic;
-  var point;
-  var reg;
+  var text, magic, point, reg;
   if (g('monsterAlive') === 0) {
     stats.self._turn += g('turn');
     stats.self._round += 1;
@@ -2431,7 +2420,7 @@ function recordUsage(parm) {
       }
     } else if (text.match(/for \d+ .* damage/)) {
       reg = text.match(/for (\d+) .* damage/);
-      magic = text.match(/^Your spike shield/) ? 'spike shield' : (text.match(/^You/) ? text.match(/^You (\w+)/)[1] : (text.match(/^(.*) [a-z]+s [\w+ \-]+ for/) ? text.match(/^(.*) [a-z]+s [\w+ \-]+ for/)[1] : text.match(/^(.*) [a-z]+s for/)[1]));
+      magic = text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ \-]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1];
       point = reg[1] * 1;
       stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point;
     } else if (text.match(/Vital Theft hits .*? for \d+ damage/)) {
@@ -2440,10 +2429,10 @@ function recordUsage(parm) {
       stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point;
     } else if (text.match(/You (evade|parry|block) the attack|misses the attack against you|(casts|uses) .* misses the attack/)) {
       stats.self.evade++;
-    } else if (text.match(/(resists your spell|Your spell is absorbed|(evades|parries) your attack)|Your attack misses its mark|Your spell fails to connect/)) {
+    } else if (text.match(/(resists your spell|Your spell is absorbed|(evades|parries) your (attack|spell))|Your attack misses its mark|Your spell fails to connect/)) {
       stats.self.miss++;
-    } else if (text.match(/^Recovered \d+ points of/) || text.match(/You are healed for \d+ Health Points/)) {
-      magic = parm.magic || parm.item;
+    } else if (text.match(/^Recovered \d+ points of/) || text.match(/You are healed for \d+ Health Points/) || text.match(/You drain \d+ HP from/)) {
+      magic = (parm.mode === 'defend') ? 'defend' : text.match(/You drain \d+ HP from/) ? 'drain' : parm.magic || parm.item;
       point = text.match(/\d+/)[0] * 1;
       stats.restore[magic] = (magic in stats.restore) ? stats.restore[magic] + point : point;
     } else if (text.match(/(restores|drain) \d+ points of/)) {
@@ -2464,7 +2453,7 @@ function recordUsage(parm) {
       magic = reg[2];
       point = reg[1] * 1;
       stats.proficiency[magic] = (magic in stats.proficiency) ? stats.proficiency[magic] + point : point;
-    } else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious|have reached Level|have obtained the title)/) || text.match(/(Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat )/) || text.match(/ drop(ped|s) /) || text.match(/defeated/)) {
+    } else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious|have reached Level|have obtained the title|do not have enough MP)/) || text.match(/(Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat |Clear Bonus|brink of defeat)/) || text.match(/ drop(ped|s) /) || text.match(/defeated/)) {
       //nothing;
     } else if (debug) {
       log = true;
