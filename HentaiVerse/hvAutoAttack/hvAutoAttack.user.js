@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.84
+// @version      2.84a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -273,13 +273,12 @@ function addStyle(lang) { //CSS
   langStyle.textContent = 'l' + lang + '{display:inline!important;}';
   if (/^[01]$/.test(lang)) langStyle.textContent += 'l01{display:inline!important;}';
   var globalStyle = gE('head').appendChild(cE('style'));
-  var boxWidth = gE('#csp').offsetWidth;
   var cssContent = [
     'button{border-radius:3px;border:2px solid #808080;cursor:pointer;margin:0 1px;}',
     'l0,l1,l01,l2{display:none;}' + //l0: 简体 l1: 繁体 l01:简繁体共用 l2: 英文
     '#riddleform>div:nth-child(3)>img{width:700px;}',
     '.hvAALog{font-size:20px;}',
-    '.hvAAButton{top:4px;left:' + boxWidth + 'px;position:absolute;z-index:9999;cursor:pointer;}',
+    '.hvAAButton{top:4px;left:1238px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
     '#hvAABox{left:calc(50% - 350px);top:50px;font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:justify;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
     '.hvAATablist{position:relative;left:14px;}',
     '.hvAATabmenu{position:absolute;left:-9px;}',
@@ -301,14 +300,14 @@ function addStyle(lang) { //CSS
     '.hvAACenter{text-align:center;}',
     '.hvAATitle{font-weight:bolder;}',
     '.hvAAGoto{cursor:pointer;text-decoration:underline;color:#5C0D11;}',
-    '.hvAANew{width:25px;height:25px;float:left;background:transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAAcElEQVQ4jbVRSQ4AIQjz/59mTiZIF3twmnCwFAq4FkeFXM+5vCzohYxjPMtfxS8CN6iqQ7TfE0wrODxVbzJNgoaTo4CmbBO1ZWICouQ0DHaL259MEzaU+w8pZOdSjcUgaPJDHCbO0A2kuAiuwPGQ+wBms12x8HExTwAAAABJRU5ErkJggg==) no-repeat;background-position:center;}',
+    '.hvAANew{width:25px;height:25px;float:left;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAAcElEQVQ4jbVRSQ4AIQjz/59mTiZIF3twmnCwFAq4FkeFXM+5vCzohYxjPMtfxS8CN6iqQ7TfE0wrODxVbzJNgoaTo4CmbBO1ZWICouQ0DHaL259MEzaU+w8pZOdSjcUgaPJDHCbO0A2kuAiuwPGQ+wBms12x8HExTwAAAABJRU5ErkJggg==) center no-repeat transparent;}',
     '#hvAATab-Alarm input[type="text"]{width:512px;}',
     '.testAlarms>div{border:2px solid #000;}',
     '.hvAAArenaLevels{display:none;}',
     '.hvAAConfig{width:100%;height:16px;}',
     '.hvAAButtonBox{position:relative;top:468px;}',
-    '.quickSiteBar{position:absolute;top:30px;left:' + (boxWidth + 2) + 'px;font-size:18px;text-align:left;}',
-    '.quickSiteBar>span{display:block;}',
+    '.quickSiteBar{position:absolute;top:30px;left:1240px;font-size:18px;text-align:left;width:calc(99% - 1236px);}',
+    '.quickSiteBar>span{display:block;max-height:24px;overflow:hidden;text-overflow:ellipsis;}',
     '.quickSiteBar>span>a{text-decoration:none;}',
     '.customize{border: 2px dashed red!important;}',
     '.customize>.customizeGroup{display:inline-block;background-color:#FFF;}',
@@ -327,7 +326,6 @@ function addStyle(lang) { //CSS
 function optionButton(lang) { //配置按钮
   var optionButton = gE('body').appendChild(cE('div'));
   optionButton.className = 'hvAAButton';
-  optionButton.innerHTML = '<img src=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==></img>';
   optionButton.onclick = function() {
     if (gE('#hvAABox')) {
       gE('#hvAABox').style.display = (gE('#hvAABox').style.display === 'none') ? 'block' : 'none';
@@ -642,7 +640,10 @@ function optionBox() { //配置界面
   gE('.testPopup', optionBox).onclick = function() {
     _alert(0, '接下来开始预处理。\n关闭本警告框之后，请切换到其他标签页，\n并在足够长的时间后再打开本标签页', '接下來開始預處理。\n關閉本警告框之後，請切換到其他標籤頁，\n並在足夠長的時間後再打開本標籤頁', 'Now, pretreat.\nAfter dismissing this alert, focus other tab,\nfocus this tab again after long time.');
     setTimeout(function() {
-      window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
+      var newWindow = window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
+      if (newWindow) setTimeout(function() {
+        newWindow.close();
+      }, 200);
     }, 3000);
   };
   gE('.staminaLostLog', optionBox).onclick = function() {
@@ -2258,8 +2259,8 @@ function attack() { //自动打怪
           gE(skillLib[skill].id).click();
           if (g('option').mercifulBlow && g('option').fightingStyle === '2' && skill === 'T3') { //Merciful Blow
             for (var j = 0; j < g('monsterStatus').length; j++) {
-              if (g('monsterStatus')[j].hpNow / g('monsterStatus')[j].hp < 0.25 && gE('mkey_' + g('monsterStatus')[j].id + ' img[src*="wpn_bleed"]')) {
-                gE('mkey_' + g('monsterStatus')[j].id).click();
+              if (g('monsterStatus')[j].hpNow / g('monsterStatus')[j].hp < 0.25 && gE('#mkey_' + g('monsterStatus')[j].id + ' img[src*="wpn_bleed"]')) {
+                gE('#mkey_' + g('monsterStatus')[j].id).click();
                 g('end', true);
                 return;
               }
@@ -2418,7 +2419,7 @@ function recordUsage(parm) {
         stats.hurt._mtotal += point;
         stats.hurt._mavg = Math.round(stats.hurt._mtotal / stats.hurt._mcount);
       }
-    } else if (text.match(/for \d+ .* damage/)) {
+    } else if (text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for/) || text.match(/^You (\w+)/)) { //text.match(/for \d+ .* damage/)
       reg = text.match(/for (\d+) .* damage/);
       magic = text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ \-]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1];
       point = reg[1] * 1;
