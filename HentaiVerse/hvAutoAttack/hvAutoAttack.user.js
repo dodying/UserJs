@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.84b
+// @version      2.84c
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -190,6 +190,7 @@ function delValue(item) { //删除数据
 
 function goto() { //前进
   location.href = location.search;
+  setTimeout(goto, 1000);
 }
 
 function g(item, key) { //全局变量
@@ -2430,7 +2431,7 @@ function recordUsage(parm) {
         stats.hurt._mtotal += point;
         stats.hurt._mavg = Math.round(stats.hurt._mtotal / stats.hurt._mcount);
       }
-    } else if (text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for/) || text.match(/^You (\w+)/)) { //text.match(/for \d+ .* damage/)
+    } else if (text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for \d+ .* damage/) || text.match(/^You .* for \d+ .* damage/)) { //text.match(/for \d+ .* damage/)
       reg = text.match(/for (\d+) .* damage/);
       magic = text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ \-]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1];
       point = reg[1] * 1;
