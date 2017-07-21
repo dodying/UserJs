@@ -7,14 +7,14 @@
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http*://hentaiverse.org/*
 // @include      http*://alt.hentaiverse.org/*
-// @include      https://e-hentai.org/news.php?randomEncounter
+// @include      https://e-hentai.org/news.php?encounter
 // @exclude      http*://hentaiverse.org/pages/showequip.php?*
 // @exclude      http*://alt.hentaiverse.org/pages/showequip.php?*
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.84a
+// @version      2.84b
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -23,7 +23,7 @@
 // @run-at       document-end
 // ==/UserScript==
 (function init() {
-  if (location.href === 'https://e-hentai.org/news.php?randomEncounter') {
+  if (location.href === 'https://e-hentai.org/news.php?encounter') {
     var href;
     if (gE('#eventpane>div>a')) {
       href = document.referrer.split('/')[0] + '//' + document.referrer.split('/')[2] + '/' + gE('#eventpane>div>a').href.split('/')[3];
@@ -88,7 +88,7 @@
     }
     reloader();
     g('attackStatus', g('option').attackStatus);
-    g('dateNow', new Date().getTime());
+    g('timeNow', new Date().getTime());
     g('runSpeed', 1);
     newRound();
     main();
@@ -123,14 +123,16 @@
       checkLength = function() {
         len++;
         if (len === eqps.length) {
-          if (g('option').randomEncounter) randomEncounterCheck();
+          if (g('option').encounter) encounterCheck();
           if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
         }
       };
       checkOnload();
       return;
     }
-    if (g('option').randomEncounter) randomEncounterCheck();
+    var dateNow = new Date();
+    g('dateNow', dateNow.getUTCFullYear() + '/' + (dateNow.getUTCMonth() + 1) + '/' + dateNow.getUTCDate());
+    if (g('option').encounter) encounterCheck();
     if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
   }
 })();
@@ -306,7 +308,8 @@ function addStyle(lang) { //CSS
     '.hvAAArenaLevels{display:none;}',
     '.hvAAConfig{width:100%;height:16px;}',
     '.hvAAButtonBox{position:relative;top:468px;}',
-    '.quickSiteBar{position:absolute;top:30px;left:1240px;font-size:18px;text-align:left;width:calc(99% - 1236px);}',
+    '.lastEncounter{font-weight:bold;font-size:large;position:absolute;top:32px;left:1240px;text-decoration:none;}',
+    '.quickSiteBar{position:absolute;top:55px;left:1240px;font-size:18px;text-align:left;width:calc(99% - 1236px);}',
     '.quickSiteBar>span{display:block;max-height:24px;overflow:hidden;text-overflow:ellipsis;}',
     '.quickSiteBar>span>a{text-decoration:none;}',
     '.customize{border: 2px dashed red!important;}',
@@ -378,7 +381,7 @@ function optionBox() { //配置界面
         <button class="testNotification"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div>\
       <div><b><l01>内置插件</l01><l2>Built-in Plugin</l2></b>: \
         <input id="riddleRadio" type="checkbox"><label for="riddleRadio">RiddleLimiter Plus</label>; \
-        <input id="randomEncounter" type="checkbox"><label for="randomEncounter"><l0>自动遭遇战</l0><l1>自動遭遇戰</l1><l2>Auto Random Encounter</l2></label></div>\
+        <input id="encounter" type="checkbox"><label for="encounter"><l0>自动遭遇战</l0><l1>自動遭遇戰</l1><l2>Auto Random Encounter</l2></label></div>\
       <div><b><l01>魔法技能</l01><l2>Offensive Magic</l2></b>: \
         <div class="customize" name="middleSkillCondition"><l0>中阶技能使用条件</l0><l1>中階技能使用條件</l1><l2>Conditions for 2nd Tier</l2>: <br></div>\
         <div class="customize" name="highSkillCondition"><l0>高阶技能使用条件</l0><l1>高階技能使用條件</l1><l2>Conditions for 3rd Tier</l2>: <br></div></div>\
@@ -1291,12 +1294,10 @@ function quickSite() { //快捷站点
 }
 
 function idleArena() { //闲置竞技场
-  var dateNow = new Date();
-  dateNow = dateNow.getUTCFullYear() + '/' + (dateNow.getUTCMonth() + 1) + '/' + dateNow.getUTCDate();
   var arena = getValue('arena', true) || {};
-  if (arena.date !== dateNow) {
+  if (arena.date !== g('dateNow')) {
     arena = {
-      date: dateNow,
+      date: g('dateNow'),
       gr: g('option').idleArenaGrTime,
       token: {
         length: 0
@@ -1373,24 +1374,33 @@ function idleArena() { //闲置竞技场
   post('?s=Battle&ss=' + href, goto, 'initid=' + String(id) + '&inittoken=' + token);
 }
 
-function randomEncounterCheck() { //Random Encounter
-  var dateNow = new Date();
-  dateNow = dateNow.getUTCFullYear() + '/' + (dateNow.getUTCMonth() + 1) + '/' + dateNow.getUTCDate();
+function encounterCheck() { //Random Encounter
   var timeNow = new Date().getTime();
-  var randomEncounter = (getValue('randomEncounter') && getValue('randomEncounter', true).dateNow === dateNow) ? getValue('randomEncounter', true) : {
-    dateNow: dateNow,
+  var encounter = (getValue('encounter') && getValue('encounter', true).dateNow === g('dateNow')) ? getValue('encounter', true) : {
+    dateNow: g('dateNow'),
     time: 0
   };
-  if (!randomEncounter.lastTime || timeNow - randomEncounter.lastTime >= (30 + Math.random() * 5) * 60 * 1000 && randomEncounter.time < 24) {
+  if (!encounter.lastTime || timeNow - encounter.lastTime >= (30 + Math.random() * 5) * 60 * 1000 && encounter.time < 24) {
     if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
       post(location.href, goto, 'recover=stamina');
       return;
     }
-    randomEncounter.lastTime = timeNow;
-    setValue('randomEncounter', randomEncounter);
-    openUrl('https://e-hentai.org/news.php?randomEncounter');
+    encounter.lastTime = timeNow;
+    setValue('encounter', encounter);
+    openUrl('https://e-hentai.org/news.php?encounter');
+    return;
   }
-  setInterval(randomEncounterCheck, 1 * 60 * 1000);
+  var lastEncounter;
+  if (gE('.lastEncounter')) {
+    lastEncounter = gE('.lastEncounter');
+  } else {
+    lastEncounter = gE('body').appendChild(cE('a'));
+    lastEncounter.className = 'lastEncounter';
+    lastEncounter.title = new Date(encounter.lastTime).toLocaleString();
+    lastEncounter.href = 'https://e-hentai.org/news.php?encounter';
+  }
+  lastEncounter.innerHTML = Math.floor((timeNow - encounter.lastTime) / 1000 / 60) + '<l0>分钟前</l0><l1>分鐘前</l1><l2> mins before</l2>';
+  setTimeout(encounterCheck, 1 * 60 * 1000);
 }
 //战斗中//
 function main() { //主程序
@@ -1482,9 +1492,9 @@ function reloader() {
   var eventEnd = cE('a');
   eventEnd.id = 'eventEnd';
   eventEnd.onclick = function() {
-    var dateNow = new Date().getTime();
-    g('runSpeed', (1000 / (dateNow - g('dateNow'))).toFixed(2));
-    g('dateNow', dateNow);
+    var timeNow = new Date().getTime();
+    g('runSpeed', (1000 / (timeNow - g('timeNow'))).toFixed(2));
+    g('timeNow', timeNow);
     if (g('option').delayAlert) clearTimeout(delayAlert);
     if (g('option').delayReload) clearTimeout(delayReload);
     var monsterDead = gE('img[src*="nbardead"]', 'all').length;
@@ -1592,10 +1602,10 @@ function newRound() { //New Round
         roundType = 'rb';
       } else if (temp.match(/^Initializing random encounter/)) {
         roundType = 'ba';
-        if (g('option').randomEncounter) {
-          var randomEncounter = getValue('randomEncounter', true);
-          randomEncounter.time++;
-          setValue('randomEncounter', randomEncounter);
+        if (g('option').encounter) {
+          var encounter = getValue('encounter', true);
+          encounter.time++;
+          setValue('encounter', encounter);
         }
       } else if (temp.match(/^Initializing Item World/)) {
         roundType = 'iw';
@@ -1654,6 +1664,7 @@ function newRound() { //New Round
   }
   g('roundNow', getValue('roundNow') * 1);
   g('roundAll', getValue('roundAll') * 1);
+  g('roundLeft', getValue('roundAll') - g('roundNow'));
   g('skillOTOS', {
     OFC: 0,
     FRD: 0,
