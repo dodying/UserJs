@@ -1,40 +1,40 @@
 ### 目录 Index
 
-* 1.[截图(Screenshots)](#截图-screenshots)
+* 1.[截图](#截图)
 
-* 2.[关于字体的说明(About Font)](#关于字体的说明-about-font)
+* 2.[关于字体的说明](#关于字体的说明)
 
-*   2.1[字体方案](#字体方案仅供参考-font-preference-for-reference-only)
+*   2.1[字体方案(仅供参考)](#字体方案仅供参考)
 
-* 3.必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件-customize-condition)
+* 3.必看: [自定义判断条件](#自定义判断条件)
 
-*   3.1[比较值-comparison-value](#比较值-comparison-value)
+*   3.1[比较值](#比较值)
 
-*   3.2[示例](#示例-example)
+*   3.2[示例](#示例)
 
-*   3.3[技能/物品id表(Skill/Item ID Table)](#技能物品id表-skill-item-id-table)
+*   3.3[技能/物品id表](#技能物品id表)
 
-*   3.4[buff对应图片(BUFF IMG)](#buff对应图片-buff-img)
+*   3.4[buff图片表](#buff图片表)
 
-* 4.[攻击规则-示例(Attack Rule Example)](#攻击规则-示例-attack-rule-example)
+* 4.[攻击规则-示例](#攻击规则-示例)
 
-* 5.[更新历史(ChangeLog)](#更新历史-changelog)
+* 5.[更新历史](#更新历史)
 
-*   5.1[最新](#最新-latest)
+*   5.1[最新](#最新)
 
 ***
 
-### 截图 Screenshots
+### 截图
 
 ![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
 ***
 
-### 关于字体的说明 About Font
+### 关于字体的说明
 
 脚本通过文字获取信息，如果尚未修改字体，可能使某些信息无法获取，使一些错误发生。
 
-#### 字体方案（仅供参考） Font Preference (for reference only)
+#### 字体方案(仅供参考)
 
 1. font-family(字形体系): Times New Roman
 2. font-size(字体大小，数字，范围5~20): 12
@@ -44,7 +44,7 @@
 
 ***
 
-### 自定义判断条件 Customize Condition
+### 自定义判断条件
 
 每一个拥有红色虚线边框的区域，都可以设置自定义判断条件。
 
@@ -58,7 +58,7 @@
 
 * 下拉列表2/4: 比较值A/比较值B
 
-#### 比较值 Comparison Value
+#### 比较值
 
 1. `hp`/`mp`/`sp`: hp/mp/sp的*百分比 (percent)*
 2. `oc`: Overcharge, 250==>250%
@@ -78,7 +78,7 @@
 
 * ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
 
-#### 示例 example
+#### 示例
 
 ![示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
 
@@ -98,7 +98,7 @@
 
 ![电路图示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
 
-#### 技能/物品id表 Skill/Item ID Table
+#### 技能/物品id表
 
 | 1 | 2 | 3 |
 | - | - | - |
@@ -137,7 +137,7 @@
 | Scroll of the Gods / 13299 | - | - |
 | Flower Vase / 19111 | Bubble-Gum / 19131 | - |
 
-#### buff对应图片 BUFF IMG
+#### buff图片表
 
 | 1 | 2 | 3 |
 | - | - | - |
@@ -155,7 +155,7 @@
 
 ***
 
-### 攻击规则-示例 Attack Rule Example
+### 攻击规则-示例
 
 | 敌人 id | 现在 hp | 初始 PW | Imperiled (-2) | Drained (-1) | Confused (+2) | 最终 PW |
 | - | - | - | - | - | - | - |
@@ -171,9 +171,9 @@
 
 ***
 
-### 更新历史 ChangeLog
+### 更新历史
 
-##### 最新 Latest
+##### 最新
 1. 详见 [History for hvAutoAttack - github](https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js)
 
 ##### ...
