@@ -1,98 +1,91 @@
 // ==UserScript==
 // @name        hvSellEquipment
-// @name:zh-CN  【HV】出售装备
-// @author      Dodying
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
+// @description
 // @include     http*://hentaiverse.org/
 // @include     http*://alt.hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
 // @include     http*://alt.hentaiverse.org/?s=Character&ss=ch
-// @version     1.00b
+// @version     1.01
 // @grant       none
+// @author      Dodying
+// @namespace   https://github.com/dodying/
+// @supportURL  https://github.com/dodying//UserJs/issues
+// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
-if (document.querySelector('#togpane_log')) {
-  return;
-}
-var ReferURL = [
-  '1handed',
-  '2handed',
-  'staff',
-  'shield',
-  'acloth',
-  'alight',
-  'aheavy'
-];
-var left = document.documentElement.clientWidth - 80;
-var div = document.createElement('div');
-div.id = 'ShowEquip';
-div.style = 'color: red;position: fixed;right: 5px;top: 30px;z-index: 999;';
-div.innerHTML = '<button type="button">Show EQPT</button><br><button type="button" style="display:none">SELL All</button><br><button type="button" style="display:none">Reload</button>';
-document.body.appendChild(div);
-var script = document.createElement('script');
-script.innerHTML = 'function Equiplock(g, f) {var e = f.className == \'il\' || f.className == \'ilp\';var h = f.className == \'ilp\' || f.className == \'iup\';f.className = \'i\' + (e ? \'u\' : \'l\') + (h ? \'p\' : \'\');var i = get_rpcsession();xhr(MAIN_URL + \'rpc/rpc_equip.php?act=toggle_lock&eid=\' + g + \'&val=\' + (e ? 0 : 1));};function xhr(url) {var xhr = \'xhr\' + Math.random().toString();xhr = new XMLHttpRequest();xhr.open(\'GET\', url, true);xhr.send(null);};';
-document.body.appendChild(script);
-document.querySelector('#ShowEquip button').addEventListener('click', function () {
-  if (!document.querySelector('#Equip')) {
-    CreateEquipDIV();
-    document.querySelector('#ShowEquip button').innerHTML = 'Hide EQPT';
-    document.querySelectorAll('#ShowEquip button') [1].setAttribute('style', '');
-    document.querySelectorAll('#ShowEquip button') [2].setAttribute('style', '');
-  } else {
-    var style = document.querySelector('#Equip').getAttribute('style');
-    if (style.indexOf('display: none') < 0) {
-      document.querySelector('#Equip').setAttribute('style', style + 'display: none;');
-      document.querySelector('#ShowEquip button').innerHTML = 'Show EQPT';
-      document.querySelectorAll('#ShowEquip button') [1].setAttribute('style', 'display: none;');
-      document.querySelectorAll('#ShowEquip button') [2].setAttribute('style', 'display: none;');
-    } else {
-      document.querySelector('#Equip').setAttribute('style', style.replace('display: none;', ''));
-      document.querySelector('#ShowEquip button').innerHTML = 'Hide EQPT';
-      document.querySelectorAll('#ShowEquip button') [1].setAttribute('style', '');
-      document.querySelectorAll('#ShowEquip button') [2].setAttribute('style', '');
+(function() {
+  /**
+   * [keepEqps description]
+   * the Equipment that you DON'T want to sell
+   * @type {Array}
+   * Eg. ['Magnificent', 'Legendary', 'Peerless']
+   * Eg. ['Legendary Arctic Redwood Staff of Destruction']
+   */
+  var keepEqps = ['Average', 'Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless'];
+  /**
+   * [func description]
+   * here put in what you want to do after sell the eqps
+   * the default is the page reload.
+   */
+  var func = function() {
+    location.href = location.href;
+  };
+  var regexp = new RegExp(keepEqps.join('|'));
+  var soldEqps = localStorage.soldEqps || [];
+  var keepEids = [];
+  post('?s=Bazaar&ss=es', function(data) {
+    post(gE('#mainpane>script[src]', data).src, function(data1) {
+      var json = JSON.parse(data1.match(/{.*}/)[0]);
+      for (var i in json) {
+        if (soldEqps.indexOf(i) === -1 && !regexp.test(json[i].t)) keepEids.push(i);
+      }
+      if (keepEids.length === 0) return;
+      localStorage.soldEqps = soldEqps.concat(keepEids);
+      post('?s=Bazaar&ss=es', function() {
+        func();
+      }, 'storetoken=' + gE('input[name="storetoken"]', data).value + '&select_group=item_pane&select_eids=' + encodeURIComponent(keepEids.join()));
+    }, null, 'text');
+  });
+
+  function gE(ele, mode, parent) { //获取元素
+    if (typeof ele === 'object') {
+      return ele;
+    } else if (mode === undefined && parent === undefined) {
+      return (isNaN(ele * 1)) ? document.querySelector(ele) : document.getElementById(ele);
+    } else if (mode === 'all') {
+      return (parent === undefined) ? document.querySelectorAll(ele) : parent.querySelectorAll(ele);
+    } else if (typeof mode === 'object' && parent === undefined) {
+      return mode.querySelector(ele);
     }
   }
-});
-document.querySelectorAll('#ShowEquip button') [1].addEventListener('click', function () {
-  var check = confirm('Whether to SELL all equipments?\nYou can lock the EQPT you dont want to sell in left panel.');
-  if (check == true) {
-    for (var i = 0; i < ReferURL.length; i++) {
-      Sell(ReferURL[i]);
-    }
+
+  function cE(name) { //创建元素
+    return document.createElement(name);
   }
-});
-document.querySelectorAll('#ShowEquip button') [2].addEventListener('click', function () {
-  var check = confirm('Whether to reload equipments?');
-  if (check == true) {
-    var temp = document.querySelector('#Equip');
-    document.body.removeChild(temp);
-    CreateEquipDIV();
+
+  function post(href, func, parm, type) { //post
+    var xhr = new XMLHttpRequest();
+    xhr.open(parm ? 'POST' : 'GET', href);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.responseType = type || 'document';
+    xhr.onerror = function() {
+      xhr = null;
+      post(href, func, parm, type);
+    };
+    xhr.onload = function(e) {
+      if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
+        var data = e.target.response;
+        if (xhr.responseType === 'document' && gE('#messagebox', data)) {
+          if (gE('#messagebox')) {
+            gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
+          } else {
+            gE('#csp').appendChild(gE('#messagebox', data));
+          }
+        }
+        func(data, e);
+      }
+      xhr = null;
+    };
+    xhr.send(parm);
   }
-});
-///////////////////////////////////////////////////////////////
-function Sell(refer) {
-  var xhr = 'xhr_Sell' + Math.random().toString();
-  xhr = new XMLHttpRequest();
-  xhr.open('POST', location.origin + '/?s=Bazaar&ss=es&filter=' + refer);
-  var parm = 'sell_all=1dca93d84fffb8614cb251bbe9a4e37571c7ff0c';
-  xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send(parm);
-}
-function CreateEquipDIV() {
-  var xhr = 'xhr_CreateEquipDIV' + Math.random().toString();
-  xhr = new XMLHttpRequest();
-  xhr.open('GET', location.origin + '/?s=Character&ss=in');
-  xhr.onload = function () {
-    var Equip_html = xhr.responseText.replace(/[\r\n]/g, '').replace(/.*?<div class="eqp/, '<div class="eqp').replace(/<\/div><div class="csps".*/, '').replace(/<div class="(eqp|eqpp)" style="width:630px"><div class="il.*?<div class="c"><\/div><\/div><\/div><\/div><\/div>/g, '').replace(/on(mouseout|mouseover)=".*?"/g, '').replace(/equips\.lock/g, 'Equiplock').replace(/Crude/g, '1-☆').replace(/Fair/g, '2-★').replace(/Average/g, '3-★☆').replace(/Superior/g, '4-★★').replace(/Exquisite/g, '<span style="background:#d7e698">5-★★☆</span>').replace(/Magnificent/g, '<span style="background:#a6daf6;font-weight:bold;" >6-★★★</span>').replace(/Legendary/g, '<span style="background:#f5b9cd;font-weight:bold;" >7-★★★☆</span>').replace(/Peerless/g, '<span style="background:#fbc93e;font-weight:bold;" >8-★★★★</span>');
-    //alert(Equip_html);
-    var div1 = document.createElement('div');
-    div1.id = 'Equip';
-    div1.style = 'position: absolute;left: 230px;top: 210px;z-index: 999;font-size: 14px;background: white;';
-    div1.innerHTML = 'The following are equipments which is not locked' + Equip_html;
-    document.body.appendChild(div1);
-  }
-  xhr.send(null);
-}
+})();
