@@ -1,4 +1,4 @@
-### 目录 Index
+### Index
 
 * 1.[Screenshots](#screenshots)
 * 2.[About Font](#about-font)
