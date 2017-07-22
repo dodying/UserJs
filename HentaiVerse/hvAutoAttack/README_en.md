@@ -2,11 +2,11 @@
 
 * 1.[Screenshots](#screenshots)
 * 2.[About Font](#about-font)
-* __2.1[Font Preference (for reference only)](#font-preference-for-reference-only-)
+* __2.1[Font Preference (for reference only)](#font-preference-for-reference-)
 * 3.IMPORTANT: [Customize Condition](#customize-condition)
 * __3.1[Comparison Value](#comparison-value)
 * __3.2[Example](#example)
-* __3.3[Skill/Item ID Table](#skill-item-id-table)
+* __3.3[Skill/Item ID Table](#skillitem-id-table)
 * __3.4[Buff Image Table](#buff-image-table)
 * 4.[Attack Rule Example](#attack-rule-example)
 
