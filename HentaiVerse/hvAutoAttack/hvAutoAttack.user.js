@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.84d
+// @version      2.84e
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -97,6 +97,7 @@
     var dateNow = new Date();
     g('dateNow', dateNow.getUTCFullYear() + '/' + (dateNow.getUTCMonth() + 1) + '/' + dateNow.getUTCDate());
     if (g('option').quickSite) quickSite();
+    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return
     if (g('option').repair) {
       var json, checkOnload, checkLength;
       var len = 0;
@@ -247,11 +248,7 @@ function objSort(obj) { //对象排序
 }
 
 function _alert(func, l0, l1, l2, answer) {
-  var lang = [
-    l0,
-    l1,
-    l2
-  ][g('lang')];
+  var lang = [l0, l1, l2][g('lang')];
   if (func === -1) {
     return lang;
   } else if (func === 0) {
@@ -382,7 +379,7 @@ function optionBox() { //配置界面
         <button class="testNotification"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div>\
       <div><b><l01>内置插件</l01><l2>Built-in Plugin</l2></b>: \
         <input id="riddleRadio" type="checkbox"><label for="riddleRadio">RiddleLimiter Plus</label>; \
-        <input id="encounter" type="checkbox"><label for="encounter"><l0>自动遭遇战</l0><l1>自動遭遇戰</l1><l2>Auto Random Encounter</l2></label></div>\
+        <input id="encounter" type="checkbox"><label for="encounter"><l0>自动遭遇战</l0><l1>自動遭遇戰</l1><l2>Auto Encounter</l2></label></div>\
       <div><b><l01>魔法技能</l01><l2>Offensive Magic</l2></b>: \
         <div class="customize" name="middleSkillCondition"><l0>中阶技能使用条件</l0><l1>中階技能使用條件</l1><l2>Conditions for 2nd Tier</l2>: <br></div>\
         <div class="customize" name="highSkillCondition"><l0>高阶技能使用条件</l0><l1>高階技能使用條件</l1><l2>Conditions for 3rd Tier</l2>: <br></div></div>\
@@ -419,7 +416,9 @@ function optionBox() { //配置界面
         <div class="customize" name="etherTapCondition"><l0>条件</l0><l1>條件</l1><l2>Conditions</l2>: <br></div></div>\
       <div><input id="autoFlee" type="checkbox"><label for="autoFlee"><b><l0>自动逃跑</l0><l1>自動逃跑</l1><l2>Flee</l2></b></label>: \
         <div class="customize" name="fleeCondition"><l0>条件</l0><l1>條件</l1><l2>Conditions</l2>: <br></div></div>\
-      <div><input id="restoreStamina" type="checkbox"><label for="restoreStamina"><b><l0>战前回复</l0><l1>戰前回复</l1><l2>Restore stamina</l2></b>: <l0>战斗前，如果</l0><l1>戰鬥前，如果</l1><l2><b></b>if before a battle and </l2>Stamina ≤ <input class="hvAANumber" name="staminaLow" placeholder="30" type="text"></label></div></div>',
+      <div><input id="restoreStamina" type="checkbox"><label for="restoreStamina"><b><l0>战前回复</l0><l1>戰前回复</l1><l2>Restore stamina</l2></b>: \
+        <l0>战斗前，如果</l0><l1>戰鬥前，如果</l1><l2><b></b>if before a battle and </l2>Stamina ≤ <input class="hvAANumber" name="staminaLow" placeholder="30" type="text"></label><br>\
+        <div class="hvAANew"></div><l0>说明: 如果不勾选，当Stamina小于此值后，则不进行自动遭遇战与闲置竞技场</l0><l1>說明: 如果不勾選，當Stamina小於此值後，則不進行自動遭遇戰與閒置競技場</l1><l2>Note: If unchecked, when Stamina is less than this value, no Auto Encounter and Idle Arena</l2></div></div>',
     '<div class="hvAATab" id="hvAATab-Item">\
       <div class="itemOrder"><l0>施放顺序</l0><l1>施放順序</l1><l2>Cast Order</l2>: <input name="itemOrderName" style="width:80%;" type="text" disabled="true"><input name="itemOrderValue" style="width:80%;" type="hidden" disabled="true"><br>\
         <input id="itemOrder_Cure" value="Cure,311" type="checkbox"><label for="itemOrder_Cure">Cure</label><input id="itemOrder_FC" value="FC,313" type="checkbox"><label for="itemOrder_FC">Full-Cure</label><input id="itemOrder_HP" value="HP,11195" type="checkbox"><label for="itemOrder_HP">Health Potion</label><input id="itemOrder_HE" value="HE,11199" type="checkbox"><label for="itemOrder_HE">Health Elixir</label><input id="itemOrder_MP" value="MP,11295" type="checkbox"><label for="itemOrder_MP">Mana Potion</label><br>\
@@ -505,7 +504,7 @@ function optionBox() { //配置界面
       <div><input id="skill_T1" type="checkbox"><label for="skill_T1"><l0>1阶</l0><l1>1階</l1><l2>T1</l2>: </label>OC ≥ <input class="hvAANumber" name="skillOC_T1" type="text">; <input id="skillOTOS_T1" type="checkbox"><label for="skillOTOS_T1"><l01>一回合只使用一次</l01><l2>One round only spell one time</l2></label><div class="customize" name="skillT1Condition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div></div>',
     '<div class="hvAATab" id="hvAATab-Scroll">\
       <l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: \
-      <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Random Encounter</label>\
+      <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Encounter</label>\
       <div class="customize" name="scrollCondition"><l0>总体施放条件</l0><l1>總體施放條件</l1><l2>Total Conditions</l2>: <br></div>\
       <input id="scrollFirst" type="checkbox"><label for="scrollFirst"><l0>存在技能生成的Buff时，仍然使用卷轴</l0><l1>存在技能生成的Buff時，仍然使用捲軸</l1><l2>Use Scrolls even when there are effects from spells</l2>.</label>\
       <div><input id="scroll_Go" type="checkbox"><label for="scroll_Go">Scroll of the Gods</label><div class="customize" name="scrollGoCondition"><l0>施放条件</l0><l1>施放條件</l1><l2>Conditions</l2>: <br></div></div>\
@@ -543,7 +542,7 @@ function optionBox() { //配置界面
     '<div class="hvAATab hvAACenter" id="hvAATab-About">\
       <div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2></span>: \
         <l0>如果脚本长期暂停且网络无问题，请点击</l0><l1>如果腳本長期暫停且網絡無問題，請點擊</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click</l2><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button><br>\
-        <l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Random Encounter</option></select> <l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug hvAANumber" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug hvAANumber" placeholder="1" type="text"></div>\
+        <l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Encounter</option></select> <l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug hvAANumber" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug hvAANumber" placeholder="1" type="text"></div>\
       <div class="hvAAQuickSite"><span class="hvAATitle"><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><button class="quickSiteAdd"><l01>新增</l01><l2>Add</l2></button><br>\
         <l0>注意: 留空“姓名”一栏则表示删除该行，修改后请保存</l0><l1>注意: 留空“姓名”一欄則表示刪除該行，修改後請保存</l1><l2>Note: The "name" input box left blank will be deleted, after change please save in time.</l2>\
         <table><tbody><tr class="hvAATh"><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr></tbody></table></div>\
@@ -976,6 +975,7 @@ function customizeBox() { //自定义条件界面
     '<option value="bossAlive">bossAlive</option>',
     '<option value="roundNow">roundNow</option>',
     '<option value="roundAll">roundAll</option>',
+    '<option value="roundLeft">roundLeft</option>',
     '<option value="roundType">roundType</option>',
     '<option value="attackStatus">attackStatus</option>',
     '<option value="_isCd_">isCd</option>',
@@ -1215,11 +1215,7 @@ function checkCondition(parms) {
 //答题//
 function riddleAlert() { //答题警报
   setAlarm('Riddle');
-  var answers = [
-    'A',
-    'B',
-    'C'
-  ];
+  var answers = ['A', 'B', 'C'];
   document.onkeydown = function(e) {
     gE('#hvAAAlert-Riddle').pause();
     if (/^[abc]$/i.test(e.key)) {
@@ -1375,7 +1371,7 @@ function idleArena() { //闲置竞技场
   post('?s=Battle&ss=' + href, goto, 'initid=' + String(id) + '&inittoken=' + token);
 }
 
-function encounterCheck() { //Random Encounter
+function encounterCheck() { //encounter
   var timeNow = new Date().getTime();
   var encounter = (getValue('encounter') && getValue('encounter', true).dateNow === g('dateNow')) ? getValue('encounter', true) : {
     dateNow: g('dateNow'),
@@ -1689,7 +1685,8 @@ function battleInfo() { //战斗战况
     '<l0>圣</l0><l1>聖</l1><l2>Divine</l2>',
     '<l0>暗</l0><l1>暗</l1><l2>Forbidden</l2>'
   ];
-  gE('.hvAALog').innerHTML = ['Turns: ' + g('turn'),
+  gE('.hvAALog').innerHTML = [
+    'Turns: ' + g('turn'),
     '<br>Speed: ' + g('runSpeed') + ' t/s',
     '<br>Round: ' + g('roundNow') + '/' + g('roundAll'),
     '<br><l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ' + status[g('attackStatus')],
@@ -2321,16 +2318,7 @@ function dropMonitor(battleLog) { //掉落监测
       item = gE('span', battleLog[i]);
       name = item.textContent.match(/^\[(.*?)\]$/)[1];
       if (item.style.color === 'rgb(255, 0, 0)') {
-        var quality = [
-          'Crude',
-          'Fair',
-          'Average',
-          'Superior',
-          'Exquisite',
-          'Magnificent',
-          'Legendary',
-          'Peerless'
-        ];
+        var quality = ['Crude', 'Fair', 'Average', 'Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless'];
         for (var j = g('option').dropQuality; j < quality.length; j++) {
           if (name.match(quality[j])) {
             drop[name] = (name in drop) ? drop[name] + 1 : 1;
