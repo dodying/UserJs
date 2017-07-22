@@ -1,18 +1,20 @@
 ### 目录 Index
 
-1. [截图(Screenshots)](#截图-screenshots)
-2. [攻击规则-示例(Attack Rule Example)](#攻击规则-示例-attack-rule-example)
-3. [关于字体的说明(About Font)](#关于字体的说明-about-font)
+* 1.[截图(Screenshots)](#截图-screenshots)
 
-  ______ [字体方案](#字体方案仅供参考-font-preference-for-reference-only)
+* 2.[关于字体的说明(About Font)](#关于字体的说明-about-font)
 
-4. 必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件-customize-condition)
+*   2.1[字体方案](#字体方案仅供参考-font-preference-for-reference-only)
 
-  ______ [示例](#示例-example)
+* 3.必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件-customize-condition)
 
-5. [更新历史(ChangeLog)](#更新历史-changelog)
+*   3.1[示例](#示例-example)
 
-  ______ [最新](#最新-latest)
+* 4.[攻击规则-示例(Attack Rule Example)](#攻击规则-示例-attack-rule-example)
+
+* 5.[更新历史(ChangeLog)](#更新历史-changelog)
+
+*   5.1[最新](#最新-latest)
 
 ***
 
@@ -22,34 +24,11 @@
 
 ***
 
-### 攻击规则-示例 Attack Rule Example
-
-<table><tbody>
-<tr><td>Enemy id</td><td>now hp</td><td>init PW</td><td>Imperiled (-2)</td><td>Drained (-1)</td><td>Confused (+2)</td><td>PW</td></tr>
-<tr><td>1</td><td>20K</td><td>10</td><td>√</td><td></td><td>√</td><td>10</td></tr>
-<tr><td>2</td><td>30K</td><td>15</td><td></td><td>√</td><td></td><td>14</td></tr>
-<tr><td>3</td><td>40K</td><td>20</td><td>√</td><td></td><td></td><td>18</td></tr>
-</tbody></table>
-
-**注意**: 脚本优先攻击最小PW值的敌人。
-
-**NOTE**: The script will attack enemy who has the least PW first.
-
-在这个例子中，脚本接下来先攻击敌人1。
-
-In this example, the script will attack enemy 1 next.
-
-***
-
 ### 关于字体的说明 About Font
 
 脚本通过文字获取信息，如果尚未修改字体，可能使某些信息无法获取，使一些错误发生。
 
-Scripts get information through text, and if you have not yet modified the font, some information may not be available, causing some errors to occur.
-
 #### 字体方案（仅供参考） Font Preference (for reference only)
-
-![字体方案（仅供参考）](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Font.gif)
 
 1. font-family(字形体系): Times New Roman
 2. font-size(字体大小，数字，范围5~20): 12
@@ -63,35 +42,23 @@ Scripts get information through text, and if you have not yet modified the font,
 
 每一个拥有红色虚线边框的区域，都可以设置自定义判断条件。
 
-Each area with a red dotted border can be set to a customize condition.
-
 ** 注意：如果这些区域留空（一个条件也没设置），那么就相当于真。 **
-
-** If these areas are left blank (a condition is not set), then it's equivalent to true. **
 
 当鼠标在这些区域内移动时，右上角会显示一个盒子（当鼠标不在这些区域内，盒子消失）
 
-When the mouse moves in these areas, a box is displayed in the upper right corner. (When the mouse out, the box disappears)
-
 盒子内可见四个下拉列表和一个按钮
-
-Four drop down lists and one button are visible in the box
 
 ** 下拉列表1: 这个条件插入的位置（具体作用请看示例） **
 
-** Drop-down List 1: the location of this condition inserted (see the example for specific effects)  **
-
 ** 下拉列表2/4: 比较值A/比较值B **
 
-** Drop-down List 2/4: comparison value A / comparison value B **
-
-** 比较值 Comparison Value **
+#### ** 比较值 Comparison Value **
 
 1. `hp`/`mp`/`sp`: hp/mp/sp的**百分比 (percent)**
 2. `oc`: Overcharge, 250==>250%
 3. `monsterAll`/`monsterAlive`/`bossAll`/`bossAlive`: 怪兽/Boss的总数目/存活数目
-4. `roundNow`/`roundAll`: 当前回合数/总回合数
-5. `roundType`: 战役模式 (`ar`: The Arena, `rb`: Ring of Blood, `gr`: GrindFest, `iw`: Item World, `ba`: Random Encounter)，由于是字符串之间的比较，所以请加上引号，如"ar"/'ar' (Because comparison between strings, please add quotation, such as `"ar"`/`'ar'`)
+4. `roundNow`/`roundAll`/`roundLeft`: 当前回合数/总回合数/剩余回合数
+5. `roundType`: 战役模式 (`ar`: The Arena, `rb`: Ring of Blood, `gr`: GrindFest, `iw`: Item World, `ba`: Random Encounter)，由于是字符串之间的比较，所以请加上引号，如"ar"/'ar'
 6. `attackStatus`: 攻击模式 (`0`: Physical, `1`: Fire, `2`: Cold, `3`: Elec, `4`: Wind, `5`: Divine, `6`: Forbidden)
 7. `isCd`: 技能/物品是否cd，格式`_isCd_id`
 
@@ -103,11 +70,7 @@ Four drop down lists and one button are visible in the box
 
 ** 下拉列表3: 只支持比较运算符（`1`:大于, `2`:小于, `3`: 大于等于, `4`: 小于等于, `5`:等于, `6`:不等于） **
 
-** Drop-down List 3: only support comparison operator (`1`: >, `2`: <, `3`: ≥, `4`: ≤, `5`: =, `6`: ≠) **
-
 ** ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框 **
-
-** Button ADD: Generates an input box with a value of `A,Comparison-Operator,B` **
 
 #### 示例 example
 
@@ -115,23 +78,90 @@ Four drop down lists and one button are visible in the box
 
 图中，我设置了三个大条件（2中有两个小条件）
 
-In the picture, I set three big conditions (2 contains two small conditions)
 
-1. Condition 1: 总回合数大于12 (total rounds more than 12)
+1. Condition 1: 总回合数大于12
 
-2. Condition 2: Boss数大于1、hp大于hp (bosses more than 1 and hp more than hp)
+2. Condition 2: Boss数大于1、hp大于hp
 
-3. Condition 3: 怪物数大于6 (monsters more than 6)
+3. Condition 3: 怪物数大于6
 
 只要任一大条件下所有小条件判断为真，总体就为真
 
-It's TRUE, when any big condition is true (To judge big condition is true, all small condition must true)
-
 以下为电路图示意图
 
-The following is a schematic diagram of the circuit diagram
 
 ![电路图示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
+
+#### 技能/物品id表
+
+| 1 | 2 | 3 |
+| - | - | - |
+| Flee / 1001 | - | - |
+| Scan / 1011 | - | - |
+| FUS RO DAH / 1101 | - | - |
+| Orbital Friendship Cannon / 1111 | - | - |
+| Skyward Sword / 2101 | - | - |
+| Shield Bash / 2201 | Vital Strike / 2202 | Merciful Blow / 2203 |
+| Great Cleave / 2301 | Rending Blow / 2302 | Shatter Strike / 2303 |
+| Iris Strike / 2401 | Backstab / 2402 | Frenzied Blows / 2403 |
+| Concussive Strike / 2501 | - | - |
+| Fiery Blast / 111 | Inferno / 112 | Flames of Loki / 113 |
+| Freeze / 121 | Blizzard / 122 | Fimbulvetr / 123 |
+| Shockblast / 131 | Chained Lightning / 132 | Wrath of Thor / 133 |
+| Gale / 141 | Downburst / 142 | Storms of Njord / 143 |
+| Smite / 151 | Banishment / 152 | Paradise Lost / 153 |
+| Corruption / 161 | Disintegrate / 162 | Ragnaro / 163 |
+| Drain / 211 | Weaken / 212 | Imperil / 213 |
+| Slow / 221 | Sleep / 222 | Confuse / 223 |
+| Blind / 231 | Silence / 232 | MagNet / 233 |
+| Cure / 311 | Regen / 312 | Full-Cure / 313 |
+| Protection / 411 | Haste / 412 | Shadow Veil / 413 |
+| Absorb / 421 | Spark of Life / 422 | Spirit Shield / 423 |
+| Arcane Focus / 431 | Heartseeker / 432 |  |
+| - | - | - |
+| Health Draught / 11191 | Health Potion / 11195 | Health Elixir / 11199 |
+| Mana Draught / 11291 | Mana Potion / 11295 | Mana Elixir / 11299 |
+| Spirit Draught / 11391 | Spirit Potion / 11395 | Spirit Elixir / 11399 |
+| Energy Drink / 11401 | - | - |
+| Last Elixir / 11501 | - | - |
+| Infusion of Flames / 12101 | Infusion of Frost / 12201 | Infusion of Lightning / 12301 |
+| Infusion of Storms / 12401 | Infusion of Divinity / 12501 | Infusion of Darkness / 12601 |
+| Scroll of Swiftness / 13101 | Scroll of Protection / 13111 | Scroll of the Avatar / 13199 |
+| Scroll of Absorption / 13201 | Scroll of Shadows / 13211 | Scroll of Life / 13221 |
+| Scroll of the Gods / 13299 | - | - |
+| Flower Vase / 19111 | Bubble-Gum / 19131 | - |
+
+#### buff对应图片
+
+| 1 | 2 | 3 |
+| - | - | - |
+| - | Regen / regen | - |
+| Protection / protection | Haste / haste | Shadow Veil / shadowveil |
+| Absorb / absorb | Spark of Life / sparklife | Spirit Shield / spiritshield |
+| Arcane Focus / arcanemeditation | Heartseeker / heartseeker | Cloak of the Fallen / 423 |
+| Health Draught / healthpot | Mana Draught / manapot | Spirit Draught / spiritpot |
+| Infusion of Flames / fireinfusion | Infusion of Frost / coldinfusion | Infusion of Lightning / elecinfusion |
+| Infusion of Storms / windinfusion | Infusion of Divinity / holyinfusion | Infusion of Darkness / darkinfusion |
+| Scroll of Swiftness / haste_scroll | - | - |
+| Flower Vase / flowers | Bubble-Gum / gum | - |
+
+
+
+***
+
+### 攻击规则-示例 Attack Rule Example
+
+| 敌人 id | 现在 hp | 初始 PW | Imperiled (-2) | Drained (-1) | Confused (+2) | 最终 PW |
+| - | - | - | - | - | - | - |
+| 1 | 20K | 10 | √ | | √ | 10 |
+| 2 | 30K | 15 | | √ | | 14 |
+| 3 | 40K | 20 | √ | | | 18 |
+
+**注意**: 脚本优先攻击最小PW值的敌人。
+
+
+在这个例子中，脚本接下来先攻击敌人1。
+
 
 ***
 
