@@ -7,136 +7,159 @@
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include     http*://hentaiverse.org/*
 // @include     http*://alt.hentaiverse.org/*
-// @version     1.01e
+// @version     1.01d
 // @grant       none
 // @run-at      document-end
 // ==/UserScript==
-(function () {
-  if (!$('#navbar')) return;
-  var trainItem = '';
-  var dateObj = new Date();
-  var countdownBox = document.createElement('div');
-  countdownBox.className = 'trainCountdown';
-  countdownBox.style.cssText = 'font-weight:bold;font-size:large;';
-  $('body').appendChild(countdownBox);
-  if (!$('#train_progress')) { //不位于训练界面或训练完成
-    var trainTimeEnd = localStorage.trainTimeEnd || '';
-    if (trainTimeEnd === '' || trainTimeEnd <= dateObj.getTime() || $('#train_table')) { //训练完成
+(function() {
+  if (!gE('#navbar')) return;
+  var trainItem = 'Adept Learner';
+  var countdownBox = gE('body').appendChild(cE('div'));
+  countdownBox.style.cssText = 'font-weight:bold;font-size:large;position:absolute;top:2px;right:2px';
+  var timeLast;
+  var trainList = {
+    'Adept Learner': {
+      id: 50,
+      time: 1
+    },
+    'Assimilator': {
+      'id': '51',
+      'time': 24
+    },
+    'Ability Boost': {
+      'id': '80',
+      'time': 2
+    },
+    'Manifest Destiny': {
+      'id': '81',
+      'time': 24
+    },
+    'Scavenger': {
+      'id': '70',
+      'time': 4
+    },
+    'Luck of the Draw': {
+      'id': '71',
+      'time': 8
+    },
+    'Quartermaster': {
+      'id': '72',
+      'time': 12
+    },
+    'Archaeologist': {
+      'id': '', //
+      'time': 24
+    },
+    'Metabolism': {
+      'id': '84',
+      'time': 24
+    },
+    'Inspiration': {
+      'id': '85',
+      'time': 24
+    },
+    'Scholar of War': {
+      'id': '90',
+      'time': 0
+    },
+    'Tincture': {
+      'id': '91',
+      'time': 0
+    },
+    'Pack Rat': {
+      'id': '98',
+      'time': 0
+    },
+    'Dissociation': {
+      'id': '88',
+      'time': 24
+    },
+    'Set Collector': {
+      'id': '96',
+      'time': 12
+    }
+  };
+  post('?s=Character&ss=tr', function(data) {
+    if (gE('#train_progcnt', data)) {
+      var nowTraining = gE('#train_progress>div>strong', data).innerText;
+      var nowTrainingProcess = gE('#train_progcnt', data).innerText;
+      var timeAll = trainList[nowTraining].time;
+      timeLast = parseInt(timeAll * (1 - 0.01 * nowTrainingProcess) * 60 * 60);
+      timeUpdate();
+    } else {
+      if (trainItem !== '') autoTrain(trainList[trainItem]);
       countdownBox.innerHTML = '<a href="/?s=Character&ss=tr">Train Completed</a>';
       document.title = 'Train Completed';
-      if (trainItem) autoTrain(trainItem); //自动训练
-    } else { //不位于训练界面
-      var timeLast = parseInt((trainTimeEnd - dateObj.getTime()) / 1000);
-      countdownBox.innerHTML = timeLast;
-      var timeDecrease = 0;
-      var timeUpdateIntarval = setInterval(timeUpdate, 1000);
     }
-  } else { //位于训练界面且训练中
-    var nowTraining = $('#train_progress>div>strong').innerText;
-    var nowTrainingProcess = $('#train_progcnt').innerText;
-    var traningItems = document.querySelectorAll('#train_table tr>td:nth-child(1)>div>div');
-    for (var i = 0; i < traningItems.length; i++) {
-      if (traningItems[i].innerText === nowTraining) break;
-    }
-    var timeAll = parseInt($('#train_table>tbody>tr:nth-child(' + (i + 2) + ')>td:nth-child(4)>div>div').innerText);
-    var timeLast = parseInt(timeAll * (1 - 0.01 * nowTrainingProcess) * 60 * 60);
-    localStorage.trainTimeEnd = dateObj.getTime() + timeLast * 1000;
-    countdownBox.innerHTML = timeLast;
-    var timeDecrease = 0;
-    var timeUpdateIntarval = setInterval(timeUpdate, 1000);
-  }
+  });
+
   function timeUpdate() {
-    timeDecrease++;
-    if (timeLast <= timeDecrease) {
-      location = location.href;
-    } else {
-      var timeCountdownNow = timeLast - timeDecrease;
-      var second = Math.floor(timeCountdownNow % 60);
-      if (second < 10) second = '0' + second.toString();
-      var minite = Math.floor((timeCountdownNow / 60) % 60);
-      if (minite < 10) minite = '0' + minite.toString();
-      var hour = Math.floor((timeCountdownNow / 3600) % 24);
-      if (hour < 10) hour = '0' + hour.toString();
-      $('.trainCountdown').innerText = hour + ':' + minite + ':' + second;
-    }
-  }
-  function $(e) {
-    return document.querySelector(e);
-  }
-  function autoTrain(name) {
-    if (location.search !== '?s=Character&ss=tr') {
-      location.search = '?s=Character&ss=tr';
-      return;
-    }
-    var trainList = {
-      'Adept Learner': {
-        id: 50,
-        time: 1
-      },
-      'Assimilator': {
-        'id': '51',
-        'time': 24
-      },
-      'Ability Boost': {
-        'id': '80',
-        'time': 2
-      },
-      'Manifest Destiny': {
-        'id': '81',
-        'time': 24
-      },
-      'Scavenger': {
-        'id': '70',
-        'time': 4
-      },
-      'Luck of the Draw': {
-        'id': '71',
-        'time': 8
-      },
-      'Quartermaster': {
-        'id': '72',
-        'time': 12
-      },
-      'Archaeologist': {
-        'id': '', //
-        'time': 24
-      },
-      'Metabolism': {
-        'id': '84',
-        'time': 24
-      },
-      'Inspiration': {
-        'id': '85',
-        'time': 24
-      },
-      'Scholar of War': {
-        'id': '90',
-        'time': 0
-      },
-      'Tincture': {
-        'id': '91',
-        'time': 0
-      },
-      'Pack Rat': {
-        'id': '98',
-        'time': 0
-      },
-      'Dissociation': {
-        'id': '88',
-        'time': 24
-      },
-      'Set Collector': {
-        'id': '96',
-        'time': 12
+    var h, m, s;
+    setInterval(function() {
+      timeLast--;
+      if (timeLast <= 0) {
+        location.href = location.href;
+      } else {
+        s = Math.floor(timeLast % 60);
+        if (s < 10) s = '0' + s.toString();
+        m = Math.floor((timeLast / 60) % 60);
+        if (m < 10) m = '0' + m.toString();
+        h = Math.floor((timeLast / 3600) % 24);
+        if (h < 10) h = '0' + h.toString();
+        countdownBox.innerText = h + ':' + m + ':' + s;
       }
-    };
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', location);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-    xhr.onload = function () {
-      localStorage.trainTimeEnd = new Date().getTime() + trainList[name].time * 60 * 60 * 1000;
-      location = location.href;
-    }
-    xhr.send('start_train=' + trainList[name].id);
+    }, 1000);
+    setTimeout(function() {
+      location.href = location.href;
+    }, 1000 * 60 * 10);
   }
-}) ();
+
+
+  function autoTrain(item) {
+    post('?s=Character&ss=tr', function() {
+      location.href = location.href;
+    }, 'start_train=' + item.id);
+  }
+
+  function gE(ele, mode, parent) { //获取元素
+    if (typeof ele === 'object') {
+      return ele;
+    } else if (mode === undefined && parent === undefined) {
+      return (isNaN(ele * 1)) ? document.querySelector(ele) : document.getElementById(ele);
+    } else if (mode === 'all') {
+      return (parent === undefined) ? document.querySelectorAll(ele) : parent.querySelectorAll(ele);
+    } else if (typeof mode === 'object' && parent === undefined) {
+      return mode.querySelector(ele);
+    }
+  }
+
+  function cE(name) { //创建元素
+    return document.createElement(name);
+  }
+
+  function post(href, func, parm) { //post
+    var xhr = new XMLHttpRequest();
+    xhr.open(parm ? 'POST' : 'GET', href);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.responseType = 'document';
+    xhr.onerror = function() {
+      xhr = null;
+      post(href, func, parm);
+    };
+    xhr.onload = function(e) {
+      if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
+        var data = e.target.response;
+        if (xhr.responseType === 'document' && gE('#messagebox', data)) {
+          if (gE('#messagebox')) {
+            gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
+          } else {
+            gE('#csp').appendChild(gE('#messagebox', data));
+          }
+        }
+        func(data, e);
+      }
+      xhr = null;
+    };
+    xhr.send(parm);
+  }
+})();
