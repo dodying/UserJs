@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.84c
+// @version      2.84d
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -94,6 +94,8 @@
     main();
   } else { //战斗外
     delValue(2);
+    var dateNow = new Date();
+    g('dateNow', dateNow.getUTCFullYear() + '/' + (dateNow.getUTCMonth() + 1) + '/' + dateNow.getUTCDate());
     if (g('option').quickSite) quickSite();
     if (g('option').repair) {
       var json, checkOnload, checkLength;
@@ -130,8 +132,6 @@
       checkOnload();
       return;
     }
-    var dateNow = new Date();
-    g('dateNow', dateNow.getUTCFullYear() + '/' + (dateNow.getUTCMonth() + 1) + '/' + dateNow.getUTCDate());
     if (g('option').encounter) encounterCheck();
     if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
   }
