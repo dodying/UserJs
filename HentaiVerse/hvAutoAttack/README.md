@@ -8,7 +8,13 @@
 
 * 3.必看(Must to See): [自定义判断条件(Customize Condition)](#自定义判断条件-customize-condition)
 
-*   3.1[示例](#示例-example)
+*   3.1[比较值-comparison-value](#比较值-comparison-value)
+
+*   3.2[示例](#示例-example)
+
+*   3.3[技能/物品id表(Skill/Item ID Table)](#技能物品id表-skill-item-id-table)
+
+*   3.4[buff对应图片(BUFF IMG)](#buff对应图片-buff-img)
 
 * 4.[攻击规则-示例(Attack Rule Example)](#攻击规则-示例-attack-rule-example)
 
@@ -16,13 +22,13 @@
 
 *   5.1[最新](#最新-latest)
 
-***
+**
 
 ### 截图 Screenshots
 
 ![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
-***
+**
 
 ### 关于字体的说明 About Font
 
@@ -36,25 +42,25 @@
 4. font-style(字形，normal, italic, oblique): normal
 5. vertical adjust(竖行间距，数字，范围-8~8): -5
 
-***
+**
 
 ### 自定义判断条件 Customize Condition
 
 每一个拥有红色虚线边框的区域，都可以设置自定义判断条件。
 
-** 注意：如果这些区域留空（一个条件也没设置），那么就相当于真。 **
+* 注意：如果这些区域留空（一个条件也没设置），那么就相当于真。 *
 
 当鼠标在这些区域内移动时，右上角会显示一个盒子（当鼠标不在这些区域内，盒子消失）
 
 盒子内可见四个下拉列表和一个按钮
 
-** 下拉列表1: 这个条件插入的位置（具体作用请看示例） **
+* 下拉列表1: 这个条件插入的位置（具体作用请看示例） *
 
-** 下拉列表2/4: 比较值A/比较值B **
+* 下拉列表2/4: 比较值A/比较值B *
 
-#### ** 比较值 Comparison Value **
+#### * 比较值 Comparison Value *
 
-1. `hp`/`mp`/`sp`: hp/mp/sp的**百分比 (percent)**
+1. `hp`/`mp`/`sp`: hp/mp/sp的*百分比 (percent)*
 2. `oc`: Overcharge, 250==>250%
 3. `monsterAll`/`monsterAlive`/`bossAll`/`bossAlive`: 怪兽/Boss的总数目/存活数目
 4. `roundNow`/`roundAll`/`roundLeft`: 当前回合数/总回合数/剩余回合数
@@ -68,9 +74,9 @@
 8. `buffTurn`: 人物Buff剩余时间，格式`_buffTurn_img`<br>如Protection的img为protection，则`_buffTurn_protection,5,0`表示不存在Protection的buff，`_buffTurn_protection,3,10`表示Protection的buff至少剩余10回合
 9. 空白(blank): 自己输入 (the value you want to put in)
 
-** 下拉列表3: 只支持比较运算符（`1`:大于, `2`:小于, `3`: 大于等于, `4`: 小于等于, `5`:等于, `6`:不等于） **
+* 下拉列表3: 只支持比较运算符（`1`:大于, `2`:小于, `3`: 大于等于, `4`: 小于等于, `5`:等于, `6`:不等于） *
 
-** ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框 **
+* ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框 *
 
 #### 示例 example
 
@@ -92,7 +98,7 @@
 
 ![电路图示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
 
-#### 技能/物品id表
+#### 技能/物品id表(Skill/Item ID Table)
 
 | 1 | 2 | 3 |
 | - | - | - |
@@ -131,7 +137,7 @@
 | Scroll of the Gods / 13299 | - | - |
 | Flower Vase / 19111 | Bubble-Gum / 19131 | - |
 
-#### buff对应图片
+#### buff对应图片(BUFF IMG)
 
 | 1 | 2 | 3 |
 | - | - | - |
@@ -147,7 +153,7 @@
 
 
 
-***
+**
 
 ### 攻击规则-示例 Attack Rule Example
 
@@ -157,13 +163,13 @@
 | 2 | 30K | 15 | | √ | | 14 |
 | 3 | 40K | 20 | √ | | | 18 |
 
-**注意**: 脚本优先攻击最小PW值的敌人。
+*注意*: 脚本优先攻击最小PW值的敌人。
 
 
 在这个例子中，脚本接下来先攻击敌人1。
 
 
-***
+**
 
 ### 更新历史 ChangeLog
 
