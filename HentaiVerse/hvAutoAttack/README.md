@@ -1,4 +1,4 @@
-### 目录 Index
+### 目录
 
 * 1.[截图](#截图)
 * 2.[关于字体的说明](#关于字体的说明)
@@ -55,6 +55,7 @@
 3. `monsterAll`/`monsterAlive`/`bossAll`/`bossAlive`: 怪兽/Boss的总数目/存活数目
 4. `roundNow`/`roundAll`/`roundLeft`: 当前回合数/总回合数/剩余回合数
 5. `roundType`: 战役模式 (`ar`: The Arena, `rb`: Ring of Blood, `gr`: GrindFest, `iw`: Item World, `ba`: Random Encounter)
+
   **注意**: 由于是字符串之间的比较，所以请加上引号，如"ar"/'ar'
 6. `attackStatus`: 攻击模式 (`0`: Physical, `1`: Fire, `2`: Cold, `3`: Elec, `4`: Wind, `5`: Divine, `6`: Forbidden)
 7. `isCd`: 技能/物品是否cd，格式`_isCd_id`
