@@ -5,7 +5,7 @@
 // @include     http*://alt.hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
 // @include     http*://alt.hentaiverse.org/?s=Character&ss=ch
-// @version     1.00
+// @version     1.00a
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/
@@ -103,7 +103,7 @@
   var checkFunc = function(data, url) {
     len++;
     eids = {};
-    gE('#eqshop_outer>.eqshop_pane:nth-child(1) .eqp>div[id]', 'all', data).forEach(function(i) {
+    gE('#eqshop_outer>.eqshop_pane:nth-child(1) .eqp>.iu+div[id]', 'all', data).forEach(function(i) {
       if (!keepEqps.test(i.textContent)) eids[i.id.match(/\d+/)[0]] = i.textContent;
     });
     if (Object.keys(eids).length !== 0) {
@@ -162,7 +162,6 @@
   var countResult = function(obj) {
     obj.forEach(function(i) {
       text = i.textContent.replace(/^Salvaged (\d+x )/, '');
-      console.log(text);
       amount = i.textContent.match(/\d+/)[0] * 1;
       if (text in result) {
         result[text] += amount || 1;
