@@ -5,7 +5,7 @@
 // @include     http*://alt.hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
 // @include     http*://alt.hentaiverse.org/?s=Character&ss=ch
-// @version     1.00a
+// @version     1.01
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/
@@ -25,10 +25,10 @@
   /**
    * [func description]
    * here put in what you want to do after sell the eqps
-   * the default is the page reload.
    */
   var func = function() {
-    //location.href = location.href;
+    //grFunc();//start GrindFest
+    //location.href = location.href;//page reload
   };
   /**
    * [price description]
@@ -129,45 +129,65 @@
         }
       }
     }
-    if (len === url.length) {
+    if (len === 7) {
       console.log(eidsSell, eidsSalvage);
       if (eidsSell.length > 0) {
         post('?s=Bazaar&ss=es', function() {
           doSell = true;
-          doFunc();
+          if (doSell && doSalvage === amountSalvage) doFunc();
         }, 'storetoken=' + gE('input[name="storetoken"]', data).value + '&select_group=item_pane&select_eids=' + encodeURIComponent(eidsSell.join()));
+      } else {
+        doSell = true;
       }
-      for (i in eidsSalvage) {
-        eidsSalvage[i].forEach(function(j) {
-          post('?s=Forge&ss=sa&filter=' + i, function() {
-            countResult(gE('#messagebox>div:nth-child(2)>div>div>div>div>div', 'all'));
-            doSalvage++;
-            doFunc();
-          }, 'select_item=' + j);
-        });
-      }
-
+      salvageFunc(eidsSalvage);
     }
   };
-  var doFunc = function() {
-    if (doSell && doSalvage === amountSalvage) {
-      if (amountSalvage !== 0) {
-        for (i in result) {          html += '<div><div style="width:530px; height:20px"><div style="width:530px; height:17px"><div class="fc2 fac fcb" style="width:530px"><div>Salvaged ' + result[i] + 'x ' + i + '</div></div></div></div></div>';
-        }
-        gE('#messagebox>div:nth-child(2)').innerHTML = html;
+  var salvageFunc = function(eidsSalvage) {
+    for (i in eidsSalvage) {
+      if (eidsSalvage[i].length === 0) {
+        delete eidsSalvage[i];
+        continue;
+      } else {
+        break;
       }
-      func();
     }
+    if (Object.keys(eidsSalvage).length === 0) return;
+    post('?s=Forge&ss=sa&filter=' + i, function() {
+      countResult(gE('#messagebox>div:nth-child(2)>div>div>div>div>div', 'all'));
+      eidsSalvage[i].splice(0, 1);
+      doSalvage++;
+      if (doSell && doSalvage === amountSalvage) {
+        doFunc();
+      } else {
+        salvageFunc(eidsSalvage);
+      }
+    }, 'select_item=' + eidsSalvage[i][0]);
+  };
+  var doFunc = function() {
+    if (amountSalvage !== 0) {
+      for (i in result) {
+        html += '<div><div style="width:530px; height:20px"><div style="width:530px; height:17px"><div class="fc2 fac fcb" style="width:530px"><div>Salvaged ' + result[i] + 'x ' + i + '</div></div></div></div></div>';
+      }
+      gE('#messagebox>div:nth-child(2)').innerHTML = html;
+    }
+    func();
   };
   var countResult = function(obj) {
     obj.forEach(function(i) {
       text = i.textContent.replace(/^Salvaged (\d+x )/, '');
-      amount = i.textContent.match(/\d+/)[0] * 1;
+      amount = i.textContent.match(/\d+/) ? i.textContent.match(/\d+/)[0] * 1 : 1;
       if (text in result) {
         result[text] += amount || 1;
       } else {
         result[text] = amount || 1;
       }
+    });
+  };
+  var grFunc = function() {
+    post('?s=Battle&ss=gr', function(data) {
+      post('?s=Battle&ss=gr', function() {
+        location.href = location.href;
+      }, 'initid=1&inittoken=' + gE('img[src*="startgrindfest.png"]', data).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1]);
     });
   };
 
