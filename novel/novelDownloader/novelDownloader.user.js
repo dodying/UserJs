@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.41
+// @version     1.41.1
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -1608,7 +1608,7 @@ function init() {
     addIRule('www.biquge.la', '笔趣阁', 'h1', '#list>dl>dd>a');
     addCRule('www.biquge.la', 'h1', '#content', 0, 1);
     addIRule('www.shumilou.co', '书迷楼', '#mybook+.list>.tit>b', 'li.zl>a');
-    addCRule('www.shumilou.co', 'h2', '#content');
+    addCRule('www.shumilou.co', 'h2', 'p');
     addRRule('www.shumilou.co', '\s+||| ', '<script.*?</a>.*?</script>', '书迷楼最快更新，无弹窗阅读请.*');
     addIRule('www.quledu.com', '无错小说网', 'h1>.bigname', '.zjlist4>ol>li>a');
     addCRule('www.quledu.com', '#htmltimu', '#htmlContent');
