@@ -1,5 +1,6 @@
 ### 目录
 
+* 0.[另类使用方式-超级书签](#另类使用方式-超级书签)
 * 1.[截图](#截图)
 * 2.[关于字体的说明](#关于字体的说明)
 * __2.1[字体方案(仅供参考)](#字体方案仅供参考)
@@ -11,6 +12,14 @@
 * 4.[攻击规则-示例](#攻击规则-示例)
 * 5.[更新历史](#更新历史)
 * __5.1[最新](#最新)
+
+***
+
+### 另类使用方式-超级书签
+
+请将以下代码存为书签，然后在hv页面点击该书签
+
+`javascript:(function()%7B(function()%20%7Bvar%20a%20%3D%20document.body.appendChild(document.createElement('iframe'))%3Bdocument.querySelectorAll('body%3E*').forEach(function(i)%20%7Bi.style.display%20%3D%20'none'%3B%7D)%3Ba.style.cssText%20%3D%20'position%3Aabsolute%3Btop%3A-2px%3Bleft%3A-2px%3Bwidth%3A100%25%3Bheight%3A708px%3Bz-index%3A99999%3B'%3Ba.onload%20%3D%20function()%20%7Bvar%20b%20%3D%20a.contentWindow.document.body.appendChild(document.createElement('script'))%3Bb.src%20%3D%20'https%3A%2F%2Fgithub.com%2Fdodying%2FUserJs%2Fraw%2Fmaster%2FHentaiVerse%2FhvAutoAttack%2FhvAutoAttack.user.js'%3B%7D%3Ba.src%20%3D%20location.href%3B%7D)()%7D)()`
 
 ***
 
