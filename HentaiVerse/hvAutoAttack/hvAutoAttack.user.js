@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.84g
+// @version      2.84h
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -25,11 +25,7 @@
 (function init() {
   if (location.href === 'https://e-hentai.org/news.php?encounter') {
     var href = document.referrer || 'https://hentaiverse.org';
-    if (gE('#eventpane>div>a')) {
-      href = href.split('/')[0] + '//' + href.split('/')[2] + '/' + gE('#eventpane>div>a').href.split('/')[3];
-    } else {
-      href = href;
-    }
+    if (gE('#eventpane>div>a')) href = href.split('/')[0] + '//' + href.split('/')[2] + '/' + gE('#eventpane>div>a').href.split('/')[3];
     openUrl(href);
     return;
   }
@@ -56,10 +52,10 @@
     return;
   }
   if (gE('[class^="c5"],[class^="c4"]') && _alert(1, '请设置字体\n使用默认字体可能使某些功能失效\n是否查看相关说明？', '請設置字體\n使用默認字體可能使某些功能失效\n是否查看相關說明？', 'Please set the font\nThe default font may make some functions fail to work\nDo you want to see instructions?')) {
-    openUrl('https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README'+(g('lang') === '2'?'_en.md#about-font':'.md#关于字体的说明'), true);
+    openUrl('https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README' + (g('lang') === '2' ? '_en.md#about-font' : '.md#关于字体的说明'), true);
     return;
   }
-  var unsafeWindow = unsafeWindow || window;
+  if (typeof unsafeWindow === 'undefined') unsafeWindow = window;
   if (gE('#riddlecounter')) { //需要答题
     if (g('option').riddlePopup && !window.opener) {
       window.open(location.href, '', 'resizable,scrollbars,width=1241,height=707');
