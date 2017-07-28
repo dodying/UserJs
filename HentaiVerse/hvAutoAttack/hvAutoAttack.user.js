@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.84h
+// @version      2.84i
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -315,7 +315,11 @@ function addStyle(lang) { //CSS
     '.favicon{width:16px;height:16px;margin:-3px 1px;border:1px solid #000;border-radius:3px;}',
     '.answerBar{z-index:1000;width:710px;height:40px;position:absolute;top:55px;left:282px;display:table;border-spacing:5px;}',
     '.answerBar>div{border:4px solid red;display:table-cell;cursor:pointer;}',
-    '.answerBar>div:hover{background:rgba(63,207,208,0.20);}'
+    '.answerBar>div:hover{background:rgba(63,207,208,0.20);}',
+    '#battle_right{overflow:visible;}',
+    '#pane_monster{counter-reset:order;}',
+    '.btm2>div:nth-child(1):before{font-size:30px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
+    '.btm2>div:nth-child(1)>img{display:none;}'
   ].join('');
   globalStyle.textContent = cssContent;
   optionButton(lang);
@@ -1600,6 +1604,7 @@ function newRound() { //New Round
         roundType = 'ba';
         if (g('option').encounter) {
           var encounter = getValue('encounter', true);
+          encounter.lastTime = new Date().getTime();
           encounter.time++;
           setValue('encounter', encounter);
         }
