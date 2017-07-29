@@ -5,7 +5,7 @@
 // @description:zh-CN
 // @include     http*://hentaiverse.org/?s=Bazaar&ss=is*
 // @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=is*
-// @version     1.02
+// @version     1.02a
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -104,7 +104,8 @@
     sendBtn.textContent = '发送';
     var html = ['', ''];
     console.log(info);
-    var itemPane, amount, i, credit;
+    var itemPane, amount, i, credit, temp;
+    var len = 0;
     var creditAll = 0;
     for (i in info) {
       itemPane = gE('#item_pane div[onclick*="' + i + '"]');
@@ -117,11 +118,17 @@
       }
       credit = amount * (info[i].credit || 0);
       creditAll += credit;
-      html[0] += amount + 'x ' + info[i].name + ' @' + (info[i].credit) + ' = ' + credit + '\n';
-      html[1] += amount + 'x ' + info[i].name + '\n';
+      temp = amount + 'x ' + info[i].name;
+      len = Math.max(temp.length, len);
+      html[0] += temp + ' @' + (info[i].credit) + ' = ' + credit + '\n';
+      html[1] += temp + '\n';
     }
-    html[0] += '- - - - -\nAll: ' + creditAll + '\n';
-    html[1] += '- - - - -\n';
+    temp = '-';
+    for (i = 1; i < len; i = i + 2) {
+      temp += ' -';
+    }
+    html[0] += temp + '\nAll: ' + creditAll + '\n';
+    html[1] += temp + '\n';
     mmBody.value = html[0];
     toggleBtn.onclick = function() {
       [html[0], html[1]] = [html[1], html[0]];
@@ -129,12 +136,22 @@
     };
     sendBtn.onclick = function() {
       post('?s=Bazaar&ss=mm&filter=new', function(data) {
-        var token = gE('input[name="mmtoken"]', data).value;
+        var parm = getParm({
+          mmtoken: gE('input[name="mmtoken"]', data).value,
+          action: 'send',
+          'action_value': '0',
+          'select_item': '0',
+          'select_count': '0',
+          'select_pane': '0',
+          'message_to_name': mmUser.value,
+          'message_subject': mmSubject.value,
+          'message_body': mmBody.value
+        });
         post('?s=Bazaar&ss=mm&filter=new', function() {
           localStorage.BazaarUser = mmUser.value;
           localStorage.BazaarSubject = mmSubject.value;
           OpenWindow.close();
-        }, 'mmtoken=' + token + '&action=send&action_value=0&select_item=0&select_count=0&select_pane=0&message_to_name=' + mmUser.value + '&message_subject=' + mmSubject.value + '&message_body=' + encodeURIComponent(mmBody.value).replace(/%20/g, '+').replace(/%0A/g, '%0D%0A'));
+        }, parm);
       });
     };
     OpenWindow.document.close();
@@ -189,4 +206,12 @@ function gE(ele, mode, parent) { //获取元素
 
 function cE(name) { //创建元素
   return document.createElement(name);
+}
+
+function getParm(obj) {
+  var out = '';
+  for (var i in obj) {
+    out += i + '=' + encodeURIComponent(obj[i]) + '&';
+  }
+  return out.replace(/%20/g, '+').replace(/%0A/g, '%0D%0A').replace(/&$/, '');
 }
