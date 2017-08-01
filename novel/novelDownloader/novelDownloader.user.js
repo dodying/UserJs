@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.41.2
+// @version     1.41.3
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -1090,40 +1090,40 @@ function init() {
     addCRule('www.popo.tw', '.read-content>h1', '.read-content>dl', 1);
     addIRule('www.anyew.com', '暗夜文学', '.book_name>h4', '.chapters_list>li>a', '.chapters_list>li>a:has(.vip)');
     chapterRule['www.anyew.com'] = {
-        'Deal': function(num, url) {
-          if (!jQuery(window).data('firstRun')) {
-            jQuery(window).data('firstRun', true);
-            jQuery('head').append('<script type="text/javascript" src="http://wwwcdn.anyew.com/js/lib/trd.js?v=20170622192855"></script>');
-            objectUnpack = function(a) {
-              var d, e, f, b = {},
-                c = ("?" === a[0] ? a.substr(1) : a).split("&");
-              for (d = 0; d < c.length; d++) e = c[d].split("="), f = decodeURIComponent(e[0]), "" != f && (b[f] = decodeURIComponent(e[1] || ""));
-              return b
-            };
-          }
-          GM_xmlhttpRequest({
-            method: 'GET',
-            url: url,
-            onload: function(response) {
-              var name = jQuery('.ML_bookname>h1', response.response).text();
-              var content;
-              h = jQuery('.data-trda', response.response).val();
-              b = jQuery('.data-trdk', response.response).val();
-              k = objectUnpack(b).s.split('.', 2);
-              l = trd.lib.CipherParams.create({
-                ciphertext: trd.enc.Base64.parse(h)
-              });
-              m = trd.ALGON.decrypt(l, trd.enc.Hex.parse(k[0] || ''), {
-                iv: trd.enc.Hex.parse(k[1] || '')
-              });
-              j = m.toString(trd.enc.Utf8);
-              content = j;
-              thisDownloaded(num, name, content, 0);
-            }
-          });
+      'Deal': function(num, url) {
+        if (!jQuery(window).data('firstRun')) {
+          jQuery(window).data('firstRun', true);
+          jQuery('head').append('<script type="text/javascript" src="http://wwwcdn.anyew.com/js/lib/trd.js?v=20170622192855"></script>');
+          objectUnpack = function(a) {
+            var d, e, f, b = {},
+              c = ("?" === a[0] ? a.substr(1) : a).split("&");
+            for (d = 0; d < c.length; d++) e = c[d].split("="), f = decodeURIComponent(e[0]), "" != f && (b[f] = decodeURIComponent(e[1] || ""));
+            return b
+          };
         }
+        GM_xmlhttpRequest({
+          method: 'GET',
+          url: url,
+          onload: function(response) {
+            var name = jQuery('.ML_bookname>h1', response.response).text();
+            var content;
+            h = jQuery('.data-trda', response.response).val();
+            b = jQuery('.data-trdk', response.response).val();
+            k = objectUnpack(b).s.split('.', 2);
+            l = trd.lib.CipherParams.create({
+              ciphertext: trd.enc.Base64.parse(h)
+            });
+            m = trd.ALGON.decrypt(l, trd.enc.Hex.parse(k[0] || ''), {
+              iv: trd.enc.Hex.parse(k[1] || '')
+            });
+            j = m.toString(trd.enc.Utf8);
+            content = j;
+            thisDownloaded(num, name, content, 0);
+          }
+        });
       }
-      //////////////////////////////////////////////////轻小说
+    }
+    //////////////////////////////////////////////////轻小说
     addIRule('www.wenku8.com', '轻小说文库', '#title', '.css>tbody>tr>td>a');
     addCRule('www.wenku8.com', '#title', '#content', 0, 1);
     addIRule('book.sfacg.com', 'SF轻小说', 'h1', '.catalog-list>ul>li>a', '.catalog-list>ul>li>a:has(.icn_vip)');
@@ -2871,7 +2871,7 @@ function download(fileType) { //下载
     }
   }, 200);
   var downloadCheck = setInterval(function() {
-    if (downloadedCheck(jQuery(window).data('dataDownload')) && (jQuery(window).data('fileType') !== 'epub' || jQuery(window).data('img').ok)) {
+    if (downloadedCheck(jQuery(window).data('dataDownload')) && (jQuery(window).data('fileType') !== 'epub' || !GM_getValue('image', false) || jQuery(window).data('img').ok)) {
       clearInterval(addTask);
       clearInterval(downloadCheck);
       if (jQuery('#nD-Btn').length === 0) jQuery('.nD-Log').append('<button id="nD-Btn">下载</button>');
