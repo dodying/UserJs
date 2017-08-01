@@ -4,7 +4,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.41.1
+// @version     1.41.2
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
@@ -2887,12 +2887,13 @@ function downloadTask(fun) { //下载列队
     if (jQuery(window).data('downloadNow')[i].ok) {
       delete jQuery(window).data('downloadNow')[i];
       jQuery(window).data('downloadNow').length--;
+      continue;
     }
     if (!jQuery(window).data('downloadNow')[i].downloading) {
       var href = jQuery(window).data('downloadNow')[i].href;
       jQuery(window).data('downloadNow')[i].downloading = true;
       addDownloadLogStart(parseInt(i) + 1, href, '开始');
-      if (jQuery('.nD-LogDiv>.nD-StatusOk').length >= 30) jQuery('.nD-LogNow').click();
+      //if (jQuery('.nD-LogDiv>.nD-StatusOk').length >= 30) jQuery('.nD-LogNow').click();
       fun(i, href);
     }
   }
