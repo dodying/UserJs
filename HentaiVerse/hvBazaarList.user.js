@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name        hvBazaarList
-// @name:zh-CN  【HV】购物清单
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description:zh-CN
 // @include     http*://hentaiverse.org/?s=Bazaar&ss=is*
 // @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=is*
-// @version     1.02a
+// @version     1.02b
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -81,10 +80,10 @@
     var info = getValue('BazaarList', true);
     if (!info) return;
     //新窗口
-    var OpenWindow = window.open('', 'newwin', 'height=250,width=250,toolbar=no,menubar=no');
-    var doc = OpenWindow.document;
+    var bazaarWindow = window.open('', 'bazaarWindow', 'resizable,scrollbars,width=300,height=350');
+    var doc = bazaarWindow.document;
     var style2 = gE('head', doc).appendChild(cE('style'));
-    style2.textContent = '*{margin:5px;text-align:center;}textarea{width:100%;height:300px;text-align:left;}input,button{}';
+    style2.textContent = '*{margin:5px;text-align:center;}textarea{width:100%;height:200px;text-align:left;}';
     var bazaarBox = gE('body', doc).appendChild(cE('div'));
     var noteUser = bazaarBox.appendChild(cE('span'));
     noteUser.textContent = 'To: ';
@@ -150,11 +149,10 @@
         post('?s=Bazaar&ss=mm&filter=new', function() {
           localStorage.BazaarUser = mmUser.value;
           localStorage.BazaarSubject = mmSubject.value;
-          OpenWindow.close();
+          bazaarWindow.close();
         }, parm);
       });
     };
-    OpenWindow.document.close();
   };
 })();
 

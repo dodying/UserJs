@@ -5,7 +5,7 @@
 // @include     http*://alt.hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
 // @include     http*://alt.hentaiverse.org/?s=Character&ss=ch
-// @version     1.01
+// @version     1.01a
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/
@@ -21,7 +21,7 @@
    * Eg. ['Magnificent', 'Legendary', 'Peerless']
    * Eg. ['Legendary Arctic Redwood Staff of Destruction']
    */
-  var keepEqps = ['Average', 'Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless'];
+  var keepEqps = ['Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless'];
   /**
    * [func description]
    * here put in what you want to do after sell the eqps
@@ -30,20 +30,21 @@
   var func = function() {
     location.href = location.href;
   };
+  if (!gE('#navbar')) return;
   var regexp = new RegExp(keepEqps.join('|'));
   var soldEqps = localStorage.soldEqps || [];
-  var keepEids = [];
+  var sellEids = [];
   post('?s=Bazaar&ss=es', function(data) {
     post(gE('#mainpane>script[src]', data).src, function(data1) {
       var json = JSON.parse(data1.match(/{.*}/)[0]);
       for (var i in json) {
-        if (soldEqps.indexOf(i) === -1 && !regexp.test(json[i].t)) keepEids.push(i);
+        if (soldEqps.indexOf(i) === -1 && !regexp.test(json[i].t)) sellEids.push(i);
       }
-      if (keepEids.length === 0) return;
-      localStorage.soldEqps = soldEqps.concat(keepEids);
+      if (sellEids.length === 0) return;
+      localStorage.soldEqps = soldEqps.concat(sellEids);
       post('?s=Bazaar&ss=es', function() {
         func();
-      }, 'storetoken=' + gE('input[name="storetoken"]', data).value + '&select_group=item_pane&select_eids=' + encodeURIComponent(keepEids.join()));
+      }, 'storetoken=' + gE('input[name="storetoken"]', data).value + '&select_group=item_pane&select_eids=' + encodeURIComponent(sellEids.join()));
     }, null, 'text');
   });
 

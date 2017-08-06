@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name        hvTrainer
-// @name:zh-CN  【HV】训练
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include     http*://hentaiverse.org/*
 // @include     http*://alt.hentaiverse.org/*
-// @version     1.02
+// @version     1.02a
 // @grant       GM_registerMenuCommand
 // @run-at      document-end
 // ==/UserScript==
@@ -101,7 +100,7 @@
   GM_registerMenuCommand('Train List', function() {
     var time = countdownBox.value || new Date().getTime();
     var trainTask;
-    var trainWindow = window.open('', 'trainWindow', 'resizable,scrollbars,width=800,height=450');
+    var trainWindow = window.open('', 'trainWindow', 'resizable,scrollbars,width=550,height=250');
     var doc = trainWindow.document;
     var style = gE('head', doc).appendChild(cE('style'));
     style.textContent = '*{margin:5px;text-align:center;}table{border:2px solid #000;border-collapse:collapse;margin:0 auto;}table>tbody>tr>td{border:1px solid #000;}input{text-align:right;width:60px;}';
@@ -135,7 +134,7 @@
     buttonNew.textContent = 'New Task';
     buttonNew.onclick = function() {
       tr = tbody.appendChild(cE('tr'));
-      tr.innerHTML = '<td>' + (order++) + '</td><td>' + select + '</td><td><input type="number" placeholder="1" min="1"></td><td></td>';
+      tr.innerHTML = '<td>' + (order++) + '</td><td>' + select + '</td><td><input type="number" value="1" placeholder="1" min="1"></td><td></td>';
       gE('select', tr).value = '-1';
     };
     var buttonSave = gE('body', doc).appendChild(cE('button'));
@@ -166,7 +165,6 @@
     }
     tbody.onclick = changeEvent;
     tbody.onkeyup = changeEvent;
-    trainWindow.document.close();
 
     function timeChange() {
       _time = gE('tr>td:nth-child(4)', 'all', tbody);
@@ -196,7 +194,7 @@
       var timeAll = trainList[nowTraining].time;
       timeLast = parseInt(timeAll * (1 - 0.01 * nowTrainingProcess) * 60 * 60);
       var timeEnd = new Date(new Date().getTime() + timeLast * 1000);
-      countdownBox.title = timeEnd.toLocaleString(lang, timeOption);
+      countdownBox.title = 'Now Trian: ' + nowTraining + '\nTrain End: ' + timeEnd.toLocaleString(lang, timeOption);
       countdownBox.value = timeEnd.getTime();
       timeUpdate();
     } else {
