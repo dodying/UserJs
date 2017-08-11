@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.85
+// @version      2.85a
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -324,6 +324,8 @@ function addStyle(lang) { //CSS
     '#hvAATab-Drop tr>td:nth-child(1),#hvAATab-Usage tr>td:nth-child(1){text-align:left;}',
     '#hvAATab-Drop td,#hvAATab-Usage td{text-align:right;white-space:nowrap;}',
     //'#hvAATab-Drop td:empty:before,#hvAATab-Usage td:empty:before{content:"";}',
+    '.selectTable{cursor:pointer;}',
+    '.selectTable:before{content:"' + String.fromCharCode(parseInt('22A0', 16).toString(10)) + '";}',
     '.hvAACenter{text-align:center;}',
     '.hvAATitle{font-weight:bolder;}',
     '.hvAAGoto{cursor:pointer;text-decoration:underline;color:#5C0D11;}',
@@ -357,9 +359,9 @@ function addStyle(lang) { //CSS
     '#riddleform>div:nth-child(3)>img{width:700px;}',
     '#battle_right{overflow:visible;}',
     '#pane_log{height:403px;}',
-    '#pane_monster{counter-reset:order;}',
-    '.btm2>div:nth-child(1):before{font-size:30px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
-    '.btm2>div:nth-child(1)>img{display:none;}'
+    //'#pane_monster{counter-reset:order;}',
+    //'.btm2>div:nth-child(1):before{font-size:30px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
+    //'.btm2>div:nth-child(1)>img{display:none;}'
   ].join('');
   globalStyle.textContent = cssContent;
   optionButton(lang);
@@ -611,7 +613,7 @@ function optionBox() { //配置界面
           dropOld.push(drop);
         }
         dropOld.reverse();
-        _html += '<tr class="hvAATh"><td></td>';
+        _html += '<tr class="hvAATh"><td class="selectTable"></td>';
         dropOld.forEach(function(_dropOld) {
           _html += '<td>' + _dropOld.__name + '</td>';
         });
@@ -659,7 +661,7 @@ function optionBox() { //配置界面
           statsOld.push(stats);
         }
         statsOld.reverse();
-        _html += '<tr class="hvAATh"><td></td>';
+        _html += '<tr class="hvAATh"><td class="selectTable"></td>';
         statsOld.forEach(function(_dropOld) {
           _html += '<td>' + _dropOld.__name + '</td>';
         });
@@ -685,6 +687,18 @@ function optionBox() { //配置界面
     } else if (name === 'About') { //关于本脚本
       gE('.hvAADebug', 'all', optionBox).forEach(function(input) {
         if (getValue(input.name)) input.value = getValue(input.name);
+      });
+    }
+    if (name === 'Drop' || name === 'Usage') {
+      gE('.selectTable', 'all', optionBox).forEach(function(i) {
+        i.onclick = null;
+        i.onclick = function(e) {
+          var select = window.getSelection();
+          select.removeAllRanges();
+          var range = document.createRange();
+          range.selectNodeContents(e.target.parentNode.parentNode.parentNode);
+          select.addRange(range);
+        };
       });
     }
     gE('.hvAATab', 'all', optionBox).forEach(function(i) {
@@ -1066,7 +1080,7 @@ function customizeBox() { //自定义条件界面
   ].join('');
   customizeBox.innerHTML = [
     '<span><l01><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#自定义判断条件" target="_blank">?</a></l01><l2><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README_en.md#customize-condition" target="_blank">?</a></l2></span>',
-    '<span class="hvAAInspect" title="off">' + String.fromCharCode(parseInt('2196', 16).toString(10)) + '</span>',
+    '<span class="hvAAInspect" title="off">' + String.fromCharCode(parseInt('21F1', 16).toString(10)) + '</span>',
     '<select name="groupChoose"></select>',
     '<select name="statusA">' + statusOption + '</select>',
     '<select name="compareAB"><option value="1">＞</option><option value="2">＜</option><option value="3">≥</option><option value="4">≤</option><option value="5">＝</option><option value="6">≠</option></select>',
@@ -1522,7 +1536,7 @@ function encounterCheck() { //encounter
   } else {
     lastEncounter = gE('body').appendChild(cE('a'));
     lastEncounter.className = 'lastEncounter';
-    lastEncounter.title = time(2, encounter.lastTime) + '\nEncounter TIme: ' + encounter.time;
+    lastEncounter.title = time(3, encounter.lastTime) + '\nEncounter TIme: ' + encounter.time;
     lastEncounter.href = 'https://e-hentai.org/news.php?encounter';
     lastEncounter.onclick = function() {
       if (encounter.time >= 24 && _alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('encounter');
@@ -1684,23 +1698,24 @@ function reloader() {
     b.send(JSON.stringify(a));
   }).toString();
   gE('head').appendChild(api_call);
-  var api_response = cE('script');
-  api_response.textContent = 'api_response =' + (function(b) {
+  var fakeApiResponse = cE('script');
+  fakeApiResponse.textContent = 'api_response = ' + (function(b) {
     if (b.readyState === 4) {
       if (b.status === 200) {
         var a = JSON.parse(b.responseText);
         if (a.login !== undefined) {
           unsafeWindow.top.location.href = unsafeWindow.login_url;
         } else {
+          if (a.error || a.reload) location.href = location.search;
           return a;
         }
       } else {
-        document.location = document.location + '';
+        location.href = location.search;
       }
     }
     return false;
   }).toString();
-  gE('head').appendChild(api_response);
+  gE('head').appendChild(fakeApiResponse);
 }
 
 function newRound() { //New Round
@@ -2482,6 +2497,7 @@ function dropMonitor(battleLog) { //掉落监测
   if (g('option').recordEach && g('roundNow') === g('roundAll')) {
     var old = getValue('dropOld', true) || [];
     drop.__name = getValue('battleCode');
+    drop['#endTime'] = time(3);
     old.push(drop);
     setValue('dropOld', old);
     delValue('drop');
@@ -2622,6 +2638,7 @@ function recordUsage2() {
   if (g('option').recordEach && g('roundNow') === g('roundAll')) {
     var old = getValue('statsOld', true) || [];
     stats.__name = getValue('battleCode');
+    stats.self._endTime = time(3);
     old.push(stats);
     setValue('statsOld', old);
     delValue('stats');
