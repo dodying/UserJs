@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.85a
+// @version      2.86
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -123,12 +123,12 @@
       };
       checkLength = function() {
         len++;
-        if (len === eqps.length && g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 10 + 90) / 100) * 1000);
+        if (len === eqps.length && g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
       };
       checkOnload();
       return;
     }
-    if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 10 + 90) / 100) * 1000);
+    if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
   }
 })();
 //通用//
@@ -457,8 +457,12 @@ function optionBox() { //配置界面
       <div><input id="autoFlee" type="checkbox"><label for="autoFlee"><b><l0>自动逃跑</l0><l1>自動逃跑</l1><l2>Flee</l2></b></label>: {{fleeCondition}}</div>\
       <div><input id="restoreStamina" type="checkbox"><label for="restoreStamina"><b><l0>战前回复</l0><l1>戰前回复</l1><l2>Restore stamina</l2></b>: \
         <l0>战斗前，如果</l0><l1>戰鬥前，如果</l1><l2><b></b>if before a battle and </l2>Stamina ≤ <input class="hvAANumber" name="staminaLow" placeholder="30" type="text"></label><br>\
-        <div class="hvAANew"></div><l0>说明: 如果不勾选，当Stamina小于此值后，则不进行闲置竞技场</l0><l1>說明: 如果不勾選，當Stamina小於此值後，則不進行閒置競技場</l1><l2>Note: If unchecked, when Stamina is less than this value, no Idle Arena</l2></div>\
-      <div><div class="hvAANew"></div><input id="recordEach" type="checkbox"><label for="recordEach"><b><l0>单独记录每场战役</l0><l1>單獨記錄每場戰役</l1><l2>Record each battle separately</l2></b></label></div></div>',
+        <l0>说明: 如果不勾选，当Stamina小于此值后，则不进行闲置竞技场</l0><l1>說明: 如果不勾選，當Stamina小於此值後，則不進行閒置競技場</l1><l2>Note: If unchecked, when Stamina is less than this value, no Idle Arena</l2></div>\
+      <div><input id="recordEach" type="checkbox"><label for="recordEach"><b><l0>单独记录每场战役</l0><l1>單獨記錄每場戰役</l1><l2>Record each battle separately</l2></b></label></div>\
+      <div><div class="hvAANew"></div><b><l0>延迟</l0><l1>延遲</l1><l2>Delay</l2></b>: <input class="hvAANumber" name="delay" placeholder="200" type="text">ms<br>\
+        <l0>说明: 单位毫秒，且在设定值基础上取其的50%-150%进行延迟</l0><l1>說明: 單位毫秒，且在設定值基礎上取其的50%-150%進行延遲</l1><l2>Note: unit milliseconds, and based on the set value multiply 50% -150% to delay</l2>\
+        </div>\
+      </div>',
     '<div class="hvAATab" id="hvAATab-Item">\
       <div class="itemOrder"><l0>施放顺序</l0><l1>施放順序</l1><l2>Cast Order</l2>: <input name="itemOrderName" style="width:80%;" type="text" disabled="true"><input name="itemOrderValue" style="width:80%;" type="hidden" disabled="true"><br>\
         <input id="itemOrder_Cure" value="Cure,311" type="checkbox"><label for="itemOrder_Cure">Cure</label><input id="itemOrder_FC" value="FC,313" type="checkbox"><label for="itemOrder_FC">Full-Cure</label><input id="itemOrder_HP" value="HP,11195" type="checkbox"><label for="itemOrder_HP">Health Potion</label><input id="itemOrder_HE" value="HE,11199" type="checkbox"><label for="itemOrder_HE">Health Elixir</label><input id="itemOrder_MP" value="MP,11295" type="checkbox"><label for="itemOrder_MP">Mana Potion</label><br>\
@@ -507,9 +511,13 @@ function optionBox() { //配置界面
     '<div class="hvAATab" id="hvAATab-Debuff">\
       <div class="debuffSkillOrder"><l0>施放顺序</l0><l1>施放順序</l1><l2>Cast Order</l2>:\
         <input name="debuffSkillOrderValue" style="width:80%;" type="text" disabled="true"><br>\
+        <input id="debuffSkillOrder_Sle" type="checkbox"><label for="debuffSkillOrder_Sle">Sleep</label><input id="debuffSkillOrder_Bl" type="checkbox"><label for="debuffSkillOrder_Bl">Blind</label><input id="debuffSkillOrder_Slo" type="checkbox"><label for="debuffSkillOrder_Slo">Slow</label><br>\
         <input id="debuffSkillOrder_Im" type="checkbox"><label for="debuffSkillOrder_Im">Imperil</label><input id="debuffSkillOrder_MN" type="checkbox"><label for="debuffSkillOrder_MN">MagNet</label><input id="debuffSkillOrder_Si" type="checkbox"><label for="debuffSkillOrder_Si">Silence</label><input id="debuffSkillOrder_Dr" type="checkbox"><label for="debuffSkillOrder_Dr">Drain</label><input id="debuffSkillOrder_We" type="checkbox"><label for="debuffSkillOrder_We">Weaken</label><input id="debuffSkillOrder_Co" type="checkbox"><label for="debuffSkillOrder_Co">Confuse</label></div>\
       <div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillAllIm" type="checkbox"><label for="debuffSkillAllIm"><l0>给所有敌人上Imperil</l0><l1>給所有敵人上Imperil</l1><l2>Imperiled all enemies.</l2></label></div>{{debuffSkillCondition}}\
       <div>\
+        <div><input id="debuffSkill_Sle" type="checkbox"><label for="debuffSkill_Sle">Sleep</label>{{debuffSkillSleCondition}}</div>\
+        <div><input id="debuffSkill_Bl" type="checkbox"><label for="debuffSkill_Bl">Blind</label>{{debuffSkillBlCondition}}</div>\
+        <div><input id="debuffSkill_Slo" type="checkbox"><label for="debuffSkill_Slo">Slow</label>{{debuffSkillWeSlondition}}</div>\
         <div><input id="debuffSkill_Im" type="checkbox"><label for="debuffSkill_Im">Imperil</label>{{debuffSkillImCondition}}</div>\
         <div><input id="debuffSkill_MN" type="checkbox"><label for="debuffSkill_MN">MagNet</label>{{debuffSkillMNCondition}}</div>\
         <div><input id="debuffSkill_Si" type="checkbox"><label for="debuffSkill_Si">Silence</label>{{debuffSkillSiCondition}}</div>\
@@ -517,8 +525,9 @@ function optionBox() { //配置界面
         <div><input id="debuffSkill_We" type="checkbox"><label for="debuffSkill_We">Weaken</label>{{debuffSkillWeCondition}}</div>\
         <div><input id="debuffSkill_Co" type="checkbox"><label for="debuffSkill_Co">Confuse</label>{{debuffSkillCoCondition}}</div></div>\
       <div><l0>持续</l0><l1>持續</l1><l2>Expire</l2> Turns: <input id="debuffSkillTurnAlert" type="checkbox"><label for="debuffSkillTurnAlert"><l0>无法正常施放DEBUFF技能时，警报</l0><l1>無法正常施放DEBUFF技能時，警報</l1><l2>If it can not cast de-skills normally, alert.</l2></label><br>\
+        Sleep: <input class="hvAANumber" name="debuffSkillTurn_Sle" type="text"> Blind: <input class="hvAANumber" name="debuffSkillTurn_Bl" type="text"> Slow: <input class="hvAANumber" name="debuffSkillTurn_Slo" type="text"><br>\
         Imperil: <input class="hvAANumber" name="debuffSkillTurn_Im" type="text"> MagNet: <input class="hvAANumber" name="debuffSkillTurn_MN" type="text"> Silence: <input class="hvAANumber" name="debuffSkillTurn_Si" type="text"><br>\
-        Drain: <input class="hvAANumber" name="debuffSkillTurn_Dr" type="text"> Weaken: <input class="hvAANumber" name="debuffSkillTurn_We" type="text"> Confuse: <input class="hvAANumber" name="debuffSkillTurn_Co" type="text"></div></div>',
+        Drain: <input class="hvAANumber" name="debuffSkillTurn_Dr" type="text"> Weaken: <input class="hvAANumber" name="debuffSkillTurn_We" type="text"> Confuse: <input class="hvAANumber" name="debuffSkillTurn_Co" type="text"> </div></div>',
     '<div class="hvAATab" id="hvAATab-Skill">\
       <div class="skillOrder"><l0>施放顺序</l0><l1>施放順序</l1><l2>Cast Order</l2>: \
       <input name="skillOrderValue" style="width:80%;" type="text" disabled="true"><br>\
@@ -1543,7 +1552,7 @@ function encounterCheck() { //encounter
     };
   }
   lastEncounter.innerHTML = Math.floor((timeNow - encounter.lastTime) / 1000 / 60) + '<l0>分钟前</l0><l1>分鐘前</l1><l2> mins before</l2>';
-  setTimeout(encounterCheck, 1 * 60 * 1000 * (Math.random() * 10 + 90) / 100);
+  setTimeout(encounterCheck, 1 * 60 * 1000 * (Math.random() * 20 + 90) / 100);
 }
 //战斗中//
 function main() { //主程序
@@ -1684,8 +1693,9 @@ function reloader() {
     }
   };
   gE('body').appendChild(eventEnd);
-  var api_call = cE('script');
-  api_call.textContent = 'api_call = ' + (function(b, a, d) {
+  unsafeWindow.delay = g('option').delay || 200;
+  var fakeApiCall = cE('script');
+  fakeApiCall.textContent = 'api_call = ' + (function(b, a, d) {
     window.info = a;
     b.open('POST', '/json');
     b.setRequestHeader('Content-Type', 'application/json');
@@ -1695,9 +1705,11 @@ function reloader() {
       document.getElementById('eventEnd').click();
     };
     document.getElementById('eventStart').click();
-    b.send(JSON.stringify(a));
+    setTimeout(function (){
+      b.send(JSON.stringify(a));
+    }, delay * (Math.random() * 50 + 50) / 100);
   }).toString();
-  gE('head').appendChild(api_call);
+  gE('head').appendChild(fakeApiCall);
   var fakeApiResponse = cE('script');
   fakeApiResponse.textContent = 'api_response = ' + (function(b) {
     if (b.readyState === 4) {
@@ -2290,20 +2302,17 @@ function useDeSkill() { //自动施法DEBUFF技能
   var skillLib = {
     Sle: {
       name: 'Sleep',
-      //id: '222',
-      //turn: 39,
+      id: '222',
       img: 'sleep'
     },
     Bl: {
       name: 'Blind',
-      //id: '231',
-      //turn: 42,
+      id: '231',
       img: 'blind'
     },
     Slo: {
       name: 'Slow',
-      //id: '221',
-      //turn: 36,
+      id: '221',
       img: 'slow'
     },
     Im: {
