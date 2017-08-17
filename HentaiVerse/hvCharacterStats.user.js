@@ -1,10 +1,13 @@
 // ==UserScript==
-// @name        【HV】自动加点
+// @name        [HV]CharacterStats
 // @description
 // @include     http://alt.hentaiverse.org/
 // @include     http://alt.hentaiverse.org/?s=Character&ss=ch
 // @include     http://alt.hentaiverse.org/?s=Battle&ss=ba&encounter=*
-// @version     1.00
+// @include     http*://hentaiverse.org/
+// @include     http*://hentaiverse.org/?s=Character&ss=ch
+// @include     http*://hentaiverse.org/?s=Battle&ss=ba&encounter=*
+// @version     1.00a
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/
@@ -14,7 +17,7 @@
 // ==/UserScript==
 (function() {
   if (!document.querySelector('img[src="/y/character/inc.png"]')) return;
-  var plus, grades, point, temp, min;
+  var plus, grades, points, temp, min;
   while (document.querySelector('img[src="/y/character/inc.png"]')) {
     plus = document.querySelectorAll('#attr_table>tbody>tr>td:nth-child(7)>img');
     grades = [];
