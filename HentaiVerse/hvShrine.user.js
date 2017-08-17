@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name        hvShrine
+// @name        [HV]Shrine
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @include     http*://hentaiverse.org/?s=Bazaar&ss=ss
-// @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=ss
+// @include     http://alt.hentaiverse.org/?s=Bazaar&ss=ss
 // @version     1.01a
 // @grant       none
 // @run-at      document-end

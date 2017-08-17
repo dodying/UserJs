@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name        hvSellEquipment2
+// @name        [HV]SellEquipment2
 // @description
 // @include     http*://hentaiverse.org/
-// @include     http*://alt.hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
-// @include     http*://alt.hentaiverse.org/?s=Character&ss=ch
+// @include     http://alt.hentaiverse.org/
+// @include     http://alt.hentaiverse.org/?s=Character&ss=ch
 // @version     1.01
 // @grant       none
 // @author      Dodying
@@ -21,7 +21,7 @@
    * Eg. ['Magnificent', 'Legendary', 'Peerless']
    * Eg. ['Legendary Arctic Redwood Staff of Destruction']
    */
-  var keepEqps = ['Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless'];
+  var keepEqps = ['Magnificent', 'Legendary', 'Peerless'];
   /**
    * [func description]
    * here put in what you want to do after sell the eqps
@@ -34,6 +34,28 @@
    * [price description]
    * here put in the price of each material
    */
+  var price = [{ //Scrap
+    Cloth: 0,
+    Leather: 0,
+    Metal: 0,
+    Wood: 0,
+  }, { //Low-Grade
+    Cloth: 0,
+    Leather: 0,
+    Metal: 0,
+    Wood: 0,
+  }, { //Mid-Grade
+    Cloth: 0,
+    Leather: 0,
+    Metal: 0,
+    Wood: 0,
+  }, { //High-Grade
+    Cloth: 0,
+    Leather: 0,
+    Metal: 0,
+    Wood: 0
+  }];
+  /*
   var price = [{ //Scrap
     Cloth: 90,
     Leather: 85,
@@ -55,6 +77,7 @@
     Metal: 1200,
     Wood: 9500
   }];
+  */
   /**
    *
    */

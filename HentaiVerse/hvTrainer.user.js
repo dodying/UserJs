@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name        hvTrainer
+// @name        [HV]Trainer
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include     http*://hentaiverse.org/*
-// @include     http*://alt.hentaiverse.org/*
+// @include     http://alt.hentaiverse.org/*
 // @version     1.02a
 // @grant       GM_registerMenuCommand
 // @run-at      document-end

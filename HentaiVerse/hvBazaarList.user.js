@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        hvBazaarList
+// @name        [HV]BazaarList
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description:zh-CN
 // @include     http*://hentaiverse.org/?s=Bazaar&ss=is*
-// @include     http*://alt.hentaiverse.org/?s=Bazaar&ss=is*
+// @include     http://alt.hentaiverse.org/?s=Bazaar&ss=is*
 // @version     1.02b
 // @grant       none
 // @author      Dodying

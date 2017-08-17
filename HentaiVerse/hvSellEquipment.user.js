@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name        hvSellEquipment
+// @name        [HV]SellEquipment
 // @description
 // @include     http*://hentaiverse.org/
-// @include     http*://alt.hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
-// @include     http*://alt.hentaiverse.org/?s=Character&ss=ch
+// @include     http://alt.hentaiverse.org/
+// @include     http://alt.hentaiverse.org/?s=Character&ss=ch
 // @version     1.01a
 // @grant       none
 // @author      Dodying

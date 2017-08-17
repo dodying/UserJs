@@ -1,15 +1,14 @@
 // ==UserScript==
-// @name        hvChallenge
+// @name        [HV]Challenge
 // @description
 // @include
 // @version     1.00
 // @include     http*://hentaiverse.org/*
-// @include     http*://alt.hentaiverse.org/*
+// @include     http://alt.hentaiverse.org/*
 // @author      Dodying
 // @namespace   https://github.com/dodying/
 // @supportURL  https://github.com/dodying//UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @run-at      document-end
 // ==/UserScript==
 (function() {
