@@ -1,20 +1,20 @@
 // ==UserScript==
-// @name         hvAutoAttack
-// @name:zh-TW   hvAutoAttack
-// @name:zh-CN   hvAutoAttack
+// @name         [HV]AutoAttack
+// @name:zh-TW   [HV]AutoAttack
+// @name:zh-CN   [HV]AutoAttack
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
 // @include      http*://hentaiverse.org/*
-// @include      http*://alt.hentaiverse.org/*
+// @include      http://alt.hentaiverse.org/*
 // @include      https://e-hentai.org/news.php?encounter
 // @exclude      http*://hentaiverse.org/pages/showequip.php?*
-// @exclude      http*://alt.hentaiverse.org/pages/showequip.php?*
+// @exclude      http://alt.hentaiverse.org/pages/showequip.php?*
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.86.1
+// @version      2.86.2
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -1481,7 +1481,7 @@ function idleArena() { //闲置竞技场
     return;
   }
   if (arena.isOk) return;
-  if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
+  if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 < 85) {
     post(location.href, goto, 'recover=stamina');
     return;
   }
@@ -1627,8 +1627,7 @@ function reloader() {
     if (g('option').delayReload) delayReload = setTimeout(goto, g('option').delayReloadTime * 1000);
     if (g('option').recordUsage) {
       obj = {
-        mode: a.mode,
-        before: gE('#textlog>tbody>tr>td', 'all').length
+        mode: a.mode
       };
       if (a.mode === 'items') {
         obj.item = gE('#pane_item div[id^="ikey"][onclick*="skill(\'' + a.skill + '\')"]').textContent;
@@ -1705,7 +1704,7 @@ function reloader() {
       document.getElementById('eventEnd').click();
     };
     document.getElementById('eventStart').click();
-    setTimeout(function (){
+    setTimeout(function() {
       b.send(JSON.stringify(a));
     }, delay * (Math.random() * 50 + 50) / 100);
   }).toString();
@@ -2569,7 +2568,8 @@ function recordUsage(parm) {
   }
   var debug = false;
   var log = false;
-  for (var i = 0; i < parm.log.length - parm.before; i++) {
+  for (var i = 0; i < parm.log.length; i++) {
+    if (parm.log[i].className === 'tls') break;
     text = parm.log[i].textContent;
     if (debug) console.log(text);
     if (text.match(/you for \d+ \w+ damage/)) {
@@ -2589,8 +2589,8 @@ function recordUsage(parm) {
         stats.hurt._mtotal += point;
         stats.hurt._mavg = Math.round(stats.hurt._mtotal / stats.hurt._mcount);
       }
-    } else if (text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for \d+ .* damage/) || text.match(/^You .* for \d+ .* damage/)) { //text.match(/for \d+ .* damage/)
-      reg = text.match(/for (\d+) .* damage/);
+    } else if (text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for \d+( .*)? damage/) || text.match(/^You .* for \d+ .* damage/)) { //text.match(/for \d+ .* damage/)
+      reg = text.match(/for (\d+)( .*)? damage/);
       magic = text.match(/^[\w ]+ [a-z]+s [\w+ \-]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ \-]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1];
       point = reg[1] * 1;
       stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point;
@@ -2624,8 +2624,8 @@ function recordUsage(parm) {
       magic = reg[2];
       point = reg[1] * 1;
       stats.proficiency[magic] = (magic in stats.proficiency) ? stats.proficiency[magic] + point : point;
-      stats.proficiency[magic] = stats.proficiency[magic].toFixed(2) * 1;
-    } else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious|have reached Level|have obtained the title|do not have enough MP)/) || text.match(/(Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat |Clear Bonus|brink of defeat)/) || text.match(/ drop(ped|s) /) || text.match(/defeated/)) {
+      stats.proficiency[magic] = stats.proficiency[magic].toFixed(3) * 1;
+    } else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious|have reached Level|have obtained the title|do not have enough MP)/) || text.match(/Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat |Clear Bonus|brink of defeat|Stop \w+ing|Spawned Monster| drop(ped|s) |defeated/)) {
       //nothing;
     } else if (debug) {
       log = true;
