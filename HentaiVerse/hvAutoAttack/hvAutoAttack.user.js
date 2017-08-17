@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.86.2
+// @version      2.86.3
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -460,7 +460,7 @@ function optionBox() { //配置界面
         <l0>说明: 如果不勾选，当Stamina小于此值后，则不进行闲置竞技场</l0><l1>說明: 如果不勾選，當Stamina小於此值後，則不進行閒置競技場</l1><l2>Note: If unchecked, when Stamina is less than this value, no Idle Arena</l2></div>\
       <div><input id="recordEach" type="checkbox"><label for="recordEach"><b><l0>单独记录每场战役</l0><l1>單獨記錄每場戰役</l1><l2>Record each battle separately</l2></b></label></div>\
       <div><div class="hvAANew"></div><b><l0>延迟</l0><l1>延遲</l1><l2>Delay</l2></b>: <input class="hvAANumber" name="delay" placeholder="200" type="text">ms<br>\
-        <l0>说明: 单位毫秒，且在设定值基础上取其的50%-150%进行延迟</l0><l1>說明: 單位毫秒，且在設定值基礎上取其的50%-150%進行延遲</l1><l2>Note: unit milliseconds, and based on the set value multiply 50% -150% to delay</l2>\
+        <l0>说明: 单位毫秒，且在设定值基础上取其的50%-150%进行延迟，0表示不延迟</l0><l1>說明: 單位毫秒，且在設定值基礎上取其的50%-150%進行延遲，0表示不延遲</l1><l2>Note: unit milliseconds, and based on the set value multiply 50% -150% to delay, 0 means no delay</l2>\
         </div>\
       </div>',
     '<div class="hvAATab" id="hvAATab-Item">\
@@ -1692,7 +1692,7 @@ function reloader() {
     }
   };
   gE('body').appendChild(eventEnd);
-  unsafeWindow.delay = g('option').delay || 200;
+  unsafeWindow.delay = g('option').delay;
   var fakeApiCall = cE('script');
   fakeApiCall.textContent = 'api_call = ' + (function(b, a, d) {
     window.info = a;
@@ -1704,9 +1704,13 @@ function reloader() {
       document.getElementById('eventEnd').click();
     };
     document.getElementById('eventStart').click();
-    setTimeout(function() {
+    if (delay <= 0) {
       b.send(JSON.stringify(a));
-    }, delay * (Math.random() * 50 + 50) / 100);
+    } else {
+      setTimeout(function() {
+        b.send(JSON.stringify(a));
+      }, delay * (Math.random() * 50 + 50) / 100);
+    }
   }).toString();
   gE('head').appendChild(fakeApiCall);
   var fakeApiResponse = cE('script');
