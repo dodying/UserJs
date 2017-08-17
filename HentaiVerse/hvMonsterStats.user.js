@@ -1,8 +1,9 @@
 // ==UserScript==
-// @name        【HV】怪物实验室-自动加点
+// @name        [HV]MonsterStats
 // @namespace   https://github.com/dodying/UserJs
 // @include     http://alt.hentaiverse.org/?s=Bazaar&ss=ml&slot=*
-// @version     1
+// @include     http*://hentaiverse.org/?s=Bazaar&ss=ml&slot=*
+// @version     1.00a
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
@@ -12,10 +13,11 @@
 // ==/UserScript==
 (function() {
   var morale = document.querySelectorAll('.msl>div>div>img')[1].style.width;
-  if (morale !== '120px') {
+  var i;
+  if (morale.match(/\d+/)[0] * 1 <= 110) {
     var grades = [];
     var elements = document.querySelectorAll('.mcr tr>td:nth-child(2)');
-    for (var i = 0; i < elements.length; i++) {
+    for (i = 0; i < elements.length; i++) {
       grades.push((document.querySelectorAll('.mcr tr')[i].querySelector('td:nth-child(1)>img[src*="_a.png"]')) ? parseInt(elements[i].textContent) : Infinity);
     }
     var min = Math.min.apply(null, grades);
@@ -33,7 +35,7 @@
   } else {
     if (document.querySelector('[src="/y/character/inc.png"]')) {
       var img = document.querySelectorAll('[src="/y/character/inc.png"]');
-      for (var i = 0; i < img.length; i++) {
+      for (i = 0; i < img.length; i++) {
         var temp = img[i].getAttribute('onmouseover').match(/Upgrade Cost: (\d+) Chaos Tokens?[ ]+Stock: (\d+)/);
         if (parseInt(temp[1]) <= parseInt(temp[2])) {
           img[i].click();
