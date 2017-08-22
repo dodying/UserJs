@@ -1,16 +1,14 @@
-#### 此脚本引用的库，感谢他们 jQuery [FileSaver](https://github.com/eligrey/FileSaver.js) [jszip](https://github.com/Stuk/jszip) [jquery-s2t](https://github.com/hustlzp/jquery-s2t)
-
 ### 使用说明
 
-#### 在目录页或是章节页使用。
+#### 在```目录页```或是```章节页```使用。
 
-#### 按```Shift+D```或```download novel```来显示下载选项。
+#### 按```Shift+D```或菜单```Download Novel```来显示下载选项。
 
-#### 如果某章节长时间无法下载，请刷新重试。<s>浏览器会从缓存中提取数据。</s>
+#### 如果某章节长时间无法下载，请刷新重试<s>或切换代理</s>。<s>浏览器会从缓存中提取数据。</s>
 
 #### 失败重试、超时重试只对```非特殊站点```有效
 
-#### vip下载只对起点有效
+#### 如非必要，不要勾选```下载Vip章节```与```下载图片```
 
 ### 意见、建议、Bug
 
@@ -20,14 +18,9 @@
 
 ![主页面](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23main.png)
 ![自定义站点规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Customize.png)
-![检查项目上的规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Url.png)
 ![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Log.png)
-![搜索引擎提示](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Search.png)
-![Google自定义搜索](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23CSE.png)
 
 ### 自定义站点规则说明
-
-#### 由脚本生成的【include】规则加在```// ==/UserScript==```这一行前。
 
 #### 一条规则写一行，尤其是【章节规则示例-自定义版】，别写成块状。
 
@@ -46,10 +39,10 @@
 
 #### 章节规则示例
 
-##### addCRule('域名','章节标题-选择器','章节内容-选择器','数字型,0-简体,1-繁体','可省略,数字型,文档编码,unicode则留空,简体中文则填1');
+##### addCRule('域名','章节标题-选择器','章节内容-选择器','可省略,数字型,文档编码,unicode则留空,简体中文则填1');
 
-1. ```addCRule('www.example1.com','h1','#content',0);```
-2. ```addCRule('www.example2.com','h1','#content',0,1);```
+1. ```addCRule('www.example1.com','h1','#content');```
+2. ```addCRule('www.example2.com','h1','#content',1);```
 
 #### 章节内容替换示例（|||三竖杆为分隔符，如果替换为空字符串，可以不写|||）
 
@@ -62,7 +55,7 @@
 
 ##### 此规则，是为了那些无法直接在网页原文件中获取到内容的网址准备的。
 
-具体示例：详见[脚本代码](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/novelDownloader.user.js#L477)
+具体示例：详见[脚本代码](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/novelDownloader.user.js#L273)
 
 ```
 说明：
@@ -73,16 +66,18 @@
   thisDownloaded（必须，传递章节内容，参数为num-表示这是第几章、name-标题、content-内容、lang-该站点的默认语言0简体1繁体）
 ```
 
-### ToDo
-
-1. 站点规则模版
-2. 搜索(谷歌自定义搜索Api)
-
-### [支持站点](https://github.com/dodying/UserJs/blob/master/novel/novelDownloader/supportUrl.md)
-
 ### 更新历史
 
 #### Latest
+
+##### 1.42
+1. @include 无HTTPS的网站一律用HTTP
+2. base64变为外部引用 @require
+3. 根据JsHint修改
+4. 删除功能: 支持站点、搜索
+5. 新增功能: 测试按钮
+6. 修改起始函数、事件...
+5. 修改通用规则（同时删除了大量站点的规则）
 
 ##### 1.41
 删除`更新站点规则`
@@ -91,147 +86,110 @@
 支持下载图片（测试网站：轻小说文库）
 
 ##### 1.38.114+332
-
 可选择是否对文本进行处理（原先默认处理），强烈建议勾选，当文本缺失时尝试不勾选
 
 ##### 1.37.113+332
-
 取巧增加了一个通用模版**(大部分内容选择器来自[小说阅读脚本](https://greasyfork.org/scripts/292/))**，细节变更。
 
 ##### 1.36.94+316
-
 增加【搜索】。
 
 ##### 1.35.94+316
-
 增加【强制分段】功能。细节修改。
 
 ##### 1.34.65+242
-
 去除【特定下载】，增加必应、搜狗、360搜索。
 
 ##### 1.33.57
-
 细节更新，增加搜索引擎提示。
 
 ##### 1.32.53
-
 细节更新
 
 ##### 1.31.178
-
 增加**增加分次下载**，具体功能自行摸索。
 
 ##### 1.30.199
-
 修复错误，增加**选择未保存**。
 
 ##### 1.29.199
-
 增加从[Github](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader)项目上获取规则的功能。
 
 ##### 1.28.199
-
 将失败重试细分为失败(onerror)重试、超时(ontimeout)重试。
 
 自定义站点规则默认只显示```当前站点的自定义规则```。
 
 ##### 1.27.199
-
 修复保存自定义站点规则时特殊字符转义的问题。
 
 ##### 1.26.199
-
 支持自定义站点规则。
 
 ##### 1.25.199
-
 增加失败重试次数，0为不重试。
 
 ##### 1.24.199
-
 增加站点替换规则，托此的福，我又检查了**每一个**站点。
 
-##### 1.230.202
-
-什么也没改进...
-
 ##### 1.23.202
-
 下载进程优化。修复epub编码。
 
 ##### 1.22.167
-
 修复章节排序问题。
 
 ##### 1.21.167
-
 如果下载的章节相同，将不再次下载。
 
 ##### 1.20.159
-
 下载进程优化。
 
 ##### 1.19.152
-
 内置base64解码、utf8to16两个函数，增加限制下载线程的功能。
 
 ##### 1.18.112
-
 增加下载为Epub格式的功能。
 
 再次去除"Shift+Q"、"Shift+W"、"Shift+E"这些快捷键。原因是，面板经过上个版本修改后在所有网站**应该**都可以正确显示。
 
 ##### 1.17.112
-
 更改了面板界面定位的方式，去除了"Shift+T"快捷键。
 
 更改了当从response查找不到元素时的解决方案（将response主体部分添加到当前网页，在当前网页查找）。
 
 ##### 1.16.97
-
 增加通配符模式。
 
 ##### 1.15.92
-
 修复关于储存默认语言信息的bug。
 
 ##### 1.14.88
-
 增加使用说明，记住默认语言。
 
 ##### 1.13.87
-
 增加改变快捷键。
 
 ##### 1.12.73
-
 简化了添加规则。
 
 ##### 1.11.29
-
 修复简繁体转换功能。
 
 ##### 1.10.29
-
 简繁体转换功能正式上线。
 
 ##### 1.1.15
-
 还是说一下，由于无错小说网章节里有些文字图片，所以增加了一大段替换规则。纪念```小说下载阅读器```
 
 ##### 1.1.13
-
 完善【特定下载某些章节】功能，增加【支持网站】。
 
 ##### 1.0.13
-
 更改版本命名规则。
 
 以后版本更新，不将**新增**的网站写入[更新历史](#更新历史)，详见[支持网站](#支持网站)。但会将修正的网站写入[更新历史](#更新历史)。
 
-##### ... 神隐
+##### ...
 
 ##### 1.00
-
 初步完成脚本。
