@@ -1,5 +1,7 @@
 ### 使用说明
 
+#### 建议将```*```加入到脚本包含规则中
+
 #### 在```目录页```或是```章节页```使用。
 
 #### 按```Shift+D```或菜单```Download Novel```来显示下载选项。
@@ -13,12 +15,6 @@
 ### 意见、建议、Bug
 
 #### [Github-issues](https://github.com/dodying/UserJs/issues)与[GF-Feedback](https://greasyfork.org/zh-CN/scripts/21515-noveldownloader/feedback)
-
-######预览
-
-![主页面](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23main.png)
-![自定义站点规则](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Customize.png)
-![下载信息](https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/%23%23%23Log.png)
 
 ### 自定义站点规则说明
 
