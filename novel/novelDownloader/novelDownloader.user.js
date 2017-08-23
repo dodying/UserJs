@@ -3,7 +3,7 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.42.1
+// @version     1.42.2
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1331,7 +1331,7 @@ function init() {
       if (jQuery(testChapter[i]).length > 0) break;
     }
     testChapter = i === testChapter.length ? 'a' : testChapter[i];
-    console.log('通用规则-index: ', testChapter);
+    console.log('通用规则-chapter: ', testChapter);
     addIRule(location.host, '通用规则（测试）', 'h1,h2', testChapter);
     var _chapter = GM_getValue('_chapter', {});
     _chapter[testChapter] = testChapter in _chapter ? _chapter[testChapter]++ : 1;
@@ -1434,11 +1434,12 @@ function init() {
       } else if (this.name === 'this') {
         if (jQuery(chapterRule[host].content).length > 0) {
           var name = jQuery(chapterRule[host].name).eq(0).text() || document.title;
-          console.log(chapterRule[host].name);
           var content = jQuery(chapterRule[host].content).html();
           if (jQuery('#ndFormat')[0].checked === true) content = wordFormat(content);
           if (jQuery('#ndSection')[0].checked === true) content = wordSection(content);
           content = '来源地址：' + location.href + '\r\n' + content;
+          name = tranStr(name, jQuery('.ndLang:checked').val() * 1);
+          content = tranStr(content, jQuery('.ndLang:checked').val() * 1);
           jQuery(window).data('dataDownload', [{
             'name': name.trim(),
             'content': content
@@ -1722,7 +1723,7 @@ function xhr(num, url) { //xhr
           if (jQuery(testContent[i], data).length > 0) break;
         }
         testContent = i === testContent.length ? chapterRule[host].content : testContent[i];
-        console.log('通用规则-chapter: ', testContent);
+        console.log('通用规则-content: ', testContent);
         var _content = GM_getValue('_content', {});
         _content[testContent] = testContent in _content ? _content[testContent]++ : 1;
         GM_setValue('_content', _content);
