@@ -3,7 +3,7 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.42.0
+// @version     1.42.1
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1338,7 +1338,6 @@ function init() {
     GM_setValue('_chapter', _chapter);
     addCRule(location.host, 'h1,h2', '#Booex123,#BookContent,#BookText,#BookTextt,#ChapterBody,#Content,#J_article_con,#TXT,#a_content,#acontent,#artWrap,#article,#article-content,#articlebody,#book_text,#bookbody,#booktext,#ccon,#ccontent,#chapterContent,#chapter_content,#chaptercontent,#clickeye_content,#content,#content1,#content_1,#contentbox,#contents,#cp_content,#detail,#floatleft,#fontsize,#htmlContent,#jsreadbox,#kui-page-read-txt,#mouseRight,#neirong,#novel_content_txtsize,#novel_contents,#ntxt,#page-content,#partContent,#r_zhengwen,#read-content,#read_txt,#readcon,#readerFs,#showcontent,#snr2,#table_container,#text_area,#texts,#txt,#view_content_txt,#zjcontentdiv,#zoom,.Text,.article,.article-con,.bd,.book,.book_con,.box_box,.chapter,.chapter_con,.chaptertxt,.chpater-content,.con_L,.con_txt,.content,.contentbox,.menu-area,.myContent,.note,.novel_content,.noveltext,.p,.page-content,.panel-body,.read-content,.reed,.shuneirong,.text,.text1,.textP,.textinfo+p,.txt,.txtc,.yd_text2', 0);
     if (jQuery('meta[content*="charset=gb"],meta[charset*="gb"],script[charset*="gb"]').length) chapterRule[location.host].MimeType = 'text/html; charset=gb2312';
-    console.log(chapterRule[location.host].MimeType);
     chapterRule[location.host].sort = jQuery('#ndSort')[0].checked;
     jQuery(window).data('autoTry', true);
     jQuery(window).data('autoTryResult', false);
@@ -1554,15 +1553,14 @@ function wordFormatSpecial(host, word) { //文本处理-特殊版
 }
 
 function downloadTo(bookName, fileType) { //下载到...
-  var name = bookName.replace(/在线|阅读|全文|最新|章节|目录|列表|无弹窗|更新|全集|下载/g, '').trim(); //待续
   if (fileType === 'zip') {
-    download2Zip(name);
+    download2Zip(bookName);
   } else if (fileType === 'txt') {
-    download2Txt(name);
+    download2Txt(bookName);
   } else if (fileType === 'epub') {
-    download2Epub(name);
+    download2Epub(bookName);
   } else if (fileType === 'test') {
-    var all = '';
+    var all = bookName + '\n\n';
     for (var i = 0; i < jQuery(window).data('dataDownload').length; i++) {
       all += jQuery(window).data('dataDownload')[i].name + '\r\n' + jQuery(window).data('dataDownload')[i].content + '\r\n\r\n';
     }
@@ -1577,6 +1575,8 @@ function download(fileType) { //下载
   var host = location.host;
   var chapter = jQuery(indexRule[host].chapter);
   var bookName = jQuery(indexRule[host].name).eq(0).text().trim() || document.title;
+  bookName = bookName.replace(/在线|阅读|全文|最新|章节|目录|列表|无弹窗|更新|全集|下载/g, '').trim();
+  if (fileType === 'epub') getCover(bookName);
   var i;
   if (jQuery('#ndVip')[0].checked === false && indexRule[host].vip !== '') chapter = jQuery(chapter).not(jQuery(indexRule[host].vip));
   if (jQuery('.ndSplitInput').val() !== '') {
@@ -1651,7 +1651,7 @@ function download(fileType) { //下载
     }
   }, 200);
   var downloadCheck = setInterval(function() {
-    if (downloadedCheck(jQuery(window).data('dataDownload')) && (jQuery(window).data('fileType') !== 'epub' || !GM_getValue('image', false) || jQuery(window).data('img').ok)) {
+    if (downloadedCheck(jQuery(window).data('dataDownload')) && (jQuery(window).data('fileType') !== 'epub' || !GM_getValue('image', false) || typeof jQuery(window).data('img') === 'undefined' || jQuery(window).data('img').ok)) {
       clearInterval(addTask);
       clearInterval(downloadCheck);
       if (jQuery('#ndBtn').length === 0) jQuery('.ndLog').append('<button id="ndBtn">下载</button>');
@@ -1994,19 +1994,25 @@ function download2Epub(name) { //下载到1个epub
   var META_INF = jQuery(window).data('blob').folder('META-INF');
   META_INF.file('container.xml', '<?xml version="1.0" encoding="UTF-8"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml" /></rootfiles></container>');
   var OEBPS = jQuery(window).data('blob').folder('OEBPS');
-  OEBPS.file('stylesheet.css', 'body{padding:0%;margin-top:0%;margin-bottom:0%;margin-left:1%;margin-right:1%;line-height:130%;text-align:justify}div{margin:0px;padding:0px;line-height:130%;text-align:justify}p{text-align:justify;text-indent:2em;line-height:130%}h1{line-height:130%;text-align:center;font-weight:bold;font-size:xx-large}h2{line-height:130%;text-align:center;font-weight:bold;font-size:x-large}h3{line-height:130%;text-align:center;font-weight:bold;font-size:large}');
+  OEBPS.file('stylesheet.css', '' +
+    'body{padding:0%;margin-top:0%;margin-bottom:0%;margin-left:1%;margin-right:1%;line-height:130%;text-align:justify}' +
+    'div{margin:0px;padding:0px;line-height:130%;text-align:justify}' +
+    'p{text-align:justify;text-indent:2em;line-height:130%}' +
+    'h1{line-height:130%;text-align:center;font-weight:bold;font-size:xx-large}' +
+    'h2{line-height:130%;text-align:center;font-weight:bold;font-size:x-large}' +
+    'h3{line-height:130%;text-align:center;font-weight:bold;font-size:large}');
   var lang = (parseInt(jQuery('.ndLang:checked').val()) === 0) ? 'zh-CN' : 'zh-TW';
-  var content_opf = '<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="' + uuid + '" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>' + name + '</dc:title><dc:creator>novelDownloader</dc:creator><dc:identifier id="' + uuid + '">urn:uuid:' + uuid + '</dc:identifier><dc:language>' + lang + '</dc:language></metadata><manifest>';
+  var content_opf = '<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="' + uuid + '" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>' + name + '</dc:title><dc:creator>novelDownloader</dc:creator><dc:identifier id="' + uuid + '">urn:uuid:' + uuid + '</dc:identifier><dc:language>' + lang + '</dc:language><meta name="cover" content="cover-image" /></metadata><manifest>';
   var toc_ncx = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:' + uuid + '"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>' + name + '</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="title.html"/></navPoint>';
   var item = '<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="title.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>';
-  var itemref = '<itemref idref="cover" linear="no"/>';
+  var itemref = '<itemref idref="cover" linear="yes"/>';
   var i;
   for (i = 0; i < jQuery(window).data('dataDownload').length; i++) {
-    var _name = String(preZeroFill(i, leng));
+    var _name = String(preZeroFill(i + 1, leng));
     var playOrder = i + 2;
     toc_ncx += '<navPoint id="chapter' + _name + '" playOrder="' + playOrder + '"><navLabel><text>' + jQuery(window).data('dataDownload')[i].name + '</text></navLabel><content src="' + _name + '.html"/></navPoint>';
     item += '<item id="chapter' + _name + '" href="' + _name + '.html" media-type="application/xhtml+xml"/>';
-    itemref += '<itemref idref="chapter' + _name + '"/>';
+    itemref += '<itemref idref="chapter' + _name + '" linear="yes"/>';
     OEBPS.file(_name + '.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + jQuery(window).data('dataDownload')[i].name + '</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>' + jQuery(window).data('dataDownload')[i].name + '</h3><div><p>' + jQuery(window).data('dataDownload')[i].content.replace(/\r\n/g, '</p><p>') + '</p></div></body></html>');
   }
   var img = jQuery(window).data('img');
@@ -2015,11 +2021,12 @@ function download2Epub(name) { //下载到1个epub
     item += '<item id="img' + i + '" href="' + i + '.jpg" media-type="image/jpeg"/>';
     OEBPS.file(i + '.jpg', img[i].data);
   }
-  content_opf = content_opf + item + '</manifest><spine toc="ncx">' + itemref + '</spine><guide><reference href="title.html" type="cover" title="Cover"/></guide></package>';
+  content_opf = content_opf + item + '<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">' + itemref + '</spine><guide><reference href="title.html" type="cover" title="Cover"/></guide></package>';
   toc_ncx += '</navMap></ncx>';
   OEBPS.file('content.opf', content_opf);
   OEBPS.file('toc.ncx', toc_ncx);
   OEBPS.file('title.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + name + '</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h1>' + name + '</h1><h2>本电子书由用户脚本novelDownloader制作</h2></body></html>');
+  OEBPS.file('cover.jpg', jQuery(window).data('cover'));
   jQuery(window).data('blob').generateAsync({
     type: 'blob'
   }).then(function(content) {
@@ -2091,4 +2098,36 @@ function objArrSort(key) {
       return 0;
     }
   };
+}
+
+function getCover(txt) {
+  var fontSize = 20;
+  var width = 180;
+  var height = 240;
+  var color = '#000';
+  var lineHeight = 10;
+  ///////////
+  var maxlen = width / fontSize - 2;
+  var txtArray = txt.split(new RegExp('(.{' + maxlen + '})'));
+  var i = 1;
+  var canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  var context = canvas.getContext('2d');
+  context.fillStyle = color;
+  context.strokeRect(0, 0, width, height);
+  context.font = fontSize + 'px sans-serif';
+  context.textBaseline = 'top';
+  var fLeft, fTop;
+  for (var j = 0; j < txtArray.length; j++) {
+    if (txtArray[j] === '') continue;
+    fLeft = fontSize * ((maxlen - txtArray[j].length) / 2 + 1);
+    fTop = fontSize / 4 + fontSize * i + lineHeight * i;
+    context.fillText(txtArray[j], fLeft, fTop, canvas.width);
+    context.fillText('\n', fLeft, fTop, canvas.width);
+    i++;
+  }
+  canvas.toBlob(function(blob) {
+    jQuery(window).data('cover', blob);
+  });
 }
