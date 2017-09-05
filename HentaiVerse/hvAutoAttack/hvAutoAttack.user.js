@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.86.3
+// @version      2.87.0
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -220,14 +220,14 @@ function goto() { //前进
   setTimeout(goto, 5000);
 }
 
-function g(item, key) { //全局变量
+function g(key, value) { //全局变量
   var hvAA = window.hvAA || {};
-  if (item === undefined && key === undefined) {
+  if (key === undefined && value === undefined) {
     return hvAA;
-  } else if (key === undefined) {
-    return hvAA[item];
+  } else if (value === undefined) {
+    return hvAA[key];
   } else {
-    hvAA[item] = key;
+    hvAA[key] = value;
     window.hvAA = hvAA;
   }
 }
@@ -429,7 +429,8 @@ function optionBox() { //配置界面
         <l0>高阶技能使用条件</l0><l1>高階技能使用條件</l1><l2>Conditions for 3rd Tier</l2>: {{highSkillCondition}}</div>\
       <div><input id="turnOnSS" type="checkbox"><label for="turnOnSS"><b><l0>开启</l0><l1>開啟</l1><l2>Turn on </l2>Spirit Stance</b></label>: {{turnOnSSCondition}}</div>\
       <div><input id="turnOffSS" type="checkbox"><label for="turnOffSS"><b><l0>关闭</l0><l1>關閉</l1><l2>Turn off </l2>Spirit Stance</b></label>: {{turnOffSSCondition}}</div>\
-      <div><input id="defend" type="checkbox"><label for="defend">Defend</label>: {{defendCondition}}</div>\
+      <div><input id="defend" type="checkbox"><label for="defend"><b>Defend</b></label>: {{defendCondition}}</div>\
+      <div><input id="focus" type="checkbox"><label for="focus"><b>Focus</b></label>: {{focusCondition}}</div>\
       <div><l2>If the page </l2><b><l0>页面停留</l0><l1>頁面停留</l1><l2>stays idle</l2></b><l2> for </l2>: \
         <input id="delayAlert" type="checkbox"><label for="delayAlert"><input class="hvAANumber" name="delayAlertTime" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2></label>; \
         <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label></div>\
@@ -728,10 +729,9 @@ function optionBox() { //配置界面
     }
     g('customizeTarget', target);
     var position = target.getBoundingClientRect();
-    var box = gE('.customizeBox').getBoundingClientRect();
     gE('.customizeBox').style.zIndex = 5;
-    gE('.customizeBox').style.top = position.top + window.scrollY + 'px';
-    gE('.customizeBox').style.left = position.right + window.scrollX - box.width + 'px';
+    gE('.customizeBox').style.top = position.bottom + window.scrollY + 'px';
+    gE('.customizeBox').style.left = position.left + window.scrollX + 'px';
   };
   //标签页-主要选项
   gE('input[name="pauseHotkeyStr"]', optionBox).onkeyup = function(e) {
@@ -2376,6 +2376,10 @@ function useDeSkill() { //自动施法DEBUFF技能
 }
 
 function attack() { //自动打怪
+  if (g('option').focus && checkCondition(g('option').focusCondition)) {
+    gE('#ckey_focus').click();
+    return;
+  }
   if (!g('option').ssForSkill && ((g('option').turnOnSS && checkCondition(g('option').turnOnSSCondition) && !gE('#ckey_spirit[src*="spirit_a"]')) || (g('option').turnOffSS && checkCondition(g('option').turnOffSSCondition) && gE('#ckey_spirit[src*="spirit_a"]')))) {
     gE('#ckey_spirit').click();
     g('end', true);
@@ -2528,7 +2532,8 @@ function recordUsage(parm) {
       _monster: 0,
       _boss: 0,
       evade: 0,
-      miss: 0
+      miss: 0,
+      focus: 0
     },
     restore: { //回复量
     },
@@ -2570,7 +2575,7 @@ function recordUsage(parm) {
   } else {
     stats.self[parm.mode] = (parm.mode in stats.self) ? stats.self[parm.mode] + 1 : 1;
   }
-  var debug = false;
+  var debug = true;
   var log = false;
   for (var i = 0; i < parm.log.length; i++) {
     if (parm.log[i].className === 'tls') break;
@@ -2606,6 +2611,8 @@ function recordUsage(parm) {
       stats.self.evade++;
     } else if (text.match(/(resists your spell|Your spell is absorbed|(evades|parries) your (attack|spell))|Your attack misses its mark|Your spell fails to connect/)) {
       stats.self.miss++;
+    } else if (text.match(/You gain the effect Focusing/)){
+      stats.self.focus++;
     } else if (text.match(/^Recovered \d+ points of/) || text.match(/You are healed for \d+ Health Points/) || text.match(/You drain \d+ HP from/)) {
       magic = (parm.mode === 'defend') ? 'defend' : text.match(/You drain \d+ HP from/) ? 'drain' : parm.magic || parm.item;
       point = text.match(/\d+/)[0] * 1;
