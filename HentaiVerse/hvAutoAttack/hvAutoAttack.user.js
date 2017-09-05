@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.87.0
+// @version      2.87.1
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -2575,7 +2575,7 @@ function recordUsage(parm) {
   } else {
     stats.self[parm.mode] = (parm.mode in stats.self) ? stats.self[parm.mode] + 1 : 1;
   }
-  var debug = true;
+  var debug = false;
   var log = false;
   for (var i = 0; i < parm.log.length; i++) {
     if (parm.log[i].className === 'tls') break;
