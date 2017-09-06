@@ -3,16 +3,16 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.1
+// @version     1.43.2
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
+// @require     https://gitcdn.xyz/repo/eligrey/FileSaver.js/master/FileSaver.min.js
 // @require     https://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
-// @require     https://greasyfork.org/scripts/21541/code/chs2cht.js?version=137286
-// @require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
+// @require     https://gitcdn.xyz/repo/dodying/UserJs/master/lib/chs2cht.js
+// @require     https://gitcdn.xyz/repo/dodying/UserJs/master/lib/base64.js
 // @grant       GM_xmlhttpRequest
 // @grant       unsafeWindow
 // @grant       GM_setValue
@@ -1786,33 +1786,35 @@ function download(fileType) { //下载
     }
   }, 200);
   var downloadCheck = setInterval(function() {
-    if (downloadedCheck($(window).data('dataDownload')) && ($(window).data('img').ok)) {
+    if (downloadedCheck($(window).data('dataDownload')) && (!$(window).data('img') || $(window).data('img').ok)) {
       clearInterval(addTask);
       clearInterval(downloadCheck);
       if ($('#ndBtn').length === 0) $('.ndLog').append('<button id="ndBtn">下载</button>');
       downloadTo(bookName, fileType);
     }
   }, 200);
-  var imgCheck = setInterval(function() {
-    var img = $(window).data('img');
-    var ok = true;
-    for (var i in img) {
-      if (img.ing >= 10) {
+  if ($(window).data('img')) {
+    var imgCheck = setInterval(function() {
+      var img = $(window).data('img');
+      var ok = true;
+      for (var i in img) {
+        if (img.ing >= 10) {
+          ok = false;
+          return;
+        }
+        if (i === 'ing' || i === 'ok' || img[i] !== null) continue;
         ok = false;
-        return;
+        downloadImage(i);
+        img.ing++;
+        $(window).data('img', img);
       }
-      if (i === 'ing' || i === 'ok' || img[i] !== null) continue;
-      ok = false;
-      downloadImage(i);
-      img.ing++;
-      $(window).data('img', img);
-    }
-    if (downloadedCheck($(window).data('dataDownload')) && img.ing === 0 && ok) {
-      clearInterval(imgCheck);
-      img.ok = true;
-      $(window).data('img', img);
-    }
-  }, 800);
+      if (downloadedCheck($(window).data('dataDownload')) && img.ing === 0 && ok) {
+        clearInterval(imgCheck);
+        img.ok = true;
+        $(window).data('img', img);
+      }
+    }, 800);
+  }
 }
 
 function downloadTask(fun) { //下载列队
@@ -1854,7 +1856,7 @@ function xhr(num, url) { //xhr
     overrideMimeType: chapterRule[host].MimeType,
     timeout: parseFloat($('.ndConfig[name="time"]').val()) * 1000,
     onload: function(res) {
-      if (res.status !== 200 || url !== res.finalUrl || res.response.match(/<title>(.*?)<\/title>/)[1].match(/404/)) {
+      if (res.status !== 200 || url !== res.finalUrl || (res.response.match(/<title>(.*?)<\/title>/) && res.response.match(/<title>(.*?)<\/title>/)[1].match(/404/))) {
         console.log({
           info: url !== res.finalUrl ? '网站跳转' : '网站错误',
           rawUrl: url,
@@ -2012,7 +2014,7 @@ function wordFormat(word) { //文本处理-通用版
     /*替换前的文本|||替换后的文本*/
     /*换行符请先用【换行】二字代替，最后同一替代*/
     /*请在最前方插入*/
-    '[\\u2000-\\u2FFF\\u3004-\\u303F\\uFE00-\\uFF60\\uFFC0-\\uFFFF\\ue000-\\uefff]||| ', //无意义字符
+    '[\\uE3C6]||| ', //非法字符
     '&lt;|||<',
     '&gt;|||>',
     '&nbsp;||| ',
