@@ -3,7 +3,7 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.2
+// @version     1.43.3
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1856,7 +1856,7 @@ function xhr(num, url) { //xhr
     overrideMimeType: chapterRule[host].MimeType,
     timeout: parseFloat($('.ndConfig[name="time"]').val()) * 1000,
     onload: function(res) {
-      if (res.status !== 200 || url !== res.finalUrl || (res.response.match(/<title>(.*?)<\/title>/) && res.response.match(/<title>(.*?)<\/title>/)[1].match(/404/))) {
+      if (res.status !== 200 || url !== res.finalUrl) {
         console.log({
           info: url !== res.finalUrl ? '网站跳转' : '网站错误',
           rawUrl: url,
@@ -2014,7 +2014,7 @@ function wordFormat(word) { //文本处理-通用版
     /*替换前的文本|||替换后的文本*/
     /*换行符请先用【换行】二字代替，最后同一替代*/
     /*请在最前方插入*/
-    '[\\uE3C6]||| ', //非法字符
+    '[\\uE4C6]||| ', //非法字符
     '&lt;|||<',
     '&gt;|||>',
     '&nbsp;||| ',
