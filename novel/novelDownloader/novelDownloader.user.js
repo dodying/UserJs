@@ -3,7 +3,7 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.3
+// @version     1.43.4
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -281,6 +281,25 @@ function init() {
       this.value = GM_getValue(this.name);
     }
   });
+  $('.ndCustomize textarea[name="replace"]').on({
+    keyup: function() {
+      var total = this.value.split('\n');
+      var i, arr;
+      for (i = 0; i < total.length; i++) {
+        if (total[i] === '') continue;
+        arr = total[i].split('|||');
+        try {
+          new RegExp(arr[0]);
+          if (arr[1]) new RegExp(arr[1]);
+        } catch (err) {
+          alert('第' + (i + 1) + '行发生错误，具体信息请打开开发者助手查看');
+          console.error(err);
+          return;
+        }
+      }
+      GM_setValue('repalce', total);
+    }
+  }).val(GM_getValue('repalce', ['格式: 替换前|||替换后']).join('\n'));
   if (GM_getValue('split')) {
     var split = GM_getValue('split');
     if ($('.ndSplit>option[value="' + split + '"]').length > 0) {
@@ -301,7 +320,8 @@ function init() {
         try {
           eval(GM_getValue(savedValue[i]));
         } catch (err) {
-          alert('站点规则出错\n名称：' + savedValue[i] + '\n值：' + GM_getValue(savedValue[i]) + '\n错误信息：\n' + err);
+          alert('站点规则出错\n名称：' + savedValue[i] + '\n值：' + GM_getValue(savedValue[i]) + '\n具体信息请打开开发者助手查看');
+          console.error(err);
         }
       }
     }
@@ -374,6 +394,16 @@ function init() {
       //$(this).css('opacity', 0.2);
       resetPositon();
     },
+  });
+  $('.ndCustomize textarea').on({
+    keyup: function() {
+      this.style.height = (this.scrollHeight) + 'px';
+      resetPositon();
+    },
+    click: function() {
+      this.style.height = (this.scrollHeight) + 'px';
+      resetPositon();
+    }
   });
   $('.ndConfig').change(function() {
     GM_setValue(this.name, this.type === 'checkbox' ? this.checked : this.type === 'number' ? (this.value || this.placeholder) * 1 : (this.value || this.placeholder));
@@ -1548,13 +1578,19 @@ function addUI() {
     var customize = [
       '<div class="ndCustomize ndBoxCenter">',
       '  <button name="hide">×</button>',
-      '  <span>默认显示当前站点规则<br>',
-      '  具体规则，详见<a href="https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明"target="_blank">自定义站点规则说明</a></span><br>',
-      '  <textarea class="ndCustomizeTextarea"></textarea><br>',
-      '  <button class="ndCustomizeSave">保存</button>',
-      '  <button class="ndCustomizeDelete">删除某站点的规则</button>',
-      '  <button class="ndCustomizeClear">清空</button><br>',
-      '  <button class="ndCustomizeAll">显示所有规则</button>',
+      '  <div>',
+      '    <span>默认显示当前站点规则<br>',
+      '    具体规则，详见<a href="https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明"target="_blank">自定义站点规则说明</a></span>',
+      '    <textarea class="ndCustomizeTextarea"></textarea>',
+      '    <button class="ndCustomizeSave">保存</button>',
+      '    <button class="ndCustomizeDelete">删除某站点的规则</button>',
+      '    <button class="ndCustomizeClear">清空</button>',
+      '    <button class="ndCustomizeAll">显示所有规则</button>',
+      '  </div>',
+      '  <div>',
+      '    <span>全局替换规则(一行一条): </span>',
+      '    <textarea name="replace"></textarea>',
+      '  </div>',
       '</div>'
     ];
     var log = [
@@ -1594,8 +1630,8 @@ function addStyle() {
       '#nd button{border:1px solid #000;background-color:white;cursor:pointer;padding:2px 3px;}',
       '#nd button[name=hide]{z-index:1000001;float:right;padding:3px 8px;position:relative;left:1px;top:-1px;border-left:none;border-bottom:none;}',
       '#nd button[name=hide]:hover{background-color:#FF0000;color:#FFF;}',
-      '#nd textarea{resize:both;width:95%;height:108px;overflow:auto;}',
-      //
+      '#nd textarea{resize:vertical;overflow:auto;display:block;}',
+      //ndLog
       '.ndLog{right:0px;bottom:0px;width:300px;}',
       '.ndLog progress:after{content:attr(value) " / "attr(max);}',
       '.ndLog div:after{float:right}',
@@ -1612,15 +1648,18 @@ function addStyle() {
       '.ndTaskImage{display:none;max-height:100px;counter-reset:imageOrder;}',
       '.ndTaskImage>div>progress{width:calc(100% - 80px);}',
       '.ndTaskImage>div>a:before{content:"pic " counter(imageOrder);counter-increment:imageOrder;}',
-      //
+      //章节标记
       'body{counter-reset:chapterOrder;}',
       '.ndPre,.ndPreVip{float:left;width:auto;}',
       '.ndPre:before,.ndPreVip:before{content:counter(chapterOrder) "-";counter-increment:chapterOrder;}',
       '.ndPre{color:#000;}',
       '.ndPreVip{color:#FF0000;}',
-      //
+      //测试区域
       '.ndTestArea>*{position:fixed;top:0;right:0;z-index:1;}',
       '.ndTestArea>textarea{width:calc(100% - 20px)!important;height:calc(100% - 20px)!important;background-color:#FFF;margin:10px;z-index:1000000;}',
+      //自定义站点规则
+      '.ndCustomize{width:100%;}',
+      '.ndCustomize textarea{width:calc(100% - 20px)!important;height:60px;background-color:#FFF;margin:10px;z-index:1000000;}',
     ].join('');
   }).appendTo('head');
 }
@@ -1856,7 +1895,7 @@ function xhr(num, url) { //xhr
     overrideMimeType: chapterRule[host].MimeType,
     timeout: parseFloat($('.ndConfig[name="time"]').val()) * 1000,
     onload: function(res) {
-      if (res.status !== 200 || url !== res.finalUrl) {
+      if (res.status !== 200 || url !== res.finalUrl || (res.response.match(/404/) && res.response.match(/Not Found|找不到文件或目录/i))) {
         console.log({
           info: url !== res.finalUrl ? '网站跳转' : '网站错误',
           rawUrl: url,
@@ -2044,6 +2083,7 @@ function wordFormat(word) { //文本处理-通用版
     '[\r\n]+\\s+([。？！”」』])|||$1',
     '(^\\s+|\\s+$)'
   ];
+  if (GM_getValue('repalce')) replaceLib = GM_getValue('repalce').concat(replaceLib);
   var regexp, str, reStr;
   for (var i = 0; i < replaceLib.length; i++) {
     str = replaceLib[i].split('|||');
