@@ -3,16 +3,19 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.5
+// @version     1.43.6
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     https://gitcdn.xyz/repo/eligrey/FileSaver.js/master/FileSaver.min.js
 // @require     https://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
-// @require     https://gitcdn.xyz/repo/dodying/UserJs/master/lib/chs2cht.js
-// @require     https://gitcdn.xyz/repo/dodying/UserJs/master/lib/base64.js
+// require     https://gitcdn.xyz/repo/eligrey/FileSaver.js/master/FileSaver.min.js
+// require     https://gitcdn.xyz/repo/dodying/UserJs/master/lib/chs2cht.js
+// require     https://gitcdn.xyz/repo/dodying/UserJs/master/lib/base64.js
+// @require     https://greasyfork.org/scripts/18532/code/FileSaver.js?version=127839
+// @require     https://greasyfork.org/scripts/21541/code/chs2cht.js?version=137286
+// @require     https://greasyfork.org/scripts/32483/code/base64.js?version=213081
 // @grant       GM_xmlhttpRequest
 // @grant       unsafeWindow
 // @grant       GM_setValue
