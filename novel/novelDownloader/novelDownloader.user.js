@@ -3,7 +3,7 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.6
+// @version     1.43.7
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -139,6 +139,8 @@
 // @include     http://www.xntk.net/book_j.php*
 // @include     http://www.kong.so/*/*
 // @include     http://www.hunhun520.com/book/*
+// @include     http://www.xiaoshuokan.com/haokan/*
+// @include     http://www.3zcn.org/3z/*
 // @include     http://www.blwen.com/*.html
 // @include     http://www.mpzw.com/html/*
 // @include     http://www.00xs.cc/xiaoshuo/*/*/
@@ -261,6 +263,7 @@ GM_registerMenuCommand('Download Novel', function() {
   showUI();
 }, 'N');
 $(window).on('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if (e.shiftKey && e.keyCode === 68) { //Shift+D
     showUI();
   }
@@ -343,7 +346,7 @@ function init() {
     var _chapter = GM_getValue('_chapter', {});
     _chapter[testChapter] = testChapter in _chapter ? _chapter[testChapter]++ : 1;
     GM_setValue('_chapter', _chapter);
-    addCRule(location.host, 'h1,h2', '.xscontent,.mcc,#Booex123,#BookContent,#BookText,#BookTextt,#ChapterBody,#Content,#J_article_con,#TXT,#a_content,#acontent,#artWrap,#article,#article-content,#articlebody,#book_text,#bookbody,#booktext,#ccon,#ccontent,#chapterContent,#chapter_content,#chaptercontent,#clickeye_content,#content,#content1,#content_1,#contentbox,#contents,#cp_content,#detail,#floatleft,#fontsize,#htmlContent,#jsreadbox,#kui-page-read-txt,#mouseRight,#neirong,#novel_content_txtsize,#novel_contents,#ntxt,#page-content,#partContent,#r_zhengwen,#read-content,#read_txt,#readcon,#readerFs,#showcontent,#snr2,#table_container,#text_area,#texts,#txt,#view_content_txt,#zjcontentdiv,#zoom,.Text,.article,.article-con,.bd,.book,.book_con,.box_box,.chapter,.chapter_con,.chaptertxt,.chpater-content,.con_L,.con_txt,.content,.contentbox,.menu-area,.myContent,.note,.novel_content,.noveltext,.p,.page-content,.panel-body,.read-content,.reed,.shuneirong,.text,.text1,.textP,.textinfo+p,.txt,.txtc,.yd_text2,.novelContent,.detailContent', 0);
+    addCRule(location.host, 'h1,h2', '.xscontent,.mcc,#Booex123,#BookContent,#BookText,#BookTextt,#ChapterBody,#Content,#J_article_con,#TXT,#a_content,#acontent,#artWrap,#article,#article-content,#articlebody,#book_text,#bookbody,#booktext,#ccon,#ccontent,#chapterContent,#chapter_content,#chaptercontent,#clickeye_content,#content,#content1,#content_1,#contentbox,#contents,#cp_content,#detail,#floatleft,#fontsize,#htmlContent,#jsreadbox,#kui-page-read-txt,#mouseRight,#neirong,#novel_content_txtsize,#novel_contents,#ntxt,#page-content,#partContent,#r_zhengwen,#read-content,#read_txt,#readcon,#readerFs,#showcontent,#snr2,#table_container,#text_area,#texts,#txt,#view_content_txt,#zjcontentdiv,#zoom,.Text,.article,.article-con,.bd,.book,.book_con,.box_box,.chapter,.chapter_con,.chaptertxt,.chpater-content,.con_L,.con_txt,.content,.contentbox,.menu-area,.myContent,.note,.novel_content,.noveltext,.p,.page-content,.panel-body,.read-content,.reed,.shuneirong,.text,.text1,.textP,.textinfo+p,.txt,.txtc,.yd_text2,.novelContent,.detailContent,.bookcontent', 0);
     if ($('meta[content*="charset=gb"],meta[charset*="gb"],script[charset*="gb"]').length) chapterRule[location.host].MimeType = 'text/html; charset=gb2312';
     chapterRule[location.host].sort = $('.ndConfig[name="sort"]')[0].checked;
     $(window).data('autoTry', true);
@@ -380,7 +383,6 @@ function init() {
     });
     $('.ndCustomize textarea').css({
       height: function() {
-        console.log(this);
         return this.scrollHeight + 'px';
       }
     });
@@ -1336,29 +1338,66 @@ function addRule() {
         overrideMimeType: 'text/html; charset=gb2312',
         url: url,
         onload: function(response) {
-          var host = getHost(url);
-          var contentSelector;
-          if (host === 'www.hunhun520.com') {
-            contentSelector = '#content';
-          } else if (host === 'www.tanxshu.net') {
-            contentSelector = '#contxt';
-          }
           var name = $('h1', response.response).text();
-          var content = $(contentSelector, response.response).html();
-          chapterRule['www.hunhun520.com'].Deal2(num, name, content, url, contentSelector);
+          var content = $('#content', response.response).html();
+          chapterRule['www.hunhun520.com'].Deal2(num, name, content, url);
         }
       });
     },
-    'Deal2': function(num, name, content, url, contentSelector) {
+    'Deal2': function(num, name, content, url) {
       GM_xmlhttpRequest({
         method: 'GET',
         overrideMimeType: 'text/html; charset=gb2312',
         url: url.replace('.html', '_2.html'),
         onload: function(response) {
-          content += $(contentSelector, response.response).html();
+          content += $('#content', response.response).html();
           thisDownloaded(num, name, content);
         }
       });
+    }
+  };
+  addIRule('www.xiaoshuokan.com', '好看小说网', 'h1', '.booklist a');
+  chapterRule['www.xiaoshuokan.com'] = {
+    'Deal': function(num, url) {
+      if (!$(window).data('firstRun')) {
+        GM_xmlhttpRequest({
+          method: 'GET',
+          url: url,
+          onload: function(res) {
+            var name = $('center>h1', res.response).text();
+            var bid = location.host.match('xiaoshuokan.com') ? 'bid' : 'mid';
+            bid = res.response.replace(/\s+/g, ' ').match(new RegExp('"' + bid + '":"(.*?)"'));
+            if (bid) {
+              $(window).data('firstRun', bid[1]);
+              chapterRule['www.xiaoshuokan.com'].Deal2(num, name, url);
+            } else {
+              var content = res.response.replace(/\s+/g, ' ').match(/<!--GGADEND-->(.*?)<!--content-->/)[1];
+              thisDownloaded(num, name, content, 0);
+            }
+          }
+        });
+      } else {
+        chapterRule['www.xiaoshuokan.com'].Deal2(num, '', url);
+      }
+    },
+    'Deal2': function(num, name, url) {
+      var bid = $(window).data('firstRun');
+      var cid = url.split(/\/|\./)[7];
+      var pre = location.host.match('xiaoshuokan.com') ? 'soso2.xiaoshuokan.com/call/chapreadajax.ashx?bid=' : 'json1.xiaoshuokan.com:81/read.php?mid=';
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: 'http://' + pre + bid + '&cid=' + cid + '&c=gbk',
+        onload: function(response) {
+          var content = response.response;
+          thisDownloaded(num, name, content, 0);
+        }
+      });
+    }
+  };
+  addIRule('www.3zcn.org', '三藏中文网', 'h1', '.booklist a');
+  chapterRule['www.3zcn.org'] = {
+    'Deal': function(num, url) {
+      chapterRule['www.xiaoshuokan.com'].Deal(num, url);
     }
   };
   addIRule('www.blwen.com', 'bl文库', 'h2', '.jogger2>li:gt(1):lt(-1)>a');
@@ -1645,6 +1684,10 @@ function addUI() {
       '    <button class="ndCustomizeAll">显示所有规则</button>',
       '  </div>',
       '  <div>',
+      '    <span>Epub的样式(修改时自动保存): </span>',
+      '    <textarea class="ndConfig" name="style"></textarea>',
+      '  </div>',
+      '  <div>',
       '    <span>全局替换规则(一行一条)(修改时自动保存): </span>',
       '    <textarea name="replace"></textarea>',
       '  </div>',
@@ -1687,7 +1730,7 @@ function addStyle() {
       '#nd button{border:1px solid #000;background-color:white;cursor:pointer;padding:2px 3px;}',
       '#nd button[name=hide]{z-index:1000001;float:right;padding:3px 8px;position:relative;left:1px;top:-1px;border-left:none;border-bottom:none;}',
       '#nd button[name=hide]:hover{background-color:#FF0000;color:#FFF;}',
-      '#nd textarea{resize:none;overflow:hidden;display:block;font-family:Consolas,Menlo;font-size:16px;}',
+      '#nd textarea{resize:none;display:block;font-family:Consolas,Menlo;font-size:16px;}',
       //ndLog
       '.ndLog{right:0px;bottom:0px;width:300px;}',
       '.ndLog progress:after{content:attr(value) " / "attr(max);}',
@@ -1716,7 +1759,7 @@ function addStyle() {
       '.ndTestArea>textarea{width:calc(100% - 20px)!important;height:calc(100% - 20px)!important;background-color:#FFF;margin:10px;z-index:1000000;}',
       //自定义站点规则
       '.ndCustomize{width:100%;}',
-      '.ndCustomize textarea{width:calc(100% - 20px)!important;height:60px;background-color:#FFF;margin:10px;z-index:1000000;}',
+      '.ndCustomize textarea{overflow:hidden;width:calc(100% - 20px)!important;height:60px;background-color:#FFF;margin:10px;z-index:1000000;}',
       //默认情况隐藏某些元素
       '.ndChapterArea>div,.ndBatchArea>div{display:none;}'
     ].join('');
@@ -2118,6 +2161,7 @@ function wordFormat(word) { //文本处理-通用版
     '&quot;|||"',
     '&quot;|||"',
     '&.*?;||| ',
+    '([\u4E00-\u9FFF])[ 　]+([\u4E00-\u9FFF])|||$1$2',
     '上一页',
     '返回目录',
     '下一页',
@@ -2163,24 +2207,19 @@ function wordSection(word) { //文本强制分段-测试功能
   var symbol = {
     'lineEnd': '。？！”」』', //句子结尾
     'lineStart': '“「『', //句子开头
-    'unbreak': '…，、—（）()·《 》〈 〉．_；： 　', //不包括作为句子开头的标点 //作用是找到【需要断句的标点】后，不断判断之后的字符是否为标点，是则继续找，不是则断句
+    'unbreak': '…，、—（）()·《 》〈 〉．_；：', //不包括作为句子开头的标点 //作用是找到【需要断句的标点】后，不断判断之后的字符是否为标点，是则继续找，不是则断句
   };
   var reLineEnd = new RegExp('[' + symbol.lineEnd + ']');
   var reLineStart = new RegExp('[' + symbol.lineStart + ']');
   var reUnbreak = new RegExp('[' + symbol.unbreak + ']');
   if ($('.ndConfig[name="section"]').val() === '2') word = word.replace(/([\r\n]+\s+)/g, '').replace(/[\r\n]+/g, '');
   var arr = word.split(/[\r\n]+/);
-  var lastIndex, lastWord, i, j;
+  var lastWord, i, j;
   for (i = 0; i < arr.length; i++) {
-    if (arr[i].length <= 30) continue;
+    //if (arr[i].length <= 30) continue;
     var arrNew = arr[i].split('');
     for (j = 1; j < arrNew.length; j++) {
-      lastIndex = -1;
-      lastWord = arrNew[j - 1].substr(lastIndex, 1); //查找上一个元素的最后一个字符
-      while ((lastWord === ' ' || lastWord === '　') && lastIndex >= 0) { //最后一个字符如果是空格，继续往前查找，直到找到真正的字符
-        lastIndex--;
-        lastWord = arrNew[j - 1].substr(lastIndex, 1);
-      }
+      lastWord = arrNew[j - 1].substr(-1, 1); //查找上一个元素的最后一个字符
       if (reUnbreak.test(arrNew[j]) || reLineEnd.test(arrNew[j]) || (!reLineEnd.test(lastWord) && !reLineStart.test(arrNew[j]))) {
         arrNew[j - 1] += arrNew[j];
         arrNew.splice(j, 1);
@@ -2272,7 +2311,7 @@ function download2Epub(name) { //下载到1个epub
   var META_INF = $(window).data('blob').folder('META-INF');
   META_INF.file('container.xml', '<?xml version="1.0" encoding="UTF-8"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml" /></rootfiles></container>');
   var OEBPS = $(window).data('blob').folder('OEBPS');
-  OEBPS.file('stylesheet.css', '' +
+  OEBPS.file('stylesheet.css', GM_getValue('style') || '' +
     'body{line-height:130%;text-align:justify;font-family:"Microsoft YaHei";font-size:22px;margin:0 auto;background-color:#CCE8CF;color:#000;}' +
     'h1{text-align:center;font-weight:bold;font-size:28px;}' +
     'h2{text-align:center;font-weight:bold;font-size:26px;}' +
