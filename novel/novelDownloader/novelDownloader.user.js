@@ -3,7 +3,7 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.7
+// @version     1.43.8
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -936,8 +936,7 @@ function addRule() {
           if ($('.vipdy', response.response).length > 0) {
             $(window).data('downloadList', []);
             for (var i = num; i < $(window).data('dataDownload').length; i++) {
-              $(window).data('dataDownload')[i].content = '来源地址：' + $(window).data('dataDownload')[num].url + '\r\n此章节为Vip章节';
-              $(window).data('dataDownload')[i].ok = true;
+              thisDownloaded(num, 'Vip章节', '', 'delete');
             }
             return;
           }
@@ -1095,8 +1094,7 @@ function addRule() {
           var content = $('#new_cpt_content', response.response).html();
           if (content.length === 9) {
             for (var i = num; i < $(window).data('dataDownload').length; i++) {
-              $(window).data('dataDownload')[i].content = '来源地址：' + $(window).data('dataDownload')[num].url + '\r\n此章节为Vip章节';
-              $(window).data('dataDownload')[i].ok = true;
+              thisDownloaded(num, 'Vip章节', '', 'delete');
             }
             $(window).data('downloadList', []);
             return;
@@ -1372,7 +1370,7 @@ function addRule() {
               chapterRule['www.xiaoshuokan.com'].Deal2(num, name, url);
             } else {
               var content = res.response.replace(/\s+/g, ' ').match(/<!--GGADEND-->(.*?)<!--content-->/)[1];
-              thisDownloaded(num, name, content, 0);
+              thisDownloaded(num, name, content);
             }
           }
         });
@@ -1389,7 +1387,7 @@ function addRule() {
         url: 'http://' + pre + bid + '&cid=' + cid + '&c=gbk',
         onload: function(response) {
           var content = response.response;
-          thisDownloaded(num, name, content, 0);
+          thisDownloaded(num, name, content);
         }
       });
     }
@@ -1727,7 +1725,7 @@ function addStyle() {
       '#nd input[type=number],#nd>div input[type=text]{border:1px solid #000;opacity:1;}',
       '#nd input[type=number],#nd input[type=text]{width:36px;}',
       '#nd input[type=checkbox]{position:relative;top:0;opacity:1;}',
-      '#nd button{border:1px solid #000;background-color:white;cursor:pointer;padding:2px 3px;}',
+      '#nd button{border:1px solid #000;cursor:pointer;padding:2px 3px;}',
       '#nd button[name=hide]{z-index:1000001;float:right;padding:3px 8px;position:relative;left:1px;top:-1px;border-left:none;border-bottom:none;}',
       '#nd button[name=hide]:hover{background-color:#FF0000;color:#FFF;}',
       '#nd textarea{resize:none;display:block;font-family:Consolas,Menlo;font-size:16px;}',
@@ -1945,11 +1943,11 @@ function downloadTask() { //下载列队
     }
   }
   if ($(window).data('downloadNow').length < thread && $(window).data('downloadList').length !== 0) {
-    var temp = {};
-    temp.href = $(window).data('downloadList')[0];
-    temp.ok = false;
-    temp.downloading = false;
-    $(window).data('downloadNow')[$(window).data('number')] = temp;
+    $(window).data('downloadNow')[$(window).data('number')] = {
+      href: $(window).data('downloadList')[0],
+      ok: false,
+      downloading: false
+    };
     $(window).data('downloadList').splice(0, 1);
     $(window).data('downloadNow').length++;
     $(window).data('number', $(window).data('number') + 1);
@@ -1977,9 +1975,7 @@ function xhr(num, url) { //xhr
           status: res.status,
           title: res.response.match(/<title>(.*?)<\/title>/)[1]
         });
-        thisDownloaded(num, '错误章节', '');
-        $(window).data('dataDownload')[num].ok = 'delete';
-        $(window).data('downloadNow')[num].ok = 'delete';
+        thisDownloaded(num, '错误章节', '', 'delete');
         return;
       }
       if (debug.xhr) console.log(res);
@@ -2030,8 +2026,7 @@ function xhr(num, url) { //xhr
         xhr(num, url);
       } else {
         var nameTrue = $(window).data('dataDownload')[num].name || num;
-        thisDownloaded(num, nameTrue, '下载超时，原因：可能是网络问题。by novelDownloader');
-        $(window).data('dataDownload')[num].ok = 'timeout';
+        thisDownloaded(num, nameTrue, '下载超时，原因：可能是网络问题。by novelDownloader', 'timeout');
       }
     },
     onerror: function() {
@@ -2040,14 +2035,13 @@ function xhr(num, url) { //xhr
         xhr(num, url);
       } else {
         var nameTrue = $(window).data('dataDownload')[num].name || num;
-        thisDownloaded(num, nameTrue, '下载失败，原因：可能是服务器问题。by novelDownloader');
-        $(window).data('dataDownload')[num].ok = 'error';
+        thisDownloaded(num, nameTrue, '下载失败，原因：可能是服务器问题。by novelDownloader', 'error');
       }
     }
   });
 }
 
-function thisDownloaded(num, name, content) { //下载完成，包括文本处理-通用版、简繁体转换
+function thisDownloaded(num, name, content, stauts) { //下载完成，包括文本处理-通用版、简繁体转换
   var host = location.host;
   if (!name) name = $(window).data('dataDownload')[num].name;
   if (reRule[host] instanceof Array) content = wordFormatSpecial(host, content);
@@ -2058,7 +2052,7 @@ function thisDownloaded(num, name, content) { //下载完成，包括文本处�
   content = tranStr(content, $('.ndLang:checked').val() * 1);
   $(window).data('dataDownload')[num].name = name.trim();
   $(window).data('dataDownload')[num].content = content;
-  $(window).data('dataDownload')[num].ok = true;
+  $(window).data('dataDownload')[num].ok = stauts || true;
   $(window).data('downloadNow')[num].ok = true;
   $(window).data('numberOk', $(window).data('numberOk') + 1);
   $('.ndProgress').val($(window).data('numberOk'));
