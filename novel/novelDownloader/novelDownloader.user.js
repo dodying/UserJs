@@ -3,7 +3,7 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.8
+// @version     1.43.9
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1396,6 +1396,20 @@ function addRule() {
   chapterRule['www.3zcn.org'] = {
     'Deal': function(num, url) {
       chapterRule['www.xiaoshuokan.com'].Deal(num, url);
+    }
+  };
+  addIRule('www.ggdown.com', '格格党', 'h1', '.chapterlist a');
+  chapterRule['www.ggdown.com'] = {
+    'Deal': function(num, url) {
+      var urlArr = url.split(/\/|\./);
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: 'http://www.ggdown.com/t/t.php?id=/' + urlArr[5] + '&did=' + urlArr[6] + '&qid=' + urlArr[7] + '&page=0',
+        onload: function(res) {
+          var content = res.response.replace(/<font.*?<\/font>/g, '');
+          thisDownloaded(num, '', content);
+        }
+      });
     }
   };
   addIRule('www.blwen.com', 'bl文库', 'h2', '.jogger2>li:gt(1):lt(-1)>a');
