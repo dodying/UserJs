@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.88
+// @version      2.88.1
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -720,9 +720,27 @@ function optionBox() { //配置界面
       gE('.hvAATabmenu>span[name="' + this.name.replace('hvAATab-', '') + '"]').click();
     };
   });
+
+  function updateGroup() {
+    var group = gE('.customizeGroup', 'all', g('customizeTarget'));
+    var customizeBox = gE('.customizeBox');
+    if (group.length + 1 === gE('select[name="groupChoose"]>option', 'all', customizeBox).length) return;
+    gE('select[name="groupChoose"]', customizeBox).textContent = '';
+    for (var i = 0; i <= group.length; i++) {
+      var option = gE('select[name="groupChoose"]', customizeBox).appendChild(cE('option'));
+      if (i === group.length) {
+        option.value = 'new';
+        option.textContent = 'new';
+      } else {
+        option.value = i + 1;
+        option.textContent = i + 1;
+      }
+    }
+  }
   optionBox.onmousemove = function(e) { //自定义条件相关事件
     var target = (e.target.className === 'customize') ? e.target : (e.target.parentNode.className === 'customize') ? e.target.parentNode : e.target.parentNode.parentNode;
     if (!gE('.customizeBox')) customizeBox();
+    updateGroup();
     if (target.className !== 'customize' && target.parentNode.className !== 'customize') {
       if (!target.className.match('customize')) gE('.customizeBox').style.zIndex = -1;
       return;
@@ -1074,18 +1092,22 @@ function customizeBox() { //自定义条件界面
     '<option value="mp">mp</option>',
     '<option value="sp">sp</option>',
     '<option value="oc">oc</option>',
+    '<option value="">- - - -</option>',
     '<option value="monsterAll">monsterAll</option>',
     '<option value="monsterAlive">monsterAlive</option>',
     '<option value="bossAll">bossAll</option>',
     '<option value="bossAlive">bossAlive</option>',
+    '<option value="">- - - -</option>',
     '<option value="roundNow">roundNow</option>',
     '<option value="roundAll">roundAll</option>',
     '<option value="roundLeft">roundLeft</option>',
     '<option value="roundType">roundType</option>',
     '<option value="attackStatus">attackStatus</option>',
+    '<option value="turn">turn</option>',
+    '<option value="">- - - -</option>',
     '<option value="_isCd_">isCd</option>',
     '<option value="_buffTurn_">buffTurn</option>',
-    '<option></option>'
+    '<option value=""></option>'
   ].join('');
   customizeBox.innerHTML = [
     '<span><l01><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#自定义判断条件" target="_blank">?</a></l01><l2><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README_en.md#customize-condition" target="_blank">?</a></l2></span>',
@@ -1126,21 +1148,6 @@ function customizeBox() { //自定义条件界面
     } else {
       this.title = 'on';
       gE('#csp').addEventListener('mousemove', funcSelect);
-    }
-  };
-  gE('select[name="groupChoose"]', customizeBox).onclick = function() {
-    var group = gE('.customizeGroup', 'all', g('customizeTarget'));
-    if (group.length + 1 === gE('select[name="groupChoose"]>option', 'all', customizeBox).length) return;
-    this.textContent = '';
-    for (var i = 0; i <= group.length; i++) {
-      var option = gE('select[name="groupChoose"]', customizeBox).appendChild(cE('option'));
-      if (i === group.length) {
-        option.value = 'new';
-        option.textContent = 'new';
-      } else {
-        option.value = i + 1;
-        option.textContent = i + 1;
-      }
     }
   };
   gE('.groupAdd', customizeBox).onclick = function() {
