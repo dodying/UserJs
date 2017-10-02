@@ -14,7 +14,7 @@
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.88.1
+// @version      2.88.2
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi
@@ -1699,12 +1699,12 @@ function reloader() {
     }
   };
   gE('body').appendChild(eventEnd);
-  setValue('delay', g('option').delay);
-  setValue('delay2', g('option').delay2);
+  sessionStorage.delay = g('option').delay;
+  sessionStorage.delay2 = g('option').delay2;
   var fakeApiCall = cE('script');
   fakeApiCall.textContent = 'api_call = ' + (function(b, a, d) {
-    var delay = localStorage.delay;
-    var delay2 = localStorage.delay2;
+    var delay = sessionStorage.delay * 1;
+    var delay2 = sessionStorage.delay2 * 1;
     window.info = a;
     b.open('POST', '/json');
     b.setRequestHeader('Content-Type', 'application/json');
