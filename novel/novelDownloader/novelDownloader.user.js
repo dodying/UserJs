@@ -3,7 +3,7 @@
 // @name:zh-CN  【小说】下载脚本
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.9
+// @version     1.43.10
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -395,11 +395,11 @@ function init() {
   });
   $('.ndMain,.ndBoxCenter').on({
     mouseenter: function() {
-      //$(this).css('opacity', 1);
+      $(this).css('opacity', 1);
       resetPositon();
     },
     mouseleave: function() {
-      //$(this).css('opacity', 0.2);
+      $(this).css('opacity', 0.2);
       resetPositon();
     },
   });
@@ -746,20 +746,20 @@ function addRule() {
       });
     }
   };
-  addIRule('www.hbooker.com', '欢乐书客', '.book-title>h3', '.book-chapter-list>.clearfix>li>a', '.book-chapter-list>.clearfix>li>a:has(.icon-vip)', false, 1);
+  addIRule('www.hbooker.com', '欢乐书客', '.book-title>h1', '.book-chapter-list>.clearfix>li>a', '.book-chapter-list>.clearfix>li>a:has(.icon-vip)', false, 1);
   chapterRule['www.hbooker.com'] = {
     'Deal': function(num, url) {
       if (!$(window).data('firstRun')) {
         $(window).data('firstRun', true);
-        $('head').append('<script type="text/javascript" src="' + location.protocol + 'www.hbooker.com/resources/js/enjs.min.js"></script>');
+        $('head').append('<script type="text/javascript" src="' + location.protocol + '//www.hbooker.com/resources/js/enjs.min.js"></script>');
       }
-      var chapterId = url.replace(location.protocol + 'www.hbooker.com/chapter/book_chapter_detail/', '');
+      var chapterId = url.replace(location.protocol + '//www.hbooker.com/chapter/book_chapter_detail/', '');
       GM_xmlhttpRequest({
         method: 'POST',
-        url: location.protocol + 'www.hbooker.com/chapter/ajax_get_session_code',
+        url: location.protocol + '//www.hbooker.com/chapter/ajax_get_session_code',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'Referer': location.protocol + 'www.hbooker.com/chapter/book_chapter_detail/' + chapterId,
+          'Referer': location.protocol + '//www.hbooker.com/chapter/book_chapter_detail/' + chapterId,
           'X-Requested-With': 'XMLHttpRequest'
         },
         data: 'chapter_id=' + chapterId,
@@ -772,19 +772,20 @@ function addRule() {
       });
     },
     'Deal2': function(num, url, accessKey) {
-      var chapterId = url.replace(location.protocol + 'www.hbooker.com/chapter/book_chapter_detail/', '');
+      var chapterId = url.replace(location.protocol + '//www.hbooker.com/chapter/book_chapter_detail/', '');
       GM_xmlhttpRequest({
         method: 'POST',
-        url: location.protocol + 'www.hbooker.com/chapter/get_book_chapter_detail_info',
+        url: location.protocol + '//www.hbooker.com/chapter/get_book_chapter_detail_info',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'Referer': location.protocol + 'www.hbooker.com/chapter/book_chapter_detail/' + chapterId,
+          'Referer': location.protocol + '//www.hbooker.com/chapter/book_chapter_detail/' + chapterId,
           'X-Requested-With': 'XMLHttpRequest'
         },
         data: 'chapter_id=' + chapterId + '&chapter_access_key=' + accessKey,
         responseType: 'json',
         onload: function(response) {
           var json = response.response;
+          var i;
           /*以下代码来自https://www.hbooker.com/resources/js/myEncrytExtend-min.js*/
           var s = {
             content: json.chapter_content,
@@ -964,7 +965,7 @@ function addRule() {
       var urlArr = url.split('/');
       GM_xmlhttpRequest({
         method: 'GET',
-        url: location.protocol + 'yuedu.163.com/getArticleContent.do?sourceUuid=' + urlArr[4] + '&articleUuid=' + urlArr[5],
+        url: location.protocol + '//yuedu.163.com/getArticleContent.do?sourceUuid=' + urlArr[4] + '&articleUuid=' + urlArr[5],
         responseType: 'json',
         onload: function(response) {
           var content = response.response.content;
@@ -1004,7 +1005,7 @@ function addRule() {
     'Deal2': function(num, url, urlReferer, nameRaw) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: location.protocol + 'ebook.longmabook.com' + url,
+        url: location.protocol + '//ebook.longmabook.com' + url,
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
           'Referer': urlReferer,
@@ -1038,7 +1039,7 @@ function addRule() {
       var urlArr = url.split(/\/|-|\./);
       GM_xmlhttpRequest({
         method: 'POST',
-        url: location.protocol + 'www.hongshu.com/bookajax.do',
+        url: location.protocol + '//www.hongshu.com/bookajax.do',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         },
@@ -1054,7 +1055,7 @@ function addRule() {
       var urlArr = url.split(/\/|-|\./);
       GM_xmlhttpRequest({
         method: 'POST',
-        url: location.protocol + 'www.hongshu.com/bookajax.do',
+        url: location.protocol + '//www.hongshu.com/bookajax.do',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         },
@@ -1521,8 +1522,8 @@ function addRule() {
   addIRule('www.cuisiliu.com', '垂丝柳(请使用批量下载)', 'h1', '.book a');
   addCRule('www.cuisiliu.com', 'h1', '.content');
   //18X
-  addIRule('www.lewenxs.net', '乐文小说网', 'h1', '.chapterlist a');
-  addCRule('www.lewenxs.net', 'h1', '#BookText', 1);
+  addIRule('www.lewenxs.net', '乐文小说网', '.kui-left.kui-fs32', '.kui-item>a');
+  addCRule('www.lewenxs.net', 'h1.kui-ac', '#kui-page-read-txt', 1);
   addIRule('www.wodexiaoshuo.cc', '我的小说网', 'h1', '.liebiao a');
   addCRule('www.wodexiaoshuo.cc', 'h2', '#content', 1);
   addRRule('www.wodexiaoshuo.cc', '本站永久地址.*');
@@ -2149,7 +2150,8 @@ function downloadImage(url) {
 
 function wordFormat(word) { //文本处理-通用版
   var html = $('<div>' + word + '</div>');
-  $(':not(p,br,div,span,img,a),[style*="display:none"],a:not(:has(img))', html).remove();
+  $(':not(p,br,div,span,img,a),[style*="display:none"],a:not(:has(img)),#nd', html).remove();
+  $('a[rel="next"],a:contains("下一页"),a:contains("下一章"),a:contains("下一节"),a:contains("下页"),a[rel="prev"],a:contains("上一页"),a:contains("上一章"),a:contains("上一节"),a:contains("上页"),a[href="index.html"],a:contains("返回书目"),a:contains("章节目录"),a:contains("章节列表"),a:contains("回目录"),a:contains("回书目"),a:contains("目 录"),a:contains("目录")', html).remove();
   if ($(window).data('img')) {
     word = html.html();
     word = word.replace(/<img.*?src="(.*?)".*?>/g, '{{IMG-$1}}');
@@ -2169,10 +2171,7 @@ function wordFormat(word) { //文本处理-通用版
     '&quot;|||"',
     '&quot;|||"',
     '&.*?;||| ',
-    '([\u4E00-\u9FFF])[ 　]+([\u4E00-\u9FFF])|||$1$2',
-    '上一页',
-    '返回目录',
-    '下一页',
+    '([\u4E00-\u9FFF])[ 　]+([\u4E00-\u9FFF])|||$1$2', //删除中文间的空格
     '无弹窗广告',
     '手机阅读本章.*',
     '本书最新TXT下载.*',
