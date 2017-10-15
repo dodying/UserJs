@@ -1,14 +1,14 @@
 // ==UserScript==
-// @name        hParkingLot
-// @name:zh-CN  【H】停车场
+// @name        [H]ParkingLot
+// @name:zh-CN  [H]停车场
 // @namespace   https://github.com/dodying/Dodying-UserJs
-// @description 
+// @description
 // 种子站点
 // @include     https://btso.pw/*
-// @include     https://btdb.in/*
+// @include     https://btdb.to/*
 // 网盘
-// @include     http://115.com/?ct=file&*
-// @include     http://115.com/?aid=-1&search_value=*&ct=file&ac=search&is_wl_tpl=1
+// include     http://115.com/*
+// @include     http://115.com/?tab=offline&mode=wangpan
 // @include     http://pan.baidu.com/*
 // 正规站点
 // @include     http://www.dmm.co.jp/*
@@ -24,7 +24,6 @@
 // @include     http://www.javlibrary.com/*
 // @include     https://www.javbus.com/*
 // @include     http://javpop.com/*
-// @include     http://www.abase.me/*
 // @include     http://www.jav007.com/*
 // @include     https://avso.pw/*
 // @include     https://avmo.pw/*
@@ -35,42 +34,52 @@
 // @include     http://bejav.me/*
 // @include     http://hpjav.com/*
 // @include     http://www.av539.com/*
-// @version     1.08a
+// @version     1.09
+// @grant       GM_xmlhttpRequest
 // @grant       GM_setValue
 // @grant       GM_getValue
+// @grant       GM_deleteValue
 // @grant       GM_openInTab
+// @grant       GM_setClipboard
+// @grant       GM_getResourceURL
+// @grant       unsafeWindow
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     http://cdn.bootcss.com/jquery.tablesorter/2.28.5/js/jquery.tablesorter.js
+// @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
+// @resource success https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Checkmark-128.png
+// @resource warn https://cdn2.iconfinder.com/data/icons/color-svg-vector-icons-2/512/warning_alert_attention_search-128.png
+// @resource error https://cdn2.iconfinder.com/data/icons/color-svg-vector-icons-2/512/error_warning_alert_attention-128.png
+// @resource downloading https://cdn4.iconfinder.com/data/icons/miu/24/circle-arrow_down-download-glyph-128.png
 // @run-at      document-end
 // ==/UserScript==
-(function ($) {
+(function($) {
   var defaultImg = 'https://cdn2.iconfinder.com/data/icons/designers-and-developers-icon-set/32/image-24.png';
-  var linkLib = {
+  var linkLib = { //待续-插入位置
     /*
     'example.com': {
       on: 布尔，是否开启,
       online: 布尔，是否在线播放,
-      cn: 标识,
+      name: 标识,
       icon: 网站，图标地址,
       search: 网站，搜索地址，搜索字样用{searchTerms}代替,
       text: 选择器-要标记的文本,
       img: 选择器-要标记的图片,
       time: 选择器-发布日期,
-      code: 选择器-番号,
-      delay: 布尔，是否要按键后在启用脚本
+      code: 选择器-番号/函数-返回值为番号,
+      codeManual: 布尔，是否手动获取番号,
+      append: 选择器，搜索结果要插入的位置,
+      manual: 布尔，是否要按键后在启用脚本
     },
     */
     // 种子站点
-    'btdb.in': {
+    'btdb.to': {
       on: false,
       name: 'BTDB',
-      icon: 'https://btdb.in/favicon.ico',
-      search: 'https://btdb.in/q/{searchTerms}/?sort=size',
+      icon: 'https://btdb.to/favicon.ico',
+      search: 'https://btdb.to/q/{searchTerms}/?sort=size',
       text: 'h1.torrent-name,.file-name,.item-title>a',
       code: '#search-input'
     },
@@ -89,10 +98,11 @@
       icon: 'http://115.com/favicon.ico',
       search: 'http://115.com/?url=%2F%3Faid%3D-1%26search_value%3D{searchTerms}%26ct%3Dfile%26ac%3Dsearch%26is_wl_tpl%3D1&mode=wangpan',
       text: '.file-name>em>a',
-      code: function () {
+      code: function() {
         return prompt('请输入番号', $('.file-path>a:eq(-1)').text());
       },
-      delay: true
+      codeManual: true,
+      manual: true
     },
     'pan.baidu.com': {
       on: false,
@@ -100,7 +110,7 @@
       icon: 'http://pan.baidu.com/box-static/disk-system/images/favicon.ico',
       search: 'http://pan.baidu.com/disk/home?adapt=pc&fr=ftw#search/key={searchTerms}&vmode=list',
       text: '.filename',
-      delay: true
+      manual: true
     },
     // 正规站点
     'www.dmm.co.jp': {
@@ -108,12 +118,17 @@
       name: 'DMM',
       icon: 'http://www.dmm.co.jp/favicon.ico',
       search: 'http://www.dmm.co.jp/search/=/searchstr={searchTerms}',
-      text: '.txt,table.mg-b20 td',
+      text: '.txt,table.mg-b20 td:not(:has(a))',
       img: '.img img,.tdmm,.crs_full>img',
       time: '.nw:contains(発売日)+td',
-      code: function () {
-        return prompt('请输入番号', $('.nw:contains(品番)+td').text());
-      }
+      code: function() {
+        var code = $('.nw:contains(品番)+td').text();
+        code = code.match(/[^h_0-9].*/)[0];
+        code = code.replace(/^tk|tk$/g, '').replace(/00([0-9]{3})/, '$1').replace(/([a-z]+)([0-9]+)/, '$1-$2');
+        code = code.toUpperCase();
+        return prompt('请输入番号', code);
+      },
+      codeManual: true
     },
     'www.tokyo-hot.com': {
       on: false,
@@ -131,8 +146,8 @@
       search: 'http://cn.caribbeancom.com/moviepages/{searchTerms}/index.html',
       img: 'img[itemprop=thumbnail]',
       time: 'dd[itemprop=uploadDate]',
-      code: function () {
-        return location.pathname.match(/[\d\-]+/) [0];
+      code: function() {
+        return location.pathname.match(/[\d\-]+/)[0];
       }
     },
     'www.1pondo.tv': {
@@ -142,10 +157,10 @@
       search: 'http://www.1pondo.tv/movies/{searchTerms}/',
       img: '.figure>img,.ng-scope>a>img,img.ng-scope',
       time: 'dd.ng-binding:eq(1)',
-      code: function () {
-        return location.pathname.match(/[\d\_]+/) [0];
+      code: function() {
+        return location.pathname.match(/[\d\_]+/)[0];
       },
-      delay: true
+      manual: true
     },
     'www.heyzo.com': {
       on: false,
@@ -154,8 +169,8 @@
       search: 'http://www.heyzo.com/search/{searchTerms}/1.html?sort=pop',
       //img: '.soundplay>img,.sample-images img,.relateive-movie img,.ranking-img>img,.withInfo>img,.new-movies>img,.actor>img',
       time: '.dataInfo:eq(0)',
-      code: function () {
-        return 'HEYZO-' + location.pathname.match(/\d+/) [0];
+      code: function() {
+        return 'HEYZO-' + location.pathname.match(/\d+/)[0];
       }
     },
     'cn.10musume.com': {
@@ -165,8 +180,8 @@
       search: 'http://cn.10musume.com/cn/moviepages/{searchTerms}/index.html',
       img: 'img',
       time: '#movie-table1:eq(5)',
-      code: function () {
-        return location.pathname.match(/[\d\_]+/) [0];
+      code: function() {
+        return location.pathname.match(/[\d\_]+/)[0];
       }
     },
     // 搜索引擎
@@ -177,7 +192,7 @@
       search: 'https://www.google.co.jp/search?q={searchTerms}',
       text: 'h3.r>a,span.st',
       code: '#lst-ib',
-      delay: true
+      manual: true
     },
     'www.baidu.com': {
       on: false,
@@ -186,7 +201,7 @@
       search: 'https://www.baidu.com/baidu?wd={searchTerms}',
       text: 'h3.t>a,.c-abstract',
       code: '#kw',
-      delay: true
+      manual: true
     },
     // JAVLibrary
     'www.javlibrary.com': {
@@ -194,10 +209,11 @@
       name: 'JAVLibrary',
       icon: 'http://www.javlibrary.com/favicon.ico',
       search: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
-      text: '.post-title>a,.text:eq(1),.id,.title>a,.video>a:not(:has(img)),.cast>.star>a',
+      text: '.post-title>a,.text:eq(1),.id,.title>a,.video>a:not(:has(img)),.cast>.star>a,.title:not(:has(a))',
       img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a',
       time: '.text:eq(2)',
-      code: '#video_id .text'
+      code: '#video_id .text',
+      append: '#video_favorite_edit'
     },
     'www.javbus.com': {
       on: true,
@@ -215,22 +231,12 @@
       search: 'http://javpop.com/index.php?s={searchTerms}',
       text: '.thumb_post a:nth-child(2),h1',
       img: '.thumb_post img,.box-b img',
-      code: function () {
-        return $('h1').text().match(/\[(.*?)\]/) [1];
+      code: function() {
+        return $('h1').text().match(/\[(.*?)\]/)[1];
       }
     },
-    'www.abase.me': {
-      on: true,
-      name: 'ABase A基地',
-      icon: 'http://www.abase.me/favicon.ico',
-      search: 'http://www.abase.me/{searchTerms}',
-      text: '.row-fluid>h3,.col-md-3 strong:eq(0),.list-group-item>a',
-      img: '.col-md-9 img',
-      time: '.col-md-3 strong:eq(1)',
-      code: '.col-md-3 strong:eq(0)'
-    },
     'www.jav007.com': {
-      on: true,
+      on: false,
       name: 'Jav007',
       icon: 'https://cdn2.iconfinder.com/data/icons/smartphone-interface-ver-2/100/smartphone-37-24.png',
       search: 'http://www.jav007.com/searchpage.php?a=1&code={searchTerms}',
@@ -240,7 +246,7 @@
       code: '.viewimfor>li:eq(8)'
     },
     'avso.pw': {
-      on: true,
+      on: false,
       name: 'AVSOX',
       icon: 'https://avso.pw/app/javu/View/img/favicon.ico',
       search: 'https://avso.pw/cn/search/{searchTerms}',
@@ -261,19 +267,19 @@
     },
     // 在线观看
     'avpapa.co': {
-      on: true,
+      on: false,
       online: true,
       name: 'Avpapa',
       icon: 'http://avpapa.co/assets/favicon-cce4d9c4feec996b085c0baf9dd0fa0e9771333225ff0da8a2105e1c292f507e.ico',
       search: 'http://avpapa.co/search?q={searchTerms}',
       text: '.tit,h4',
       img: '.thumbs>a>img,#click_to_show>img',
-      code: function () {
-        return $('h4').text().match(/^\[(.*?)\]/) [1];
+      code: function() {
+        return $('h4').text().match(/^\[(.*?)\]/)[1];
       }
     },
     'av99.us': {
-      on: true,
+      on: false,
       online: true,
       name: 'AV99免費A片',
       icon: 'http://av99.us/favicon.ico',
@@ -281,54 +287,86 @@
       text: 'h1,.list>li>a,.dd>a,.fl>a>span',
       img: '.pic>a>img',
       time: '.viewimfor>li:eq(1)',
-      code: function () {
-        return $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/) [1];
+      code: function() {
+        return $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/)[1];
       }
     },
     'www.doojav69.com': {
-      on: true,
+      on: false,
       online: true,
       name: 'Doojav69',
       icon: 'http://www.doojav69.com/favicon.ico',
       search: 'http://www.doojav69.com/?s={searchTerms}',
       text: 'h2.entry-title>a,h1.entry-title',
-      code: function () {
-        return $('h1.entry-title').text().match(/(.*?) (.*?)/) [1];
+      code: function() {
+        return $('h1.entry-title').text().match(/(.*?) (.*?)/)[1];
       }
     },
     'bejav.me': {
-      on: true,
+      on: false,
       online: true,
       name: 'BeJav.Me',
       search: 'http://bejav.me/search/{searchTerms}/',
       text: '.name>a,.breadcrumb_last,.body>ul>li>a',
       img: '.img-responsive,.thumbnail>img,.body>ul>li>img',
-      code: function () {
+      code: function() {
         return prompt('请输入番号', $('.breadcrumb_last').text());
-      }
+      },
+      codeManual: true
     },
     'hpjav.com': {
-      on: true,
+      on: false,
       online: true,
       name: 'HPJAV',
       icon: 'http://hpjav.com/wp-content/themes/dist/image/HP.ico',
       search: 'http://hpjav.com/tw/?s={searchTerms}',
       text: '.entry-title a,h1,.current',
-      code: function () {
-        return prompt('请输入番号', $('.current').text().match(/(.*?) (.*?)/) [1]);
-      }
+      code: function() {
+        return prompt('请输入番号', $('.current').text().match(/(.*?) (.*?)/)[1]);
+      },
+      codeManual: true
     },
-    'www.av539.com': {
-      on: true,
-      online: true,
-      name: 'av539',
-      icon: 'http://www.av539.com/images/icon.png',
-      search: 'http://www.av539.com/?search=&s={searchTerms}&post_type=post',
-      text: '.title:not(:has(a)),.singletitle,.title>span',
-      code: function () {
-        return prompt('请输入番号', $('.singletitle').text().match(/(.*?) (.*?)/) [1]);
-      }
+  };
+  var magnetLib = {
+    /*
+    'example.com': {
+      search: 网站，搜索地址,
+      title: 选择器,
+      magnet: 选择器,
+      size: 选择器,
+      time: 选择器,
     },
+    */
+    contains: [
+      'btdb.to',
+      'btso.pw'
+    ],
+    'btdb.to': {
+      search: 'https://btdb.to/q/{searchTerms}/{pageTerms}',
+      title: 'h2.item-title>a',
+      magnet: '.magnet',
+      size: '.item-meta-info span:nth-child(2)',
+      time: '.item-meta-info span:nth-child(4)',
+      page: '.pagination',
+      origin: 'https://btdb.to'
+    },
+    'btso.pw': {
+      search: 'https://btso.pw/search/{searchTerms}/page/{pageTerms}',
+      title: '.data-list>.row>a',
+      magnet: function(data) {
+        var arr = [];
+        for (var i = 0; i < $('.data-list>.row>a', data).length; i++) {
+          arr.push({
+            href: 'magnet:?xt=urn:btih:' + $('.data-list>.row>a', data).eq(i).attr('href').replace(/.*hash\/(.*)$/, '$1') + '&dn=' + encodeURI($('.file', data).eq(i).text())
+          });
+        }
+        return arr;
+      },
+      size: '.size',
+      time: '.date',
+      page: '.pagination',
+      origin: 'https://btso.pw'
+    }
   };
   var imgLib = {
     add: 'https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519691-199_CircledPlus-24.png',
@@ -337,8 +375,7 @@
     table: 'https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519904-098_Spreadsheet-24.png',
     restart: 'https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/power-24.png'
   };
-  var markLib = [
-    { //0
+  var markLib = [{ //0
       name: '等待中',
       img: 'https://cdn2.iconfinder.com/data/icons/lightly-icons/24/time-24.png',
       color: 'gray'
@@ -369,45 +406,60 @@
       color: 'black'
     },
   ];
-  if (linkLib[location.host].delay) {
-    $(window).on('keydown', function (e) {
+  if (linkLib[location.host].manual) {
+    $(window).on('keydown', function(e) {
       if (e.keyCode === 65 && e.shiftKey) { //Shift+A
-        init();
-        markAdded();
+        _init();
         $(window).off('keydown');
       }
     });
   } else {
-    init();
-    markAdded();
+    _init();
   }
+  if (location.href === 'http://115.com/?tab=offline&mode=wangpan') downloadIn115();
+
+  function _init() {
+    init();
+    getCode(true);
+    markAdded();
+    $('a[href^="magnet:"]:not(.hBanner a):not(.hSearch a)').on({
+      click: function(e) {
+        e.preventDefault();
+        GM_setValue('link', this.href);
+        GM_setValue('name', this.href.match(/dn=(.*?)(&|$)/) ? decodeURIComponent(this.href.match(/dn=(.*?)(&|$)/)[1]) : '');
+      }
+    });
+  }
+
   function init() {
-    $('<style></style>').appendTo('head').html('' +
-    '.hBanner{position:fixed;background-color:white;z-index:999999;}' +
-    '.hBanner{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}' +
-    '.hBanner>*{cursor:pointer;float:left;margin:0 1px 0 1px;}' +
-    '.hBanner *{line-height:9px;text-shadow:none;}' +
-    '.switcher{width:32px;height:24px;background:#333;border-radius:12px;position:relative;}' +
-    '.switcher>span{position:absolute;left:6px;top:7px;height:2px;color:#26CA28;font-size:16px;text-transform:Capitalize;}' +
-    '.hBanner>:not(.switcher):not(.hasCode){width:24px;height:24px;}' +
-    '.links>*,.addCode>*{background-color:white;display:none;width:24px;height:24px;}' +
-    '.links>:nth-child(1),.addCode>:nth-child(1){display:inline;}' +
-    '.links:hover>*,.addCode:hover>*{display:inline;}' +
-    '.links>.avOnline{border:solid 1px black;}' +
-    '.hasCode>a{margin:0 1px;display:none;}' +
-    '.hasCode,.hasCode>*{line-height:normal;}' +
-    '.showTable{background-color:white;position:absolute;top:80px;z-index:999998;}' +
-    '.showTable>table{border-collapse:collapse;}' +
-    '.showTable>table>thead>tr{position:fixed;top:64px;}' +
-    '.showTable tr{background-color:white;}' +
-    '.showTable td{border:1px solid black;}' +
-    '.showTable>button{float:right;color:red;position:fixed;right:10px;}' +
-    '.showTable>button:nth-child(1){top:70px;}');
+    $('<style></style>').appendTo('head').html(['.hBanner{position:fixed;background-color:#F2F2F2;z-index:999999;}',
+      '.hBanner{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}',
+      '.hBanner>*{cursor:pointer;float:left;margin:0 1px 0 1px;}',
+      '.hBanner *{line-height:9px;text-shadow:none;}',
+      '.switcher{width:32px;height:24px;background:#333;border-radius:12px;position:relative;}',
+      '.switcher>span{position:absolute;left:6px;top:7px;height:2px;color:#26CA28;font-size:16px;text-transform:Capitalize;}',
+      '.hBanner>:not(.switcher):not(.hasCode){width:24px;height:24px;}',
+      '.links>*,.addCode>*{background-color:#F2F2F2;display:none;width:24px;height:24px;}',
+      '.links>:nth-child(1),.addCode>:nth-child(1){display:inline;}',
+      '.links:hover>*,.addCode:hover>*{display:inline;}',
+      '.links>.avOnline{border:solid 1px black;}',
+      '.hasCode>a{margin:0 1px;display:none;}',
+      '.hasCode,.hasCode>*{line-height:normal;}',
+      '.showTable{background-color:#F2F2F2;position:absolute;top:80px;z-index:999998;}',
+      '.showTable>table,.hSearch{border-collapse:collapse;margin:0 auto;color:#666666;font-size:13px;text-align:center;background-color:#FFF;}',
+      '.showTable tr:nth-child(2n),.hSearch tr:nth-child(2n){background-color:#F2F2F2;}',
+      '.showTable td,.showTable th,.hSearch th,.hSearch td{border:1px solid black;padding:8px 16px;}',
+      '.hSearchPage li{display:inline;padding:0 1px;}',
+      '.hSearchPage li.active{font-weight:bolder;}',
+      '.hSearchPage li.active *{color:gray;}',
+      //
+      '.fa-file-video-o{background-color:yellow;color:yellow;}'
+    ].join(''));
     $('<div class="hBanner"></div>').on({
-      mousedown: function (e1) {
-        if (e1.target !== $('.hasCode') [0]) return;
+      mousedown: function(e1) {
+        if (e1.target !== $('.hasCode')[0]) return;
         $(this).off('mouseout');
-        $('body').mouseup(function (e2) {
+        $('body').mouseup(function(e2) {
           var width = 152;
           var topBorder = $(window).height() - $('.hBanner').height();
           var leftBorder = $(window).width() - $('.hBanner').width();
@@ -423,28 +475,28 @@
           GM_setValue('left', left);
           $(this).off('mouseup');
           $('.hBanner').on({
-            mouseout: function () {
+            mouseout: function() {
               $('.hasCode>a').hide();
             }
           });
         });
       },
-      mouseover: function () {
+      mouseover: function() {
         $('.hasCode>a').show();
       },
-      mouseout: function () {
+      mouseout: function() {
         $('.hasCode>a').hide();
       }
     }).css({
-      'top': function () {
+      'top': function() {
         return GM_getValue('top', 0);
       },
-      'left': function () {
+      'left': function() {
         return GM_getValue('left', 0);
       }
     }).appendTo('body');
     $('<div class="switcher"></div>').html('<span>on</span>').appendTo('.hBanner').on({
-      click: function () {
+      click: function() {
         if ($(this).find('span').text() === 'on') {
           $(this).find('span').text('off');
           $(this).find('span').css('color', 'red');
@@ -455,14 +507,14 @@
           markAdded();
         }
       },
-      contextmenu: function (e) {
+      contextmenu: function(e) {
         e.preventDefault();
         $(this).find('span').text('on');
         undoMarkAdded();
         markAdded();
       }
     });
-    $('<div class="links"></div>').html(function () {
+    $('<div class="links"></div>').html(function() {
       var _html = '';
       for (var i in linkLib) {
         if (!linkLib[i].on) continue;
@@ -472,49 +524,49 @@
       }
       return _html;
     }).on({
-      click: function (e) {
+      click: function(e) {
         var code = getCode();
         GM_openInTab($(e.target).attr('url').replace('{searchTerms}', code));
       },
-      contextmenu: function (e) {
+      contextmenu: function(e) {
         e.preventDefault();
         var code = getCode().match(/[a-z0-9]+/gi).join(' ');
         GM_openInTab($(e.target).attr('url').replace('{searchTerms}', code));
       },
     }).appendTo('.hBanner');
     $('.links>.avOnline').on({
-      mouseover: function () {
+      mouseover: function() {
         $(this).attr({
           rawSrc: this.src,
           src: 'https://cdn4.iconfinder.com/data/icons/iconsimple-logotypes/512/youtube-24.png'
         });
       },
-      mouseout: function () {
+      mouseout: function() {
         $(this).attr('src', $(this).attr('rawSrc'));
       }
     });
-    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + imgLib.add + '"></img>').click(function () {
+    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + imgLib.add + '"></img>').click(function() {
       addValue(GM_getValue('lastMark', 0));
     }).appendTo('.hBanner');
-    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + imgLib.del + '"></img>').click(function () {
+    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + imgLib.del + '"></img>').click(function() {
       delValue();
     }).appendTo('.hBanner');
-    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + imgLib.import + '"></img>').click(function () {
+    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + imgLib.import+'"></img>').click(function() {
       importValue();
     }).appendTo('.hBanner');
     $('<div title="左键:数据库展示\n右键:下载数据库(网页格式)"></div>').html('<img src="' + imgLib.table + '"></img>').on({
-      click: function () {
+      click: function() {
         showValue(0);
-        $(this).off('click').on('click', function () {
+        $(this).off('click').on('click', function() {
           $('.showTable').toggle();
         });
       },
-      contextmenu: function (e) {
+      contextmenu: function(e) {
         e.preventDefault();
         showValue(1);
       }
     }).appendTo('.hBanner');
-    $('<div title="重启"></div>').html('<img src="' + imgLib.restart + '"></img>').click(function () {
+    $('<div title="重启"></div>').html('<img src="' + imgLib.restart + '"></img>').click(function() {
       $('.hBanner').remove();
       undoMarkAdded();
       $(window).removeData('code');
@@ -523,14 +575,14 @@
     }).appendTo('.hBanner');
     $('<div class="hasCode">(已标记)</div>').appendTo('.hBanner');
     for (var i = 0; i < markLib.length; i++) {
-      $('<img src="' + markLib[i].img + '"title="' + i + '|' + markLib[i].name + '"></img>').val(i).click(function () {
+      $('<img src="' + markLib[i].img + '"title="' + i + '|' + markLib[i].name + '"></img>').val(i).click(function() {
         addValue($(this).val());
       }).appendTo('.addCode');
     }
-    $(window).keydown(function (e) {
+    $(window).keydown(function(e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) { //0-9
-        var code = (e.shiftKey) ? prompt('请输入番号', getCode())  : getCode();
+        var code = (e.shiftKey) ? prompt('请输入番号', getCode()) : getCode();
         if (!code) return;
         addValue(String.fromCharCode(e.keyCode), code);
       } else if (e.keyCode === 66 && e.shiftKey) { //Shift+B
@@ -538,16 +590,17 @@
       }
     });
   }
+
   function markAdded() {
     $('.hasCode a').remove();
     var lib = GM_getValue('lib', null);
     if (!lib) return;
     if (linkLib[location.host].img) {
       $(linkLib[location.host].img).removeAttr('onerror').attr({
-        rawSrc: function () {
+        rawSrc: function() {
           return $(this).attr('src');
         },
-        src: function () {
+        src: function() {
           var keyword;
           var _src = $(this).attr('src');
           for (var i in lib) {
@@ -562,7 +615,7 @@
       });
     }
     if (linkLib[location.host].text) {
-      $(linkLib[location.host].text).each(function () {
+      $(linkLib[location.host].text).each(function() {
         var keyword;
         var _html = $(this).text();
         $(this).empty();
@@ -577,27 +630,29 @@
       });
     }
   }
+
   function undoMarkAdded() {
     var lib = GM_getValue('lib', null);
     if (!lib) return;
     if (linkLib[location.host].img) {
       $(linkLib[location.host].img).attr({
-        src: function () {
+        src: function() {
           return $(this).attr('rawSrc');
         }
       }).removeAttr('rawSrc');
     }
-    $(linkLib[location.host].text).html(function () {
+    $(linkLib[location.host].text).html(function() {
       return $(this).text();
     });
   }
+
   function addValue(mark, code) { //可选参数code
     mark = parseInt(mark);
     if (mark >= markLib.length) {
       alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
       return;
     }
-    var lib = GM_getValue('lib', null) || new Object();
+    var lib = GM_getValue('lib', null) || {};
     var code = code || getCode();
     if (!code) return;
     GM_setValue('lastMark', mark);
@@ -609,6 +664,7 @@
     undoMarkAdded();
     markAdded();
   }
+
   function delValue(code) { //可选参数code
     var lib = GM_getValue('lib', null);
     if (!lib) return;
@@ -619,13 +675,14 @@
     undoMarkAdded();
     markAdded();
   }
+
   function importValue() {
-    var notice = '请输入车位\n';
+    var notice = '请输入车位\n-1. 删除\n';
     for (var i = 0; i < markLib.length; i++) {
-      notice += i + markLib[i].name + '\n';
+      notice += i + '. ' + markLib[i].name + '\n';
     }
     var mark = parseInt(prompt(notice));
-    if (isNaN(mark) || mark >= markLib.length) {
+    if (isNaN(mark) || mark >= markLib.length || mark < -1) {
       alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
       return;
     }
@@ -633,19 +690,24 @@
     var codeArr = prompt('请输入车牌号，以|为分割');
     if (!codeArr) return;
     codeArr = codeArr.split('|');
-    var lib = GM_getValue('lib', null) || new Object();
+    var lib = GM_getValue('lib', null) || {};
     for (var i = 0; i < codeArr.length; i++) {
-      lib[codeArr[i]] = {
-        mark: mark
-      };
+      if (mark === -1 && codeArr[i] in lib) {
+        delete lib[codeArr[i]]
+      } else if (mark >= 0) {
+        lib[codeArr[i]] = {
+          mark: mark
+        };
+      }
     }
     GM_setValue('lib', lib);
     undoMarkAdded();
     markAdded();
   }
+
   function showValue(type) {
-    var lib = GM_getValue('lib', null) || new Object();
-    var _html = '<table class="tablesorter"><thead><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>';
+    var lib = GM_getValue('lib', null) || {};
+    var _html = '<table class="tablesorter"><tbody><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr>';
     var num = 0;
     for (var i in lib) {
       num++;
@@ -654,10 +716,6 @@
     _html += '</tbody></table>';
     if (type === 0) {
       $('<div class="showTable"></div>').html(_html).appendTo('body');
-      $('<button>x</button>').click(function () {
-        $('.showTable').toggle();
-      }).prependTo('.showTable');
-      $('.showTable>table').tablesorter();
     } else if (type === 1) {
       _html = '<html><head><script src="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script><script src="http://cdn.bootcss.com/jquery.tablesorter/2.28.5/js/jquery.tablesorter.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>';
       var blob = new Blob([_html], {
@@ -666,23 +724,247 @@
       saveAs(blob, '1.html');
     }
   }
-  function getCode() {
+
+  function getCode(first) {
     if ($(window).data('code')) return $(window).data('code');
     var code;
-    if (typeof linkLib[location.host].code === 'string') {
-      var temp = $(linkLib[location.host].code);
+    var lib = linkLib[location.host];
+    if (typeof lib.code === 'string') {
+      var temp = $(lib.code);
       if (temp.length > 0) {
-        code = (temp[0].tagName === 'INPUT') ? temp.val()  : temp.text();
+        code = (temp[0].tagName === 'INPUT') ? temp.val() : temp.text();
       } else {
         code = '';
       }
-    } else if (typeof linkLib[location.host].code === 'function') {
-      code = linkLib[location.host].code();
+    } else if (typeof lib.code === 'function') {
+      if (!first || !lib.codeManual) code = lib.code();
     } else {
       code = '';
     }
     code = code.toUpperCase();
     $(window).data('code', code);
+    if (code) getMagnet(code);
     return code;
   }
-}) (jQuery);
+
+  function getMagnet(code, page = '1', searchUrl = magnetLib.contains[0]) {
+    var lib = magnetLib[searchUrl];
+    var url = lib.search.replace('{searchTerms}', code).replace('{pageTerms}', page);
+    var codeArr = code.split('-');
+    var expArr = [];
+    for (var i = 0; i < codeArr.length; i++) {
+      expArr.push(new RegExp(codeArr[i], 'gi'));
+    }
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: url,
+      onload: function(response) {
+        var data = response.response;
+        var title = $(lib.title, data);
+        var magnet;
+        if (typeof lib.magnet === 'string') {
+          magnet = $(lib.magnet, data);
+        } else {
+          magnet = lib.magnet(data);
+        }
+        var size = $(lib.size, data);
+        var time = $(lib.time, data);
+        $('.hSearch').remove();
+        $('<table class="hSearch"></table>').html('<tbody><tr><th><select><option>' + magnetLib.contains.join('</option><option>') + '</option></select></th><th><a href="' + url + '" target="_blank">大小</a></th><th>时间</th><th>复制</th></tr></tbody>').insertAfter(linkLib[location.host].append || 'body>:eq(-1)');
+        var name;
+        for (var i = 0; i < title.length; i++) {
+          name = title[i].title;
+          for (var j = 0; j < codeArr.length; j++) {
+            name = name.replace(expArr[j], '<b>' + codeArr[j] + '</b>');
+          }
+          $('<tr></tr>').appendTo('.hSearch>tbody').html('<td><a class="hMagent" href="' + magnet[i].href + '">' + name + '</a></td><td><a href="' + lib.origin + title[i].pathname + '" target="_blank">' + size[i].textContent + '</a></td><td>' + time[i].textContent + '</td><td><button class="hSearchCopy">复制</button></td>');
+        }
+        $('.hMagent').on('click', function(e) {
+          e.preventDefault();
+          var target = (e.target.tagName === 'B') ? e.target.parentNode : e.target;
+          GM_setValue('link', target.href);
+          GM_setValue('name', target.innerText);
+          addValue(2);
+        });
+        $('.hSearchCopy').on('click', function(e) {
+          console.log(this);
+          $(e.target).text('已复制');
+          setTimeout(function() {
+            $(e.target).text('复制');
+          }, 3000);
+          GM_setClipboard($(e.target).parents('tr').find('td>a:eq(0)').attr('href'));
+        });
+        if (title.length === 0) $('<tr></tr>').appendTo('.hSearch>tbody').html('<td colspan="4">No search result</td>');
+        if ($(lib.page, data).html() !== undefined) {
+          $('<tr class="hSearchPage"></tr>').appendTo('.hSearch>tbody').html('<td colspan="4">' + $(lib.page, data).html() + '</td>');
+          $('.hSearchPage li').click(function(e) {
+            e.preventDefault();
+            var text = $(e.target).text();
+            if (isNaN(parseInt(text)) && text.match(/Prev/)) {
+              text = String(parseInt(page) - 1);
+            } else if (isNaN(parseInt(text)) && text.match(/Next/)) {
+              text = String(parseInt(page) + 1);
+            }
+            getMagnet(getCode(), text, searchUrl);
+          });
+        }
+        $('.hSearch th select').on({
+          change: function() {
+            getMagnet(getCode(), '1', this.value);
+          }
+        }).find(':contains(' + searchUrl + ')')[0].selected = true;
+      }
+    });
+  }
+
+  function downloadIn115() {
+    if (document.readyState !== 'complete') {
+      setTimeout(downloadIn115, 200);
+    } else {
+      $('<a href="javascript:;" class="opmenu-clean">清空所有任务</a>').prependTo(unsafeWindow.frames.wangpan.document.querySelector('.operate-menu')).on({
+        click: function() {
+          unsafeWindow.Core.OFFL5Plug.GetDataCtl().list(function(e) {
+            var tasks = e.tasks;
+            tasks.forEach(function(task) {
+              unsafeWindow.Core.OFFL5Plug.Delete(task, null);
+            });
+          });
+        }
+      });
+      setInterval(function() {
+        if (GM_getValue('link')) {
+          var link = GM_getValue('link');
+          GM_setValue('task', link.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toLowerCase());
+          //console.log(GM_getValue('task'));
+          unsafeWindow.Core.OFFL5Plug.OpenLink();
+          setTimeout(function() {
+            if ($('#js_offline_new_add')) {
+              $('#js_offline_new_add').val(link);
+              GM_deleteValue('link');
+              unsafeWindow.$('.con>.button').click();
+              var checkResult = setInterval(function() {
+                if ($('iframe[src^="//captchaapi.115.com"]').length > 0) { //验证
+                  clearInterval(checkResult);
+                  setNotice('请重新验证你的帐号', null, GM_getResourceURL('warn'));
+                } else if ($('.exph-suc').length > 0) { //成功
+                  //clearInterval(checkResult);
+                  //setNotice($('.exph-suc').text(), null, GM_getResourceURL('downloading'));
+                } else if ($('.exph-war').length > 0) { //错误
+                  clearInterval(checkResult);
+                  setNotice($('.exph-war').text(), null, GM_getResourceURL('error'));
+                  unsafeWindow.$('.btn-link').click();
+                }
+              }, 200);
+            }
+          }, 300);
+        } else {
+          unsafeWindow.Core.OFFL5Plug.Reload(); //刷新任务
+          if (GM_getValue('task') && $('iframe[src^="//captchaapi.115.com"]').length === 0) { //检查下载情况
+            unsafeWindow.Core.OFFL5Plug.GetDataCtl().list(function(e) {
+              var tasks = e.tasks;
+              for (var i = 0; i < tasks.length; i++) {
+                if (tasks[i].info_hash === GM_getValue('task')) break;
+              }
+              //console.log(tasks[i]);
+              if (i === tasks.length) {
+                GM_deleteValue('task');
+                return;
+              }
+              var p = Math.round(tasks[i].percentDone * 100) / 100;
+              var now = Math.floor(p / 4);
+              //setNotice(tasks[i].name, '┏━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃' + new Array(now + 1).join('▉') + new Array(25 - now + 1).join('▁') + '┃ ' + p + '%\n┗━━━━━━━━━━━━━━━━━━━━━━━━━┛', tasks[i].status === 2 ? GM_getResourceURL('success') : getProcess(p, 128));
+              setNotice(tasks[i].name, new Array(now + 1).join('▉') + new Array(25 - now + 1).join('▁') + ' ' + p + '%', tasks[i].status === 2 ? GM_getResourceURL('success') : getProcess(p, 128));
+              if (tasks[i].status === 2) GM_deleteValue('task'); //1:下载中 2:下载完成
+            });
+          }
+        }
+      }, 2000);
+    }
+  }
+
+  function setNotice(title, body = undefined, icon = undefined) {
+    if (window.Notification && Notification.permission !== 'denied') {
+      Notification.requestPermission(function(status) {
+        if (status === 'granted') {
+          var option = {
+            tag: 'hParkingLot'
+          };
+          if (body) option.body = body;
+          if (icon) option.icon = icon;
+          var n = new Notification(cutByte(title, 28), option);
+          n.onclick = function() {
+            n.close();
+          };
+          setTimeout(function() {
+            if (n) n.close();
+          }, 3000);
+        }
+      });
+    }
+  }
+
+  function getProcess(process, radius) { //https://imys.net/20150722/canvas-annulus-process.html
+    var c = document.createElement('canvas');
+    radius = radius || 100;
+    c.width = 2 * radius;
+    c.height = 2 * radius;
+    var ctx = c.getContext('2d');
+
+    // 画灰色的圆
+    ctx.beginPath();
+    ctx.arc(radius, radius, 0.8 * radius, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fillStyle = '#F6F6F6';
+    ctx.fill();
+
+    // 画进度环
+    ctx.beginPath();
+    ctx.moveTo(radius, radius);
+    ctx.arc(radius, radius, 0.8 * radius, Math.PI * 1.5, Math.PI * (1.5 + 2 * process / 100));
+    ctx.closePath();
+    ctx.fillStyle = '#00CD00';
+    ctx.fill();
+
+    // 画内填充圆
+    ctx.beginPath();
+    ctx.arc(radius, radius, 0.6 * radius, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+
+    // 填充文字
+    ctx.font = 'bold ' + 0.2 * radius + 'pt Microsoft YaHei';
+    ctx.fillStyle = '#333';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.moveTo(radius, radius);
+    ctx.fillText(process + '%', radius, radius);
+    return c.toDataURL();
+  }
+
+  function cutByte(str, len, endstr = '...') { //http://www.cnblogs.com/whyoop/p/3680228.html
+    function n2(a) { //用于二分法查找
+      var n = a / 2 | 0;
+      return (n > 0 ? n : 1);
+    }
+
+    function getBlength(str) {
+      for (var i = str.length, n = 0; i--;) {
+        n += str.charCodeAt(i) > 255 ? 2 : 1;
+      }
+      return n;
+    }
+    if (str.length <= len) return str;
+    if (!(str + '').length || !len || len <= 0) return '';
+    if (getBlength(str) <= len) { return str; } //整个函数中最耗时的一个判断,欢迎优化
+    var lenS = len,
+      _lenS = 0,
+      _strl = 0;
+    while (_strl <= lenS) {
+      var _lenS1 = n2(lenS - _strl);
+      _strl += getBlength(str.substr(_lenS, _lenS1));
+      _lenS += _lenS1;
+    }
+    return str.substr(0, _lenS - 1) + endstr;
+  }
+})(jQuery);
