@@ -3,7 +3,7 @@
 // @namespace   https://github.com/dodying/UserJs
 // @include     http://alt.hentaiverse.org/?s=Bazaar&ss=ml&slot=*
 // @include     http*://hentaiverse.org/?s=Bazaar&ss=ml&slot=*
-// @version     1.00a
+// @version     1.01
 // @grant       none
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
@@ -12,16 +12,16 @@
 // @run-at      document-end
 // ==/UserScript==
 (function() {
-  var morale = document.querySelectorAll('.msl>div>div>img')[1].style.width;
+  var morale = $$('.msl>div>div>img')[1].style.width;
   var i;
-  if (morale.match(/\d+/)[0] * 1 <= 110) {
+  if (morale.match(/\d+/)[0] * 1 <= 110) { //Morale<=110
     var grades = [];
-    var elements = document.querySelectorAll('.mcr tr>td:nth-child(2)');
+    var elements = $$('.mcr tr>td:nth-child(2)');
     for (i = 0; i < elements.length; i++) {
-      grades.push((document.querySelectorAll('.mcr tr')[i].querySelector('td:nth-child(1)>img[src*="_a.png"]')) ? parseInt(elements[i].textContent) : Infinity);
+      grades.push(($$('.mcr tr')[i].querySelector('td:nth-child(1)>img[src*="_a.png"]')) ? parseInt(elements[i].textContent) : Infinity);
     }
     var min = Math.min.apply(null, grades);
-    elements = document.querySelectorAll('.mcr tr>td:nth-child(1)>img');
+    elements = $$('.mcr tr>td:nth-child(1)>img');
     var target;
     for (i = 0; i < elements.length; i++) {
       target = elements[inArray(min, grades)];
@@ -32,17 +32,13 @@
         grades[inArray(min, grades)] = -1;
       }
     }
+  } else if ($('[src="/y/character/inc.png"]')) {
+    var img = $$('[src="/y/character/inc.png"]');
+    var costs = Array.prototype.map.call(img, function(i) {
+      return i.getAttribute('onmouseover').match(/Upgrade Cost: (\d+) Chaos Tokens?[ ]+Stock: (\d+)/)[1] * 1;
+    });
+    img[costs.indexOf(Math.min.apply(null, costs))].click();
   } else {
-    if (document.querySelector('[src="/y/character/inc.png"]')) {
-      var img = document.querySelectorAll('[src="/y/character/inc.png"]');
-      for (i = 0; i < img.length; i++) {
-        var temp = img[i].getAttribute('onmouseover').match(/Upgrade Cost: (\d+) Chaos Tokens?[ ]+Stock: (\d+)/);
-        if (parseInt(temp[1]) <= parseInt(temp[2])) {
-          img[i].click();
-          return;
-        }
-      }
-    }
     var slot = location.href.match(/slot=(\d+)/)[1];
     var dateNow = new Date();
     dateNow = dateNow.getUTCFullYear() + '/' + (dateNow.getUTCMonth() + 1) + '/' + dateNow.getUTCDate();
@@ -58,7 +54,15 @@
     }
     monsterLab[slot] = true;
     localStorage.monsterLab = JSON.stringify(monsterLab);
-    document.querySelector('#monster_nav>div:nth-child(3)>img').click();
+    $('#monster_nav>div:nth-child(3)>img').click();
+  }
+
+  function $(e) {
+    return document.querySelector(e);
+  }
+
+  function $$(e) {
+    return document.querySelectorAll(e);
   }
 
   function inArray(text, array) {
