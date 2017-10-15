@@ -1,9 +1,7 @@
 // ==UserScript==
-// @name        ehEnhance
-// @name:zh-CN  【EH】Enhance
+// @name        [EH]Enhance
 // @description
 // @namespace   https://github.com/dodying/Dodying-UserJs
-// @description:zh-CN
 //              里站
 // @include     https://exhentai.org/
 // @include     https://exhentai.org/favorites.php*
