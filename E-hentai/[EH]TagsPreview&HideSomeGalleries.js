@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name        EH_TagsPreview&HideSomeGalleries
-// @name:zh-CN  【EH】标签预览+隐藏画集
+// @name        [EH]TagsPreview&HideSomeGalleries
+// @name:zh-CN  [EH]标签预览+隐藏画集
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
@@ -42,11 +42,15 @@ var CONFIG = {
     'insect': '昆虫',
     'worm': '虫子',
     'furry': '毛皮',
+    'eggs': '产卵',
+    'parasite': '寄生',
+    'brain fuck': '脑交',
     'amputee': '残肢',
     'futanari': '扶她',
     'dickgirl on dickgirl': '扶她上扶她',
     'male on dickgirl': '男的上扶她',
     'dickgirl on male': '扶她上男的',
+    'bisexual': '双性',
     'monster': '怪物',
     'giantess': '女巨人',
     'novel': '小说'
@@ -86,7 +90,10 @@ var CONFIG = {
   },
   addStyle: function () {
     var style = $_('style');
-    style.textContent = '.TAGS{font-size:larger;}.TAGS>li{display:inline;margin:1px;cursor:pointer;}';
+    style.textContent = [
+      '.TAGS{font-size:larger;}',
+      '.TAGS>li{display:inline;margin:1px;cursor:pointer;}'
+    ].join('');
     $('body').appendChild(style);
   }
 }
@@ -115,7 +122,7 @@ var TagsPreview = {
     }
     var xhr = 'xhr_' + Math.random().toString();
     xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://e-hentai.org/api.php', true);
+    xhr.open('POST', location.origin + '/api.php', true);
     xhr.responseType = 'json';
     var _i = i;
     xhr.onload = function () {
@@ -126,17 +133,6 @@ var TagsPreview = {
       i++;
       _.xhr(_gidlist, i);
     }
-  },
-  getMousePos: function (event) {
-    var e = event || window.event;
-    var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
-    var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
-    var x = e.pageX || e.clientX + scrollX;
-    var y = e.pageY || e.clientY + scrollY;
-    return {
-      'x': x,
-      'y': y
-    };
   },
   init: function () {
     var _ = this;
@@ -233,17 +229,16 @@ var TagsPreview = {
               tag.push('<li class="' + i + 'Tag"><span>' + tagsObj[i].join('</span><span>') + '</span></li>');
             }
           }
-          data[id].tag = tag.join('');
+          tag = tag.join('');
+          data[id].tag = tag;
         }
         var title = (data[id].title_jpn) ? data[id].title_jpn : data[id].title;
-        var MousePos = _.getMousePos(e);
         box.style.display = 'block';
-        box.style.left = (MousePos.x + 5) + 'px';
-        box.style.top = (MousePos.y + 5) + 'px';
+        box.style.left = (e.clientX + 5) + 'px';
+        box.style.top = (e.clientY + 5) + 'px';
         box.innerHTML = '<div>' + title + '</div><div style="color:red">[' + (parseInt(data[id].filesize / 1024 / 1024)) + 'M]' + data[id].filecount + 'P</div><div style="height:2px;background-color:black;"></div><div>' + tag + '</div>';
-        if (box.offsetHeight + MousePos.y + 5 >= $('body').offsetHeight) {
-          $('body').style.height = box.offsetHeight + MousePos.y + 10 + 'px';
-        }
+        if (box.offsetHeight + e.clientY + 10 >= window.innerHeight) box.style.top = e.clientY - box.offsetHeight - 5 + 'px';
+        if (box.offsetWidth + e.clientX + 10 >= window.innerWidth) box.style.left = e.clientX - box.offsetWidth - 5 + 'px';
       } else {
         box.style.display = 'none';
       }
@@ -297,7 +292,7 @@ var TagsPreview = {
   addStyle: function () {
     var style = $_('style');
     style.textContent = [
-      '#TagPreview{position:absolute;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:black;border-style:solid;color:white;background-color:#34353B;}',
+      '#TagPreview{position:fixed;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:black;border-style:solid;color:white;background-color:#34353B;}',
       '#TagPreview li.languageTag::before{content:"语言: "}',
       '#TagPreview li.reclassTag::before{content:"重新分类: "}',
       '#TagPreview li.artistTag{font-size:larger;color:green;}',
