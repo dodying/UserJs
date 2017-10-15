@@ -1,9 +1,7 @@
 // ==UserScript==
-// @name        novelDownloader
-// @name:zh-CN  【小说】下载脚本
+// @name        [Novel]Downloader
 // @description novelDownloaderHelper，press key "shift+d" to show up.
-// @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version     1.43.10
+// @version     1.44.0
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -336,7 +334,7 @@ function init() {
   if (allCustomizeRule === '') GM_setValue('savedUrl', []);
   $('.ndCustomizeTextarea').val(nowCustomizeRule);
   if (indexRule[location.host] === undefined) { //待续
-    var testChapter = ['.dir a', '#BookText a', '#Chapters a', '#TabCss a', '#Table1 a', '#at a', '#book a', '#booktext a', '#catalog_list a', '#chapterList a', '#chapterlist a', '#container1 a', '#content_1 a', '#contenttable a', '#dir a', '#htmlList a', '#list a', '#oneboolt a', '#read.chapter a', '#readerlist a', '#readerlists a', '#readlist a', '#tbchapterlist a', '#xslist a', '#zcontent a', '.Chapter a', '.L a', '.TabCss>dl>dd>a', '.Volume a', '._chapter a', '.aarti a', '.acss a', '.all-catalog a', '.art_fnlistbox a', '.art_listmain_main a', '.article_texttitleb a', '.as a', '.bd a', '.book a', '.book-chapter-list a', '.bookUpdate a', '.book_02 a', '.book_article_listtext a', '.book_con_list a', '.book_dirbox a', '.book_list a', '.booklist a', '.box-item a', '.box1 a', '.box_box a', '.box_chap a', '.catalog a', '.catalog-list a', '.catebg a', '.category a', '.ccss a', '.centent a', '.chapname a', '.chapter a', '.chapter-list a', '.chapterBean a', '.chapterNum a', '.chapterTable a', '.chapter_box_ul a', '.chapter_list_chapter a', '.chapterlist a', '.chapterlistxx a', '.chapters a', '.chapters_list a', '.chaptertable a', '.chaptertd a', '.columns a', '.con_05 a', '.content a', '.contentlist a', '.conter a', '.css a', '.d_contarin a', '.dccss a', '.detail-chapters a', '.dir_main_section a', '.dirbox a', '.dirconone a', '.dirinfo_list a', '.dit-list a', '.download_rtx a', '.entry_video_list a', '.float-list a', '.index a', '.indexlist a', '.info_chapterlist a', '.insert_list a', '.item a', '.kui-item a', '.l_mulu_table a', '.lb a', '.liebiao a', '.liebiao_bottom a', '.list a', '.list-directory a', '.list-group a', '.list01a', '.list_Content a', '.list_box a', '.listmain a', '.lists a', '.lrlb a', '.m10 a', '.main a', '.mb_content a', '.menu-area a', '.ml-list1 a', '.ml_main a', '.mls a', '.mod_container a', '.mread a', '.mulu a', '.mulu_list a', '.nav a', '.nolooking a', '.novel_leftright a', '.novel_list a', '.ocon a', '.opf a', '.qq', '.read_list a', '.readout a', '.td_0 a', '.td_con a', '.third a', '.uclist a', '.uk-table a', '.volume a', '.volumes a', '.wiki-content-table a', '.www a', '.xiaoshuo_list a', '.xsList a', '.zhangjieUl a', '.zjbox a', '.zjlist a', '.zjlist4 a', '.zl a', '.zp_li a'];
+    var testChapter = ['.dir a', '#BookText a', '#Chapters a', '#TabCss a', '#Table1 a', '#at a', '#book a', '#booktext a', '#catalog_list a', '#chapterList a', '#chapterlist a', '#container1 a', '#content_1 a', '#contenttable a', '#dir a', '#htmlList a', '#list a', '#oneboolt a', '#read.chapter a', '#readerlist a', '#readerlists a', '#readlist a', '#tbchapterlist a', '#xslist a', '#zcontent a', '.Chapter a', '.L a', '.TabCss>dl>dd>a', '.Volume a', '._chapter a', '.aarti a', '.acss a', '.all-catalog a', '.art_fnlistbox a', '.art_listmain_main a', '.article_texttitleb a', '.as a', '.bd a', '.book a', '.book-chapter-list a', '.bookUpdate a', '.book_02 a', '.book_article_listtext a', '.book_con_list a', '.book_dirbox a', '.book_list a', '.booklist a','#booklist a', '.box-item a', '.box1 a', '.box_box a', '.box_chap a', '.catalog a', '.catalog-list a', '.catebg a', '.category a', '.ccss a', '.centent a', '.chapname a', '.chapter a', '.chapter-list a', '.chapterBean a', '.chapterNum a', '.chapterTable a', '.chapter_box_ul a', '.chapter_list_chapter a', '.chapterlist a', '.chapterlistxx a', '.chapters a', '.chapters_list a', '.chaptertable a', '.chaptertd a', '.columns a', '.con_05 a', '.content a', '.contentlist a', '.conter a', '.css a', '.d_contarin a', '.dccss a', '.detail-chapters a', '.dir_main_section a', '.dirbox a', '.dirconone a', '.dirinfo_list a', '.dit-list a', '.download_rtx a', '.entry_video_list a', '.float-list a', '.index a', '.indexlist a', '.info_chapterlist a', '.insert_list a', '.item a', '.kui-item a', '.l_mulu_table a', '.lb a', '.liebiao a', '.liebiao_bottom a', '.list a', '.list-directory a', '.list-group a', '.list01a', '.list_Content a', '.list_box a', '.listmain a', '.lists a', '.lrlb a', '.m10 a', '.main a', '.mb_content a', '.menu-area a', '.ml-list1 a', '.ml_main a', '.mls a', '.mod_container a', '.mread a', '.mulu a', '.mulu_list a', '.nav a', '.nolooking a', '.novel_leftright a', '.novel_list a', '.ocon a', '.opf a', '.qq', '.read_list a', '.readout a', '.td_0 a', '.td_con a', '.third a', '.uclist a', '.uk-table a', '.volume a', '.volumes a', '.wiki-content-table a', '.www a', '.xiaoshuo_list a', '.xsList a', '.zhangjieUl a', '.zjbox a', '.zjlist a', '.zjlist4 a', '.zl a', '.zp_li a'];
     for (i = 0; i < testChapter.length; i++) {
       if ($(testChapter[i]).length > 0) break;
     }
@@ -772,7 +770,7 @@ function addRule() {
       });
     },
     'Deal2': function(num, url, accessKey) {
-      var chapterId = url.replace(location.protocol + '//www.hbooker.com/chapter/book_chapter_detail/', '');
+      var chapterId = url.match(/\d+/)[0];
       GM_xmlhttpRequest({
         method: 'POST',
         url: location.protocol + '//www.hbooker.com/chapter/get_book_chapter_detail_info',
@@ -1901,11 +1899,38 @@ function download(fileType) { //下载
     }
   }
   if ($(window).data('chapter') !== undefined && chapter.toString() === $(window).data('chapter').toString()) {
-    downloadTo();
+    var error = $(window).data('dataDownload').some(function(i) {
+      return i.ok !== true;
+    });
+    if (!error) {
+      downloadTo();
+    } else {
+      $('.ndTask,.ndTaskImage').empty();
+      var downloadList=[];
+      $(window).data('dataDownload').forEach(function(e, i, arr) {
+        downloadList.push(e.url);
+        if (e.ok !== true) {
+          arr[i] = {
+            url: e.url,
+            name: e.name,
+            error: 0,
+            timeout: 0,
+            ok: false
+          };
+        }
+      });
+      $(window).data({
+        'downloadList': downloadList,
+        'number': 0,
+        'numberOk': 0
+      });
+      $('.ndProgress').val(0).attr('max', downloadList.length);
+      downloadTask();
+    }
     return;
   }
   $('.ndLog').show();
-  $('.ndTask').html('');
+  $('.ndTask,.ndTaskImage').empty();
   $(window).data({
     'chapter': chapter,
     'dataDownload': [],
@@ -1935,7 +1960,6 @@ function download(fileType) { //下载
     $(window).data('downloadList')[i] = href;
   }
   $('.ndProgress').val(0).attr('max', chapter.length);
-
   downloadTask();
 }
 
@@ -1954,7 +1978,13 @@ function downloadTask() { //下载列队
       var href = $(window).data('downloadNow')[i].href;
       $(window).data('downloadNow')[i].downloading = true;
       addDownloadLogStart(i * 1 + 1, href);
-      fun(i, href);
+      if ($(window).data('dataDownload')[i].ok===true){
+        $(window).data('downloadNow')[i].ok = true;
+        $(window).data('numberOk', $(window).data('numberOk') + 1);
+        $('.ndProgress').val($(window).data('numberOk'));
+      }else{
+        fun(i, href);
+      }
     }
   }
   if ($(window).data('downloadNow').length < thread && $(window).data('downloadList').length !== 0) {
@@ -1976,6 +2006,7 @@ function downloadTask() { //下载列队
 
 function xhr(num, url) { //xhr
   var host = getHost(url);
+  host = host in chapterRule ? host : location.host;
   GM_xmlhttpRequest({
     method: 'GET',
     url: url,
