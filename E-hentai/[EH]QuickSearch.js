@@ -1,38 +1,32 @@
 // ==UserScript==
-// @name        EH_QuickSearch
-// @name:zh-CN  【EH】快捷搜索
+// @name        [EH]QuickSearch
+// @name:zh-CN  [EH]快捷搜索
 // @author      Dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
 // @description Add a button to top-right; Left Click:choose the keywords;Right Click:search in other site;
 // @description:zh-CN 在右上角添加一个按钮；左键：选择搜索关键词，中间：添加\删除关键词：中文，右键：在其他站点搜索
-// @include     http*://g.e-hentai.org/
-// @include     http*://g.e-hentai.org/?*
-// @include     http*://g.e-hentai.org/tag/*
-// @include     http*://g.e-hentai.org/g/*
-// @include     http*://g.e-hentai.org/uploader/*
-// @include     http*://g.e-hentai.org/favorites.php*
-// @include     http*://exhentai.org/
-// @include     http*://exhentai.org/?*
-// @include     http*://exhentai.org/tag/*
-// @include     http*://exhentai.org/g/*
-// @include     http*://exhentai.org/uploader/*
-// @include     http*://exhentai.org/favorites.php*
+// @include     https://exhentai.org/*
+// @include     https://e-hentai.org/*
+// @exclude     https://exhentai.org/g/*
+// @exclude     https://e-hentai.org/g/*
+// @exclude     https://exhentai.org/s/*
+// @exclude     https://e-hentai.org/s/*
 // @version     1.040
 // @grant       none
 // @run-at      document-idle
 // require     https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js
 // ==/UserScript==
-var bookname = (window.location.href.indexOf('hentai.org/g/') < 0) ? document.querySelector('input.stdinput,form>input[name="favcat"]+div>input').value : document.querySelector('#gn').innerHTML;
+var bookname = (location.href.indexOf('hentai.org/g/') < 0) ? document.querySelector('input.stdinput,form>input[name="favcat"]+div>input').value : document.querySelector('#gn').innerHTML;
 bookname = bookname.replace(/"/g, '%22').replace(/ /g, '+');
-(window.location.host == 'g.e-hentai.org') ? exurl = window.location.href.replace('g.e-', 'ex')  : exurl = window.location.href.replace('ex', 'g.e-');
+var exurl = (location.host === 'e-hentai.org') ? location.href.replace('e-', 'ex') : location.href.replace('ex', 'e-');
 var EH_QuickSearch_Button = document.createElement('div');
 EH_QuickSearch_Button.id = 'EH_QuickSearch_Button';
-EH_QuickSearch_Button.oncontextmenu = function () {
+EH_QuickSearch_Button.oncontextmenu = function() {
   return false;
 };
-EH_QuickSearch_Button.onmousedown = function () {
+EH_QuickSearch_Button.onmousedown = function() {
   return false;
 };
 EH_QuickSearch_Button.style = 'left:' + eval(window.innerWidth - 58) + 'px;top:0px;position:absolute;width:32px;';
@@ -47,15 +41,14 @@ document.body.appendChild(EH_QuickSearch_Button);
 /*分割线*/
 var EH_QuickSearch_Box = document.createElement('div');
 EH_QuickSearch_Box.id = 'EH_QuickSearch_Box';
-var bgcolor;
-(window.location.host == 'g.e-hentai.org') ? bgcolor = '#E3E0D1' : bgcolor = '#34353B';
+var bgcolor = (location.host === 'e-hentai.org') ? '#E3E0D1' : '#34353B';
 EH_QuickSearch_Box.style = 'z-index:999;width:400px;display:none;background-color:' + bgcolor + ';position:absolute;left:' + eval(window.innerWidth / 2 - 200) + 'px;top:240px;border-color:black;border-style:solid;transform:scale(1.05);';
 EH_QuickSearch_Box.innerHTML = '<div id="EH_QuickSearch_Exchange"><div style="font-size:larger;">跳转</div></div><div id="EH_QuickSearch_Popular"><div style="font-size:larger;">常用</div></div><div id="EH_QuickSearch_Used"><div style="font-size:larger;">已使用</div></div><div id="EH_QuickSearch_Plus"><div style="font-size:larger;">要选择的</div></div><div id="EH_QuickSearch_Delete"><div style="font-size:larger;">要排除的</div></div><button id="EH_QuickSearch_Apply" class="stdbtn">应用</button><button id="EH_QuickSearch_Cancel" class="stdbtn">取消</button>';
 document.body.appendChild(EH_QuickSearch_Box);
-document.querySelector('#EH_QuickSearch_Box').onclick = function () {
+document.querySelector('#EH_QuickSearch_Box').onclick = function() {
   document.querySelector('#EH_QuickSearch_Apply').focus();
-}
-document.querySelector('#EH_QuickSearch_Apply').onclick = function () {
+};
+document.querySelector('#EH_QuickSearch_Apply').onclick = function() {
   var input_check = document.querySelectorAll('#EH_QuickSearch_Box input:checked');
   var Keyword_New = '';
   for (var i = 0; i < input_check.length; i++) {
@@ -64,17 +57,18 @@ document.querySelector('#EH_QuickSearch_Apply').onclick = function () {
   }
   document.querySelector('#EH_QuickSearch_Box').style.display = 'none';
   /*if (confirm('关键词为' + search_bar.value + '\r\n是否立即搜索'))*/
-  if (window.location.href.indexOf('hentai.org/favorites.php') >= 0) {
+  if (location.href.indexOf('hentai.org/favorites.php') >= 0) {
     document.querySelector('input.stdbtn:nth-child(1)').click();
   } else {
     document.querySelector('input.stdbtn:nth-child(2)').click();
   }
-}
-document.querySelector('#EH_QuickSearch_Cancel').onclick = function () {
+};
+document.querySelector('#EH_QuickSearch_Cancel').onclick = function() {
   document.querySelector('#EH_QuickSearch_Box').style.display = 'none';
-}
+};
 var Keyword_All = {
   'language:chinese$': '中文',
+  '-language:translated$': '-翻译本',
   'harem': '后宫',
   'uncensored': '无码',
   'tankoubon': '单行本',
@@ -112,8 +106,7 @@ var Keyword_All = {
   '-rape': '-强奸',
   '-furry': '-毛皮（动物）'
 };
-var Keyword_Exchange = [
-  {
+var Keyword_Exchange = [{
     'name': 'E-Hentai',
     'img': 'http://exhentai.org/favicon.ico',
     'url': exurl
@@ -137,8 +130,7 @@ var Keyword_Exchange = [
 for (var i = 0; i < Keyword_Exchange.length; i++) {
   EH_QuickSearch_Add2Exchange(Keyword_Exchange[i].name, Keyword_Exchange[i].img, Keyword_Exchange[i].url);
 }
-var Keyword_Popular = [
-  {
+var Keyword_Popular = [{
     'name': 'chinese',
     'name_cn': '中文',
     'url': 'language:chinese$'
@@ -189,18 +181,18 @@ EH_QuickSearch_Sort();
 /////////////////////////////////////////////////
 function DeleteSpaceInQuotation(word) {
   var temp = word.match(/(-|)((language|artist|parody|male|female|group|character):|)".*?"/g);
-  if (temp != null) {
+  if (temp !== null) {
     for (var i = 0; i < temp.length; i++) {
       word = word.replace(temp[i], '');
       temp[i] = temp[i].replace(/ /g, '_');
     }
-    var temp = temp.join(' ');
+    temp = temp.join(' ');
     word = temp + ' ' + word;
   }
   word = word.replace(/\s+/g, ' ').replace(/^ | $/g, '').split(' ');
-  delete temp;
   return word;
 }
+
 function EH_QuickSearch_Add2Exchange(name, img, url) {
   var a = document.createElement('a');
   //a.id = 'EH_QuickSearch_Exchange_' + name;
@@ -210,6 +202,7 @@ function EH_QuickSearch_Add2Exchange(name, img, url) {
   document.querySelector('#EH_QuickSearch_Exchange').appendChild(a);
   a.outerHTML += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; //空格
 }
+
 function EH_QuickSearch_Add2Popular(name, name_cn, url) {
   var a = document.createElement('a');
   //a.id = 'EH_QuickSearch_Popular_' + name;
@@ -219,6 +212,7 @@ function EH_QuickSearch_Add2Popular(name, name_cn, url) {
   document.querySelector('#EH_QuickSearch_Popular').appendChild(a);
   a.outerHTML += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 }
+
 function EH_QuickSearch_Add2Used(name, name_cn) {
   var name_2 = name.replace(/"/g, '\'\'');
   var span = document.createElement('span');
@@ -227,6 +221,7 @@ function EH_QuickSearch_Add2Used(name, name_cn) {
   if (name in Keyword_All) delete Keyword_All[name];
   document.querySelector('#EH_QuickSearch_Used').appendChild(span);
 }
+
 function EH_QuickSearch_Add(type, name, name_cn) {
   var name_2 = name.replace(/"/g, '\'\'');
   var span = document.createElement('span');
@@ -242,6 +237,7 @@ function EH_QuickSearch_Add(type, name, name_cn) {
       break;
   }
 }
+
 function EH_QuickSearch_Sort() {
   var EH_QuickSearch_Sort_div = [
     'EH_QuickSearch_Keyword_Used',
@@ -252,7 +248,7 @@ function EH_QuickSearch_Sort() {
     var div = EH_QuickSearch_Sort_div[i];
     var div_ele = document.getElementsByClassName(div);
     for (var n = 0; n < div_ele.length; n++) {
-      if (n % 6 == 5) {
+      if (n % 6 === 5) {
         div_ele[n].outerHTML += '<br>';
       }
     }
