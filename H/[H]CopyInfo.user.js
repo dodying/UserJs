@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        [H]CopyInfo
 // @name:zh-CN  [H]复制信息
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -103,6 +103,7 @@
     stars.join(' '), //star
     genres.join(' '), //genre
   ];
+  if (!info[0]) return;
   if (typeof rule.score === 'string' && $(rule.score).length > 0) { //score
     info.push($(rule.score).text() ? $(rule.score).text().match(/[\d\.]+/)[0] : '');
   }
