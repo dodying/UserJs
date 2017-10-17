@@ -3,8 +3,10 @@
 // @description
 // @include     http*://hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
+// @include     http*://hentaiverse.org/?s=Battle&ss=ba&encounter=*
 // @include     http://alt.hentaiverse.org/
 // @include     http://alt.hentaiverse.org/?s=Character&ss=ch
+// @include     http://alt.hentaiverse.org/?s=Battle&ss=ba&encounter=*
 // @version     1.01
 // @grant       none
 // @author      Dodying
