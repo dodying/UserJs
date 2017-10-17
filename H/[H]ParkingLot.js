@@ -3,9 +3,45 @@
 // @name:zh-CN  [H]停车场
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description
+// @version     1.09a
+// @grant       GM_xmlhttpRequest
+// @grant       GM_setValue
+// @grant       GM_getValue
+// @grant       GM_deleteValue
+// @grant       GM_openInTab
+// @grant       GM_setClipboard
+// @grant       GM_getResourceURL
+// @grant       unsafeWindow
+// @author      Dodying
+// @namespace   https://github.com/dodying/Dodying-UserJs
+// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
+// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
+// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
+// 工具栏
+// @resource add https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519691-199_CircledPlus-128.png
+// @resource del https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/trash-128.png
+// @resource import https://cdn1.iconfinder.com/data/icons/design-2d-cad-solid-set-2/60/079-Import-128.png
+// @resource table https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519904-098_Spreadsheet-128.png
+// @resource restart https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/power-128.png
+// 标记
+// @resource mark0 https://cdn2.iconfinder.com/data/icons/lightly-icons/24/time-96.png
+// @resource mark1 https://cdn3.iconfinder.com/data/icons/math-physics/512/null-128.png
+// @resource mark2 https://cdn4.iconfinder.com/data/icons/education-bold-line-1/49/34-128.png
+// @resource mark3 https://cdn3.iconfinder.com/data/icons/chess-8/512/horse-game-role-chess-128.png
+// @resource mark4 https://cdn3.iconfinder.com/data/icons/chess-8/154/chess-pawn-128.png
+// @resource mark5 https://cdn1.iconfinder.com/data/icons/lightly-icons/30/heart-broken-120.png
+// @resource play https://cdn4.iconfinder.com/data/icons/iconsimple-logotypes/512/youtube-128.png
+// 下载状况
+// @resource success https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Checkmark-128.png
+// @resource warn https://cdn2.iconfinder.com/data/icons/color-svg-vector-icons-2/512/warning_alert_attention_search-128.png
+// @resource error https://cdn2.iconfinder.com/data/icons/color-svg-vector-icons-2/512/error_warning_alert_attention-128.png
+// @resource downloading https://cdn4.iconfinder.com/data/icons/miu/24/circle-arrow_down-download-glyph-128.png
+// @run-at      document-end
 // 种子站点
 // @include     https://btso.pw/*
 // @include     https://btdb.to/*
+// @include     https://torrentz2.eu/*
 // 网盘
 // include     http://115.com/*
 // @include     http://115.com/?tab=offline&mode=wangpan
@@ -13,7 +49,7 @@
 // 正规站点
 // @include     http://www.dmm.co.jp/*
 // @include     http://www.tokyo-hot.com/*
-// @include     http://cn.caribbeancom.com/*
+// @include     http://www.caribbeancom.com/*
 // @include     http://www.1pondo.tv/*
 // @include     http://www.heyzo.com/*
 // @include     http://cn.10musume.com/*
@@ -34,36 +70,14 @@
 // @include     http://bejav.me/*
 // @include     http://hpjav.com/*
 // @include     http://www.av539.com/*
-// @version     1.09
-// @grant       GM_xmlhttpRequest
-// @grant       GM_setValue
-// @grant       GM_getValue
-// @grant       GM_deleteValue
-// @grant       GM_openInTab
-// @grant       GM_setClipboard
-// @grant       GM_getResourceURL
-// @grant       unsafeWindow
-// @author      Dodying
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
-// @resource success https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Checkmark-128.png
-// @resource warn https://cdn2.iconfinder.com/data/icons/color-svg-vector-icons-2/512/warning_alert_attention_search-128.png
-// @resource error https://cdn2.iconfinder.com/data/icons/color-svg-vector-icons-2/512/error_warning_alert_attention-128.png
-// @resource downloading https://cdn4.iconfinder.com/data/icons/miu/24/circle-arrow_down-download-glyph-128.png
-// @run-at      document-end
 // ==/UserScript==
 (function($) {
-  var defaultImg = 'https://cdn2.iconfinder.com/data/icons/designers-and-developers-icon-set/32/image-24.png';
   var linkLib = { //待续-插入位置
     /*
     'example.com': {
       on: 布尔，是否开启,
       online: 布尔，是否在线播放,
       name: 标识,
-      icon: 网站，图标地址,
       search: 网站，搜索地址，搜索字样用{searchTerms}代替,
       text: 选择器-要标记的文本,
       img: 选择器-要标记的图片,
@@ -76,26 +90,30 @@
     */
     // 种子站点
     'btdb.to': {
-      on: false,
+      on: true,
       name: 'BTDB',
-      icon: 'https://btdb.to/favicon.ico',
       search: 'https://btdb.to/q/{searchTerms}/?sort=size',
       text: 'h1.torrent-name,.file-name,.item-title>a',
       code: '#search-input'
     },
+    'torrentz2.eu': {
+      on: true,
+      name: 'Torrentz2',
+      search: 'https://torrentz2.eu/search?f={searchTerms}',
+      text: '.results>dl>dt>a,.files .t>ul>li',
+      code: '#thesearchbox'
+    },
     'btso.pw': {
       on: false,
       name: 'BTSOW',
-      icon: 'https://btso.pw/app/bts/View/img/favicon.ico',
       search: 'http://btso.pw/search/{searchTerms}/',
       text: 'h3,.file',
       code: '.form-control:visible'
     },
     // 网盘
     '115.com': {
-      on: true,
+      on: false,
       name: '115网盘',
-      icon: 'http://115.com/favicon.ico',
       search: 'http://115.com/?url=%2F%3Faid%3D-1%26search_value%3D{searchTerms}%26ct%3Dfile%26ac%3Dsearch%26is_wl_tpl%3D1&mode=wangpan',
       text: '.file-name>em>a',
       code: function() {
@@ -107,7 +125,6 @@
     'pan.baidu.com': {
       on: false,
       name: '百度网盘',
-      icon: 'http://pan.baidu.com/box-static/disk-system/images/favicon.ico',
       search: 'http://pan.baidu.com/disk/home?adapt=pc&fr=ftw#search/key={searchTerms}&vmode=list',
       text: '.filename',
       manual: true
@@ -116,7 +133,6 @@
     'www.dmm.co.jp': {
       on: true,
       name: 'DMM',
-      icon: 'http://www.dmm.co.jp/favicon.ico',
       search: 'http://www.dmm.co.jp/search/=/searchstr={searchTerms}',
       text: '.txt,table.mg-b20 td:not(:has(a))',
       img: '.img img,.tdmm,.crs_full>img',
@@ -139,11 +155,10 @@
       time: '.info:eq(1)>dd:eq(0)',
       code: '.info:eq(1)>dd:eq(2)'
     },
-    'cn.caribbeancom.com': {
+    'www.caribbeancom.com': {
       on: false,
       name: '加勒比',
-      icon: 'http://cn.caribbeancom.com/favicon.ico',
-      search: 'http://cn.caribbeancom.com/moviepages/{searchTerms}/index.html',
+      search: 'http://www.caribbeancom.com/moviepages/{searchTerms}/index.html',
       img: 'img[itemprop=thumbnail]',
       time: 'dd[itemprop=uploadDate]',
       code: function() {
@@ -153,7 +168,6 @@
     'www.1pondo.tv': {
       on: false,
       name: '一本道',
-      icon: 'http://www.1pondo.tv/images/favicons/favicon-16.png',
       search: 'http://www.1pondo.tv/movies/{searchTerms}/',
       img: '.figure>img,.ng-scope>a>img,img.ng-scope',
       time: 'dd.ng-binding:eq(1)',
@@ -165,7 +179,6 @@
     'www.heyzo.com': {
       on: false,
       name: 'HEYZO',
-      icon: 'http://www.heyzo.com/images/favicon.ico',
       search: 'http://www.heyzo.com/search/{searchTerms}/1.html?sort=pop',
       //img: '.soundplay>img,.sample-images img,.relateive-movie img,.ranking-img>img,.withInfo>img,.new-movies>img,.actor>img',
       time: '.dataInfo:eq(0)',
@@ -176,7 +189,6 @@
     'cn.10musume.com': {
       on: false,
       name: '10musume.com',
-      icon: 'http://cn.10musume.com/favicon.ico',
       search: 'http://cn.10musume.com/cn/moviepages/{searchTerms}/index.html',
       img: 'img',
       time: '#movie-table1:eq(5)',
@@ -188,7 +200,6 @@
     'www.google.co.jp': {
       on: false,
       name: 'Google',
-      icon: 'https://www.google.co.jp/images/branding/product/ico/googleg_lodp.ico',
       search: 'https://www.google.co.jp/search?q={searchTerms}',
       text: 'h3.r>a,span.st',
       code: '#lst-ib',
@@ -197,7 +208,6 @@
     'www.baidu.com': {
       on: false,
       name: 'Baidu',
-      icon: 'https://www.baidu.com/img/baidu.svg',
       search: 'https://www.baidu.com/baidu?wd={searchTerms}',
       text: 'h3.t>a,.c-abstract',
       code: '#kw',
@@ -207,7 +217,6 @@
     'www.javlibrary.com': {
       on: true,
       name: 'JAVLibrary',
-      icon: 'http://www.javlibrary.com/favicon.ico',
       search: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
       text: '.post-title>a,.text:eq(1),.id,.title>a,.video>a:not(:has(img)),.cast>.star>a,.title:not(:has(a))',
       img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a',
@@ -218,7 +227,6 @@
     'www.javbus.com': {
       on: true,
       name: 'JavBus',
-      icon: 'https://www.javbus.com/favicon.ico',
       search: 'https://www.javbus.com/{searchTerms}',
       text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,date',
       time: '.info>p:eq(1)',
@@ -227,7 +235,6 @@
     'javpop.com': {
       on: false,
       name: 'JavPOP',
-      icon: 'http://javpop.com/favicon.ico',
       search: 'http://javpop.com/index.php?s={searchTerms}',
       text: '.thumb_post a:nth-child(2),h1',
       img: '.thumb_post img,.box-b img',
@@ -238,7 +245,6 @@
     'www.jav007.com': {
       on: false,
       name: 'Jav007',
-      icon: 'https://cdn2.iconfinder.com/data/icons/smartphone-interface-ver-2/100/smartphone-37-24.png',
       search: 'http://www.jav007.com/searchpage.php?a=1&code={searchTerms}',
       text: '.viewimfor>li:eq(8),.view-code',
       img: '.photo,.cell>a>img',
@@ -248,7 +254,6 @@
     'avso.pw': {
       on: false,
       name: 'AVSOX',
-      icon: 'https://avso.pw/app/javu/View/img/favicon.ico',
       search: 'https://avso.pw/cn/search/{searchTerms}',
       text: 'date,h3',
       img: '.photo-frame>img,.bigImage>img',
@@ -258,7 +263,6 @@
     'avmo.pw': {
       on: false,
       name: 'AVMOO',
-      icon: 'https://avmo.pw/app/jav/View/img/favicon.ico',
       search: 'https://avmo.pw/cn/search/{searchTerms}',
       text: 'date,h3',
       img: '.photo-frame>img,.bigImage>img',
@@ -270,7 +274,6 @@
       on: false,
       online: true,
       name: 'Avpapa',
-      icon: 'http://avpapa.co/assets/favicon-cce4d9c4feec996b085c0baf9dd0fa0e9771333225ff0da8a2105e1c292f507e.ico',
       search: 'http://avpapa.co/search?q={searchTerms}',
       text: '.tit,h4',
       img: '.thumbs>a>img,#click_to_show>img',
@@ -282,7 +285,6 @@
       on: false,
       online: true,
       name: 'AV99免費A片',
-      icon: 'http://av99.us/favicon.ico',
       search: 'http://tw.search.yahoo.com/search?p={searchTerms}&vs=av99.us',
       text: 'h1,.list>li>a,.dd>a,.fl>a>span',
       img: '.pic>a>img',
@@ -295,7 +297,6 @@
       on: false,
       online: true,
       name: 'Doojav69',
-      icon: 'http://www.doojav69.com/favicon.ico',
       search: 'http://www.doojav69.com/?s={searchTerms}',
       text: 'h2.entry-title>a,h1.entry-title',
       code: function() {
@@ -318,7 +319,6 @@
       on: false,
       online: true,
       name: 'HPJAV',
-      icon: 'http://hpjav.com/wp-content/themes/dist/image/HP.ico',
       search: 'http://hpjav.com/tw/?s={searchTerms}',
       text: '.entry-title a,h1,.current',
       code: function() {
@@ -328,21 +328,14 @@
     },
   };
   var magnetLib = {
-    /*
-    'example.com': {
-      search: 网站，搜索地址,
-      title: 选择器,
-      magnet: 选择器,
-      size: 选择器,
-      time: 选择器,
-    },
-    */
     contains: [
       'btdb.to',
+      'torrentz2.eu',
       'btso.pw'
     ],
     'btdb.to': {
-      search: 'https://btdb.to/q/{searchTerms}/{pageTerms}',
+      searchPage: 'https://btdb.to/q/{q}',
+      searchPre: 'https://btdb.to/q/{q}/',
       title: 'h2.item-title>a',
       magnet: '.magnet',
       size: '.item-meta-info span:nth-child(2)',
@@ -350,17 +343,28 @@
       page: '.pagination',
       origin: 'https://btdb.to'
     },
+    'torrentz2.eu': {
+      searchPage: 'https://torrentz2.eu/search?f={q}',
+      searchPre: 'https://torrentz2.eu',
+      title: '.results>dl>dt>a',
+      magnet: function(data) {
+        return $('.results>dl>dt>a', data).toArray().map(function(i) {
+          return 'magnet:?xt=urn:btih:' + i.getAttribute('href').match(/\/(.*)/)[1].toUpperCase();
+        });
+      },
+      size: '.results>dl>dd>span:nth-child(3)',
+      time: '.results>dl>dd>span:nth-child(2)',
+      page: '.results>p>span',
+      origin: 'https://torrentz2.eu'
+    },
     'btso.pw': {
-      search: 'https://btso.pw/search/{searchTerms}/page/{pageTerms}',
+      searchPage: 'https://btso.pw/search/{q}',
+      searchPre: 'https://btso.pw/search',
       title: '.data-list>.row>a',
       magnet: function(data) {
-        var arr = [];
-        for (var i = 0; i < $('.data-list>.row>a', data).length; i++) {
-          arr.push({
-            href: 'magnet:?xt=urn:btih:' + $('.data-list>.row>a', data).eq(i).attr('href').replace(/.*hash\/(.*)$/, '$1') + '&dn=' + encodeURI($('.file', data).eq(i).text())
-          });
-        }
-        return arr;
+        return $('.data-list>.row>a', data).toArray().map(function(i) {
+          return 'magnet:?xt=urn:btih:' + i.href.match(/hash\/(.*)/)[1].toUpperCase();
+        });
       },
       size: '.size',
       time: '.date',
@@ -368,41 +372,28 @@
       origin: 'https://btso.pw'
     }
   };
-  var imgLib = {
-    add: 'https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519691-199_CircledPlus-24.png',
-    del: 'https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/trash-24.png',
-    import: 'https://cdn1.iconfinder.com/data/icons/design-2d-cad-solid-set-2/60/079-Import-24.png',
-    table: 'https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519904-098_Spreadsheet-24.png',
-    restart: 'https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/power-24.png'
-  };
   var markLib = [{ //0
       name: '等待中',
-      img: 'https://cdn2.iconfinder.com/data/icons/lightly-icons/24/time-24.png',
       color: 'gray'
     },
     { //1
       name: '有种子无配额',
-      img: 'https://cdn3.iconfinder.com/data/icons/math-physics/512/null-24.png',
       color: 'gray'
     },
     { //2
       name: '下载中',
-      img: 'https://cdn4.iconfinder.com/data/icons/education-bold-line-1/49/34-24.png',
       color: 'blue'
     },
     { //3
       name: '已下-骑兵',
-      img: 'https://cdn3.iconfinder.com/data/icons/chess-8/512/horse-game-role-chess-24.png',
       color: 'green'
     },
     { //4
       name: '已下-步兵',
-      img: 'https://cdn3.iconfinder.com/data/icons/chess-8/154/chess-pawn-24.png',
       color: 'green'
     },
     { //5
       name: '已删-不喜欢的',
-      img: 'https://cdn1.iconfinder.com/data/icons/lightly-icons/24/heart-broken-24.png',
       color: 'black'
     },
   ];
@@ -432,10 +423,12 @@
   }
 
   function init() {
-    $('<style></style>').appendTo('head').html(['.hBanner{position:fixed;background-color:#F2F2F2;z-index:999999;}',
+    $('<style></style>').appendTo('head').html([
+      '.hBanner{position:fixed;background-color:#F2F2F2;z-index:999999;}',
       '.hBanner{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}',
       '.hBanner>*{cursor:pointer;float:left;margin:0 1px 0 1px;}',
       '.hBanner *{line-height:9px;text-shadow:none;}',
+      '.hBanner img{width:24px;height:24px;}',
       '.switcher{width:32px;height:24px;background:#333;border-radius:12px;position:relative;}',
       '.switcher>span{position:absolute;left:6px;top:7px;height:2px;color:#26CA28;font-size:16px;text-transform:Capitalize;}',
       '.hBanner>:not(.switcher):not(.hasCode){width:24px;height:24px;}',
@@ -449,9 +442,10 @@
       '.showTable>table,.hSearch{border-collapse:collapse;margin:0 auto;color:#666666;font-size:13px;text-align:center;background-color:#FFF;}',
       '.showTable tr:nth-child(2n),.hSearch tr:nth-child(2n){background-color:#F2F2F2;}',
       '.showTable td,.showTable th,.hSearch th,.hSearch td{border:1px solid black;padding:8px 16px;}',
-      '.hSearchPage li{display:inline;padding:0 1px;}',
-      '.hSearchPage li.active{font-weight:bolder;}',
-      '.hSearchPage li.active *{color:gray;}',
+      '.hSearchPage>td *{padding:0 1px;}',
+      '.hSearchPage>td>*{display:inline;}',
+      '.hSearchPage>td>*.active{font-weight:bolder;}',
+      '.hSearchPage>td>*.active *{color:gray;}',
       //
       '.fa-file-video-o{background-color:yellow;color:yellow;}'
     ].join(''));
@@ -518,9 +512,10 @@
       var _html = '';
       for (var i in linkLib) {
         if (!linkLib[i].on) continue;
+        if (i === location.host) continue;
         _html += '<img ';
         if (linkLib[i].online) _html += 'class="avOnline"';
-        _html += 'src="' + (linkLib[i].icon || defaultImg) + '"url="' + linkLib[i].search + '"title="' + linkLib[i].name + '"></img>';
+        _html += 'src="https://www.google.com/s2/favicons?domain=' + i + '"url="' + linkLib[i].search + '"title="' + linkLib[i].name + '"></img>';
       }
       return _html;
     }).on({
@@ -538,23 +533,23 @@
       mouseover: function() {
         $(this).attr({
           rawSrc: this.src,
-          src: 'https://cdn4.iconfinder.com/data/icons/iconsimple-logotypes/512/youtube-24.png'
+          src: GM_getResourceURL('play')
         });
       },
       mouseout: function() {
         $(this).attr('src', $(this).attr('rawSrc'));
       }
     });
-    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + imgLib.add + '"></img>').click(function() {
+    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + GM_getResourceURL('add') + '"></img>').click(function() {
       addValue(GM_getValue('lastMark', 0));
     }).appendTo('.hBanner');
-    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + imgLib.del + '"></img>').click(function() {
+    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + GM_getResourceURL('del') + '"></img>').click(function() {
       delValue();
     }).appendTo('.hBanner');
-    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + imgLib.import+'"></img>').click(function() {
+    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + GM_getResourceURL('import') + '"></img>').click(function() {
       importValue();
     }).appendTo('.hBanner');
-    $('<div title="左键:数据库展示\n右键:下载数据库(网页格式)"></div>').html('<img src="' + imgLib.table + '"></img>').on({
+    $('<div title="左键:数据库展示\n右键:下载数据库(网页格式)"></div>').html('<img src="' + GM_getResourceURL('table') + '"></img>').on({
       click: function() {
         showValue(0);
         $(this).off('click').on('click', function() {
@@ -566,7 +561,7 @@
         showValue(1);
       }
     }).appendTo('.hBanner');
-    $('<div title="重启"></div>').html('<img src="' + imgLib.restart + '"></img>').click(function() {
+    $('<div title="重启"></div>').html('<img src="' + GM_getResourceURL('restart') + '"></img>').click(function() {
       $('.hBanner').remove();
       undoMarkAdded();
       $(window).removeData('code');
@@ -575,7 +570,7 @@
     }).appendTo('.hBanner');
     $('<div class="hasCode">(已标记)</div>').appendTo('.hBanner');
     for (var i = 0; i < markLib.length; i++) {
-      $('<img src="' + markLib[i].img + '"title="' + i + '|' + markLib[i].name + '"></img>').val(i).click(function() {
+      $('<img src="' + GM_getResourceURL('mark' + i) + '"title="' + i + '|' + markLib[i].name + '"></img>').val(i).click(function() {
         addValue($(this).val());
       }).appendTo('.addCode');
     }
@@ -646,14 +641,13 @@
     });
   }
 
-  function addValue(mark, code) { //可选参数code
+  function addValue(mark, code = getCode()) { //可选参数code
     mark = parseInt(mark);
     if (mark >= markLib.length) {
       alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
       return;
     }
     var lib = GM_getValue('lib', null) || {};
-    var code = code || getCode();
     if (!code) return;
     GM_setValue('lastMark', mark);
     lib[code] = {
@@ -665,10 +659,9 @@
     markAdded();
   }
 
-  function delValue(code) { //可选参数code
+  function delValue(code = getCode()) { //可选参数code
     var lib = GM_getValue('lib', null);
     if (!lib) return;
-    var code = code || getCode();
     if (!code) return;
     delete lib[code];
     GM_setValue('lib', lib);
@@ -678,7 +671,8 @@
 
   function importValue() {
     var notice = '请输入车位\n-1. 删除\n';
-    for (var i = 0; i < markLib.length; i++) {
+    var i;
+    for (i = 0; i < markLib.length; i++) {
       notice += i + '. ' + markLib[i].name + '\n';
     }
     var mark = parseInt(prompt(notice));
@@ -691,9 +685,9 @@
     if (!codeArr) return;
     codeArr = codeArr.split('|');
     var lib = GM_getValue('lib', null) || {};
-    for (var i = 0; i < codeArr.length; i++) {
+    for (i = 0; i < codeArr.length; i++) {
       if (mark === -1 && codeArr[i] in lib) {
-        delete lib[codeArr[i]]
+        delete lib[codeArr[i]];
       } else if (mark >= 0) {
         lib[codeArr[i]] = {
           mark: mark
@@ -747,9 +741,9 @@
     return code;
   }
 
-  function getMagnet(code, page = '1', searchUrl = magnetLib.contains[0]) {
+  function getMagnet(code, page = undefined, searchUrl = magnetLib.contains[0]) {
     var lib = magnetLib[searchUrl];
-    var url = lib.search.replace('{searchTerms}', code).replace('{pageTerms}', page);
+    var url = page === undefined ? lib.searchPage.replace('{q}', code) : lib.searchPre.replace('{q}', code) + page;
     var codeArr = code.split('-');
     var expArr = [];
     for (var i = 0; i < codeArr.length; i++) {
@@ -763,7 +757,9 @@
         var title = $(lib.title, data);
         var magnet;
         if (typeof lib.magnet === 'string') {
-          magnet = $(lib.magnet, data);
+          magnet = $(lib.magnet, data).map(function(i) {
+            return i.href;
+          });
         } else {
           magnet = lib.magnet(data);
         }
@@ -773,11 +769,11 @@
         $('<table class="hSearch"></table>').html('<tbody><tr><th><select><option>' + magnetLib.contains.join('</option><option>') + '</option></select></th><th><a href="' + url + '" target="_blank">大小</a></th><th>时间</th><th>复制</th></tr></tbody>').insertAfter(linkLib[location.host].append || 'body>:eq(-1)');
         var name;
         for (var i = 0; i < title.length; i++) {
-          name = title[i].title;
+          name = title[i].title || title[i].textContent;
           for (var j = 0; j < codeArr.length; j++) {
             name = name.replace(expArr[j], '<b>' + codeArr[j] + '</b>');
           }
-          $('<tr></tr>').appendTo('.hSearch>tbody').html('<td><a class="hMagent" href="' + magnet[i].href + '">' + name + '</a></td><td><a href="' + lib.origin + title[i].pathname + '" target="_blank">' + size[i].textContent + '</a></td><td>' + time[i].textContent + '</td><td><button class="hSearchCopy">复制</button></td>');
+          $('<tr></tr>').appendTo('.hSearch>tbody').html('<td><a class="hMagent" href="' + magnet[i] + '">' + name + '</a></td><td><a href="' + lib.origin + title[i].pathname + '" target="_blank">' + size[i].textContent + '</a></td><td>' + time[i].textContent + '</td><td><button class="hSearchCopy">复制</button></td>');
         }
         $('.hMagent').on('click', function(e) {
           e.preventDefault();
@@ -797,20 +793,14 @@
         if (title.length === 0) $('<tr></tr>').appendTo('.hSearch>tbody').html('<td colspan="4">No search result</td>');
         if ($(lib.page, data).html() !== undefined) {
           $('<tr class="hSearchPage"></tr>').appendTo('.hSearch>tbody').html('<td colspan="4">' + $(lib.page, data).html() + '</td>');
-          $('.hSearchPage li').click(function(e) {
+          $('.hSearchPage a').click(function(e) {
             e.preventDefault();
-            var text = $(e.target).text();
-            if (isNaN(parseInt(text)) && text.match(/Prev/)) {
-              text = String(parseInt(page) - 1);
-            } else if (isNaN(parseInt(text)) && text.match(/Next/)) {
-              text = String(parseInt(page) + 1);
-            }
-            getMagnet(getCode(), text, searchUrl);
+            getMagnet(getCode(), e.target.getAttribute('href'), searchUrl);
           });
         }
         $('.hSearch th select').on({
           change: function() {
-            getMagnet(getCode(), '1', this.value);
+            getMagnet(getCode(), undefined, this.value);
           }
         }).find(':contains(' + searchUrl + ')')[0].selected = true;
       }
