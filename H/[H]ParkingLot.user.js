@@ -1,9 +1,9 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        [H]ParkingLot
 // @name:zh-CN  [H]停车场
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description
-// @version     1.09a
+// @version     1.09.2
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -602,7 +602,8 @@
             keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi');
             if (keyword.test(_src)) {
               if ($('.' + i).length === 0) $('<a target="_blank"></a>').addClass(i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
-              _src = markLib[lib[i].mark].img;
+              _src = GM_getResourceURL('mark' + lib[i].mark);
+              break;
             }
           }
           return _src;
@@ -641,13 +642,14 @@
     });
   }
 
-  function addValue(mark, code = getCode()) { //可选参数code
+  function addValue(mark, code = undefined) { //可选参数code
     mark = parseInt(mark);
     if (mark >= markLib.length) {
       alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
       return;
     }
     var lib = GM_getValue('lib', null) || {};
+    code = code || getCode();
     if (!code) return;
     GM_setValue('lastMark', mark);
     lib[code] = {
@@ -659,9 +661,10 @@
     markAdded();
   }
 
-  function delValue(code = getCode()) { //可选参数code
+  function delValue(code = undefined) { //可选参数code
     var lib = GM_getValue('lib', null);
     if (!lib) return;
+    code = code || getCode();
     if (!code) return;
     delete lib[code];
     GM_setValue('lib', lib);
@@ -705,7 +708,7 @@
     var num = 0;
     for (var i in lib) {
       num++;
-      _html += '<tr><td>' + num + '</td><td>' + lib[i].mark + '</td><td><img src="' + markLib[lib[i].mark].img + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].time || '') + '</td></tr>';
+      _html += '<tr><td>' + num + '</td><td>' + lib[i].mark + '</td><td><img src="' + GM_getResourceURL('mark' + lib[i].mark) + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].time || '') + '</td></tr>';
     }
     _html += '</tbody></table>';
     if (type === 0) {
@@ -757,7 +760,7 @@
         var title = $(lib.title, data);
         var magnet;
         if (typeof lib.magnet === 'string') {
-          magnet = $(lib.magnet, data).map(function(i) {
+          magnet = $(lib.magnet, data).toArray().map(function(i) {
             return i.href;
           });
         } else {
