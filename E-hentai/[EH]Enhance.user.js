@@ -12,7 +12,7 @@
 // @include     https://e-hentai.org/favorites.php*
 // @include     https://e-hentai.org/?*
 // @include     https://e-hentai.org/g/*
-// @version     1.02
+// @version     1.03
 // @grant       unsafeWindow
 // @grant       GM_openInTab
 // @grant       GM_setClipboard
@@ -26,6 +26,9 @@
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @run-at      document-end
 // ==/UserScript==
+/**
+ * dom.allow_scripts_to_close_windows
+ */
 (function() {
   jQuery('<div class="ehNavBar"><div></div><div></div><div></div></div>').appendTo('body');
   addStyle();
@@ -351,7 +354,7 @@ function changeConfig(key, value) {
     uconfig.push(i + '_' + u[i]);
   }
   uconfig = uconfig.join('-');
-  document.cookie = 'uconfig=' + uconfig + '; max-age=31536000; domain=.exhentai.org; path=/';
+  document.cookie = 'uconfig=' + uconfig + '; max-age=31536000; domain=.' + location.host + '; path=/';
 }
 
 function changeName(e) {
@@ -419,21 +422,15 @@ function downloadInfo() {
       downloadInfo()
     }, 200);
   }
-  jQuery('.ehD-box>.g2:eq(0)>a').on({
-    click: function() {
-      var name = location.href.split('/')[4];
-      setInterval(function() {
-        var info = jQuery('.ehD-status').text().match(/\d+/g);
-        var download = GM_getValue('downloadInfo', {});
-        download[name] = [
-          info[2],
-          info[0]
-        ];
-        if (info[0] === info[2]) delete download[name];
-        GM_setValue('downloadInfo', download);
-      }, 800);
-    }
-  });
+  var name = location.href.split('/')[4];
+  setInterval(function() {
+    if (!jQuery('.ehD-status').length || !jQuery('.ehD-status').text().match(/\d+/g)) return;
+    var info = jQuery('.ehD-status').text().match(/\d+/g);
+    var download = GM_getValue('downloadInfo', {});
+    download[name] = [info[2], info[0]];
+    if (info[0] === info[2]) delete download[name];
+    GM_setValue('downloadInfo', download);
+  }, 800);
 }
 
 function exportRule() {
@@ -546,7 +543,7 @@ function showInfo() {
     }, 3000);
   });
   jQuery(window).unload(function() {
-    GM_setValue('downloadInfo', '{}');
+    GM_setValue('downloadInfo', {});
   });
 }
 
@@ -555,7 +552,8 @@ function setNotification(title, body) { //发出桌面通知
     Notification.requestPermission(function(status) {
       if (status === 'granted') {
         var n = (body) ? new Notification(title, {
-          body: body
+          body: body,
+          tag: GM_info.script.name
         }) : new Notification(title);
         setTimeout(function() {
           if (n) n.close();
