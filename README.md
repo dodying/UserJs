@@ -5,7 +5,7 @@
 #### 目录说明
 
 | 名称 | 地址1 | 地址2 | 更新中 | 有效 | 说明 |
-|------------------------------|---------------------------------------------------------------------------------------------------------:|--------------------------------------------------|--------|--------|--------------------------------------|
+| - | - | - | - | - | - |
 | ```novel``` | 文件夹 | - | - |  | - |
 | [小说]下载脚本 | [GitHub](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader) | [GF](https://greasyfork.org/zh-CN/scripts/21515) | √ | √ |  |
 | [小说]污客增强 | [GitHub](https://github.com/dodying/UserJs/blob/master/novel/hbookerEnhance.user.js) |  | × | √ |  |
@@ -35,15 +35,6 @@
 | [H]停车场 | [安装](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) |  |  |  |  |
 | [nH]下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  | × |  | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
 | ```other``` | 文件夹 | - | - |  | 其它 |
-| 163LyricDownloader | [GitHub](https://github.com/dodying/UserJs/blob/master/other/163LyricDownloader.user.js) | [GF](https://greasyfork.org/zh-CN/scripts/23002) | ? | √ |  |
-| 简繁转换-输入框 | [安装](https://github.com/dodying/UserJs/raw/master/other/chs2chtForInputbox.user.js) |  | × | √ |  |
-| [GitHub]复制Issues里的代码 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyCodeInIssues.user.js) |  | × | √ |  |
-| [Github]强制Commit | [安装](https://github.com/dodying/UserJs/raw/master/other/githubEnforceCommit.user.js) |  | × | √ |  |
-| [Github]复制原始链接 | [安装](https://github.com/dodying/UserJs/raw/master/other/GithubCopyRawLink.user.js) |  | × | √ |  |
-| [百度云]分享页复制 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopy.user.js) |  | × |  |  |
-| [百度云]分享-答题专用 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidao.user.js) |  | × | √ |  |
-| [百度云]分享-答题专用V2 | [安装](https://github.com/dodying/UserJs/raw/master/other/baiduShareCopyForZhidaoV2.user.js) |  | × | √ |  |
-| [维基]跳转到中文 | [安装](https://github.com/dodying/UserJs/raw/master/other/wikiJump2Chinese.user.js) |  | × | √ |  |
 | ```modify``` | 文件夹 | - | - |  | 修改自其它脚本 |
 | [HV]翻译 | [安装](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) |  | × |  | 修改自 [Replace Text On Webpages](http://userscripts-mirror.org/scripts/show/41369) |
 | [nH]下载器-修改自Doying | [安装](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) |  | × |  | 修改自 [nHentai Downloader](https://greasyfork.org/zh-CN/scripts/16088) |
