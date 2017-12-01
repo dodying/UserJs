@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name        [H]CopyInfo
 // @name:zh-CN  [H]复制信息
 // @namespace   https://github.com/dodying/Dodying-UserJs
@@ -7,7 +7,7 @@
 // @include     http*://www.javbus.com/*
 // @include     http*://www.caribbeancom.com/moviepages/*
 // @include     http*://www.caribbeancompr.com/moviepages/*
-// @version     1.01
+// @version     1.01.1
 // @grant       GM_setClipboard
 // @author      Dodying
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
@@ -20,8 +20,11 @@
   if (location.href.match('/search/') && $('.item').length === 1) {
     location = $('.item>a').attr('href');
     return;
-  } else if (location.href.match('vl_searchbyid') && $('.video').length === 2 && $('.video:eq(0) .id').text() === $('.video:eq(1) .id').text()) {
-    location = $('.video:not(:contains("（ブルーレイディスク）"))>a').attr('href');
+  } else if (location.href.match('vl_searchbyid')) {
+    var find = $('.id').filter(function() {
+      return this.textContent === location.href.match(/keyword=(.*?)$/)[1] && !$(this).parents().eq(1).text().match('（ブルーレイディスク）');
+    });
+    if (find.length === 1) location = find.parent().attr('href');
     return;
   }
   var linkLib = {
