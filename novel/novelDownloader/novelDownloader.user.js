@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
-// @description novelDownloaderHelper，press key "shift+d" to show up.
-// @version     1.44.1
+// @description novelDownloaderHelper, press key "shift+d" to show up.
+// @version     1.44.2
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -252,13 +252,13 @@ var showUI = function() {
     $('.ndMain').toggle();
   } else {
     $('.ndMain').toggle();
-    $('#ndToggle').text(function() {
+    $('#ndFlag').text(function() {
       return '.ndPre,.ndPreVip{display:' + $('.ndMain').css('display') + ';}';
     });
   }
 };
 $('<div class="ndTrigger" style="position:fixed;top:0px;left:0px;width:1px;height:100%;z-index:999999;background:transparent;"></div>').on({
-  click: function() {
+  dblclick: function() {
     showUI();
   }
 }).appendTo('body');
@@ -279,7 +279,7 @@ function init() {
   addRule();
   addUI();
   addStyle();
-  $('<style id="ndToggle"></style>').text('.ndPre,.ndPreVip{display:block;}').appendTo('head');
+  $('<style id="ndFlag"></style>').text('.ndPre,.ndPreVip{display:block;}').appendTo('head');
   $('.ndConfig').each(function() {
     if (GM_getValue(this.name) === undefined) return;
     if (this.type === 'checkbox') {
@@ -290,7 +290,7 @@ function init() {
       this.value = GM_getValue(this.name);
     }
   });
-  $('.ndCustomize textarea[name="replace"]').on({
+  $('.ndCustomize textarea[name=replace]').on({
     keyup: function() {
       var total = this.value.split('\n');
       var i, arr;
@@ -351,7 +351,7 @@ function init() {
     GM_setValue('_chapter', _chapter);
     addCRule(location.host, 'h1,h2', '.xscontent,.mcc,#Booex123,#BookContent,#BookText,#BookTextt,#ChapterBody,#Content,#J_article_con,#TXT,#a_content,#acontent,#artWrap,#article,#article-content,#articlebody,#book_text,#bookbody,#booktext,#ccon,#ccontent,#chapterContent,#chapter_content,#chaptercontent,#clickeye_content,#content,#content1,#content_1,#contentbox,#contents,#cp_content,#detail,#floatleft,#fontsize,#htmlContent,#jsreadbox,#kui-page-read-txt,#mouseRight,#neirong,#novel_content_txtsize,#novel_contents,#ntxt,#page-content,#partContent,#r_zhengwen,#read-content,#read_txt,#readcon,#readerFs,#showcontent,#snr2,#table_container,#text_area,#texts,#txt,#view_content_txt,#zjcontentdiv,#zoom,.Text,.article,.article-con,.bd,.book,.book_con,.box_box,.chapter,.chapter_con,.chaptertxt,.chpater-content,.con_L,.con_txt,.content,.contentbox,.menu-area,.myContent,.note,.novel_content,.noveltext,.p,.page-content,.panel-body,.read-content,.reed,.shuneirong,.text,.text1,.textP,.textinfo+p,.txt,.txtc,.yd_text2,.novelContent,.detailContent,.bookcontent', 0);
     if ($('meta[content*="charset=gb"],meta[charset*="gb"],script[charset*="gb"]').length) chapterRule[location.host].MimeType = 'text/html; charset=gb2312';
-    chapterRule[location.host].sort = $('.ndConfig[name="sort"]')[0].checked;
+    chapterRule[location.host].sort = $('.ndConfig[name=sort]')[0].checked;
     $(window).data('autoTry', true);
     $(window).data('autoTryResult', false);
   }
@@ -406,17 +406,36 @@ function init() {
       resetPositon();
     },
   });
+  $('.ndMain>[name=general]').on({
+    mouseenter: function() {
+      this.style.height = '';
+    },
+    mouseleave: function() {
+      this.style.height = '1px';
+    }
+  });
   $('.ndCustomize textarea').on({
-    keyup: function() {
-      resetPositon();
+    keyup: function(e) {
+      if (e.shiftKey || e.shiftKey || e.altKey || !!e.key.match(/^(Enter|Escape|Delete|Backspace)$/)) resetPositon();
     },
     click: function() {
       resetPositon();
     }
   });
-  $('[name="chapter"]').on({
+  $('[name=chapter]').on({
     change: function() {
       $('.ndChapterArea>div').css('display', this.checked ? 'block' : 'none');
+      resetPositon();
+    }
+  });
+  $('#nd input[type=text],.ndBatchStart,.ndBatchEnd').on({
+    dblclick: function() {
+      this.value = '';
+      resetPositon();
+    },
+    keyup: function() {
+      var trueWidth = parseInt($(this).css('font-size')) * (getBlength($(this).val()) + 4) / 2;
+      $(this).css('width', trueWidth + 'px');
       resetPositon();
     }
   });
@@ -497,8 +516,8 @@ function init() {
           }
           var content = $(chapterRule[host].content).html();
           if (reRule[host] instanceof Array) content = wordFormatSpecial(host, content);
-          if ($('.ndConfig[name="format"]')[0].checked === true) content = wordFormat(content);
-          if ($('.ndConfig[name="section"]').val() !== '0') content = wordSection(content);
+          if ($('.ndConfig[name=format]')[0].checked === true) content = wordFormat(content);
+          if ($('.ndConfig[name=section]').val() !== '0') content = wordSection(content);
           content = '来源地址：' + location.href + '\r\n' + content;
           content = tranStr(content, $('.ndLang:checked').val() * 1);
           $(window).data('dataDownload', [{
@@ -514,12 +533,12 @@ function init() {
       }
     }
   });
-  $('.ndShow').on({
+  $('.ndToggle').on({
     click: function() {
-      $('.nd' + this.name).show();
+      $('.nd' + this.name).toggle();
     }
   });
-  $('#nd button[name="hide"]').on({
+  $('#nd button[name=hide]').on({
     click: function() {
       $(this).parents().filter('#nd>div').hide();
     }
@@ -530,7 +549,7 @@ function init() {
       var host = location.host;
       if (this.name === 'inclue') {
         text = '\n' + '// @include     ' + location.href;
-      } else if (this.name === 'general') {
+      } else if (this.name === 'common') {
         var i = indexRule[host];
         text = 'addIRule(\'' + host + '\',\'' + i.cn + '\',\'' + i.name + '\',\'' + i.chapter + '\'';
         if (i.vip || i.sort || i.thread) text += ',\'' + i.vip + '\'';
@@ -1629,9 +1648,9 @@ function addUI() {
       '  <button name="hide">×</button>',
       '  <div>',
       '    <span class="ndInfo"></span><br>',
-      '    书籍名称: <input class="ndTitle" type="text" style="width:60%;">',
+      '    书籍名称: <input class="ndTitle" type="text">',
       '    </div>',
-      '  <div>',
+      '  <div name="general" style="height:1px;overflow:hidden;">',
       '    下载线程: <input class="ndConfig" name="thread" placeholder="5" type="number">',
       '    失败重试次数: <input class="ndConfig" title="0表示不重试" name="error" placeholder="0" type="number"><br>',
       '    超时重试次数: <input class="ndConfig" title="0表示不重试" name="timeout" placeholder="3" type="number">',
@@ -1639,29 +1658,31 @@ function addUI() {
       '    语言: ',
       '    <input class="ndConfig" id="ndLangZhs" type="radio" name="lang" class="ndLang" value="0"><label for="ndLangZhs">简体</label>',
       '    <input class="ndConfig" id="ndLangZht" type="radio" name="lang" class="ndLang" value="1"><label for="ndLangZht">繁体</label>',
+      '    <input class="ndConfig" id="ndSort" name="sort" type="checkbox"><label for="ndSort">章节排序</label>',
       '  </div>',
       '  <div>',
-      '    <input class="ndConfig" id="ndImage" name="image" type="checkbox"><label for="ndImage">下载图片</label>',
+      '    <input id="ndImage" name="image" type="checkbox"><label for="ndImage">下载图片</label>',
       '    <input id="ndVip" type="checkbox"><label for="ndVip">下载Vip章节</label><br>',
-      '    <input class="ndConfig" id="ndSort" name="sort" type="checkbox"><label for="ndSort">章节排序</label>',
-      '    <input class="ndConfig" id="ndIndex" name="index" type="checkbox"><label for="ndIndex">包括本页</label><br>',
+      '    <input id="ndIndex" name="index" type="checkbox"><label for="ndIndex">包括本页</label>',
+      '    <input id="ndEmpty" name="empty" type="checkbox"><label for="ndEmpty">空目录页</label><br>',
       '    <input class="ndConfig" id="ndFormat" name="format" type="checkbox"><label for="ndFormat">文本处理</label>',
       '    分段: <select class="ndConfig" id="ndSection" name="section"><option value="0">不处理</option><option value="1">仅处理长段落</option><option value="2">处理全部</option></select>',
       '  </div>',
       '  <div class="ndChapterArea" title="灵感来自epubBuilder">',
       '    <input id="ndChapter" name="chapter" type="checkbox"><label for="ndChapter">拆分章节(仅Epub)</label>: <br>',
       '    <div>',
-      '    前缀: <input type="text" name="chapterPre" list="ndChapterPre">',
+      '    前缀: <input class="ndConfig" type="text" name="chapterPre" list="ndChapterPre">',
       '    <datalist id="ndChapterPre"><option value="（">（</option><option value="第">第</option><option value="卷">卷</option><option value="chapter">chapter</option></datalist>',
-      '    数字: <input type="text" name="chapterNumber" list="ndChapterNumber">',
+      '    数字: <input class="ndConfig" type="text" name="chapterNumber" list="ndChapterNumber">',
       '    <datalist id="ndChapterNumber"><option value="-1">通用</option><option value="1">半角数字</option><option value="１">全角数字</option><option value="1１">半角/全角数字</option><option value="一">简体数字</option><option value="壹">繁体数字</option><option value="一壹">简体/繁体数字</option></datalist>',
-      '    后缀: <input type="text" name="chapterSuf" list="ndChapterSuf">',
-      '    <datalist id="ndChapterSuf"><option value="）">）</option><option value="章">章</option><option value="回">回</option><option value="节">节</option><option value="集">集</option><option value="部分">部分</option><option value="卷">卷</option><option value="部">部</option></datalist>',
+      '    后缀: <input class="ndConfig" type="text" name="chapterSuf" list="ndChapterSuf">',
+      '    <datalist id="ndChapterSuf"><option value="）">）</option><option value="章">章</option><option value="回">回</option><option value="节">节</option><option value="集">集</option><option value="部分">部分</option><option value="卷">卷</option><option value="部">部</option></datalist><br>',
+      '    <input class="ndConfig" id="ndChapterRE" name="chapterRE" type="checkbox"><label for="ndChapterRE">正则表达式</label><input class="ndConfig" id="ndChapterResult" name="chapterResult" type="checkbox"><label for="ndChapterResult">显示拆分结果</label>',
       '    </div>',
       '  </div>',
       '  <div class="ndBatchArea">',
       '    批量下载: ',
-      '    <input class="ndBatchUrl" placeholder="URL: 以(*)表示不同部分" title="eg1(存在*):\nhttp://www.cuisiliu.com/book/11154/*.html\n\neg2(不存在*，只下载这一章):\nhttp://vipreader.qidian.com/chapter/1/277454116" type="text" style="width:65%;"><br>',
+      '    <input class="ndBatchUrl" placeholder="URL: 以(*)表示不同部分" title="eg1(存在*):\nhttp://www.cuisiliu.com/book/11154/*.html\n\neg2(不存在*，只下载这一章):\nhttp://vipreader.qidian.com/chapter/1/277454116" type="text"><br>',
       '    <div>',
       '    从<input class="ndBatchStart" type="number">到<input class="ndBatchEnd" type="number">',
       '    <input class="ndConfig" id="ndZero" name="zero" type="checkbox"><label for="ndZero" title="用0补足位数\neg: 从1-20\n不勾选: 1,2,3,...,20\n勾选: 01,02,03,...,20">补足位数</label>',
@@ -1670,7 +1691,7 @@ function addUI() {
       '  <div>',
       '    分次下载: <select class="ndSplit"><option value=""></option><option value="all-2">2次</option><option value="all-3">3次</option><option value="every-500">500章</option><option value="every-100">100章</option><option value="...">...</option></select>',
       '    <button class="ndSplitStart">开始下载</button><br>',
-      '    下载范围: <input class="ndSplitInput" placeholder="0为空,1开头,例1-25,35,50" title="值为0:\n不下载目录页，与(包括本页)或(批量下载)配合使用" type="text" style="width:65%;">',
+      '    下载范围: <input class="ndSplitInput" placeholder="1开头,例1-25,35,50" title="值为0:\n不下载目录页，与(包括本页)或(批量下载)配合使用" type="text">',
       '  </div>',
       '  <div class="ndDownload">',
       '    <button name="test">测试(随机章节)</button><br>',
@@ -1680,7 +1701,8 @@ function addUI() {
       '    <button name="epub">下载目录页(Epub)</button><br>',
       '  </div>',
       '  <div>',
-      '    <button class="ndShow" name="Customize">自定义站点规则</button>',
+      '    <button class="ndToggle" name="Customize">自定义站点规则</button>',
+      '    <button class="ndToggle" name="Console">控制台</button>',
       '  </div>',
       '</div>'
     ];
@@ -1691,7 +1713,7 @@ function addUI() {
       '    <span>默认显示当前站点规则<br>',
       '    具体规则，详见<a href="https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明"target="_blank">自定义站点规则说明</a></span><br>',
       '    <button class="ndCopy" name="inclue">复制 @include</button>',
-      '    <button class="ndCopy" name="general">复制 通用规则</button>',
+      '    <button class="ndCopy" name="common">复制 通用规则</button>',
       '    <button class="ndCopy" name="replace">复制 替换规则</button>',
       '    <textarea class="ndCustomizeTextarea"></textarea>',
       '    <button class="ndCustomizeSave">保存</button>',
@@ -1717,16 +1739,21 @@ function addUI() {
       '  <div class="ndTaskImage"></div>',
       '</div>'
     ];
-    var finder = [
-      '<div class="ndFinderArea"></div>'
-    ];
     var test = [
       '<div class="ndTestArea">',
       '  <button name="hide" style="position:fixed;top:0;right:0;border:1px solid #000;left:auto;">×</button>',
       '  <textarea></textarea>',
       '</div>'
     ];
-    return main.join('') + customize.join('') + log.join('') + finder.join('') + test.join('');
+    var consoleDiv = [
+      '<div class="ndConsole ndBoxCenter">',
+      '  <button name="hide">×</button>',
+      '</div>'
+    ];
+    var other = [
+      '<div class="ndFinderArea"></div>'
+    ];
+    return main.concat(customize, log, test, consoleDiv, other).join('');
   }).appendTo('body');
 }
 
@@ -1741,7 +1768,7 @@ function addStyle() {
       '#nd span{float:none;background:none;}',
       '#nd input:hover,#nd>div select:hover,#nd>div button:hover{box-shadow:2px 2px 2px #888888;}',
       '#nd input[type=number],#nd>div input[type=text]{border:1px solid #000;opacity:1;}',
-      '#nd input[type=number],#nd input[type=text]{width:36px;}',
+      '#nd input[type=number],#nd input[name=chapterPre],#nd input[name=chapterNumber],#nd input[name=chapterSuf]{width:36px;}',
       '#nd input[type=checkbox]{position:relative;top:0;opacity:1;}',
       '#nd input[type=number]{-moz-appearance:textfield;}',
       '#nd input[type=number]::-webkit-inner-spin-button,#nd input[type=number]::-webkit-outer-spin-button{-webkit-appearance: none;margin: 0;}',
@@ -1779,27 +1806,24 @@ function addStyle() {
       '.ndCustomize{width:100%;}',
       '.ndCustomize textarea{overflow:hidden;width:calc(100% - 20px)!important;height:60px;background-color:#FFF;margin:10px;z-index:1000000;}',
       //默认情况隐藏某些元素
-      '.ndChapterArea>div,.ndBatchArea>div{display:none;}'
+      '.ndChapterArea>div,.ndBatchArea>div{display:none;}',
+      '.ndTitle,.ndBatchUrl,.ndSplitInput{width:60%;}'
     ].join('');
   }).appendTo('head');
 }
 
-function addIRule(host, cn, name, chapter, vip, sort, thread) { //增加站点目录规则
-  var cnT = cn || '';
-  var vipT = vip || '';
-  var sortT = sort || false;
-  var threadT = thread || false;
+function addIRule(host, cn = '', name, chapter, vip = '', sort = false, thread = false) { //增加站点目录规则
   indexRule[host] = {
-    cn: cnT,
+    cn: cn,
     name: name,
     chapter: chapter,
-    vip: vipT,
-    sort: sortT,
-    thread: threadT
+    vip: vip,
+    sort: sort,
+    thread: thread
   };
 }
 
-function addCRule(host, name, content, MimeType) { //增加站点章节规则
+function addCRule(host, name, content, MimeType = undefined) { //增加站点章节规则
   MimeType = (MimeType === 1) ? 'text/html; charset=gb2312' : '';
   chapterRule[host] = {
     name: name,
@@ -1862,7 +1886,7 @@ function download(fileType) { //下载
   if (fileType === 'epub') getCover(bookName);
   var i;
   if ($('#ndVip')[0].checked === false && indexRule[host].vip !== '') chapter = $(chapter).not($(indexRule[host].vip));
-  if ($('.ndSplitInput').val() === '0') {
+  if ($('.ndMain [name=empty]')[0].checked) {
     chapter = [];
   } else if ($('.ndSplitInput').val() !== '') {
     $(chapter).each(function() {
@@ -1890,16 +1914,16 @@ function download(fileType) { //下载
     }
     chapter = chapterNew;
   }
-  if (indexRule[host].sort || $('.ndConfig[name="sort"]')[0].checked) chapter.sort(objArrSort('href'));
+  if (indexRule[host].sort || $('.ndConfig[name=sort]')[0].checked) chapter.sort(objArrSort('href'));
   chapter = $.makeArray(chapter);
-  if ($('.ndConfig[name="index"]')[0].checked) chapter.unshift($('<a href="' + location.href + '">' + bookName + '</a>')[0]);
+  if ($('.ndMain [name=index]')[0].checked) chapter.unshift($('<a href="' + location.href + '">' + bookName + '</a>')[0]);
   if ($('.ndBatchUrl').val() !== '') {
     var url = $('.ndBatchUrl').val();
     if (url.match(/\*/)) {
       url = url.split('*');
       var length = $('.ndBatchEnd').val().length;
       for (i = $('.ndBatchStart').val() * 1; i <= $('.ndBatchEnd').val() * 1; i++) {
-        chapter.push(url[0] + ($('.ndConfig[name="zero"]')[0].checked ? preZeroFill(i, length) : i) + url[1]);
+        chapter.push(url[0] + ($('.ndConfig[name=zero]')[0].checked ? String(i).padStart(length, '0') : i) + url[1]);
       }
     } else {
       chapter.push(url);
@@ -1949,7 +1973,7 @@ function download(fileType) { //下载
     'number': 0,
     'numberOk': 0
   });
-  if ($('.ndConfig[name="image"]')[0].checked && $(window).data('fileType') === 'epub') {
+  if ($('.ndMain [name=image]')[0].checked && $(window).data('fileType') === 'epub') {
     $(window).data('img', {
       ing: 0,
       ok: false
@@ -1974,7 +1998,7 @@ function download(fileType) { //下载
 function downloadTask() { //下载列队
   var host = location.host;
   var fun = chapterRule[host].Deal instanceof Function ? chapterRule[host].Deal : xhr;
-  var thread = indexRule[host].thread || $('.ndConfig[name="thread"]').val() * 1 || 10;
+  var thread = indexRule[host].thread || $('.ndConfig[name=thread]').val() * 1 || 10;
   for (var i in $(window).data('downloadNow')) {
     if (!/^\d+$/.test(i)) continue;
     if ($(window).data('downloadNow')[i].ok) {
@@ -2019,7 +2043,7 @@ function xhr(num, url) { //xhr
     method: 'GET',
     url: url,
     overrideMimeType: chapterRule[host].MimeType,
-    timeout: parseFloat($('.ndConfig[name="time"]').val()) * 1000,
+    timeout: parseFloat($('.ndConfig[name=time]').val()) * 1000,
     onload: function(res) {
       if (res.status !== 200 || url !== res.finalUrl || (res.response.match(/404/) && res.response.match(/Not Found|找不到文件或目录/i))) {
         console.log({
@@ -2058,7 +2082,7 @@ function xhr(num, url) { //xhr
       if (content.length === 0) {
         content = $('<div class="ndFinder" name="' + num + '"></div>').append(data).appendTo('.ndFinderArea');
         content = content.find(chapterRule[host].content);
-        $('.ndFinder[name="' + num + '"]').remove();
+        $('.ndFinder[name=' + num + ']').remove();
       }
       if (content.length > 0) {
         var raw = content;
@@ -2076,7 +2100,7 @@ function xhr(num, url) { //xhr
     },
     ontimeout: function() {
       $(window).data('dataDownload')[num].timeout++;
-      if ($('.ndConfig[name="timeout"]').val() * 1 > $(window).data('dataDownload')[num].timeout) {
+      if ($('.ndConfig[name=timeout]').val() * 1 > $(window).data('dataDownload')[num].timeout) {
         xhr(num, url);
       } else {
         var nameTrue = $(window).data('dataDownload')[num].name || num;
@@ -2085,7 +2109,7 @@ function xhr(num, url) { //xhr
     },
     onerror: function() {
       $(window).data('dataDownload')[num].error++;
-      if ($('.ndConfig[name="error"]').val() * 1 > $(window).data('dataDownload')[num].error) {
+      if ($('.ndConfig[name=error]').val() * 1 > $(window).data('dataDownload')[num].error) {
         xhr(num, url);
       } else {
         var nameTrue = $(window).data('dataDownload')[num].name || num;
@@ -2095,18 +2119,18 @@ function xhr(num, url) { //xhr
   });
 }
 
-function thisDownloaded(num, name, content, stauts) { //下载完成，包括文本处理-通用版、简繁体转换
+function thisDownloaded(num, name = undefined, content, stauts = true) { //下载完成，包括文本处理-通用版、简繁体转换
   var host = location.host;
   if (!name) name = $(window).data('dataDownload')[num].name;
   if (reRule[host] instanceof Array) content = wordFormatSpecial(host, content);
-  if ($('.ndConfig[name="format"]')[0].checked === true) content = wordFormat(content);
-  if ($('.ndConfig[name="section"]').val() !== '0') content = wordSection(content);
+  if ($('.ndConfig[name=format]')[0].checked === true) content = wordFormat(content);
+  if ($('.ndConfig[name=section]').val() !== '0') content = wordSection(content);
   content = '来源地址：' + $(window).data('dataDownload')[num].url + '\r\n' + content;
   name = tranStr(name, $('.ndLang:checked').val() * 1);
   content = tranStr(content, $('.ndLang:checked').val() * 1);
   $(window).data('dataDownload')[num].name = name.trim();
   $(window).data('dataDownload')[num].content = content;
-  $(window).data('dataDownload')[num].ok = stauts || true;
+  $(window).data('dataDownload')[num].ok = stauts;
   $(window).data('downloadNow')[num].ok = true;
   $(window).data('numberOk', $(window).data('numberOk') + 1);
   $('.ndProgress').val($(window).data('numberOk'));
@@ -2141,17 +2165,17 @@ function imageTask() {
 }
 
 function downloadImage(url) {
-  if ($('.ndTaskImage>[name="' + url + '"]').length === 0) $('.ndTaskImage').show().append('<div class="ndIng" name="' + url + '"><a href="' + url + '" target="_blank"></a><progress max="1" value="0"></progress></div>');
+  if ($('.ndTaskImage>[name=' + url + ']').length === 0) $('.ndTaskImage').show().append('<div class="ndIng" name="' + url + '"><a href="' + url + '" target="_blank"></a><progress max="1" value="0"></progress></div>');
   GM_xmlhttpRequest({
     method: 'GET',
     url: url,
     responseType: 'arraybuffer',
     timeout: 30000,
     onprogress: function(res) {
-      if (res.lengthComputable) $('.ndTaskImage>[name="' + url + '"]>progress').val(res.loaded).attr('max', res.total)[0].scrollIntoView();
+      if (res.lengthComputable) $('.ndTaskImage>[name=' + url + ']>progress').val(res.loaded).attr('max', res.total)[0].scrollIntoView();
     },
     onload: function(res) {
-      $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndOk')[0].scrollIntoView();
+      $('.ndTaskImage>[name=' + url + ']').attr('class', 'ndOk')[0].scrollIntoView();
       var img = $(window).data('img');
       img[url] = new Blob([res.response], {
         type: url.match(/\.png$/) ? 'image/png' : 'image/jpeg'
@@ -2164,7 +2188,7 @@ function downloadImage(url) {
       if (confirm('一张图片下载超时，请检查\n网络是否正常，或是否网站地址错误\n建议打开图片地址，使其载入\n图片地址: ' + url + '\n是否尝试再次下载')) {
         downloadImage(url);
       } else {
-        $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndError')[0].scrollIntoView();
+        $('.ndTaskImage>[name=' + url + ']').attr('class', 'ndError')[0].scrollIntoView();
         var img = $(window).data('img');
         img[name].data = 'timeout';
         img.ing--;
@@ -2176,7 +2200,7 @@ function downloadImage(url) {
       if (confirm('一张图片下载错误，请检查\n网络是否正常，或是否网站地址错误\n建议打开图片地址，使其载入\n图片地址: ' + url + '\n是否尝试再次下载')) {
         downloadImage(url);
       } else {
-        $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndTimeout')[0].scrollIntoView();
+        $('.ndTaskImage>[name=' + url + ']').attr('class', 'ndTimeout')[0].scrollIntoView();
         var img = $(window).data('img');
         img[name].data = 'error';
         img.ing--;
@@ -2258,7 +2282,7 @@ function wordSection(word) { //文本强制分段-测试功能
   var reLineEnd = new RegExp('[' + symbol.lineEnd + ']');
   var reLineStart = new RegExp('[' + symbol.lineStart + ']');
   var reUnbreak = new RegExp('[' + symbol.unbreak + ']');
-  if ($('.ndConfig[name="section"]').val() === '2') word = word.replace(/([\r\n]+\s+)/g, '').replace(/[\r\n]+/g, '');
+  if ($('.ndConfig[name=section]').val() === '2') word = word.replace(/([\r\n]+\s+)/g, '').replace(/[\r\n]+/g, '');
   var arr = word.split(/[\r\n]+/);
   var lastWord, i, j;
   for (i = 0; i < arr.length; i++) {
@@ -2296,7 +2320,7 @@ function download2Zip(name) { //下载到1个zip
   var leng = String($(window).data('dataDownload').length).length;
   for (var i = 0; i < $(window).data('dataDownload').length; i++) {
     var num = i + 1;
-    $(window).data('blob').file(String(preZeroFill(num, leng)) + '-' + $(window).data('dataDownload')[i].name + '.txt', $(window).data('dataDownload')[i].name + '\r\n' + $(window).data('dataDownload')[i].content);
+    $(window).data('blob').file(String(num).padStart(length, '0') + '-' + $(window).data('dataDownload')[i].name + '.txt', $(window).data('dataDownload')[i].name + '\r\n' + $(window).data('dataDownload')[i].content);
   }
   $(window).data('blob').file('###说明文件.txt', '本压缩包由用户脚本novelDownloader制作\r\n来源地址：' + location.href);
   $(window).data('blob').generateAsync({
@@ -2331,8 +2355,10 @@ function download2Epub(name) { //下载到1个epub
       '壹': '零壹贰参肆伍陆柒捌玖拾佰仟萬',
       '一壹': '零一二三四五六七八九十百千万零壹贰参肆伍陆柒捌玖拾佰仟萬'
     };
-    number = '[' + number[$('[name="chapterNumber"]').val()] + ']+';
-    var regexp = new RegExp('(([\\r\\n]|^)(.*?' + $('[name="chapterPre"]').val() + number + $('[name="chapterSuf"]').val() + '.*?)([\\r\\n]|$))', 'gi');
+    number = '[' + number[$('[name=chapterNumber]').val() || '-1'] + ']+';
+    var prefix = $('#ndChapterRE')[0].checked ? $('[name=chapterPre]').val() : $('[name=chapterPre]').val().replace(/[\^\$\*\+\?\.\|\(\)\{\}\[\]]/g, '\\$&');
+    var suffix = $('#ndChapterRE')[0].checked ? $('[name=chapterSuf]').val() : $('[name=chapterSuf]').val().replace(/[\^\$\*\+\?\.\|\(\)\{\}\[\]]/g, '\\$&');
+    var regexp = new RegExp('(([\\r\\n]|^)(.*?' + prefix + number + suffix + '.*?)([\\r\\n]|$))', 'gi');
     var result = all.split(regexp);
     chapter = [];
     if (result[0].trim() !== '') {
@@ -2350,6 +2376,12 @@ function download2Epub(name) { //下载到1个epub
       });
     }
     console.log(chapter);
+    if ($('#ndChapterResult')[0].checked) {
+      $('<div></div>').html('<table><tbody><tr><th></th><th>标题</th><th>长度</th><th>预览</th></tr>' + chapter.reduce(function(all, _, i) {
+        return all + '<tr><td>' + i + '</td><td>' + _.name + '</td><td>' + _.length + '</td><td>' + _.content.substr(0, 26).trim() + '</td></tr>';
+      }) + '</tbody></table>').appendTo('.ndConsole');
+      $('.ndConsole').show();
+    }
   }
   var leng = String(chapter.length).length;
   var uuid = 'nd' + new Date().getTime().toString();
@@ -2365,8 +2397,8 @@ function download2Epub(name) { //下载到1个epub
     'h3{text-align:center;font-weight:bold;font-size:24px;}');
   var lang = ($('.ndLang:checked').val() * 1 === 0) ? 'zh-CN' : 'zh-TW';
   var content_opf = '<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="' + uuid + '" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>' + name + '</dc:title><dc:creator>novelDownloader</dc:creator><dc:identifier id="' + uuid + '">urn:uuid:' + uuid + '</dc:identifier><dc:language>' + lang + '</dc:language><meta name="cover" content="cover-image" /></metadata><manifest>';
-  var toc_ncx = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:' + uuid + '"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>' + name + '</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="' + preZeroFill(0, leng) + '.html"/></navPoint>';
-  var item = '<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="' + preZeroFill(0, leng) + '.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>';
+  var toc_ncx = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:' + uuid + '"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>' + name + '</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="' + String(0).padStart(leng, '0') + '.html"/></navPoint>';
+  var item = '<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="' + String(0).padStart(leng, '0') + '.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>';
   var itemref = '<itemref idref="cover" linear="yes"/>';
   var _name, _content;
   if (img) {
@@ -2377,19 +2409,19 @@ function download2Epub(name) { //下载到1个epub
     var imgOrder, imgName;
     for (i = 0; i < imgArr.length; i++) {
       if (typeof img[imgArr[i]] === 'string') continue;
-      imgOrder = preZeroFill(i, leng2);
+      imgOrder = String(i).padStart(leng2, '0');
       imgName = imgOrder + '.' + img[imgArr[i]].type.match(/image\/(.*)/)[1];
       item += '<item id="img' + imgOrder + '" href="' + imgName + '" media-type="image/jpeg"/>';
       OEBPS.file(imgName, img[imgArr[i]]);
     }
   }
   for (i = 0; i < chapter.length; i++) {
-    _name = String(preZeroFill(i + 1, leng));
+    _name = String(i + 1).padStart(leng, '0');
     _content = chapter[i].content.replace(/\r\n/g, '</p><p>');
     if ($('<div></div>').html(_content).find('img').length > 0 && img) {
       var _html = $('<div></div>').html(_content);
       _html.find('img').each(function() {
-        if (imgArr.indexOf(this.src) >= 0) this.src = preZeroFill(imgArr.indexOf(this.src), leng2) + '.' + img[this.src].type.match(/image\/(.*)/)[1];
+        if (imgArr.indexOf(this.src) >= 0) this.src = String(imgArr.indexOf(this.src)).padStart(leng2, '0') + '.' + img[this.src].type.match(/image\/(.*)/)[1];
       });
       _content = _html.html();
     }
@@ -2398,11 +2430,11 @@ function download2Epub(name) { //下载到1个epub
     itemref += '<itemref idref="chapter' + _name + '" linear="yes"/>';
     OEBPS.file(_name + '.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + chapter[i].name + '</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>' + chapter[i].name + '</h3><div><p>' + _content + '</p></div></body></html>');
   }
-  content_opf = content_opf + item + '<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">' + itemref + '</spine><guide><reference href="' + preZeroFill(0, leng) + '.html" type="cover" title="Cover"/></guide></package>';
+  content_opf = content_opf + item + '<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">' + itemref + '</spine><guide><reference href="' + String(0).padStart(leng, '0') + '.html" type="cover" title="Cover"/></guide></package>';
   toc_ncx += '</navMap></ncx>';
   OEBPS.file('content.opf', content_opf);
   OEBPS.file('toc.ncx', toc_ncx);
-  OEBPS.file(preZeroFill(0, leng) + '.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + name + '</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h1>' + name + '</h1><h2>本电子书由用户脚本novelDownloader制作</h2><h3>来源地址：' + location.href + '</h3></body></html>');
+  OEBPS.file(String(0).padStart(leng, '0') + '.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + name + '</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h1>' + name + '</h1><h2>本电子书由用户脚本novelDownloader制作</h2><h3>来源地址：' + location.href + '</h3></body></html>');
   OEBPS.file('cover.jpg', $(window).data('cover'));
   $(window).data('blob').generateAsync({
     type: 'blob',
@@ -2455,15 +2487,6 @@ function getHost(url) { //获取网址域名
   return (/^http(s|):\/\//.test(url)) ? url.split('/')[2] : url.split('/')[0];
 }
 
-function preZeroFill(num, size) { //用0补足指定位数，来自https://segmentfault.com/q/1010000002607221，作者：captainblue与solar
-  if (num >= Math.pow(10, size)) { //如果num本身位数不小于size位
-    return num.toString();
-  } else {
-    var _str = Array(size + 1).join('0') + num;
-    return _str.slice(_str.length - size);
-  }
-}
-
 function objArrSort(key) {
   return function(obj1, obj2) {
     var value1 = obj1[key].match(/\d+/g);
@@ -2511,4 +2534,11 @@ function getCover(txt) {
   canvas.toBlob(function(blob) {
     $(window).data('cover', blob);
   });
+}
+
+function getBlength(str) { //获取字节数
+  for (var i = str.length, n = 0; i--;) {
+    n += str.charCodeAt(i) > 255 ? 2 : 1;
+  }
+  return n;
 }
