@@ -5,7 +5,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @description 移动到画廊上可预览标签，同时如果标签里有不喜欢的标签则会隐藏该画集
+// @description Show tags when move to a title or thumb, while hiding the gallery which tagged you unlike
 // @description:zh-CN 移动到画廊上可预览标签，同时如果标签里有不喜欢的标签则会隐藏该画集
 // @include     http*://exhentai.org/*
 // @include     http*://e-hentai.org/*
@@ -13,27 +13,22 @@
 // @exclude     http*://e-hentai.org/g/*
 // @exclude     http*://exhentai.org/s/*
 // @exclude     http*://e-hentai.org/s/*
-// @version     1.2.1
+// @version     1.2.2
+// 使用了来自Mapaler/EhTagTranslator生成的json数据
 // @resource data https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/%5BEH%5DTagsPreview%26HideSomeGalleries.json
 // @grant       GM_getResourceText
 // @run-at      document-idle
 // ==/UserScript==
-var $ = function(e) {
-  return document.querySelector(e);
-}
-var $$ = function(e) {
-  return document.querySelectorAll(e);
-}
-var $_ = function(e) {
-  return document.createElement(e);
-}
-var inArray = function(key, array) {
-  for (var i = 0; i < array.length; i++) {
-    if (array[i] === key) return true;
+const $ = e => document.querySelector(e);
+const $$ = e => document.querySelectorAll(e);
+const $_ = e => document.createElement(e);
+const inArray = (key, array) => {
+  for (let i of array) {
+    if (i === key) return true;
   }
   return false;
 }
-var CONFIG = {
+const CONFIG = {
   UNLIKE: {
     'females only': '只有女性',
     'males only': '只有男性',
@@ -68,7 +63,7 @@ var CONFIG = {
     'scat': '排泄',
     'animated': 'Gif'
   },
-  CHS: (function() {
+  CHS: (() => {
     var value = {};
     let data = GM_getResourceText('data');
     data = JSON.parse(data).dataset;
@@ -82,36 +77,7 @@ var CONFIG = {
       }
     }
     return value;
-  })(),
-  lastKey: function() {
-    var a = Object.keys(this.CHS);
-    var last = a[a.length - 1];
-    this.lastKey = function() {
-      return last;
-    };
-    return last;
-  },
-  notice: function() {
-    var _ = this;
-    var notice = '当前屏蔽的标签有：<span class="TAGS">';
-    for (var i in _.UNLIKE) {
-      notice += '<li title="' + i + '">' + _.UNLIKE[i] + '</li>';
-    }
-    notice += '</span><br>当前警告的标签有：<span class="TAGS">';
-    for (var i in _.ALERT) {
-      notice += '<li title="' + i + '">' + _.ALERT[i] + '</li>';
-    }
-    notice += '</span>';
-    $('h1').innerHTML = notice;
-  },
-  addStyle: function() {
-    var style = $_('style');
-    style.textContent = [
-      '.TAGS{font-size:larger;}',
-      '.TAGS>li{display:inline;margin:1px;cursor:pointer;}'
-    ].join('');
-    $('body').appendChild(style);
-  }
+  })()
 }
 var TagsPreview = {
   dataArr: [],
@@ -132,7 +98,8 @@ var TagsPreview = {
     }
     var gdata = {
       'method': 'gdata',
-      'gidlist': gidlist
+      'gidlist': gidlist,
+      'namespace': 1
     }
     var xhr = 'xhr_' + Math.random().toString();
     xhr = new XMLHttpRequest();
@@ -150,8 +117,7 @@ var TagsPreview = {
   },
   init: function() {
     var _ = this;
-    CONFIG.notice();
-    CONFIG.addStyle();
+    _.notice();
     _.addStyle();
     var gidlist = [];
     var bars = $$('.it5>a,.id3>a');
@@ -169,24 +135,24 @@ var TagsPreview = {
   },
   tagPreview: function(data) {
     var _ = this;
-    var group = [];
-    var groupChs = [];
-    var artist = [];
-    var artistChs = [];
-    var parody = [];
-    var parodyChs = [];
+    var CHS2 = {
+      group: {},
+      artist: {},
+      parody: {}
+    };
     data.forEach(function(_data, i) {
       var _title = _data.title.toLowerCase().replace(/^\(.*?\)/, '').trim();
       if (_data.title_jpn) var _titleJpn = _data.title_jpn.replace(/^\(.*?\)/, '').trim();
+      let g, gc, a, ac, p, pc;
       if (_title.match(/^\[.*?\]/)) {
-        group[i] = _title.match(/^\[(.*?)\]/)[1].trim();
-        if (_titleJpn && _titleJpn.match(/^\[.*?\]/)) groupChs[i] = _titleJpn.match(/^\[(.*?)\]/)[1].trim();
-        if (group[i].match(/\(.*?\)/)) {
-          artist[i] = group[i].match(/\((.*?)\)/)[1].trim();
-          group[i] = group[i].match(/(.*?)\(.*?\)/)[1].trim();
-          if (groupChs[i] && groupChs[i].match(/\(.*?\)/)) {
-            artistChs[i] = groupChs[i].match(/\((.*?)\)/)[1].trim();
-            groupChs[i] = groupChs[i].match(/(.*?)\(.*?\)/)[1].trim();
+        g = _title.match(/^\[(.*?)\]/)[1].trim();
+        if (_titleJpn && _titleJpn.match(/^\[.*?\]/)) gc = _titleJpn.match(/^\[(.*?)\]/)[1].trim();
+        if (g.match(/\(.*?\)/)) {
+          a = g.match(/\((.*?)\)/)[1].trim();
+          g = g.match(/(.*?)\(.*?\)/)[1].trim();
+          if (gc && gc.match(/\(.*?\)/)) {
+            ac = gc.match(/\((.*?)\)/)[1].trim();
+            gc = gc.match(/(.*?)\(.*?\)/)[1].trim();
           }
         }
       }
@@ -194,10 +160,15 @@ var TagsPreview = {
         _title = _title.replace(/\[.*?\]/g, '').trim();
         if (_data.title_jpn) _titleJpn = _titleJpn.replace(/\[.*?\]/g, '').trim();
         if (_title.match(/\(.*?\)/)) {
-          parody[i] = _title.match(/\((.*?)\)/)[1].replace(/[!?\.\/]/g, ' ').trim();
-          if (_titleJpn && _titleJpn.match(/\(.*?\)/)) parodyChs[i] = _titleJpn.match(/\((.*?)\)/)[1];
+          p = _title.match(/\((.*?)\)/)[1].replace(/[!?\.\/]/g, ' ').trim();
+          if (_titleJpn && _titleJpn.match(/\(.*?\)/)) pc = _titleJpn.match(/\((.*?)\)/)[1];
         }
       }
+      CHS2.artist[a] = ac;
+      CHS2.artist[g] = gc;
+      CHS2.group[a] = ac;
+      CHS2.group[g] = gc;
+      CHS2.parody[p] = pc;
     });
     var box = $_('div');
     box.id = 'TagPreview';
@@ -211,29 +182,15 @@ var TagsPreview = {
           tag = [];
           var tags = data[id].tags.slice();
           var tagsObj = new _.tagsObj();
-          for (var i = 0; i < tags.length; i++) {
-            if (tags[i] == parody[id]) {
-              tagsObj.parody.push(parodyChs[id] || tags[i]);
-            } else if (tags[i] == group[id]) {
-              tagsObj.group.push(groupChs[id] || tags[i]);
-            } else if (tags[i] == artist[id]) {
-              tagsObj.artist.push(artistChs[id] || tags[i]);
-            } else {
-              var find = false;
-              for (var j in CONFIG.CHS) {
-                if (tags[i] in CONFIG.CHS[j]) {
-                  tagsObj[j].push(CONFIG.CHS[j][tags[i]]);
-                  find = true;
-                } else if (j === CONFIG.lastKey() && !find) {
-                  tagsObj.other.push(tags[i]);
-                }
-              }
-            }
+          for (let i of tags) {
+            let arr = i.split(':');
+            let type = arr.length === 2 ? arr[0] : 'misc';
+            let value = arr.length === 2 ? arr[1] : i;
+            value = CONFIG.CHS[type][value] || (type in CHS2 && value in CHS2[type] ? CHS2[type][value] : value);
+            tagsObj[type].push(value);
           }
-          for (var i in tagsObj) {
-            if (tagsObj[i].length > 0) {
-              tag.push('<li class="' + i + 'Tag"><span>' + tagsObj[i].join('</span><span>') + '</span></li>');
-            }
+          for (let i in tagsObj) {
+            if (tagsObj[i].length > 0) tag.push(`<li class="${i}Tag"><span>${tagsObj[i].join('</span><span>')}</span></li>`);
           }
           tag = tag.join('');
           data[id].tag = tag;
@@ -242,7 +199,7 @@ var TagsPreview = {
         box.style.display = 'block';
         box.style.left = (e.clientX + 5) + 'px';
         box.style.top = (e.clientY + 5) + 'px';
-        box.innerHTML = '<div>' + title + '</div><div style="color:red">[' + (parseInt(data[id].filesize / 1024 / 1024)) + 'M]' + data[id].filecount + 'P</div><div style="height:2px;background-color:black;"></div><div>' + tag + '</div>';
+        box.innerHTML = '<div>' + title + '</div><div style="color:#FF0000">[' + (parseInt(data[id].filesize / 1024 / 1024)) + 'M]' + data[id].filecount + 'P</div><div style="height:2px;background-color:#000000;"></div><div>' + tag + '</div>';
         if (box.offsetHeight + e.clientY + 10 >= window.innerHeight) box.style.top = e.clientY - box.offsetHeight - 5 + 'px';
         if (box.offsetWidth + e.clientX + 10 >= window.innerWidth) box.style.left = e.clientX - box.offsetWidth - 5 + 'px';
       } else {
@@ -257,13 +214,15 @@ var TagsPreview = {
     var boxHide = [];
     data.forEach(function(_data, i) {
       _data.tags.forEach(function(_tag, k) {
-        if (_tag in CONFIG.UNLIKE || _tag in CONFIG.ALERT) {
+        let arr = _tag.split(':');
+        let value = arr.length === 2 ? arr[1] : i;
+        if (value in CONFIG.UNLIKE || value in CONFIG.ALERT) {
           var div = $_('span');
-          div.title = _tag;
+          div.title = value;
           bars[i].parentNode.parentNode.insertBefore(div, bars[i].parentNode);
-          if (_tag in CONFIG.UNLIKE) {
+          if (value in CONFIG.UNLIKE) {
             div.className = 'unlikeTag';
-            div.innerHTML = CONFIG.UNLIKE[_tag];
+            div.innerHTML = CONFIG.UNLIKE[value];
             if (bars[i].parentNode.className === 'it5' && !inArray(bars[i], barHide)) {
               barHide.push(bars[i]);
             } else if (bars[i].parentNode.className === 'id3' && !inArray(bars[i], boxHide)) {
@@ -271,7 +230,7 @@ var TagsPreview = {
             }
           } else {
             div.className = 'alertTag';
-            div.innerHTML = CONFIG.ALERT[_tag];
+            div.innerHTML = CONFIG.ALERT[value];
           }
         }
       });
@@ -293,17 +252,34 @@ var TagsPreview = {
     toggle.click();
     $('p.ip').appendChild(toggle);
   },
+  notice: function() {
+    let _ = CONFIG;
+    let notice = '当前屏蔽的标签有：<span class="TAGS UNLIKE">';
+    for (let i in _.UNLIKE) {
+      notice += `<li title="${i}">${_.UNLIKE[i]}</li>`;
+    }
+    notice += '</span><br>当前警告的标签有：<span class="TAGS ALERT">';
+    for (let i in _.ALERT) {
+      notice += `<li title="${i}">${_.ALERT[i]}</li>`;
+    }
+    notice += '</span>';
+    $('h1').innerHTML = notice;
+  },
   addStyle: function() {
     var style = $_('style');
     style.textContent = [
-      '#TagPreview{position:fixed;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:black;border-style:solid;color:white;background-color:#34353B;}',
+      '.TAGS{font-size:10pt;}',
+      '.TAGS>li{display:inline;margin:0 2px;cursor:pointer;}',
+      '.UNLIKE>li{color:#FF0000;}',
+      '.ALERT>li{color:#FFFF00;}',
+      '#TagPreview{position:fixed;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:#000000;border-style:solid;color:#FFFFFF;background-color:#34353B;}',
       '#TagPreview li.languageTag::before{content:"语言: "}',
       '#TagPreview li.reclassTag::before{content:"重新分类: "}',
-      '#TagPreview li.artistTag{font-size:larger;color:green;}',
+      '#TagPreview li.artistTag{font-size:larger;color:#008000;}',
       '#TagPreview li.artistTag::before{content:"漫画家: "}',
       '#TagPreview li.groupTag{font-size:larger;color:#00FFF5;}',
       '#TagPreview li.groupTag::before{content:"组织: "}',
-      '#TagPreview li.parodyTag{font-size:larger;color:yellow;}',
+      '#TagPreview li.parodyTag{font-size:larger;color:#FFFF00;}',
       '#TagPreview li.parodyTag::before{content:"同人: "}',
       '#TagPreview li.characterTag::before{content:"角色: "}',
       '#TagPreview li.femaleTag::before{content:"女: "}',
@@ -312,8 +288,8 @@ var TagsPreview = {
       '#TagPreview li.otherTag::before{content:"未分类: "}',
       '#TagPreview li{color:#C9BA67}',
       '#TagPreview li>span{display:inline;margin:0 2px;border:1px #456F78 solid;}',
-      '.unlikeTag{float:left;color:red;background-color:blue;margin:0 1px;}',
-      '.alertTag{float:left;color:yellow;background-color:green;margin:0 1px;}',
+      '.unlikeTag{float:left;color:#FF0000;background-color:#0000FF;margin:0 1px;}',
+      '.alertTag{float:left;color:#FFFF00;background-color:#008000;margin:0 1px;}',
       '#toggleShow::before{content:"显示"}',
       '#toggleHide::before{content:"隐藏"}'
     ].join('');
