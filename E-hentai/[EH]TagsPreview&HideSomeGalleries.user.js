@@ -13,8 +13,8 @@
 // @exclude     http*://e-hentai.org/g/*
 // @exclude     http*://exhentai.org/s/*
 // @exclude     http*://e-hentai.org/s/*
-// @version     1.2.0
-// @resource data https://github.com/dodying/UserJs/raw/master/E-hentai/%5BEH%5DTagsPreview%26HideSomeGalleries.json
+// @version     1.2.1
+// @resource data https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/%5BEH%5DTagsPreview%26HideSomeGalleries.json
 // @grant       GM_getResourceText
 // @run-at      document-idle
 // ==/UserScript==
@@ -73,12 +73,15 @@ var CONFIG = {
     let data = GM_getResourceText('data');
     data = JSON.parse(data).dataset;
     for (let i in data) {
+      let type = data[i].name;
+      value[type] = {};
       for (let j in data[i].tags) {
         if (data[i].tags[j].type === 0) {
-          value[data[i].tags[j].name] = data[i].tags[j].cname.filter(k => k.type === 0)[0].text
+          value[type][data[i].tags[j].name] = data[i].tags[j].cname.filter(k => k.type === 0)[0].text;
         }
       }
     }
+    return value;
   })(),
   lastKey: function() {
     var a = Object.keys(this.CHS);
@@ -111,13 +114,11 @@ var CONFIG = {
   }
 }
 var TagsPreview = {
-  dataArr: [
-  ],
+  dataArr: [],
   checkData: function(data, i) {
     var _ = this;
     _.dataArr[i] = data;
-    var dataAll = [
-    ].concat.apply([], _.dataArr);
+    var dataAll = [].concat.apply([], _.dataArr);
     if (dataAll.length >= $$('.it5>a,.id3>a').length) {
       _.tagPreview(dataAll);
       _.hideGalleries(dataAll);
@@ -152,8 +153,7 @@ var TagsPreview = {
     CONFIG.notice();
     CONFIG.addStyle();
     _.addStyle();
-    var gidlist = [
-    ];
+    var gidlist = [];
     var bars = $$('.it5>a,.id3>a');
     $$('.it5>a,.id3>a').forEach(function(_bar, i) {
       if (_bar.querySelector('img')) {
@@ -169,18 +169,12 @@ var TagsPreview = {
   },
   tagPreview: function(data) {
     var _ = this;
-    var group = [
-    ];
-    var groupChs = [
-    ];
-    var artist = [
-    ];
-    var artistChs = [
-    ];
-    var parody = [
-    ];
-    var parodyChs = [
-    ];
+    var group = [];
+    var groupChs = [];
+    var artist = [];
+    var artistChs = [];
+    var parody = [];
+    var parodyChs = [];
     data.forEach(function(_data, i) {
       var _title = _data.title.toLowerCase().replace(/^\(.*?\)/, '').trim();
       if (_data.title_jpn) var _titleJpn = _data.title_jpn.replace(/^\(.*?\)/, '').trim();
@@ -214,8 +208,7 @@ var TagsPreview = {
         if (data[id].tag) {
           tag = data[id].tag;
         } else {
-          tag = [
-          ];
+          tag = [];
           var tags = data[id].tags.slice();
           var tagsObj = new _.tagsObj();
           for (var i = 0; i < tags.length; i++) {
@@ -260,10 +253,8 @@ var TagsPreview = {
   },
   hideGalleries: function(data) {
     var bars = $$('.it5>a,.id3>a');
-    var barHide = [
-    ];
-    var boxHide = [
-    ];
+    var barHide = [];
+    var boxHide = [];
     data.forEach(function(_data, i) {
       _data.tags.forEach(function(_tag, k) {
         if (_tag in CONFIG.UNLIKE || _tag in CONFIG.ALERT) {
@@ -315,7 +306,8 @@ var TagsPreview = {
       '#TagPreview li.parodyTag{font-size:larger;color:yellow;}',
       '#TagPreview li.parodyTag::before{content:"同人: "}',
       '#TagPreview li.characterTag::before{content:"角色: "}',
-      '#TagPreview li.maleTag::before{content:"属性: "}',
+      '#TagPreview li.femaleTag::before{content:"女: "}',
+      '#TagPreview li.maleTag::before{content:"男: "}',
       '#TagPreview li.miscTag::before{content:"杂项: "}',
       '#TagPreview li.otherTag::before{content:"未分类: "}',
       '#TagPreview li{color:#C9BA67}',
@@ -328,24 +320,16 @@ var TagsPreview = {
     $('body').appendChild(style);
   },
   tagsObj: function() {
-    this.language = [
-    ];
-    this.reclass = [
-    ];
-    this.artist = [
-    ];
-    this.group = [
-    ];
-    this.parody = [
-    ];
-    this.character = [
-    ];
-    this.male = [
-    ];
-    this.misc = [
-    ];
-    this.other = [
-    ];
+    this.language = [];
+    this.reclass = [];
+    this.artist = [];
+    this.group = [];
+    this.parody = [];
+    this.character = [];
+    this.female = [];
+    this.male = [];
+    this.misc = [];
+    this.other = [];
   }
 }
 TagsPreview.init();
