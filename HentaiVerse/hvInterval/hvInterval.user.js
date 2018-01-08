@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name        [HV]Interval
+// @description 更新: 当回执信息非ABC时(发生错误)，不填充答案
 // @author      Dodying
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
-// @version     1
+// @version     1.01
 // @grant       GM_xmlhttpRequest
 // @connect     127.0.0.1
 // @run-at      document-idle
@@ -14,12 +15,15 @@
     GM_xmlhttpRequest({
       method: 'GET',
       url: 'http://127.0.0.1:5000/?img=' + encodeURIComponent(url),
+      timeout: 60 * 1000,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
       onload: function(e) {
-        $('#riddleanswer').value = e.response;
-        //$('#riddleanswer+img').click();
+        if (e.response.match(/^[abc]$/)) {
+          $('#riddleanswer').value = e.response;
+          $('#riddleanswer+img').click();
+        }
       }
     });
   } else if (/Time Bonus/.test($('#textlog').textContent)) {
@@ -36,6 +40,7 @@
     GM_xmlhttpRequest({
       method: 'GET',
       url: 'http://127.0.0.1:5000/?answer=' + isTrue,
+      timeout: 60 * 1000,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       }
