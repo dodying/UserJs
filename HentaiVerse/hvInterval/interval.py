@@ -21,9 +21,9 @@ config = dict(config)
 
 imgPath = config['img_path'] + '\\'
 abc = ['a', 'b', 'c']
-ocrUrl = config['url_ocr']
 token = config['token']
-sim = round(float(config['sim']), 2)
+taskId = config['task_id']
+sim = float(config['sim'])
 simMin = float(config['sim_min'])
 option = [config['aj'], config['fs'], config['pp'], config['ra'], config['rd'], config['ts']]
 #hvUrl = ['http://hentaiverse.org/', 'https://hentaiverse.org/', 'http://alt.hentaiverse.org/']
@@ -32,14 +32,14 @@ def work():
   global now, riddle
   #OCR小马图片
   file = open(imgPath + "riddle.jpg", 'rb')
-  files = {'image': file}
-  headers = {"Authorization": "JWT " + token}
-  response = requests.request("POST", ocrUrl, files = files, headers = headers)
+  headers = {"Authorization": "Token " + token}
+  files = {'image_file': file}
+  data = {'task': taskId}
+  response = requests.post('https://api.vize.ai/v1/classify/', headers = headers, files = files, data = data)
   file.close()
   #return response.text
   response = json.loads(response.text)
-  scores = response['scores']
-  scores = sorted(scores.items(), key = lambda item:item[1], reverse = True)
+  scores = response['labels']
 
   #识别小马选项
   img_rgb = cv2.imread(imgPath + 'riddle.jpg')
@@ -59,10 +59,10 @@ def work():
   order = -1
   while not isFind:
     order = order + 1
-    if scores[order][1] < simMin:
+    if scores[order]['probability'] < simMin:
       break
     for i in answers:
-      if i[1] == scores[order][0]:
+      if i[1] == scores[order]['label_name']:
         answer = answers.index(i)
         isFind = True
         break
