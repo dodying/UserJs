@@ -78,7 +78,7 @@ def work():
   return ABC[answer]
 
 def getNow():
-  return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+  return time.strftime('%Y-%m-%d %H-%M-%S', time.localtime(time.time()))
 
 def log(response, option, answer, isRandom):
   f = open(PATH + 'log.txt', 'a')
