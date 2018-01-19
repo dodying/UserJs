@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name        [H]ParkingLot
-// @name:zh-CN  [H]停车场
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @description
-// @version     1.09.3
+// @version     1.10.0
+// @author      dodying
+// @namespace   https://github.com/dodying/UserJs
+// @supportURL  https://github.com/dodying/UserJs/issues
+// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+//
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -12,20 +14,24 @@
 // @grant       GM_setClipboard
 // @grant       GM_getResourceURL
 // @grant       unsafeWindow
-// @author      Dodying
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @run-at      document-end
+//
+// @connect     dmm.co.jp
 // @connect     btdb.to
+// @connect     thepiratebay.org
 // @connect     pantsu.cat
 // @connect     nyaa.si
 // @connect     torrentz2.eu
 // @connect     btso.pw
-// @connect     javbus.com
+// @connect     tokyotosho.info
+// @connect     btku.org
+// @connect     btdiggs.com
+// @connect     seedpeer.eu
+// @connect     bitcq.com
+//
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// require     https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js
+// @require     https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
+//
 // 工具栏
 // @resource add https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519691-199_CircledPlus-128.png
 // @resource del https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/trash-128.png
@@ -45,6 +51,7 @@
 // @resource warn https://cdn2.iconfinder.com/data/icons/color-svg-vector-icons-2/512/warning_alert_attention_search-128.png
 // @resource error https://cdn2.iconfinder.com/data/icons/color-svg-vector-icons-2/512/error_warning_alert_attention-128.png
 // @resource downloading https://cdn4.iconfinder.com/data/icons/miu/24/circle-arrow_down-download-glyph-128.png
+//
 // 种子站点
 // @include     https://btso.pw/*
 // @include     https://btdb.to/*
@@ -52,54 +59,54 @@
 // 网盘
 // include     http://115.com/*
 // @include     http://115.com/?tab=offline&mode=wangpan
-// @include     http://pan.baidu.com/*
 // 正规站点
 // @include     http://www.dmm.co.jp/*
+// @include     http://www.mgstage.com/*
 // @include     http://www.tokyo-hot.com/*
 // @include     http://www.caribbeancom.com/*
 // @include     http://www.1pondo.tv/*
 // @include     http://www.heyzo.com/*
 // @include     http://cn.10musume.com/*
-// 搜索引擎
-// @include     https://www.google.co.jp/*q=*
-// @include     https://www.baidu.com/*wd=*
 // JAVLibrary
 // @include     http://www.javlibrary.com/*
 // @include     https://www.javbus.com/*
+// @include     https://javfree.me/*
+// @include     http://javdownloader.info/*
 // @include     http://javpop.com/*
-// @include     http://www.jav007.com/*
-// @include     https://avso.pw/*
-// @include     https://avmo.pw/*
+// @include     https://javpee.com/*
+// @include     https://javhip.com/*
+// @include     https://www.inoreader.com/*
 // 在线观看
 // @include     http://avpapa.co/*
 // @include     http://av99.us/*
-// @include     http://www.doojav69.com/*
-// @include     http://bejav.me/*
+// @include     http://bejav.net/*
 // @include     http://hpjav.com/*
 // @include     http://www.av539.com/*
+// @run-at      document-end
 // ==/UserScript==
 (function($) {
   var linkLib = { //待续-插入位置
     /*
-    'example.com': {
-      on: 布尔，是否开启,
-      online: 布尔，是否在线播放,
-      name: 标识,
-      search: 网站，搜索地址，搜索字样用{searchTerms}代替,
-      text: 选择器-要标记的文本,
-      img: 选择器-要标记的图片,
-      time: 选择器-发布日期,
-      code: 选择器-番号/函数-返回值为番号,
-      codeManual: 布尔，是否手动获取番号,
-      append: 选择器，搜索结果要插入的位置,
-      manual: 布尔，是否要按键后在启用脚本
-    },
+      'example.com': {
+        on: 布尔，是否开启,
+        online: 布尔，是否在线播放,
+        name: 标识,
+        search: 网站，搜索地址，搜索字样用{searchTerms}代替,
+        text: 选择器-要标记的文本,
+        img: 选择器-要标记的图片,
+        time: 选择器-发布日期,
+        code: 选择器-番号/函数-返回值为番号,
+        codeManual: 布尔，是否手动获取番号,
+        after: 选择器，搜索结果要插入的位置,
+        manual: 布尔，是否要按键后在启用脚本,
+        extra: 函数，init时执行
+      },
     */
     // 种子站点
     'btdb.to': {
       on: true,
       name: 'BTDB',
-      search: 'https://btdb.to/q/{searchTerms}/?sort=size',
+      search: 'https://btdb.to/q/{searchTerms}/?sort=popular',
       text: 'h1.torrent-name,.file-name,.item-title>a',
       code: '#search-input'
     },
@@ -123,17 +130,8 @@
       name: '115网盘',
       search: 'http://115.com/?url=%2F%3Faid%3D-1%26search_value%3D{searchTerms}%26ct%3Dfile%26ac%3Dsearch%26is_wl_tpl%3D1&mode=wangpan',
       text: '.file-name>em>a',
-      code: function() {
-        return prompt('请输入番号', $('.file-path>a:eq(-1)').text());
-      },
+      code: () => prompt('请输入番号', $('.file-path>a:eq(-1)').text()),
       codeManual: true,
-      manual: true
-    },
-    'pan.baidu.com': {
-      on: false,
-      name: '百度网盘',
-      search: 'http://pan.baidu.com/disk/home?adapt=pc&fr=ftw#search/key={searchTerms}&vmode=list',
-      text: '.filename',
       manual: true
     },
     // 正规站点
@@ -144,14 +142,58 @@
       text: '.txt,table.mg-b20 td:not(:has(a))',
       img: '.img img,.tdmm,.crs_full>img',
       time: '.nw:contains(発売日)+td',
-      code: function() {
-        var code = $('.nw:contains(品番)+td').text();
+      code() {
+        let code = $('.nw:contains(品番)+td').text();
         code = code.match(/[^h_0-9].*/)[0];
         code = code.replace(/^tk|tk$/g, '').replace(/00([0-9]{3})/, '$1').replace(/([a-z]+)([0-9]+)/, '$1-$2');
         code = code.toUpperCase();
         return prompt('请输入番号', code);
       },
-      codeManual: true
+      codeManual: true,
+      extra() {
+        let preview_src = linkLib['www.dmm.co.jp']['preview_src'];
+        $(document).on({
+          click() {
+            $('#sample-image-block>a>img').each((i, _) => {
+              _.src = preview_src(_.src);
+            });
+            $(document).off('click');
+          }
+        });
+      },
+      preview_src(src) {
+        if (src.match(/(p[a-z]\.)jpg/)) {
+          return src.replace(RegExp.$1, 'pl.');
+        } else if (src.match(/consumer_game/)) {
+          return src.replace('js-', '-');
+        } else if (src.match(/js\-([0-9]+)\.jpg$/)) {
+          return src.replace('js-', 'jp-');
+        } else if (src.match(/ts\-([0-9]+)\.jpg$/)) {
+          return src.replace('ts-', 'tl-');
+        } else if (src.match(/(\-[0-9]+\.)jpg$/)) {
+          return src.replace(RegExp.$1, 'jp' + RegExp.$1);
+        } else {
+          return src.replace('-', 'jp-');
+        }
+      }
+    },
+    'www.mgstage.com': {
+      on: false,
+      name: 'mgstage',
+      search: 'https://www.google.com/search?q=site%3Amgstage.com+{searchTerms}',
+      text: '.detail_data tr:contains("品番")>td,.detail_txt>li:contains("品番")',
+      img: '.detail_data img,.sample_image img,.push_title_list img',
+      time: '.detail_data tr:contains("配信開始日")>td',
+      code() {
+        let arr = location.href.split('/');
+        return arr[arr.length - 2];
+      },
+      extra() {
+        $('<style></style>').text('#sample-photo li{float:none!important;}').appendTo('head');
+        $('.sample_image').each((i, _) => {
+          $(_).html(`<img src="${$(_).attr('href')}">`).removeAttr('href').off('click');
+        });
+      }
     },
     'www.tokyo-hot.com': {
       on: false,
@@ -168,9 +210,7 @@
       search: 'http://www.caribbeancom.com/moviepages/{searchTerms}/index.html',
       img: 'img[itemprop=thumbnail]',
       time: 'dd[itemprop=uploadDate]',
-      code: function() {
-        return location.pathname.match(/[\d\-]+/)[0];
-      }
+      code: () => location.pathname.match(/[\d\-]+/)[0]
     },
     'www.1pondo.tv': {
       on: false,
@@ -178,9 +218,7 @@
       search: 'http://www.1pondo.tv/movies/{searchTerms}/',
       img: '.figure>img,.ng-scope>a>img,img.ng-scope',
       time: 'dd.ng-binding:eq(1)',
-      code: function() {
-        return location.pathname.match(/[\d\_]+/)[0];
-      },
+      code: () => location.pathname.match(/[\d\_]+/)[0],
       manual: true
     },
     'www.heyzo.com': {
@@ -189,9 +227,7 @@
       search: 'http://www.heyzo.com/search/{searchTerms}/1.html?sort=pop',
       //img: '.soundplay>img,.sample-images img,.relateive-movie img,.ranking-img>img,.withInfo>img,.new-movies>img,.actor>img',
       time: '.dataInfo:eq(0)',
-      code: function() {
-        return 'HEYZO-' + location.pathname.match(/\d+/)[0];
-      }
+      code: () => 'HEYZO-' + location.pathname.match(/\d+/)[0]
     },
     'cn.10musume.com': {
       on: false,
@@ -199,26 +235,7 @@
       search: 'http://cn.10musume.com/cn/moviepages/{searchTerms}/index.html',
       img: 'img',
       time: '#movie-table1:eq(5)',
-      code: function() {
-        return location.pathname.match(/[\d\_]+/)[0];
-      }
-    },
-    // 搜索引擎
-    'www.google.co.jp': {
-      on: false,
-      name: 'Google',
-      search: 'https://www.google.co.jp/search?q={searchTerms}',
-      text: 'h3.r>a,span.st',
-      code: '#lst-ib',
-      manual: true
-    },
-    'www.baidu.com': {
-      on: false,
-      name: 'Baidu',
-      search: 'https://www.baidu.com/baidu?wd={searchTerms}',
-      text: 'h3.t>a,.c-abstract',
-      code: '#kw',
-      manual: true
+      code: () => location.pathname.match(/[\d\_]+/)[0]
     },
     // JAVLibrary
     'www.javlibrary.com': {
@@ -229,7 +246,34 @@
       img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a',
       time: '.text:eq(2)',
       code: '#video_id .text',
-      append: '#video_favorite_edit'
+      after: '#video_favorite_edit',
+      extra() {
+        let code = $('#video_jacket_img').attr('src').match(/http:\/\/pics.dmm.co.jp\/mono\/movie\/adult\/(.*?)\/(.*?)pl\.jpg/)[1];
+        let url = `http://www.dmm.co.jp/mono/dvd/-/detail/=/cid=${code}/`;
+        $('#video_jacket_img').wrap(() => `<a target="_blank" href="${url}"></a>`);
+        let preview_src = linkLib['www.dmm.co.jp']['preview_src'];
+        if ($('.previewthumbs').length) {
+          $('.previewthumbs>img').each((i, _) => {
+            if ($(_).attr('src').match('//pics.dmm.co.jp')) $(_).attr('src', preview_src($(_).attr('src'))).removeAttr('width').removeAttr('height').attr('style', 'margin:2px 0;');
+          })
+        } else {
+          $('#video_jacket').one('click', e => {
+            e.preventDefault();
+            GM_xmlhttpRequest({
+              method: 'GET',
+              url: url,
+              timeout: 30 * 1000,
+              onload(res) {
+                let data = res.response;
+                if ($('#sample-image-block>a>img', data).length) {
+                  let img = $('#sample-image-block>a>img', data).toArray().map(i => `<img src="${preview_src(i.src)}" style="margin:2px 0;">`).join('');
+                  $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia');
+                }
+              }
+            });
+          });
+        }
+      }
     },
     'www.javbus.com': {
       on: true,
@@ -237,7 +281,27 @@
       search: 'https://www.javbus.com/{searchTerms}',
       text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,date',
       time: '.info>p:eq(1)',
-      code: '.info>p>span:eq(1)'
+      code: '.info>p>span:eq(1)',
+      after: '.row.movie'
+    },
+    'javfree.me': {
+      on: false,
+      name: 'Free JAV Share',
+      search: 'https://javfree.me/?s={searchTerms}',
+      text: 'h1.entry-title,h2.entry-title>a,.entry-wrap>a',
+      img: '.entry-content img,.thumbnail-wrap>img',
+      time: '.post-author',
+      code: () => $('h1.entry-title').text().replace('[HD]', '').match(/\[(.*?)\]/)[1],
+      after: 'article'
+    },
+    'javdownloader.info': {
+      on: false,
+      name: 'javdownloader',
+      search: 'http://javdownloader.info/?s={searchTerms}',
+      text: '.title,.wp_rp_title,#nav-below a,.widget_recent_entries a',
+      img: '.entry img',
+      code: () => $('.title').text().replace('[HD]', '').match(/\[(.*?)\]/)[1],
+      after: '.post-info-bottom'
     },
     'javpop.com': {
       on: false,
@@ -245,36 +309,34 @@
       search: 'http://javpop.com/index.php?s={searchTerms}',
       text: '.thumb_post a:nth-child(2),h1',
       img: '.thumb_post img,.box-b img',
-      code: function() {
-        return $('h1').text().match(/\[(.*?)\]/)[1];
-      }
+      code: () => $('h1').text().match(/\[(.*?)\]/)[1],
+      after: '.box-b>h1'
     },
-    'www.jav007.com': {
-      on: false,
-      name: 'Jav007',
-      search: 'http://www.jav007.com/searchpage.php?a=1&code={searchTerms}',
-      text: '.viewimfor>li:eq(8),.view-code',
-      img: '.photo,.cell>a>img',
-      time: '.viewimfor>li:eq(1)',
-      code: '.viewimfor>li:eq(8)'
-    },
-    'avso.pw': {
+    'javpee.com': {
       on: false,
       name: 'AVSOX',
-      search: 'https://avso.pw/cn/search/{searchTerms}',
+      search: 'https://javpee.com/cn/search/{searchTerms}',
       text: 'date,h3',
       img: '.photo-frame>img,.bigImage>img',
       time: '.info>p:eq(1)',
-      code: '.info>p>span:eq(1)'
+      code: '.info>p>span:eq(1)',
+      after: '.row.movie'
     },
-    'avmo.pw': {
+    'javhip.com': {
       on: false,
       name: 'AVMOO',
-      search: 'https://avmo.pw/cn/search/{searchTerms}',
+      search: 'https://javhip.com/cn/search/{searchTerms}',
       text: 'date,h3',
       img: '.photo-frame>img,.bigImage>img',
       time: '.info>p:eq(1)',
-      code: '.info>p>span:eq(1)'
+      code: '.info>p>span:eq(1)',
+      after: '.row.movie'
+    },
+    'www.inoreader.com': {
+      on: false,
+      name: 'Inoreader',
+      search: 'https://www.inoreader.com/search/{searchTerms}',
+      text: '.article_title_link,.article_header_title'
     },
     // 在线观看
     'avpapa.co': {
@@ -284,9 +346,7 @@
       search: 'http://avpapa.co/search?q={searchTerms}',
       text: '.tit,h4',
       img: '.thumbs>a>img,#click_to_show>img',
-      code: function() {
-        return $('h4').text().match(/^\[(.*?)\]/)[1];
-      }
+      code: () => $('h4').text().match(/^\[(.*?)\]/)[1]
     },
     'av99.us': {
       on: false,
@@ -296,30 +356,16 @@
       text: 'h1,.list>li>a,.dd>a,.fl>a>span',
       img: '.pic>a>img',
       time: '.viewimfor>li:eq(1)',
-      code: function() {
-        return $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/)[1];
-      }
+      code: () => $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/)[1]
     },
-    'www.doojav69.com': {
-      on: false,
-      online: true,
-      name: 'Doojav69',
-      search: 'http://www.doojav69.com/?s={searchTerms}',
-      text: 'h2.entry-title>a,h1.entry-title',
-      code: function() {
-        return $('h1.entry-title').text().match(/(.*?) (.*?)/)[1];
-      }
-    },
-    'bejav.me': {
+    'bejav.net': {
       on: false,
       online: true,
       name: 'BeJav.Me',
-      search: 'http://bejav.me/search/{searchTerms}/',
+      search: 'http://bejav.net/search/{searchTerms}/',
       text: '.name>a,.breadcrumb_last,.body>ul>li>a',
       img: '.img-responsive,.thumbnail>img,.body>ul>li>img',
-      code: function() {
-        return prompt('请输入番号', $('.breadcrumb_last').text());
-      },
+      code: () => prompt('请输入番号', $('.breadcrumb_last').text()),
       codeManual: true
     },
     'hpjav.com': {
@@ -328,9 +374,7 @@
       name: 'HPJAV',
       search: 'http://hpjav.com/tw/?s={searchTerms}',
       text: '.entry-title a,h1,.current',
-      code: function() {
-        return prompt('请输入番号', $('.current').text().match(/(.*?) (.*?)/)[1]);
-      },
+      code: () => prompt('请输入番号', $('.current').text().match(/(.*?) (.*?)/)[1]),
       codeManual: true
     },
   };
@@ -341,9 +385,24 @@
       magnet: '.magnet',
       size: '.item-meta-info>span:nth-child(2)',
       time: '.item-meta-info>span:nth-child(4)',
+      sort: '.toolbar',
       page: '.pagination',
       more: {
         Popularity: '.item-meta-info>span:nth-child(5)'
+      }
+    },
+    'thepiratebay.org': {
+      searchPage: 'https://thepiratebay.org/search/{q}/0/1/0',
+      title: '.vertTh+td>a',
+      magnet: 'nobr>a:nth-child(1)',
+      size: '.vertTh+td+td+td+td',
+      time: '.vertTh+td+td',
+      sort: data => $('.header a', data).toArray().filter(i => i.href.match('/search/')).map(i => i.outerHTML).join(' / '),
+      page: '#content>[align="center"]',
+      more: {
+        Type: '.vertTh>a',
+        SE: '.vertTh+td+td+td+td+td',
+        LE: '.vertTh+td+td+td+td+td+td',
       }
     },
     'sukebei.pantsu.cat': {
@@ -353,7 +412,9 @@
       size: '.torrent-info>.tr-size',
       time: '.torrent-info>.tr-date',
       page: '#sort-list-order+.pagination',
+      sort: data => $('#sort-list-order td>*', data).toArray().map(i => i.outerHTML).join(' / '),
       more: {
+        File: (data, lib) => $('.tr-links>a:nth-child(2)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'), lib.searchPage).href}" target="blank">File</a>`),
         S: '.torrent-info>.tr-se',
         L: '.torrent-info>.tr-le',
         D: '.torrent-info>.tr-dl'
@@ -362,11 +423,13 @@
     'sukebei.nyaa.si': {
       searchPage: 'https://sukebei.nyaa.si/?q={q}',
       title: '.default>td:nth-child(2)>a',
-      magnet: '.default>td:nth-child(3)>a:nth-child(2)',
+      magnet: '.default>td:nth-child(3)>a[href^="magnet"]',
       size: '.default>td:nth-child(4)',
       time: '.default>td:nth-child(5)',
       page: '.pagination',
+      sort: data => $('.table-responsive thead>tr>th>a', data).toArray().map(i => i.outerHTML.replace('</a>', $(i).attr('href').match(/s=(.*?)&/)[1] + '</a>')).join(' / '),
       more: {
+        File: (data, lib) => $('.default>.text-center>a:nth-child(1)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'),lib.searchPage).href}" target="blank">File</a>`),
         S: '.default>td:nth-child(6)',
         L: '.default>td:nth-child(7)',
         D: '.default>td:nth-child(8)'
@@ -375,14 +438,11 @@
     'torrentz2.eu': {
       searchPage: 'https://torrentz2.eu/search?f={q}',
       title: '.results>dl>dt>a',
-      magnet: function(data) {
-        return $('.results>dl>dt>a', data).toArray().map(function(i) {
-          return 'magnet:?xt=urn:btih:' + i.getAttribute('href').match(/\/(.*)/)[1].toUpperCase();
-        });
-      },
+      magnet: data => $('.results>dl>dt>a', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.getAttribute('href').match(/\/(.*)/)[1].toUpperCase()),
       size: '.results>dl>dd>span:nth-child(3)',
       time: '.results>dl>dd>span:nth-child(2)',
       page: '.results>p>span',
+      sort: '.results>div',
       more: {
         seeder: '.results>dl>dd>span:nth-child(4)',
         rating: '.results>dl>dd>span:nth-child(5)'
@@ -391,43 +451,107 @@
     'btso.pw': {
       searchPage: 'https://btso.pw/search/{q}/',
       title: '.data-list>.row>a',
-      magnet: function(data) {
-        return $('.data-list>.row>a', data).toArray().map(function(i) {
-          return 'magnet:?xt=urn:btih:' + i.href.match(/hash\/(.*)/)[1].toUpperCase();
-        });
-      },
+      magnet: data => $('.data-list>.row>a', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.href.match(/hash\/(.*)/)[1].toUpperCase()),
       size: '.size',
       time: '.date',
       page: '.pagination'
-    }
+    },
+    'tokyotosho.info': {
+      searchPage: 'https://www.tokyotosho.info/search.php?terms={q}',
+      title: 'a[type="application/x-bittorrent"]',
+      magnet: '.desc-top>a[href^="magnet"]',
+      size: data => $('.desc-bot', data).toArray().map(i => i.textContent.match(/Size: (.*?) /)[1]),
+      time: data => $('.desc-bot', data).toArray().map(i => i.textContent.match(/Date: (.*? UTC)/)[1]),
+      page: '.listing+p+p',
+      more: {
+        Website: data => $('.category_0>.web', data).toArray().map(i => $(i).find('a:contains("Website")').length ? $(i).find('a:contains("Website")')[0].outerHTML : ''),
+        Details: '.web>a:contains("Details")',
+        S: '.stats>span:nth-child(1)',
+        L: '.stats>span:nth-child(2)',
+        C: '.stats>span:nth-child(3)'
+      }
+    },
+    'btku.org': {
+      searchPage: 'https://btku.org/q/{q}/',
+      title: '.results>h2>a',
+      magnet: '.downLink>a[href^="magnet"]',
+      size: '.resultsIntroduction>label:nth-child(4)',
+      time: '.resultsIntroduction>label:nth-child(8)',
+      page: '#nextPage',
+      sort: '#bar-sort',
+      more: {
+        Hot: '.resultsIntroduction>label:nth-child(6)',
+        Files: '.resultsIntroduction>label:nth-child(2)'
+      }
+    },
+    'btdiggs.com': {
+      searchPage: code => `http://btdiggs.com/search/${btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))).replace(/[=]+$/g,'')}/1/0/0.html`,
+      title: '.list>dl>dt>a',
+      magnet: '.list>dl>dd.attr>span>a',
+      size: '.list>dl>dd.attr>span:nth-child(2)>b',
+      time: '.list>dl>dd.attr>span:nth-child(1)>b',
+      page: '.page-split',
+      sort: data => $('.category>a,.sorted-by>a', data).toArray().map(i => i.outerHTML).join(' / '),
+      more: {
+        Files: '.list>dl>dd.attr>span:nth-child(3)>b',
+        Speed: '.list>dl>dd.attr>span:nth-child(4)>b',
+        Hot: '.list>dl>dd.attr>span:nth-child(5)>b'
+      }
+    },
+    'seedpeer.eu': {
+      searchPage: 'https://www.seedpeer.eu/search/{q}',
+      title: '.table a[href]',
+      magnet: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => 'magnet:?xt=urn:btih:' + i.hash),
+      size: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => parseInt(i.size / 1024 / 1024) + 'Mb'),
+      time: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.createdAt),
+      page: data => new Array(JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.pages).fill(1).map((_, i) => `<a href="?page=${i+1}">${i+1}</a>`).join(''),
+      more: {
+        Seeds: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.seeds),
+        Peers: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.peers),
+        Health: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.ratio)
+      }
+    },
+    'bitcq.com': {
+      searchPage: 'https://bitcq.com/search?q={q}',
+      title: '.table-hover tr>td:nth-child(2)>a',
+      magnet: '.table-hover tr>td:nth-child(1)>a[href^="magnet"]',
+      size: '.table-hover tr>td:nth-child(4)',
+      time: '',
+      page: '.pagination',
+      more: {
+        Type: '.table-hover tr>td:nth-child(3)>.label',
+        Peers: '.table-hover tr>td:nth-child(5)',
+      }
+    },
   };
   var m2tLib = [
     'http://btcache.me/torrent/{hash}',
+    'http://storetorrents.com/hash/{hash}',
+    'https://itorrents.org/torrent/{hash}.torrent',
     'https://torrage.info/torrent.php?h={hash}',
-    'https://sukebei.pantsu.cat/download/{hash}',
-    'https://www.seedpeer.eu/torrent/{hash}',
-    'https://savebt.org/torrent/{hash}.html'
+    'https://www.seedpeer.eu/torrent/{hashLow}'
   ];
   var markLib = [
     { //0
       name: '等待中',
       color: 'gray'
-  }, { //1
+    }, { //1
       name: '有种子无配额',
       color: 'gray'
-  }, { //2
+    }, { //2
       name: '下载中',
       color: 'blue'
-  }, { //3
+    }, { //3
       name: '已下-骑兵',
       color: 'green'
-  }, { //4
+    }, { //4
       name: '已下-步兵',
       color: 'green'
-  }, { //5
+    }, { //5
       name: '已删-不喜欢的',
       color: 'black'
-  }, ];
+    }
+  ];
   if (linkLib[location.host].manual) {
     $(window).on('keydown', function(e) {
       if (e.keyCode === 65 && e.shiftKey) { //Shift+A
@@ -443,6 +567,7 @@
   function _init() {
     init();
     getCode(true);
+    if (linkLib[location.host]['extra']) linkLib[location.host]['extra']();
     markAdded();
   }
 
@@ -466,16 +591,22 @@
         '.hasCode>a{margin:1px;padding:0 1px;display:none;}',
         '.hasCode,.hasCode>*{line-height:normal;}',
         '.showTable{background-color:#F2F2F2;position:absolute;top:80px;z-index:999998;}',
-        '.showTable>table,.hSearch{border-collapse:collapse;margin:0 auto;color:#666666;font-size:13px;text-align:center;background-color:#FFF;}',
+        '.showTable>table,.hSearch{border-collapse:collapse;margin:0 auto;color:#666666;font-size:13px;text-align:center;background-color:#FFF;text-transform:capitalize;}',
         '.showTable tr:nth-child(2n),.hSearch tr:nth-child(2n){background-color:#F2F2F2;}',
-        '.showTable td,.showTable th,.hSearch th,.hSearch td{border:1px solid black;max-width:400px;}',
-        '.hSearch td>*{margin:0 1px;}',
+        '.showTable td,.showTable th,.hSearch th,.hSearch td{border:1px solid black;max-width:400px;padding:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+        '.hSearch td>*{margin:0 1px;height:auto;line-height:normal;}',
+        '.hSearch img{width:16px;position:relative;top:2px;}',
+        '.hSearch button{cursor:pointer;}',
         '.hSearchPage>td *{padding:0 1px;}',
         '.hSearchPage>td>*{display:inline;}',
         '.hSearchPage>td>*.active{font-weight:bolder;}',
         '.hSearchPage>td>*.active *{color:gray;}',
         //
-        '.fa-file-video-o{background-color:yellow;color:yellow;}'
+        '.fa-file-video-o{background-color:yellow;color:yellow;}',
+        '.tablesorter-header{background-image:url(data:image/gif;base64,R0lGODlhFQAJAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAkAAAIXjI+AywnaYnhUMoqt3gZXPmVg94yJVQAAOw==);background-repeat:no-repeat;background-position:center right;padding:0 18px 0 4px!important;cursor:pointer;}',
+        '.tablesorter-headerAsc{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);}',
+        '.tablesorter-headerDesc{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);}',
+        '.sorter-false{background:none;cursor:default;}'
         ];
       return style.concat(mark, markImg).join('');
     });
@@ -538,7 +669,7 @@
         if (!linkLib[i].on || i === location.host) continue;
         _html += '<img ';
         if (linkLib[i].online) _html += 'class="avOnline"';
-        _html += 'src="https://www.google.com/s2/favicons?domain=' + i + '"url="' + linkLib[i].search + '"title="' + linkLib[i].name + '"></img>';
+        _html += 'src="https://www.google.com/s2/favicons?domain=' + i + '"url="' + linkLib[i].search + '"title="' + linkLib[i].name + '">';
       }
       return _html;
     }).on({
@@ -563,16 +694,16 @@
         $(this).attr('src', $(this).attr('rawSrc'));
       }
     });
-    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + GM_getResourceURL('add') + '"></img>').click(function() {
+    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + GM_getResourceURL('add') + '">').click(function() {
       addValue(GM_getValue('lastMark', 0));
     }).appendTo('.hBanner');
-    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + GM_getResourceURL('del') + '"></img>').click(function() {
+    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + GM_getResourceURL('del') + '">').click(function() {
       delValue();
     }).appendTo('.hBanner');
-    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + GM_getResourceURL('import') + '"></img>').click(function() {
+    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + GM_getResourceURL('import') + '">').click(function() {
       importValue();
     }).appendTo('.hBanner');
-    $('<div title="左键:数据库展示\n右键:下载数据库(网页格式)"></div>').html('<img src="' + GM_getResourceURL('table') + '"></img>').on({
+    $('<div title="左键:数据库展示\n右键:下载数据库(网页格式)"></div>').html('<img src="' + GM_getResourceURL('table') + '">').on({
       click: function() {
         showValue(0);
         $(this).off('click').on('click', function() {
@@ -584,7 +715,7 @@
         showValue(1);
       }
     }).appendTo('.hBanner');
-    $('<div title="重启"></div>').html('<img src="' + GM_getResourceURL('restart') + '"></img>').click(function() {
+    $('<div title="重启"></div>').html('<img src="' + GM_getResourceURL('restart') + '">').click(function() {
       $('.hBanner').remove();
       undoMarkAdded();
       $(window).removeData('code');
@@ -593,7 +724,7 @@
     }).appendTo('.hBanner');
     $('<div class="hasCode">Marked: </div>').appendTo('.hBanner');
     for (var i = 0; i < markLib.length; i++) {
-      $('<img src="' + GM_getResourceURL('mark' + i) + '"title="' + i + '|' + markLib[i].name + '"></img>').val(i).click(function() {
+      $('<img src="' + GM_getResourceURL('mark' + i) + '"title="' + i + '|' + markLib[i].name + '">').val(i).click(function() {
         addValue($(this).val());
       }).appendTo('.addCode');
     }
@@ -655,7 +786,7 @@
     });
   }
 
-  function addValue(mark, code = undefined) { //可选参数code
+  function addValue(mark, code = undefined) {
     mark = parseInt(mark);
     if (mark >= markLib.length) {
       alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
@@ -674,7 +805,7 @@
     markAdded();
   }
 
-  function delValue(code = undefined) { //可选参数code
+  function delValue(code = undefined) {
     var lib = GM_getValue('lib', null);
     if (!lib) return;
     code = code || getCode();
@@ -721,7 +852,7 @@
     var num = 0;
     for (var i in lib) {
       num++;
-      _html += '<tr><td>' + num + '</td><td>' + lib[i].mark + '</td><td><img class="hMarkImg_' + lib[i].mark + '"></img>' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].time || '') + '</td></tr>';
+      _html += '<tr><td>' + num + '</td><td>' + lib[i].mark + '</td><td><img class="hMarkImg_' + lib[i].mark + '">' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].time || '') + '</td></tr>';
     }
     _html += '</tbody></table>';
     if (type === 0) {
@@ -748,14 +879,14 @@
     }
     code = code.toUpperCase();
     $(window).data('code', code);
-    if (code) getMagnet(code);
+    if (code) getMagnet(code, undefined, GM_getValue('lastSearch', undefined));
     return code;
   }
 
   function getMagnet(code, page = undefined, searchUrl = Object.keys(magnetLib)[0]) {
     var lib = magnetLib[searchUrl];
-    var searchPage = lib.searchPage.replace('{q}', encodeURIComponent(code));
-    var url = page === undefined ? searchPage : page.match(/^\//) ? searchPage.match(/(http.*?:\/\/.*?)\//)[1] + page : searchPage.match(/.*\//) + page;
+    var searchPage = typeof lib.searchPage === 'string' ? lib.searchPage.replace('{q}', encodeURIComponent(code)) : lib.searchPage(code);
+    var url = page ? new URL(page, searchPage).href : searchPage;
     var codeArr = code.split('-');
     var expArr = [];
     for (var i = 0; i < codeArr.length; i++) {
@@ -764,49 +895,112 @@
     GM_xmlhttpRequest({
       method: 'GET',
       url: url,
-      onload: function(response) {
-        var data = response.response;
-        var title = $(lib.title, data);
-        var magnet = typeof lib.magnet === 'string' ? $(lib.magnet, data).toArray().map(i => i.href) : lib.magnet(data);
-        var hash = magnet.map(i => i.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toUpperCase());
-        var size = $(lib.size, data);
-        var time = $(lib.time, data);
+      timeout: 30 * 1000,
+      onload(res) {
+        let data = res.response;
+        let info = {};
+        console.log(url, info);
+        for (let i in lib) { //获取信息
+          if (['searchPage', 'more'].includes(i)) continue;
+          if (typeof lib[i] === 'string') {
+            info[i] = $(lib[i], data).toArray().map(j => {
+              if (i === 'title') {
+                return j;
+              } else if (['sort', 'page'].includes(i)) {
+                return j.innerHTML.replace(/<(|\/)(td|th)>/g, '<$1span>');
+              } else if (i === 'magnet') {
+                return j.href;
+              } else {
+                return j.textContent;
+              }
+            });
+          } else {
+            info[i] = lib[i](data);
+          }
+        }
+        let hash = info['magnet'].map(i => i.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toUpperCase());
+        if (lib['more']) {
+          info['more'] = {};
+          for (let i in lib['more']) {
+            info['more'][i] = typeof lib['more'][i] === 'string' ? $(lib['more'][i], data).toArray().map(i => i.outerHTML.replace(/<(|\/)(td|th)( |>)/g, '<$1span$3')) : lib['more'][i](data, lib);
+          }
+        }
         $('.hSearch').remove();
-        $('<table class="hSearch"></table>').html('<thead><tr><th><select><option>' + Object.keys(magnetLib).join('</option><option>') + '</option></select></th><th><a href="' + url + '" target="_blank">大小</a></th><th>时间</th><th>下载种子</th><th>操作</th></tr></thead><tbody></tbody>').insertAfter(linkLib[location.host].append || 'body>:eq(-1)');
-        var name, downloadHTML;
-        for (var i = 0; i < title.length; i++) {
-          name = title[i].title || title[i].textContent;
-          for (var j = 0; j < codeArr.length; j++) {
+        $('<table class="hSearch"></table>').insertAfter(linkLib[location.host].after || 'body>:eq(-1)').html(`
+          <thead><tr>
+            <th><a href="${url}" target="_blank">#</a></th>
+            <th data-sorter="false"><img src="//www.google.com/s2/favicons?domain=${new URL(url).host}"><select><option>${Object.keys(magnetLib).join('</option><option>')}</option></select></th>
+            <th>大小</th>
+            <th>时间</th>
+            ${lib['more'] ? '<th>' + Object.keys(lib['more']).join('</th><th>') + '</th>' : ''}
+            <th data-sorter="false">下载种子</th>
+            <th data-sorter="false">操作</th>
+            </tr></thead>
+          <tbody></tbody>
+          `);
+        for (let i = 0; i < info['title'].length; i++) {
+          let name = info['title'][i].title || info['title'][i].textContent;
+          for (let j = 0; j < codeArr.length; j++) {
             name = name.replace(expArr[j], '<b>' + codeArr[j] + '</b>');
           }
-          downloadHTML = m2tLib.map((i1, i2) => '<a href="' + i1.replace('{hash}', hash[i]) + '" target="_blank">' + i2 + '</a>');
-          $('<tr></tr>').appendTo('.hSearch>tbody').html('<td><a href="' + magnet[i] + '">' + name + '</a></td><td><a href="' + searchPage.match(/(http.*?:\/\/.*?)\//)[1] + title[i].pathname + '" target="_blank">' + size[i].textContent + '</a></td><td>' + time[i].textContent + '</td><td>' + downloadHTML.join('') + '</td><td><button class="hSearchCopy">复制</button><button class="hMagnet_115">115</button></td>');
+          let downloadHTML = m2tLib.map(j => `<a href="${j.replace('{hash}', hash[i]).replace('{hashLow}', hash[i].toLowerCase())}" target="_blank"><img src="//www.google.com/s2/favicons?domain=${new URL(j).host}"></a>`).join('');
+          $('<tr></tr>').appendTo('.hSearch>tbody').html(`
+            <td>${i + 1}</td>
+            <td><a href="${info['magnet'][i]}">${name}</a></td>
+            <td><a href="${new URL(info['title'][i].pathname, searchPage).href}" target="_blank">${info['size'][i]}</a></td>
+            <td>${info['time'][i]}</td>
+            ${lib['more'] ? '<td>' + Object.keys(lib['more']).map(j => info['more'][j][i]).join('</td><td>') + '</td>' : ''}
+            <td>${downloadHTML}</td>
+            <td>
+              <button class="hSearchCopy">复制</button>
+              <a href class="hMagnet_115"><img src="//115.com/favicon.ico"></a>
+              <a href="https://d.miwifi.com/d2r/?url=${btoa(info['magnet'][i])}" target="_blank"><img src="//d.miwifi.com/favicon.ico"></a>
+              <a href="https://m.zbigz.com/startcache?url=${encodeURIComponent(info['magnet'][i])}" target="_blank"><img src="//zbigz.com/img/favicon.ico"></a>
+              </td>
+            `);
         }
-        //$('.hSearch').tablesorter();
+        $('.hSearch').tablesorter();
+        //按钮
         $('.hSearchCopy').on('click', function(e) {
-          var target = $(e.target).parents('tr').find('td>a')[0];
+          let target = $(e.target).parents('tr').find('td>a')[0];
           setNotice(target.innerText, target.href);
           GM_setClipboard(target.href);
         });
         $('.hMagnet_115').on('click', function(e) {
-          var target = $(e.target).parents('tr').find('td>a')[0];
+          let target = $(e.target).parents('tr').find('td>a')[0];
           GM_setValue('link', target.href);
           GM_setValue('name', target.innerText);
           addValue(2);
         });
-        if (title.length === 0) $('<tr></tr>').appendTo('.hSearch>tbody').html('<td colspan="5">No search result</td>');
-        if ($(lib.page, data).html() !== undefined) {
-          $('<tfoot></tfoot>').appendTo('.hSearch').html('<tr class="hSearchPage"><td colspan="5">' + $(lib.page, data).html() + '</td></tr>');
-          $('.hSearchPage a').click(function(e) {
-            e.preventDefault();
-            getMagnet(getCode(), e.target.getAttribute('href'), searchUrl);
-          });
+
+        let colspan = lib['more'] ? Object.keys(lib['more']).length + 6 : 6;
+        if (info['title'].length === 0) { //无搜索结果
+          $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${colspan}">No search result</td>`);
+        } else if (info['sort']) { //排序
+          $('<tr class="hSearchSort"></tr>').appendTo('.hSearch>thead').html(`<td colspan="${colspan}">${info['sort']}</td>`);
         }
+        //翻页
+        if (info['page']) $('<tfoot></tfoot>').appendTo('.hSearch').html(`<tr class="hSearchPage"><td colspan="${colspan}">${info['page']}</td></tr>`);
+        //排序翻页事件
+        $('.hSearchSort a,.hSearchPage a').click(e => {
+          e.preventDefault();
+          let target = e.target;
+          if (!$(target).is('a')) target = $(target).parents().filter('a')[0];
+          getMagnet(getCode(), $(target).attr('href'), searchUrl);
+        });
+        //选择其他站点
         $('.hSearch th select').on({
           change: function() {
             getMagnet(getCode(), undefined, this.value);
+            GM_setValue('lastSearch', this.value);
           }
-        }).find(':contains(' + searchUrl + ')')[0].selected = true;
+        }).find(`:contains(${searchUrl})`)[0].selected = true;
+      },
+      onerror() {
+        $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load<a href="${url}" target="_blank">${url}</a> Error</td>`);
+      },
+      ontimeout() {
+        $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load <a href="${url}" target="_blank">${url}</a> Timeout</td>`);
       }
     });
   }
