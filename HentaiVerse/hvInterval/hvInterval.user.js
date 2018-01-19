@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [HV]Interval
-// @description 更新: 当回执信息非ABC时(发生错误)，不填充答案
+// @description 更新: 战役外报错
 // @author      Dodying
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
@@ -26,10 +26,12 @@
         }
       }
     });
-  } else if (/Time Bonus/.test($('#textlog').textContent)) {
-    logResult('True');
-  } else if (/You lose \d+ Stamina/.test($('#textlog').textContent)) {
-    logResult('False');
+  } else if ($('#textlog').textContent) {
+    if (/Time Bonus/.test($('#textlog').textContent)) {
+      logResult('True');
+    } else if (/You lose \d+ Stamina/.test($('#textlog').textContent)) {
+      logResult('False');
+    }
   }
 
   function $(e) {
