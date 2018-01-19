@@ -1,19 +1,16 @@
 // ==UserScript==
 // @name        [H]CopyInfo
-// @name:zh-CN  [H]复制信息
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @description:zh-CN
+// @version     1.01.2
+// @author      dodying
+// @namespace   https://github.com/dodying/UserJs
+// @supportURL  https://github.com/dodying/UserJs/issues
+// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include     http*://www.javlibrary.com/*
 // @include     http*://www.javbus.com/*
 // @include     http*://www.caribbeancom.com/moviepages/*
 // @include     http*://www.caribbeancompr.com/moviepages/*
-// @version     1.01.1
 // @grant       GM_setClipboard
-// @author      Dodying
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 (function() {
@@ -45,7 +42,6 @@
       name: 'h3',
       star: '.star-show~p:eq(0)>.genre>a',
       genre: '.header:contains(類別)~p:eq(0)>.genre>a',
-      score: '',
       length: '.info>p:eq(2)'
     },
     'www.caribbeancompr.com': {
@@ -55,7 +51,6 @@
       name: '.video-detail>h1',
       star: '.movie-info>dl:contains("出演") a',
       genre: '.movie-info-cat>dd>a',
-      score: '',
       length: function() {
         var time = $('.movie-info>dl:contains("再生時間")>dd').text();
         time = new Date('1970-01-01 ' + time + ' GMT+000').getTime();
@@ -69,7 +64,6 @@
       name: '.video-detail>h1',
       star: '.movie-info>dl:contains("出演") a',
       genre: '.movie-info-cat>dd>a',
-      score: '',
       length: function() {
         var time = $('.movie-info>dl:contains("再生時間")>dd').text();
         time = new Date('1970-01-01 ' + time + ' GMT+000').getTime();
@@ -107,7 +101,7 @@
     genres.join(' '), //genre
   ];
   if (!info[0]) return;
-  if (typeof rule.score === 'string' && $(rule.score).length > 0) { //score
+  if (typeof rule.score === 'string') { //score
     info.push($(rule.score).text() ? $(rule.score).text().match(/[\d\.]+/)[0] : '');
   }
   if (typeof rule.length === 'string' && $(rule.length).length > 0) { //length
