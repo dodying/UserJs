@@ -5,19 +5,19 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
+// @version      2.88.3
+// @author       dodying
+// @namespace    https://github.com/dodying/
+// @supportURL   https://github.com/dodying/UserJs/issues
+// @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include      http*://hentaiverse.org/*
 // @include      http://alt.hentaiverse.org/*
 // @include      https://e-hentai.org/news.php?encounter
 // @exclude      http*://hentaiverse.org/pages/showequip.php?*
 // @exclude      http://alt.hentaiverse.org/pages/showequip.php?*
-// @author       dodying
-// @namespace    https://github.com/dodying/
-// @supportURL   https://github.com/dodying/UserJs/issues
-// @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @version      2.88.2
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
-// @compatible   Android + Firefox + Usi
+// @compatible   Android + Firefox + Usi/Tampermonkey
 // @compatible   Other + Bookmarklet
 // @grant        unsafeWindow
 // @run-at       document-end
@@ -1340,8 +1340,10 @@ function checkCondition(parms) {
       }
     }
   };
+
   for (i in parms) {
     for (j = 0; j < parms[i].length; j++) {
+      if (!(parms[i] instanceof Array)) continue;
       k = parms[i][j].split(',');
       k[0] = returnValue(k[0]);
       k[2] = returnValue(k[2]);
@@ -1373,6 +1375,9 @@ function checkCondition(parms) {
 }
 //答题//
 function riddleAlert() { //答题警报
+  gE('#riddleanswer+img').onclick = function (){
+    riddleSubmit(gE('#riddleanswer').value);
+  };
   setAlarm('Riddle');
   var answers = ['A', 'B', 'C'];
   document.onkeydown = function(e) {
