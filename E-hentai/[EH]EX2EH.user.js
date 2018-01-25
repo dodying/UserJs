@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name        [EH]EX2EH
-// @version     1.01
+// @name        ExHentai2E-Hantai
+// @description 已整合到[EH]Enhance
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -9,30 +9,22 @@
 // @include     https://e-hentai.org/g/*
 // @exclude     https://exhentai.org/g/*/?p=*
 // @exclude     https://e-hentai.org/g/*/?p=*
+// @version     1.02
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue
 // @run-at      document-end
 // ==/UserScript==
-const url = location.href;
-const gid = url.split('/')[4];
-const $_ = e => document.getElementById(e);
-const $ = e => document.querySelector(e);
-if (url.match('exhentai')) { //里站
+let gid = location.href.split('/')[4];
+if (location.host === 'exhentai.org') { //里站
   if (GM_getValue(gid, true)) { //尝试跳转
-    if (!$_('ta_female:lolicon') && !$_('ta_male:shotacon')) location = url.replace('exhentai', 'e-hentai');
+    if (!['ta_female:lolicon', 'ta_male:shotacon'].some(i => document.getElementById(i))) location = '//e-hentai.org' + location.pathname;
+  } else {
+    GM_deleteValue(gid);
   }
-} else if (url.match('e-hentai')) { //表站
-  if ($('.d')) { //不存在则返回
-    location = url.replace('e-hentai', 'exhentai');
+} else if (location.host === 'e-hentai.org') { //表站
+  if (document.querySelector('.d')) { //不存在则返回
+    location = '//exhentai.org' + location.pathname;
     GM_setValue(gid, false);
   }
 }
-window.addEventListener('beforeunload', () => { //页面关闭
-  GM_deleteValue(gid);
-}, true);
-/*
-window.addEventListener('unload', function () {//页面改变
-  GM_setValue('unload', GM_getValue('unload', '') + '2')
-}, true);
-*/
