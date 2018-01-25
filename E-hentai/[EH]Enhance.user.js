@@ -1,7 +1,10 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @description
-// @namespace   https://github.com/dodying/Dodying-UserJs
+// @version     1.04
+// @author      dodying
+// @namespace   https://github.com/dodying/UserJs
+// @supportURL  https://github.com/dodying/UserJs/issues
+// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 //              里站
 // @include     https://exhentai.org/
 // @include     https://exhentai.org/favorites.php*
@@ -12,16 +15,14 @@
 // @include     https://e-hentai.org/favorites.php*
 // @include     https://e-hentai.org/?*
 // @include     https://e-hentai.org/g/*
-// @version     1.03
 // @grant       unsafeWindow
 // @grant       GM_openInTab
 // @grant       GM_setClipboard
 // @grant       GM_setValue
 // @grant       GM_getValue
-// @author      Dodying
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @grant       GM_getResourceText
+// @grant       GM_registerMenuCommand
+// @resource data https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/%5BEH%5DTagsPreview%26HideSomeGalleries.json
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @run-at      document-end
@@ -30,9 +31,17 @@
  * dom.allow_scripts_to_close_windows
  */
 (function() {
-  jQuery('<div class="ehNavBar"><div></div><div></div><div></div></div>').appendTo('body');
   addStyle();
-  if (location.href.match('/g/')) { //信息页
+  $('<div class="ehNavBar"><div></div><div></div><div></div></div>').appendTo('body');
+  $(window).on({
+    scroll: () => {
+      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && location.pathname.match('/g/') ? 'top:0;' : 'bottom:0;');
+    }
+  });
+  GM_registerMenuCommand('[EH]Enhance Options', showConfig, 'S');
+  let config = GM_getValue('config', {});
+  if (location.pathname.match('/g/')) { //信息页
+    if (config['ehConfig_ex2eh'] && jumpHost()) return;
     if (!GM_getValue('apikey')) {
       GM_setValue('apikey', unsafeWindow.apikey);
       GM_setValue('apiuid', unsafeWindow.apiuid);
@@ -58,7 +67,7 @@
   saveLink();
   showInfo();
   exportRule();
-  jQuery('.ehNavBar .ehCopy').on({
+  $('.ehNavBar .ehCopy').on({
     click: function() {
       var _ = this;
       var text = _.textContent;
@@ -69,21 +78,23 @@
       }, 800);
     }
   });
-  jQuery('.ehNavBar button:not(.ehCopy)').on({
+  $('.ehNavBar button:not(.ehCopy)').on({
     contextmenu: function() {
       return false;
     },
+    /*
     mousedown: function(e) {
       setNotification(e.button + ': ' + this.textContent);
     }
+    */
   });
-  jQuery('<a>1</a>').css('visibility', 'hidden').appendTo('.ehNavBar>div:empty');
+  $('<a>1</a>').css('visibility', 'hidden').appendTo('.ehNavBar>div:empty');
 })();
 
 function abortPending() {
-  jQuery('<button>Force Abort</button>').on({
+  $('<button>Force Abort</button>').on({
     click: function() {
-      jQuery('.ehD-pt-status-text:contains("Pending...")+span').click();
+      $('.ehD-pt-status-text:contains("Pending...")+span').click();
     }
   }).appendTo('.ehNavBar>div:eq(1)');
 }
@@ -96,7 +107,7 @@ function add2Fav(gid, token, i, target) {
   xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.onload = function() {
-    target = jQuery(target);
+    target = $(target);
     if (i === 'favdel') {
       target.attr('class', 'btnAddFav').removeAttr('id').removeAttr('style');
     } else {
@@ -107,33 +118,66 @@ function add2Fav(gid, token, i, target) {
 }
 
 function addStyle() {
-  jQuery('<style></style>').html(function() {
-    return ['.ido,.itg{max-width:9999px!important;}',
+  $('<style></style>').text(['.ido,.itg{max-width:9999px!important;}',
       '.itg>tbody>tr.batchHover{background-color:#669933}',
       '.itg>tbody>tr:hover{background-color:#4A86E8}.itd>label{cursor:pointer;}',
       '.ehD-dialog{bottom:23px!important;}',
       '.ehD-status{bottom:334px!important;}',
       '.ehD-force-download-tips{bottom:311px!important;}',
       '.ehCenter{text-align:center;}',
-      '.ehNavBar{display:flex;width:99%;background-color:#34353B;position:fixed;bottom:0px;z-index:1000;padding:0 10px 5px 10px;}',
+      '.ehNavBar{display:flex;width:99%;background-color:#34353B;position:fixed;z-index:1000;padding:0 10px 5px 10px;}',
       '.ehNavBar>div{width:33.3%;}',
       '.ehNavBar>div:nth-child(1){text-align:left;}',
       '.ehNavBar>div:nth-child(2){text-align:center;}',
       '.ehNavBar>div:nth-child(3){text-align:right;}',
-      '.ehNavBar button,.ehBtn{font-size:12px;border:2px outset black;height:21px;margin:0px 10px;padding:0px 4px 1px 4px;}',
+      '.ehNavBar button,.ehBtn{font-size:12px;border:2px outset black;height:21px;margin:0 10px;padding:0 4px 1px 4px;}',
       '.ehNavBar .ehCopy{color:#F0F0F0;background-color:#000;}',
       '.btnSearch{cursor:pointer;width:16px;height:16px;float:left;background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB7ElEQVQ4jX1TvW7iQBBeJCLBPQOF66PwzuwWRjTrwjUVz8Aj2D2iRLmTsJLIut4UfgCfkIJ0D0ARUkR5AlMvLrJSvmvAR0wuI02xs/N98y9ES5hZMfMDM78S0dtJX4joTkop2/6NKKW+EdEvpRS+UiK6HwwG/SuwlPLPpaPWClpraH1NIqV89DyvJ4ToCCGEaEeezWYoigLb7RZ5nmM6nV6RMHNqjOkKZlaXH1mWwVqL/X6PzWaDqqrgnEOSJGhn6Ps+CWZ+uIxsrcVyuWwcgyBAWZao6xpRFJ3AGlprMPNKMPPrmbEoCuz3+6t0wzCEcw6LxaIBa63AzM+CiN7OrNvtFpvN5tPuV1WFNF01BKeJ1BcECnmeo6oqBEHwATyZTGCtRRzHDfhEcBRE9HI2TKdTOOdQliXCMGzAu90Oh8MB4/G4Pc4nQUR3l8YkSVDXNZxzqKoK1locDgccj0fkef4hA2a+FVJK2a43iiIsFguk6QpxHGM8HmO9XgMAsiw7g9+Hw+H38yLdt0n+dVs37yzLMJ/PoZSC7/s/m00cDAZ9KeXj/8CfrPJvz/N6xphucw+e5/WYOf3qBpj5nZl/eJ7XG41GfaXUzeVNdYwxXd/3iZlXzPxMRDURHaWUT8x8e6q5Y4zpKqVujDHdv6rJoiTHuLTjAAAAAElFTkSuQmCC);}',
       '.btnAddFav{cursor:pointer;width:16px;height:16px;float:left;background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAxUlEQVQ4ja2TSwrDMAxERyNvEgg9jFdC25y9tMdpcwB3k4/j2GkoFQiMkZ9GHwPAE0D60R84CxCR1U/itkNmYmZdjLE3sw6A4GhNAN19GMd4c/cBACuPsSgsAeXj9+ylkeQBIJXMtfLo7oOq7gFm1lVkN8sjufVARFKMsc9kVzuuyilLsgfM3WYLEIImVX3VyltqaY6qMZXTPVgBIWhqjPQrgKqcCtkHdS3AlWX6/yYmAIlkUtWUzbnq+SY+lsuLvy+Lw/0DpJalxJ3rpocAAAAASUVORK5CYII=);}',
       '.id44>.btnAddFav,.id44>.i[id^="favicon_"],.id44>.btnSearch{float:right;margin:4px 2px 0 0;}',
-      '.i[id^="favicon_"],#fav>.i{cursor:pointer;background-image:url("data:image/png;base64,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")!important;}'
-    ].join('');
-  }).appendTo('head');
-  jQuery('.i:has(.n),.id44>div>a:has(.tn)').hide(); //隐藏种子图标
+      '.i[id^="favicon_"],#fav>.i{cursor:pointer;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAADSCAYAAACVdpq7AAALdElEQVRoge2a/0/Tdx7H+SfwlyX+0OKJsMap0x/4oWauEm+4JcjiD1wuuYVAlgHzDAKd3t08ik5ZoMNpN4+Im3yg35CJl3iS0iET1h0Xk4rYFEkRcaM0DS0dxYHsw+N+KJ9PaPspX7r74RJ9Jk34kufz9Xq+Xq/3q+9+ycj4v4Moiuj1eubn59kUcXFhgZKSEnQ6HYWFhUQikY0JRCIRCgsLKSwspKSkRP55ampqbYGpqak4ovQoLCxEp9Pxo29SWeBH36ScZklJCQaDgcWFBURR5I6zTxYYGhqKF/B4PHHEkpISgsEgPT096PV6gsEgjQ0NssAdZ19M4I6zL4nY2NDA/Pw8jQ0N6PV67jj7uOPsi7Ngs3eSkehRr9fTdkUgFAphMBgwGAzY7J14PJ6kGihGvmS6SDAYxGAwoNfr48hxkZU8S2nr9Xr0ej09PT309PQke05V7VAohM3eiV6vZ2pqCoPBoFxtpT4bDAaCwSCiKNLT04NOp8Pj8aw9KGlPmITE2Q6FQps7HGmfqhcVoijy3Z//zML8s81X2pqfj1mjwZqfTzQyuzGBaGQWa34+w7k5oNXyk0qFNT+fcMC//hqy5ufzk0oFWi19Z+qpN33NTyoVZo2GwOMJZYHA4wnMGo1M1D14QAbQeP1fcgZmjYYn9+7FC0yOuOOIFBdDdTXnXa4YubgYtFrm1GrMGg2+3t6YgK+3F7NGw5xaHUekqYnzLhfnXa7Y7wkCXquVjNUeVxMRBM6OjcXITU2KAr8t8nqeq+4OpPa8XrUzAJV/OnW1U/VZirhunyXMhUOKExb4cXzja2j1bM+F01hDaZ2qFxWiKPLtFx9tvmCLCwvYTxTQ+d527CcKNrGGohHsJwoYrdrG8oX9jFZtQyjbt/4aCgf8CGX7GK3axuHzt3nlk1Fe+WSUC3+tRCjbl3rKAj+Oy8RzZ01UNVuhu5pvv/iIVz4ZJXRKjVC2j8kRd7zA00fDCGX7CJ1Ss3xhP/Wmr6k3fQ19TdBdzSufjLJ8YT+hU2o639vO2JAzJjDxHwed722XiVwrhu7qGPE/AjZ7J5e/vA7XiuMEvE4rGasjJhLvOPtiC3Alg9UCQtk+Uka22TtTEuXISp6//eKjWKorxKpmq7LnxGqHTqnj2iQ9UlZbqc+ShdUe111D0chsehMmIXG201pDaZ2qFxWiKPJdbyULC5u8PoqiiL2jgC7zduwdBUSjG3xRFo1GsHcU8HA4C6Jano6qaG/du/7NNxQK0d66l4fDWRQe7iJzi4/MLT4+NVbS3rqXQOBxijUUeEx7616ejqr4rrcS3ZuD/Dpfw79/OEHmFh/BiVgGE5MJB2Ni0k17616CEyqIauFZMb/O18BiE/2OZgoPd0FUy9y0mvbWvYyNSmto3EGXebsicdcOL7t2eOl3NMOzYlmgy7wd70MrGaki/vJrJ7/82on3oZVdO7yxv68SaLm0k4yJcQftrXuZm1YrCrDYROmfBrn5zZnkyEqeb35zBt2bg7DYxMSogcwtPqbH30n2rFTt6fF30L05KLeqsaEhdbUlzIT9soBkYfWgpOzzehM2E97MGlo12z/PpXMb6q1kcWHh5RraCERR5MPv63m22TW0uLBA0c1Kfnf7EPnWPxLZ6BqKRCPkW/9IlrcILeW813IMbftR/OHA2gL+cABt+1GZ+Fm7EU+2DfXMEXYLb/Mk1Xg+CTxmt/A26pkjaCmnmL8zWGTDk21DS7ks8GByOF7gweRwErGtro22KwKebBvF/F0WyLbk4xwbiAk4JgbItuTHERvc/8DWPETnyC082TaOPTcmCXSO3CJD2340jnjsuZHBIhudI7fwWq14sm20upMFdgtvkxT52HMjt99vx1XRhauiC0+2jdvvt3PsuTE5cirPx54baXXbFD07JgZQrLbUpg+/r+f2++14sm00H7+Qutqp+pzoMWWfU01YlrdoYxMmIXG2Q3Phza+htE7ViwpRFPmqr2bzt6HFhQXq7QX89fbvqLcXbHwNRaMR6u0FNI+p6V7eT/OYmpNC3vrPVTNhPyeFPGpLP6c00yc/PjVWclLISz2egcBjTgp5XA6oOHfWhJNiBpdqcVJM9/J+LgdUVJtzkw/GxKSbanMulwMqupf3c+6sicGlWka4GCfw1ZyaanMubt/K+yRuXy/V5ly+mot5dFJMY+11KrZ5KM308fFbdxUFBr1WMqRUJeLgUi2Xv7zOcNjCcNiCqXyAy19eTxI41rITxchSyiNcxGbvxFQ+oBxZyXPFNo8s8PFbd7lkuqjsWcKTlWo3j6lpPn5BbtPpd2+sXW0J/nBAFpAsSMQ1+ywhku6ESUic7bRuQ2mdqhcVoihSdXeA+c1eHxcXFiiw29E4HBTY7YTm5jYmMBuNUmC3s230Edpl2Db6iDxBwB9e5ynHHw6TJwhoHA4GDh3CtyWT4dwcWWA8kOLJbjwQIE8QUPmnGTh0iEumi1Qvw3BuDlXd3aj80+R2mHFPJnzU5p6cJLfDjMo/zdHnSwzn5lC9DE1A9TIcfb6EdhnUsxFyO8z0+nwxgV6fj9wOM+rZCNplqOruZjg3Jy7ts2NjskDW/DNyO8xYvV4ypFS1KxHOu1z8pFLxz/5+OoG+M/U4q6riMsiaf8bOlhaSIp8dG2M4N4cmoBNo6+9n4NAh5ciJnrUrRWq7ItAEdNTV0VFXp+x5dbV3trSg8k9TdXeA4dwcfFsy5agpq53YZ2lApFRV/ml2trSk7rOE0NxcehMmIe3ZlpD2qXpRIYoitcdd6X1gX3i4iz05FgoPdxGZjW7wRdlslMLDXeza4aVAC6+pZ3gjT2Dav86QBP1h3sgTZGJpMXECT8ZTjOeT8QBv5Am8pp7h3FkTbl+m/Hg4nMWuHV725Fh46E44GA/dk+zJsfCaeoYCLXzWbqSpwY2pCQx/CXPJdFHOYE+OBadj5U1yp2M8jlhaDH+rBlMT2AS4+c0ZDH8Jx1nYk2PhltVLhpSqEtHpGOfb7+owNcX+niiwZuR//3ACW/OQIvGWdWUNJXqWBNy+TMWUZc9K1S7QQu1xF25fZhIxqdpyn4NBWaD0T4O4fZkb6/NvnjAJibMdDqWxhmqPu4hGNngoXnSIooipfIBn82nchk6/e4OKVy3UHDBvvOLRSJSaA2bq1eNc00K9epyaA2aCG1lDNQfMnH73BnrvVvTerdTdy+Pjt+7ywe6ra6+hD3ZfpV49jt67lba6Nhy1S1wyXeR0v45G9SwVr6ZYQx/svkqjepZrWjjdr8PWPITLuISteYjz3SVc0yIL3OtduRnc6/VR8apFJnb9QcTWPETdvTw+d5XwuasER+0SXX8Q4wRuWb1k1BwwxxEdtUt81VdDl+Nr7jj7qLuXh83emSTwwe6rKEauu5eHy7jEAwFcxiX03q3KkRM9X/19GL13q+y57YrA6X6dsmelap87a4prlal8IHW1E/ssDYiUar16fO0+/+YJk5A42z+ns4bSOlUvKkRRxFXRtfnbkCiKWA42YNEYsBxs2NwashxsYDTrGmgHGM26huVgA2H/zDof2PtnZGLRzUoyfUfI9B2h+fgFLBrD2t8bsmgMjGZdo7GhgaKblVB2n4lyJ1neIjzZNlp2nmTSnXCiJt0+LBoDIfUN0A5QZY19cXDJOAZl9ynpPkVbXRsh9Q0sGgNjzpW3OyYcD+OIlN3ns3YjH35fD8JT+ttuk+Ut4pLpImgHZIFHwhAZloMNcUTK7vNIGOL1kVIyfUd4faSU10dKabsixP6/ItCy8ySKkSm7H0tZeMqScYwsbxGuiq7kyEqeJ8qdZPqOsGQc47N2IzpXRRxR9qxU7el3etC5Ksj0HUHnqmD6nR6ZmFRtpT7LFqRB0RhSf01Vws+hufQmTELibKe1hlwVXS8/sH+Jl3iJl/if478+4qV4DzoUcgAAAABJRU5ErkJggg==")!important;}',
+      '.ehConfig{z-index:3;position:fixed;top:100px;left:calc(50% - 300px);width:600px;background-color:#34353b;}',
+      '.ehConfigBtn>button{font-size:8pt;color:#f1f1f1;background:#34353b;border:2px outset #000000;height:21px;margin:4px 1px 0 1px;padding:0 4px 1px 4px;}'
+    ].join('')).appendTo('head');
+  $('.i:has(.n),.id44>div>a:has(.tn)').hide(); //隐藏种子图标
+  if (location.pathname.match('/g/')) {
+    let data = GM_getResourceText('data');
+    data = JSON.parse(data).dataset;
+    let data2 = {};
+    let combineText = arr => arr.map(i => {
+      if (i.type === 0) {
+        return i.text;
+      } else if (i.type === 2) {
+        return `"url("${i.src}")"`;
+      } else {
+        return null;
+      }
+    }).filter(i => i).join('\\A');
+    data.forEach(i => {
+      let main = i.name;
+      i.tags.forEach(j => {
+        if (!j.name || !j.cname) return;
+        let sub = j.name.replace(/\s/g, '_');
+        data2[main + ':' + sub] = {
+          b: combineText(j.cname)
+        };
+        if (j.info instanceof Array && j.info.length > 0) {
+          data2[main + ':' + sub]['a'] = combineText(j.info);
+        }
+      });
+    });
+    let css = ['div#taglist{overflow:visible;min-height:295px;height:auto}div#gmid{min-height:330px;height:auto;position:static}#taglist a{background:inherit}#taglist a::before{font-size:12px;overflow:hidden;line-height:20px;height:20px}#taglist a::after{display:block;color:#ff8e8e;font-size:14px;background:inherit;border:1px solid #000;border-radius:5px;position:absolute;float:left;z-index:999;padding:8px;box-shadow:3px 3px 10px #000;min-width:150px;max-width:500px;white-space:pre-wrap;opacity:0;transition:opacity .2s;transform:translate(-50%,20px);top:0;left:50%;pointer-events:none;padding-top:8px;font-weight:400;line-height:20px}#taglist a:hover::after,#taglist a:focus::after{opacity:1;pointer-events:auto}#taglist a:focus::before,#taglist a:hover::before{font-size:12px;position:relative;background-color:inherit;border:1px solid #000;border-width:1px 1px 0 1px;margin:-4px -5px;padding:3px 4px;color:inherit;border-radius:5px 5px 0 0}div.gt,div.gtw,div.gtl{line-height:20px;height:20px}#taglist a:hover::after{z-index:9999998}#taglist a:focus::after{z-index:9999996}#taglist a:hover::before{z-index:9999999}#taglist a:focus::before{z-index:9999997}', `#taglist a::after{color:#${location.host === 'exhentai.org' ? 'fff' : '000'};}`, ...Object.keys(data2).map(i => `a[id="ta_${i}"]{font-size:0;}`)];
+    for (let i in data2) {
+      css.push(`a[id="ta_${i}"]::before{content:"${data2[i]['b']}"}`);
+      if (data2[i]['a']) css.push(`a[id="ta_${i}"]::after{content:"${data2[i]['a']}"}`);
+    }
+    $('<style name="EhTagBuilder"></style>').text(css.join('')).appendTo('head');
+  }
 }
 
 function autoClose() {
   setTimeout(function() {
-    if (jQuery('.ehD-dialog>.ehD-pt-gen-filename+button').text() === 'Not download? Click here to download' || jQuery('.ehD-dialog span:contains("Not download or file is broken? "):has(a[href^="filesystem:https://"])').length > 0) {
+    if ($('.ehD-dialog>.ehD-pt-gen-filename+button').text() === 'Not download? Click here to download' || $('.ehD-dialog span:contains("Not download or file is broken? "):has(a[href^="filesystem:https://"])').length > 0) {
       setTimeout(function() {
         self.close();
       }, 3000);
@@ -145,9 +189,9 @@ function autoClose() {
 
 function autoDownload() {
   setTimeout(function() {
-    if (jQuery('.ehD-box>.g2').length > 0) {
+    if ($('.ehD-box>.g2').length > 0) {
       setTimeout(function() {
-        jQuery('.ehD-box>.g2:eq(0)').click();
+        $('.ehD-box>.g2:eq(0)').click();
       }, 1500);
     } else {
       autoDownload();
@@ -157,48 +201,48 @@ function autoDownload() {
 
 function batchDown() {
   window.batchTime = 0;
-  jQuery('.itg').on('contextmenu', function(e) { //右键：下载
+  $('.itg').on('contextmenu', function(e) { //右键：下载
     e.preventDefault();
     if (e.target.className.indexOf('TagPreview_') >= 0) {
-      openUrl(e.target.href + '#0', true); //待续
-    } else if (window.batchTime > 0 && jQuery(e.target).hasClass('EH_QuickAddToFav') || jQuery(e.target).hasClass('ehLBAdd')) {
+      openUrl(e.target.href + '#0'); //待续
+    } else if (window.batchTime > 0 && $(e.target).hasClass('EH_QuickAddToFav') || $(e.target).hasClass('ehLBAdd')) {
       window.batchTime--;
     }
   });
-  var tr = jQuery('.itg>tbody>tr');
+  var tr = $('.itg>tbody>tr');
   if (tr.length > 0) {
-    var notFavoritesPage = jQuery('.itg>tbody>tr>td>input').length === 0;
+    var notFavoritesPage = $('.itg>tbody>tr>td>input').length === 0;
     tr.each(function(i) {
       var _this = this;
       if (notFavoritesPage) {
-        var div = jQuery((i === 0) ? '<th></th>' : '<td></td>').css('text-align', 'center').html('<input id="EH_FavHelper_' + i + '" type="checkbox">').appendTo(this);
+        var div = $((i === 0) ? '<th></th>' : '<td></td>').css('text-align', 'center').html('<input id="EH_FavHelper_' + i + '" type="checkbox">').appendTo(this);
       } else {
-        jQuery(_this).find('td:eq(-1)>input').attr('id', 'EH_FavHelper_' + i);
+        $(_this).find('td:eq(-1)>input').attr('id', 'EH_FavHelper_' + i);
       }
-      if (jQuery(_this).find('.itd').length > 0) {
-        var _ = jQuery(_this).find('.itd:eq(0)');
+      if ($(_this).find('.itd').length > 0) {
+        var _ = $(_this).find('.itd:eq(0)');
         _.html('<label for="EH_FavHelper_' + i + '">' + _.html() + '</label>');
       }
     });
     tr.find('th>input').on('click', function() { //全选
       var _this = this;
-      jQuery('tr.gtr0 input,tr.gtr1 input').each(function() {
+      $('tr.gtr0 input,tr.gtr1 input').each(function() {
         this.checked = (_this.checked === true) ? true : false;
       });
     });
     tr.find('td:eq(-1)>input').on('change', function(e) { //高亮选中
-      jQuery(e.target).parents(1).toggleClass('batchHover');
+      $(e.target).parents(1).toggleClass('batchHover');
     });
   }
-  jQuery('<button>Batch</button>').appendTo('.ehNavBar>div:eq(2)').on({
+  $('<button>Batch</button>').appendTo('.ehNavBar>div:eq(2)').on({
     contextmenu: function() {
       window.batchTime = 0;
       return false;
     },
     click: function() {
       var input = [];
-      jQuery('tr.gtr0:visible,tr.gtr1:visible').each(function() {
-        var i = jQuery(this);
+      $('tr.gtr0:visible,tr.gtr1:visible').each(function() {
+        var i = $(this);
         if ((i.find('.i[id^="favicon_"]').length === 0 || i.find('.i[id^="favicon_"]').css('background-position-y') === '-2px') && i.find('.ehLBAdd').length > 0) {
           input.push(i.find('td>input'));
         } else {
@@ -219,16 +263,16 @@ function batchDown() {
       window.batchTime += 4;
     }
   });
-  jQuery('<button>Open</button>').appendTo('.ehNavBar>div:eq(2)').on({
+  $('<button>Open</button>').appendTo('.ehNavBar>div:eq(2)').on({
     contextmenu: function() {
       return false;
     },
     mousedown: function(e) {
-      jQuery('.showInfo').click();
-      jQuery('.itg>tbody>tr:visible>td>input:checked').each(function(i) {
-        var href = jQuery(this).parents().eq(1).find('.itd>div>.it5>a').attr('href');
-        var target = jQuery(this).parents().eq(1).find('.it3').find('.btnAddFav,.i[id^="favicon_"]')[0];
-        openUrl(href + '#' + e.button, true);
+      $('.showInfo').click();
+      $('.itg>tbody>tr:visible>td>input:checked').each(function(i) {
+        var href = $(this).parents().eq(1).find('.itd>div>.it5>a').attr('href');
+        var target = $(this).parents().eq(1).find('.it3').find('.btnAddFav,.i[id^="favicon_"]')[0];
+        openUrl(href + '#' + e.button);
         if (e.button === 0) { //待续
           var arr = href.split('/');
           add2Fav(arr[4], arr[5], GM_getValue('lastFavcat', 0), target);
@@ -237,11 +281,11 @@ function batchDown() {
       });
     }
   });
-  jQuery('<button>Delete</button>').appendTo('.ehNavBar>div:eq(2)').on({
+  $('<button>Delete</button>').appendTo('.ehNavBar>div:eq(2)').on({
     click: function() {
-      jQuery('.itg>tbody>tr:visible>td>input:checked').each(function(i) {
-        var href = jQuery(this).parents().eq(1).find('.itd>div>.it5>a').attr('href');
-        var target = jQuery(this).parents().eq(1).find('.it3').find('.btnAddFav,.i[id^="favicon_"]')[0];
+      $('.itg>tbody>tr:visible>td>input:checked').each(function(i) {
+        var href = $(this).parents().eq(1).find('.itd>div>.it5>a').attr('href');
+        var target = $(this).parents().eq(1).find('.it3').find('.btnAddFav,.i[id^="favicon_"]')[0];
         var arr = href.split('/');
         add2Fav(arr[4], arr[5], '10', target);
       });
@@ -251,8 +295,8 @@ function batchDown() {
 
 function btnAddFav() {
   var fav = -1;
-  if (jQuery('#gdf>#fav>.i').length > 0) fav = 0 - (parseInt(jQuery('#gdf>#fav>.i').css('background-position-y')) + 2) / 19;
-  jQuery('#gdf').empty().removeAttr('onclick').on({
+  if ($('#gdf>#fav>.i').length > 0) fav = 0 - (parseInt($('#gdf>#fav>.i').css('background-position-y')) + 2) / 19;
+  $('#gdf').empty().removeAttr('onclick').on({
     contextmenu: function() {
       return false;
     },
@@ -274,20 +318,20 @@ function btnAddFav() {
     }
   });
   if (fav === -1) {
-    jQuery('#gdf').attr('class', 'btnAddFav').removeAttr('id').removeAttr('style');
+    $('#gdf').attr('class', 'btnAddFav').removeAttr('id').removeAttr('style');
   } else {
-    jQuery('#gdf').attr('class', 'i').attr('id', 'favicon_' + location.href.split('/')[4]).css('background-position', '0px -' + (fav * 19 + 2) + 'px');
+    $('#gdf').attr('class', 'i').attr('id', 'favicon_' + location.href.split('/')[4]).css('background-position', '0px -' + (fav * 19 + 2) + 'px');
   }
 }
 
 function btnAddFav2() {
-  jQuery('<div class="btnAddFav"></div>').appendTo('.it3:not(:has(.i[id^="favicon_"])),.id44:not(:has(.i[id^="favicon_"]))');
-  jQuery('.btnAddFav,.i[id^="favicon_"]').removeAttr('onclick').on({
+  $('<div class="btnAddFav"></div>').appendTo('.it3:not(:has(.i[id^="favicon_"])),.id44:not(:has(.i[id^="favicon_"]))');
+  $('.btnAddFav,.i[id^="favicon_"]').removeAttr('onclick').on({
     contextmenu: function() {
       return false;
     },
     mousedown: function(e) {
-      var href = jQuery(this).parentsUntil('.itd,#pp').eq(-1).find('.it5>a,.id2>a').attr('href');
+      var href = $(this).parentsUntil('.itd,#pp').eq(-1).find('.it5>a,.id2>a').attr('href');
       var arr = href.split('/');
       var target = e.target;
       if (e.button === 0) {
@@ -307,19 +351,19 @@ function btnAddFav2() {
 }
 
 function btnSearch() {
-  var text = jQuery('#gn').text() || jQuery('#gj').text();
+  var text = $('#gn').text() || $('#gj').text();
   if (text === '') return;
-  jQuery('<div class="ehSearch"></div>').appendTo('#gd2');
+  $('<div class="ehSearch"></div>').appendTo('#gd2');
   text = text.split(/[\[\]\(\)\{\}【】\|]+/);
   for (var i = 0; i < text.length; i++) {
     text[i] = text[i].trim();
     if (text[i] !== '') {
-      jQuery('<span><input id="ehSearch_' + i + '" type="checkbox"><label for="ehSearch_' + i + '">' + text[i] + '</label></span>').appendTo('.ehSearch');
+      $('<span><input id="ehSearch_' + i + '" type="checkbox"><label for="ehSearch_' + i + '">' + text[i] + '</label></span>').appendTo('.ehSearch');
     }
   }
-  jQuery('<button class="ehBtn">Search</button>').appendTo('.ehSearch').click(function() {
+  $('<button class="ehBtn">Search</button>').appendTo('.ehSearch').click(function() {
     var keyword = [];
-    jQuery('.ehSearch input:checked+label').each(function() {
+    $('.ehSearch input:checked+label').each(function() {
       keyword.push(this.textContent);
     })
     if (keyword.length > 0) openUrl('/?f_search=%22' + encodeURIComponent(keyword.join('" "')) + '%22');
@@ -327,12 +371,12 @@ function btnSearch() {
 }
 
 function btnSearch2() {
-  jQuery('<div class="btnSearch"></div>').appendTo('.it3,.id44').on({
+  $('<div class="btnSearch"></div>').appendTo('.it3,.id44').on({
     contextmenu: function() {
       return false;
     },
     mousedown: function(e) {
-      var name = jQuery(this).parentsUntil('.itd,#pp').eq(-1).find('.it5>a,.id2>a').text();
+      var name = $(this).parentsUntil('.itd,#pp').eq(-1).find('.it5>a,.id2>a').text();
       name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】/g, '').replace(/!/g, '').replace(/\|.*/, '').trim();
       name = '"' + name + '"';
       if (e.button === 2) name += ' language:chinese$';
@@ -358,7 +402,7 @@ function changeConfig(key, value) {
 }
 
 function changeName(e) {
-  jQuery(e).each(function() {
+  $(e).each(function() {
     this.textContent = this.textContent.replace(/^\(.*?\)( |)/, '').replace(' Ni ', ' 2 ').replace(' San ', ' 3 ').replace(' Yon ', ' 4 ').replace(' Go ', ' 5 ').replace(' Roku ', ' 6 ').replace(' Nana ', ' 7 ').replace(' Hachi ', ' 8 ').replace(' Ku ', ' 9 ').replace(/\s+/g, ' ').trim(); //.replace(/[\\/:\*\?"<>\|]+/g, '-')
   });
 }
@@ -372,15 +416,15 @@ function checkImageSize() {
   var rate;
   var num0 = 0; //单页
   var num1 = 0; //双页
-  jQuery('.gdtm>div>a>img').each(function() {
-    rate = jQuery(this).height() / jQuery(this).width(); //长宽比
+  $('.gdtm>div>a>img').each(function() {
+    rate = $(this).height() / $(this).width(); //长宽比
     if (rate > 1.1) {
       num0++;
     } else if (rate < 0.9) {
       num1++;
     }
   });
-  if (2 * num1 > jQuery('.gdtm>div>a>img').length) {
+  if (2 * num1 > $('.gdtm>div>a>img').length) {
     if (imageSize !== '1280') {
       document.title = '1280|' + document.title;
       changeConfig('xr', '1280');
@@ -396,36 +440,36 @@ function checkImageSize() {
 }
 
 function copyAuthor() {
-  if (jQuery('#gn').text().match(/\[(.*?)\]/) && jQuery('#gj').text().match(/\[(.*?)\]/)) {
-    var name = jQuery('#gn').text().match(/\[(.*?)\]/)[1];
-    var nameJpn = jQuery('#gj').text().match(/\[(.*?)\]/)[1];
+  if ($('#gn').text().match(/\[(.*?)\]/) && $('#gj').text().match(/\[(.*?)\]/)) {
+    var name = $('#gn').text().match(/\[(.*?)\]/)[1];
+    var nameJpn = $('#gj').text().match(/\[(.*?)\]/)[1];
     if (name.match(/\(.*?\)/)) name = name.match(/\((.*?)\)/)[1];
     if (nameJpn.match(/\(.*?\)/)) nameJpn = nameJpn.match(/\((.*?)\)/)[1];
-    jQuery('<button class="ehCopy"></button>').text('[' + name + ']' + nameJpn).appendTo('.ehNavBar>div:eq(0)');
+    $('<button class="ehCopy"></button>').text('[' + name + ']' + nameJpn).appendTo('.ehNavBar>div:eq(0)');
   }
-  if (jQuery('#gdc>a>img[alt="doujinshi"]').length > 0 && jQuery('.gt[id*="td_parody"]>a').length > 0) {
-    var parody = window.getComputedStyle(jQuery('.gt[id*="td_parody"]>a')[0], ':before').content;
+  if ($('.gt[id*="td_parody"]>a').length > 0) {
+    var parody = window.getComputedStyle($('.gt[id*="td_parody"]>a')[0], ':before').content;
     if (parody !== 'none' && parody !== '') {
       parody = parody.match(/"(.*?)"/)[1];
     } else {
-      parody = (jQuery('#gj').text().match(/\(.*?\)/g)) ? jQuery('#gj').text().match(/\(.*?\)/g) : jQuery('#gn').text().match(/\(.*?\)/g);
+      parody = ($('#gj').text().match(/\(.*?\)/g)) ? $('#gj').text().match(/\(.*?\)/g) : $('#gn').text().match(/\(.*?\)/g);
       parody = parody[parody.length - 1].match(/\((.*?)\)/)[1];
     }
-    var parodyKeyword = jQuery('.gt[id*="td_parody"]>a').text().replace(/ \| .*/, '');
-    jQuery('<button class="ehCopy"></button>').text('【' + parody + '】' + parodyKeyword).appendTo('.ehNavBar>div:eq(0)');
+    var parodyKeyword = $('.gt[id*="td_parody"]>a').text().replace(/ \| .*/, '');
+    $('<button class="ehCopy"></button>').text('【' + parody + '】' + parodyKeyword).appendTo('.ehNavBar>div:eq(0)');
   }
 }
 
 function downloadInfo() {
-  if (jQuery('.ehD-box>.g2:eq(0)>a').length === 0) {
+  if ($('.ehD-box>.g2:eq(0)>a').length === 0) {
     setTimeout(function() {
       downloadInfo()
     }, 200);
   }
   var name = location.href.split('/')[4];
   setInterval(function() {
-    if (!jQuery('.ehD-status').length || !jQuery('.ehD-status').text().match(/\d+/g)) return;
-    var info = jQuery('.ehD-status').text().match(/\d+/g);
+    if (!$('.ehD-status').length || !$('.ehD-status').text().match(/\d+/g)) return;
+    var info = $('.ehD-status').text().match(/\d+/g);
     var download = GM_getValue('downloadInfo', {});
     download[name] = [info[2], info[0]];
     if (info[0] === info[2]) delete download[name];
@@ -434,7 +478,7 @@ function downloadInfo() {
 }
 
 function exportRule() {
-  jQuery('<button>Export Rule</button>').appendTo('.ehNavBar>div:eq(1)').click(function() {
+  $('<button>Export Rule</button>').appendTo('.ehNavBar>div:eq(1)').click(function() {
     var record = (localStorage.record) ? JSON.parse(localStorage.record) : [];
     var exportRule = GM_getValue('exportRule', []);
     exportRule = exportRule.concat(record).sort();
@@ -450,19 +494,19 @@ function exportRule() {
       type: 'text/plain;charset=utf-8'
     }), 'e-hentai.txt');
   });
-  jQuery('<button>Clear Rule</button>').appendTo('.ehNavBar>div:eq(1)').click(function() {
+  $('<button>Clear Rule</button>').appendTo('.ehNavBar>div:eq(1)').click(function() {
     localStorage.record = '[]';
   });
 }
 
 function keywordFunction() {
-  if (jQuery('input.stdinput,form>input[name="favcat"]+div>input').val()) {
-    var value = jQuery('input.stdinput,form>input[name="favcat"]+div>input').val();
+  if ($('input.stdinput,form>input[name="favcat"]+div>input').val()) {
+    var value = $('input.stdinput,form>input[name="favcat"]+div>input').val();
     if (value.match(/\w+:"?([\w \-\.]+)\$?"?\$? language:chinese\$$/))
       value = value.match(/\w+:"?([\w \-\.]+)\$?"?\$? language:chinese\$$/)[1];
-    jQuery('<button class="ehCopy"></button>').text(value).appendTo('.ehNavBar>div:eq(0)');
+    $('<button class="ehCopy"></button>').text(value).appendTo('.ehNavBar>div:eq(0)');
     document.title = value;
-    jQuery('<button>Find Parody</button>').appendTo('.ehNavBar>div:eq(1)').on({
+    $('<button>Find Parody</button>').appendTo('.ehNavBar>div:eq(1)').on({
       click: function() {
         var p = '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0&f_search=parody%3A';
         var t = prompt('请输入系列').replace(/[\(\)\[\]!?]/g, '').trim().toLowerCase();
@@ -474,9 +518,33 @@ function keywordFunction() {
   }
 }
 
-function openUrl(url, newWindow) {
+function jumpHost() {
+  let gid = location.href.split('/')[4];
+  let jump = GM_getValue('jump', []);
+  if (location.host === 'exhentai.org') { //里站
+    if (!jump.includes(gid)) { //尝试跳转
+      if (!['ta_female:lolicon', 'ta_male:shotacon'].some(i => document.getElementById(i))) {
+        location = '//e-hentai.org' + location.pathname;
+        return true;
+      }
+    } else {
+      jump.splice(jump.indexOf(gid), 1);
+      GM_setValue('jump', jump);
+    }
+  } else if (location.host === 'e-hentai.org') { //表站
+    if (document.querySelector('.d')) { //不存在则返回
+      jump.push(gid);
+      GM_setValue('jump', jump);
+      location = '//exhentai.org' + location.pathname;
+      return true;
+    }
+  }
+}
+
+function openUrl(url) {
+  let config = GM_getValue('config', {});
   url = (url.match('//') ? '' : location.origin) + url;
-  if (newWindow && navigator.userAgent.match('Chrome')) {
+  if (config['ehConfig_oiw']) {
     window.open(url, '', 'resizable,scrollbars,status');
   } else {
     GM_openInTab(url, true);
@@ -484,9 +552,9 @@ function openUrl(url, newWindow) {
 }
 
 function rateInSearchPage() {
-  jQuery('.it4>.ir.it4r').on({
+  $('.it4>.ir.it4r').on({
     mousemove: function(e) {
-      var _ = jQuery(this);
+      var _ = $(this);
       if (!_.attr('rawRate')) _.attr('rawRate', _.css('background-position'));
       var star = Math.round(e.offsetX / 8);
       _.attr('title', star);
@@ -495,7 +563,7 @@ function rateInSearchPage() {
       _.css('background-position', x + 'px ' + y + 'px');
     },
     mouseout: function() {
-      jQuery(this).css('background-position', jQuery(this).attr('rawRate'));
+      $(this).css('background-position', $(this).attr('rawRate'));
     },
     click: function(e) {
       var apikey = GM_getValue('apikey');
@@ -504,7 +572,7 @@ function rateInSearchPage() {
         return;
       }
       var apiuid = GM_getValue('apiuid');
-      var _ = jQuery(this);
+      var _ = $(this);
       var href = _.parent().prev().find('a').attr('href').split('/');
       var star = Math.round(e.offsetX / 8);
       var xhr = 'xhr_' + Math.random().toString();
@@ -530,8 +598,8 @@ function rateInSearchPage() {
 }
 
 function showInfo() {
-  jQuery('<button class="showInfo">Show Info</button>').appendTo('.ehNavBar>div:eq(1)').click(function() {
-    jQuery(this).remove();
+  $('<button class="showInfo">Show Info</button>').appendTo('.ehNavBar>div:eq(1)').click(function() {
+    $(this).remove();
     var showInfoInterval = setInterval(function() {
       var download = GM_getValue('downloadInfo', {});
       if (Object.keys(download).length === 0) return;
@@ -542,8 +610,61 @@ function showInfo() {
       setNotification('下载进度', body.join('\n'));
     }, 3000);
   });
-  jQuery(window).unload(function() {
+  $(window).unload(function() {
     GM_setValue('downloadInfo', {});
+  });
+}
+
+function showConfig() {
+  let config = GM_getValue('config', {});
+  $('<div class="ehConfig"></div>')
+    .html(`
+      <div><label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">里站自动跳转到表站</label></div>
+      <div><label for="ehConfig_oiw"><input type="checkbox" id="ehConfig_oiw">在弹窗中打开，而不是新标签页</label></div>
+      <div class="ehConfigBtn"><button name="save">保存</button><button name="cancel">取消</button></div>
+    `)
+    .on({
+      click(e) {
+        if ($(e.target).is('.ehConfigBtn>button')) {
+          if (e.target.name === 'save') {
+            $('.ehConfig input,.ehConfig select').toArray().forEach(i => {
+              let name, value;
+              if (i.type === 'number') {
+                name = i.name;
+                value = (i.value || i.placeholder) * 1;
+                if (isNaN(value)) return;
+              } else if (i.type === 'text' || i.type === 'hidden') {
+                name = i.name;
+                value = i.value || i.placeholder;
+                if (value === '') return;
+              } else if (i.type === 'checkbox') {
+                name = i.id;
+                value = i.checked;
+                if (value === false) return;
+              } else if (i.type === 'select-one') {
+                name = i.name;
+                value = i.value;
+              }
+              console.log(name, value);
+              config[name] = value;
+            });
+            GM_setValue('config', config);
+          }
+          $('.ehConfig').remove();
+        }
+      }
+    })
+    .appendTo('body');
+  $('.ehConfig input,.ehConfig select').toArray().forEach(i => {
+    let name, value;
+    name = i.name || i.id;
+    if (!(name in config)) return;
+    value = config[name];
+    if (i.type === 'text' || i.type === 'hidden' || i.type === 'select-one' || i.type === 'number') {
+      i.value = value;
+    } else if (i.type === 'checkbox') {
+      i.checked = value;
+    }
   });
 }
 
@@ -564,7 +685,7 @@ function setNotification(title, body) { //发出桌面通知
 }
 
 function tagSearch() {
-  jQuery('#taglist a').on({
+  $('#taglist a').on({
     contextmenu: function() {
       openUrl(this.href);
       return false;
@@ -579,7 +700,7 @@ function tagSearch() {
 }
 
 function saveLink() {
-  jQuery('<button>Shortcut</button>').click(function() {
+  $('<button>Shortcut</button>').click(function() {
     var content = [
       '[InternetShortcut]\r\nURL={{url}}',
       '<?xml version=\'1.0\' encoding=\'UTF-8\'?><!DOCTYPE plist PUBLIC \'-//Apple//DTD PLIST 1.0//EN\' \'http://www.apple.com/DTDs/PropertyList-1.0.dtd\'><plist version=\'1.0\'><dict><key>URL</key><string>{{url}}</string></dict></plist>',
