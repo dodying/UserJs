@@ -13,9 +13,9 @@
 // @exclude     http*://e-hentai.org/g/*
 // @exclude     http*://exhentai.org/s/*
 // @exclude     http*://e-hentai.org/s/*
-// @version     1.2.2
+// @version     1.2.3
 // 使用了来自Mapaler/EhTagTranslator生成的json数据
-// @resource data https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/%5BEH%5DTagsPreview%26HideSomeGalleries.json
+// @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json
 // @grant       GM_getResourceText
 // @run-at      document-idle
 // ==/UserScript==
@@ -65,7 +65,7 @@ const CONFIG = {
   },
   CHS: (() => {
     var value = {};
-    let data = GM_getResourceText('data');
+    let data = GM_getResourceText('EHT');
     data = JSON.parse(data).dataset;
     for (let i in data) {
       let type = data[i].name;
