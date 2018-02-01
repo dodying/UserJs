@@ -1,16 +1,15 @@
 // ==UserScript==
-// @name        [HV]BazaarList
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @description:zh-CN
-// @include     http*://hentaiverse.org/?s=Bazaar&ss=is*
-// @include     http://alt.hentaiverse.org/?s=Bazaar&ss=is*
-// @version     1.02b
-// @grant       none
-// @author      Dodying
-// @namespace   https://github.com/dodying/Dodying-UserJs
-// @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @run-at      document-end
+// @name         [HV]BazaarList
+// @version      1.03
+// @author       dodying
+// @namespace    https://github.com/dodying/
+// @supportURL   https://github.com/dodying/UserJs/issues
+// @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @include      http*://hentaiverse.org/?s=Bazaar&ss=is*
+// @include      http://alt.hentaiverse.org/?s=Bazaar&ss=is*
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @run-at       document-end
 // ==/UserScript==
 (function() {
   //style
@@ -29,32 +28,32 @@
     '<button id="listSave">SAVE</button>'
   ].join('');
   gE('#listDel', listBox).onclick = function() {
-    var info = getValue('BazaarList', true);
+    var info = GM_getValue('BazaarList');
     if (!info) return;
     delete info[gE('input[name=itemId]', listBox).value];
-    setValue('BazaarList', info);
+    GM_setValue('BazaarList', info);
     listBox.style.display = 'none';
   };
   gE('#listSave', listBox).onclick = function() {
-    var info = getValue('BazaarList', true) || {};
+    var info = GM_getValue('BazaarList', {});
     info[gE('input[name=itemId]', listBox).value] = {
       name: gE('input[name=itemName]', listBox).value,
       amount: gE('input[name=itemAmount]', listBox).value * 1 || 1000,
       credit: gE('input[name=itemCredit]', listBox).value * 1,
       fix: gE('input[name=itemFix]', listBox).value * 1 || 100
     };
-    setValue('BazaarList', info);
+    GM_setValue('BazaarList', info);
     listBox.style.display = 'none';
   };
   //Event
-  gE('#itshop_outer').onclick = function(e) {
+  document.addEventListener('click', e => {
     var target = e.target;
     if (target.getAttribute('onmouseout') !== 'common.hide_popup_box()') return;
     if (target.style.color !== 'rgb(0, 48, 203)') {
       listBox.style.display = 'none';
     } else {
       var id = target.getAttribute('onclick').match(/\d+/)[0] * 1;
-      var info = getValue('BazaarList', true) || {};
+      var info = GM_getValue('BazaarList', {});
       gE('input[name=itemId]', listBox).value = id;
       if (id in info) {
         gE('input[name=itemName]', listBox).value = info[id].name;
@@ -71,13 +70,13 @@
       listBox.style.left = e.pageX - e.offsetX + target.offsetWidth + 'px';
       listBox.style.top = e.pageY - e.offsetY + target.offsetHeight + 'px';
     }
-  };
+  });
   //显示结果
   var showText = gE('body').appendChild(cE('button'));
   showText.id = 'showText';
   showText.textContent = 'Generate List';
   showText.onclick = function() {
-    var info = getValue('BazaarList', true);
+    var info = GM_getValue('BazaarList',false);
     if (!info) return;
     //新窗口
     var bazaarWindow = window.open('', 'bazaarWindow', 'resizable,scrollbars,width=300,height=350');
@@ -155,14 +154,6 @@
     };
   };
 })();
-
-function setValue(item, value) {
-  localStorage[item] = (typeof value === 'string') ? value : JSON.stringify(value);
-}
-
-function getValue(item, toJSON) {
-  return (localStorage[item]) ? ((toJSON) ? JSON.parse(localStorage[item]) : localStorage[item]) : null;
-}
 
 function post(href, func, parm) { //post
   var xhr = new XMLHttpRequest();
