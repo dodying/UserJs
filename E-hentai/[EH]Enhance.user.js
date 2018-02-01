@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.04.1
+// @version     1.05
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -22,7 +22,7 @@
 // @grant       GM_getValue
 // @grant       GM_getResourceText
 // @grant       GM_registerMenuCommand
-// @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1516880191879
+// @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1517486954165
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @run-at      document-end
@@ -44,6 +44,7 @@ function init() {
   GM_registerMenuCommand('[EH]Enhance Settings', showConfig, 'S');
   if (location.pathname.match('/g/')) { //信息页
     if (CONFIG['ex2eh'] && jumpHost()) return;
+    tagTranslate();
     if (!GM_getValue('apikey')) {
       GM_setValue('apikey', unsafeWindow.apikey);
       GM_setValue('apiuid', unsafeWindow.apiuid);
@@ -54,7 +55,7 @@ function init() {
     changeName('#gn');
     if (location.hash.match('#') && CONFIG['autoDownload']) autoDownload();
     if (location.hash === '#' + CONFIG['autoClose']) autoClose();
-    tagSearch();
+    tagAct();
     copyInfo();
     downloadInfo();
     abortPending(); //终止EHD所有下载
@@ -132,21 +133,12 @@ function addStyle() {
       '.id44>.btnAddFav,.id44>.i[id^="favicon_"],.id44>.btnSearch{float:right;margin:4px 2px 0 0;}',
       '.i[id^="favicon_"],#fav>.i{cursor:pointer;background-image:url("data:image/png;base64,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")!important;}',
       '.ehConfig{z-index:3;position:fixed;top:100px;left:calc(50% - 300px);width:600px;background-color:#34353b;}',
-      '.ehConfigBtn>button{font-size:8pt;color:#f1f1f1;background:#34353b;border:2px outset #000000;height:21px;margin:4px 1px 0 1px;padding:0 4px 1px 4px;}'
+      '.ehConfigBtn>button{font-size:8pt;color:#f1f1f1;background:#34353b;border:2px outset #000000;height:21px;margin:4px 1px 0 1px;padding:0 4px 1px 4px;}',
+      '.ehTagAct{display:none;font-weight:bold;}',
+      '.ehTagAct:before{content:url("https://ehgt.org/g/mr.gif") " " attr(name) ": ";}',
+      '.ehTagAct>a{cursor:pointer;}',
     ].join('')).appendTo('head');
   $('.i:has(.n),.id44>div>a:has(.tn)').hide(); //隐藏种子图标
-  if (location.pathname.match('/g/')) {
-    let data = $('#taglist a').toArray().map(i => {
-      let info = i.id.split(/ta_|:/);
-      return findData(info[1], info[2]);
-    }).filter(i => i);
-    let css = ['div#taglist{overflow:visible;min-height:295px;height:auto}div#gmid{min-height:330px;height:auto;position:static}#taglist a{background:inherit}#taglist a::before{font-size:12px;overflow:hidden;line-height:20px;height:20px}#taglist a::after{display:block;color:#ff8e8e;font-size:14px;background:inherit;border:1px solid #000;border-radius:5px;position:absolute;float:left;z-index:999;padding:8px;box-shadow:3px 3px 10px #000;min-width:150px;max-width:500px;white-space:pre-wrap;opacity:0;transition:opacity .2s;transform:translate(-50%,20px);top:0;left:50%;pointer-events:none;padding-top:8px;font-weight:400;line-height:20px}#taglist a:hover::after,#taglist a:focus::after{opacity:1;pointer-events:auto}#taglist a:focus::before,#taglist a:hover::before{font-size:12px;position:relative;background-color:inherit;border:1px solid #000;border-width:1px 1px 0 1px;margin:-4px -5px;padding:3px 4px;color:inherit;border-radius:5px 5px 0 0}div.gt,div.gtw,div.gtl{line-height:20px;height:20px}#taglist a:hover::after{z-index:9999998}#taglist a:focus::after{z-index:9999996}#taglist a:hover::before{z-index:9999999}#taglist a:focus::before{z-index:9999997}', `#taglist a::after{color:#${location.host === 'exhentai.org' ? 'fff' : '000'};}`, ...data.map(i => `a[id="ta_${i.name}"]{font-size:0;}`)];
-    data.forEach(i => {
-      css.push(`a[id="ta_${i.name}"]::before{content:"${i.cname}"}`);
-      if (i.info) css.push(`a[id="ta_${i.name}"]::after{content:"${i.info}"}`);
-    });
-    $('<style name="EHT"></style>').text(css.join('')).appendTo('head');
-  }
 }
 
 function autoClose() {
@@ -670,19 +662,37 @@ function setNotification(title, body) { //发出桌面通知
   }
 }
 
-function tagSearch() {
+function tagAct() {
+  $('<div class="ehTagAct"></div>').insertBefore('#tagmenu_act');
+  $('<a href="https://github.com/Mapaler/EhTagTranslator/" target="_blank">Copy for ETT</a>').appendTo('.ehTagAct').on('click', e => {
+    GM_setClipboard(`| ${$('.ehTagAct').attr('name')} | | | |`);
+    return false;
+  });
   $('#taglist a').on({
-    contextmenu: function() {
-      openUrl(this.href);
+    contextmenu: e => {
+      var keyword = e.target.innerText.replace(/\s+\|.*/, '');
+      if (/\s+/.test(keyword)) keyword = '"' + keyword + '"';
+      if (/:/.test(e.target.id)) keyword = e.target.id.replace(/ta_(.*?):.*/, '$1') + ':' + keyword + '$';
+      openUrl('/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0&f_search=' + encodeURIComponent(keyword) + '+language%3Achinese%24&f_apply=Apply+Filter');
       return false;
     },
-    click: function() { //标签
-      var keyword = this.innerText.replace(/\s+\|.*/, '');
-      if (/\s+/.test(keyword)) keyword = '"' + keyword + '"';
-      if (/:/.test(this.id)) keyword = this.id.replace(/ta_(.*?):.*/, '$1') + ':' + keyword + '$';
-      openUrl('/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0&f_search=' + encodeURIComponent(keyword) + '+language%3Achinese%24&f_apply=Apply+Filter');
+    click: e => { //标签
+      $('.ehTagAct').css('display', e.target.style.color ? 'block' : 'none').attr('name', e.target.id.replace('ta_', ''));
     }
   });
+}
+
+function tagTranslate() {
+  let data = $('#taglist a').toArray().map(i => {
+    let info = i.id.split(/ta_|:/);
+    return findData(info[1], info[2]);
+  }).filter(i => i);
+  let css = ['div#taglist{overflow:visible;min-height:295px;height:auto}div#gmid{min-height:330px;height:auto;position:static}#taglist a{background:inherit}#taglist a::before{font-size:12px;overflow:hidden;line-height:20px;height:20px}#taglist a::after{display:block;color:#ff8e8e;font-size:14px;background:inherit;border:1px solid #000;border-radius:5px;position:absolute;float:left;z-index:999;padding:8px;box-shadow:3px 3px 10px #000;min-width:150px;max-width:500px;white-space:pre-wrap;opacity:0;transition:opacity .2s;transform:translate(-50%,20px);top:0;left:50%;pointer-events:none;padding-top:8px;font-weight:400;line-height:20px}#taglist a:hover::after,#taglist a:focus::after{opacity:1;pointer-events:auto}#taglist a:focus::before,#taglist a:hover::before{font-size:12px;position:relative;background-color:inherit;border:1px solid #000;border-width:1px 1px 0 1px;margin:-4px -5px;padding:3px 4px;color:inherit;border-radius:5px 5px 0 0}div.gt,div.gtw,div.gtl{line-height:20px;height:20px}#taglist a:hover::after{z-index:9999998}#taglist a:focus::after{z-index:9999996}#taglist a:hover::before{z-index:9999999}#taglist a:focus::before{z-index:9999997}', `#taglist a::after{color:#${location.host === 'exhentai.org' ? 'fff' : '000'};}`, ...data.map(i => `a[id="ta_${i.name}"]{font-size:0;}`)];
+  data.forEach(i => {
+    css.push(`a[id="ta_${i.name}"]::before{content:"${i.cname}"}`);
+    if (i.info) css.push(`a[id="ta_${i.name}"]::after{content:"${i.info}"}`);
+  });
+  $('<style name="EHT"></style>').text(css.join('')).appendTo('head');
 }
 
 function saveLink() {
