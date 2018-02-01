@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.05
+// @version     1.05.1
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -50,9 +50,9 @@ function init() {
       GM_setValue('apiuid', unsafeWindow.apiuid);
     }
     checkImageSize();
+    changeName('#gn');
     btnAddFav();
     btnSearch();
-    changeName('#gn');
     if (location.hash.match('#') && CONFIG['autoDownload']) autoDownload();
     if (location.hash === '#' + CONFIG['autoClose']) autoClose();
     tagAct();
@@ -458,7 +458,7 @@ function findData(main, sub) {
   data = data[0].tags.filter(i => i.name === sub.replace(/_/g, ' '));
   if (data.length === 0) return false;
   return {
-    name: main + ':' + sub,
+    name: main === 'misc' ? sub : main + ':' + sub,
     cname: combineText(data[0].cname),
     info: combineText(data[0].info)
   };
@@ -685,9 +685,26 @@ function tagAct() {
 function tagTranslate() {
   let data = $('#taglist a').toArray().map(i => {
     let info = i.id.split(/ta_|:/);
+    if (info.length === 2) info.splice(1, 0, 'misc');
     return findData(info[1], info[2]);
   }).filter(i => i);
-  let css = ['div#taglist{overflow:visible;min-height:295px;height:auto}div#gmid{min-height:330px;height:auto;position:static}#taglist a{background:inherit}#taglist a::before{font-size:12px;overflow:hidden;line-height:20px;height:20px}#taglist a::after{display:block;color:#ff8e8e;font-size:14px;background:inherit;border:1px solid #000;border-radius:5px;position:absolute;float:left;z-index:999;padding:8px;box-shadow:3px 3px 10px #000;min-width:150px;max-width:500px;white-space:pre-wrap;opacity:0;transition:opacity .2s;transform:translate(-50%,20px);top:0;left:50%;pointer-events:none;padding-top:8px;font-weight:400;line-height:20px}#taglist a:hover::after,#taglist a:focus::after{opacity:1;pointer-events:auto}#taglist a:focus::before,#taglist a:hover::before{font-size:12px;position:relative;background-color:inherit;border:1px solid #000;border-width:1px 1px 0 1px;margin:-4px -5px;padding:3px 4px;color:inherit;border-radius:5px 5px 0 0}div.gt,div.gtw,div.gtl{line-height:20px;height:20px}#taglist a:hover::after{z-index:9999998}#taglist a:focus::after{z-index:9999996}#taglist a:hover::before{z-index:9999999}#taglist a:focus::before{z-index:9999997}', `#taglist a::after{color:#${location.host === 'exhentai.org' ? 'fff' : '000'};}`, ...data.map(i => `a[id="ta_${i.name}"]{font-size:0;}`)];
+  let css = [
+    'div#taglist{overflow:visible;min-height:295px;height:auto}',
+    'div#gmid{min-height:330px;height:auto;position:static}',
+    '#taglist a{background:inherit}',
+    '#taglist a::before{font-size:12px;overflow:hidden;line-height:20px;height:20px}',
+    '#taglist a::after{display:block;color:#ff8e8e;font-size:14px;background:inherit;border:1px solid #000;border-radius:5px;position:absolute;float:left;z-index:999;padding:8px;box-shadow:3px 3px 10px #000;min-width:150px;max-width:500px;white-space:pre-wrap;opacity:0;transition:opacity .2s;transform:translate(-50%,20px);top:0;left:50%;pointer-events:none;padding-top:8px;font-weight:400;line-height:20px}',
+    '#taglist a:hover::after,#taglist a:focus::after{opacity:1;pointer-events:auto}',
+    '#taglist a:focus::before,#taglist a:hover::before{font-size:12px;position:relative;background-color:inherit;border:1px solid #000;border-width:1px 1px 0 1px;margin:-4px -5px;padding:3px 4px;color:inherit;border-radius:5px 5px 0 0}',
+    'div.gt,div.gtw,div.gtl{line-height:20px;height:20px}',
+    '#taglist a:hover::after{z-index:9999998}',
+    '#taglist a:focus::after{z-index:9999996}',
+    '#taglist a:hover::before{z-index:9999999}',
+    '#taglist a:focus::before{z-index:9999997}',
+    `#taglist a::after{color:#${location.host === 'exhentai.org' ? 'fff' : '000'};}`,
+    ...data.map(i => `a[id="ta_${i.name}"]{font-size:0;}`),
+    '#taglist a::before{text-decoration:line-through;}'
+  ];
   data.forEach(i => {
     css.push(`a[id="ta_${i.name}"]::before{content:"${i.cname}"}`);
     if (i.info) css.push(`a[id="ta_${i.name}"]::after{content:"${i.info}"}`);
