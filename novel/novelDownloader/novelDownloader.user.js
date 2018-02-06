@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.44.2
+// @version     1.44.3
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -22,6 +22,7 @@
 // @grant       GM_deleteValue
 // @grant       GM_setClipboard
 // @grant       GM_registerMenuCommand
+// @connect     *
 // @run-at      document-end
 //              文学
 // @include     http://gj.zdic.net/archive.php?aid=*
@@ -1923,7 +1924,7 @@ function download(fileType) { //下载
       url = url.split('*');
       var length = $('.ndBatchEnd').val().length;
       for (i = $('.ndBatchStart').val() * 1; i <= $('.ndBatchEnd').val() * 1; i++) {
-        chapter.push(url[0] + ($('.ndConfig[name=zero]')[0].checked ? String(i).padStart(length, '0') : i) + url[1]);
+        chapter.push(url[0] + ($('.ndConfig[name=zero]')[0].checked ? preZeroFill(i, length) : i) + url[1]);
       }
     } else {
       chapter.push(url);
@@ -2222,6 +2223,7 @@ function wordFormat(word) { //文本处理-通用版
     $('a,img', html).remove();
     word = html.html();
   }
+  //var symbol = '\\$\\(\\)\\*\\+\\.\\[\\]\\?\\^\\{\\}\\|’\'\"\\\\。？！‘’“”「」『』…，、—（）·《》〈〉．_；：<>❨❩❴❵⟨⟩【】〔〕〘〙‒–―~──﹏＿～‐/□×&@•~¦';
   var replaceLib = [
     /*替换前的文本|||替换后的文本*/
     /*换行符请先用【换行】二字代替，最后同一替代*/
@@ -2234,7 +2236,11 @@ function wordFormat(word) { //文本处理-通用版
     '&quot;|||"',
     '&quot;|||"',
     '&.*?;||| ',
-    '([\u4E00-\u9FFF])[ 　]+([\u4E00-\u9FFF])|||$1$2', //删除中文间的空格
+    '([\\u4E00-\\u9FFF])\\s+|||$1', //删除中文后的空格
+    '\\s+([\\u4E00-\\u9FFF])|||$1', //删除中文前的空格
+    //'([' + symbol + '])\\s+|||$1', //删除标点符号后的不可见字符
+    //'\\s+([' + symbol + '。？！“”「」『』…，、—（）()·《 》〈 〉．_；：])|||$1', //删除标点符号前的不可见字符
+    //'([,\\.:;?!\\(\\)\\[\\]\\{\\}])([a-zA-Z])|||$1 $2', //英文标点后加空格
     '无弹窗广告',
     '手机阅读本章.*',
     '本书最新TXT下载.*',
@@ -2320,7 +2326,7 @@ function download2Zip(name) { //下载到1个zip
   var leng = String($(window).data('dataDownload').length).length;
   for (var i = 0; i < $(window).data('dataDownload').length; i++) {
     var num = i + 1;
-    $(window).data('blob').file(String(num).padStart(length, '0') + '-' + $(window).data('dataDownload')[i].name + '.txt', $(window).data('dataDownload')[i].name + '\r\n' + $(window).data('dataDownload')[i].content);
+    $(window).data('blob').file(String(preZeroFill(num, leng)) + '-' + $(window).data('dataDownload')[i].name + '.txt', $(window).data('dataDownload')[i].name + '\r\n' + $(window).data('dataDownload')[i].content);
   }
   $(window).data('blob').file('###说明文件.txt', '本压缩包由用户脚本novelDownloader制作\r\n来源地址：' + location.href);
   $(window).data('blob').generateAsync({
@@ -2377,9 +2383,9 @@ function download2Epub(name) { //下载到1个epub
     }
     console.log(chapter);
     if ($('#ndChapterResult')[0].checked) {
-      $('<div></div>').html('<table><tbody><tr><th></th><th>标题</th><th>长度</th><th>预览</th></tr>' + chapter.reduce(function(all, _, i) {
-        return all + '<tr><td>' + i + '</td><td>' + _.name + '</td><td>' + _.length + '</td><td>' + _.content.substr(0, 26).trim() + '</td></tr>';
-      }) + '</tbody></table>').appendTo('.ndConsole');
+      $('<div></div>').html('<table><tbody><tr><th></th><th>标题</th><th>长度</th><th>预览</th></tr>' + chapter.map(function(_, i) {
+        return '<tr><td>' + i + '</td><td>' + _.name + '</td><td>' + _.length + '</td><td>' + _.content.substr(0, 26).trim() + '</td></tr>';
+      }).join('') + '</tbody></table>').appendTo('.ndConsole');
       $('.ndConsole').show();
     }
   }
@@ -2394,11 +2400,12 @@ function download2Epub(name) { //下载到1个epub
     'body{line-height:130%;text-align:justify;font-family:"Microsoft YaHei";font-size:22px;margin:0 auto;background-color:#CCE8CF;color:#000;}' +
     'h1{text-align:center;font-weight:bold;font-size:28px;}' +
     'h2{text-align:center;font-weight:bold;font-size:26px;}' +
-    'h3{text-align:center;font-weight:bold;font-size:24px;}');
-  var lang = ($('.ndLang:checked').val() * 1 === 0) ? 'zh-CN' : 'zh-TW';
+    'h3{text-align:center;font-weight:bold;font-size:24px;}' +
+    'p{text-indent:2em;}');
+  var lang = ($('[name="lang"]:checked').val() * 1 === 1) ? 'zh-TW' : 'zh-CN';
   var content_opf = '<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="' + uuid + '" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>' + name + '</dc:title><dc:creator>novelDownloader</dc:creator><dc:identifier id="' + uuid + '">urn:uuid:' + uuid + '</dc:identifier><dc:language>' + lang + '</dc:language><meta name="cover" content="cover-image" /></metadata><manifest>';
-  var toc_ncx = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:' + uuid + '"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>' + name + '</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="' + String(0).padStart(leng, '0') + '.html"/></navPoint>';
-  var item = '<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="' + String(0).padStart(leng, '0') + '.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>';
+  var toc_ncx = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:' + uuid + '"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>' + name + '</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="' + preZeroFill(0, leng) + '.html"/></navPoint>';
+  var item = '<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="' + preZeroFill(0, leng) + '.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>';
   var itemref = '<itemref idref="cover" linear="yes"/>';
   var _name, _content;
   if (img) {
@@ -2409,32 +2416,32 @@ function download2Epub(name) { //下载到1个epub
     var imgOrder, imgName;
     for (i = 0; i < imgArr.length; i++) {
       if (typeof img[imgArr[i]] === 'string') continue;
-      imgOrder = String(i).padStart(leng2, '0');
+      imgOrder = preZeroFill(i, leng2);
       imgName = imgOrder + '.' + img[imgArr[i]].type.match(/image\/(.*)/)[1];
       item += '<item id="img' + imgOrder + '" href="' + imgName + '" media-type="image/jpeg"/>';
       OEBPS.file(imgName, img[imgArr[i]]);
     }
   }
   for (i = 0; i < chapter.length; i++) {
-    _name = String(i + 1).padStart(leng, '0');
-    _content = chapter[i].content.replace(/\r\n/g, '</p><p>');
+    _name = String(preZeroFill(i + 1, leng));
+    _content = chapter[i].content.replace(/\r\n/g, '</p><p>').replace(/<p>\s+/g, '<p>');
     if ($('<div></div>').html(_content).find('img').length > 0 && img) {
       var _html = $('<div></div>').html(_content);
       _html.find('img').each(function() {
-        if (imgArr.indexOf(this.src) >= 0) this.src = String(imgArr.indexOf(this.src)).padStart(leng2, '0') + '.' + img[this.src].type.match(/image\/(.*)/)[1];
+        if (imgArr.indexOf(this.src) >= 0) this.src = preZeroFill(imgArr.indexOf(this.src), leng2) + '.' + img[this.src].type.match(/image\/(.*)/)[1];
       });
       _content = _html.html();
     }
     toc_ncx += '<navPoint id="chapter' + _name + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapter[i].name + '</text></navLabel><content src="' + _name + '.html"/></navPoint>';
     item += '<item id="chapter' + _name + '" href="' + _name + '.html" media-type="application/xhtml+xml"/>';
     itemref += '<itemref idref="chapter' + _name + '" linear="yes"/>';
-    OEBPS.file(_name + '.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + chapter[i].name + '</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>' + chapter[i].name + '</h3><div><p>' + _content + '</p></div></body></html>');
+    OEBPS.file(_name + '.html', '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + chapter[i].name + '</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>' + chapter[i].name + '</h3><div><p>' + _content + '</p></div></body></html>');
   }
-  content_opf = content_opf + item + '<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">' + itemref + '</spine><guide><reference href="' + String(0).padStart(leng, '0') + '.html" type="cover" title="Cover"/></guide></package>';
+  content_opf = content_opf + item + '<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">' + itemref + '</spine><guide><reference href="' + preZeroFill(0, leng) + '.html" type="cover" title="Cover"/></guide></package>';
   toc_ncx += '</navMap></ncx>';
   OEBPS.file('content.opf', content_opf);
   OEBPS.file('toc.ncx', toc_ncx);
-  OEBPS.file(String(0).padStart(leng, '0') + '.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + name + '</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h1>' + name + '</h1><h2>本电子书由用户脚本novelDownloader制作</h2><h3>来源地址：' + location.href + '</h3></body></html>');
+  OEBPS.file(preZeroFill(0, leng) + '.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + name + '</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h1>' + name + '</h1><h2>本电子书由用户脚本novelDownloader制作</h2><h3>来源地址：' + location.href + '</h3></body></html>');
   OEBPS.file('cover.jpg', $(window).data('cover'));
   $(window).data('blob').generateAsync({
     type: 'blob',
@@ -2541,4 +2548,13 @@ function getBlength(str) { //获取字节数
     n += str.charCodeAt(i) > 255 ? 2 : 1;
   }
   return n;
+}
+
+function preZeroFill(num, size) { //用0补足指定位数，来自https://segmentfault.com/q/1010000002607221，作者：captainblue与solar
+  if (num >= Math.pow(10, size)) { //如果num本身位数不小于size位
+    return num.toString();
+  } else {
+    var _str = Array(size + 1).join('0') + num;
+    return _str.slice(_str.length - size);
+  }
 }
