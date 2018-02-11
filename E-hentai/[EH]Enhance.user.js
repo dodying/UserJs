@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.05.1
+// @version     1.06
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -22,9 +22,8 @@
 // @grant       GM_getValue
 // @grant       GM_getResourceText
 // @grant       GM_registerMenuCommand
-// @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1517486954165
+// @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1518335359727
 // @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @run-at      document-end
 // ==/UserScript==
 /**
@@ -67,10 +66,10 @@ function init() {
     quickDown(); //右键：下载
     batchDown();
     rateInSearchPage();
+    autoComplete();
   }
   saveLink();
   showInfo();
-  //exportRule();
   $('.ehNavBar .ehCopy').on({
     click: e => {
       let _ = e.target;
@@ -137,6 +136,13 @@ function addStyle() {
       '.ehTagAct{display:none;font-weight:bold;}',
       '.ehTagAct:before{content:url("https://ehgt.org/g/mr.gif") " " attr(name) ": ";}',
       '.ehTagAct>a{cursor:pointer;}',
+      '.ehDatalist{display:none;}',
+      '.ehDatalist>ul{list-style:decimal;text-align:left;}',
+      '.ehDatalist>ul>li{cursor:pointer;}',
+      '.ehDatalist>ul>li:after{content:"  "attr(cname);font-size:9pt;font-weight:bold;}',
+      '.ehDatalistToggle{background-repeat:no-repeat;background-position:center right;padding:1px 16px 6px 4px!important;cursor:pointer;}',
+      '.ehDatalistToggle{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);}',
+      '.ehDatalistToggle.ehDatalistShow{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);}'
     ].join('')).appendTo('head');
   $('.i:has(.n),.id44>div>a:has(.tn)').hide(); //隐藏种子图标
 }
@@ -153,6 +159,42 @@ function autoClose() {
   }, 3000);
 }
 
+function autoComplete() { //自动填充
+  let main = (CONFIG['autocomplete'] || 'language,artist,female,male,parody,character,group,misc').split(',');
+  main = EHT.filter(i => main.includes(i.name));
+  $('<div class="ehDatalist"><ul></ul></div>').on('click', 'li', function(e) {
+    let value = $('[name="f_search"]').val().split(/\s+/);
+    value[value.length - 1] = e.target.textContent;
+    $('[name="f_search"]').val(value.filter(i => i).join(' ')).focus();
+    $('.ehDatalist>ul').empty();
+  }).appendTo('#searchbox');
+  $('<input type="button" class="ehDatalistToggle">').on('click', function() {
+    $('.ehDatalist').toggle();
+    $('.ehDatalistToggle').toggleClass('ehDatalistShow');
+  }).insertAfter('[name="f_search"]');
+  let lastValue;
+  $('[name="f_search"]').on({
+    click: function() {
+      $('.ehDatalist').show();
+      $('.ehDatalistToggle').removeClass('ehDatalistShow');
+    },
+    keyup: function(e) {
+      let value = e.target.value.split(/\s+/);
+      value = value[value.length - 1];
+      if (value === lastValue) return;
+      $('.ehDatalist>ul').empty();
+      if (!value) return;
+      lastValue = value;
+      value = new RegExp(value, 'i');
+      main.forEach(i => {
+        i.tags.filter(j => j.name && (j.name.match(value) || combineText(j.cname, true).match(value))).forEach(j => {
+          $(`<li cname="${combineText(j.cname,true)}">${i.name}:"${j.name}"$</li>`).appendTo('.ehDatalist>ul');
+        });
+      });
+    }
+  })
+}
+
 function autoDownload() {
   setTimeout(() => {
     if ($('.ehD-box>.g2').length > 0) {
@@ -165,7 +207,7 @@ function autoDownload() {
   }, 800);
 }
 
-function batchDown() { //待续
+function batchDown() {
   sessionStorage.batchTime = 0;
   var tr = $('.itg>tbody>tr');
   if (tr.length > 0) {
@@ -257,7 +299,7 @@ function btnAddFav0(e, url) {
     if (keydown) {
       let favcat = arr[2] || GM_getValue('lastFavcat', 0);
       if (favcat === '-1') {
-        favcat = prompt(`请选择：\n${CONFIG['bookmark'].replace(/\\n/g,'\n')}\n10.从收藏中移除`);
+        favcat = prompt(`请选择：\n${'bookmark' in CONFIG ? CONFIG['bookmark'].replace(/\\n/g,'\n') : ''}\n10.从收藏中移除`);
         if (!favcat) return;
         GM_setValue('lastFavcat', favcat);
       }
@@ -379,12 +421,12 @@ function checkImageSize() {
   }
 }
 
-function combineText(arr) {
+function combineText(arr, textOnly = undefined) {
   return arr instanceof Array ? arr.map(i => {
     if (i.type === 0) {
       return i.text;
-    } else if (i.type === 2) {
-      return `"url("${i.src.replace('http:','')}")"`;
+    } else if (!textOnly && i.type === 2) {
+      return `"url("${i.src.replace(/http.?:/g,'')}")"`;
     } else {
       return null;
     }
@@ -402,7 +444,7 @@ function copyInfo() {
   if ($('.gt[id*="td_parody"]>a').length > 0) { //parody
     let info = $('.gt[id*="td_parody"]>a').attr('id').split(/ta_|:/);
     let parody = findData(info[1], info[2]);
-    if (parody) {
+    if (Object.keys(parody).length) {
       parody = parody.cname;
     } else {
       parody = ($('#gj').text().match(/\(.*?\)/g)) ? $('#gj').text().match(/\(.*?\)/g) : $('#gn').text().match(/\(.*?\)/g);
@@ -430,33 +472,11 @@ function downloadInfo() {
   }, 800);
 }
 
-function exportRule() {
-  $('<button>Export Rule</button>').appendTo('.ehNavBar>div:eq(1)').click(function() {
-    let record = (localStorage.record) ? JSON.parse(localStorage.record) : [];
-    let exportRule = GM_getValue('exportRule', []);
-    exportRule = exportRule.concat(record).sort();
-    for (let i = 1; i < exportRule.length; i++) {
-      if (exportRule[i - 1] === exportRule[i]) {
-        exportRule.splice(i, 1);
-        i--;
-      }
-    }
-    localStorage.record = '[]';
-    GM_setValue('exportRule', exportRule);
-    saveAs(new Blob(['[AutoProxy 0.2.9]\r\n' + exportRule.join('\r\n')], {
-      type: 'text/plain;charset=utf-8'
-    }), 'e-hentai.txt');
-  });
-  $('<button>Clear Rule</button>').appendTo('.ehNavBar>div:eq(1)').click(function() {
-    localStorage.record = '[]';
-  });
-}
-
 function findData(main, sub) {
   let data = EHT.filter(i => i.name === main);
-  if (data.length === 0 || data[0].tags.length === 0) return false;
+  if (data.length === 0 || data[0].tags.length === 0) return {};
   data = data[0].tags.filter(i => i.name === sub.replace(/_/g, ' '));
-  if (data.length === 0) return false;
+  if (data.length === 0) return {};
   return {
     name: main === 'misc' ? sub : main + ':' + sub,
     cname: combineText(data[0].cname),
@@ -599,6 +619,7 @@ function showConfig() {
       <div>大图宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1">; 小图宽高比: <input name="ehConfig_rateS" type="number" placeholder="0.9"></div>
       <div>大图尺寸: <input name="ehConfig_sizeD" type="text" placeholder="1280">; 小图尺寸: <input name="ehConfig_sizeS" type="text" placeholder="780"></div>
       <div>默认设置Cookie: <input name="ehConfig_uconfig" type="text" placeholder="sa_5e844a-tf_e78085-cats_126-xl_20x1044x2068x30x1054x2078x40x1064x2088x50x1074x2098x60x1084x2108x70x1094x2118x80x1104x2128x90x1114x2138x100x1124x2148x110x1134x2158x120x1144x2168x130x1154x2178x254x1278x2302x255x1279x2303-fs_f-xr_780"></div>
+      <div>搜索栏自动完成: <input name="ehConfig_autocomplete" type="text" placeholder="language,artist,female,male,parody,character,group,misc"></div>
       <div class="ehConfigBtn"><button name="save">保存</button><button name="cancel">取消</button></div>
     `)
     .on({
@@ -687,7 +708,7 @@ function tagTranslate() {
     let info = i.id.split(/ta_|:/);
     if (info.length === 2) info.splice(1, 0, 'misc');
     return findData(info[1], info[2]);
-  }).filter(i => i);
+  }).filter(i => Object.keys(i).length);
   let css = [
     'div#taglist{overflow:visible;min-height:295px;height:auto}',
     'div#gmid{min-height:330px;height:auto;position:static}',
@@ -731,9 +752,10 @@ function saveLink() {
       platform = 2;
       fileType = '.desktop';
     }
-    saveAs(new Blob([content[platform].replace('{{url}}', location.href)], {
+    let blob = new Blob([content[platform].replace('{{url}}', location.href)], {
       type: 'application/octet-stream'
-    }), document.title + fileType);
+    });
+    $(`<a href="${URL.createObjectURL(blob)}" download="${document.title + fileType}"></a>`)[0].click();
   }).prependTo('.ehNavBar>div:eq(2)');
 }
 
