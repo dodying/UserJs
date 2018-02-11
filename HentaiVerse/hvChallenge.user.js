@@ -2,7 +2,7 @@
 // @name        [HV]Challenge
 // @description
 // @include
-// @version     1.00
+// @version     1.01
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
 // @author      Dodying
@@ -13,38 +13,23 @@
 // ==/UserScript==
 (function() {
   if (!gE('#navbar')) return;
-  var challenges = ['Normal', 'Hard', 'Nightmare', 'Hell', 'Nintendo', 'IWBTH', 'PFUDOR'];
-  var options = '';
-  challenges.forEach(function(i, j) {
-    options += '<option value="' + (j + 1) + '">' + i + '</option>';
+  let challenges = ['Normal', 'Hard', 'Nightmare', 'Hell', 'Nintendo', 'IWBTH', 'PFUDOR'];
+  let options = challenges.map(function(i, j) {
+    return '<option value="' + (j + 1) + '">' + i + '</option>';
   });
-  var init = function() {
-    gE('#level_readout>div.fc4.far.fcb>div').onclick = function() {
-      this.onclick = null;
-      var text = this.textContent.split(' ');
-      var _ch = challenges.indexOf(text[0]) + 1;
-      this.innerHTML = '<select style="position:relative;top:-5px;">' + options + '</select> ' + text[1];
-      this.querySelector('select').value = _ch;
-      this.querySelector('select').onchange = function() {
-        var value = this.value;
-        var iframe = gE('body').appendChild(document.createElement('iframe'));
-        iframe.id = 'hvChallenge';
-        iframe.src = '?s=Character&ss=se';
-        iframe.style.cssText = 'display:none;';
-        iframe.onload = function() {
-          var target = gE('[name="difflevel"][value="' + value + 'ch"]', iframe.contentWindow.document).checked;
-          if (target) {
-            iframe.onload = null;
-            gE('body').removeChild(iframe);
-            gE('#level_readout>div.fc4.far.fcb>div').textContent = gE('#level_readout>div.fc4.far.fcb>div>select>option:nth-child(' + value + ')').textContent + ' ' + text[1];
-            init();
-            return;
-          }
-          gE('[name="difflevel"][value="' + value + 'ch"]', iframe.contentWindow.document).checked = true;
-          gE('[type="submit"]', iframe.contentWindow.document).click();
-        };
-      };
-    };
+  let init = function() {
+    gE('#level_readout>div.fc4.far.fcb>div').onclick = function(e) {
+      e.target.onclick = null;
+      let text = e.target.textContent.split(' ');
+      e.target.innerHTML = '<select style="position:relative;top:-5px;">' + options + '</select> ' + text[1];
+      e.target.querySelector('select').value = challenges.indexOf(text[0]) + 1;
+      e.target.querySelector('select').onchange = function(e1) {
+        changeChallenge(e1.target.value, function() {
+          gE('#level_readout>div.fc4.far.fcb>div').textContent = challenges[e1.target.value - 1] + ' ' + text[1];
+          init();
+        });
+      }
+    }
   };
   init();
 
@@ -58,5 +43,48 @@
     } else if (typeof mode === 'object' && parent === undefined) {
       return mode.querySelector(ele);
     }
+  }
+
+  function post(href, func, parm, type) { //post
+    let xhr = new XMLHttpRequest();
+    xhr.open(parm ? 'POST' : 'GET', href);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.responseType = type || 'document';
+    xhr.onerror = function() {
+      xhr = null;
+      post(href, func, parm, type);
+    };
+    xhr.onload = function(e) {
+      if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
+        let data = e.target.response;
+        if (xhr.responseType === 'document' && gE('#messagebox', data)) {
+          if (gE('#messagebox')) {
+            gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
+          } else {
+            gE('#csp').appendChild(gE('#messagebox', data));
+          }
+        }
+        func(data, e);
+      }
+      xhr = null;
+    };
+    xhr.send(parm);
+  }
+
+  function changeChallenge(level, func) { //level=1-7
+    post('?s=Character&ss=se', function(data) {
+      let settings = [...gE('#settings_outer input,#settings_outer select', 'all', data)].map(function(i) {
+        if (i.type === 'radio' || i.type === 'checkbox') {
+          return i.checked ? i.name + '=' + i.value : '';
+        } else {
+          return i.name + '=' + i.value;
+        }
+      }).filter(function(i) {
+        return i;
+      }).join('&');
+      post('?s=Character&ss=se', function() {
+        func();
+      }, settings.replace(/difflevel=\d+/, 'difflevel=' + level + 'ch'));
+    });
   }
 })();
