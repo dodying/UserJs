@@ -21,7 +21,7 @@ function main() {
       xhr(id, sessionStorage.getItem('equip'));
     } else {
       let equip = prompt('Which you want to get: \n1.One-Handed\n2.Two-Handed\n3.Staffs\n4.Shields\n5.Cloth Armor\n6.Light Armor\n7.Heavy Armor');
-      if (!equip.match(/^[1-7]$/)) return;
+      if (!equip || !equip.match(/^[1-7]$/)) return;
       sessionStorage.setItem('equip', equip);
       xhr(id, sessionStorage.getItem('equip'));
     }
