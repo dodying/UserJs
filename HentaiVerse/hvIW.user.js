@@ -1,0 +1,395 @@
+// ==UserScript==
+// @name        [HV]IW
+// @include     http://alt.hentaiverse.org/*
+// @exclude     http://alt.hentaiverse.org/equip/*
+// @include     http*://hentaiverse.org/*
+// @exclude     http*://hentaiverse.org/equip/*
+// @version     1.0.0
+// @author      dodying
+// @namespace   https://github.com/dodying/UserJs
+// @supportURL  https://github.com/dodying/UserJs/issues
+// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @run-at      document-end
+// @grant       unsafeWindow
+// @grant       GM_getValue
+// @grant       GM_setValue
+// ==/UserScript==
+(function() {
+  'use strict';
+
+  //战斗中-监测日志
+  if (!gE('#navbar') && GM_getValue('equip') && GM_getValue('tasks', []).length) {
+    let observer = new MutationObserver(checkLog);
+    observer.observe(gE('#battle_main'), {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  //container
+  let eContainer = gE('body').appendChild(cE('div'));
+  eContainer.style = 'position:fixed;top:100px;left:' + (gE('#csp').offsetLeft + gE('#csp').offsetWidth) + 'px;';
+  eContainer.innerHTML = '<button name="config">IW Config</button><br><button name="log">IW Log</button>';
+
+  let eConfig = eContainer.querySelector('[name="config"]');
+  eConfig.addEventListener('click', function() {
+    if (gE('#iwTask')) {
+      gE('#iwTask').style.display = gE('#iwTask').style.display === 'none' ? 'block' : 'none';
+      return;
+    }
+    let iframe = gE('body').appendChild(cE('iframe'));
+    iframe.src = 'about:blank';
+    iframe.frameBorder = '0';
+    iframe.id = 'iwTask';
+    let place = gE('#itemworld_right>.v') || gE('#csp');
+    iframe.style = 'background-color:#EDEBDF;z-index:3;border:1px solid #5C0D12;position:absolute;top:' + place.offsetTop + 'px;left:' + place.offsetLeft + 'px;width:' + place.offsetWidth + 'px;height:' + place.offsetHeight + 'px;';
+    iframe.onload = function() {
+      let doc = iframe.contentWindow.document;
+      doc.body.innerHTML = '0.规则: 当<b>不</b>满足 <b>当前Upgrades和 * 10 >= 目标Upgrades和 * Potency Tier</b> 时，<b>Reforge</b><br>1. 选择equip后，点击New Task，设置后保存<br>2. 第一个Target选择框留空，表示删除该任务<br>3. 只需设置一个属性时，将第二个Target选择框留空<br>Max Potency Tier: <input name="tierMax" placeholder="10" type="number"><br><input id="pre" type="checkbox"><label for="pre">预模式: 先(X15)到Tier 2, 再(X20)</label><br><input id="targetOnly" type="checkbox"><label for="targetOnly">只要目标完成，不管Tier多少，都停止</label><br>';
+      //Style
+      let style = gE('head', doc).appendChild(cE('style'));
+      style.textContent = '*{margin:5px;text-align:center;}table{border:2px solid #000;border-collapse:collapse;margin:0 auto;}table td,table th{border:1px solid #000;}input{text-align:right;width:80px;}';
+      //
+      let eBtnReset = gE('body', doc).appendChild(cE('button'));
+      eBtnReset.textContent = 'I have enough Amnesia Shards';
+      eBtnReset.onclick = function() {
+        GM_setValue('empty', false);
+        location = location.search;
+      };
+      //Table
+      let eTable = gE('body', doc).appendChild(cE('table'));
+      let eTbody = eTable.appendChild(cE('tbody'));
+      let eTr = eTbody.appendChild(cE('tr'));
+      eTr.innerHTML = '<th></th><th>Equip</th><th>Target</th>';
+      //Button
+      let select = [
+        '<select name="potency">',
+        '<option></option>',
+        '<option>Coldproof</option>',
+        '<option>Darkproof</option>',
+        '<option>Elecproof</option>',
+        '<option>Fireproof</option>',
+        '<option>Holyproof</option>',
+        '<option>Windproof</option>',
+        '<option>Capacitor</option>',
+        '<option>Juggernaut</option>',
+        '<option>Butcher</option>',
+        '<option>Fatality</option>',
+        '<option>Overpower</option>',
+        '<option>Swift Strike</option>',
+        '<option>Annihilator</option>',
+        '<option>Archmage</option>',
+        '<option>Economizer</option>',
+        '<option>Penetrator</option>',
+        '<option>Spellweaver</option>',
+        '</select>',
+      ].join('');
+      let select2 = '<select name="tier">' + [1, 2, 3, 4, 5].map(function(i) {
+        return '<option value="' + i + '">' + i + '</option>';
+      }).join('') + '</select>';
+      let order = 1;
+      let eBtnNew = gE('body', doc).appendChild(cE('button'));
+      eBtnNew.textContent = 'New Task';
+
+      function newTr(obj) {
+        obj = obj instanceof Object ? obj : {};
+        let equip = obj.equip || unsafeWindow.select_equip;
+        if (!equip) return;
+        let title = obj.title || unsafeWindow.dynjs_equip[equip].t;
+        let url = obj.url || unsafeWindow.dynjs_equip[equip].k;
+        let token = obj.token || unsafeWindow.select_token;
+        let type = obj.type || location.search.match('&filter=') ? location.search.split(/&|=/)[5] : '1handed';
+        let eTr = eTbody.appendChild(cE('tr'));
+        eTr.innerHTML = '<td>' + (order++) + '</td><td><a name="url" target="_blank" href="/equip/' + equip + '/' + url + '">' + title + '</a><input name="equip" type="hidden" value="' + equip + '"><input name="token" type="hidden" value="' + token + '"><input name="type" type="hidden" value="' + type + '"></td><td><div>' + select + ': ' + select2 + '</div><div>' + select + ': ' + select2 + '</div></td>';
+        return eTr;
+      }
+      eBtnNew.onclick = newTr;
+      let eBtnSave = gE('body', doc).appendChild(cE('button'));
+      eBtnSave.textContent = 'Save Config';
+      eBtnSave.onclick = function() {
+        let tasks = [];
+        let url = gE('[name="url"]', 'all', doc);
+        let equip = gE('[name="equip"]', 'all', doc);
+        let token = gE('[name="token"]', 'all', doc);
+        let type = gE('[name="type"]', 'all', doc);
+        let potency = gE('[name="potency"]', 'all', doc);
+        let tier = gE('[name="tier"]', 'all', doc);
+        for (let i = 0; i < equip.length; i++) {
+          if (potency[i * 2].value) {
+            let _target = [];
+            _target.push(potency[i * 2].value, tier[i * 2].value);
+            if (potency[i * 2 + 1].value) _target.push(potency[i * 2 + 1].value, tier[i * 2 + 1].value);
+            tasks.push({
+              equip: equip[i].value,
+              title: url[i].textContent,
+              url: url[i].getAttribute('href').split('/')[3],
+              token: token[i].value,
+              type: type[i].value,
+              target: _target.join()
+            });
+          }
+        }
+        GM_setValue('tasks', tasks);
+        GM_setValue('tierMax', gE('[name="tierMax"]', doc).value ? gE('[name="tierMax"]', doc).value * 1 : 10);
+        GM_setValue('pre', gE('#pre', doc).checked);
+        GM_setValue('targetOnly', gE('#targetOnly', doc).checked);
+        gE('body').removeChild(iframe);
+        location = location.search;
+      };
+
+      if (GM_getValue('tasks', []).length) {
+        let tasks = GM_getValue('tasks', []);
+        for (let i of tasks) {
+          let eTr = newTr(i);
+          let potency = gE('[name="potency"]', 'all', eTr);
+          let tier = gE('[name="tier"]', 'all', eTr);
+
+          let _target = i.target.split(',');
+          potency[0].value = _target[0];
+          tier[0].value = _target[1];
+          if (_target.length === 4) {
+            potency[1].value = _target[2];
+            tier[1].value = _target[3];
+          }
+        }
+      }
+      if (GM_getValue('tierMax')) gE('[name="tierMax"]', doc).value = GM_getValue('tierMax');
+      if (GM_getValue('pre')) gE('#pre', doc).checked = GM_getValue('pre');
+      if (GM_getValue('targetOnly')) gE('#targetOnly', doc).checked = GM_getValue('targetOnly');
+    }
+  });
+  let eLog = eContainer.querySelector('[name="log"]');
+  eLog.addEventListener('click', function() {
+    if (gE('#iwLog')) {
+      gE('body').removeChild(gE('#iwLog'))
+      return;
+    }
+    let iframe = gE('body').appendChild(cE('iframe'));
+    iframe.src = 'about:blank';
+    iframe.frameBorder = '0';
+    iframe.id = 'iwLog';
+    let place = gE('#itemworld_right>.v') || gE('#csp');
+    iframe.style = 'background-color:#EDEBDF;z-index:3;border:1px solid #5C0D12;position:absolute;top:' + place.offsetTop + 'px;left:' + place.offsetLeft + 'px;width:' + place.offsetWidth + 'px;height:' + place.offsetHeight + 'px;';
+    iframe.onload = function() {
+      let log = GM_getValue('log', {});
+      let html = ['<tr><th>equip</th><th>time</th><th>info</th></tr>'];
+      let txt = ['equip\ttime\tinfo'];
+      let csv = ['equip,time,info'];
+      for (let i in log) {
+        for (let j of log[i]) {
+          let _log = [].concat(i, j.split('|||'));
+          html.push('<tr><td>' + _log.join('</td><td>') + '</td></tr>');
+          txt.push(_log.join('\t'));
+          csv.push(_log.join());
+        }
+      }
+
+      let doc = iframe.contentWindow.document;
+      let style = gE('head', doc).appendChild(cE('style'));
+      style.textContent = '*{margin:5px;text-align:center;}table{border:2px solid #000;border-collapse:collapse;margin:0 auto;}table td,table th{border:1px solid #000;}input{text-align:right;width:80px;}';
+
+      let logContainer = gE('body', doc).appendChild(cE('div'));
+
+      let csvA = logContainer.appendChild(cE('a'));
+      csvA.textContent = 'download .CSV';
+      csvA.href = '#';
+      csvA.download = 'log.csv';
+      csvA.onclick = function() {
+        let csvBlob = new Blob([csv.join('\n')], {
+          type: 'octet/stream'
+        });
+        csvA.target = '_blank';
+        csvA.href = URL.createObjectURL(csvBlob);
+      }
+
+      let txtA = logContainer.appendChild(cE('a'));
+      txtA.textContent = 'download .TXT';
+      txtA.href = '#';
+      txtA.download = 'log.txt';
+      txtA.onclick = function() {
+        let csvBlob = new Blob([txt.join('\r\n')], {
+          type: 'octet/stream'
+        });
+        txtA.target = '_blank';
+        txtA.href = URL.createObjectURL(csvBlob);
+      }
+
+      let btnReset = logContainer.appendChild(cE('button'));
+      btnReset.textContent = 'Log Reset';
+      btnReset.onclick = function() {
+        GM_setValue('log', {});
+      }
+
+      let table = logContainer.appendChild(cE('table'));
+      table.innerHTML = '<tbody>' + html.join('') + '</tbody>';
+    }
+  });
+
+  //非战斗时，检查装备
+  if (gE('#navbar') && GM_getValue('tasks', []).length && !GM_getValue('empty', false)) {
+    let task = GM_getValue('tasks')[0];
+    if (!task) return;
+    let equip = task.equip;
+    GM_setValue('equip', equip);
+    let target = task.target.split(',');
+    post('/equip/' + equip + '/' + task.url, function(data) {
+      let upgrades = gE('#ep>span', 'all', data);
+      if (upgrades.length) { //Potency Tier: >0
+        let potency = gE('.eq>div:nth-child(2)', data).textContent.match(/Potency Tier: (\d+)/)[1] * 1;
+        upgrades = [...upgrades].map(function(i) {
+          let re = i.textContent.match(/(\w+) Lv\.(\d+)/);
+          return [re[1], re[2] * 1];
+        });
+        let tier = 0;
+        let tierNow = 0;
+        let targetOnly = true;
+        for (let i = 0; i < target.length; i += 2) {
+          let name = target[i];
+          let _tier = target[i + 1] * 1;
+          tier += _tier;
+          let _tierNow = upgrades.filter(function(i) {
+            return i[0] === name;
+          });
+          _tierNow = _tierNow.length ? _tierNow[0][1] * 1 : 0;
+          tierNow += _tierNow;
+          if (_tierNow < _tier) targetOnly = false;
+        }
+        if (tierNow * 10 >= tier * potency) {
+          if (potency === GM_getValue('tierMax', 10) || (GM_getValue('targetOnly') && _tierNow)) { //Lv max -> next equip
+            addLog('Completed: ' + equip);
+            addLog('Equip Url: ' + location.origin + '/equip/' + equip + '/' + task.url);
+            let tasks = GM_getValue('tasks');
+            tasks.splice(0, 1);
+            GM_setValue('tasks', tasks);
+          }
+          startTask(potency < 2); //AND continue iw
+        } else { //reforge AND restart
+          post('?s=Forge&ss=fo&filter=' + task.type, function() {
+            if (gE('#messagebox') && gE('#messagebox').textContent.match('Insufficient amnesia shards')) {
+              GM_setValue('empty', true);
+            } else {
+              let info = [...gE('#ep>span', 'all', data)].map(function(i) {
+                return i.textContent;
+              }).join(' & ');
+              addLog('Reforged: ' + equip);
+              addLog('Equip Url: ' + location.origin + '/equip/' + equip + '/' + task.url);
+              addLog('Info: Tier: ' + potency + ' & ' + info);
+              startTask(true);
+            }
+          }, 'select_item=' + equip);
+        }
+      } else { //Potency Tier: 0
+        startTask(true);
+      }
+    });
+  }
+})();
+
+function gE(ele, mode, parent) { //获取元素
+  if (typeof ele === 'object') {
+    return ele;
+  } else if (mode === undefined && parent === undefined) {
+    return (isNaN(ele * 1)) ? document.querySelector(ele) : document.getElementById(ele);
+  } else if (mode === 'all') {
+    return (parent === undefined) ? document.querySelectorAll(ele) : parent.querySelectorAll(ele);
+  } else if (typeof mode === 'object' && parent === undefined) {
+    return mode.querySelector(ele);
+  }
+}
+
+function cE(name) { //创建元素
+  return document.createElement(name);
+}
+
+function post(href, func, parm, type) { //post
+  let xhr = new XMLHttpRequest();
+  xhr.open(parm ? 'POST' : 'GET', href);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  xhr.responseType = type || 'document';
+  xhr.onerror = function() {
+    xhr = null;
+    post(href, func, parm, type);
+  };
+  xhr.onload = function(e) {
+    if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
+      let data = e.target.response;
+      if (xhr.responseType === 'document' && gE('#messagebox', data)) {
+        if (gE('#messagebox')) {
+          gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
+        } else {
+          gE('#csp').appendChild(gE('#messagebox', data));
+        }
+      }
+      func(data, e);
+    }
+    xhr = null;
+  };
+  xhr.send(parm);
+}
+
+function checkLog(e) {
+  if (['pauseChange', 'hvAALog'].includes(e[0].target.className)) return;
+  let filter = GM_getValue('equip') && gE('#btcp') && gE('#btcp').textContent.match('Item world cleared!') && e.some(function(i) {
+    return i.target === gE('#textlog>tbody');
+  });
+  if (filter) {
+    let battleLog = gE('#textlog td', 'all');
+    let regexp = /^(The equipment|Unlocked innate potential)/;
+    for (let i of battleLog) {
+      if (i.textContent === 'You are Victorious!') {
+        break;
+      } else if (regexp.test(i.textContent)) {
+        addLog(i.textContent);
+      }
+    }
+  }
+}
+
+function addLog(text) {
+  let log = GM_getValue('log', {});
+  let equip = GM_getValue('equip');
+  if (!(equip in log)) log[equip] = [];
+  log[equip].push(new Date().toLocaleString(navigator.language, {
+    hour12: false
+  }) + '|||' + text);
+  GM_setValue('log', log);
+}
+
+function startTask(change) {
+  if (!GM_getValue('tasks', []).length) return;
+
+  function start() {
+    let task = GM_getValue('tasks')[0];
+    setTimeout(function() {
+      post('?s=Battle&ss=iw&filter=' + task.type, function() {
+        location = location.search;
+      }, 'initid=' + task.equip + '&inittoken=' + task.token);
+    }, (Math.random() * 60 + 5) * 1000);
+  }
+  if (GM_getValue('pre') && change && !gE('#level_readout').textContent.match('IWBTH')) {
+    //need change AND challenge != x15
+    changeChallenge('6', start);
+  } else if (GM_getValue('pre') && !change && !gE('#level_readout').textContent.match('PFUDOR')) {
+    //not need change BUT challenge != pre
+    changeChallenge('7', start);
+  } else {
+    start();
+  }
+}
+
+function changeChallenge(level, func) { //level=1-7
+  post('?s=Character&ss=se', function(data) {
+    let settings = [...gE('#settings_outer input,#settings_outer select', 'all', data)].map(function(i) {
+      if (i.type === 'radio' || i.type === 'checkbox') {
+        return i.checked ? i.name + '=' + i.value : '';
+      } else {
+        return i.name + '=' + i.value;
+      }
+    }).filter(function(i) {
+      return i;
+    }).join('&');
+    post('?s=Character&ss=se', function() {
+      func();
+    }, settings.replace(/difflevel=\d+/, 'difflevel=' + level + 'ch'));
+  });
+}
