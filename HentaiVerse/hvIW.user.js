@@ -4,7 +4,7 @@
 // @exclude     http://alt.hentaiverse.org/equip/*
 // @include     http*://hentaiverse.org/*
 // @exclude     http*://hentaiverse.org/equip/*
-// @version     1.0.0
+// @version     1.0.1
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -255,7 +255,7 @@
           if (_tierNow < _tier) targetOnly = false;
         }
         if (tierNow * 10 >= tier * potency) {
-          if (potency === GM_getValue('tierMax', 10) || (GM_getValue('targetOnly') && _tierNow)) { //Lv max -> next equip
+          if (potency === GM_getValue('tierMax', 10) || (GM_getValue('targetOnly') && targetOnly)) { //Lv max -> next equip
             addLog('Completed: ' + equip);
             addLog('Equip Url: ' + location.origin + '/equip/' + equip + '/' + task.url);
             let tasks = GM_getValue('tasks');
