@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.07
+// @version     1.07.1
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -61,24 +61,21 @@ function init() {
     btnSearch();
     tagEvent();
     copyInfo();
-    if (location.hash.match('#') && CONFIG['autoDownload']) autoDownload();
+    if (location.hash.match('#') && CONFIG['autoStartDownload']) autoStartDownload();
     if (location.hash === '#' + CONFIG['autoClose']) autoClose();
-    downloadProgress();
     abortPending(); //终止EHD所有下载
   } else { //搜索页
     changeName('.it5>a');
     btnAddFav2();
     btnSearch2();
-    keywordFunction();
     quickDown(); //右键：下载
-    batchDown();
+    //batchDown();
     getInfo(tagPreview, hideGalleries, checkExist); //获取信息 -> 标签预览 AND 隐藏某些画集 AND 检查本地是否存在
     rateInSearchPage();
     autoComplete();
     checkForNew();
   }
-  saveLink();
-  showDownloadProgress();
+  if (CONFIG['saveLink']) saveLink();
   showTooltip();
   $('.ehNavBar .ehCopy').on({
     click: e => {
@@ -94,7 +91,6 @@ function init() {
   $('.ehNavBar input[type="button"]:not(.ehCopy)').on({
     contextmenu: () => false
   });
-  $('<a>1</a>').css('visibility', 'hidden').appendTo('.ehNavBar>div:empty');
 }
 
 function abortPending() {
@@ -273,19 +269,19 @@ function autoComplete() { //自动填充
   })
 }
 
-function autoDownload() {
+function autoStartDownload() {
   setTimeout(() => {
     if ($('.ehD-box>.g2').length > 0) {
       setTimeout(() => {
         $('.ehD-box>.g2:eq(0)').click();
       }, 2000);
     } else {
-      autoDownload();
+      autoStartDownload();
     }
   }, 800);
 }
 
-function batchDown() {
+function batchDown() { //待续
   sessionStorage.batchTime = 0;
   var tr = $('.itg>tbody>tr');
   if (tr.length > 0) {
@@ -344,7 +340,6 @@ function batchDown() {
   $('<input type="button" value="Open">').appendTo('.ehNavBar>div:eq(2)').on({
     contextmenu: () => false,
     mousedown: function(e) {
-      $('.showDownloadProgress').click();
       $('.itg>tbody>tr:visible>td>input:checked').each(function(i) {
         var href = $(this).parents().eq(1).find('.itd>div>.it5>a').attr('href');
         var target = $(this).parents().eq(1).find('.it3').find('.btnAddFav,.i[id^="favicon_"]')[0];
@@ -375,7 +370,7 @@ function btnAddFav0(e, url) {
     let arr = event[i].split(',');
     let keydown = arr[1] === '-1' ? true : e[['altKey', 'ctrlKey', 'shiftKey'][arr[1]]];
     if (keydown) {
-      let favcat = arr[2] || GM_getValue('lastFavcat', 0);
+      let favcat = arr[2] === undefined ? GM_getValue('lastFavcat', 0) : arr[2];
       if (favcat === '-1') {
         favcat = prompt(`请选择：\n${'bookmark' in CONFIG ? CONFIG['bookmark'].replace(/\\n/g,'\n') : ''}\n10.从收藏中移除`);
         if (!favcat) return;
@@ -387,11 +382,11 @@ function btnAddFav0(e, url) {
   }
 }
 
-function btnAddFav() {
+function btnAddFav() { //按钮 -> 加入收藏
   let fav = -1;
   if ($('#gdf>#fav>.i').length > 0) fav = 0 - (parseInt($('#gdf>#fav>.i').css('background-position-y')) + 2) / 19;
   let url = location.href.split('/');
-  $('#gdf').empty().removeAttr('onclick').on({
+  $('#gdf').attr('title', CONFIG['bookmarkEventChs']).empty().removeAttr('onclick').on({
     contextmenu: () => false,
     mousedown: e => {
       btnAddFav0(e, url);
@@ -404,9 +399,9 @@ function btnAddFav() {
   }
 }
 
-function btnAddFav2() {
+function btnAddFav2() { //按钮 -> 加入收藏
   $('<div class="btnAddFav"></div>').appendTo('.it3:not(:has(.i[id^="favicon_"])),.id44:not(:has(.i[id^="favicon_"]))');
-  $('.btnAddFav,.i[id^="favicon_"]').removeAttr('onclick').on({
+  $('.btnAddFav,.i[id^="favicon_"]').attr('title', CONFIG['bookmarkEventChs']).removeAttr('onclick').on({
     contextmenu: () => false,
     mousedown: e => {
       let href = $(e.target).parentsUntil('.itd,#pp').eq(-1).find('.it5>a,.id2>a').attr('href');
@@ -415,7 +410,7 @@ function btnAddFav2() {
   });
 }
 
-function btnSearch() {
+function btnSearch() { //按钮 -> 搜索
   let text = $('#gn').text() || $('#gj').text();
   if (text === '') return;
   $('<div class="ehSearch"></div>').appendTo('#gd2');
@@ -433,8 +428,8 @@ function btnSearch() {
   });
 }
 
-function btnSearch2() {
-  $('<div class="btnSearch"></div>').appendTo('.it3,.id44').on({
+function btnSearch2() { //按钮 -> 搜索
+  $('<div class="btnSearch" title="左键: 搜索<br>右键: 搜索 + 中文"></div>').appendTo('.it3,.id44').on({
     mousedown: e => {
       let name = $(e.target).parentsUntil('.itd,#pp').eq(-1).find('.it5>a,.id2>a').text();
       name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|\d+|\-|!/g, '').replace(/\|.*/, '').trim();
@@ -479,12 +474,12 @@ function checkExist() { //检查本地是否存在
       xhr('http://127.0.0.1:3000/', e => {
         if (e.response.length) {
           e.response.forEach((j, k) => {
-            $(`<span class="ehExist" name="force" title="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
+            $(`<span class="ehExist" name="force" title="点击复制<br>${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
           });
         } else {
           xhr('http://127.0.0.1:3000/', e => {
             e.response.forEach((j, k) => {
-              $(`<span class="ehExist" title="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
+              $(`<span class="ehExist" title="点击复制<br>${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
             });
           }, 'name=' + name2, {
             responseType: 'json'
@@ -526,7 +521,7 @@ function checkForNew() {
   }).appendTo('#nb');
   $(listStyle).appendTo('#nb');
   $('<a href="#">Show Check List</a>').on('click', function(e) {
-    if ($('.ehCheckTable').length){
+    if ($('.ehCheckTable').length) {
       $('.ehCheckTable').toggle();
       return;
     }
@@ -676,23 +671,6 @@ function copyInfo() { //复制信息
   }
 }
 
-function downloadProgress() { //下载进度
-  if ($('.ehD-box>.g2:eq(0)>a').length === 0) {
-    setTimeout(() => {
-      downloadProgress();
-    }, 200);
-  }
-  let name = location.href.split('/')[4];
-  setInterval(() => {
-    if (!$('.ehD-status').length || !$('.ehD-status').text().match(/\d+/g)) return;
-    let info = $('.ehD-status').text().match(/\d+/g);
-    let download = GM_getValue('downloadProgress', {});
-    download[name] = [info[2], info[0]];
-    if (info[0] === info[2]) delete download[name];
-    GM_setValue('downloadProgress', download);
-  }, 800);
-}
-
 function findData(main, sub = undefined, textOnly = false) {
   let data = EHT.filter(i => i.name === main);
   if (data.length === 0 || data[0].tags.length === 0) return {};
@@ -739,25 +717,6 @@ function getInfo(...todos) { //获取信息
       });
     }
   }, 200);
-}
-
-function keywordFunction() {
-  if ($('input.stdinput,form>input[name="favcat"]+div>input').val()) {
-    let value = $('input.stdinput,form>input[name="favcat"]+div>input').val();
-    if (value.match(/\w+:"?([\w \-\.]+)\$?"?\$? language:chinese\$$/))
-      value = value.match(/\w+:"?([\w \-\.]+)\$?"?\$? language:chinese\$$/)[1];
-    $('<input type="button" class="ehCopy>').val(value).appendTo('.ehNavBar>div:eq(0)');
-    document.title = value;
-    $('<input type="button" value="Find Parody">').appendTo('.ehNavBar>div:eq(1)').on({
-      click: function() {
-        let p = '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0&f_search=parody%3A';
-        let t = prompt('请输入系列').replace(/[\(\)\[\]!?]/g, '').trim().toLowerCase();
-        p += (t.match(/ /)) ? '"' + t + '"%24' : t;
-        p += '+language%3Achinese%24&f_apply=Apply+Filter';
-        location = p;
-      }
-    });
-  }
 }
 
 function hideGalleries() { //隐藏某些画集
@@ -914,12 +873,13 @@ function showConfig() { //显示设置
     .html(`
       <div><label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">里站自动跳转到表站</label></div>
       <div><label for="ehConfig_openInTab"><input type="checkbox" id="ehConfig_openInTab">在新标签页中打开，而不是弹窗</label></div>
-      <div><label for="ehConfig_autoDownload"><input type="checkbox" id="ehConfig_autoDownload">点击Open时，自动开始下载</label></div>
+      <div><label for="ehConfig_autoStartDownload"><input type="checkbox" id="ehConfig_autoStartDownload">点击Open时，自动开始下载</label></div>
       <div><label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">信息页显示所有预览图</label></div>
       <div><label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything Command-line Interface</a>)</label></div>
+      <div><label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">保存链接按钮</label></div>
       <div>当用<select name="ehConfig_autoClose"><option value="0">左键</option><option value="1">中键</option><option value="2">右键</option></select>点击Open时，下载完成后自动关闭</div>
       <div>收藏夹: <input name="ehConfig_bookmark" type="text" placeholder="0.未下载\\n1.连载-系列\\n2.CG-COS-画集-女同\\n3.东方-LL-舰娘-偶像大师\\n4.同人\\n5.大师-萝莉\\n6.纯爱-Np-1♂\\n7.纯爱-乱伦\\n8.纯爱-2p-♂♀\\n9.难定-杂志"></div>
-      <div>收藏按钮事件: <input name="ehConfig_bookmarkEvent" type="text" placeholder="0,-1,10|1,-1,-1|2,2,0|2,-1"></div>
+      <div>收藏按钮事件: <input name="ehConfig_bookmarkEvent" type="text" placeholder="0,-1,10|1,-1,-1|2,2,0|2,-1"><input name="ehConfig_bookmarkEventChs" type="hidden"></div>
       <div>大图宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1">; 小图宽高比: <input name="ehConfig_rateS" type="number" placeholder="0.9"></div>
       <div>大图尺寸: <input name="ehConfig_sizeD" type="number" placeholder="1280">; 小图尺寸: <input name="ehConfig_sizeS" type="number" placeholder="780"></div>
       <div>默认设置Cookie: <input name="ehConfig_uconfig" type="text" placeholder="sa_5e844a-tf_e78085-cats_126-xl_20x1044x2068x30x1054x2078x40x1064x2088x50x1074x2098x60x1084x2108x70x1094x2118x80x1104x2128x90x1114x2138x100x1124x2148x110x1134x2158x120x1144x2168x130x1154x2178x254x1278x2302x255x1279x2303-fs_f-xr_780"></div>
@@ -951,6 +911,25 @@ function showConfig() { //显示设置
               }
               config[name.replace('ehConfig_', '')] = value;
             });
+            let bookmarkEvent = config['bookmarkEvent'].split('|');
+            let bookmarkEventChs = [];
+            for (let i of bookmarkEvent) {
+              let arr = i.split(',').map(i => i * 1);
+              let chs = [];
+              chs.push('鼠标' + '左中右'.split('')[arr[0]] + '键');
+              chs.push(arr[1] === -1 ? '任意按键' : ['altKey', 'ctrlKey', 'shiftKey'][arr[1]]);
+              if (arr[2] === undefined) {
+                chs.push('上次选择');
+              } else if (arr[2] === -1) {
+                chs.push('自行选择');
+              } else if (arr[2] >= 0 && arr[2] <= 9) {
+                chs.push(arr[2]);
+              } else if (arr[2] === 10) {
+                chs.push('移除');
+              }
+              bookmarkEventChs.push(chs[0] + ' + ' + chs[1] + ' -> ' + chs[2]);
+            }
+            config.bookmarkEventChs = bookmarkEventChs.join('<br>');
             GM_setValue('config', config);
           }
           $('.ehConfig').remove();
@@ -969,24 +948,6 @@ function showConfig() { //显示设置
     } else if (i.type === 'checkbox') {
       i.checked = value;
     }
-  });
-}
-
-function showDownloadProgress() { //显示下载进度
-  $('<input type="button" class="showDownloadProgress" value="Show Info">').appendTo('.ehNavBar>div:eq(1)').click(function() {
-    $(this).remove();
-    var showDownloadProgressInterval = setInterval(function() {
-      var download = GM_getValue('downloadProgress', {});
-      if (Object.keys(download).length === 0) return;
-      var body = [];
-      for (var i in download) {
-        body.push(i + ': ' + download[i][0] + '/' + download[i][1]);
-      }
-      setNotification('下载进度', body.join('\n'));
-    }, 2000);
-  });
-  $(window).unload(function() {
-    GM_setValue('downloadProgress', {});
   });
 }
 
@@ -1061,7 +1022,7 @@ function tagEvent() { //标签事件
 function tagPreview() { //标签预览
   let gmetadata = $('.itg').data('gmetadata');
   $('<div class="ehTagPreview"></div>').appendTo('body');
-  $('.ido').on({
+  $('body').on({
     mousemove(e) {
       if (!$(e.target).is('.it5>a')) {
         $('.ehTagPreview').hide();
@@ -1120,7 +1081,7 @@ function tagTranslate() { //翻译标签
 }
 
 function saveLink() { //保存链接
-  $('<input type="button" value="Shortcut">').click(function() {
+  $('<input type="button" title="创建链接" value="Shortcut">').click(function() {
     var content = [
       '[InternetShortcut]\r\nURL={{url}}',
       '<?xml version=\'1.0\' encoding=\'UTF-8\'?><!DOCTYPE plist PUBLIC \'-//Apple//DTD PLIST 1.0//EN\' \'http://www.apple.com/DTDs/PropertyList-1.0.dtd\'><plist version=\'1.0\'><dict><key>URL</key><string>{{url}}</string></dict></plist>',
