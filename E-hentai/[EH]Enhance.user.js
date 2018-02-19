@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.07.1
+// @version     1.08
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -25,16 +25,13 @@
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_getResourceText
-// @grant       GM_registerMenuCommand
 // @grant       GM_xmlhttpRequest
 // @connect     127.0.0.1
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1518335359727
 // @run-at      document-end
 // ==/UserScript==
-/**
- * dom.allow_scripts_to_close_windows
- */
+
 const CONFIG = GM_getValue('config', {});
 const EHT = JSON.parse(GM_getResourceText('EHT')).dataset;
 
@@ -46,8 +43,8 @@ function init() {
       $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && location.pathname.match('/g/') ? 'top:0;' : 'bottom:0;');
     }
   });
-  GM_registerMenuCommand('[EH]Enhance Settings', showConfig, 'S');
-  if (location.pathname.match('/g/')) { //信息页
+  showConfig();
+  if ($('.gm').length) { //信息页
     changeName('#gn');
     if (CONFIG['ex2eh'] && jumpHost()) return;
     tagTranslate();
@@ -55,42 +52,53 @@ function init() {
       GM_setValue('apikey', unsafeWindow.apikey);
       GM_setValue('apiuid', unsafeWindow.apiuid);
     }
-    if (CONFIG['showAllThumb']) showAllThumb();
-    if (CONFIG['sizeS'] && CONFIG['sizeD']) checkImageSize();
-    btnAddFav();
-    btnSearch();
-    tagEvent();
-    copyInfo();
-    if (location.hash.match('#') && CONFIG['autoStartDownload']) autoStartDownload();
-    if (location.hash === '#' + CONFIG['autoClose']) autoClose();
-    abortPending(); //终止EHD所有下载
+    new Promise((resolve, reject) => {
+      showAllThumb(resolve, reject);
+    }).then(() => {
+      return new Promise((resolve, reject) => {
+        checkImageSize(resolve, reject);
+      });
+    }).then(() => {
+      highlightBlacklist();
+      btnAddFav();
+      btnSearch();
+      tagEvent();
+      copyInfo();
+      if (location.hash !== '' && CONFIG['autoClose']) autoClose();
+      if (location.hash !== '' && CONFIG['autoStartDownload']) autoStartDownload();
+      abortPending(); //终止EHD所有下载
+    });
   } else { //搜索页
     changeName('.it5>a');
+    highlightBlacklist2();
     btnAddFav2();
     btnSearch2();
-    quickDown(); //右键：下载
-    //batchDown();
-    getInfo(tagPreview, hideGalleries, checkExist); //获取信息 -> 标签预览 AND 隐藏某些画集 AND 检查本地是否存在
+    quickDownload(); //右键：下载
+    batchDownload();
+    new Promise((resolve, reject) => {
+      getInfo(resolve, reject);
+    }).then((gmetadata) => { //获取信息
+      if (gmetadata) {
+        tagPreview(gmetadata); //标签预览
+        hideGalleries(gmetadata); //隐藏某些画集
+      }
+      checkExist(); //检查本地是否存在
+    });
     rateInSearchPage();
     autoComplete();
     checkForNew();
   }
   if (CONFIG['saveLink']) saveLink();
   showTooltip();
-  $('.ehNavBar .ehCopy').on({
-    click: e => {
-      let _ = e.target;
-      let text = _.value;
-      GM_setClipboard(text);
-      _.value = '已复制';
-      setTimeout(() => {
-        _.value = text;
-      }, 800);
-    }
-  });
-  $('.ehNavBar input[type="button"]:not(.ehCopy)').on({
-    contextmenu: () => false
-  });
+  $('.ehNavBar').on('click', '.ehCopy', e => {
+    let _ = e.target;
+    let text = _.value;
+    GM_setClipboard(text);
+    _.value = '已复制';
+    setTimeout(() => {
+      _.value = text;
+    }, 800);
+  }).on('contextmenu', 'input[type="button"]', () => false);
 }
 
 function abortPending() {
@@ -117,16 +125,10 @@ function addStyle() {
   let backgroundColor = $('body').css('background-color');
   $('<style></style>').text([
       'input[type="number"]{width:60px;border:1px solid #B5A4A4;margin:3px 1px 0;padding:1px 3px 3px;border-radius:3px;}',
-      'button{color:#f1f1f1;background-color:#34353b;min-height:26px;padding:1px 5px 2px;margin:0 2px;border:2px solid #8d8d8d;border-radius:3px;font-size:9pt}',
-      'button:enabled:hover{background-color:#43464e !important;border-color:#aeaeae !important;outline:0}',
-      'button:enabled:active{background:radial-gradient(#1a1a1a,#43464e) !important;border-color:#c3c3c3 !important}',
+      'button{color:#f1f1f1;background-color:#34353b;min-height:26px;padding:1px 5px 2px;margin:0 2px;border:2px solid #8d8d8d;border-radius:3px;font-size:9pt;}',
+      'button:enabled:hover{background-color:#43464e !important;border-color:#aeaeae !important;outline:0;}',
+      'button:enabled:active{background:radial-gradient(#1a1a1a,#43464e) !important;border-color:#c3c3c3 !important;}',
       '.ido,.itg{max-width:9999px!important;}',
-      '.itg>tbody>tr.batchHover{background-color:#669933}',
-      '.itg>tbody>tr:hover{background-color:#4A86E8}.itd>label{cursor:pointer;}',
-      '.ehD-dialog{bottom:23px!important;}',
-      '.ehD-status{bottom:334px!important;}',
-      '.ehD-force-download-tips{bottom:311px!important;}',
-      '.ehCenter{text-align:center;}',
       '.ehNavBar{display:flex;width:99%;background-color:' + backgroundColor + ';position:fixed;z-index:1000;padding:0 10px;}',
       '.ehNavBar>div{width:33.3%;}',
       '.ehNavBar>div:nth-child(1){text-align:left;}',
@@ -145,50 +147,57 @@ function addStyle() {
       '.ehDatalist>ol{list-style:decimal;text-align:left;}',
       '.ehDatalist>ol>li{cursor:pointer;}',
       '.ehDatalist>ol>li:after{content:"  "attr(cname);font-size:9pt;font-weight:bold;}',
-      '.ehDatalistHover{color:#F00;font-weight:bold;font-size:large}',
+      '.ehDatalistHover{color:#F00;font-weight:bold;font-size:large;}',
       '.ehToggleShow{background-repeat:no-repeat;background-position:center right;padding:1px 16px 6px 4px!important;cursor:pointer;}',
       '.ehToggleShow[name="show"]{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);}',
       '.ehToggleShow[name="hide"]{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);}',
       '.ehThumbBtn{height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;}',
       '.ehExist{color:green;padding:0 1px;border:black 1px solid;cursor:pointer;}',
       '.ehExist[name="force"]{color:red;}',
-      '.ehTagPreview{position:fixed;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:#000;border-style:solid;color:#fff;background-color:#34353b}',
-      '.ehTagPreviewLi{color:#C9BA67}',
-      '.ehTagPreviewLi[name="language"]::before{content:"语言: "}',
-      '.ehTagPreviewLi[name="reclass"]::before{content:"重新分类: "}',
+      '.ehTagPreview{position:fixed;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:#000;border-style:solid;color:#fff;background-color:#34353b;}',
+      '.ehTagPreviewLi{color:#C9BA67;}',
+      '.ehTagPreviewLi[name="language"]::before{content:"语言: ";}',
+      '.ehTagPreviewLi[name="reclass"]::before{content:"重新分类: ";}',
       '.ehTagPreviewLi[name="artist"]{font-size:larger;color:#008000;}',
-      '.ehTagPreviewLi[name="artist"]::before{content:"漫画家: "}',
+      '.ehTagPreviewLi[name="artist"]::before{content:"漫画家: ";}',
       '.ehTagPreviewLi[name="group"]{font-size:larger;color:#00FFF5;}',
       '.ehTagPreviewLi[name="group"]::before{content:"组织: "}',
       '.ehTagPreviewLi[name="parody"]{font-size:larger;color:#FFFF00;}',
-      '.ehTagPreviewLi[name="parody"]::before{content:"同人: "}',
-      '.ehTagPreviewLi[name="character"]::before{content:"角色: "}',
-      '.ehTagPreviewLi[name="female"]::before{content:"女: "}',
-      '.ehTagPreviewLi[name="male"]::before{content:"男: "}',
-      '.ehTagPreviewLi[name="misc"]::before{content:"杂项: "}',
-      '.ehTagPreviewLi[name="other"]::before{content:"未分类: "}',
+      '.ehTagPreviewLi[name="parody"]::before{content:"同人: ";}',
+      '.ehTagPreviewLi[name="character"]::before{content:"角色: ";}',
+      '.ehTagPreviewLi[name="female"]::before{content:"女: ";}',
+      '.ehTagPreviewLi[name="male"]::before{content:"男: ";}',
+      '.ehTagPreviewLi[name="misc"]::before{content:"杂项: ";}',
+      '.ehTagPreviewLi[name="other"]::before{content:"未分类: ";}',
       '.ehTagPreviewLi>span{display:inline;margin:0 2px;border:1px #456F78 solid;}',
-      '.ih>li{margin:0 2px;cursor:pointer;list-style:none}',
-      '.ih>li::before{content:attr(name) ": "}',
+      '.ih>li{margin:0 2px;cursor:pointer;list-style:none;}',
+      '.ih>li::before{content:attr(name) ": ";}',
       '.ih>li>span,.ehTagNotice{margin:0 1px;}',
       '.ehTagNotice{float:left;}',
       '.ehTagNotice[name="Unlike"],#taglist div[id][name="Unlike"]{color:#F00;background-color:#00F;}',
       '.ehTagNotice[name="Alert"],#taglist div[id][name="Alert"]{color:#FF0;background-color:#080;}',
       '.ehTagNotice[name="Like"],#taglist div[id][name="Like"]{color:#000;background-color:#0FF;}',
-      '.ehTagEvent>.ehTagEventNotice[on="true"]::after{content:attr(name) " this"}',
-      '.ehTagEvent>.ehTagEventNotice[on="false"]::after{content:"NOT " attr(name) " this"}',
-      '.ehToggleShow2[name="show"]::before{content:"Hide"}',
-      '.ehToggleShow2[name="hide"]::before{content:"Show"}',
-      '.ehTooltip{display:none;position:absolute;z-index:99999;border:2px solid #8d8d8d;background-color:' + backgroundColor + ';}',
+      '.ehTagEvent>.ehTagEventNotice[on="true"]::after{content:attr(name) " this";}',
+      '.ehTagEvent>.ehTagEventNotice[on="false"]::after{content:"NOT " attr(name) " this";}',
+      '.ehToggleShow2[name="show"]::before{content:"Hide";}',
+      '.ehToggleShow2[name="hide"]::before{content:"Show";}',
+      '.ehTooltip{display:none;white-space:nowrap;position:fixed;text-align:left;z-index:99999;border:2px solid #8d8d8d;background-color:' + backgroundColor + ';}',
+      '.ehTooltip>ul{margin:0;}',
       '.ehCheckTable{top:60px;left:0;position:fixed;width:98%;z-index:2;background-color:' + backgroundColor + ';}',
       '.ehCheckTable>table{margin:0 auto;border-collapse:collapse;}',
       '.ehCheckTable>table th,.ehCheckTable>table td{border:2px ridge #000;}',
       '.ehCheckTable>table a{text-decoration:none;}',
+      '.ehBlacklist{color:#000;background-color:#000;}',
+      '.ehCheckTr{text-align:center;}',
+      '.ehCheckTr>td{padding:3px 4px;border-right:1px solid #40454b;}',
+      '.itg>tbody>tr.ehBatchHover{background-color:#669933;}',
+      '.itg>tbody>tr:hover{background-color:#4A86E8}',
+      '.itg>tbody>tr>th:nth-child(5),.itg>tbody>tr>td:nth-child(5){cursor:pointer;}',
     ].concat(GM_getResourceText('jquery_ui')).join('')).appendTo('head');
   $('.i:has(.n),.id44>div>a:has(.tn)').hide(); //隐藏种子图标
 }
 
-function autoClose() {
+function autoClose() { //下载完成后自动关闭
   setTimeout(() => {
     if ($('.ehD-dialog>.ehD-pt-gen-filename+button').text() === 'Not download? Click here to download' || $('.ehD-dialog span:contains("Not download or file is broken? "):has(a[href^="filesystem:https://"])').length > 0) {
       setTimeout(() => {
@@ -208,20 +217,22 @@ function autoComplete() { //自动填充
     value[value.length - 1] = e.target.textContent;
     $('[name="f_search"]').val(value.filter(i => i).join(' ')).focus();
     $('.ehDatalist>ol').empty();
-  }).appendTo('#searchbox');
+  }).appendTo('form:has([name="f_search"])');
   $('<input type="button" class="ehToggleShow ehDatalistBtn" name="hide">').on('click', function() {
     $('.ehDatalist').toggle();
     $('.ehDatalistBtn').attr('name', $('.ehDatalistBtn').attr('name') === 'show' ? 'hide' : 'show');
   }).insertAfter('[name="f_search"]');
   let lastValue;
-  $('[name="f_search"]').attr('title', `当输入大于${CONFIG['acLength'] || 0}个字符时，显示选单<br>点击选单或使用主键盘区的数字/加减/方向键快速选择，Insert键填充`).on({
+  $('[name="f_search"]').attr('title', `当输入大于${CONFIG['acLength'] || 0}个字符时，显示选单<br>使用主键盘区的数字/加减/方向键快速选择<br>点击/Enter/Insert键填充`).on({
     focusin: function() {
       $('.ehDatalist').show();
       $('.ehDatalistBtn').attr('name', 'show');
     },
-    focusout: function() {
-      $('.ehDatalist').hide();
-      $('.ehDatalistBtn').attr('name', 'hide');
+    focusout: function(e) {
+      setTimeout(() => {
+        $('.ehDatalist').hide();
+        $('.ehDatalistBtn').attr('name', 'hide');
+      }, 100);
     },
     keydown: function(e) {
       let hasItem = $('.ehDatalist li').length;
@@ -248,7 +259,8 @@ function autoComplete() { //自动填充
         $('.ehDatalist li').removeClass('ehDatalistHover');
         $('.ehDatalist li').eq(onItem).addClass('ehDatalistHover');
         $('.ehDatalist').scrollTop($('.ehDatalistHover').position().top - $('.ehDatalist>ol').position().top - 150 + $('.ehDatalistHover').height() / 2);
-      } else if (onItem >= 0 && e.keyCode === 45) { //选择选项: Insert
+      } else if (onItem >= 0 && [13, 45].includes(e.keyCode)) { //选择选项: Insert
+        e.preventDefault();
         $('.ehDatalistHover').click();
       }
     },
@@ -266,10 +278,10 @@ function autoComplete() { //自动填充
         });
       });
     }
-  })
+  });
 }
 
-function autoStartDownload() {
+function autoStartDownload() { //自动开始下载
   setTimeout(() => {
     if ($('.ehD-box>.g2').length > 0) {
       setTimeout(() => {
@@ -281,108 +293,84 @@ function autoStartDownload() {
   }, 800);
 }
 
-function batchDown() { //待续
-  sessionStorage.batchTime = 0;
-  var tr = $('.itg>tbody>tr');
-  if (tr.length > 0) {
-    var notFavoritesPage = $('.itg>tbody>tr>td>input').length === 0;
-    tr.each(function(i) {
-      var _this = this;
-      if (notFavoritesPage) {
-        var div = $((i === 0) ? '<th></th>' : '<td></td>').css('text-align', 'center').html('<input id="EH_FavHelper_' + i + '" type="checkbox">').appendTo(this);
-      } else {
-        $(_this).find('td:eq(-1)>input').attr('id', 'EH_FavHelper_' + i);
-      }
-      if ($(_this).find('.itd').length > 0) {
-        var _ = $(_this).find('.itd:eq(0)');
-        _.html('<label for="EH_FavHelper_' + i + '">' + _.html() + '</label>');
-      }
-    });
-    tr.find('th>input').on('click', function() { //全选
-      var _this = this;
-      $('tr.gtr0 input,tr.gtr1 input').each(function() {
-        this.checked = (_this.checked === true) ? true : false;
-      });
-    });
-    tr.find('td:eq(-1)>input').on('change', function(e) { //高亮选中
-      $(e.target).parents(1).toggleClass('batchHover');
-    });
-  }
-  $('<input type="button" value="Batch">').appendTo('.ehNavBar>div:eq(2)').on({
-    contextmenu: function() {
-      sessionStorage.batchTime = 0;
-      return false;
-    },
-    click: function() {
-      var input = [];
-      $('tr.gtr0:visible,tr.gtr1:visible').each(function() {
-        var i = $(this);
-        if ((i.find('.i[id^="favicon_"]').length === 0 || i.find('.i[id^="favicon_"]').css('background-position-y') === '-2px') && i.find('.ehLBAdd').length > 0) {
-          input.push(i.find('td>input'));
-        } else {
-          i.find('td>input')[0].checked = false;
-          i.removeClass('batchHover');
-        }
-      });
-      if (sessionStorage.batchTime > input.length + 3) sessionStorage.batchTime = 0;
-      input.forEach(function(_input, i) {
-        if (i <= sessionStorage.batchTime + 3 && i >= sessionStorage.batchTime) {
-          _input[0].checked = true;
-          _input.parents().eq(1).addClass('batchHover');
-        } else {
-          _input[0].checked = false;
-          _input.parents().eq(1).removeClass('batchHover');
-        }
-      });
-      sessionStorage.batchTime += 4;
+function batchDownload() { //批量下载
+  $('<th><input type="checkbox"></th>').appendTo('.itg tr:eq(0)');
+  $('.itg tr:eq(0) input').on('click', function(e) {
+    $('.itg tr:gt(0) input').prop('checked', e.target.checked);
+    if (e.target.checked) {
+      $('.itg tr:gt(0):not(.ehCheckTr)').addClass('ehBatchHover');
+    } else {
+      $('.itg tr:gt(0):not(.ehCheckTr)').removeClass('ehBatchHover');
     }
   });
-  $('<input type="button" value="Open">').appendTo('.ehNavBar>div:eq(2)').on({
-    contextmenu: () => false,
-    mousedown: function(e) {
-      $('.itg>tbody>tr:visible>td>input:checked').each(function(i) {
-        var href = $(this).parents().eq(1).find('.itd>div>.it5>a').attr('href');
-        var target = $(this).parents().eq(1).find('.it3').find('.btnAddFav,.i[id^="favicon_"]')[0];
-        openUrl(href + '#' + e.button);
-        if (e.button === 0) { //待续
-          var arr = href.split('/');
-          add2Fav(arr[4], arr[5], GM_getValue('lastFavcat', 0), target);
-          sessionStorage.batchTime--;
-        }
-      });
+  $('<td><input type="checkbox"></td>').appendTo('.itg tr:gt(0):not(.ehCheckTr)');
+  $('.itg tr:gt(0) input').on('click', function(e) {
+    if (e.target.checked) {
+      $(e.target).parentsUntil('tbody').eq(-1).addClass('ehBatchHover');
+    } else {
+      $(e.target).parentsUntil('tbody').eq(-1).removeClass('ehBatchHover');
     }
   });
-  $('<input type="button" value="Delete">').appendTo('.ehNavBar>div:eq(2)').on({
-    click: function() {
-      $('.itg>tbody>tr:visible>td>input:checked').each(function(i) {
-        var href = $(this).parents().eq(1).find('.itd>div>.it5>a').attr('href');
-        var target = $(this).parents().eq(1).find('.it3').find('.btnAddFav,.i[id^="favicon_"]')[0];
-        var arr = href.split('/');
-        add2Fav(arr[4], arr[5], '10', target);
+  $('.itg tr>th:has(input),.itg tr>td:has(input)').on('click', function(e) {
+    if ($(e.target).find('input').length) $(e.target).find('input').click();
+  });
+  sessionStorage.setItem('batch', 0)
+  $('<input type="button" value="Batch" title="左键: Batch<br>右键: 重置Batch">').on('mousedown', e => {
+    if (e.button === 2) {
+      sessionStorage.setItem('batch', 0);
+    } else {
+      let batch = sessionStorage.getItem('batch') * 1;
+      $('.itg tr input:checked').click();
+      let books = $('.itg tr:gt(0):visible:not(:has(.i[id^="favicon_"],.ehExist,.ehBlacklist),.ehCheckTr)').toArray();
+      books.splice(batch * CONFIG['batch'], CONFIG['batch']).forEach(i => {
+        $(i).find('input[type="checkbox"]').click();
+      });
+      sessionStorage.setItem('batch', batch * CONFIG['batch'] <= books.length ? batch + 1 : 0);
+    }
+  }).appendTo('.ehNavBar>div:eq(2)');
+  $('<input type="button" value="Open" title="' + '左中右'.split('')[CONFIG['auto2Fav']] + '键: Open + Add to Favorites (上次选择)<br>其他: Open">').on('mousedown', e => {
+    let url = $('.ehBatchHover .it5>a').toArray().forEach(i => {
+      openUrl(i.href + '#' + e.button);
+    });
+    if (e.button === CONFIG['auto2Fav'] * 1) {
+      $('.ehBatchHover').toArray().forEach(i => {
+        let arr = $(i).find('.it5>a').attr('href').split('/');
+        add2Fav(arr[4], arr[5], GM_getValue('lastFavcat', 0), $(i).find('.i[id^="favicon"],.btnAddFav')[0]);
       });
     }
-  });
+  }).appendTo('.ehNavBar>div:eq(2)');
 }
 
-function btnAddFav0(e, url) {
+function btnAddFav0(e, url) { //按钮 -> 加入收藏(通用事件)
   let event = CONFIG['bookmarkEvent'].split('|').filter(i => i.match(new RegExp(`^${e.button},`)));
   for (let i = 0; i < event.length; i++) {
     let arr = event[i].split(',');
     let keydown = arr[1] === '-1' ? true : e[['altKey', 'ctrlKey', 'shiftKey'][arr[1]]];
     if (keydown) {
-      let favcat = arr[2] === undefined ? GM_getValue('lastFavcat', 0) : arr[2];
-      if (favcat === '-1') {
-        favcat = prompt(`请选择：\n${'bookmark' in CONFIG ? CONFIG['bookmark'].replace(/\\n/g,'\n') : ''}\n10.从收藏中移除`);
-        if (!favcat) return;
-        GM_setValue('lastFavcat', favcat);
+      if (arr[2] === 'b') {
+        let keyword = $('.ido').length ? $(e.target).parentsUntil('tr').eq(-1).find('.it5').text() : $('#gn').text();
+        keyword = prompt('请输入加入黑名单或从黑名单中移除的关键词', keyword);
+        if (keyword) toggleBlacklist(keyword.trim());
+        if ($('.ido').length) {
+          highlightBlacklist2();
+        } else {
+          highlightBlacklist();
+        }
+      } else {
+        let favcat = arr[2] === undefined ? GM_getValue('lastFavcat', 0) : arr[2];
+        if (favcat === '-1') {
+          favcat = prompt(`请选择：\n${'bookmark' in CONFIG ? CONFIG['bookmark'].replace(/\\n/g,'\n') : ''}\n10.从收藏中移除`, GM_getValue('lastFavcat', 0));
+          if (!favcat) return;
+          GM_setValue('lastFavcat', favcat);
+        }
+        add2Fav(url[4], url[5], favcat, e.target);
       }
-      add2Fav(url[4], url[5], favcat, e.target);
       break;
     }
   }
 }
 
-function btnAddFav() { //按钮 -> 加入收藏
+function btnAddFav() { //按钮 -> 加入收藏(信息页)
   let fav = -1;
   if ($('#gdf>#fav>.i').length > 0) fav = 0 - (parseInt($('#gdf>#fav>.i').css('background-position-y')) + 2) / 19;
   let url = location.href.split('/');
@@ -399,7 +387,7 @@ function btnAddFav() { //按钮 -> 加入收藏
   }
 }
 
-function btnAddFav2() { //按钮 -> 加入收藏
+function btnAddFav2() { //按钮 -> 加入收藏(搜索页)
   $('<div class="btnAddFav"></div>').appendTo('.it3:not(:has(.i[id^="favicon_"])),.id44:not(:has(.i[id^="favicon_"]))');
   $('.btnAddFav,.i[id^="favicon_"]').attr('title', CONFIG['bookmarkEventChs']).removeAttr('onclick').on({
     contextmenu: () => false,
@@ -410,7 +398,7 @@ function btnAddFav2() { //按钮 -> 加入收藏
   });
 }
 
-function btnSearch() { //按钮 -> 搜索
+function btnSearch() { //按钮 -> 搜索(信息页)
   let text = $('#gn').text() || $('#gj').text();
   if (text === '') return;
   $('<div class="ehSearch"></div>').appendTo('#gd2');
@@ -420,43 +408,44 @@ function btnSearch() { //按钮 -> 搜索
     if (text[i]) $('<span></span>').html(`<input id="ehSearch_${i}" type="checkbox"><label for="ehSearch_${i}">${text[i]}</label>`).appendTo('.ehSearch');
   }
   $('<input type="button" value="Search">').appendTo('.ehSearch').click(() => {
-    let keyword = [];
-    $('.ehSearch input:checked+label').each(function() {
-      keyword.push(this.textContent);
-    })
+    let keyword = $('.ehSearch input:checked+label').toArray().map(i => i.textContent);
     if (keyword.length > 0) openUrl('/?f_search=%22' + encodeURIComponent(keyword.join('" "')) + '%22');
   });
 }
 
-function btnSearch2() { //按钮 -> 搜索
+function btnSearch2() { //按钮 -> 搜索(搜索页)
   $('<div class="btnSearch" title="左键: 搜索<br>右键: 搜索 + 中文"></div>').appendTo('.it3,.id44').on({
     mousedown: e => {
       let name = $(e.target).parentsUntil('.itd,#pp').eq(-1).find('.it5>a,.id2>a').text();
-      name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|\d+|\-|!/g, '').replace(/\|.*/, '').trim();
+      name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|\d+|\-|!/g, '').replace(/\|.*/, '').trim();
       name = '"' + name + '"';
-      if (e.button === 2) name += ' language:chinese$';
+      if (e.button === 2) name += ' language:"chinese"$';
       openUrl('/?f_search=' + encodeURIComponent(name));
     }
   });
 }
 
-function changeConfig(key, value) { //修改EH设置
-  let uconfig = (document.cookie.match('uconfig')) ? document.cookie.match(/uconfig=(.*?)(; |$)/)[1] : CONFIG['uconfig'];
-  let u = {};
-  uconfig.split('-').forEach(function(i) {
-    let _ = i.split('_');
-    u[_[0]] = _[1];
+function changeEConfig(key, value) { //修改EH设置
+  return new Promise((resolve, reject) => {
+    if (CONFIG['uconfig']) {
+      resolve(CONFIG['uconfig']);
+    } else {
+      xhr('/uconfig.php', res => {
+        let config = $('#settings_outer>form', res.response).serialize();
+        resolve(config);
+      });
+    }
+  }).then(uconfig => {
+    return new Promise((resolve, reject) => {
+      uconfig = uconfig.replace(new RegExp(key + '=.*?(&|$)'), key + '=' + value + '$1') + '&apply=Apply';
+      xhr('/uconfig.php', res => {
+        resolve();
+      }, uconfig);
+    });
   });
-  u[key] = value;
-  uconfig = [];
-  for (let i in u) {
-    uconfig.push(i + '_' + u[i]);
-  }
-  uconfig = uconfig.join('-');
-  document.cookie = 'uconfig=' + uconfig + '; max-age=31536000; domain=.' + location.host + '; path=/';
 }
 
-function changeName(e) { //修改本子标题（移除集会名，替换日文数字为罗马数字）
+function changeName(e) { //修改本子标题（移除集会名）
   $(e).toArray().forEach(i => {
     i.textContent = i.textContent.replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim();
   });
@@ -465,21 +454,21 @@ function changeName(e) { //修改本子标题（移除集会名，替换日文�
 function checkExist() { //检查本地是否存在
   if (!CONFIG['checkExist']) return;
   $('body').on('click', '.ehExist', function(e) {
-    GM_setClipboard($(e.target).attr('title') || $(e.target).attr('raw-title'));
+    GM_setClipboard($(e.target).attr('copy'));
   });
   let checkExistFunction = () => {
     $('.itg tr:visible:not(:has(.ehExist)) .it5,.id1:visible:not(:has(.ehExist)) .id2').toArray().forEach(i => {
       let name = i.textContent;
-      let name2 = i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】/g, '').replace(/\|.*/g, '').replace(/:"*?|<>\/\\/g, '-').trim();
+      let name2 = i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）/g, '').replace(/\|.*/g, '').replace(/:"*?|<>\/\\/g, '-').trim();
       xhr('http://127.0.0.1:3000/', e => {
         if (e.response.length) {
           e.response.forEach((j, k) => {
-            $(`<span class="ehExist" name="force" title="点击复制<br>${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
+            $(`<span class="ehExist" name="force" title="点击复制<br>${j}" copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
           });
-        } else {
+        } else if (name2.length > 5) {
           xhr('http://127.0.0.1:3000/', e => {
             e.response.forEach((j, k) => {
-              $(`<span class="ehExist" title="点击复制<br>${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
+              $(`<span class="ehExist" title="点击复制<br>${j}" copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
             });
           }, 'name=' + name2, {
             responseType: 'json'
@@ -490,14 +479,14 @@ function checkExist() { //检查本地是否存在
       })
     });
   }
-  setInterval(checkExistFunction, 60 * 1000);
+  if (CONFIG['checkExistInterval']) setInterval(checkExistFunction, CONFIG['checkExistInterval'] * 1000);
   checkExistFunction();
 }
 
 function checkForNew() {
   let listStyle = $('#nb>img')[0].outerHTML;
   $(listStyle).appendTo('#nb');
-  $('<a href="#">Add to Check</a>').on('click', function(e) {
+  $('<a href="javascript:;">Add to Check</a>').on('click', function(e) {
     let keywordRaw = $('[name="f_search"]').val();
     if (!keywordRaw) return;
     let keyword = keywordRaw;
@@ -512,35 +501,39 @@ function checkForNew() {
     }
     if (keyword) keywordNew = keywordNew.concat(keyword.split(/\s+/));
     keywordNew = prompt('请输入名称', keywordNew.join(' '));
+    if (!keywordNew) return;
     let list = GM_getValue('checkList', {});
     list[keywordRaw] = {
       name: keywordNew,
+      url: location.search,
       time: new Date().getTime()
     }
     GM_setValue('checkList', list);
   }).appendTo('#nb');
   $(listStyle).appendTo('#nb');
-  $('<a href="#">Show Check List</a>').on('click', function(e) {
+  $('<a href="javascript:;">Show Check List</a>').on('click', function(e) {
     if ($('.ehCheckTable').length) {
       $('.ehCheckTable').toggle();
       return;
     }
-    $('<div class="ehCheckTable"></div>').html(function() {
-      let html = '<table><thead><tr><th>Keyword</th><th>Name</th><th>Time</th><th><input class="ehCheckTableSelectAll" type="checkbox"></th></tr></thead><tbody>';
-      let list = GM_getValue('checkList', {});
-      for (let i in list) {
-        html += `<tr><td><a target="_blank" href="/?f_search=${encodeURIComponent(i)}">${i}</a></td><td>${list[i].name}</td><td name="${list[i].time}">${new Date(list[i].time).toLocaleString(navigator.language, {hour12: false})}</td><td><input type="checkbox"></td></tr>`;
-      }
-      html += '</tbody></table>';
-      return html;
-    }).appendTo('body');
-    $('.ehCheckTableSelectAll').on('click', () => {
-      $('.ehCheckTable td>input').prop('checked', $('.ehCheckTableSelectAll')[0].checked);
+    $('<div class="ehCheckTable"></div>').html('<table><thead><tr><th>Keyword</th><th>Name</th><th>Time</th><th><input class="ehCheckTableSelectAll" type="checkbox"></th></tr></thead><tbody></tbody></table>').appendTo('body');
+    let list = GM_getValue('checkList', {});
+    for (let i in list) {
+      let tr = $('<tr><td></td><td></td><td></td><td><input type="checkbox"></td></tr>');
+      $('<a target="_blank"></a>').attr('href', '/' + list[i].url).text(i).appendTo($(tr).find('td:eq(0)'));
+      $(tr).find('td:eq(1)').text(list[i].name);
+      $(tr).find('td:eq(2)').text(new Date(list[i].time).toLocaleString(navigator.language, {
+        hour12: false
+      }));
+      $(tr).appendTo('.ehCheckTable tbody');
+    }
+    $('.ehCheckTableSelectAll').on('click', (e) => {
+      $('.ehCheckTable td>input').prop('checked', e.target.checked);
     });
     $('<input type="button" value="Select Invert">').on('click', function() {
       $('.ehCheckTable td>input').toArray().forEach(i => {
         i.checked = !i.checked;
-      })
+      });
     }).appendTo('.ehCheckTable');
     $('<input type="button" value="Delete">').on('click', function() {
       let list = GM_getValue('checkList', {});
@@ -566,10 +559,10 @@ function checkForNew() {
     let _time = new Date($(tr[i]).find('td').eq(1).text()).getTime();
     if (info.time > _time) break;
   }
-  $(`<tr style="text-align:center;"><td colspan="${$('.itg tr:eq(0)>th').length}">Name: ${info.name}<br>Last Check Time: ${new Date(info.time).toLocaleString(navigator.language, {hour12: false})}</td></tr>`).insertBefore(tr[i]);
+  $(`<tr class="ehCheckTr ${tr[i].className === 'gtr0' ? 'gtr1' : 'gtr0'}"><td colspan="${$('.itg tr:eq(0)>th').length}">Name: ${info.name}<br>Last Check Time: ${new Date(info.time).toLocaleString(navigator.language, {hour12: false})}</td></tr>`).insertBefore(tr[i]);
 }
 
-function checkImageSize() { //检查图片尺寸
+function checkImageSize(resolve, reject) { //检查图片尺寸
   let ads = {
     'c8d2ff755b': 'https://e-hentai.org/s/c8d2ff755b/1183972-24', //脸肿汉化组 - 微博广告
     '81e88b4743': 'https://e-hentai.org/s/81e88b4743/1183972-25', //脸肿汉化组 - 字幕组招募
@@ -601,22 +594,28 @@ function checkImageSize() { //检查图片尺寸
     '4cbe8f6296': 'https://exhentai.org/s/4cbe8f6296/1182476-17', //K记翻译 - 声明 - 999.jpg
     '09fe6b9a55': 'https://exhentai.org/s/09fe6b9a55/1182161-24', //寂月汉化组 - 招募 - 2018.jpg
   };
-  ads = Object.keys(ads).concat(GM_getValue('ads', [])); //字幕组宣传图
+  ads = Object.keys(ads).concat(GM_getValue('ads', '').split(',')); //字幕组宣传图
   let s = CONFIG['sizeS'];
   let d = CONFIG['sizeD'];
   if (!GM_getValue('imageSize', false)) {
-    changeConfig('xr', s);
     GM_setValue('imageSize', s);
+    changeEConfig('xr', s).then(() => {
+      location = location.href;
+    });
+    return reject();
   }
   let imageSize = GM_getValue('imageSize');
   let numS = 0; //单页
   let numD = 0; //双页
-  $('.gdtm>div>a>img').toArray().forEach(function(i) {
+  let pics = $('.gdtm>div>a>img').toArray().filter(i => {
     if (ads.includes($(i).parent().attr('href').split('/')[4])) {
-      $(i).parentsUntil('#gdt').eq(-1).hide(); //隐藏
-      $(i).parentsUntil('#gdt').eq(-1).show().css('background-color', 'red'); //临时
-      return;
+      $(i).parentsUntil('#gdt').eq(-1).hide();
+      return false;
+    } else {
+      return true;
     }
+  });
+  pics.forEach(function(i) {
     let rate = $(i).width() / $(i).height(); //宽高比
     if (rate > CONFIG['rateD']) {
       numD++;
@@ -624,17 +623,22 @@ function checkImageSize() { //检查图片尺寸
       numS++;
     }
   });
-  if (2 * numD > $('.gdtm>div>a>img').length) { //双页超过一半
+  if (2 * numD > pics.length) { //双页超过一半
     if (imageSize !== d) {
       document.title = d + '|' + document.title;
-      changeConfig('xr', d);
       GM_setValue('imageSize', d);
+      changeEConfig('xr', d).then(() => {
+        resolve();
+      });
     }
   } else if (imageSize !== s) {
     document.title = s + '|' + document.title;
-    changeConfig('xr', s);
     GM_setValue('imageSize', s);
+    changeEConfig('xr', s).then(() => {
+      resolve();
+    });
   }
+  resolve();
 }
 
 function combineText(arr, textOnly = undefined) {
@@ -688,12 +692,13 @@ function findData(main, sub = undefined, textOnly = false) {
   };
 }
 
-function getInfo(...todos) { //获取信息
+function getInfo(resolve, reject) { //获取信息
+  if (!$('.itg').length) return resolve();
   let gidlist = $('.it5>a').toArray().map(i => {
     let arr = i.href.split('/');
     return [arr[4], arr[5]];
   });
-  $('.itg').data('gmetadata', []);
+  let gmetadata = [];
   let length = gidlist.length;
   while (gidlist.length) {
     let _gidlist = gidlist.splice(0, 25);
@@ -703,24 +708,20 @@ function getInfo(...todos) { //获取信息
       'namespace': 1
     }
     xhr('/api.php', res => {
-      let gmetadata = $('.itg').data('gmetadata').concat(res.response.gmetadata);
-      $('.itg').data('gmetadata', gmetadata);
+      gmetadata = gmetadata.concat(res.response.gmetadata);
     }, JSON.stringify(gdata), {
       responseType: 'json'
     });
   }
   let checkInfoInterval = setInterval(() => {
-    if ($('.itg').data('gmetadata').length === length) {
+    if (gmetadata.length === length) {
       clearInterval(checkInfoInterval);
-      todos.forEach(i => {
-        i();
-      });
+      resolve(gmetadata);
     }
   }, 200);
 }
 
-function hideGalleries() { //隐藏某些画集
-  let gmetadata = $('.itg').data('gmetadata');
+function hideGalleries(gmetadata) { //隐藏某些画集
   let tags = {};
   ['Unlike', 'Alert', 'Like'].forEach(i => {
     let tag = GM_getValue('tag' + i, []);
@@ -744,11 +745,43 @@ function hideGalleries() { //隐藏某些画集
     }
   });
   let length = $('.itg tr:has(.ehTagNotice[name="Unlike"])').hide().length;
-  $('.ip').html($('.ip').html() + ' 过滤' + length + '本 ');
+  $('.ip:eq(0)').html($('.ip').html() + ' 过滤' + length + '本 ');
   $('<button class="ehToggleShow2 ehFilterBtn" name="hide"></button>').on('click', function() {
     $('.itg tr:has(.ehTagNotice[name="Unlike"])').toggle();
     $('.ehFilterBtn').attr('name', $('.ehFilterBtn').attr('name') === 'show' ? 'hide' : 'show');
-  }).appendTo('.ip');
+  }).appendTo('.ip:eq(0)');
+}
+
+function highlightBlacklist() { //隐藏黑名单相关的画廊(信息页)
+  let blacklist = GM_getValue('blacklist', []);
+  let title = $('#gn').text();
+  for (let i of blacklist) {
+    if (title.match(i)) {
+      i = i.replace(/\\(.?)/g, '$1');
+      $('#gn').attr('copy', i).attr('title', '点击复制<br>' + i).addClass('ehBlacklist').on('click', function(e) {
+        GM_setClipboard($(e.target).attr('copy'));
+      });
+      return;
+    }
+  }
+  $('#gn').removeAttr('copy').removeAttr('title').removeClass('ehBlacklist').off('click');
+}
+
+function highlightBlacklist2() { //隐藏黑名单相关的画廊(搜索页)
+  let blacklist = GM_getValue('blacklist', []);
+  $('.it5').toArray().forEach(i => {
+    let title = $(i).text();
+    for (let j of blacklist) {
+      if (title.match(j)) {
+        j = j.replace(/\\(.?)/g, '$1');
+        $(i).parentsUntil('tr').eq(-1).attr('copy', j).attr('title', '点击复制<br>' + j).addClass('ehBlacklist').on('click', function(e) {
+          GM_setClipboard($(e.target).attr('copy') || $(e.target).parentsUntil('tr').eq(-1).attr('copy'));
+        });
+        return;
+      }
+    }
+    $(i).parentsUntil('tr').eq(-1).removeAttr('copy').removeAttr('title').removeClass('ehBlacklist').off('click');
+  });
 }
 
 function jumpHost() { //里站跳转
@@ -784,10 +817,10 @@ function openUrl(url) { //打开链接
   }
 }
 
-function quickDown() { //右键下载
+function quickDownload() { //右键下载
   $('.itg').on('contextmenu', e => {
     e.preventDefault();
-    if ($(e.target).is('.it5>a,.id3>a')) openUrl(e.target.href + '#' + CONFIG['autoClose']);
+    if ($(e.target).is('.it5>a,.id3>a')) openUrl(e.target.href + '#2');
   });
 }
 
@@ -846,9 +879,10 @@ function setNotification(title, body) { //发出桌面通知
   }
 }
 
-function showAllThumb() { //显示所有预览页
+function showAllThumb(resolve, reject) { //显示所有预览页
+  if (!CONFIG['showAllThumb']) return resolve();
   let pages = $('.ptt td:gt(0):lt(-1)>a').toArray();
-  if (pages.length <= 1) return;
+  if (pages.length <= 1) return resolve();
   $('<div class="ehToggleShow ehThumbBtn" name="show"></div>').on('click', function() {
     $('.gdtContainer').toggle();
     $('.ehThumbBtn').attr('name', $('.ehThumbBtn').attr('name') === 'show' ? 'hide' : 'show');
@@ -865,90 +899,104 @@ function showAllThumb() { //显示所有预览页
     }
     xhr.send(null);
   });
+  let interval = setInterval(() => {
+    if ($('.gdtContainer>div:empty').length === 0) {
+      clearInterval(interval);
+      resolve();
+    }
+  }, 200);
 }
 
 function showConfig() { //显示设置
-  let config = GM_getValue('config', {});
-  $('<div class="ehConfig"></div>')
-    .html(`
-      <div><label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">里站自动跳转到表站</label></div>
-      <div><label for="ehConfig_openInTab"><input type="checkbox" id="ehConfig_openInTab">在新标签页中打开，而不是弹窗</label></div>
-      <div><label for="ehConfig_autoStartDownload"><input type="checkbox" id="ehConfig_autoStartDownload">点击Open时，自动开始下载</label></div>
-      <div><label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">信息页显示所有预览图</label></div>
-      <div><label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything Command-line Interface</a>)</label></div>
-      <div><label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">保存链接按钮</label></div>
-      <div>当用<select name="ehConfig_autoClose"><option value="0">左键</option><option value="1">中键</option><option value="2">右键</option></select>点击Open时，下载完成后自动关闭</div>
-      <div>收藏夹: <input name="ehConfig_bookmark" type="text" placeholder="0.未下载\\n1.连载-系列\\n2.CG-COS-画集-女同\\n3.东方-LL-舰娘-偶像大师\\n4.同人\\n5.大师-萝莉\\n6.纯爱-Np-1♂\\n7.纯爱-乱伦\\n8.纯爱-2p-♂♀\\n9.难定-杂志"></div>
-      <div>收藏按钮事件: <input name="ehConfig_bookmarkEvent" type="text" placeholder="0,-1,10|1,-1,-1|2,2,0|2,-1"><input name="ehConfig_bookmarkEventChs" type="hidden"></div>
-      <div>大图宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1">; 小图宽高比: <input name="ehConfig_rateS" type="number" placeholder="0.9"></div>
-      <div>大图尺寸: <input name="ehConfig_sizeD" type="number" placeholder="1280">; 小图尺寸: <input name="ehConfig_sizeS" type="number" placeholder="780"></div>
-      <div>默认设置Cookie: <input name="ehConfig_uconfig" type="text" placeholder="sa_5e844a-tf_e78085-cats_126-xl_20x1044x2068x30x1054x2078x40x1064x2088x50x1074x2098x60x1084x2108x70x1094x2118x80x1104x2128x90x1114x2138x100x1124x2148x110x1134x2158x120x1144x2168x130x1154x2178x254x1278x2302x255x1279x2303-fs_f-xr_780"></div>
-      <div>搜索栏自动完成: 字符数 > <input name="ehConfig_acLength" type="number" placeholder="3"> 时，显示 ; 显示项目: <input name="ehConfig_acItem" type="text" placeholder="language,artist,female,male,parody,character,group,misc"></div>
-      <div>宣传图ID: <input name="ehConfig_ads" type="text"></div>
-      <div>批量下载数(待续): <input name="ehConfig_batch" type="number" placeholder="4"></div>
-      <div class="ehConfigBtn"><input type="button" name="save" value="保存"><input type="button" name="cancel" value="取消"></div>
-    `)
-    .on({
-      click(e) {
-        if ($(e.target).is('.ehConfigBtn>input[type="button"]')) {
-          if (e.target.name === 'save') {
-            $('.ehConfig input:not([type="button"]),.ehConfig select').toArray().forEach(i => {
-              let name, value;
-              if (i.type === 'number') {
-                name = i.name;
-                value = (i.value || i.placeholder) * 1;
-                if (isNaN(value)) return;
-              } else if (i.type === 'text' || i.type === 'hidden') {
-                name = i.name;
-                value = i.value || i.placeholder;
-                if (value === '') return;
-              } else if (i.type === 'checkbox') {
-                name = i.id;
-                value = i.checked;
-              } else if (i.type === 'select-one') {
-                name = i.name;
-                value = i.value;
-              }
-              config[name.replace('ehConfig_', '')] = value;
-            });
-            let bookmarkEvent = config['bookmarkEvent'].split('|');
-            let bookmarkEventChs = [];
-            for (let i of bookmarkEvent) {
-              let arr = i.split(',').map(i => i * 1);
-              let chs = [];
-              chs.push('鼠标' + '左中右'.split('')[arr[0]] + '键');
-              chs.push(arr[1] === -1 ? '任意按键' : ['altKey', 'ctrlKey', 'shiftKey'][arr[1]]);
-              if (arr[2] === undefined) {
-                chs.push('上次选择');
-              } else if (arr[2] === -1) {
-                chs.push('自行选择');
-              } else if (arr[2] >= 0 && arr[2] <= 9) {
-                chs.push(arr[2]);
-              } else if (arr[2] === 10) {
-                chs.push('移除');
-              }
-              bookmarkEventChs.push(chs[0] + ' + ' + chs[1] + ' -> ' + chs[2]);
-            }
-            config.bookmarkEventChs = bookmarkEventChs.join('<br>');
-            GM_setValue('config', config);
-          }
-          $('.ehConfig').remove();
-        }
-      }
-    })
-    .appendTo('body');
-  $('.ehConfig input:not([type="button"]),.ehConfig select').toArray().forEach(i => {
-    let name, value;
-    name = i.name || i.id;
-    name = name.replace('ehConfig_', '');
-    if (!(name in config)) return;
-    value = config[name];
-    if (i.type === 'text' || i.type === 'hidden' || i.type === 'select-one' || i.type === 'number') {
-      i.value = value;
-    } else if (i.type === 'checkbox') {
-      i.checked = value;
+  let listStyle = $('#nb>img')[0].outerHTML;
+  $(listStyle).appendTo('#nb');
+  $('<a href="javascript:;">[EH]Enhance Config</a>').on('click', function(e) {
+    if ($('.ehConfig').length) {
+      $('.ehConfig').toggle();
+      return;
     }
-  });
+    let config = GM_getValue('config', {});
+    let _html = [
+      '<div><label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">里站自动跳转到表站</label></div>',
+      '<div><label for="ehConfig_openInTab"><input type="checkbox" id="ehConfig_openInTab">在新标签页中打开，而不是弹窗</label></div>',
+      '<div><label for="ehConfig_autoStartDownload"><input type="checkbox" id="ehConfig_autoStartDownload">Location Hash不为空时，自动开始下载</label></div>',
+      '<div><label for="ehConfig_autoClose" title="Firefox: 需打开about:config并设置dom.allow_scripts_to_close_windows为true"><input type="checkbox" id="ehConfig_autoClose">Location Hash不为空时，下载完成后自动关闭标签</label></div>',
+      '<div><label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">信息页显示所有预览图</label></div>',
+      '<div><label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label></div>',
+      '<div>检查本地是否存在间隔 <input name="ehConfig_checkExistInterval" type="number" placeholder="180" title="0为只检查一次"></div>',
+      '<div><label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">显示保存链接按钮</label></div>',
+      '<div>当用<select name="ehConfig_auto2Fav"><option value="0">左键</option><option value="1">中键</option><option value="2">右键</option></select>点击Open时，自动添加到收藏</div>',
+      '<div>收藏夹: <input name="ehConfig_bookmark" type="text" placeholder="0.Series\\n1.Cosplay\\n2.Image Set\\n3.Game CG\\n4.Doujinshi\\n5.Harem\\n6.Incest\\n7.Story arc\\n8.Anthology\\n9.Artist"></div>',
+      '<div>收藏按钮事件: <input name="ehConfig_bookmarkEvent" title="事件格式: 鼠标按键,键盘按键,收藏事件<br>多个事件以|分割<br>鼠标按键:<ul><li>0 -> 左键</li><li>1 -> 中键</li><li>2 -> 右键</li></ul>键盘按键:<ul><li>-1 -> 任意</li><li>0 -> altKey</li><li>1 -> ctrlKey</li><li>2 -> shiftKey</li></ul>收藏事件:<ul><li>留空 -> 上次选择</li><li>-1 -> 自行选择</li><li>0-9 -> 0-9</li><li>10 -> 移除</li><li>b -> 加入黑名单</li></ul>" type="text" placeholder="0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0"><input name="ehConfig_bookmarkEventChs" type="hidden"></div>',
+      '<div>大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1">; 小图(单页)宽高比: <input name="ehConfig_rateS" type="number" placeholder="0.9"></div>',
+      '<div>大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select></div>',
+      '<div>默认设置: <input name="ehConfig_uconfig" title="在Settings页面使用$.serialize获取，可留空<br>留空表示每次使用当前设置" type="text"></div>',
+      '<div>搜索栏自动完成: 字符数 > <input name="ehConfig_acLength" type="number" placeholder="3"> 时，显示</div>',
+      '<div>搜索栏自动完成显示项目: <input name="ehConfig_acItem" type="text" placeholder="language,artist,female,male,parody,character,group,misc" title="以,分割"></div>',
+      '<div>宣传图ID: <input name="ehConfig_ads" type="text" title="以,分割"></div>',
+      '<div>批量下载数: <input name="ehConfig_batch" type="number" placeholder="4"></div>',
+      '<div class="ehConfigBtn"><input type="button" name="save" value="保存"><input type="button" name="cancel" value="取消"></div>'].join('');
+    $('<div class="ehConfig"></div>').html(_html).appendTo('body').on('click', function(e) {
+      if ($(e.target).is('.ehConfigBtn>input[type="button"]')) {
+        if (e.target.name === 'save') {
+          $('.ehConfig input:not([type="button"]),.ehConfig select').toArray().forEach(i => {
+            let name, value;
+            if (i.type === 'number') {
+              name = i.name;
+              value = (i.value || i.placeholder) * 1;
+              if (isNaN(value)) return;
+            } else if (i.type === 'text' || i.type === 'hidden') {
+              name = i.name;
+              value = i.value || i.placeholder;
+            } else if (i.type === 'checkbox') {
+              name = i.id;
+              value = i.checked;
+            } else if (i.type === 'select-one') {
+              name = i.name;
+              value = i.value;
+            }
+            config[name.replace('ehConfig_', '')] = value;
+          });
+          let bookmarkEvent = config['bookmarkEvent'].split('|');
+          let bookmarkEventChs = [];
+          for (let i of bookmarkEvent) {
+            let arr = i.split(',').map(i => isNaN(i * 1) ? i : i * 1);
+            let chs = [];
+            chs.push('鼠标' + '左中右'.split('')[arr[0]] + '键');
+            chs.push(arr[1] === -1 ? '任意按键' : ['altKey', 'ctrlKey', 'shiftKey'][arr[1]]);
+            if (arr[2] === undefined) {
+              chs.push('上次选择');
+            } else if (arr[2] === -1) {
+              chs.push('自行选择');
+            } else if (arr[2] >= 0 && arr[2] <= 9) {
+              chs.push(arr[2]);
+            } else if (arr[2] === 10) {
+              chs.push('移除');
+            } else if (arr[2] === 'b') {
+              chs.push('加入黑名单');
+            }
+            bookmarkEventChs.push(chs[0] + ' + ' + chs[1] + ' -> ' + chs[2]);
+          }
+          config.bookmarkEventChs = bookmarkEventChs.join('<br>');
+          Object.assign(CONFIG, config);
+          GM_setValue('config', config);
+        }
+        $('.ehConfig').remove();
+      }
+    });
+    $('.ehConfig input:not([type="button"]),.ehConfig select').toArray().forEach(i => {
+      let name, value;
+      name = i.name || i.id;
+      name = name.replace('ehConfig_', '');
+      if (!(name in config)) return;
+      value = config[name];
+      if (i.type === 'text' || i.type === 'hidden' || i.type === 'select-one' || i.type === 'number') {
+        i.value = value;
+      } else if (i.type === 'checkbox') {
+        i.checked = value;
+      }
+    });
+  }).appendTo('#nb');
 }
 
 function showTooltip() { //显示提示
@@ -964,9 +1012,20 @@ function showTooltip() { //显示提示
     preEle = e.target;
     let title = $(preEle).attr('title') || $(preEle).attr('raw-title');
     $(preEle).removeAttr('title').attr('raw-title', title);
-    $('.ehTooltip').html(title).show().offset({
-      top: $(preEle).offset().top + $(preEle).height() + parseInt($(preEle).css('padding-bottom')) + parseInt($(preEle).css('border-width')) + parseInt($(preEle).css('margin-bottom')) + 5,
-      left: $(preEle).offset().left
+    $('.ehTooltip').html(title);
+
+    let top = $(preEle).offset().top - $('body').scrollTop();
+    let height = $(preEle).height() + parseInt($(preEle).css('padding-bottom')) + parseInt($(preEle).css('border-bottom-width')) + parseInt($(preEle).css('margin-bottom'));
+    let _height = $('.ehTooltip').height() + parseInt($('.ehTooltip').css('padding-bottom')) + parseInt($('.ehTooltip').css('border-bottom-width')) + parseInt($('.ehTooltip').css('margin-bottom'));
+    top = top + height + 5 + _height > window.innerHeight ? top - _height - 5 : top + height + 5;
+
+    let left = $(preEle).offset().left - $('body').scrollLeft();
+    let width = $(preEle).width() + parseInt($(preEle).css('padding-left')) + parseInt($(preEle).css('border-left-width')) + parseInt($(preEle).css('margin-left'));
+    let _width = $('.ehTooltip').width() + parseInt($('.ehTooltip').css('padding-left')) + parseInt($('.ehTooltip').css('border-left-width')) + parseInt($('.ehTooltip').css('margin-left'));
+    left = left + _width > window.innerWidth ? left + width - _width : left;
+    $('.ehTooltip').show().offset({
+      top: top,
+      left: left
     });
   });
 }
@@ -976,7 +1035,7 @@ function tagEvent() { //标签事件
   let tags = {};
   ['Unlike', 'Alert', 'Like'].forEach(i => {
     tags[i] = GM_getValue('tag' + i, []);
-    $('<a class="ehTagEventNotice" name="' + i + '" href="#" on="true"></a>').appendTo('.ehTagEvent').on('click', e => {
+    $('<a class="ehTagEventNotice" name="' + i + '" href="javascript:;" on="true"></a>').appendTo('.ehTagEvent').on('click', e => {
       let tag = GM_getValue('tag' + i, []);
       let keyword = $('.ehTagEvent').attr('name');
       if ($(e.target).attr('on') === 'true' && !tag.includes(keyword)) {
@@ -996,9 +1055,9 @@ function tagEvent() { //标签事件
   $('#taglist a').on({
     contextmenu: e => { //搜索标签+中文
       var keyword = e.target.innerText.replace(/\s+\|.*/, '');
-      if (/\s+/.test(keyword)) keyword = '"' + keyword + '"';
+      keyword = '"' + keyword + '"';
       if (/:/.test(e.target.id)) keyword = e.target.id.replace(/ta_(.*?):.*/, '$1') + ':' + keyword + '$';
-      openUrl('/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0&f_search=' + encodeURIComponent(keyword) + '+language%3Achinese%24&f_apply=Apply+Filter');
+      openUrl('/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_western=0&f_non-h=0&f_imageset=0&f_cosplay=0&f_asianporn=0&f_misc=0&f_search=' + encodeURIComponent(keyword + ' language:"chinese"$') + '&f_apply=Apply+Filter');
       return false;
     },
     click: e => { //标签
@@ -1019,8 +1078,7 @@ function tagEvent() { //标签事件
   });
 }
 
-function tagPreview() { //标签预览
-  let gmetadata = $('.itg').data('gmetadata');
+function tagPreview(gmetadata) { //标签预览
   $('<div class="ehTagPreview"></div>').appendTo('body');
   $('body').on({
     mousemove(e) {
@@ -1045,7 +1103,7 @@ function tagPreview() { //标签预览
       $('.ehTagPreview').css({
         left: _width + e.clientX + 10 < window.innerWidth ? e.clientX + 5 : e.clientX - _width - 5,
         top: _height + e.clientY + 10 < window.innerHeight ? e.clientY + 5 : e.clientY - _height - 5
-      })
+      });
     }
   });
 }
@@ -1078,6 +1136,17 @@ function tagTranslate() { //翻译标签
     if (i.info) css.push(`a[id="ta_${i.name}"]::after{content:"${i.info}"}`);
   });
   $('<style name="EHT"></style>').text(css.join('')).appendTo('head');
+}
+
+function toggleBlacklist(keyword) { //加入黑名单或从黑名单中移除
+  let blacklist = GM_getValue('blacklist', []);
+  keyword = keyword.replace(/[\$\(\)\*\+\.\[\]\?\^\{\}\|]+/g, '\\$&');
+  if (!blacklist.includes(keyword)) { //加入黑名单
+    blacklist.push(keyword);
+  } else if (blacklist.includes(keyword)) { //从黑名单中移除
+    blacklist.splice(blacklist.indexOf(keyword), 1);
+  }
+  GM_setValue('blacklist', blacklist);
 }
 
 function saveLink() { //保存链接
