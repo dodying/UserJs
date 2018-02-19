@@ -4,7 +4,7 @@
 // @exclude     http://alt.hentaiverse.org/equip/*
 // @include     http*://hentaiverse.org/*
 // @exclude     http*://hentaiverse.org/equip/*
-// @version     1.0.1
+// @version     1.0.2
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -45,7 +45,7 @@
     iframe.style = 'background-color:#EDEBDF;z-index:3;border:1px solid #5C0D12;position:absolute;top:' + place.offsetTop + 'px;left:' + place.offsetLeft + 'px;width:' + place.offsetWidth + 'px;height:' + place.offsetHeight + 'px;';
     iframe.onload = function() {
       let doc = iframe.contentWindow.document;
-      doc.body.innerHTML = '0.规则: 当<b>不</b>满足 <b>当前Upgrades和 * 10 >= 目标Upgrades和 * Potency Tier</b> 时，<b>Reforge</b><br>1. 选择equip后，点击New Task，设置后保存<br>2. 第一个Target选择框留空，表示删除该任务<br>3. 只需设置一个属性时，将第二个Target选择框留空<br>Max Potency Tier: <input name="tierMax" placeholder="10" type="number"><br><input id="pre" type="checkbox"><label for="pre">预模式: 先(X15)到Tier 2, 再(X20)</label><br><input id="targetOnly" type="checkbox"><label for="targetOnly">只要目标完成，不管Tier多少，都停止</label><br>';
+      doc.body.innerHTML = '0.规则: 当<b>不</b>满足 <b>当前Upgrades和 * 10 >= 目标Upgrades和 * Potency Tier</b> 时，<b>Reforge</b><br>1. 选择equip后，点击New Task，设置后保存<br>2. 第一个Target选择框留空，表示删除该任务<br>3. 只需设置一个属性时，将第二个Target选择框留空<br>Max Potency Tier: <input name="potencyMax" placeholder="10" type="number"> (Potency Tier ≥ 该值后，停止)<br><input id="pre" type="checkbox"><label for="pre">预模式: 先(X15)到Tier 2, 再(X20)</label><br><input id="targetOnly" type="checkbox"><label for="targetOnly">只要目标完成，不管Tier多少，都停止</label><br><input id="double" type="checkbox"><label for="double">设置双属性时，当设置总值 ≥ <input name="doubleMax" placeholder="8" type="number"> 时，装备出现第三属性就reforge </label><br>';
       //Style
       let style = gE('head', doc).appendChild(cE('style'));
       style.textContent = '*{margin:5px;text-align:center;}table{border:2px solid #000;border-collapse:collapse;margin:0 auto;}table td,table th{border:1px solid #000;}input{text-align:right;width:80px;}';
@@ -62,7 +62,7 @@
       let eTr = eTbody.appendChild(cE('tr'));
       eTr.innerHTML = '<th></th><th>Equip</th><th>Target</th>';
       //Button
-      let select = [
+      let htmlPotency = [
         '<select name="potency">',
         '<option></option>',
         '<option>Coldproof</option>',
@@ -84,7 +84,10 @@
         '<option>Spellweaver</option>',
         '</select>',
       ].join('');
-      let select2 = '<select name="tier">' + [1, 2, 3, 4, 5].map(function(i) {
+      let htmlTier = '<select name="tier">' + [1, 2, 3, 4, 5].map(function(i) {
+        return '<option value="' + i + '">' + i + '</option>';
+      }).join('') + '</select>';
+      let htmlTierMax = '<select name="tierMax">' + [5, 4, 3, 2, 1].map(function(i) {
         return '<option value="' + i + '">' + i + '</option>';
       }).join('') + '</select>';
       let order = 1;
@@ -100,7 +103,7 @@
         let token = obj.token || unsafeWindow.select_token;
         let type = obj.type || location.search.match('&filter=') ? location.search.split(/&|=/)[5] : '1handed';
         let eTr = eTbody.appendChild(cE('tr'));
-        eTr.innerHTML = '<td>' + (order++) + '</td><td><a name="url" target="_blank" href="/equip/' + equip + '/' + url + '">' + title + '</a><input name="equip" type="hidden" value="' + equip + '"><input name="token" type="hidden" value="' + token + '"><input name="type" type="hidden" value="' + type + '"></td><td><div>' + select + ': ' + select2 + '</div><div>' + select + ': ' + select2 + '</div></td>';
+        eTr.innerHTML = '<td>' + (order++) + '</td><td><a name="url" target="_blank" href="/equip/' + equip + '/' + url + '">' + title + '</a><input name="equip" type="hidden" value="' + equip + '"><input name="token" type="hidden" value="' + token + '"><input name="type" type="hidden" value="' + type + '"></td><td><div>' + htmlPotency + ': ' + htmlTier + ' Tier最大值: ' + htmlTierMax + '</div><div>' + htmlPotency + ': ' + htmlTier + ' Tier最大值: ' + htmlTierMax + '</div></td>';
         return eTr;
       }
       eBtnNew.onclick = newTr;
@@ -114,11 +117,12 @@
         let type = gE('[name="type"]', 'all', doc);
         let potency = gE('[name="potency"]', 'all', doc);
         let tier = gE('[name="tier"]', 'all', doc);
+        let tierMax = gE('[name="tierMax"]', 'all', doc);
         for (let i = 0; i < equip.length; i++) {
           if (potency[i * 2].value) {
             let _target = [];
-            _target.push(potency[i * 2].value, tier[i * 2].value);
-            if (potency[i * 2 + 1].value) _target.push(potency[i * 2 + 1].value, tier[i * 2 + 1].value);
+            _target.push(potency[i * 2].value, tier[i * 2].value, tierMax[i * 2].value);
+            if (potency[i * 2 + 1].value) _target.push(potency[i * 2 + 1].value, tier[i * 2 + 1].value, tierMax[i * 2 + 1].value);
             tasks.push({
               equip: equip[i].value,
               title: url[i].textContent,
@@ -130,9 +134,11 @@
           }
         }
         GM_setValue('tasks', tasks);
-        GM_setValue('tierMax', gE('[name="tierMax"]', doc).value ? gE('[name="tierMax"]', doc).value * 1 : 10);
+        GM_setValue('potencyMax', gE('[name="potencyMax"]', doc).value ? gE('[name="potencyMax"]', doc).value * 1 : 10);
         GM_setValue('pre', gE('#pre', doc).checked);
         GM_setValue('targetOnly', gE('#targetOnly', doc).checked);
+        GM_setValue('double', gE('#double', doc).checked);
+        GM_setValue('doubleMax', gE('[name="doubleMax"]', doc).value ? gE('[name="doubleMax"]', doc).value * 1 : 8);
         gE('body').removeChild(iframe);
         location = location.search;
       };
@@ -143,25 +149,30 @@
           let eTr = newTr(i);
           let potency = gE('[name="potency"]', 'all', eTr);
           let tier = gE('[name="tier"]', 'all', eTr);
+          let tierMax = gE('[name="tierMax"]', 'all', eTr);
 
           let _target = i.target.split(',');
           potency[0].value = _target[0];
           tier[0].value = _target[1];
-          if (_target.length === 4) {
-            potency[1].value = _target[2];
-            tier[1].value = _target[3];
+          tierMax[0].value = _target[2];
+          if (_target.length === 6) {
+            potency[1].value = _target[3];
+            tier[1].value = _target[4];
+            tierMax[1].value = _target[5];
           }
         }
       }
-      if (GM_getValue('tierMax')) gE('[name="tierMax"]', doc).value = GM_getValue('tierMax');
-      if (GM_getValue('pre')) gE('#pre', doc).checked = GM_getValue('pre');
-      if (GM_getValue('targetOnly')) gE('#targetOnly', doc).checked = GM_getValue('targetOnly');
+      if (GM_getValue('potencyMax')) gE('[name="potencyMax"]', doc).value = GM_getValue('potencyMax');
+      gE('#pre', doc).checked = GM_getValue('pre');
+      gE('#targetOnly', doc).checked = GM_getValue('targetOnly');
+      gE('#double', doc).checked = GM_getValue('double');
+      if (GM_getValue('doubleMax')) gE('[name="doubleMax"]', doc).value = GM_getValue('doubleMax');
     }
   });
   let eLog = eContainer.querySelector('[name="log"]');
   eLog.addEventListener('click', function() {
     if (gE('#iwLog')) {
-      gE('body').removeChild(gE('#iwLog'))
+      gE('body').removeChild(gE('#iwLog'));
       return;
     }
     let iframe = gE('body').appendChild(cE('iframe'));
@@ -235,27 +246,42 @@
     post('/equip/' + equip + '/' + task.url, function(data) {
       let upgrades = gE('#ep>span', 'all', data);
       if (upgrades.length) { //Potency Tier: >0
-        let potency = gE('.eq>div:nth-child(2)', data).textContent.match(/Potency Tier: (\d+)/)[1] * 1;
+        let potency = gE('.eq>div:nth-child(2)', data).textContent.match(/Potency Tier: (\d+)/)[1] * 1; //当前等级
         upgrades = [...upgrades].map(function(i) {
           let re = i.textContent.match(/(\w+) Lv\.(\d+)/);
           return [re[1], re[2] * 1];
         });
-        let tier = 0;
-        let tierNow = 0;
+        let tier = 0; //目标属性和
+        let tierNow = 0; //当前满足的属性和
         let targetOnly = true;
-        for (let i = 0; i < target.length; i += 2) {
+        let _tier; //目标属性
+        let _tierMax; //目标属性最大值
+        let _tierNow; //当前满足的属性
+        let checkTierMax = true;
+        for (let i = 0; i < target.length; i += 3) {
           let name = target[i];
-          let _tier = target[i + 1] * 1;
+          _tier = target[i + 1] * 1; //目标属性
+          _tierMax = target[i + 2] * 1; //目标属性
           tier += _tier;
-          let _tierNow = upgrades.filter(function(i) {
+          _tierNow = upgrades.filter(function(i) {
             return i[0] === name;
-          });
+          }); //当前满足的属性
           _tierNow = _tierNow.length ? _tierNow[0][1] * 1 : 0;
           tierNow += _tierNow;
           if (_tierNow < _tier) targetOnly = false;
+          if (_tierNow > _tierMax) checkTierMax = false;
         }
-        if (tierNow * 10 >= tier * potency) {
-          if (potency === GM_getValue('tierMax', 10) || (GM_getValue('targetOnly') && targetOnly)) { //Lv max -> next equip
+        let check = tierNow * 10 >= tier * potency &&
+          (checkTierMax) &&
+          (_tier === tier || !GM_getValue('double') || tier < GM_getValue('doubleMax', 8) || (GM_getValue('double') && tier >= GM_getValue('doubleMax', 8) && potency === tierNow));
+        //-> 判断1: 总体成长度满足
+        //   -> 判断2: 目标属性小于等于目标属性最大值
+        //      -> 判断3: 单属性
+        //      -> 判断3: 双属性，但未勾选双属性
+        //      -> 判断3: 双属性，勾选双属性，但目标属性和小于设定值
+        //      -> 判断3: 双属性，勾选双属性，且目标属性和大于等于设定值，且当前等级等于当前满足的属性和（即无第三属性）
+        if (check) {
+          if (potency === GM_getValue('potencyMax', 10) || (GM_getValue('targetOnly') && targetOnly)) { //Lv max -> next equip
             addLog('Completed: ' + equip);
             addLog('Equip Url: ' + location.origin + '/equip/' + equip + '/' + task.url);
             let tasks = GM_getValue('tasks');
