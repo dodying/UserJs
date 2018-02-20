@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.08.2
+// @version     1.08.3
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -43,14 +43,14 @@ function init() {
   $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body');
   $(window).on({
     scroll: () => {
-      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && location.pathname.match('/g/') ? 'top:0;' : 'bottom:0;');
+      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && $('.gm').length ? 'top:0;' : 'bottom:0;');
     }
   });
   showConfig();
   if ($('.gm').length) { //信息页
     changeName('#gn'); //修改本子标题（移除集会名）
     if (CONFIG['ex2eh'] && jumpHost()) return; //里站跳转
-    tagTranslate(); //翻译标签
+    tagTranslate(); //标签翻译
     if (!GM_getValue('apikey')) {
       GM_setValue('apikey', unsafeWindow.apikey);
       GM_setValue('apiuid', unsafeWindow.apiuid);
@@ -98,12 +98,11 @@ function init() {
   if (CONFIG['saveLink']) saveLink(); //保存链接
   showTooltip(); //显示提示
   $('.ehNavBar').on('click', '.ehCopy', e => {
-    let _ = e.target;
-    let text = _.value;
+    let text = $(e.target).val();
     GM_setClipboard(text);
-    _.value = '已复制';
+    $(e.target).val('已复制').prop('disabled', true);
     setTimeout(() => {
-      _.value = text;
+      $(e.target).val(text).prop('disabled', false);
     }, 800);
   }).on('contextmenu', 'input[type="button"]', () => false);
 }
@@ -132,9 +131,6 @@ function addStyle() { //添加样式
   let backgroundColor = $('body').css('background-color');
   $('<style></style>').text([
       'input[type="number"]{width:60px;border:1px solid #B5A4A4;margin:3px 1px 0;padding:1px 3px 3px;border-radius:3px;}',
-      'button{color:#f1f1f1;background-color:#34353b;min-height:26px;padding:1px 5px 2px;margin:0 2px;border:2px solid #8d8d8d;border-radius:3px;font-size:9pt;}',
-      'button:enabled:hover{background-color:#43464e !important;border-color:#aeaeae !important;outline:0;}',
-      'button:enabled:active{background:radial-gradient(#1a1a1a,#43464e) !important;border-color:#c3c3c3 !important;}',
       '.ido,.itg{max-width:9999px!important;}',
       '.ehNavBar{display:flex;width:99%;background-color:' + backgroundColor + ';position:fixed;z-index:1000;padding:0 10px;}',
       '.ehNavBar>div{width:33.3%;}',
@@ -155,13 +151,9 @@ function addStyle() { //添加样式
       '.ehDatalist>ol>li{cursor:pointer;}',
       '.ehDatalist>ol>li:after{content:"  "attr(cname);font-size:9pt;font-weight:bold;}',
       '.ehDatalistHover{color:#F00;font-weight:bold;font-size:large;}',
-      '.ehToggleShow{background-repeat:no-repeat;background-position:center right;padding:1px 16px 6px 4px!important;cursor:pointer;}',
-      '.ehToggleShow[name="show"]{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);}',
-      '.ehToggleShow[name="hide"]{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);}',
-      '.ehThumbBtn{height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;}',
       '.ehExist{color:green;padding:0 1px;border:black 1px solid;cursor:pointer;}',
       '.ehExist[name="force"]{color:red;}',
-      '.ehTagPreview{position:fixed;padding:5px;display:none;z-index:999;font-size:larger;width:250px;border-color:#000;border-style:solid;color:#fff;background-color:#34353b;}',
+      '.ehTagPreview{position:fixed;padding:5px;display:none;z-index:99999;font-size:larger;width:250px;border-color:#000;border-style:solid;color:#fff;background-color:#34353b;}',
       '.ehTagPreviewLi{color:#C9BA67;}',
       '.ehTagPreviewLi[name="language"]::before{content:"语言: ";}',
       '.ehTagPreviewLi[name="reclass"]::before{content:"重新分类: ";}',
@@ -186,8 +178,6 @@ function addStyle() { //添加样式
       '.ehTagNotice[name="Like"],#taglist div[id][name="Like"]{color:#000;background-color:#0FF;}',
       '.ehTagEvent>.ehTagEventNotice[on="true"]::after{content:attr(name) " this";}',
       '.ehTagEvent>.ehTagEventNotice[on="false"]::after{content:"NOT " attr(name) " this";}',
-      '.ehToggleShow2[name="show"]::before{content:"Hide";}',
-      '.ehToggleShow2[name="hide"]::before{content:"Show";}',
       '.ehTooltip{display:none;white-space:nowrap;position:fixed;text-align:left;z-index:99999;border:2px solid #8d8d8d;background-color:' + backgroundColor + ';}',
       '.ehTooltip>ul{margin:0;}',
       '.ehCheckTable{top:60px;left:0;position:fixed;width:98%;z-index:2;background-color:' + backgroundColor + ';}',
@@ -225,20 +215,14 @@ function autoComplete() { //自动填充
     $('[name="f_search"]').val(value.filter(i => i).join(' ')).focus();
     $('.ehDatalist>ol').empty();
   }).appendTo('form:has([name="f_search"])');
-  $('<input type="button" class="ehToggleShow ehDatalistBtn" name="hide">').on('click', function() {
-    $('.ehDatalist').toggle();
-    $('.ehDatalistBtn').attr('name', $('.ehDatalistBtn').attr('name') === 'show' ? 'hide' : 'show');
-  }).insertAfter('[name="f_search"]');
   let lastValue;
   $('[name="f_search"]').attr('title', `当输入大于${CONFIG['acLength'] || 0}个字符时，显示选单<br>使用主键盘区的数字/加减/方向键快速选择<br>点击/Enter/Insert键填充`).on({
     focusin: function() {
       $('.ehDatalist').show();
-      $('.ehDatalistBtn').attr('name', 'show');
     },
-    focusout: function(e) {
+    focusout: function() {
       setTimeout(() => {
         $('.ehDatalist').hide();
-        $('.ehDatalistBtn').attr('name', 'hide');
       }, 100);
     },
     keydown: function(e) {
@@ -462,28 +446,11 @@ function checkExist() { //检查本地是否存在
   $('body').on('click', '.ehExist', function(e) {
     GM_setClipboard($(e.target).attr('copy'));
   });
-  $('<input type="button" value="Check Exist" title="只检查可见的，且之前检查无结果">').on('click', () => {
-    new Promise((resolve, reject) => {
-      if (CONFIG['checkExistName2']) {
-        resolve();
-      } else {
-        let lst = $('.itg tr:visible:not(:has(.ehExist)) .it5,.id1:visible:not(:has(.ehExist)) .id2').toArray();
-        async.mapSeries(lst, async i => {
-          let name = i.textContent.replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
-          let res = await xhrSync('http://127.0.0.1:3000/', 'name=' + encodeURIComponent(name), {
-            responseType: 'json'
-          });
-          res.response.forEach((j, k) => {
-            $(`<span class="ehExist" ${name === j.replace(/\.(zip|cbz|rar|cbr)$/, '')? 'name="force" ' : ''}title="点击复制<br>${j}" copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
-          });
-        }, (err, results) => {
-          if (err) console.error(err);
-          resolve();
-        });
-      }
-    }).then(() => {
-      let lst = $('.itg tr:visible:not(:has(.ehExist)) .it5,.id1:visible:not(:has(.ehExist)) .id2').toArray();
-      async.mapSeries(lst, async i => {
+  $('<input type="button" value="Check Exist" title="只检查可见的，且之前检查无结果">').on('click', async (e) => {
+    $(e.target).val('Checking').prop('disabled', true);
+    let lst = $('.itg tr:visible:not(:has(.ehExist)) .it5,.id1:visible:not(:has(.ehExist)) .id2').toArray();
+    if (CONFIG['checkExistOld']) {
+      async.mapLimit(lst, CONFIG['checkExistLimit'] || 1, async i => {
         let name = i.textContent.replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
         let name2 = i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）/g, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
         let res = await xhrSync('http://127.0.0.1:3000/', 'name=' + encodeURIComponent(name2), {
@@ -492,8 +459,28 @@ function checkExist() { //检查本地是否存在
         res.response.forEach((j, k) => {
           $(`<span class="ehExist" ${name === j.replace(/\.(zip|cbz|rar|cbr)$/, '')? 'name="force" ' : ''}title="点击复制<br>${j}" copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
         });
-      }, (err, results) => {});
-    });
+      }, (err, results) => {
+        $(e.target).val('Check Exist').prop('disabled', false);
+      });
+    } else {
+      let name = {};
+      lst.forEach((i, j) => {
+        name[j] = CONFIG['checkExistName2'] ? i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）/g, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim() : i.textContent.replace(/[\\/:*?"<>|]/g, '-').replace(/\|.*?(\s|[\(\[\{【（]|$)/, '$1').split(/[\[\]\(\)\{\}【】（）]+/).map(i => i.replace(/.*(漢化|汉化|翻譯|家族社).*/, '').trim()).filter(i => i).join().replace(/\.$/, '');
+      });
+      console.log(name);
+      let res = await xhrSync('http://127.0.0.1:3000/', 'names=' + encodeURIComponent(JSON.stringify(name)), {
+        responseType: 'json',
+        timeout: 120 * 1000
+      });
+      console.log(res);
+      lst.forEach((i, j) => {
+        let name = i.textContent.replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
+        res.response[j].forEach((k, l) => {
+          $(`<span class="ehExist" ${name === k.replace(/\.(zip|cbz|rar|cbr)$/, '')? 'name="force" ' : ''}title="点击复制<br>${k}" copy="${k}">${l}</span>`).appendTo($(i).parent().find('.it3,.id44'));
+        });
+      });
+      $(e.target).val('Check Exist').prop('disabled', false);
+    }
   }).appendTo('.ehNavBar>div:eq(1)');
 }
 
@@ -759,9 +746,9 @@ function hideGalleries(gmetadata) { //隐藏某些画集
   });
   let length = $('.itg tr:has(.ehTagNotice[name="Unlike"])').hide().length;
   $('.ip:eq(0)').html($('.ip').html() + ' 过滤' + length + '本 ');
-  $('<button class="ehToggleShow2 ehFilterBtn" name="hide"></button>').on('click', function() {
+  $('<input type="button" value="Show">').on('click', function(e) {
     $('.itg tr:has(.ehTagNotice[name="Unlike"])').toggle();
-    $('.ehFilterBtn').attr('name', $('.ehFilterBtn').attr('name') === 'show' ? 'hide' : 'show');
+    $(e.target).val($(e.target).val() === 'Show' ? 'Hide' : 'Show');
   }).appendTo('.ip:eq(0)');
 }
 
@@ -769,7 +756,7 @@ function highlightBlacklist() { //隐藏黑名单相关的画廊(信息页)
   let blacklist = GM_getValue('blacklist', []);
   let title = $('#gn').text();
   for (let i of blacklist) {
-    if (title.match(i)) {
+    if (title.match(new RegExp(i, 'i'))) {
       i = i.replace(/\\(.?)/g, '$1');
       $('#gn').attr('copy', i).attr('title', '点击复制<br>' + i).addClass('ehBlacklist').on('click', function(e) {
         GM_setClipboard($(e.target).attr('copy'));
@@ -785,7 +772,7 @@ function highlightBlacklist2() { //隐藏黑名单相关的画廊(搜索页)
   $('.it5').toArray().forEach(i => {
     let title = $(i).text();
     for (let j of blacklist) {
-      if (title.match(j)) {
+      if (title.match(new RegExp(j, 'i'))) {
         j = j.replace(/\\(.?)/g, '$1');
         $(i).parentsUntil('tr').eq(-1).attr('copy', j).attr('title', '点击复制<br>' + j).addClass('ehBlacklist').on('click', function(e) {
           GM_setClipboard($(e.target).attr('copy') || $(e.target).parentsUntil('tr').eq(-1).attr('copy'));
@@ -895,9 +882,9 @@ function setNotification(title, body) { //发出桌面通知
 function showAllThumb(resolve, reject) { //显示所有预览页
   let pages = $('.ptt td:gt(0):lt(-1)>a').toArray();
   if (pages.length <= 1) return resolve();
-  $('<div class="ehToggleShow ehThumbBtn" name="show"></div>').on('click', function() {
+  $('<input type="button" class="ehThumbBtn" value="Hide" style="width:36px;height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;">').on('click', function(e) {
     $('.gdtContainer').toggle();
-    $('.ehThumbBtn').attr('name', $('.ehThumbBtn').attr('name') === 'show' ? 'hide' : 'show');
+    $(e.target).val($(e.target).val() === 'Show' ? 'Hide' : 'Show');
   }).prependTo('#gdo2');
   $('<div class="gdtContainer"></div>').html('<div></div>'.repeat(pages.length)).insertBefore('#gdt');
   $('#gdt').appendTo(`.gdtContainer>div:nth-child(${$('.ptds:eq(0)').text()})`);
@@ -936,7 +923,9 @@ function showConfig() { //显示设置
       '<div><label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">信息页显示所有预览图</label></div>',
       '<div><label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">显示按钮: 检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label></div>',
       '<div><label for="ehConfig_checkExistName2"><input type="checkbox" id="ehConfig_checkExistName2">检查本地是否存在: 只搜索主要名称(去除集会号/作者/原作名/翻译组织/语言等)</label></div>',
+      '<div><label for="ehConfig_checkExistOld"><input type="checkbox" id="ehConfig_checkExistOld">检查本地是否存在: 使用旧式方法</label>; 一次检查 <input name="ehConfig_checkExistLimit" type="number" placeholder="3"> 本</div>',
       '<div><label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">显示按钮: 保存链接</label></div>',
+      '<div><label for="ehConfig_tagTranslateImage"><input type="checkbox" id="ehConfig_tagTranslateImage">标签翻译显示图片</label></div>',
       '<div>当用<select name="ehConfig_auto2Fav"><option value="0">左键</option><option value="1">中键</option><option value="2">右键</option></select>点击Open时，自动添加到收藏</div>',
       '<div>收藏夹: <input name="ehConfig_bookmark" type="text" placeholder="0.Series\\n1.Cosplay\\n2.Image Set\\n3.Game CG\\n4.Doujinshi\\n5.Harem\\n6.Incest\\n7.Story arc\\n8.Anthology\\n9.Artist"></div>',
       '<div>收藏按钮事件: <input name="ehConfig_bookmarkEvent" title="事件格式: 鼠标按键,键盘按键,收藏事件<br>多个事件以|分割<br>鼠标按键:<ul><li>0 -> 左键</li><li>1 -> 中键</li><li>2 -> 右键</li></ul>键盘按键:<ul><li>-1 -> 任意</li><li>0 -> altKey</li><li>1 -> ctrlKey</li><li>2 -> shiftKey</li></ul>收藏事件:<ul><li>留空 -> 上次选择</li><li>-1 -> 自行选择</li><li>0-9 -> 0-9</li><li>10 -> 移除</li><li>b -> 加入黑名单</li></ul>" type="text" placeholder="0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0"><input name="ehConfig_bookmarkEventChs" type="hidden"></div>',
@@ -1120,11 +1109,11 @@ function tagPreview(gmetadata) { //标签预览
   });
 }
 
-function tagTranslate() { //翻译标签
+function tagTranslate() { //标签翻译
   let data = $('#taglist a').toArray().map(i => {
     let info = i.id.split(/ta_|:/);
     if (info.length === 2) info.splice(1, 0, 'misc');
-    return findData(info[1], info[2]);
+    return findData(info[1], info[2], !CONFIG['tagTranslateImage']);
   }).filter(i => Object.keys(i).length);
   let css = [
     'div#taglist{overflow:visible;min-height:295px;height:auto}',
