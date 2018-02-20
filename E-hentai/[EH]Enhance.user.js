@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.08
+// @version     1.08.1
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -36,7 +36,7 @@ const CONFIG = GM_getValue('config', {});
 const EHT = JSON.parse(GM_getResourceText('EHT')).dataset;
 
 function init() {
-  addStyle();
+  addStyle(); //添加样式
   $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body');
   $(window).on({
     scroll: () => {
@@ -45,51 +45,55 @@ function init() {
   });
   showConfig();
   if ($('.gm').length) { //信息页
-    changeName('#gn');
-    if (CONFIG['ex2eh'] && jumpHost()) return;
-    tagTranslate();
+    changeName('#gn'); //修改本子标题（移除集会名）
+    if (CONFIG['ex2eh'] && jumpHost()) return; //里站跳转
+    tagTranslate(); //翻译标签
     if (!GM_getValue('apikey')) {
       GM_setValue('apikey', unsafeWindow.apikey);
       GM_setValue('apiuid', unsafeWindow.apiuid);
     }
     new Promise((resolve, reject) => {
-      showAllThumb(resolve, reject);
+      if (CONFIG['showAllThumb']) {
+        showAllThumb(resolve, reject); //显示所有预览页
+      } else {
+        resolve();
+      }
     }).then(() => {
       return new Promise((resolve, reject) => {
-        checkImageSize(resolve, reject);
+        checkImageSize(resolve, reject); //检查图片尺寸
       });
     }).then(() => {
-      highlightBlacklist();
-      btnAddFav();
-      btnSearch();
-      tagEvent();
-      copyInfo();
-      if (location.hash !== '' && CONFIG['autoClose']) autoClose();
-      if (location.hash !== '' && CONFIG['autoStartDownload']) autoStartDownload();
+      highlightBlacklist(); //隐藏黑名单相关的画廊(信息页)
+      btnAddFav(); //按钮 -> 加入收藏(信息页)
+      btnSearch(); //按钮 -> 搜索(信息页)
+      tagEvent(); //标签事件
+      copyInfo(); //复制信息
+      if (location.hash !== '' && CONFIG['autoClose']) autoClose(); //下载完成后自动关闭
+      if (location.hash !== '' && CONFIG['autoStartDownload']) autoStartDownload(); //自动开始下载
       abortPending(); //终止EHD所有下载
     });
   } else { //搜索页
-    changeName('.it5>a');
-    highlightBlacklist2();
-    btnAddFav2();
-    btnSearch2();
+    changeName('.it5>a'); //修改本子标题（移除集会名）
+    highlightBlacklist2(); //隐藏黑名单相关的画廊(搜索页)
+    btnAddFav2(); //按钮 -> 加入收藏(搜索页)
+    btnSearch2(); //按钮 -> 搜索(搜索页)
     quickDownload(); //右键：下载
-    batchDownload();
+    batchDownload(); //批量下载
     new Promise((resolve, reject) => {
-      getInfo(resolve, reject);
+      getInfo(resolve, reject); //获取信息
     }).then((gmetadata) => { //获取信息
       if (gmetadata) {
         tagPreview(gmetadata); //标签预览
         hideGalleries(gmetadata); //隐藏某些画集
       }
-      checkExist(); //检查本地是否存在
     });
-    rateInSearchPage();
-    autoComplete();
-    checkForNew();
+    if (CONFIG['checkExist']) checkExist(); //检查本地是否存在
+    rateInSearchPage(); //在搜索页评分
+    autoComplete(); //自动填充
+    checkForNew(); //检查有无新本子
   }
-  if (CONFIG['saveLink']) saveLink();
-  showTooltip();
+  if (CONFIG['saveLink']) saveLink(); //保存链接
+  showTooltip(); //显示提示
   $('.ehNavBar').on('click', '.ehCopy', e => {
     let _ = e.target;
     let text = _.value;
@@ -101,8 +105,8 @@ function init() {
   }).on('contextmenu', 'input[type="button"]', () => false);
 }
 
-function abortPending() {
-  $('<input type="button" value="Force Abort">').on({
+function abortPending() { //终止EHD所有下载
+  $('<input type="button" value="Force Abort" title="终止EHD所有下载">').on({
     click: () => {
       $('.ehD-pt-item:not(.ehD-pt-succeed,.ehD-pt-failed) .ehD-pt-abort').click();
     }
@@ -121,7 +125,7 @@ function add2Fav(gid, token, i, target) { //添加收藏
   }, `favcat=${i}&favnote=&submit=Apply+Changes&update=1`);;
 }
 
-function addStyle() {
+function addStyle() { //添加样式
   let backgroundColor = $('body').css('background-color');
   $('<style></style>').text([
       'input[type="number"]{width:60px;border:1px solid #B5A4A4;margin:3px 1px 0;padding:1px 3px 3px;border-radius:3px;}',
@@ -294,7 +298,7 @@ function autoStartDownload() { //自动开始下载
 }
 
 function batchDownload() { //批量下载
-  $('<th><input type="checkbox"></th>').appendTo('.itg tr:eq(0)');
+  $('<th><input type="checkbox" title="全选"></th>').appendTo('.itg tr:eq(0)');
   $('.itg tr:eq(0) input').on('click', function(e) {
     $('.itg tr:gt(0) input').prop('checked', e.target.checked);
     if (e.target.checked) {
@@ -407,9 +411,9 @@ function btnSearch() { //按钮 -> 搜索(信息页)
     text[i] = text[i].trim();
     if (text[i]) $('<span></span>').html(`<input id="ehSearch_${i}" type="checkbox"><label for="ehSearch_${i}">${text[i]}</label>`).appendTo('.ehSearch');
   }
-  $('<input type="button" value="Search">').appendTo('.ehSearch').click(() => {
-    let keyword = $('.ehSearch input:checked+label').toArray().map(i => i.textContent);
-    if (keyword.length > 0) openUrl('/?f_search=%22' + encodeURIComponent(keyword.join('" "')) + '%22');
+  $('<input type="button" value="Search" title="搜索">').appendTo('.ehSearch').click(() => {
+    let keyword = $('.ehSearch input:checked+label').toArray().map(i => '"'+i.textContent+'"').join(' ');
+    if (keyword.length > 0) openUrl('/?f_search=' + encodeURIComponent(keyword));
   });
 }
 
@@ -452,38 +456,35 @@ function changeName(e) { //修改本子标题（移除集会名）
 }
 
 function checkExist() { //检查本地是否存在
-  if (!CONFIG['checkExist']) return;
   $('body').on('click', '.ehExist', function(e) {
     GM_setClipboard($(e.target).attr('copy'));
   });
-  let checkExistFunction = () => {
+  $('<input type="button" value="Check Exist" title="只检查可见的，且之前检查无结果">').on('click', () => {
     $('.itg tr:visible:not(:has(.ehExist)) .it5,.id1:visible:not(:has(.ehExist)) .id2').toArray().forEach(i => {
-      let name = i.textContent;
-      let name2 = i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）/g, '').replace(/\|.*/g, '').replace(/:"*?|<>\/\\/g, '-').trim();
+      let name = i.textContent.replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
+      let name2 = i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）/g, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
       xhr('http://127.0.0.1:3000/', e => {
         if (e.response.length) {
           e.response.forEach((j, k) => {
-            $(`<span class="ehExist" name="force" title="点击复制<br>${j}" copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
+            if (name === j.replace(/\.(zip|cbz|rar|cbr)$/, '')) $(`<span class="ehExist" name="force" title="点击复制<br>${j}" copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
           });
         } else if (name2.length > 5) {
           xhr('http://127.0.0.1:3000/', e => {
             e.response.forEach((j, k) => {
               $(`<span class="ehExist" title="点击复制<br>${j}" copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
             });
-          }, 'name=' + name2, {
+          }, 'name=' + encodeURIComponent(name2), {
             responseType: 'json'
           });
         }
-      }, 'name=' + name, {
+      }, 'name=' + encodeURIComponent(name), {
         responseType: 'json'
       })
     });
-  }
-  if (CONFIG['checkExistInterval']) setInterval(checkExistFunction, CONFIG['checkExistInterval'] * 1000);
-  checkExistFunction();
+  }).appendTo('.ehNavBar>div:eq(1)');
 }
 
-function checkForNew() {
+function checkForNew() { //检查有无新本子
   let listStyle = $('#nb>img')[0].outerHTML;
   $(listStyle).appendTo('#nb');
   $('<a href="javascript:;">Add to Check</a>').on('click', function(e) {
@@ -506,7 +507,8 @@ function checkForNew() {
     list[keywordRaw] = {
       name: keywordNew,
       url: location.search,
-      time: new Date().getTime()
+      time: new Date().getTime(),
+      result: $('.ip').text().match(/Showing .*? of \d+/) ? $('.ip').text().match(/Showing .*? of (\d+)/)[1] : 0
     }
     GM_setValue('checkList', list);
   }).appendTo('#nb');
@@ -516,26 +518,27 @@ function checkForNew() {
       $('.ehCheckTable').toggle();
       return;
     }
-    $('<div class="ehCheckTable"></div>').html('<table><thead><tr><th>Keyword</th><th>Name</th><th>Time</th><th><input class="ehCheckTableSelectAll" type="checkbox"></th></tr></thead><tbody></tbody></table>').appendTo('body');
+    $('<div class="ehCheckTable"></div>').html('<table><thead><tr><th>Keyword</th><th>Name</th><th>Time</th><th>Result</th><th><input class="ehCheckTableSelectAll" type="checkbox" title="全选"></th></tr></thead><tbody></tbody></table>').appendTo('body');
     let list = GM_getValue('checkList', {});
     for (let i in list) {
-      let tr = $('<tr><td></td><td></td><td></td><td><input type="checkbox"></td></tr>');
+      let tr = $('<tr><td></td><td></td><td></td><td></td><td><input type="checkbox"></td></tr>');
       $('<a target="_blank"></a>').attr('href', '/' + list[i].url).text(i).appendTo($(tr).find('td:eq(0)'));
       $(tr).find('td:eq(1)').text(list[i].name);
       $(tr).find('td:eq(2)').text(new Date(list[i].time).toLocaleString(navigator.language, {
         hour12: false
       }));
+      $(tr).find('td:eq(3)').text(list[i].result);
       $(tr).appendTo('.ehCheckTable tbody');
     }
     $('.ehCheckTableSelectAll').on('click', (e) => {
       $('.ehCheckTable td>input').prop('checked', e.target.checked);
     });
-    $('<input type="button" value="Select Invert">').on('click', function() {
+    $('<input type="button" value="Select Invert" title="反选">').on('click', function() {
       $('.ehCheckTable td>input').toArray().forEach(i => {
         i.checked = !i.checked;
       });
     }).appendTo('.ehCheckTable');
-    $('<input type="button" value="Delete">').on('click', function() {
+    $('<input type="button" value="Delete" title="移除">').on('click', function() {
       let list = GM_getValue('checkList', {});
       $('.ehCheckTable td>input:checked').toArray().forEach(i => {
         let keyword = $(i).parentsUntil('tbody').eq(-1).find('td>a').html();
@@ -544,7 +547,7 @@ function checkForNew() {
       GM_setValue('checkList', list);
       $('.ehCheckTable').remove();
     }).appendTo('.ehCheckTable');
-    $('<input type="button" value="Cancel">').on('click', function() {
+    $('<input type="button" value="Cancel" title="取消">').on('click', function() {
       $('.ehCheckTable').hide();
     }).appendTo('.ehCheckTable');
   }).appendTo('#nb');
@@ -880,7 +883,6 @@ function setNotification(title, body) { //发出桌面通知
 }
 
 function showAllThumb(resolve, reject) { //显示所有预览页
-  if (!CONFIG['showAllThumb']) return resolve();
   let pages = $('.ptt td:gt(0):lt(-1)>a').toArray();
   if (pages.length <= 1) return resolve();
   $('<div class="ehToggleShow ehThumbBtn" name="show"></div>').on('click', function() {
@@ -922,9 +924,8 @@ function showConfig() { //显示设置
       '<div><label for="ehConfig_autoStartDownload"><input type="checkbox" id="ehConfig_autoStartDownload">Location Hash不为空时，自动开始下载</label></div>',
       '<div><label for="ehConfig_autoClose" title="Firefox: 需打开about:config并设置dom.allow_scripts_to_close_windows为true"><input type="checkbox" id="ehConfig_autoClose">Location Hash不为空时，下载完成后自动关闭标签</label></div>',
       '<div><label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">信息页显示所有预览图</label></div>',
-      '<div><label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label></div>',
-      '<div>检查本地是否存在间隔 <input name="ehConfig_checkExistInterval" type="number" placeholder="180" title="0为只检查一次"></div>',
-      '<div><label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">显示保存链接按钮</label></div>',
+      '<div><label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">显示按钮: 检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label></div>',
+      '<div><label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">显示按钮: 保存链接</label></div>',
       '<div>当用<select name="ehConfig_auto2Fav"><option value="0">左键</option><option value="1">中键</option><option value="2">右键</option></select>点击Open时，自动添加到收藏</div>',
       '<div>收藏夹: <input name="ehConfig_bookmark" type="text" placeholder="0.Series\\n1.Cosplay\\n2.Image Set\\n3.Game CG\\n4.Doujinshi\\n5.Harem\\n6.Incest\\n7.Story arc\\n8.Anthology\\n9.Artist"></div>',
       '<div>收藏按钮事件: <input name="ehConfig_bookmarkEvent" title="事件格式: 鼠标按键,键盘按键,收藏事件<br>多个事件以|分割<br>鼠标按键:<ul><li>0 -> 左键</li><li>1 -> 中键</li><li>2 -> 右键</li></ul>键盘按键:<ul><li>-1 -> 任意</li><li>0 -> altKey</li><li>1 -> ctrlKey</li><li>2 -> shiftKey</li></ul>收藏事件:<ul><li>留空 -> 上次选择</li><li>-1 -> 自行选择</li><li>0-9 -> 0-9</li><li>10 -> 移除</li><li>b -> 加入黑名单</li></ul>" type="text" placeholder="0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0"><input name="ehConfig_bookmarkEventChs" type="hidden"></div>',
@@ -935,7 +936,7 @@ function showConfig() { //显示设置
       '<div>搜索栏自动完成显示项目: <input name="ehConfig_acItem" type="text" placeholder="language,artist,female,male,parody,character,group,misc" title="以,分割"></div>',
       '<div>宣传图ID: <input name="ehConfig_ads" type="text" title="以,分割"></div>',
       '<div>批量下载数: <input name="ehConfig_batch" type="number" placeholder="4"></div>',
-      '<div class="ehConfigBtn"><input type="button" name="save" value="保存"><input type="button" name="cancel" value="取消"></div>'].join('');
+      '<div class="ehConfigBtn"><input type="button" name="save" value="Save" title="保存"><input type="button" name="cancel" value="Cancel" title="取消"></div>'].join('');
     $('<div class="ehConfig"></div>').html(_html).appendTo('body').on('click', function(e) {
       if ($(e.target).is('.ehConfigBtn>input[type="button"]')) {
         if (e.target.name === 'save') {
