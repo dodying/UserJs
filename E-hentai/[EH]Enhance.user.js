@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.08.3
+// @version     1.08.4
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -82,28 +82,24 @@ function init() {
     btnSearch2(); //按钮 -> 搜索(搜索页)
     quickDownload(); //右键：下载
     batchDownload(); //批量下载
+    if (CONFIG['checkExist']) checkExist(); //检查本地是否存在
     new Promise((resolve, reject) => {
       getInfo(resolve, reject); //获取信息
     }).then((gmetadata) => { //获取信息
       if (gmetadata) {
         tagPreview(gmetadata); //标签预览
         hideGalleries(gmetadata); //隐藏某些画集
+        if (CONFIG['checkExistAtStart']) $('input:button[name="checkExist"]').click();
       }
     });
-    if (CONFIG['checkExist']) checkExist(); //检查本地是否存在
     rateInSearchPage(); //在搜索页评分
     autoComplete(); //自动填充
     checkForNew(); //检查有无新本子
   }
   if (CONFIG['saveLink']) saveLink(); //保存链接
   showTooltip(); //显示提示
-  $('.ehNavBar').on('click', '.ehCopy', e => {
-    let text = $(e.target).val();
-    GM_setClipboard(text);
-    $(e.target).val('已复制').prop('disabled', true);
-    setTimeout(() => {
-      $(e.target).val(text).prop('disabled', false);
-    }, 800);
+  $('body').on('click', '[copy]', e => {
+    GM_setClipboard($(e.target).attr('copy'));
   }).on('contextmenu', 'input[type="button"]', () => false);
 }
 
@@ -132,6 +128,7 @@ function addStyle() { //添加样式
   $('<style></style>').text([
       'input[type="number"]{width:60px;border:1px solid #B5A4A4;margin:3px 1px 0;padding:1px 3px 3px;border-radius:3px;}',
       '.ido,.itg{max-width:9999px!important;}',
+      '.it5{max-width:9999px!important;}',
       '.ehNavBar{display:flex;width:99%;background-color:' + backgroundColor + ';position:fixed;z-index:1000;padding:0 10px;}',
       '.ehNavBar>div{width:33.3%;}',
       '.ehNavBar>div:nth-child(1){text-align:left;}',
@@ -443,10 +440,7 @@ function changeName(e) { //修改本子标题（移除集会名）
 }
 
 function checkExist() { //检查本地是否存在
-  $('body').on('click', '.ehExist', function(e) {
-    GM_setClipboard($(e.target).attr('copy'));
-  });
-  $('<input type="button" value="Check Exist" title="只检查可见的，且之前检查无结果">').on('click', async (e) => {
+  $('<input type="button" name="checkExist" value="Check Exist" title="只检查可见的，且之前检查无结果">').on('click', async (e) => {
     $(e.target).val('Checking').prop('disabled', true);
     let lst = $('.itg tr:visible:not(:has(.ehExist)) .it5,.id1:visible:not(:has(.ehExist)) .id2').toArray();
     if (CONFIG['checkExistOld']) {
@@ -457,7 +451,7 @@ function checkExist() { //检查本地是否存在
           responseType: 'json'
         });
         res.response.forEach((j, k) => {
-          $(`<span class="ehExist" ${name === j.replace(/\.(zip|cbz|rar|cbr)$/, '')? 'name="force" ' : ''}title="点击复制<br>${j}" copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
+          $(`<span class="ehExist" ${name === j.replace(/\.(zip|cbz|rar|cbr)$/, '')? 'name="force" ' : ''}copy="${j}">${k}</span>`).appendTo($(i).parent().find('.it3,.id44'));
         });
       }, (err, results) => {
         $(e.target).val('Check Exist').prop('disabled', false);
@@ -467,16 +461,14 @@ function checkExist() { //检查本地是否存在
       lst.forEach((i, j) => {
         name[j] = CONFIG['checkExistName2'] ? i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）/g, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim() : i.textContent.replace(/[\\/:*?"<>|]/g, '-').replace(/\|.*?(\s|[\(\[\{【（]|$)/, '$1').split(/[\[\]\(\)\{\}【】（）]+/).map(i => i.replace(/.*(漢化|汉化|翻譯|家族社).*/, '').trim()).filter(i => i).join().replace(/\.$/, '');
       });
-      console.log(name);
       let res = await xhrSync('http://127.0.0.1:3000/', 'names=' + encodeURIComponent(JSON.stringify(name)), {
         responseType: 'json',
         timeout: 120 * 1000
       });
-      console.log(res);
       lst.forEach((i, j) => {
         let name = i.textContent.replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
         res.response[j].forEach((k, l) => {
-          $(`<span class="ehExist" ${name === k.replace(/\.(zip|cbz|rar|cbr)$/, '')? 'name="force" ' : ''}title="点击复制<br>${k}" copy="${k}">${l}</span>`).appendTo($(i).parent().find('.it3,.id44'));
+          $(`<span class="ehExist" ${name === k.replace(/\.(zip|cbz|rar|cbr)$/, '')? 'name="force" ' : ''}copy="${k}">${l}</span>`).appendTo($(i).parent().find('.it3,.id44'));
         });
       });
       $(e.target).val('Check Exist').prop('disabled', false);
@@ -662,7 +654,7 @@ function copyInfo() { //复制信息
     var nameJpn = $('#gj').text().match(/\[(.*?)\]/)[1];
     if (name.match(/\(.*?\)/)) name = name.match(/\((.*?)\)/)[1];
     if (nameJpn.match(/\(.*?\)/)) nameJpn = nameJpn.match(/\((.*?)\)/)[1];
-    $('<input type="button" class="ehCopy">').val(`[${name}]${nameJpn}`).appendTo('.ehNavBar>div:eq(0)');
+    $(`<input type="button" value="[${name}]${nameJpn}" copy="[${name}]${nameJpn}">`).appendTo('.ehNavBar>div:eq(0)');
   }
   if ($('.gt[id*="td_parody"]>a').length > 0) { //parody
     let info = $('.gt[id*="td_parody"]>a').attr('id').split(/ta_|:/);
@@ -674,7 +666,7 @@ function copyInfo() { //复制信息
       parody = parody[parody.length - 1].match(/\((.*?)\)/)[1];
     }
     let parodyKeyword = $('.gt[id*="td_parody"]>a').text().replace(/ \| .*/, '');
-    $('<input type="button" class="ehCopy">').val(`【${parody}】${parodyKeyword}`).appendTo('.ehNavBar>div:eq(0)');
+    $(`<input type="button" value="【${parody}】${parodyKeyword}" copy="【${parody}】${parodyKeyword}">`).appendTo('.ehNavBar>div:eq(0)');
   }
 }
 
@@ -758,13 +750,13 @@ function highlightBlacklist() { //隐藏黑名单相关的画廊(信息页)
   for (let i of blacklist) {
     if (title.match(new RegExp(i, 'i'))) {
       i = i.replace(/\\(.?)/g, '$1');
-      $('#gn').attr('copy', i).attr('title', '点击复制<br>' + i).addClass('ehBlacklist').on('click', function(e) {
+      $('#gn').attr('copy', i).addClass('ehBlacklist').on('click', function(e) {
         GM_setClipboard($(e.target).attr('copy'));
       });
       return;
     }
   }
-  $('#gn').removeAttr('copy').removeAttr('title').removeClass('ehBlacklist').off('click');
+  $('#gn').removeAttr('copy').removeClass('ehBlacklist').off('click');
 }
 
 function highlightBlacklist2() { //隐藏黑名单相关的画廊(搜索页)
@@ -774,13 +766,13 @@ function highlightBlacklist2() { //隐藏黑名单相关的画廊(搜索页)
     for (let j of blacklist) {
       if (title.match(new RegExp(j, 'i'))) {
         j = j.replace(/\\(.?)/g, '$1');
-        $(i).parentsUntil('tr').eq(-1).attr('copy', j).attr('title', '点击复制<br>' + j).addClass('ehBlacklist').on('click', function(e) {
+        $(i).parentsUntil('tr').eq(-1).attr('copy', j).addClass('ehBlacklist').on('click', function(e) {
           GM_setClipboard($(e.target).attr('copy') || $(e.target).parentsUntil('tr').eq(-1).attr('copy'));
         });
         return;
       }
     }
-    $(i).parentsUntil('tr').eq(-1).removeAttr('copy').removeAttr('title').removeClass('ehBlacklist').off('click');
+    $(i).parentsUntil('tr').eq(-1).removeAttr('copy').removeClass('ehBlacklist').off('click');
   });
 }
 
@@ -922,6 +914,7 @@ function showConfig() { //显示设置
       '<div><label for="ehConfig_autoClose" title="Firefox: 需打开about:config并设置dom.allow_scripts_to_close_windows为true"><input type="checkbox" id="ehConfig_autoClose">Location Hash不为空时，下载完成后自动关闭标签</label></div>',
       '<div><label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">信息页显示所有预览图</label></div>',
       '<div><label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">显示按钮: 检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label></div>',
+      '<div><label for="ehConfig_checkExistAtStart"><input type="checkbox" id="ehConfig_checkExistAtStart">检查本地是否存在: 页面载入后检查一次</label></div>',
       '<div><label for="ehConfig_checkExistName2"><input type="checkbox" id="ehConfig_checkExistName2">检查本地是否存在: 只搜索主要名称(去除集会号/作者/原作名/翻译组织/语言等)</label></div>',
       '<div><label for="ehConfig_checkExistOld"><input type="checkbox" id="ehConfig_checkExistOld">检查本地是否存在: 使用旧式方法</label>; 一次检查 <input name="ehConfig_checkExistLimit" type="number" placeholder="3"> 本</div>',
       '<div><label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">显示按钮: 保存链接</label></div>',
@@ -1009,10 +1002,16 @@ function showTooltip() { //显示提示
     $(preEle).removeAttr('raw-title').attr('title', title);
     $('.ehTooltip').hide();
   });
-  $('body').on('mouseenter', ':visible[title],:visible[raw-title]', function(e) {
+  $('body').on('mouseenter', ':visible[title],:visible[raw-title],[copy]', function(e) {
     preEle = e.target;
-    let title = $(preEle).attr('title') || $(preEle).attr('raw-title');
-    $(preEle).removeAttr('title').attr('raw-title', title);
+    let title;
+    if ($(preEle).is('[copy]:not([title])')) {
+      title = '点击复制<br>' + $(preEle).attr('copy');
+      $(preEle).attr('raw-title', title);
+    } else {
+      title = $(preEle).attr('title') || $(preEle).attr('raw-title');
+      $(preEle).removeAttr('title').attr('raw-title', title);
+    }
     $('.ehTooltip').html(title);
 
     let top = $(preEle).offset().top - $('body').scrollTop();
@@ -1043,7 +1042,7 @@ function tagEvent() { //标签事件
         tag.push(keyword);
         $('#taglist div[id="td_' + keyword.replace(/ /g, '_') + '"]').attr('name', i);
       } else if ($(e.target).attr('on') === 'false' && tag.includes(keyword)) {
-        tag.splice(tag.indexOf(keyword));
+        tag.splice(tag.indexOf(keyword), 1);
         $('#taglist div[id="td_' + keyword.replace(/ /g, '_') + '"]').removeAttr('name');
       }
       GM_setValue('tag' + i, tag);
