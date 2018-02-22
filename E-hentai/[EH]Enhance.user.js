@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.08.4
+// @version     1.08.5
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -25,11 +25,18 @@
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_getResourceText
+// @grant       GM_getResourceURL
 // @grant       GM_xmlhttpRequest
 // @connect     127.0.0.1
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://cdn.bootcss.com/async/2.6.0/async.min.js
 // @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1518335359727
+// @resource favicon_0 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAL0lEQVR42mNgGBQgjU3wPzomJI+ihmoGEHIhTvWDxwBkCVxs2howjAKR/ilxQAEA0niUcVUdSr0AAAAASUVORK5CYII=
+// @resource favicon_1 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAK0lEQVR42mNgGBQgjU3wPzrGp452BhDr0kFsALICbIppb8AwCkT6p8QBBQBmZWTxFXfR8AAAAABJRU5ErkJggg==
+// @resource favicon_2 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANElEQVR42mNgGBQgjU3wPzomJI+ihmoGkOriQWgAsgQ2NtGBSLYBRDuZVAX0M2DgUuKAAgB3d4iRNiZLcAAAAABJRU5ErkJggg==
+// @resource favicon_3 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMElEQVR42mNgGBQgjU3wPzomJI+ihmoGkOriQWgAsgQ2NtGBSLYBwygQ6Z8SBxQAAOjoiJF+j7m3AAAAAElFTkSuQmCC
+// @resource favicon_4 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANElEQVR42mNgGBQgjU3wPzrGJo+LTz0DCLlwCBiALIGNjTOcqGYAqdE+CA3AlZBob8CAAgCuIn+p3J00ugAAAABJRU5ErkJggg==
+// @resource favicon_5 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANUlEQVR42mNgGBQgjU3wPzomJI+ihmoGEHIhA7kK6GcAskJsbKIDkWwDSI32QWjAwKXEAQUAd3eIkeLwZzcAAAAASUVORK5CYII=
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)
 // @compatible  chrome 55+(ES2017)
@@ -43,13 +50,12 @@ function init() {
   $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body');
   $(window).on({
     scroll: () => {
-      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && $('.gm').length ? 'top:0;' : 'bottom:0;');
+      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && $('.ido').length === 0 ? 'top:0;' : 'bottom:0;');
     }
   });
-  showConfig();
-  if ($('.gm').length) { //信息页
-    changeName('#gn'); //修改本子标题（移除集会名）
+  if ($('.ido').length === 0) { //信息页
     if (CONFIG['ex2eh'] && jumpHost()) return; //里站跳转
+    changeName('#gn'); //修改本子标题（移除集会名）
     tagTranslate(); //标签翻译
     if (!GM_getValue('apikey')) {
       GM_setValue('apikey', unsafeWindow.apikey);
@@ -63,9 +69,14 @@ function init() {
       }
     }).then(() => {
       return new Promise((resolve, reject) => {
-        checkImageSize(resolve, reject); //检查图片尺寸
+        if (CONFIG['sizeS'] && CONFIG['sizeD'] && CONFIG['rateS'] && CONFIG['rateD']) {
+          checkImageSize(resolve, reject); //检查图片尺寸
+        } else {
+          resolve();
+        }
       });
     }).then(() => {
+      $('<link rel="shortcut icon" href="' + GM_getResourceURL('favicon_' + GM_getValue('imageSize', 0)) + '" type="image/x-icon">').appendTo('head');
       highlightBlacklist(); //隐藏黑名单相关的画廊(信息页)
       btnAddFav(); //按钮 -> 加入收藏(信息页)
       btnSearch(); //按钮 -> 搜索(信息页)
@@ -74,6 +85,7 @@ function init() {
       if (location.hash !== '' && CONFIG['autoClose']) autoClose(); //下载完成后自动关闭
       if (location.hash !== '' && CONFIG['autoStartDownload']) autoStartDownload(); //自动开始下载
       abortPending(); //终止EHD所有下载
+      introPic(); //宣传图
     });
   } else { //搜索页
     changeName('.it5>a'); //修改本子标题（移除集会名）
@@ -90,12 +102,14 @@ function init() {
         tagPreview(gmetadata); //标签预览
         hideGalleries(gmetadata); //隐藏某些画集
         if (CONFIG['checkExistAtStart']) $('input:button[name="checkExist"]').click();
+        if (CONFIG['preloadPaneImage']) $('.itd:visible[onmouseover]').trigger('mouseover');
       }
     });
     rateInSearchPage(); //在搜索页评分
     autoComplete(); //自动填充
     checkForNew(); //检查有无新本子
   }
+  showConfig();
   if (CONFIG['saveLink']) saveLink(); //保存链接
   showTooltip(); //显示提示
   $('body').on('click', '[copy]', e => {
@@ -187,6 +201,8 @@ function addStyle() { //添加样式
       '.itg>tbody>tr.ehBatchHover{background-color:#669933;}',
       '.itg>tbody>tr:hover{background-color:#4A86E8}',
       '.itg>tbody>tr>th:nth-child(5),.itg>tbody>tr>td:nth-child(5){cursor:pointer;}',
+      '.gdtm [name="intro"][on="true"]::after{content:"Block this";}',
+      '.gdtm [name="intro"][on="false"]::after{content:"Unblock this";}',
     ].concat(GM_getResourceText('jquery_ui')).join('')).appendTo('head');
   $('.i:has(.n),.id44>div>a:has(.tn)').hide(); //隐藏种子图标
 }
@@ -211,6 +227,7 @@ function autoComplete() { //自动填充
     value[value.length - 1] = e.target.textContent;
     $('[name="f_search"]').val(value.filter(i => i).join(' ')).focus();
     $('.ehDatalist>ol').empty();
+    $('.ehDatalist').show();
   }).appendTo('form:has([name="f_search"])');
   let lastValue;
   $('[name="f_search"]').attr('title', `当输入大于${CONFIG['acLength'] || 0}个字符时，显示选单<br>使用主键盘区的数字/加减/方向键快速选择<br>点击/Enter/Insert键填充`).on({
@@ -459,7 +476,13 @@ function checkExist() { //检查本地是否存在
     } else {
       let name = {};
       lst.forEach((i, j) => {
-        name[j] = CONFIG['checkExistName2'] ? i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）/g, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim() : i.textContent.replace(/[\\/:*?"<>|]/g, '-').replace(/\|.*?(\s|[\(\[\{【（]|$)/, '$1').split(/[\[\]\(\)\{\}【】（）]+/).map(i => i.replace(/.*(漢化|汉化|翻譯|家族社).*/, '').trim()).filter(i => i).join().replace(/\.$/, '');
+        if (CONFIG['checkExistName2']) {
+          name[j] = i.textContent.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）/g, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
+        } else {
+          let arr = i.textContent.replace(/\|.*?([\(\[\{【（]|$)/, '$1').replace(/[\\/:*?"<>|]/g, '-').split(/[\[\]\(\)\{\}【】（）]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i);
+          if (arr.includes('Chinese')) arr.splice(arr.indexOf('Chinese'));
+          name[j] = arr.join();
+        }
       });
       let res = await xhrSync('http://127.0.0.1:3000/', 'names=' + encodeURIComponent(JSON.stringify(name)), {
         responseType: 'json',
@@ -500,7 +523,7 @@ function checkForNew() { //检查有无新本子
       name: keywordNew,
       url: location.search,
       time: new Date().getTime(),
-      result: $('.ip').text().match(/Showing .*? of \d+/) ? $('.ip').text().match(/Showing .*? of (\d+)/)[1] : 0
+      result: $('.ip').text().match(/Showing .*? of [\d,]+/) ? $('.ip').text().match(/Showing .*? of ([\d,]+)/)[1] : 0
     }
     GM_setValue('checkList', list);
   }).appendTo('#nb');
@@ -558,38 +581,7 @@ function checkForNew() { //检查有无新本子
 }
 
 function checkImageSize(resolve, reject) { //检查图片尺寸
-  let ads = {
-    'c8d2ff755b': 'https://e-hentai.org/s/c8d2ff755b/1183972-24', //脸肿汉化组 - 微博广告
-    '81e88b4743': 'https://e-hentai.org/s/81e88b4743/1183972-25', //脸肿汉化组 - 字幕组招募
-    '7b88fccc0b': 'https://e-hentai.org/s/7b88fccc0b/1183972-26', //脸肿汉化组 - 招募
-    '8b7d43e713': 'https://e-hentai.org/s/8b7d43e713/1183972-27', //脸肿汉化组 - 粉丝群3二维码
-    '43067d768b': 'https://exhentai.org/s/43067d768b/971053-20', //CE家族社 - 招募
-    '683f48d8e8': 'https://exhentai.org/s/683f48d8e8/1183171-23', //无毒汉化组 - 招募 - 998.jpg/IMG999.jpg
-    '08db14c5fb': 'https://exhentai.org/s/08db14c5fb/1182672-28', //无毒汉化组 - 招募
-    'ea76cf5fb0': 'https://exhentai.org/s/ea76cf5fb0/1182539-36', //无毒汉化组 - 招募 - P099.jpg
-    '9d1afcfa9f': 'https://exhentai.org/s/9d1afcfa9f/1183465-19', //無邪気漢化組 - 招募 - _ver.4.1.png
-    '6df42be9ea': 'https://exhentai.org/s/6df42be9ea/1183726-110', //魔劍个人汉化 - Logo - EvilSword.jpg
-    '58262210ee': 'https://exhentai.org/s/58262210ee/1183752-25', //瑞树汉化组 - 招募
-    '6aa700774a': 'https://exhentai.org/s/6aa700774a/1183377-23', //檸檬茶漢化組 - 招募
-    '4354346b0f': 'https://exhentai.org/s/4354346b0f/1182171-18', //绅士仓库汉化 - 招募
-    'b8f49e0337': 'https://exhentai.org/s/b8f49e0337/1183109-28', //补丁布丁汉化组E - 声明 - 999.jpg
-    'f364818d76': 'https://exhentai.org/s/f364818d76/958857-20', //想抱雷妈汉化组 - 招募 - zm01.jpg
-    'baa1140051': 'https://exhentai.org/s/baa1140051/958857-21', //想抱雷妈汉化组 - 招募 - zm02_05.jpg
-    '5c6d42c811': 'https://exhentai.org/s/5c6d42c811/971053-21', //想抱雷妈汉化组 - 招募1
-    'e7db8c9963': 'https://exhentai.org/s/e7db8c9963/971053-22', //想抱雷妈汉化组 - 招募2
-    '960688f1b0': 'https://exhentai.org/s/960688f1b0/1184027-31', //有毒氣漢化組 - 招募 - 999.jpg
-    'e493033062': 'https://exhentai.org/s/e493033062/1183061-31', //女子力研究 - 招募 - 999.jpg
-    '0ee25db5eb': 'https://exhentai.org/s/0ee25db5eb/1183061-30', //緋色影法師 - 系列
-    'b4b9f1eb28': 'https://exhentai.org/s/b4b9f1eb28/1182897-24', //兔屋家族社 - 招募
-    'fd6e0c8bc9': 'https://exhentai.org/s/fd6e0c8bc9/1182888-18', //百疯合狗汉化 - 右箭头 - zQRCODE1.jpg
-    'ee7c677272': 'https://exhentai.org/s/ee7c677272/1182888-19', //百疯合狗汉化 - 二维码 - zQRCODE2.jpg
-    '9182740ce7': 'https://exhentai.org/s/9182740ce7/1182888-20', //百疯合狗汉化 - 左箭头 - zQRCODE3.jpg
-    '2716ad4d6c': 'https://exhentai.org/s/2716ad4d6c/1174189-16', //靴下汉化组 - 招募1
-    '8e21688aff': 'https://exhentai.org/s/8e21688aff/1174189-17', //靴下汉化组 - 招募2
-    '4cbe8f6296': 'https://exhentai.org/s/4cbe8f6296/1182476-17', //K记翻译 - 声明 - 999.jpg
-    '09fe6b9a55': 'https://exhentai.org/s/09fe6b9a55/1182161-24', //寂月汉化组 - 招募 - 2018.jpg
-  };
-  ads = Object.keys(ads).concat(GM_getValue('ads', '').split(',')); //字幕组宣传图
+  let ads = GM_getValue('introPic', []);
   let s = CONFIG['sizeS'];
   let d = CONFIG['sizeD'];
   if (!GM_getValue('imageSize', false)) {
@@ -602,14 +594,8 @@ function checkImageSize(resolve, reject) { //检查图片尺寸
   let imageSize = GM_getValue('imageSize');
   let numS = 0; //单页
   let numD = 0; //双页
-  let pics = $('.gdtm>div>a>img').toArray().filter(i => {
-    if (ads.includes($(i).parent().attr('href').split('/')[4])) {
-      $(i).parentsUntil('#gdt').eq(-1).hide();
-      return false;
-    } else {
-      return true;
-    }
-  });
+  let pics = $('.gdtm>div>a>img').toArray().filter(i => !ads.includes($(i).parent().attr('href').split('/')[4]));
+  console.log(pics);
   pics.forEach(function(i) {
     let rate = $(i).width() / $(i).height(); //宽高比
     if (rate > CONFIG['rateD']) {
@@ -625,6 +611,7 @@ function checkImageSize(resolve, reject) { //检查图片尺寸
       changeEConfig('xr', d).then(() => {
         resolve();
       });
+      return;
     }
   } else if (imageSize !== s) {
     document.title = s + '|' + document.title;
@@ -632,6 +619,7 @@ function checkImageSize(resolve, reject) { //检查图片尺寸
     changeEConfig('xr', s).then(() => {
       resolve();
     });
+    return;
   }
   resolve();
 }
@@ -722,6 +710,8 @@ function hideGalleries(gmetadata) { //隐藏某些画集
   $('.it5>a').toArray().forEach(i => {
     let info = gmetadata.filter(j => j.gid === i.href.split('/')[4] * 1)[0];
     if (!info) return;
+    if (info.rating * 1 < CONFIG['lowRating']) $('<span class="ehTagNotice" name="Unlike" title="低评分">低评分</span>').insertBefore($(i).parent());
+    if (info.filecount * 1 < CONFIG['fewPages']) $('<span class="ehTagNotice" name="Unlike" title="页面少">页面少</span>').insertBefore($(i).parent());
     for (let j in tags) {
       let check = info.tags.filter(k => tags[j].includes(k));
       if (check.length) {
@@ -773,6 +763,26 @@ function highlightBlacklist2() { //隐藏黑名单相关的画廊(搜索页)
       }
     }
     $(i).parentsUntil('tr').eq(-1).removeAttr('copy').removeClass('ehBlacklist').off('click');
+  });
+}
+
+function introPic() { //宣传图
+  $('<a type="button" name="intro" href="javascript:;" on="true"></a>').on('click', function(e) {
+    let introPic = GM_getValue('introPic', []);
+    let id = $(e.target).prev().attr('href').split('/')[4];
+    if ($(e.target).attr('on') === 'true' && !introPic.includes(id)) {
+      introPic.push(id);
+      $(e.target).attr('on', 'false');
+    } else if ($(e.target).attr('on') === 'false' && introPic.includes(id)) {
+      introPic.splice(introPic.indexOf(id), 1);
+      $(e.target).attr('on', 'true');
+    }
+    GM_setValue('introPic', introPic);
+  }).appendTo('.gdtm>div');
+  let introPic = GM_getValue('introPic', []);
+  $('.gdtm>div>a:nth-child(1)').toArray().forEach(i => {
+    let id = i.href.split('/')[4];
+    if (introPic.includes(id)) $(i).next().attr('on', 'false');
   });
 }
 
@@ -909,6 +919,7 @@ function showConfig() { //显示设置
     let config = GM_getValue('config', {});
     let _html = [
       '<div><label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">里站自动跳转到表站</label></div>',
+      '<div><label for="ehConfig_preloadPaneImage"><input type="checkbox" id="ehConfig_preloadPaneImage">页面载入后自动载入预览图</label></div>',
       '<div><label for="ehConfig_openInTab"><input type="checkbox" id="ehConfig_openInTab">在新标签页中打开，而不是弹窗</label></div>',
       '<div><label for="ehConfig_autoStartDownload"><input type="checkbox" id="ehConfig_autoStartDownload">Location Hash不为空时，自动开始下载</label></div>',
       '<div><label for="ehConfig_autoClose" title="Firefox: 需打开about:config并设置dom.allow_scripts_to_close_windows为true"><input type="checkbox" id="ehConfig_autoClose">Location Hash不为空时，下载完成后自动关闭标签</label></div>',
@@ -927,8 +938,8 @@ function showConfig() { //显示设置
       '<div>默认设置: <input name="ehConfig_uconfig" title="在Settings页面使用$.serialize获取，可留空<br>留空表示每次使用当前设置" type="text"></div>',
       '<div>搜索栏自动完成: 字符数 > <input name="ehConfig_acLength" type="number" placeholder="3"> 时，显示</div>',
       '<div>搜索栏自动完成显示项目: <input name="ehConfig_acItem" type="text" placeholder="language,artist,female,male,parody,character,group,misc" title="以,分割"></div>',
-      '<div>宣传图ID: <input name="ehConfig_ads" type="text" title="以,分割"></div>',
       '<div>批量下载数: <input name="ehConfig_batch" type="number" placeholder="4"></div>',
+      '<div>隐藏评分 < <input name="ehConfig_lowRating" type="number" placeholder="4.0"> 的本子; 隐藏页数 < <input name="ehConfig_fewPages" type="number" placeholder="5"> 的本子</div>',
       '<div class="ehConfigBtn"><input type="button" name="save" value="Save" title="保存"><input type="button" name="cancel" value="Cancel" title="取消"></div>'].join('');
     $('<div class="ehConfig"></div>').html(_html).appendTo('body').on('click', function(e) {
       if ($(e.target).is('.ehConfigBtn>input[type="button"]')) {
