@@ -4,7 +4,7 @@
 // @exclude     http://alt.hentaiverse.org/equip/*
 // @include     http*://hentaiverse.org/*
 // @exclude     http*://hentaiverse.org/equip/*
-// @version     1.0.2
+// @version     1.0.3
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -189,7 +189,15 @@
       for (let i in log) {
         for (let j of log[i]) {
           let _log = [].concat(i, j.split('|||'));
-          html.push('<tr><td>' + _log.join('</td><td>') + '</td></tr>');
+          let _logColor = '';
+          if (j.match(/Completed:/)) {
+            _logColor = '#00BB00';
+          } else if (j.match(/Reforged:/)) {
+            _logColor = '#BB0000';
+          }
+          if (_logColor) _logColor = ' style="color:' + _logColor + '"';
+          if (j.match(/Url:/)) _log[2] = _log[2].replace(/(\/equip\/.*)/, '<a href="$1" target="_blank">$1</a>');
+          html.push('<tr' + _logColor + '><td>' + _log.join('</td><td>') + '</td></tr>');
           txt.push(_log.join('\t'));
           csv.push(_log.join());
         }
@@ -197,9 +205,21 @@
 
       let doc = iframe.contentWindow.document;
       let style = gE('head', doc).appendChild(cE('style'));
-      style.textContent = '*{margin:5px;text-align:center;}table{border:2px solid #000;border-collapse:collapse;margin:0 auto;}table td,table th{border:1px solid #000;}input{text-align:right;width:80px;}';
+      style.textContent = '*{margin:5px;text-align:center;}table{border:2px solid #000;border-collapse:collapse;margin:0 auto;}table td,table th{border:1px solid #000;}input{text-align:right;width:80px;}tr[style]{font-size:large;font-weight:bold;}';
 
       let logContainer = gE('body', doc).appendChild(cE('div'));
+
+      let htmlA = logContainer.appendChild(cE('a'));
+      htmlA.textContent = 'download .HTML';
+      htmlA.href = '#';
+      htmlA.download = 'log.html';
+      htmlA.onclick = function() {
+        let htmlBlob = new Blob([gE('head', doc).outerHTML + gE('table', doc).outerHTML], {
+          type: 'octet/stream'
+        });
+        htmlA.target = '_blank';
+        htmlA.href = URL.createObjectURL(htmlBlob);
+      }
 
       let csvA = logContainer.appendChild(cE('a'));
       csvA.textContent = 'download .CSV';
@@ -283,7 +303,8 @@
         if (check) {
           if (potency === GM_getValue('potencyMax', 10) || (GM_getValue('targetOnly') && targetOnly)) { //Lv max -> next equip
             addLog('Completed: ' + equip);
-            addLog('Equip Url: ' + location.origin + '/equip/' + equip + '/' + task.url);
+            addLog('Url: ' + '/equip/' + equip + '/' + task.url);
+            addLog('----------------');
             let tasks = GM_getValue('tasks');
             tasks.splice(0, 1);
             GM_setValue('tasks', tasks);
@@ -298,8 +319,9 @@
                 return i.textContent;
               }).join(' & ');
               addLog('Reforged: ' + equip);
-              addLog('Equip Url: ' + location.origin + '/equip/' + equip + '/' + task.url);
-              addLog('Info: Tier: ' + potency + ' & ' + info);
+              addLog('Url: ' + '/equip/' + equip + '/' + task.url);
+              addLog('Tier: ' + potency + ' & ' + info);
+              addLog('----------------');
               startTask(true);
             }
           }, 'select_item=' + equip);
@@ -359,13 +381,16 @@ function checkLog(e) {
     return i.target === gE('#textlog>tbody');
   });
   if (filter) {
-    let battleLog = gE('#textlog td', 'all');
-    let regexp = /^(The equipment|Unlocked innate potential)/;
+    let battleLog = [...gE('#textlog td', 'all')].map(function(i) {
+      return i.textContent;
+    });
+    if (!battleLog.includes('You are Victorious!')) return;
+    battleLog = battleLog.reverse().splice(battleLog.indexOf('You are Victorious!'));
     for (let i of battleLog) {
-      if (i.textContent === 'You are Victorious!') {
-        break;
-      } else if (regexp.test(i.textContent)) {
-        addLog(i.textContent);
+      if (i.match(/^The equipment/)) {
+        addLog('+ ' + i.match(/by (\d+) points/)[1] + 'p');
+      } else if (i.match(/^Unlocked innate potential/)) {
+        addLog('!!New: ' + i.match(/: (.*)/)[1]);
       }
     }
   }
