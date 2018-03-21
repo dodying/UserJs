@@ -56,6 +56,10 @@ Four drop down lists and one button are visible in the box
 
 * Drop-down List 2/4: comparison value A / comparison value B
 
+* Drop-down List 3: only support comparison operator (`1`: >, `2`: <, `3`: ≥, `4`: ≤, `5`: =, `6`: ≠)
+
+* Button ADD: Generates an input box with a value of `A,Comparison-Operator,B`
+
 #### Comparison Value
 
 1. `hp`/`mp`/`sp`: **percent** of hp/mp/sp, 0-100
@@ -65,20 +69,19 @@ Four drop down lists and one button are visible in the box
 5. `roundType`: Battle Type (`ar`: The Arena, `rb`: Ring of Blood, `gr`: GrindFest, `iw`: Item World, `ba`: Random Encounter)
 
   (**Note**: Because comparison between strings, please add quotation, such as `"ar"`/`'ar'`)
+
 6. `attackStatus`: Attack Mode (`0`: Physical, `1`: Fire, `2`: Cold, `3`: Elec, `4`: Wind, `5`: Divine, `6`: Forbidden)
 7. `isCd`: whether the skill/item is cooldowning, format: `_isCd_id`
 
   **example 1**: the id of Protection is 411 , `_isCd_411,5,0` means Protection can't be casted or `_isCd_411,5,1` means Protection can be casted
 
   **example 2**: the id of ManaElixir is 11295, `_isCd_11295,5,0` means ManaElixir can't be used or `_isCd_11295,5,1` means ManaElixir can be used
+
 8. `buffTurn`: time the buff last in person, format`_buffTurn_img`
 
   **example**: the image of Protection is protection, `_buffTurn_protection,5,0` means you don't have the buff of Protection or `_buffTurn_protection,3,10` means the the buff of Protection on you last at least 10 turns
+
 9. blank: the value you want to put in
-
-* Drop-down List 3: only support comparison operator (`1`: >, `2`: <, `3`: ≥, `4`: ≤, `5`: =, `6`: ≠)
-
-* Button ADD: Generates an input box with a value of `A,Comparison-Operator,B`
 
 #### Example
 

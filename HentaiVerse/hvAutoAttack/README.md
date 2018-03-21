@@ -57,6 +57,10 @@
 
 * 下拉列表2/4: 比较值A/比较值B
 
+* 下拉列表3: 只支持比较运算符（`1`:大于, `2`:小于, `3`: 大于等于, `4`: 小于等于, `5`:等于, `6`:不等于）
+
+* ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
+
 #### 比较值
 
 1. `hp`/`mp`/`sp`: hp/mp/sp的*百分比 (percent)*
@@ -66,20 +70,19 @@
 5. `roundType`: 战役模式 (`ar`: The Arena, `rb`: Ring of Blood, `gr`: GrindFest, `iw`: Item World, `ba`: Random Encounter)
 
   **注意**: 由于是字符串之间的比较，所以请加上引号，如"ar"/'ar'
+
 6. `attackStatus`: 攻击模式 (`0`: Physical, `1`: Fire, `2`: Cold, `3`: Elec, `4`: Wind, `5`: Divine, `6`: Forbidden)
 7. `isCd`: 技能/物品是否cd，格式`_isCd_id`
 
   **示例1**: Protection的id为411，则`_isCd_411,5,0`表示不可施放，`_isCd_411,5,1`表示可以施放
 
   **示例2**: ManaElixir的id为11295，则`_isCd_11295,5,0`表示不可使用，`_isCd_11295,5,1`表示可以使用
+
 8. `buffTurn`: 人物Buff剩余时间，格式`_buffTurn_img`
 
   **示例**: Protection的img为protection，则`_buffTurn_protection,5,0`表示不存在Protection的buff，`_buffTurn_protection,3,10`表示Protection的buff至少剩余10回合
+
 9. 空白(blank): 自己输入 (the value you want to put in)
-
-* 下拉列表3: 只支持比较运算符（`1`:大于, `2`:小于, `3`: 大于等于, `4`: 小于等于, `5`:等于, `6`:不等于）
-
-* ADD按钮: 生成一个值为`比较值A,比较值,比较值B`的输入框
 
 #### 示例
 
