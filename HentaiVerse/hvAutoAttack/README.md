@@ -150,7 +150,7 @@
 | - | Regen / regen | - |
 | Protection / protection | Haste / haste | Shadow Veil / shadowveil |
 | Absorb / absorb | Spark of Life / sparklife | Spirit Shield / spiritshield |
-| Arcane Focus / arcanemeditation | Heartseeker / heartseeker | Cloak of the Fallen / 423 |
+| Arcane Focus / arcanemeditation | Heartseeker / heartseeker | Cloak of the Fallen / fallenshield |
 | Health Draught / healthpot | Mana Draught / manapot | Spirit Draught / spiritpot |
 | Infusion of Flames / fireinfusion | Infusion of Frost / coldinfusion | Infusion of Lightning / elecinfusion |
 | Infusion of Storms / windinfusion | Infusion of Divinity / holyinfusion | Infusion of Darkness / darkinfusion |
