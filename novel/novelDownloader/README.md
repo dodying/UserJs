@@ -1,3 +1,7 @@
+### 推荐同类脚本
+
+#### [懒人小说下载器 - DownloadAllContent](https://greasyfork.org/zh-CN/scripts/25068)
+
 ### 使用说明
 
 1. 新特性: 进行一次下载后，如果有下载失败的章节，再次尝试下载可只下载失败的章节
