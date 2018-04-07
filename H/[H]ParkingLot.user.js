@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [H]ParkingLot
-// @version     1.10.0
+// @version     1.11.0
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -15,22 +15,10 @@
 // @grant       GM_getResourceURL
 // @grant       unsafeWindow
 //
-// @connect     dmm.co.jp
-// @connect     btdb.to
-// @connect     thepiratebay.org
-// @connect     pantsu.cat
-// @connect     nyaa.si
-// @connect     torrentz2.eu
-// @connect     btso.pw
-// @connect     tokyotosho.info
-// @connect     btku.org
-// @connect     btdiggs.com
-// @connect     seedpeer.eu
-// @connect     bitcq.com
+// @connect     *
 //
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js
-// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 //
 // 工具栏
 // @resource add https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519691-199_CircledPlus-128.png
@@ -53,9 +41,10 @@
 // @resource downloading https://cdn4.iconfinder.com/data/icons/miu/24/circle-arrow_down-download-glyph-128.png
 //
 // 种子站点
-// @include     https://btso.pw/*
 // @include     https://btdb.to/*
+// @include     https://sukebei.nyaa.si/*
 // @include     https://torrentz2.eu/*
+// @include     https://btso.pw/*
 // 网盘
 // include     http://115.com/*
 // @include     http://115.com/?tab=offline&mode=wangpan
@@ -110,6 +99,13 @@
       text: 'h1.torrent-name,.file-name,.item-title>a',
       code: '#search-input'
     },
+    'sukebei.nyaa.si': {
+      on: true,
+      name: 'Sukebei',
+      search: 'https://sukebei.nyaa.si/?q={searchTerms}',
+      text: 'td[colspan="2"]>a',
+      code: '.search-bar'
+    },
     'torrentz2.eu': {
       on: true,
       name: 'Torrentz2',
@@ -151,6 +147,7 @@
       },
       codeManual: true,
       extra() {
+        if (!$('#sample-image-block>a>img').length) return;
         let preview_src = linkLib['www.dmm.co.jp']['preview_src'];
         $(document).on({
           click() {
@@ -189,6 +186,7 @@
         return arr[arr.length - 2];
       },
       extra() {
+        if (!$('.sample_image').length) return;
         $('<style></style>').text('#sample-photo li{float:none!important;}').appendTo('head');
         $('.sample_image').each((i, _) => {
           $(_).html(`<img src="${$(_).attr('href')}">`).removeAttr('href').off('click');
@@ -242,23 +240,27 @@
       on: true,
       name: 'JAVLibrary',
       search: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
-      text: '.post-title>a,.text:eq(1),.id,.title>a,.video>a:not(:has(img)),.cast>.star>a,.title:not(:has(a))',
-      img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a',
+      text: '.post-title>a,.text:eq(1),.id,.title>a,.video>a:not(:has(img)),.cast>.star>a,.title:not(:has(a)),.info+td>strong>a',
+      img: '#video_jacket_img,.previewthumbs>img,.id+img,strong>a,.info+td>a>img',
       time: '.text:eq(2)',
       code: '#video_id .text',
       after: '#video_favorite_edit',
       extra() {
-        let code = $('#video_jacket_img').attr('src').match(/http:\/\/pics.dmm.co.jp\/mono\/movie\/adult\/(.*?)\/(.*?)pl\.jpg/)[1];
-        let url = `http://www.dmm.co.jp/mono/dvd/-/detail/=/cid=${code}/`;
-        $('#video_jacket_img').wrap(() => `<a target="_blank" href="${url}"></a>`);
         let preview_src = linkLib['www.dmm.co.jp']['preview_src'];
+        if (!$('#video_jacket_img').length) return;
         if ($('.previewthumbs').length) {
           $('.previewthumbs>img').each((i, _) => {
             if ($(_).attr('src').match('//pics.dmm.co.jp')) $(_).attr('src', preview_src($(_).attr('src'))).removeAttr('width').removeAttr('height').attr('style', 'margin:2px 0;');
           })
-        } else {
+        }
+        let code = $('#video_jacket_img').attr('src').match(/http:\/\/pics.dmm.co.jp\/mono\/movie\/adult\/(.*?)\/(.*?)pl\.jpg/);
+        if (!code) return;
+        let url = `http://www.dmm.co.jp/mono/dvd/-/detail/=/cid=${code[1]}/`;
+        $('#video_jacket_img').wrap(() => `<a target="_blank" href="${url}"></a>`);
+        if (!$('.previewthumbs').length) {
           $('#video_jacket').one('click', e => {
             e.preventDefault();
+            /*
             GM_xmlhttpRequest({
               method: 'GET',
               url: url,
@@ -267,6 +269,19 @@
                 let data = res.response;
                 if ($('#sample-image-block>a>img', data).length) {
                   let img = $('#sample-image-block>a>img', data).toArray().map(i => `<img src="${preview_src(i.src)}" style="margin:2px 0;">`).join('');
+                  $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia');
+                }
+              }
+            });
+            */
+            GM_xmlhttpRequest({
+              method: 'GET',
+              url: 'https://www.javbus.com/' + $('#video_id .text').text(),
+              timeout: 30 * 1000,
+              onload(res) {
+                let data = res.response;
+                if ($('#sample-waterfall', data).length) {
+                  let img = $('.sample-box', data).toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`).join('');
                   $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia');
                 }
               }
@@ -282,10 +297,13 @@
       text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,date',
       time: '.info>p:eq(1)',
       code: '.info>p>span:eq(1)',
-      after: '.row.movie'
+      after: '.row.movie',
+      extra() {
+        if ($('#sample-waterfall').length) $('#sample-waterfall').html($('.sample-box').toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`));
+      }
     },
     'javfree.me': {
-      on: false,
+      on: true,
       name: 'Free JAV Share',
       search: 'https://javfree.me/?s={searchTerms}',
       text: 'h1.entry-title,h2.entry-title>a,.entry-wrap>a',
@@ -295,7 +313,7 @@
       after: 'article'
     },
     'javdownloader.info': {
-      on: false,
+      on: true,
       name: 'javdownloader',
       search: 'http://javdownloader.info/?s={searchTerms}',
       text: '.title,.wp_rp_title,#nav-below a,.widget_recent_entries a',
@@ -391,6 +409,20 @@
         Popularity: '.item-meta-info>span:nth-child(5)'
       }
     },
+    'savebt.org': {
+      searchPage: 'http://savebt.org/q/{q}/0/0/1.html',
+      title: '.item>dt>a',
+      magnet: '.item>.attr>span:nth-child(6)>a',
+      size: '.item>.attr>span:nth-child(2)>b',
+      time: '.item>.attr>span:nth-child(1)>b',
+      sort: '.sortby,.category',
+      page: '.pages',
+      more: {
+        Files: '.item>.attr>span:nth-child(3)>b',
+        Speed: '.item>.attr>span:nth-child(4)>b',
+        Hot: '.item>.attr>span:nth-child(5)>b'
+      }
+    },
     'thepiratebay.org': {
       searchPage: 'https://thepiratebay.org/search/{q}/0/1/0',
       title: '.vertTh+td>a',
@@ -402,9 +434,10 @@
       more: {
         Type: '.vertTh>a',
         SE: '.vertTh+td+td+td+td+td',
-        LE: '.vertTh+td+td+td+td+td+td',
+        LE: '.vertTh+td+td+td+td+td+td'
       }
     },
+    /*
     'sukebei.pantsu.cat': {
       searchPage: 'https://sukebei.pantsu.cat/search?q={q}',
       title: '.torrent-info>.tr-name>a',
@@ -420,19 +453,20 @@
         D: '.torrent-info>.tr-dl'
       }
     },
+    */
     'sukebei.nyaa.si': {
       searchPage: 'https://sukebei.nyaa.si/?q={q}',
-      title: '.default>td:nth-child(2)>a',
-      magnet: '.default>td:nth-child(3)>a[href^="magnet"]',
-      size: '.default>td:nth-child(4)',
-      time: '.default>td:nth-child(5)',
+      title: '.torrent-list tr>td:nth-child(2)>a',
+      magnet: '.torrent-list tr>td:nth-child(3)>a[href^="magnet"]',
+      size: '.torrent-list tr>td:nth-child(4)',
+      time: '.torrent-list tr>td:nth-child(5)',
       page: '.pagination',
       sort: data => $('.table-responsive thead>tr>th>a', data).toArray().map(i => i.outerHTML.replace('</a>', $(i).attr('href').match(/s=(.*?)&/)[1] + '</a>')).join(' / '),
       more: {
-        File: (data, lib) => $('.default>.text-center>a:nth-child(1)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'),lib.searchPage).href}" target="blank">File</a>`),
-        S: '.default>td:nth-child(6)',
-        L: '.default>td:nth-child(7)',
-        D: '.default>td:nth-child(8)'
+        Torrent: (data, lib) => $('.torrent-list tr>td:nth-child(3)>a:nth-child(1)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'),lib.searchPage).href}" target="blank">Torrent</a>`),
+        S: '.torrent-list tr>td:nth-child(6)',
+        L: '.torrent-list tr>td:nth-child(7)',
+        D: '.torrent-list tr>td:nth-child(8)'
       }
     },
     'torrentz2.eu': {
@@ -520,9 +554,76 @@
       page: '.pagination',
       more: {
         Type: '.table-hover tr>td:nth-child(3)>.label',
-        Peers: '.table-hover tr>td:nth-child(5)',
+        Peers: '.table-hover tr>td:nth-child(5)'
       }
     },
+    'digbt.org': {
+      searchPage: 'https://www.digbt.org/search/{q}',
+      title: '.x-item>div:nth-child(1)>a.title',
+      magnet: '.tail>a.title',
+      size: data => $('.tail', data).toArray().map(i => i.textContent.match(/Size:\s+([\d\.]+\s+\w+)/)[1]),
+      time: data => $('.tail', data).toArray().map(i => i.textContent.match(/Updated:\s+(.*?)\s{2}/)[1]),
+      sort: '.btn-group',
+      page: '.pagination',
+      more: {
+        Files: data => $('.tail', data).toArray().map(i => i.textContent.match(/Files:\s+(\d+)/)[1]),
+        Downloads: data => $('.tail', data).toArray().map(i => i.textContent.match(/Downloads:\s+(\d+)/)[1])
+      }
+    },
+    // 'kickasstorrents.to': {
+    //   searchPage: 'https://kickasstorrents.to/usearch/{q}/',
+    //   title: '.cellMainLink',
+    //   magnet: data => $('.iaconbox>div', data).toArray().map(i => JSON.parse($(i).attr('data-sc-params').replace(/'/g, '"')).magnet),
+    //   size: '[id^="torrent_"]>td:nth-child(2)',
+    //   time: '[id^="torrent_"]>td:nth-child(4)',
+    //   sort: '.tabNavigation:gt(0)',
+    //   page: data => $('.pages', data).html().replace(/[\r\n]+/g, '').replace(/<script.*/, ''),
+    //   more: {
+    //     Files: '[id^="torrent_"]>td:nth-child(3)',
+    //     Speed: '[id^="torrent_"]>td:nth-child(5)',
+    //     Leech: '[id^="torrent_"]>td:nth-child(6)'
+    //   }
+    // },
+    'idope.se': {
+      searchPage: 'https://idope.se/torrent-list/{q}/',
+      title: '.resultdivtop>a',
+      magnet: data => $('[id^="hideinfohash"]', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.textContent.toUpperCase()),
+      size: '.resultdivbottonlength',
+      time: '.resultdivbottontime',
+      page: '#div3',
+      more: {
+        Seed: '.resultdivbottonseed',
+        Files: '.resultdivbottonfiles'
+      }
+    },
+    'extratorrent.cd': {
+      searchPage: 'https://extratorrent.cd/search/?search={q}',
+      title: '.tli>a',
+      magnet: 'a[title="Magnet link"]',
+      size: '.tl tr>td:nth-child(5)',
+      time: '.tl tr>td:nth-child(4)',
+      sort: '.tl tr>th:gt(0):lt(-1)',
+      page: 'td[style="padding: 5px;"]:has(.pager_link)',
+      more: {
+        S: '.tl tr>td:nth-child(6)',
+        L: '.tl tr>td:nth-child(7)'
+      }
+    },
+    /*
+    'katcr.co': {
+      searchPage: 'https://katcr.co/katsearch/page/1/{q}',
+      title: '.tli>a',
+      magnet: 'a[title="Magnet link"]',
+      size: '.tl tr>td:nth-child(5)',
+      time: '.tl tr>td:nth-child(4)',
+      sort: '.tl tr>th:gt(0):lt(-1)',
+      page: 'td[style="padding: 5px;"]:has(.pager_link):gt(0)',
+      more: {
+        S: '.tl tr>td:nth-child(6)',
+        L: '.tl tr>td:nth-child(7)'
+      }
+    },
+    */
   };
   var m2tLib = [
     'http://btcache.me/torrent/{hash}',
@@ -594,7 +695,7 @@
         '.showTable>table,.hSearch{border-collapse:collapse;margin:0 auto;color:#666666;font-size:13px;text-align:center;background-color:#FFF;text-transform:capitalize;}',
         '.showTable tr:nth-child(2n),.hSearch tr:nth-child(2n){background-color:#F2F2F2;}',
         '.showTable td,.showTable th,.hSearch th,.hSearch td{border:1px solid black;max-width:400px;padding:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
-        '.hSearch td>*{margin:0 1px;height:auto;line-height:normal;}',
+        '.hSearch td>*{margin:0 1px;height:auto;line-height:normal;display:inline;}',
         '.hSearch img{width:16px;position:relative;top:2px;}',
         '.hSearch button{cursor:pointer;}',
         '.hSearchPage>td *{padding:0 1px;}',
@@ -606,7 +707,8 @@
         '.tablesorter-header{background-image:url(data:image/gif;base64,R0lGODlhFQAJAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAkAAAIXjI+AywnaYnhUMoqt3gZXPmVg94yJVQAAOw==);background-repeat:no-repeat;background-position:center right;padding:0 18px 0 4px!important;cursor:pointer;}',
         '.tablesorter-headerAsc{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);}',
         '.tablesorter-headerDesc{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);}',
-        '.sorter-false{background:none;cursor:default;}'
+        '.sorter-false{background:none;cursor:default;}',
+        '.hHighlight{font-weight:bold;font-size:110%;color:#F00;}'
         ];
       return style.concat(mark, markImg).join('');
     });
@@ -667,9 +769,7 @@
       var _html = '';
       for (var i in linkLib) {
         if (!linkLib[i].on || i === location.host) continue;
-        _html += '<img ';
-        if (linkLib[i].online) _html += 'class="avOnline"';
-        _html += 'src="https://www.google.com/s2/favicons?domain=' + i + '"url="' + linkLib[i].search + '"title="' + linkLib[i].name + '">';
+        _html += `<img${linkLib[i].online ? ' class="avOnline"' : ''} src="//${i}/favicon.ico" url="${linkLib[i].search}" title="${linkLib[i].name}" onerror="this.src='//www.google.com/s2/favicons?domain=${i}';this.onerror=null;">`;
       }
       return _html;
     }).on({
@@ -789,7 +889,7 @@
   function addValue(mark, code = undefined) {
     mark = parseInt(mark);
     if (mark >= markLib.length) {
-      alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
+      alert('请输入正确的标记，范围: 0-' + (markLib.length - 1));
       return;
     }
     var lib = GM_getValue('lib', null) || {};
@@ -817,25 +917,19 @@
   }
 
   function importValue() {
-    var notice = '请输入车位\n-1. 删除\n';
-    var i;
-    for (i = 0; i < markLib.length; i++) {
-      notice += i + '. ' + markLib[i].name + '\n';
-    }
-    var mark = parseInt(prompt(notice));
+    let mark = prompt('请输入车位\n-1. 删除\n' + markLib.map((_, i) => `${i}. ${_.name}\n`).join('')) * 1;
     if (isNaN(mark) || mark >= markLib.length || mark < -1) {
-      alert('请输入正确的标记，范围：0-' + (markLib.length - 1));
+      alert(`请输入正确的标记，范围: -1 ==> ${markLib.length - 1}`);
       return;
     }
-    mark = parseInt(mark);
-    var codeArr = prompt('请输入车牌号，以|为分割');
+    let codeArr = prompt('请输入车牌号，以|为分割');
     if (!codeArr) return;
     codeArr = codeArr.split('|');
-    var lib = GM_getValue('lib', null) || {};
-    for (i = 0; i < codeArr.length; i++) {
+    let lib = GM_getValue('lib', {});
+    for (let i = 0; i < codeArr.length; i++) {
       if (mark === -1 && codeArr[i] in lib) {
         delete lib[codeArr[i]];
-      } else if (mark >= 0) {
+      } else {
         lib[codeArr[i]] = {
           mark: mark
         };
@@ -847,30 +941,29 @@
   }
 
   function showValue(type) {
-    var lib = GM_getValue('lib', null) || {};
-    var _html = '<table class="tablesorter"><thead><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>';
-    var num = 0;
-    for (var i in lib) {
-      num++;
-      _html += '<tr><td>' + num + '</td><td>' + lib[i].mark + '</td><td><img class="hMarkImg_' + lib[i].mark + '">' + markLib[lib[i].mark].name + '</td><td><a href="' + linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i) + '"target="_blank">' + i + '</a></td><td>' + (lib[i].time || '') + '</td></tr>';
+    let lib = GM_getValue('lib', {});
+    let _html = '<table class="tablesorter"><thead><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>';
+    let num = 1;
+    for (let i in lib) {
+      _html += `<tr><td>${num++}</td><td>${lib[i].mark}</td><td><img class="hMarkImg_${lib[i].mark}">${markLib[lib[i].mark].name}</td><td><a href="${linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)}"target="_blank">${i}</a></td><td>${lib[i].time || ''}</td></tr>`;
     }
     _html += '</tbody></table>';
     if (type === 0) {
       $('<div class="showTable"></div>').html(_html).appendTo('body');
     } else if (type === 1) {
       let markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}').join('');
-      _html = '<html><head><script src="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script><script src="https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>';
-      var blob = new Blob([_html], {
+      _html = '<html><head><script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script><script src="https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>';
+      let blob = new Blob([_html], {
         type: 'text/html;charset=utf-8'
       });
-      saveAs(blob, '1.html');
+      $(`<a href="${URL.createObjectURL(blob)}" download="1.html"></a>`)[0].click();
     }
   }
 
   function getCode(first = undefined) {
     if ($(window).data('code')) return $(window).data('code');
-    var code = '';
-    var lib = linkLib[location.host];
+    let code = '';
+    let lib = linkLib[location.host];
     if (typeof lib.code === 'string') {
       let temp = $(lib.code);
       if (temp.length > 0) code = (temp[0].tagName === 'INPUT') ? temp.val() : temp.text();
@@ -883,23 +976,57 @@
     return code;
   }
 
-  function getMagnet(code, page = undefined, searchUrl = Object.keys(magnetLib)[0]) {
+  function getMagnet(code, page = undefined, searchUrl = undefined) {
+    searchUrl = searchUrl in magnetLib ? searchUrl : Object.keys(magnetLib)[0];
     var lib = magnetLib[searchUrl];
     var searchPage = typeof lib.searchPage === 'string' ? lib.searchPage.replace('{q}', encodeURIComponent(code)) : lib.searchPage(code);
     var url = page ? new URL(page, searchPage).href : searchPage;
+    if ($('.hSearch').length === 0) {
+      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${searchUrl}"><select class="hSearchSite">${Object.keys(magnetLib).map(i=>`<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter(linkLib[location.host].after || 'body>:eq(-1)');
+      $('.hSearchSite').val(searchUrl);
+      //排序翻页事件
+      $('.hSearch').on('click', '.hSearchSort a,.hSearchPage a', e => {
+        e.preventDefault();
+        $('.hSearch').trigger('destroy');
+        let target = e.target;
+        if (!$(target).is('a')) target = $(target).parents().filter('a')[0];
+        getMagnet(getCode(), $(target).attr('href'), $('.hSearchSite').val());
+      });
+      //选择其他站点
+      $('.hSearch').on('change', '.hSearchSite', () => {
+        GM_setValue('lastSearch', $('.hSearchSite').val());
+        if (typeof $('.hSearch').data('abort') === 'function') $('.hSearch').data('abort')();
+        $('.hSearchSiteImg').attr('src', '//www.google.com/s2/favicons?domain=' + $('.hSearchSite').val());
+        $('.hSearch').trigger('destroy');
+        getMagnet(getCode(), undefined, $('.hSearchSite').val());
+      });
+      //按钮
+      $('.hSearch').on('click', '.hSearchCopy', e => {
+        let target = $(e.target).parents('tr').find('td>a')[0];
+        setNotice(target.innerText, target.href);
+        GM_setClipboard(target.href);
+      });
+      $('.hSearch').on('click', '.hMagnet_115', e => {
+        let target = $(e.target).parents('tr').find('td>a')[0];
+        GM_setValue('link', target.href);
+        GM_setValue('name', target.innerText);
+        addValue(2);
+      });
+    }
+    $('.hSearch>thead>tr:nth-child(1)').html(`<th>#</th><th><a href="${url}" target="_blank">名称</a></th><th>大小</th><th>时间</th>${lib['more']&&Object.keys(lib['more']).length ? '<th>' + Object.keys(lib['more']).join('</th><th>') + '</th>' : ''}<th data-sorter="false">下载种子</th><th data-sorter="false">操作</th>`);
+    $('.hSearchSort,.hSearch>tbody>tr,.hSearchPage').remove();
     var codeArr = code.split('-');
     var expArr = [];
     for (var i = 0; i < codeArr.length; i++) {
       expArr.push(new RegExp(re_escape(codeArr[i]), 'gi'));
     }
-    GM_xmlhttpRequest({
+    var abort = GM_xmlhttpRequest({
       method: 'GET',
       url: url,
       timeout: 30 * 1000,
       onload(res) {
         let data = res.response;
         let info = {};
-        console.log(url, info);
         for (let i in lib) { //获取信息
           if (['searchPage', 'more'].includes(i)) continue;
           if (typeof lib[i] === 'string') {
@@ -919,37 +1046,25 @@
           }
         }
         let hash = info['magnet'].map(i => i.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toUpperCase());
-        if (lib['more']) {
+        if (lib['more'] && Object.keys(lib['more']).length) {
           info['more'] = {};
           for (let i in lib['more']) {
             info['more'][i] = typeof lib['more'][i] === 'string' ? $(lib['more'][i], data).toArray().map(i => i.outerHTML.replace(/<(|\/)(td|th)( |>)/g, '<$1span$3')) : lib['more'][i](data, lib);
           }
         }
-        $('.hSearch').remove();
-        $('<table class="hSearch"></table>').insertAfter(linkLib[location.host].after || 'body>:eq(-1)').html(`
-          <thead><tr>
-            <th><a href="${url}" target="_blank">#</a></th>
-            <th data-sorter="false"><img src="//www.google.com/s2/favicons?domain=${new URL(url).host}"><select><option>${Object.keys(magnetLib).join('</option><option>')}</option></select></th>
-            <th>大小</th>
-            <th>时间</th>
-            ${lib['more'] ? '<th>' + Object.keys(lib['more']).join('</th><th>') + '</th>' : ''}
-            <th data-sorter="false">下载种子</th>
-            <th data-sorter="false">操作</th>
-            </tr></thead>
-          <tbody></tbody>
-          `);
+        console.log('load: ', url, '\ndata: ', [data], '\ninfo: ', info);
         for (let i = 0; i < info['title'].length; i++) {
           let name = info['title'][i].title || info['title'][i].textContent;
+          let downloadHTML = m2tLib.map(j => `<a href="${j.replace('{hash}', hash[i]).replace('{hashLow}', hash[i].toLowerCase()).replace('{name}', name)}" target="_blank"><img src="//www.google.com/s2/favicons?domain=${new URL(j).host}"></a>`).join('');
           for (let j = 0; j < codeArr.length; j++) {
-            name = name.replace(expArr[j], '<b>' + codeArr[j] + '</b>');
+            name = name.replace(expArr[j], '<span class="hHighlight">' + codeArr[j] + '</span>');
           }
-          let downloadHTML = m2tLib.map(j => `<a href="${j.replace('{hash}', hash[i]).replace('{hashLow}', hash[i].toLowerCase())}" target="_blank"><img src="//www.google.com/s2/favicons?domain=${new URL(j).host}"></a>`).join('');
           $('<tr></tr>').appendTo('.hSearch>tbody').html(`
             <td>${i + 1}</td>
             <td><a href="${info['magnet'][i]}">${name}</a></td>
             <td><a href="${new URL(info['title'][i].pathname, searchPage).href}" target="_blank">${info['size'][i]}</a></td>
             <td>${info['time'][i]}</td>
-            ${lib['more'] ? '<td>' + Object.keys(lib['more']).map(j => info['more'][j][i]).join('</td><td>') + '</td>' : ''}
+            ${lib['more']&&Object.keys(lib['more']).length ? '<td>' + Object.keys(lib['more']).map(j => info['more'][j][i]).join('</td><td>') + '</td>' : ''}
             <td>${downloadHTML}</td>
             <td>
               <button class="hSearchCopy">复制</button>
@@ -960,41 +1075,13 @@
             `);
         }
         $('.hSearch').tablesorter();
-        //按钮
-        $('.hSearchCopy').on('click', function(e) {
-          let target = $(e.target).parents('tr').find('td>a')[0];
-          setNotice(target.innerText, target.href);
-          GM_setClipboard(target.href);
-        });
-        $('.hMagnet_115').on('click', function(e) {
-          let target = $(e.target).parents('tr').find('td>a')[0];
-          GM_setValue('link', target.href);
-          GM_setValue('name', target.innerText);
-          addValue(2);
-        });
-
         let colspan = lib['more'] ? Object.keys(lib['more']).length + 6 : 6;
         if (info['title'].length === 0) { //无搜索结果
           $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${colspan}">No search result</td>`);
-        } else if (info['sort']) { //排序
-          $('<tr class="hSearchSort"></tr>').appendTo('.hSearch>thead').html(`<td colspan="${colspan}">${info['sort']}</td>`);
+        } else {
+          if (info['sort']) $('<tr class="hSearchSort"></tr>').appendTo('.hSearch>thead').html(`<td colspan="${colspan}">${info['sort']}</td>`).show(); //排序
+          if (info['page']) $('<tr class="hSearchPage"></tr>').appendTo('.hSearch>tfoot').html(`<td colspan="${colspan}">${info['page']}</td>`); //翻页
         }
-        //翻页
-        if (info['page']) $('<tfoot></tfoot>').appendTo('.hSearch').html(`<tr class="hSearchPage"><td colspan="${colspan}">${info['page']}</td></tr>`);
-        //排序翻页事件
-        $('.hSearchSort a,.hSearchPage a').click(e => {
-          e.preventDefault();
-          let target = e.target;
-          if (!$(target).is('a')) target = $(target).parents().filter('a')[0];
-          getMagnet(getCode(), $(target).attr('href'), searchUrl);
-        });
-        //选择其他站点
-        $('.hSearch th select').on({
-          change: function() {
-            getMagnet(getCode(), undefined, this.value);
-            GM_setValue('lastSearch', this.value);
-          }
-        }).find(`:contains(${searchUrl})`)[0].selected = true;
       },
       onerror() {
         $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load<a href="${url}" target="_blank">${url}</a> Error</td>`);
@@ -1002,7 +1089,8 @@
       ontimeout() {
         $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load <a href="${url}" target="_blank">${url}</a> Timeout</td>`);
       }
-    });
+    }).abort;
+    $('.hSearch').data('abort', abort);
   }
 
   function downloadIn115() {
