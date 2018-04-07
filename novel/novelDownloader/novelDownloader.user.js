@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.44.5
+// @version     1.45.5
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1656,7 +1656,8 @@ function addUI() {
       '    语言: ',
       '    <input class="ndConfig" id="ndLangZhs" type="radio" name="lang" class="ndLang" value="0"><label for="ndLangZhs">简体</label>',
       '    <input class="ndConfig" id="ndLangZht" type="radio" name="lang" class="ndLang" value="1"><label for="ndLangZht">繁体</label>',
-      '    <input class="ndConfig" id="ndSort" name="sort" type="checkbox"><label for="ndSort">章节排序</label>',
+      '    <input class="ndConfig" id="ndSort" name="sort" type="checkbox"><label for="ndSort">章节排序</label><br>',
+      '    <input class="ndConfig" id="ndNoUrl" name="nourl" type="checkbox"><label for="ndNoUrl">不显示来源地址</label>',
       '  </div>',
       '  <div>',
       '    <input id="ndImage" name="image" type="checkbox"><label for="ndImage">下载图片</label>',
@@ -2123,7 +2124,7 @@ function thisDownloaded(num, name = undefined, content, stauts = true) { //下�
   if (reRule[host] instanceof Array) content = wordFormatSpecial(host, content);
   if ($('.ndConfig[name=format]')[0].checked === true) content = wordFormat(content);
   if ($('.ndConfig[name=section]').val() !== '0') content = wordSection(content);
-  content = '来源地址：' + $(window).data('dataDownload')[num].url + '\r\n' + content;
+  if (!$('.ndConfig[name=nourl]')[0].checked) content = '来源地址：' + $(window).data('dataDownload')[num].url + '\r\n' + content;
   name = tranStr(name, $('.ndLang:checked').val() * 1);
   content = tranStr(content, $('.ndLang:checked').val() * 1);
   $(window).data('dataDownload')[num].name = name.trim();
