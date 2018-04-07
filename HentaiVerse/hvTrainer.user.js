@@ -6,7 +6,7 @@
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
-// @version     1.02a
+// @version     1.02b
 // @grant       GM_registerMenuCommand
 // @run-at      document-end
 // ==/UserScript==
@@ -194,7 +194,7 @@
       var timeAll = trainList[nowTraining].time;
       timeLast = parseInt(timeAll * (1 - 0.01 * nowTrainingProcess) * 60 * 60);
       var timeEnd = new Date(new Date().getTime() + timeLast * 1000);
-      countdownBox.title = 'Now Trian: ' + nowTraining + '\nTrain End: ' + timeEnd.toLocaleString(lang, timeOption);
+      countdownBox.title = 'Now Train: ' + nowTraining + '\nTrain End: ' + timeEnd.toLocaleString(lang, timeOption);
       countdownBox.value = timeEnd.getTime();
       timeUpdate();
     } else {
