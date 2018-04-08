@@ -5,35 +5,44 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.88.4
+// @version      2.89.0
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @include      http*://hentaiverse.org/*
 // @include      http://alt.hentaiverse.org/*
-// @include      https://e-hentai.org/news.php?encounter
+// @include      https://e-hentai.org/*
 // @exclude      http*://hentaiverse.org/pages/showequip.php?*
 // @exclude      http://alt.hentaiverse.org/pages/showequip.php?*
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi/Tampermonkey
 // @compatible   Other + Bookmarklet
+// @grant        GM_deleteValue
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_notification
 // @grant        unsafeWindow
 // @run-at       document-end
 // ==/UserScript==
 (function init() {
-  if (location.href === 'https://e-hentai.org/news.php?encounter') {
-    var href = document.referrer || 'https://hentaiverse.org';
-    if (gE('#eventpane>div>a')) href = href.split('/')[0] + '//' + href.split('/')[2] + '/' + gE('#eventpane>div>a').href.split('/')[3];
-    openUrl(href);
+  if (location.host === 'e-hentai.org') {
+    var href = getValue('url') || (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
+    href = gE('#eventpane>div>a') ? href + '/' + gE('#eventpane>div>a').href.split('/')[3] : getValue('lastEncounter') || href;
+    if (location.href === 'https://e-hentai.org/news.php?encounter') {
+      openUrl(href);
+    } else if (gE('#eventpane>div>a')) {
+      setValue('lastEncounter', href);
+    }
     return;
   }
+  setValue('url', location.origin);
   if (!gE('#navbar,#riddlecounter,#textlog')) {
     setTimeout(goto, 5 * 60 * 1000);
     return;
   }
-  g('version', '2.86');
+  g('version', GM_info ? GM_info.script.version.substr(0, 4) : '2.89');
   if (getValue('option')) {
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
@@ -45,7 +54,7 @@
       return;
     }
   } else {
-    g('lang', prompt('请输入以下语言代码对应的数字\nPlease put in the number of your preferred language (0, 1 or 2)\n0.简体中文\n1.繁體中文\n2.English', 0));
+    g('lang', prompt('请输入以下语言代码对应的数字\nPlease put in the number of your preferred language (0, 1 or 2)\n0.简体中文\n1.繁體中文\n2.English', 0) || 2);
     addStyle(g('lang'));
     _alert(0, '请设置hvAutoAttack', '請設置hvAutoAttack', 'Please config this script');
     gE('.hvAAButton').click();
@@ -187,28 +196,39 @@ function isOn(id) { //是否可以施放技能/使用物品
 }
 
 function setValue(item, value) { //储存数据
-  localStorage['hvAA-' + item] = (typeof value === 'string') ? value : JSON.stringify(value);
+  if (typeof GM_setValue === 'undefined') {
+    localStorage['hvAA-' + item] = (typeof value === 'string') ? value : JSON.stringify(value);
+  } else {
+    GM_setValue(item, value);
+  }
 }
 
 function getValue(item, toJSON) { //读取数据
-  item = 'hvAA-' + item;
-  return (item in localStorage) ? ((toJSON) ? JSON.parse(localStorage[item]) : localStorage[item]) : null;
+  if (typeof GM_getValue === 'undefined' || !GM_getValue(item, null)) {
+    item = 'hvAA-' + item;
+    return (item in localStorage) ? ((toJSON) ? JSON.parse(localStorage[item]) : localStorage[item]) : null;
+  } else {
+    return GM_getValue(item, null);
+  }
 }
 
 function delValue(item) { //删除数据
   if (typeof item === 'string') {
-    localStorage.removeItem('hvAA-' + item);
-    goto();
+    if (typeof GM_deleteValue === 'undefined') {
+      localStorage.removeItem('hvAA-' + item);
+    } else {
+      GM_deleteValue(item);
+    }
   } else if (typeof item === 'number') {
     if (item === 0) {
-      localStorage.removeItem('hvAA-' + 'disabled');
+      delValue('disabled');
     } else if (item === 1) {
-      localStorage.removeItem('hvAA-' + 'roundNow');
-      localStorage.removeItem('hvAA-' + 'roundAll');
-      localStorage.removeItem('hvAA-' + 'monsterStatus');
+      delValue('roundNow');
+      delValue('roundAll');
+      delValue('monsterStatus');
     } else if (item === 2) {
-      localStorage.removeItem('hvAA-' + 'roundType');
-      localStorage.removeItem('hvAA-' + 'battleCode');
+      delValue('roundType');
+      delValue('battleCode');
       delValue(0);
       delValue(1);
     }
@@ -390,7 +410,7 @@ function optionBox() { //配置界面
       <a href="https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js" target="_blank"><l0>更新历史</l0><l1>更新歷史</l1><l2>ChangeLog</l2></a>\
       <l01><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md" target="_blank">使用说明</a></l01><l2><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README_en.md" target="_blank">README</a></l2>\
       <select name="lang"><option value="0">简体中文</option><option value="1">繁體中文</option><option value="2">English</option></select>\
-      <l2><span style="font-size:small;">by Google Translate<a target="_blank" href="https://greasyfork.org/forum/profile/18194/Koko191" style="color:#E3E0D1;background-color:#E3E0D1;" title="Thanks to Koko191 who give help in the translation"> and Koko191</a></span></l2></div>',
+      <l2><span style="font-size:small;"><a target="_blank" href="https://greasyfork.org/forum/profile/18194/Koko191" style="color:#E3E0D1;background-color:#E3E0D1;" title="Thanks to Koko191 who give help in the translation">by Koko191</a></span></l2></div>',
     '<div class="hvAATablist">',
     '<div class="hvAATabmenu">\
       <span name="Main"><l0>主要选项</l0><l1>主要選項</l1><l2>Main</l2></span>\
@@ -941,10 +961,11 @@ function optionBox() { //配置界面
     goto();
   };
   gE('.hvAAExport', optionBox).onclick = function() {
-    gE('.hvAAConfig').value = getValue('option');
+    var t = getValue('option');
+    gE('.hvAAConfig').value = typeof t === 'string' ? t : JSON.stringify(t);
   };
   gE('.hvAAImport', optionBox).onclick = function() {
-    var option = gE('.hvAAConfig').value;
+    var option = JSON.parse(gE('.hvAAConfig').value);
     if (!option) return;
     if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
       setValue('option', option);
@@ -1213,85 +1234,95 @@ function setAudioAlarm(e) { //发出音频警报
 }
 
 function setNotification(e) { //发出桌面通知
+  var notification = [
+    {
+      Common: {
+        text: '未知',
+        time: 5
+      },
+      Error: {
+        text: '某些错误发生了',
+        time: 10
+      },
+      Defeat: {
+        text: '游戏失败\n玩家可自行查看战斗Log寻找失败原因',
+        time: 5
+      },
+      Riddle: {
+        text: '小马答题\n紧急！\n紧急！\n紧急！',
+        time: 30
+      },
+      Victory: {
+        text: '游戏胜利\n页面将在3秒后刷新',
+        time: 3
+      },
+      Test: {
+        text: '测试文本',
+        time: 3
+      }
+    }, {
+      Common: {
+        text: '未知',
+        time: 5
+      },
+      Error: {
+        text: '某些錯誤發生了',
+        time: 10
+      },
+      Defeat: {
+        text: '遊戲失敗\n玩家可自行查看戰鬥Log尋找失敗原因',
+        time: 5
+      },
+      Riddle: {
+        text: '小馬答題\n緊急！\n緊急！\n緊急！',
+        time: 30
+      },
+      Victory: {
+        text: '遊戲勝利\n頁面將在3秒後刷新',
+        time: 3
+      },
+      Test: {
+        text: '測試文本',
+        time: 3
+      }
+    }, {
+      Common: {
+        text: 'unknown',
+        time: 5
+      },
+      Error: {
+        text: 'Some errors have occurred',
+        time: 10
+      },
+      Defeat: {
+        text: 'You have been defeated.\nYou can check the battle log.',
+        time: 5
+      },
+      Riddle: {
+        text: 'Riddle\nURGENT\nURGENT\nURGENT',
+        time: 30
+      },
+      Victory: {
+        text: 'You\'re victorious.\nThis page will refresh in 3 seconds.',
+        time: 3
+      },
+      Test: {
+        text: 'testText',
+        time: 3
+      }
+      }
+  ][g('lang')][e];
+  if (typeof GM_notification !== 'undefined') {
+    GM_notification({
+      text: notification.text,
+      image: location.origin + '/y/hentaiverse.png',
+      highlight: true,
+      timeout: 1000 * notification.time
+    });
+  }
   if (Notification && Notification.permission !== 'denied') {
     Notification.requestPermission(function(status) {
       if (status === 'granted') {
-        var notification = [{
-          Common: {
-            text: '未知',
-            time: 5
-          },
-          Error: {
-            text: '某些错误发生了',
-            time: 10
-          },
-          Defeat: {
-            text: '游戏失败\n玩家可自行查看战斗Log寻找失败原因',
-            time: 5
-          },
-          Riddle: {
-            text: '小马答题\n紧急！\n紧急！\n紧急！',
-            time: 30
-          },
-          Victory: {
-            text: '游戏胜利\n页面将在3秒后刷新',
-            time: 3
-          },
-          Test: {
-            text: '测试文本',
-            time: 3
-          }
-        }, {
-          Common: {
-            text: '未知',
-            time: 5
-          },
-          Error: {
-            text: '某些錯誤發生了',
-            time: 10
-          },
-          Defeat: {
-            text: '遊戲失敗\n玩家可自行查看戰鬥Log尋找失敗原因',
-            time: 5
-          },
-          Riddle: {
-            text: '小馬答題\n緊急！\n緊急！\n緊急！',
-            time: 30
-          },
-          Victory: {
-            text: '遊戲勝利\n頁面將在3秒後刷新',
-            time: 3
-          },
-          Test: {
-            text: '測試文本',
-            time: 3
-          }
-        }, {
-          Common: {
-            text: 'unknown',
-            time: 5
-          },
-          Error: {
-            text: 'Some errors have occurred',
-            time: 10
-          },
-          Defeat: {
-            text: 'You have been defeated.\nYou can check the battle log.',
-            time: 5
-          },
-          Riddle: {
-            text: 'Riddle\nURGENT\nURGENT\nURGENT',
-            time: 30
-          },
-          Victory: {
-            text: 'You\'re victorious.\nThis page will refresh in 3 seconds.',
-            time: 3
-          },
-          Test: {
-            text: 'testText',
-            time: 3
-          }
-        }][g('lang')][e];
         var n = new Notification(notification.text, {
           icon: '/y/hentaiverse.png'
         });
@@ -1375,7 +1406,7 @@ function checkCondition(parms) {
 }
 //答题//
 function riddleAlert() { //答题警报
-  if (window.opener) gE('#riddleanswer+img').onclick = function (){
+  if (window.opener) gE('#riddleanswer+img').onclick = function() {
     riddleSubmit(gE('#riddleanswer').value);
   };
   setAlarm('Riddle');
