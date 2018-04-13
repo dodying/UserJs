@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.10.0
+// @version     1.11.0
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -28,9 +28,8 @@
 // @grant       GM_getResourceText
 // @grant       GM_getResourceURL
 // @grant       GM_xmlhttpRequest
-// @connect     127.0.0.1
+// @connect     *
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     https://cdn.bootcss.com/async/2.6.0/async.min.js
 // @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1522933172772
 // @resource favicon_0 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAL0lEQVR42mNgGBQgjU3wPzomJI+ihmoGEHIhTvWDxwBkCVxs2howjAKR/ilxQAEA0niUcVUdSr0AAAAASUVORK5CYII=
 // @resource favicon_1 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAK0lEQVR42mNgGBQgjU3wPzrGp452BhDr0kFsALICbIppb8AwCkT6p8QBBQBmZWTxFXfR8AAAAABJRU5ErkJggg==
@@ -38,6 +37,9 @@
 // @resource favicon_3 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMElEQVR42mNgGBQgjU3wPzomJI+ihmoGkOriQWgAsgQ2NtGBSLYBwygQ6Z8SBxQAAOjoiJF+j7m3AAAAAElFTkSuQmCC
 // @resource favicon_4 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANElEQVR42mNgGBQgjU3wPzrGJo+LTz0DCLlwCBiALIGNjTOcqGYAqdE+CA3AlZBob8CAAgCuIn+p3J00ugAAAABJRU5ErkJggg==
 // @resource favicon_5 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANUlEQVR42mNgGBQgjU3wPzomJI+ihmoGEHIhA7kK6GcAskJsbKIDkWwDSI32QWjAwKXEAQUAd3eIkeLwZzcAAAAASUVORK5CYII=
+// @resource favicon_d data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABTSURBVHjaYvj//z8DJZiBKgaksQn+R8cMSABdjmIDkA1BMYABB0DXhMwfZAYgG4SNTXsDCHmBgYFhgA1IYxNUJioMyE5IZCflAc2NAAAAAP//AwAC/Mv3iQhmBgAAAABJRU5ErkJggg==
+// @resource favicon_p data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABTSURBVHjaYvj//z8DJZiBKgaksQn+R8cMSACbfBqb4H/qG8CAA6DLD2IDkBViYxMdiGQbQIwX8KYDmhuQxiaoTGlKlKXUAG7aZCZKMAAAAP//AwCS0Ls1SQllgAAAAABJRU5ErkJggg==
+// @resource emptyAudio data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU3LjcxLjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAEAAABVgANTU1NTU1Q0NDQ0NDUFBQUFBQXl5eXl5ea2tra2tra3l5eXl5eYaGhoaGhpSUlJSUlKGhoaGhoaGvr6+vr6+8vLy8vLzKysrKysrX19fX19fX5eXl5eXl8vLy8vLy////////AAAAAExhdmM1Ny44OQAAAAAAAAAAAAAAACQCgAAAAAAAAAVY82AhbwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+MYxAALACwAAP/AADwQKVE9YWDGPkQWpT66yk4+zIiYPoTUaT3tnU487uNhOvEmQDaCm1Yz1c6DPjbs6zdZVBk0pdGpMzxF/+MYxA8L0DU0AP+0ANkwmYaAMkOKDDjmYoMtwNMyDxMzDHE/MEsLow9AtDnBlQgDhTx+Eye0GgMHoCyDC8gUswJcMVMABBGj/+MYxBoK4DVpQP8iAtVmDk7LPgi8wvDzI4/MWAwK1T7rxOQwtsItMMQBazAowc4wZMC5MF4AeQAGDpruNuMEzyfjLBJhACU+/+MYxCkJ4DVcAP8MAO9J9THVg6oxRMGNMIqCCTAEwzwwBkINOPAs/iwjgBnMepYyId0PhWo+80PXMVsBFzD/AiwwfcKGMEJB/+MYxDwKKDVkAP8eAF8wMwIxMlpU/OaDPLpNKkEw4dRoBh6qP2FC8jCJQFcweQIPMHOBtTBoAVcwOoCNMYDI0u0Dd8ANTIsy/+MYxE4KUDVsAP8eAFBVpgVVPjdGeTEWQr0wdcDtMCeBgDBkgRgwFYB7Pv/zqx0yQQMCCgKNgonHKj6RRVkxM0GwML0AhDAN/+MYxF8KCDVwAP8MAIHZMDDA3DArAQo3K+TF5WOBDQw0lgcKQUJxhT5sxRcwQQI+EIPWMA7AVBoTABgTgzfBN+ajn3c0lZMe/+MYxHEJyDV0AP7MAA4eEwsqP/PDmzC/gNcwXUGaMBVBIwMEsmB6gaxhVuGkpoqMZMQjooTBwM0+S8FTMC0BcjBTgPwwOQDm/+MYxIQKKDV4AP8WADAzAKQwI4CGPhWOEwCFAiBAYQnQMT+uwXUeGzjBWQVkwTcENMBzA2zAGgFEJfSPkPSZzPXgqFy2h0xB/+MYxJYJCDV8AP7WAE0+7kK7MQrATDAvQRIwOADKMBuA9TAYQNM3AiOSPjGxowgHMKFGcBNMQU1FMy45OS41VVU/31eYM4sK/+MYxKwJaDV8AP7SAI4y1Yq0MmOIADGwBZwwlgIJMztCM0qU5TQPG/MSkn8yEROzCdAxECVMQU1FMy45OS41VTe7Ohk+Pqcx/+MYxMEJMDWAAP6MADVLDFUx+4J6Mq7NsjN2zXo8V5fjVJCXNOhwM0vTCDAxFpMYYQU+RlVMQU1FMy45OS41VVVVVVVVVVVV/+MYxNcJADWAAP7EAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxOsJwDWEAP7SAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxPMLoDV8AP+eAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxPQL0DVcAP+0AFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)
 // @compatible  chrome 55+(ES2017)
@@ -46,7 +48,7 @@
 const CONFIG = GM_getValue('config', {});
 const EHT = JSON.parse(GM_getResourceText('EHT')).dataset;
 
-function init() {
+async function init() {
   addStyle(); //添加样式
   $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body');
   $(window).on({
@@ -55,6 +57,22 @@ function init() {
     }
   });
   if ($('.ido').length === 0) { //信息页
+    await updateEHD();
+    eval('(function (){' + (CONFIG['distroyEHDLog'] ? 'let console = {};for (let i in window.console) {console[i] = new Function();}' : '') + GM_getValue('EHD_code') + '})();'); //运行EHD
+    $('.g2:contains("Download Archive")').click(e => { //使用EHD下载时, 添加到下载列表
+      window.downloading = true;
+      let downloading = GM_getValue('downloading', []);
+      downloading.push(unsafeWindow.gid);
+      GM_setValue('downloading', downloading);
+      if ($('[rel="shortcut icon"]').length === 0) changeFav(GM_getResourceURL('favicon_d'));
+    });
+    $(window).on('unload', () => { //关闭页面时, 从下载列表中移除
+      let downloading = GM_getValue('downloading', []);
+      if (window.downloading && downloading.includes(unsafeWindow.gid)) {
+        downloading.splice(downloading.indexOf(unsafeWindow.gid), 1);
+        GM_setValue('downloading', downloading);
+      }
+    });
     if (CONFIG['ex2eh'] && jumpHost()) return; //里站跳转
     changeName('#gn'); //修改本子标题（移除集会名）
     document.title = $('#gn').text();
@@ -69,32 +87,16 @@ function init() {
     copyInfo(); //复制信息
     abortPending(); //终止EHD所有下载
     introPic(); //宣传图
-    new Promise((resolve, reject) => {
-      if (CONFIG['showAllThumb']) {
-        showAllThumb(resolve, reject); //显示所有预览页
-      } else {
-        resolve();
-      }
-    }).then(() => {
-      return new Promise((resolve, reject) => {
-        if (CONFIG['sizeS'] && CONFIG['sizeD'] && CONFIG['rateS'] && CONFIG['rateD']) {
-          checkImageSize().then(() => { //检查图片尺寸
-            resolve();
-          });
-        } else {
-          resolve();
-        }
-      });
-    }).then(() => {
-      if (location.hash.match(/^#[0-2]$/) && CONFIG['autoClose']) autoClose(); //下载完成后自动关闭
-      if (location.hash.match(/^#[0-2]$/) && CONFIG['autoStartDownload']) autoStartDownload(); //自动开始下载
-      if (location.hash.match(/^#[0-2]$/) && CONFIG['autoStartDownload'] && CONFIG['playEmptyAudio']) {
-        let emptyAudioBase64 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU3LjcxLjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAEAAABVgANTU1NTU1Q0NDQ0NDUFBQUFBQXl5eXl5ea2tra2tra3l5eXl5eYaGhoaGhpSUlJSUlKGhoaGhoaGvr6+vr6+8vLy8vLzKysrKysrX19fX19fX5eXl5eXl8vLy8vLy////////AAAAAExhdmM1Ny44OQAAAAAAAAAAAAAAACQCgAAAAAAAAAVY82AhbwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+MYxAALACwAAP/AADwQKVE9YWDGPkQWpT66yk4+zIiYPoTUaT3tnU487uNhOvEmQDaCm1Yz1c6DPjbs6zdZVBk0pdGpMzxF/+MYxA8L0DU0AP+0ANkwmYaAMkOKDDjmYoMtwNMyDxMzDHE/MEsLow9AtDnBlQgDhTx+Eye0GgMHoCyDC8gUswJcMVMABBGj/+MYxBoK4DVpQP8iAtVmDk7LPgi8wvDzI4/MWAwK1T7rxOQwtsItMMQBazAowc4wZMC5MF4AeQAGDpruNuMEzyfjLBJhACU+/+MYxCkJ4DVcAP8MAO9J9THVg6oxRMGNMIqCCTAEwzwwBkINOPAs/iwjgBnMepYyId0PhWo+80PXMVsBFzD/AiwwfcKGMEJB/+MYxDwKKDVkAP8eAF8wMwIxMlpU/OaDPLpNKkEw4dRoBh6qP2FC8jCJQFcweQIPMHOBtTBoAVcwOoCNMYDI0u0Dd8ANTIsy/+MYxE4KUDVsAP8eAFBVpgVVPjdGeTEWQr0wdcDtMCeBgDBkgRgwFYB7Pv/zqx0yQQMCCgKNgonHKj6RRVkxM0GwML0AhDAN/+MYxF8KCDVwAP8MAIHZMDDA3DArAQo3K+TF5WOBDQw0lgcKQUJxhT5sxRcwQQI+EIPWMA7AVBoTABgTgzfBN+ajn3c0lZMe/+MYxHEJyDV0AP7MAA4eEwsqP/PDmzC/gNcwXUGaMBVBIwMEsmB6gaxhVuGkpoqMZMQjooTBwM0+S8FTMC0BcjBTgPwwOQDm/+MYxIQKKDV4AP8WADAzAKQwI4CGPhWOEwCFAiBAYQnQMT+uwXUeGzjBWQVkwTcENMBzA2zAGgFEJfSPkPSZzPXgqFy2h0xB/+MYxJYJCDV8AP7WAE0+7kK7MQrATDAvQRIwOADKMBuA9TAYQNM3AiOSPjGxowgHMKFGcBNMQU1FMy45OS41VVU/31eYM4sK/+MYxKwJaDV8AP7SAI4y1Yq0MmOIADGwBZwwlgIJMztCM0qU5TQPG/MSkn8yEROzCdAxECVMQU1FMy45OS41VTe7Ohk+Pqcx/+MYxMEJMDWAAP6MADVLDFUx+4J6Mq7NsjN2zXo8V5fjVJCXNOhwM0vTCDAxFpMYYQU+RlVMQU1FMy45OS41VVVVVVVVVVVV/+MYxNcJADWAAP7EAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxOsJwDWEAP7SAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxPMLoDV8AP+eAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxPQL0DVcAP+0AFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
-        let emptyAudio = new Audio(emptyAudioBase64);
-        emptyAudio.loop = true;
-        emptyAudio.play();
-      }
-    });
+    if (CONFIG['showAllThumb']) await showAllThumb();
+    if (CONFIG['sizeS'] && CONFIG['sizeD'] && CONFIG['rateS'] && CONFIG['rateD']) await checkImageSize();
+    if (location.hash.match(/^#[0-2]$/) && CONFIG['autoClose']) autoClose(); //下载完成后自动关闭
+    if (location.hash.match(/^#[0-2]$/) && CONFIG['autoStartDownload']) $('.ehD-box>.g2:eq(0)').click(); //自动开始下载
+    if (location.hash.match(/^#[0-2]$/) && CONFIG['autoStartDownload'] && CONFIG['playEmptyAudio']) {
+      let emptyAudioBase64 = GM_getResourceURL('emptyAudio');
+      let emptyAudio = new Audio(emptyAudioBase64);
+      emptyAudio.loop = true;
+      emptyAudio.play();
+    }
   } else { //搜索页
     if (CONFIG['eh2ex'] && location.host === 'e-hentai.org' && $('[name="f_search"]').val()) {
       location = location.href.replace('//e-hentai.org', '//exhentai.org');
@@ -107,29 +109,34 @@ function init() {
     quickDownload(); //右键：下载
     batchDownload(); //批量下载
     if (CONFIG['checkExist']) checkExist(); //检查本地是否存在
-    new Promise((resolve, reject) => {
-      getInfo(resolve, reject); //获取信息
-    }).then((gmetadata) => { //获取信息
-      if (gmetadata) {
-        window.gmetadata = gmetadata;
-        tagPreview(gmetadata); //标签预览
-        hideGalleries(gmetadata); //隐藏某些画集
-        if (CONFIG['checkExistAtStart']) $('input:button[name="checkExist"]').click();
-        if (CONFIG['preloadPaneImage']) $('.itd:visible[onmouseover]').trigger('mouseover');
-      }
-    });
+    let gmetadata = await getInfo();
+    window.gmetadata = gmetadata;
+    tagPreview(gmetadata); //标签预览
+    hideGalleries(gmetadata); //隐藏某些画集
+    if (CONFIG['checkExistAtStart']) $('input:button[name="checkExist"]').click();
+    if (CONFIG['preloadPaneImage']) $('.itd:visible[onmouseover]').trigger('mouseover');
     rateInSearchPage(); //在搜索页评分
     autoComplete(); //自动填充
     checkForNew(); //检查有无新本子
   }
   highlightBlacklist(); //高亮黑名单相关的画廊(通用)
   showConfig();
+  searchInOtherSite();
   if (CONFIG['saveLink']) saveLink(); //保存链接
+  $('<input type="button" title="重置下载列表" value="Clear Downloading">').on({
+    click: () => {
+      GM_setValue('downloading', []);
+    },
+    mouseenter: e => {
+      $(e.target).attr('title', '重置下载列表<br><br>当前下载列表:<br>' + GM_getValue('downloading', []).join('<br> '));
+    }
+  }).prependTo('.ehNavBar>div:eq(2)');
   showTooltip(); //显示提示
-  $('body').on('click', '[copy]', e => {
+  $('body').on('mousedown', '[copy]', e => {
     e.preventDefault();
-    GM_setClipboard($(e.target).attr('copy'));
-
+    let copy = $(e.target).attr('copy')
+    setNotification(copy, '已复制');
+    GM_setClipboard(copy);
   }).on('contextmenu', 'input[type="button"]', () => false);
 }
 
@@ -179,11 +186,11 @@ function addStyle() { //添加样式
       '.ehDatalist>ol>li{cursor:pointer;}',
       '.ehDatalist>ol>li::after{content:"  "attr(cname);font-size:9pt;font-weight:bold;}',
       '.ehDatalistHover{color:#f00;font-weight:bold;font-size:large;}',
-      '.ehExistContainer{float:left;max-width:240px;overflow-x:auto;overflow-y:hidden;}',
+      '.ehExistContainer{float:left;/*max-width:240px;*/overflow-x:auto;overflow-y:hidden;}',
       '.ehExistContainer::-webkit-scrollbar{height:5px;}',
       '.ehExistContainer::-webkit-scrollbar-track{background:#ddd;}',
       '.ehExistContainer::-webkit-scrollbar-thumb{background:#666;}',
-      '.ehExist{color:#fff;background:#000;padding:0 1px;border:black 1px solid;cursor:pointer;}',
+      '.ehExist{display:inline-block;color:#fff;background:#000;padding:0 1px;border:black 1px solid;cursor:pointer;}',
       '.ehExist::before{content:attr(fileSize) "M";}',
       '.ehExist[name="force"]{color:#0f0;float:left;}',
       '.ehExist[name="force1"]{color:#00f;}',
@@ -211,8 +218,8 @@ function addStyle() { //添加样式
       '.ehTagNotice[name="Unlike"],#taglist div[id][name="Unlike"]{color:#f00;background-color:#00f;}',
       '.ehTagNotice[name="Alert"],#taglist div[id][name="Alert"]{color:#ff0;background-color:#080;}',
       '.ehTagNotice[name="Like"],#taglist div[id][name="Like"]{color:#000;background-color:#0ff;}',
-      '.ehTagEvent>.ehTagEventNotice[on="true"]::after{content:attr(name) " this";}',
-      '.ehTagEvent>.ehTagEventNotice[on="false"]::after{content:"NOT " attr(name) " this";}',
+      '.ehTagEvent>.ehTagEventNotice[on="true"]::after{content:attr(name);}',
+      '.ehTagEvent>.ehTagEventNotice[on="false"]::after{content:"NOT " attr(name);}',
       '.ehTooltip{display:none;white-space:nowrap;position:fixed;text-align:left;z-index:99999;border:2px solid #8d8d8d;background-color:' + backgroundColor + ';}',
       '.ehTooltip>ul{margin:0;}',
       '.ehCheckTableContainer{position:fixed;top:33px;left:0;width:calc(100% - 2px);height:calc(100% - 61px);border:solid 1px black;z-index:2;background-color:' + backgroundColor + ';}',
@@ -232,9 +239,13 @@ function addStyle() { //添加样式
       '.itg>tbody>tr.ehBatchHover{background-color:#669933;}',
       '.itg>tbody>tr:hover{background-color:#4a86e8;}',
       '.itg>tbody>tr>th:nth-child(5),.itg>tbody>tr>td:nth-child(5){cursor:pointer;}',
-      '.gdtm [name="intro"][on="true"]::after{content:"Block this";}',
-      '.gdtm [name="intro"][on="false"]::after{content:"Unblock this";}',
+      '.gdtm [name="intro"][on="true"]::after{content:"Block";}',
+      '.gdtm [name="intro"][on="false"]::after{content:"Unblock";}',
       '[copy]{cursor:pointer;}',
+      '.ehSites{display:inline-block;}',
+      '.ehSites>a{display:none;}',
+      '.ehSites>a:nth-child(1),.ehSites:hover>a{display:list-item;list-style:none;}',
+      '.ehSites>a>img{margin:-3px 0!important;height:16px!important;width:16px!important;}',
     ].join('\n')).appendTo('head');
   $('.i:has(.n),.id44>div>a:has(.tn)').css('float', 'right') //.hide(); //隐藏种子图标
 }
@@ -317,18 +328,6 @@ function autoComplete() { //自动填充
       $('.ehDatalist').show();
     }
   });
-}
-
-function autoStartDownload() { //自动开始下载
-  setTimeout(() => {
-    if ($('.ehD-box>.g2').length > 0) {
-      setTimeout(() => {
-        $('.ehD-box>.g2:eq(0)').click();
-      }, 2000);
-    } else {
-      autoStartDownload();
-    }
-  }, 800);
 }
 
 function batchDownload() { //批量下载
@@ -464,7 +463,6 @@ function btnSearch2() { //按钮 -> 搜索(搜索页)
         let arr = event[i].split(',');
         let keydown = arr[1] === '-1' ? true : e[['altKey', 'ctrlKey', 'shiftKey'][arr[1]]];
         if (keydown) {
-          console.log(arr);
           let name;
           let gid = $(e.target).parentsUntil('.itd,#pp').eq(-1).find('.it5>a,.id2>a').attr('href').match(/\/g\/(\d+)/)[1] * 1;
           let tags = window.gmetadata.filter(i => i.gid === gid)[0].tags.map(i => i.match(/^\w+:/) ? i.replace(/^(\w+:)/, '$1"') + '"$' : `misc:"${i}"$`);
@@ -534,6 +532,14 @@ async function changeEConfig(key, value) { //修改EH设置
   await xhrSync('/uconfig.php', uconfig);
 }
 
+function changeFav(url) { //修改Favicon
+  if ($('[rel="shortcut icon"]').length === 0) {
+    $('<link rel="shortcut icon" href="' + url + '" type="image/x-icon">').appendTo('head');
+  } else {
+    $('[rel="shortcut icon"]').attr('href', url);
+  }
+}
+
 function changeName(e) { //修改本子标题（移除集会名）
   $(e).toArray().forEach(i => {
     i.textContent = i.textContent.replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim();
@@ -591,21 +597,28 @@ function checkExist() { //检查本地是否存在
 function checkForNew() { //检查有无新本子
   let listStyle = $('#nb>img')[0].outerHTML;
   $(listStyle).appendTo('#nb');
-  $('<a href="javascript:;">Add to Check</a>').on('click', function(e) {
+  $('<a href="javascript:;">Add to CheckList</a>').on('mousedown', e => {
+    e.preventDefault();
     let keyword = $('[name="f_search"]').val();
-    let name = translateText(keyword);
-    name = prompt('请输入名称\n留空: ' + name);
-    if (name === 'null') return;
     let list = GM_getValue('checkList', {});
+    let name;
+    let nameInput;
+    if (keyword in list && list[keyword].name) name = list[keyword].name;
+    if (e.button === 0) {
+      if (!name) name = translateText(keyword);
+      nameInput = prompt('请输入名称\n留空: ' + name);
+      if (nameInput === null) return;
+    }
+    $(e.target).remove();
     list[keyword] = {
       time: new Date().getTime(),
       result: $('.ip').text().match(/Showing .*? of [\d,]+/) ? $('.ip').text().match(/Showing .*? of ([\d,]+)/)[1].replace(/,/g, '') * 1 : 0
     }
-    if (name) list[keyword].name = name;
+    if (nameInput || name !== translateText(keyword)) list[keyword].name = nameInput || name;
     GM_setValue('checkList', sortObj(list, 'time'));
   }).appendTo('#nb');
   $(listStyle).appendTo('#nb');
-  $('<a href="javascript:;">Show Check List</a>').on('click', function(e) {
+  $('<a href="javascript:;">Show CheckList</a>').on('click', e => {
     if ($('.ehCheckTableContainer').length) {
       $('.ehCheckTableContainer').toggle();
       return;
@@ -685,11 +698,11 @@ function checkForNew() { //检查有无新本子
     }
     if (info.name) list[keyword].name = info.name;
     GM_setValue('checkList', sortObj(list, 'time'));
-    setNotification((info.name || translateText(keyword)) + ' has been updated');
+    setNotification((info.name || translateText(keyword)), 'CheckList updated');
   }
 }
 
-async function checkImageSize(resolve, reject) { //检查图片尺寸
+async function checkImageSize() { //检查图片尺寸
   let ads = GM_getValue('introPic', []);
   let s = CONFIG['sizeS'];
   let d = CONFIG['sizeD'];
@@ -712,10 +725,23 @@ async function checkImageSize(resolve, reject) { //检查图片尺寸
     imageSizeNew = s;
   }
   if (imageSizeNew !== undefined) {
-    document.title = imageSizeNew + '|' + document.title;
-    await changeEConfig('xr', imageSizeNew);
+    if (location.hash.match(/^#[0-2]$/) && CONFIG['autoStartDownload'] && GM_getValue('downloading', []).length === 0) {
+      document.title = imageSizeNew + '|' + document.title;
+      await changeEConfig('xr', imageSizeNew);
+      changeFav(GM_getResourceURL('favicon_' + imageSizeNew));
+    } else {
+      let rawBtn = $('.g2:contains("Download Archive")');
+      $('<div class="g2"></div>').html(rawBtn.html()).click(async e => {
+        if (GM_getValue('downloading', []).length !== 0 && !confirm('下载列表不为空, 是否开始下载?')) return;
+        document.title = imageSizeNew + '|' + document.title;
+        await changeEConfig('xr', imageSizeNew);
+        changeFav(GM_getResourceURL('favicon_' + imageSizeNew));
+        rawBtn.click();
+      }).insertBefore(rawBtn);
+      rawBtn.hide();
+      changeFav(GM_getResourceURL('favicon_p'));
+    }
   }
-  if (imageSizeNew) $('<link rel="shortcut icon" href="' + GM_getResourceURL('favicon_' + imageSizeNew) + '" type="image/x-icon">').appendTo('head');
 }
 
 function combineText(arr, textOnly = undefined) {
@@ -775,8 +801,8 @@ async function getEConfig(key) { //获取EH设置
   return key ? uconfig.match(new RegExp(key + '=(.*?)(&|$)'))[1] : uconfig;
 }
 
-function getInfo(resolve, reject) { //获取信息
-  if (!$('.itg').length) return resolve();
+async function getInfo() { //获取信息
+  if (!$('.itg').length) return;
   let gidlist = $('.it5>a').toArray().map(i => {
     let arr = i.href.split('/');
     return [arr[4], arr[5]];
@@ -786,19 +812,18 @@ function getInfo(resolve, reject) { //获取信息
     lst.push(gidlist.splice(0, 25));
   }
   let gmetadata = [];
-  async.mapSeries(lst, async i => {
+  for (let i = 0; i < lst.length; i++) {
     let gdata = {
       'method': 'gdata',
-      'gidlist': i,
+      'gidlist': lst[i],
       'namespace': 1
     }
     let res = await xhrSync('/api.php', JSON.stringify(gdata), {
       responseType: 'json'
     });
     gmetadata = gmetadata.concat(res.response.gmetadata);
-  }, (err, results) => {
-    resolve(gmetadata);
-  });
+  }
+  return gmetadata;
 }
 
 function hideGalleries(gmetadata) { //隐藏某些画集
@@ -821,7 +846,8 @@ function hideGalleries(gmetadata) { //隐藏某些画集
           let sub = tag[tag.length - 1];
           let tagChs = findData(main, sub, true).cname;
           if (tagChs) tagChs = (main === 'male' ? '♂:' : main === 'female' ? '♀:' : '') + tagChs;
-          $(`<span class="ehTagNotice" name="${j}" title="${k}">${tagChs || k}</span>`).insertBefore($(i).parent());
+          tagChs = tagChs || k;
+          $(`<span class="ehTagNotice" name="${j}" title="${k}">${tagChs}</span>`).insertBefore($(i).parent());
         });
       }
     }
@@ -960,6 +986,32 @@ function reEscape(text) {
   return text.replace(/[\$\(\)\*\+\.\[\]\?\^\{\}\|]/g, '\\$&');
 }
 
+function saveLink() { //保存链接
+  $('<input type="button" title="创建链接" value="Shortcut">').click(function() {
+    var content = [
+      '[InternetShortcut]\r\nURL={{url}}',
+      '<?xml version=\'1.0\' encoding=\'UTF-8\'?><!DOCTYPE plist PUBLIC \'-//Apple//DTD PLIST 1.0//EN\' \'http://www.apple.com/DTDs/PropertyList-1.0.dtd\'><plist version=\'1.0\'><dict><key>URL</key><string>{{url}}</string></dict></plist>',
+      '[Desktop Entry]\r\nType=Link\r\nURL={{url}}'
+    ];
+    var platform = navigator.platform;
+    var fileType;
+    if (platform.match(/^Win/)) {
+      platform = 0;
+      fileType = '.url';
+    } else if (platform.match(/^Mac/)) {
+      platform = 1;
+      fileType = '.webloc';
+    } else {
+      platform = 2;
+      fileType = '.desktop';
+    }
+    let blob = new Blob([content[platform].replace('{{url}}', location.href)], {
+      type: 'application/octet-stream'
+    });
+    $(`<a href="${URL.createObjectURL(blob)}"></a>`).attr('download', document.title + fileType)[0].click();
+  }).prependTo('.ehNavBar>div:eq(2)');
+}
+
 function setNotification(title, body) { //发出桌面通知
   if (Notification && Notification.permission !== 'denied') {
     Notification.requestPermission(function(status) {
@@ -976,31 +1028,75 @@ function setNotification(title, body) { //发出桌面通知
   }
 }
 
-function showAllThumb(resolve, reject) { //显示所有预览页
+function searchInOtherSite() { //在其他站点搜索
+  let listStyle = $('#nb>img')[0].outerHTML;
+  $(listStyle).appendTo('#nb');
+  let sites = {
+    'nhentai.net': {
+      url: q => 'https://nhentai.net/search/?q=' + q.replace(/\$/g, '')
+    },
+    'doujinshi.org': {
+      url: 'https://www.doujinshi.org/search/simple/?T=objects&sn={q}'
+    },
+    'Google': {
+      url: 'https://www.google.com/search?q={q}',
+      icon: '//www.google.com/images/branding/product/ico/googleg_lodp.ico'
+    },
+    'hentai-comic.com': {
+      url: 'https://zh.hentai-comic.com/search/keyword/{q}/page/1/'
+    },
+    'asmhentai.com': {
+      url: 'https://asmhentai.com/search/{q}/'
+    },
+    'mujaki.blog.jp': {
+      urlJ: 'http://mujaki.blog.jp/search?q={q}'
+    },
+    'cefamilie.com': {
+      urlJ: 'https://cefamilie.com/?s={q}'
+    },
+    'wnacg.com': {
+      urlJ: 'https://wnacg.com/albums-index-page-1-sname-{q}.html'
+    },
+    'hentai2read.com': {
+      url: 'https://asmhentai.com/search/{q}/'
+    }
+  };
+  let keyword, keywordJ;
+  if ($('[name="f_search"]').length) {
+    keyword = $('[name="f_search"]').val();
+    keywordJ = $('[name="f_search"]').val();
+  } else {
+    keyword = $('#gn').text();
+    keywordJ = $('#gj').text();
+  }
+  $('<div class="ehSites"></div>').appendTo('#nb');
+  for (let i in sites) {
+    let url;
+    if ('url' in sites[i]) {
+      url = sites[i].url instanceof Function ? sites[i].url(keyword) : sites[i].url.replace('{q}', keyword);
+    } else if ('urlJ' in sites[i]) {
+      url = sites[i].urlJ instanceof Function ? sites[i].urlJ(keywordJ) : sites[i].urlJ.replace('{q}', keywordJ);
+    }
+    $(`<a target="_blank"><img src="${sites[i].icon||'//www.google.com/s2/favicons?domain='+i}"></img>${i}</a>`).attr('href', url).appendTo('.ehSites');
+  }
+}
+
+async function showAllThumb() { //显示所有预览页
   let pages = $('.ptt td:gt(0):lt(-1)>a').toArray();
-  if (pages.length <= 1) return resolve();
+  if (pages.length <= 1) return;
   $('<input type="button" class="ehThumbBtn" value="Hide" style="width:36px;height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;">').on('click', function(e) {
     $('.gdtContainer').toggle();
     $(e.target).val($(e.target).val() === 'Show' ? 'Hide' : 'Show');
   }).prependTo('#gdo2');
   $('<div class="gdtContainer"></div>').html('<div></div>'.repeat(pages.length)).insertBefore('#gdt');
   $('#gdt').appendTo(`.gdtContainer>div:nth-child(${$('.ptds:eq(0)').text()})`);
-  pages.forEach(i => {
-    if (i.pathname === location.pathname && i.search === location.search) return;
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', i.href, true);
-    xhr.responseType = 'document';
-    xhr.onload = function(e) {
-      $('#gdt', e.target.response).appendTo(`.gdtContainer>div:nth-child(${$('.ptds:eq(0)', e.target.response).text()})`);
-    }
-    xhr.send(null);
-  });
-  let interval = setInterval(() => {
-    if ($('.gdtContainer>div:empty').length === 0) {
-      clearInterval(interval);
-      resolve();
-    }
-  }, 200);
+  for (let i = 0; i < pages.length; i++) {
+    if (pages[i].pathname === location.pathname && pages[i].search === location.search) continue;
+    let res = await xhrSync(pages[i].href);
+    let doc = document.createElement('html');
+    doc.innerHTML = res.response;
+    $('#gdt', doc).appendTo(`.gdtContainer>div:nth-child(${$('.ptds:eq(0)', doc).text()})`);
+  }
 }
 
 function showConfig() { //显示设置
@@ -1025,6 +1121,7 @@ function showConfig() { //显示设置
       '<label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">显示按钮: 保存链接</label>',
       '<label for="ehConfig_tagTranslateImage"><input type="checkbox" id="ehConfig_tagTranslateImage">标签翻译显示图片</label>',
       '<label for="ehConfig_alwaysShowLike"><input type="checkbox" id="ehConfig_alwaysShowLike">总是显示带有喜欢的标签的画廊</label>',
+      '<label for="ehConfig_distroyEHDLog"><input type="checkbox" id="ehConfig_distroyEHDLog">隐藏EHD的Console日志</label>',
       '',
       '当用<select name="ehConfig_auto2Fav"><option value="0">左键</option><option value="1">中键</option><option value="2">右键</option></select>点击Open时，自动添加到收藏',
       '收藏夹: <input name="ehConfig_bookmark" type="text" placeholder="0.Series\\n1.Cosplay\\n2.Image Set\\n3.Game CG\\n4.Doujinshi\\n5.Harem\\n6.Incest\\n7.Story arc\\n8.Anthology\\n9.Artist">',
@@ -1311,30 +1408,14 @@ function translateText(text) {
   return arr.join(' ');
 }
 
-function saveLink() { //保存链接
-  $('<input type="button" title="创建链接" value="Shortcut">').click(function() {
-    var content = [
-      '[InternetShortcut]\r\nURL={{url}}',
-      '<?xml version=\'1.0\' encoding=\'UTF-8\'?><!DOCTYPE plist PUBLIC \'-//Apple//DTD PLIST 1.0//EN\' \'http://www.apple.com/DTDs/PropertyList-1.0.dtd\'><plist version=\'1.0\'><dict><key>URL</key><string>{{url}}</string></dict></plist>',
-      '[Desktop Entry]\r\nType=Link\r\nURL={{url}}'
-    ];
-    var platform = navigator.platform;
-    var fileType;
-    if (platform.match(/^Win/)) {
-      platform = 0;
-      fileType = '.url';
-    } else if (platform.match(/^Mac/)) {
-      platform = 1;
-      fileType = '.webloc';
-    } else {
-      platform = 2;
-      fileType = '.desktop';
-    }
-    let blob = new Blob([content[platform].replace('{{url}}', location.href)], {
-      type: 'application/octet-stream'
-    });
-    $(`<a href="${URL.createObjectURL(blob)}"></a>`).attr('download', document.title + fileType)[0].click();
-  }).prependTo('.ehNavBar>div:eq(2)');
+async function updateEHD() { //更新EHD
+  let res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/e-hentai-downloader.meta.js');
+  let version = res.response.match(/\/\/\ @version\s+([\d\.]+)/)[1];
+  if (version > GM_getValue('EHD_version', '0')) {
+    GM_setValue('EHD_version', version);
+    let res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/e-hentai-downloader.user.js');
+    GM_setValue('EHD_code', res.response);
+  }
 }
 
 function xhr(url, onload, parm = null, opt = {}) {
@@ -1366,7 +1447,7 @@ function xhrSync(url, parm = null, opt = {}) {
       url: url,
       data: parm,
       timeout: opt.timeout || 60 * 1000,
-      responseType: opt.responseType || 'text',
+      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : 'text',
       headers: opt.headers || {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
@@ -1383,4 +1464,8 @@ function xhrSync(url, parm = null, opt = {}) {
   });
 }
 
-init();
+init().then(() => {
+  //
+}, (err) => {
+  console.log(err);
+});
