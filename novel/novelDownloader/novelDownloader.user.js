@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.5
+// @version     1.45.6
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -126,8 +126,8 @@
 // @include     http://www.yidm.com/article/info/*.html
 // @include     http://www.yidm.com/article/html/*.html
 // @include     http://book.suixw.com/modules/article/reader.php*
-// @include     http*://www.iqing.in/book/*
-// @include     http*://www.iqing.in/read/*
+// @include     http*://www.iqing.com/book/*
+// @include     http*://www.iqing.com/read/*
 //              盗贴
 // @include     http://www.chuanyue8.net/files/article/html/*
 // @include     http://www.22ff.com/xs/*
@@ -1212,13 +1212,13 @@ function addRule() {
   addCRule('www.yidm.com', '.bd>h4', '.bd', 1);
   addIRule('book.suixw.com', '随想轻小说', '#title', '.ccss>a');
   addCRule('book.suixw.com', '#title', '#content', 1);
-  addIRule('www.iqing.in', '轻文轻小说', 'h1', '.chapter>a');
-  chapterRule['www.iqing.in'] = {
+  addIRule('www.iqing.com', '轻文轻小说', 'h1', '.chapter>a');
+  chapterRule['www.iqing.com'] = {
     'Deal': function(num, url) {
       var urlArr = url.split('/');
       GM_xmlhttpRequest({
         method: 'GET',
-        url: location.protocol + '//poi.iqing.in/content/' + urlArr[4] + '/chapter/',
+        url: location.protocol + '//poi.iqing.com/content/' + urlArr[4] + '/chapter/',
         headers: {
           'Referer': url,
           'X-Requested-With': 'XMLHttpRequest'
