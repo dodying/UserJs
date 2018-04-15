@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.6
+// @version     1.45.7
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -447,7 +447,7 @@ function init() {
     GM_setValue(this.name, this.type === 'checkbox' ? this.checked : this.type === 'number' ? (this.value || this.placeholder) * 1 : (this.value || this.placeholder));
   });
   $('#ndVip').click(function() {
-    if (this.checked && !confirm('只在起点有效。\n如未登录，则只会下载章节预览。\n如已登录，可能会订阅Vip章节。\n如果不放心，请勿勾选。出事作者概不负责。')) this.checked = false;
+    if (this.checked && !confirm('只在部分站点(起点/轻文轻小说)有效。\n如未登录，则只会下载章节预览。\n如已登录，可能会订阅Vip章节。\n如果不放心，请勿勾选。出现误订阅，作者概不负责。')) this.checked = false;
   });
   $('.ndSplit').change(function() {
     if (this.value === '...') {
@@ -1212,7 +1212,7 @@ function addRule() {
   addCRule('www.yidm.com', '.bd>h4', '.bd', 1);
   addIRule('book.suixw.com', '随想轻小说', '#title', '.ccss>a');
   addCRule('book.suixw.com', '#title', '#content', 1);
-  addIRule('www.iqing.com', '轻文轻小说', 'h1', '.chapter>a');
+  addIRule('www.iqing.com', '轻文轻小说', 'h1', '.chapter a', '.lock>a');
   chapterRule['www.iqing.com'] = {
     'Deal': function(num, url) {
       var urlArr = url.split('/');
