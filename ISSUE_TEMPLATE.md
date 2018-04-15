@@ -2,6 +2,7 @@
 - 类型: `Bug, 建议等`
 - OS: `操作系统`
 - 浏览器: `浏览器及类型`
+- 扩展: `Greasemonkey/Tampermonkey/Violentmonkey 及 版本`
 
 1. 如果是Bug
 - 网址: `在哪个网址发生了错误`
