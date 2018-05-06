@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.7
+// @version     1.45.8
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -462,12 +462,14 @@ function init() {
     $('.ndSplitStart').text('开始下载');
   });
   $('.ndSplitStart').click(function() {
+    let host = location.host;
     var split = ($(window).data('split')) ? $(window).data('split') + 1 : 1;
     $(window).data('split', split);
     var arr = $('.ndSplit').val().split('-');
     if (arr[0] === 'all' || arr[0] === 'every') {
       $(this).text('第' + split + '次下载');
-      var len = $(indexRule[location.host].chapter).length;
+      var len = $(indexRule[host].chapter).length;
+      if ($('#ndVip')[0].checked === false && indexRule[host].vip !== '') len = $(indexRule[host].chapter).not($(indexRule[host].vip)).length;
       var step = (arr[0] === 'all') ? Math.floor(len / arr[1]) + 1 : arr[1];
       var start = step * (split - 1) + 1;
       var end = step * split;
@@ -1888,30 +1890,22 @@ function download(fileType) { //下载
   if ($('.ndMain [name=empty]')[0].checked) {
     chapter = [];
   } else if ($('.ndSplitInput').val() !== '') {
-    $(chapter).each(function() {
-      this.added = false;
-    });
+    $(chapter).prop('nD-add', false);
     var arr = $('.ndSplitInput').val().split(',');
     arr.sort();
-    var chapterNew = [];
     for (i = 0; i < arr.length; i++) {
       if (/^\d+\-\d+$/.test(arr[i])) {
         var start = arr[i].replace(/^(\d+)\-\d+$/, '$1') - 1;
         var end = arr[i].replace(/^\d+\-(\d+)$/, '$1') - 1;
         for (var j = start; j <= end; j++) {
-          if (!chapter[j].added) {
-            chapter[j].added = true;
-            chapterNew.push(chapter[j]);
-          }
+          if (j >= chapter.length) break;
+          if (!chapter[j]['nD-add']) chapter[j]['nD-add'] = true;
         }
       } else if (/^\d+$/.test(arr[i])) {
-        if (!chapter[arr[i] - 1].added) {
-          chapter[arr[i] - 1].added = true;
-          chapterNew.push(chapter[arr[i] - 1]);
-        }
+        if (!chapter[arr[i] - 1]['nD-add']) chapter[arr[i] - 1]['nD-add'] = true;
       }
     }
-    chapter = chapterNew;
+    chapter = $(chapter).toArray().filter(i => i['nD-add']);
   }
   if (indexRule[host].sort || $('.ndConfig[name=sort]')[0].checked) chapter.sort(objArrSort('href'));
   chapter = $.makeArray(chapter);
@@ -2164,17 +2158,17 @@ function imageTask() {
 }
 
 function downloadImage(url) {
-  if ($('.ndTaskImage>[name=' + url + ']').length === 0) $('.ndTaskImage').show().append('<div class="ndIng" name="' + url + '"><a href="' + url + '" target="_blank"></a><progress max="1" value="0"></progress></div>');
+  if ($('.ndTaskImage>[name="' + url + '"]').length === 0) $('.ndTaskImage').show().append('<div class="ndIng" name="' + url + '"><a href="' + url + '" target="_blank"></a><progress max="1" value="0"></progress></div>');
   GM_xmlhttpRequest({
     method: 'GET',
     url: url,
     responseType: 'arraybuffer',
     timeout: 30000,
     onprogress: function(res) {
-      if (res.lengthComputable) $('.ndTaskImage>[name=' + url + ']>progress').val(res.loaded).attr('max', res.total)[0].scrollIntoView();
+      if (res.lengthComputable) $('.ndTaskImage>[name="' + url + '"]>progress').val(res.loaded).attr('max', res.total)[0].scrollIntoView();
     },
     onload: function(res) {
-      $('.ndTaskImage>[name=' + url + ']').attr('class', 'ndOk')[0].scrollIntoView();
+      $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndOk')[0].scrollIntoView();
       var img = $(window).data('img');
       img[url] = new Blob([res.response], {
         type: url.match(/\.png$/) ? 'image/png' : 'image/jpeg'
@@ -2187,7 +2181,7 @@ function downloadImage(url) {
       if (confirm('一张图片下载超时，请检查\n网络是否正常，或是否网站地址错误\n建议打开图片地址，使其载入\n图片地址: ' + url + '\n是否尝试再次下载')) {
         downloadImage(url);
       } else {
-        $('.ndTaskImage>[name=' + url + ']').attr('class', 'ndError')[0].scrollIntoView();
+        $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndError')[0].scrollIntoView();
         var img = $(window).data('img');
         img[name].data = 'timeout';
         img.ing--;
@@ -2199,7 +2193,7 @@ function downloadImage(url) {
       if (confirm('一张图片下载错误，请检查\n网络是否正常，或是否网站地址错误\n建议打开图片地址，使其载入\n图片地址: ' + url + '\n是否尝试再次下载')) {
         downloadImage(url);
       } else {
-        $('.ndTaskImage>[name=' + url + ']').attr('class', 'ndTimeout')[0].scrollIntoView();
+        $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndTimeout')[0].scrollIntoView();
         var img = $(window).data('img');
         img[name].data = 'error';
         img.ing--;
