@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.8
+// @version     1.45.9
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1231,7 +1231,13 @@ function addRule() {
           var name = json.chapter_title;
           var content = '';
           for (var i = 0; i < json.results.length; i++) {
-            content += json.results[i].value;
+            if (json.results[i].type === 0) {
+              content += json.results[i].value + '\r\n';
+            } else if (json.results[i].type === 1 && $('.ndMain [name=image]')[0].checked) {
+              content += '<img src="' + json.results[i].value + '"></img>';
+              threadImg(json.results[i].value);
+              imageTask();
+            }
           }
           thisDownloaded(num, name, content);
         }
@@ -2082,7 +2088,7 @@ function xhr(num, url) { //xhr
         content = content.html();
         if ($(window).data('img') && raw.find('img').length > 0) {
           raw.find('img').each(function() {
-            threadImg(this);
+            threadImg(this.src);
           });
           imageTask();
         }
@@ -2130,9 +2136,9 @@ function thisDownloaded(num, name = undefined, content, stauts = true) { //下�
   downloadTask();
 }
 
-function threadImg(aHtml) {
+function threadImg(url) { //添加到下载图片队列
   var img = $(window).data('img');
-  img[aHtml.src] = null;
+  img[url] = null;
   $(window).data('img', img);
 }
 
@@ -2416,7 +2422,7 @@ function download2Epub(name) { //下载到1个epub
   }
   for (i = 0; i < chapter.length; i++) {
     _name = String(preZeroFill(i + 1, leng));
-    _content = chapter[i].content.replace(/\r\n/g, '</p><p>').replace(/<p>\s+/g, '<p>');
+    _content = chapter[i].content.replace(/[\r\n]+/g, '</p><p>').replace(/<p>\s+/g, '<p>');
     if ($('<div></div>').html(_content).find('img').length > 0 && img) {
       var _html = $('<div></div>').html(_content);
       _html.find('img').each(function() {
