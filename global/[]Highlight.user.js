@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        []Highlight
 // @include     *
-// @version     1.0.0
+// @version     1.0.1
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -121,7 +121,7 @@
             if (preWord) parentNode.insertBefore($t(preWord), l);
             if (sufWord) {
               if (l.nextSibling) {
-                parentNode.insertBefore($t(preWord), l.nextSiblingl);
+                parentNode.insertBefore($t(sufWord), l.nextSibling);
               } else {
                 parentNode.appendChild($t(sufWord));
               }
