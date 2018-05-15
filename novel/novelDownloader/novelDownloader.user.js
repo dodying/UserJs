@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.9
+// @version     1.45.10
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
 // @require     https://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
-// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js
+// @require     https://cdn.bootcss.com/FileSaver.js/2014-11-29/FileSaver.min.js
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js
 // @require     https://greasyfork.org/scripts/32483-base64/code/base64.js
 // @grant       GM_xmlhttpRequest
