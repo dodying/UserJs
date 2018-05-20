@@ -3,7 +3,7 @@
 // @description
 // @include     http://*
 // @include     https://*
-// @version     1.0.0
+// @version     1.0.1
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -23,7 +23,7 @@
   let host = location.host;
   if (blacklist.includes(host)) {
     let id;
-    id = GM_registerMenuCommand('S: Effect ' + host, function () {
+    id = GM_registerMenuCommand('S: Effect ' + host, function() {
       let blacklist = GM_getValue('blacklist', []);
       if (blacklist.includes(host)) {
         blacklist.splice(blacklist.indexOf(host), 1);
@@ -39,13 +39,13 @@
         url: url,
         method: 'HEAD',
         timeout: 5 * 1000,
-        onload: function () {
-          location.href = url;
+        onload: function(res) {
+          if (new URL(res.finalUrl).protocol === 'https:' && res.status < 400) location.href = res.finalUrl;
         }
       });
     }
     let id;
-    id = GM_registerMenuCommand('S: DO NOT Effect ' + host, function () {
+    id = GM_registerMenuCommand('S: DO NOT Effect ' + host, function() {
       let blacklist = GM_getValue('blacklist', []);
       if (!(blacklist.includes(host))) {
         blacklist.push(host);
