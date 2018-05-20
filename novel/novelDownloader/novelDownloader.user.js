@@ -1210,6 +1210,7 @@ function addRule() {
           let arr = res.response.c;
           let name = arr[0].c;
           let content = '';
+          if (typeof(name) != 'string') name = name[0].c;
           for (let i = 1; i < arr.length; i++) {
             if (!arr[i].c) continue;
             if (arr[i].c instanceof Array) {
