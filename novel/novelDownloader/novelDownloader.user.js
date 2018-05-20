@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.11
+// @version     1.45.12
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -119,6 +119,7 @@
 // @include     http*://www.popo.tw/books/*/articles*
 // @include     http://www.anyew.cn/chapters/*
 // @include     http://www.anyew.cn/book/*.html
+// @include     http*://yuedu.baidu.com/ebook/*
 //              轻小说
 // @include     http://www.wenku8.com/novel/*
 // @include     http*://book.sfacg.com/Novel/*
@@ -171,7 +172,7 @@
 // @include     http://www.qmshu.com/html/*
 // @include     http://www.xfqxsw.com/book/*
 // @include     http://www.zwda.com/*/*
-// @include     http*://www.sto.cc/*-*/
+// @include     http*://www.sto.cc/*
 // @include     http://www.musemailsvr.com/*.shtml
 // @include     http://www.50zw.co/book_*/*
 // @include     http://www.piaotian.com/html/*
@@ -344,9 +345,6 @@ function init() {
     testChapter = i === testChapter.length ? 'a:link:not(:empty)' : testChapter[i];
     console.log('通用规则-chapter: ', testChapter);
     addIRule(location.host, '通用规则（测试）', 'h1,h2', testChapter);
-    var _chapter = GM_getValue('_chapter', {});
-    _chapter[testChapter] = testChapter in _chapter ? _chapter[testChapter]++ : 1;
-    GM_setValue('_chapter', _chapter);
     addCRule(location.host, 'h1,h2', '.xscontent,.mcc,#Booex123,#BookContent,#BookText,#BookTextt,#ChapterBody,#Content,#J_article_con,#TXT,#a_content,#acontent,#artWrap,#article,#article-content,#articlebody,#book_text,#bookbody,#booktext,#ccon,#ccontent,#chapterContent,#chapter_content,#chaptercontent,#clickeye_content,#content,#content1,#content_1,#contentbox,#contents,#cp_content,#detail,#floatleft,#fontsize,#htmlContent,#jsreadbox,#kui-page-read-txt,#mouseRight,#neirong,#novel_content_txtsize,#novel_contents,#ntxt,#page-content,#partContent,#r_zhengwen,#read-content,#read_txt,#readcon,#readerFs,#showcontent,#snr2,#table_container,#text_area,#texts,#txt,#view_content_txt,#zjcontentdiv,#zoom,.Text,.article,.article-con,.bd,.book,.book_con,.box_box,.chapter,.chapter_con,.chaptertxt,.chpater-content,.con_L,.con_txt,.content,.contentbox,.menu-area,.myContent,.note,.novel_content,.noveltext,.p,.page-content,.panel-body,.read-content,.reed,.shuneirong,.text,.text1,.textP,.textinfo+p,.txt,.txtc,.yd_text2,.novelContent,.detailContent,.bookcontent', 0);
     if ($('meta[content*="charset=gb"],meta[charset*="gb"],script[charset*="gb"]').length) chapterRule[location.host].MimeType = 'text/html; charset=gb2312';
     chapterRule[location.host].sort = $('.ndConfig[name=sort]')[0].checked;
@@ -508,9 +506,6 @@ function init() {
             }
             testContent = i === testContent.length ? chapterRule[host].content : testContent[i];
             console.log('通用规则-content: ', testContent);
-            var _content = GM_getValue('_content', {});
-            _content[testContent] = testContent in _content ? _content[testContent]++ : 1;
-            GM_setValue('_content', _content);
             chapterRule[host].content = testContent;
             $(window).data('autoTryResult', true);
           }
@@ -1198,6 +1193,34 @@ function addRule() {
           j = m.toString(trd.enc.Utf8);
           content = j;
           content = content.replace(/【重磅推荐】.*/, '');
+          thisDownloaded(num, name, content);
+        }
+      });
+    }
+  };
+  addIRule('yuedu.baidu.com', '百度阅读', '.book-title', '#catalog-list>.level1>a');
+  chapterRule['yuedu.baidu.com'] = {
+    'Deal': function(num, url) {
+      let pn = url.match(/\?pn=(\d+)/)[1];
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: unsafeWindow.__fisData.get('bdjsonUrl') + '&type=json&cn=' + pn,
+        responseType: 'json',
+        onload: function(res) {
+          let arr = res.response.c;
+          let name = arr[0].c;
+          let content = '';
+          for (let i = 1; i < arr.length; i++) {
+            if (!arr[i].c) continue;
+            if (arr[i].c instanceof Array) {
+              for (let j = 0; j < arr[i].c.length; j++) {
+                if (arr[i].c[j].c) content += arr[i].c[j].c + '<br>';
+              }
+            } else {
+              content += arr[i].c + '<br>';
+              if (arr[i].t !== 'p') content += '<br>';
+            }
+          }
           thisDownloaded(num, name, content);
         }
       });
@@ -2395,7 +2418,7 @@ function download2Epub(name) { //下载到1个epub
   META_INF.file('container.xml', '<?xml version="1.0" encoding="UTF-8"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml" /></rootfiles></container>');
   var OEBPS = $(window).data('blob').folder('OEBPS');
   OEBPS.file('stylesheet.css', GM_getValue('style') || '' +
-    'body{line-height:130%;text-align:justify;font-family:"Microsoft YaHei";font-size:22px;margin:0 auto;background-color:#CCE8CF;color:#000;}' +
+    'body{line-height:130%;text-align:justify;font-family:"Microsoft YaHei";font-size:22px;margin:0 auto;}' +
     'h1{text-align:center;font-weight:bold;font-size:28px;}' +
     'h2{text-align:center;font-weight:bold;font-size:26px;}' +
     'h3{text-align:center;font-weight:bold;font-size:24px;}' +
