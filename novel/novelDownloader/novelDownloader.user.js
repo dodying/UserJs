@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.12
+// @version     1.45.13
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1210,7 +1210,7 @@ function addRule() {
           let arr = res.response.c;
           let name = arr[0].c;
           let content = '';
-          if (typeof(name) != 'string') name = name[0].c;
+          if (typeof(name) !== 'string') name = name[0].c;
           for (let i = 1; i < arr.length; i++) {
             if (!arr[i].c) continue;
             if (arr[i].c instanceof Array) {
