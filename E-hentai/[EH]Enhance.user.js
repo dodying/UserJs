@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.12.0
+// @version     1.13.0
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -30,7 +30,6 @@
 // @grant       GM_xmlhttpRequest
 // @connect     *
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1522933172772
 // @resource favicon_0 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAL0lEQVR42mNgGBQgjU3wPzomJI+ihmoGEHIhTvWDxwBkCVxs2howjAKR/ilxQAEA0niUcVUdSr0AAAAASUVORK5CYII=
 // @resource favicon_1 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAK0lEQVR42mNgGBQgjU3wPzrGp452BhDr0kFsALICbIppb8AwCkT6p8QBBQBmZWTxFXfR8AAAAABJRU5ErkJggg==
 // @resource favicon_2 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANElEQVR42mNgGBQgjU3wPzomJI+ihmoGkOriQWgAsgQ2NtGBSLYBRDuZVAX0M2DgUuKAAgB3d4iRNiZLcAAAAABJRU5ErkJggg==
@@ -45,7 +44,8 @@
 // ==/UserScript==
 
 const CONFIG = GM_getValue('config', {});
-const EHT = JSON.parse(GM_getResourceText('EHT')).dataset;
+const EHT = [];
+const gmetadata = [];
 
 async function init() {
   addStyle(); //添加样式
@@ -55,11 +55,25 @@ async function init() {
       $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && $('.ido').length === 0 ? 'top:0;' : 'bottom:0;');
     }
   });
+
+  let now = new Date().getTime();
+  let lastTime = GM_getValue('EHT_checkTime', 0);
+  if (CONFIG['updateIntervalEHT'] === undefined || (CONFIG['updateIntervalEHT'] !== 0 && now - lastTime >= CONFIG['updateIntervalEHT'] * 24 * 60 * 60 * 1000)) {
+    try {
+      await updateEHT();
+    } catch (err) {}
+  }
+  EHT.push(...JSON.parse(GM_getValue('EHT')).dataset);
+
   if ($('.ido').length === 0) { //信息页
     if (CONFIG['enableEHD']) {
-      try {
-        await updateEHD();
-      } catch (err) {}
+      let now = new Date().getTime();
+      let lastTime = GM_getValue('EHD_checkTime', 0);
+      if (CONFIG['updateIntervalEHD'] !== 0 && now - lastTime >= CONFIG['updateIntervalEHD'] * 24 * 60 * 60 * 1000) {
+        try {
+          await updateEHD();
+        } catch (err) {}
+      }
       eval('(function (){' + (CONFIG['distroyEHDLog'] ? 'let console = {};for (let i in window.console) {console[i] = new Function();}' : '') + GM_getValue('EHD_code') + '})();'); //运行EHD
     } else {
       let loaded = await waitForElement('.ehD-box', 30 * 1000);
@@ -110,16 +124,16 @@ async function init() {
     quickDownload(); //右键：下载
     if ($('table.itg').length) batchDownload(); //Displsy: List => 批量下载
     if (CONFIG['checkExist']) checkExist(); //检查本地是否存在
-    let gmetadata = await getInfo();
-    window.gmetadata = gmetadata;
-    if (CONFIG['languageCode']) languageCode(gmetadata); //显示iso语言代码
-    tagPreview(gmetadata); //标签预览
-    hideGalleries(gmetadata); //隐藏某些画集
+    let _gmetadata = await getInfo();
+    gmetadata.push(..._gmetadata);
+    if (CONFIG['languageCode']) languageCode(); //显示iso语言代码
+    tagPreview(); //标签预览
+    hideGalleries(); //隐藏某些画集
     if (CONFIG['checkExistAtStart']) $('input:button[name="checkExist"]').click();
     if ($('table.itg').length && CONFIG['preloadPaneImage']) $('.itd:visible[onmouseover]').trigger('mouseover');
     rateInSearchPage(); //在搜索页评分
     autoComplete(); //自动填充
-    checkForNew(gmetadata); //检查有无新本子
+    checkForNew(); //检查有无新本子
   }
   highlightBlacklist(); //高亮黑名单相关的画廊(通用)
   showConfig();
@@ -479,7 +493,7 @@ function btnSearch2() { //按钮 -> 搜索(搜索页)
         if (keydown) {
           let name;
           let gid = $(e.target).parentsUntil('.itd,div.itg,#pp').eq(-1).find('.it5>a,.id2>a').attr('href').match(/\/g\/(\d+)/)[1] * 1;
-          let tags = window.gmetadata.filter(i => i.gid === gid)[0].tags.map(i => i.match(/^\w+:/) ? i.replace(/^(\w+:)/, '$1"') + '"$' : `misc:"${i}"$`);
+          let tags = gmetadata.filter(i => i.gid === gid)[0].tags.map(i => i.match(/^\w+:/) ? i.replace(/^(\w+:)/, '$1"') + '"$' : `misc:"${i}"$`);
           if (arr[2] === '-1') {
             let order = prompt(tags.map((i, j) => `${j}: ${translateText(i)}`).join('\n'));
             if (order) {
@@ -534,7 +548,7 @@ function calcRelativeTime(time) { //计算相对时间
     }
   }
   t = Math.round(t);
-  let text = `about ${t} ${suf}${t>1 ? 's' : ''} ago`;
+  let text = `about ${t} ${suf}${t > 1 ? 's' : ''} ago`;
   if (delta <= 1000 * 60 * 60 * 24 * 7) text = '<span class="ehHighlight">' + text + '</span>';
   return text;
 }
@@ -618,7 +632,7 @@ function checkExist() { //检查本地是否存在
   }).appendTo('.ehNavBar>div:eq(1)');
 }
 
-function checkForNew(gmetadata) { //检查有无新本子
+function checkForNew() { //检查有无新本子
   let listStyle = $('#nb>img')[0].outerHTML;
   $(listStyle).appendTo('#nb');
   $('<a href="javascript:;">Add to CheckList</a>').on({
@@ -730,8 +744,8 @@ function checkForNew(gmetadata) { //检查有无新本子
       ele.insertBefore(tr[i]);
     }
   }
-  $('<input type="button" value="Delete" title="移除该项">').click(()=>{
-    if (confirm('确认移除: \n' + keyword)){
+  $('<input type="button" value="Delete" title="移除该项">').click(() => {
+    if (confirm('确认移除: \n' + keyword)) {
       let list = GM_getValue('checkList', {});
       delete list[keyword];
       GM_setValue('checkList', list);
@@ -919,7 +933,7 @@ async function getInfo() { //获取信息
   return gmetadata;
 }
 
-function hideGalleries(gmetadata) { //隐藏某些画集
+function hideGalleries() { //隐藏某些画集
   let tags = {};
   ['Unlike', 'Alert', 'Like'].forEach(i => {
     let tag = GM_getValue('tag' + i, []);
@@ -1030,7 +1044,7 @@ function jumpHost() { //里站跳转
   }
 }
 
-function languageCode(gmetadata) { //显示iso语言代码
+function languageCode() { //显示iso语言代码
   let value = $('[name="f_search"]').val();
   let iso = {
     'chinese': 'zh',
@@ -1276,13 +1290,16 @@ function showConfig() { //显示设置
     }
     let config = GM_getValue('config', {});
     let _html = [
+      '更新 EHT: 更新频率: <input name="ehConfig_updateIntervalEHT" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHT" value="立即更新" title="更新标签数据，来自[Mapaler/EhTagTranslator]">',
+      '更新 EHD: 更新频率: <input name="ehConfig_updateIntervalEHD" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHD" value="立即更新" title="更新内置 [E-Hentai-Downloader]">',
+      '',
       '跳转相关: <label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">信息页: 里站自动跳转到表站</label>; <label for="ehConfig_eh2ex"><input type="checkbox" id="ehConfig_eh2ex">搜索页: 表站自动跳转到里站</label>',
       '<label for="ehConfig_openInTab"><input type="checkbox" id="ehConfig_openInTab">在新标签页中打开，而不是弹窗</label>',
       '<label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">显示按钮: 保存链接</label>',
       '收藏夹: <input name="ehConfig_bookmark" type="text" title="以,分割" placeholder="0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist">',
       '收藏按钮事件: <input name="ehConfig_bookmarkEvent" title="事件格式: 鼠标按键,键盘按键,收藏事件<br>多个事件以|分割<br>鼠标按键:<ul><li>0 -> 左键</li><li>1 -> 中键</li><li>2 -> 右键</li></ul>键盘按键:<ul><li>-1 -> 任意</li><li>0 -> altKey</li><li>1 -> ctrlKey</li><li>2 -> shiftKey</li></ul>收藏事件:<ul><li>留空 -> 上次选择</li><li>-1 -> 自行选择</li><li>0-9 -> 0-9</li><li>10 -> 移除</li><li>b -> 加入黑名单</li></ul>" type="text" placeholder="0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0"><input name="ehConfig_bookmarkEventChs" type="hidden">',
       '',
-      '搜索页: ',
+      '搜索页:',
       '<label for="ehConfig_preloadPaneImage"><input type="checkbox" id="ehConfig_preloadPaneImage">自动载入预览图</label>; <label for="ehConfig_languageCode"><input type="checkbox" id="ehConfig_languageCode">显示iso语言代码</label>',
       '<label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">显示按钮: 检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label>',
       '检查本地是否存在: <label for="ehConfig_checkExistAtStart"><input type="checkbox" id="ehConfig_checkExistAtStart">页面载入后检查一次</label>; <label for="ehConfig_checkExistName2" title="去除集会号/作者/原作名/翻译组织/语言等"><input type="checkbox" id="ehConfig_checkExistName2">只搜索主要名称</label>',
@@ -1297,7 +1314,7 @@ function showConfig() { //显示设置
       '当结果数目变化 <= <input name="ehConfig_autoUpdateCheck" type="number" placeholder="10" min="0">时, 自动更新Check',
       '每页 <input name="ehConfig_checkListPerPage" type="number" placeholder="25" min="25" max="100"> 条CheckList',
       '',
-      '信息页',
+      '信息页:',
       '下载相关: <label for="ehConfig_autoStartDownload"><input type="checkbox" id="ehConfig_autoStartDownload">锚部分不为空时，自动开始下载</label>; <label for="ehConfig_autoClose" title="Firefox: 需打开about:config并设置dom.allow_scripts_to_close_windows为true"><input type="checkbox" id="ehConfig_autoClose">锚部分不为空时，下载完成后自动关闭标签</label>',
       '下载-EHD相关: <label for="ehConfig_enableEHD"><input type="checkbox" id="ehConfig_enableEHD">启用内置 [E-Hentai-Downloader]</label>; <label for="ehConfig_distroyEHDLog"><input type="checkbox" id="ehConfig_distroyEHDLog">隐藏内置 [E-Hentai-Downloader] 的 Console 日志</label>',
       '<label for="ehConfig_tagTranslateImage"><input type="checkbox" id="ehConfig_tagTranslateImage">标签翻译显示图片</label>',
@@ -1305,7 +1322,7 @@ function showConfig() { //显示设置
       '大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1" step="0.1">; 小图(单页)宽高比: <input name="ehConfig_rateS" type="number" placeholder="0.9" step="0.1">',
       '大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>',
     ].map(i => i ? '<li>' + i + '</li>' : '<hr>').join('');
-    $('<div class="ehConfig"></div>').html('<ul>' + _html + '</ul><div class="ehConfigBtn"><input type="button" name="save" value="Save" title="保存"><input type="button" name="cancel" value="Cancel" title="取消"></div>').appendTo('body').on('click', function(e) {
+    $('<div class="ehConfig"></div>').html('<ul>' + _html + '</ul><div class="ehConfigBtn"><input type="button" name="save" value="保存"><input type="button" name="cancel" value="取消"></div>').appendTo('body').on('click', function(e) {
       if ($(e.target).is('.ehConfigBtn>input[type="button"]')) {
         if (e.target.name === 'save') {
           $('.ehConfig input:not([type="button"]),.ehConfig select').toArray().forEach(i => {
@@ -1372,6 +1389,10 @@ function showConfig() { //显示设置
           GM_setValue('config', config);
         }
         $('.ehConfig').remove();
+      } else if ($(e.target).is('.ehConfig input[name="updateEHT"]')) {
+        updateEHT();
+      } else if ($(e.target).is('.ehConfig input[name="updateEHD"]')) {
+        updateEHD();
       }
     });
     $('.ehConfig input:not([type="button"]),.ehConfig select').toArray().forEach(i => {
@@ -1491,7 +1512,7 @@ function tagEvent() { //标签事件
   });
 }
 
-function tagPreview(gmetadata) { //标签预览
+function tagPreview() { //标签预览
   $('<div class="ehTagPreview"></div>').appendTo('body');
   $('body').on({
     mousemove(e) {
@@ -1593,17 +1614,121 @@ function translateText(text) {
 }
 
 async function updateEHD() { //更新EHD
-  let now = new Date().getTime();
-  let lastTime = GM_getValue('EHD_checkTime', 0);
-  if (now - lastTime < 24 * 60 * 60 * 1000) return;
   let res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/e-hentai-downloader.meta.js');
-  GM_setValue('EHD_checkTime', now);
   let version = res.response.match(/\/\/\ @version\s+([\d\.]+)/)[1];
   if (version > GM_getValue('EHD_version', '0')) {
     GM_setValue('EHD_version', version);
     let res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/e-hentai-downloader.user.js');
+    setNotification('E-Hentai-Downloader has been updated to ' + version);
     GM_setValue('EHD_code', res.response);
   }
+  GM_setValue('EHD_checkTime', new Date().getTime());
+}
+
+async function updateEHT() { //更新EHT
+  let url = 'https://github.com/Mapaler/EhTagTranslator/wiki/';
+  let InfoToArray = function(infoDom) {
+    let arr = [];
+    if (infoDom.childNodes !== undefined) {
+      for (let ci = 0, cilen = infoDom.childNodes.length; ci < cilen; ci++) {
+        let node = infoDom.childNodes[ci];
+        let InfoObj = {};
+        switch (node.nodeName) {
+          case '#text':
+            InfoObj.type = 0;
+            if (node.textContent == '\n') continue;
+            InfoObj.text = node.textContent.replace('"', '\\"');
+            break;
+          case 'BR':
+            InfoObj.type = 1;
+            break;
+          case 'IMG':
+            InfoObj.type = 2;
+            let osrc = node.getAttribute('data-canonical-src');
+            if (osrc) {
+              InfoObj.src = osrc;
+            } else if (node.title.length > 0) {
+              InfoObj.src = node.title;
+            } else if (node.src.length > 0) {
+              InfoObj.src = node.src;
+            }
+            InfoObj.alt = node.alt;
+            break;
+          case 'A':
+            InfoObj.type = 3;
+            InfoObj.text = node.textContent;
+            InfoObj.href = node.href;
+            InfoObj.title = node.title;
+            break;
+          default:
+            continue;
+        }
+        arr.push(InfoObj);
+      }
+    }
+    return arr;
+  }
+  let LinksToArray = function(linksDom) {
+    let arr = [];
+    let as = linksDom.querySelectorAll('a');
+    for (let ai = 0; ai < as.length; ai++) {
+      let a = as[ai];
+      arr.push({
+        text: a.textContent || '',
+        href: a.href || '',
+        title: a.title || '',
+      });
+    }
+    return arr;
+  }
+  let dealTags = function(response) {
+    let rowTags = [];
+    let PageDOM = new DOMParser().parseFromString(response, 'text/html');
+    let tBody = PageDOM.querySelector('#wiki-body div table').tBodies[0];
+    for (let ri = 0, rilen = tBody.rows.length; ri < rilen; ri++) {
+      let trow = tBody.rows[ri];
+      let tag = {};
+      if (trow.cells.length > 2) {
+        tag.name = trow.cells[0].textContent.trim();
+        tag.cname = InfoToArray(trow.cells[1]);
+        tag.info = InfoToArray(trow.cells[2]);
+        tag.links = LinksToArray(trow.cells[3]);
+        tag.type = tag.name.replace(/\s/ig, '').length < 1 ? 1 : 0;
+        rowTags.push(tag);
+      }
+    }
+    return rowTags;
+  }
+
+  let dataset = [];
+  let rows = await xhrSync(url + 'rows');
+  rows = rows.response;
+  let rowsPageDOM = new DOMParser().parseFromString(rows, 'text/html');
+  let table = rowsPageDOM.querySelector('#wiki-body div table').tBodies[0];
+  let rowsCount = table.rows.length;
+  for (let ri = 0; ri < rowsCount; ri++) {
+    let trow = table.rows[ri];
+    let row = {
+      tags: []
+    };
+    row.name = trow.cells[0].textContent.trim();
+    row.cname = InfoToArray(trow.cells[1]);
+    row.info = InfoToArray(trow.cells[2]);
+    row.links = LinksToArray(trow.cells[3]);
+
+    let tagRows = await xhrSync(url + row.name);
+    tagRows = tagRows.response;
+    row.tags = dealTags(tagRows);
+    dataset.push(row);
+  }
+
+  GM_setValue('EHT', JSON.stringify({
+    'database-structure-version': 4,
+    date: new Date().getTime(),
+    dataset: dataset
+  }));
+  setNotification('EhTagTranslator has been up-to-date');
+  GM_setValue('EHT_checkTime', new Date().getTime());
 }
 
 function waitForElement(ele, timeout) {
