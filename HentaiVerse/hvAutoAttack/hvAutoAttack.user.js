@@ -5,7 +5,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.89.0
+// @version      2.90.0
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -476,11 +476,12 @@ function optionBox() { //配置界面
         <l0>耐久度</l0><l1>耐久度</l1><l2>Durability</l2> ≤ <input class="hvAANumber" name="repairValue" type="text">%</div>\
       <div><input id="etherTap" type="checkbox"><label for="etherTap"><b>Ether Tap</b></label>: {{etherTapCondition}}</div>\
       <div><input id="autoFlee" type="checkbox"><label for="autoFlee"><b><l0>自动逃跑</l0><l1>自動逃跑</l1><l2>Flee</l2></b></label>: {{fleeCondition}}</div>\
+      <div><div class="hvAANew"></div><input id="autoPause" type="checkbox"><label for="autoPause"><b><l0>自动暂停</l0><l1>自動暫停</l1><l2>Pause</l2></b></label>: {{pauseCondition}}</div>\
       <div><input id="restoreStamina" type="checkbox"><label for="restoreStamina"><b><l0>战前回复</l0><l1>戰前回复</l1><l2>Restore stamina</l2></b>: \
         <l0>战斗前，如果</l0><l1>戰鬥前，如果</l1><l2><b></b>if before a battle and </l2>Stamina ≤ <input class="hvAANumber" name="staminaLow" placeholder="30" type="text"></label><br>\
         <l0>说明: 如果不勾选，当Stamina小于此值后，则不进行闲置竞技场</l0><l1>說明: 如果不勾選，當Stamina小於此值後，則不進行閒置競技場</l1><l2>Note: If unchecked, when Stamina is less than this value, no Idle Arena</l2></div>\
       <div><input id="recordEach" type="checkbox"><label for="recordEach"><b><l0>单独记录每场战役</l0><l1>單獨記錄每場戰役</l1><l2>Record each battle separately</l2></b></label></div>\
-      <div><div class="hvAANew"></div><b><l0>延迟</l0><l1>延遲</l1><l2>Delay</l2></b>: 1. <l0>其他/Buff/Debuff技能</l0><l1>其他/Buff/Debuff技能</l1><l2>Skills&BUFF/DEBUFF Spells</l2>: <input class="hvAANumber" name="delay" placeholder="200" type="text">ms 2. <l01>其他</l01><l2>Other</l2>: <input class="hvAANumber" name="delay2" placeholder="30" type="text">ms<br>\
+      <div><b><l0>延迟</l0><l1>延遲</l1><l2>Delay</l2></b>: 1. <l0>其他/Buff/Debuff技能</l0><l1>其他/Buff/Debuff技能</l1><l2>Skills&BUFF/DEBUFF Spells</l2>: <input class="hvAANumber" name="delay" placeholder="200" type="text">ms 2. <l01>其他</l01><l2>Other</l2>: <input class="hvAANumber" name="delay2" placeholder="30" type="text">ms<br>\
         <l0>说明: 单位毫秒，且在设定值基础上取其的50%-150%进行延迟，0表示不延迟</l0><l1>說明: 單位毫秒，且在設定值基礎上取其的50%-150%進行延遲，0表示不延遲</l1><l2>Note: unit milliseconds, and based on the set value multiply 50% -150% to delay, 0 means no delay</l2>\
         </div>\
       </div>',
@@ -1348,7 +1349,7 @@ function checkCondition(parms) {
   var returnValue = function(str) {
     if (str.match(/^_/)) {
       var arr = str.split('_');
-      return func[arr[1]](arr[2]);
+      return func[arr[1]](...[...arr].splice(2));
     } else if (str.match(/^'.*?'$|^".*?"$/)) {
       return str.substr(1, str.length - 2);
     } else if (isNaN(str * 1)) {
@@ -1624,6 +1625,15 @@ function main() { //主程序
   }
   battleInfo(); //战斗战况
   countMonsterHP(); //统计敌人血量
+  if (g('option').autoFlee && checkCondition(g('option').fleeCondition)) {
+    gE('1001').click();
+    setTimeout(goto, 3 * 1000);
+    return;
+  }
+  if (g('option').autoPause && checkCondition(g('option').pauseCondition)) {
+    pauseChange();
+    return;
+  }
   if (gE('#ikey_p')) useGem(); //自动使用宝石
   if (g('end')) return;
   if (g('option').item && g('option').itemOrderValue) deadSoon(); //自动回血回魔
@@ -1798,11 +1808,6 @@ function newRound() { //New Round
   g('bossAll', gE('div.btm2[style^="background"]', 'all').length);
   var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
   g('bossAlive', g('bossAll') - bossDead);
-  if (g('option').autoFlee && checkCondition(g('option').fleeCondition)) {
-    gE('1001').click();
-    setTimeout(goto, 3 * 1000);
-    return;
-  }
   var battleLog = gE('#textlog>tbody>tr>td', 'all');
   g('roundType', (function() {
     if (getValue('roundType')) {
