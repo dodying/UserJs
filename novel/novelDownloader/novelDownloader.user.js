@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.14
+// @version     1.45.15
 // @author      Dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -43,6 +43,7 @@
 // @include     http://chuangshi.qq.com/bk/*/*-*.html
 // @include     http://yunqi.qq.com/bk/*/*-*.html
 // @include     http://dushu.qq.com/intro.html*
+// @include     http://book.qq.com/intro.html*
 // @include     http://book.tianya.cn/html2/dir.aspx?bookid=*
 // @include     http://book.tianya.cn/chapter-*
 // @include     http*://www.hbooker.com/book/*
@@ -138,6 +139,8 @@
 // @include     http://www.hunhun520.com/book/*
 // @include     http://www.xiaoshuokan.com/haokan/*
 // @include     http://www.3zcn.org/3z/*
+// @include     http://www.ggdown.com/*
+// @include     http*://www.daizitouxiang.com/du/*
 // @include     http://www.blwen.com/*.html
 // @include     http://www.mpzw.com/html/*
 // @include     http://www.00xs.cc/xiaoshuo/*/*/
@@ -686,34 +689,15 @@ function addRule() {
   addIRule('chuangshi.qq.com', '创世中文网', '.title>a>b', 'div.list>ul>li>a', 'div.list:has(span.f900)>ul>li>a');
   chapterRule['chuangshi.qq.com'] = {
     'Deal': function(num, url) {
-      GM_xmlhttpRequest({
-        method: 'GET',
-        url: url,
-        onload: function(response) {
-          var name = response.response.replace(/[\r\n]/g, '').replace(/.*<title>(.*)<\/title>.*/, '$1').replace(/.*_(.*)_.*/, '$1');
-          var bid = response.response.replace(/[\r\n]/g, '').replace(/.*'bid' : '(\d+)'.*/g, '$1');
-          var uuid = response.response.replace(/[\r\n]/g, '').replace(/.*'uuid' : '(\d+)'.*/g, '$1');
-          var host = getHost(url);
-          chapterRule['chuangshi.qq.com'].Deal2(host, num, name, bid, uuid);
-        }
-      });
-    },
-    'Deal2': function(host, num, name, bid, uuid) {
-      var url;
-      if (host === 'dushu.qq.com') {
-        url = 'http://' + host + '/read/' + bid + '/' + uuid;
-      } else {
-        url = 'http://' + host + '/index.php/Bookreader/' + bid + '/' + uuid;
-      }
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', url);
+      xhr.open('POST', location.origin + '/index.php/Bookreader/' + $('.title a:eq(0)').attr('href').match(/\/(\d+).html/)[1] + '/' + url.match(/-(\d+).html/)[1]);
       xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
       xhr.setRequestHeader('Accept', 'application/json, text/javascript, */*; q=0.01');
       xhr.responseType = 'json';
-      xhr.onload = function() {
+      xhr.onload = function () {
         var content = xhr.response.Content;
-        if (host === 'chuangshi.qq.com') {
+        if (location.host === 'chuangshi.qq.com') {
           var base = 30;
           var arrStr = [];
           var arrText = content.split('\\');
@@ -722,7 +706,7 @@ function addRule() {
           }
           content = arrStr.join('');
         }
-        content = $('.bookreadercontent', content).html().replace('最新章节由云起书院首发，最新最火最快网络小说首发地！（本站提供：传统翻页、瀑布阅读两种模式，可在设置中选择）', '').replace('本作品腾讯文学发表，请登录', '').replace('dushu.qq.com', '').replace('浏览更多精彩作品。腾讯公司版权所有，未经允许不得复制', '');
+        content = $('.bookreadercontent', content).html().replace('最新章节由云起书院首发，最新最火最快网络小说首发地！（本站提供：传统翻页、瀑布阅读两种模式，可在设置中选择）', '').replace('本作品腾讯文学发表，请登录', '').replace(location.host, '').replace('浏览更多精彩作品。腾讯公司版权所有，未经允许不得复制', '');
         thisDownloaded(num, name, content);
       };
       xhr.send('lang=zhs');
@@ -730,14 +714,31 @@ function addRule() {
   };
   addIRule('yunqi.qq.com', '云起书院', '.title>a>b', 'div.list>ul>li>a', 'div.list:has(span.f900)>ul>li>a');
   chapterRule['yunqi.qq.com'] = {
-    'Deal': function(num, url) {
+    'Deal': function (num, url) {
       chapterRule['chuangshi.qq.com'].Deal(num, url);
     }
   };
   addIRule('dushu.qq.com', '腾讯读书(只支持当前目录页)', 'h3>a', '#chapterList>div>ol>li>a', '#chapterList>div>ol>li:not(:has(span.free))>a');
   chapterRule['dushu.qq.com'] = {
-    'Deal': function(num, url) {
-      chapterRule['chuangshi.qq.com'].Deal(num, url);
+    'Deal': function (num, url) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', location.origin + '/read/' + unsafeWindow.bid + '/' + url.match(/cid=(\d+)/)[1]);
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      xhr.setRequestHeader('Accept', 'application/json, text/javascript, */*; q=0.01');
+      xhr.responseType = 'json';
+      xhr.onload = function () {
+        var content = xhr.response.Content;
+        content = $('.bookreadercontent', content).html().replace('最新章节由云起书院首发，最新最火最快网络小说首发地！（本站提供：传统翻页、瀑布阅读两种模式，可在设置中选择）', '').replace('本作品腾讯文学发表，请登录', '').replace(location.host, '').replace('浏览更多精彩作品。腾讯公司版权所有，未经允许不得复制', '');
+        thisDownloaded(num, name, content);
+      };
+      xhr.send('lang=zhs');
+    }
+  };
+  addIRule('book.qq.com', 'QQ阅读(只支持当前目录页)', 'h3>a', '#chapterList>div>ol>li>a', '#chapterList>div>ol>li:not(:has(span.free))>a');
+  chapterRule['book.qq.com'] = {
+    'Deal': function (num, url) {
+      chapterRule['dushu.qq.com'].Deal(num, url);
     }
   };
   addIRule('book.tianya.cn', '天涯文学(只支持当前目录页)', 'h1>a', 'ul.dit-list>li>a', 'ul.dit-list>li:not(:has(.free))>a');
@@ -1447,7 +1448,7 @@ function addRule() {
   };
   addIRule('www.3zcn.org', '三藏中文网', 'h1', '.booklist a');
   chapterRule['www.3zcn.org'] = {
-    'Deal': function(num, url) {
+    'Deal': function (num, url) {
       chapterRule['www.xiaoshuokan.com'].Deal(num, url);
     }
   };
@@ -1461,6 +1462,19 @@ function addRule() {
         onload: function(res) {
           var content = res.response.replace(/<font.*?<\/font>/g, '');
           thisDownloaded(num, '', content);
+        }
+      });
+    }
+  };
+  addIRule('www.daizitouxiang.com', '笔趣阁', 'h1', '.book-chapter-list a:gt(8)');
+  chapterRule['www.daizitouxiang.com'] = {
+    'Deal': function (num, url) {
+      var urlId = url.match(/\d+/g);
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: 'https://www.daizitouxiang.com/files/article/html/' + Math.floor(urlId[1] / 1000) +'/' + urlId[1] + '/' + urlId[2]+'.html',
+        onload: function (res) {
+          thisDownloaded(num, '', res.response);
         }
       });
     }
