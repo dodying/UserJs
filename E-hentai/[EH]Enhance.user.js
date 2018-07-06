@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.15.0
+// @version     1.15.1
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -69,7 +69,14 @@ async function init() {
       await updateEHT();
     } catch (err) { }
   }
-  G.EHT.push(...JSON.parse(GM_getValue('EHT')).dataset);
+  if (GM_getValue('EHT')) {
+    G.EHT = JSON.parse(GM_getValue('EHT')).dataset;
+  } else {
+    let res = await xhrSync('https://github.com/dodying/UserJs/raw/master/E-hentai/EHT.json');
+    let EHT = res.response;
+    GM_setValue('EHT', EHT);
+    G.EHT = JSON.parse(EHT).dataset;
+  }
 
   if ($('.ido').length === 0) { //信息页
     if (G.config['enableEHD']) {
@@ -166,7 +173,7 @@ async function init() {
       GM_setValue('downloading', []);
     },
     mouseenter: e => {
-      $(e.target).attr('title', '当前下载列表:' + GM_getValue('downloading', []).join('<br> '));
+      $(e.target).attr('title', '当前下载列表:<br> ' + GM_getValue('downloading', []).join('<br> '));
     }
   }).prependTo('.ehNavBar>div:eq(2)');
   showTooltip(); //显示提示
@@ -981,7 +988,7 @@ function defaultConfig() { //默认设置
   }
 }
 
-const findData = (main, sub, textOnly = true) => {
+function findData(main, sub, textOnly = true) {
   let data = G.EHT.filter(i => i.name === main);
   if (data.length === 0 || data[0].tags.length === 0) return {};
   if (sub === undefined) return {
@@ -1613,7 +1620,7 @@ function showConfig() { //显示设置
         GM_listValues().forEach(value => {
           obj[value] = GM_getValue(value);
         });
-        text = JSON.stringify(obj, null, 2);
+        let text = JSON.stringify(obj, null, 2);
         let blob = new Blob([text], {
           type: 'text/plain;charset=utf-8'
         });
@@ -2116,5 +2123,5 @@ function xhrSync(url, parm = null, opt = {}) {
 init().then(() => {
   //
 }, (err) => {
-  console.log(err);
+  console.error(err);
 });
