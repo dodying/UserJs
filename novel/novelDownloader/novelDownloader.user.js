@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.15
-// @author      Dodying
+// @version     1.45.16
+// @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
@@ -287,7 +287,7 @@ function init() {
     if (this.type === 'checkbox') {
       this.checked = GM_getValue(this.name);
     } else if (this.type === 'radio') {
-      this.checked = (GM_getValue(this.name) === this.value * 1) ? true : false;
+      this.checked = (GM_getValue(this.name) === this.value) ? true : false;
     } else {
       this.value = GM_getValue(this.name);
     }
@@ -364,7 +364,7 @@ function init() {
     var host = location.host;
     var bookName = $(indexRule[host].name).eq(0).text().trim() || $(chapterRule[host].name).eq(0).text().trim() || document.title;
     bookName = bookName.replace(/在线|阅读|全文|最新|章节|目录|列表|无弹窗|更新|全集|下载/g, '').trim();
-    return tranStr(bookName, $('.ndLang:checked').val() * 1);
+    return $('.ndLang:checked').val() * 1 >= 0 ? tranStr(bookName, $('.ndLang:checked').val() * 1) : bookName;
   });
   //////////////////////////////////////////////////以下为CSS设置与事件
   var resetPositon = function() {
@@ -444,7 +444,7 @@ function init() {
       resetPositon();
     }
   });
-  $('.ndConfig').change(function() {
+  $('.ndConfig').change(function () {
     GM_setValue(this.name, this.type === 'checkbox' ? this.checked : this.type === 'number' ? (this.value || this.placeholder) * 1 : (this.value || this.placeholder));
   });
   $('#ndVip').click(function() {
@@ -517,7 +517,7 @@ function init() {
           if ($('.ndConfig[name=format]')[0].checked === true) content = wordFormat(content);
           if ($('.ndConfig[name=section]').val() !== '0') content = wordSection(content);
           content = '来源地址：' + location.href + '\r\n' + content;
-          content = tranStr(content, $('.ndLang:checked').val() * 1);
+          if ($('.ndLang:checked').val() * 1 >= 0) content = tranStr(content, $('.ndLang:checked').val() * 1);
           $(window).data('dataDownload', [{
             'name': name,
             'content': content
@@ -1492,7 +1492,7 @@ function addRule() {
   addCRule('www.kenshu.cc', 'h1', '.article-con', 1);
   addRRule('www.kenshu.cc', '(以下为|)00小说网.*出版社。', '00小说网', '\\s+||| ', '<span style="color:#4876FF">.*?</script>.*?</span>');
   addIRule('www.pbtxt.com', '平板电子书网', 'h1', '.list>dl>dd>a', '', true);
-  addCRule('www.pbtxt.com', 'h1', '.content');
+  addCRule('www.pbtxt.com', 'h1', '.content', 1);
   addRRule('www.pbtxt.com', 'txt下载地址：.*');
   addIRule('www.8shuw.net', '8书网', '#info>h1', '.indexlist>tbody>tr>td>span>a');
   addCRule('www.8shuw.net', 'h2>span:nth-child(2)', '[itemprop="content"]', 1);
@@ -1700,9 +1700,10 @@ function addUI() {
       '    超时重试次数: <input class="ndConfig" title="0表示不重试" name="timeout" placeholder="3" type="number">',
       '    超时时间: <input class="ndConfig" name="time" placeholder="20" type="number">秒<br>',
       '    语言: ',
+      '    <input class="ndConfig" id="ndLangNo" type="radio" name="lang" class="ndLang" value="-1"><label for="ndLangNo">不转换</label>',
       '    <input class="ndConfig" id="ndLangZhs" type="radio" name="lang" class="ndLang" value="0"><label for="ndLangZhs">简体</label>',
-      '    <input class="ndConfig" id="ndLangZht" type="radio" name="lang" class="ndLang" value="1"><label for="ndLangZht">繁体</label>',
-      '    <input class="ndConfig" id="ndSort" name="sort" type="checkbox"><label for="ndSort">章节排序</label><br>',
+      '    <input class="ndConfig" id="ndLangZht" type="radio" name="lang" class="ndLang" value="1"><label for="ndLangZht">繁体</label><br>',
+      '    <input class="ndConfig" id="ndSort" name="sort" type="checkbox"><label for="ndSort">章节排序</label>',
       '    <input class="ndConfig" id="ndNoUrl" name="nourl" type="checkbox"><label for="ndNoUrl">不显示来源地址</label>',
       '  </div>',
       '  <div>',
@@ -2163,8 +2164,10 @@ function thisDownloaded(num, name = undefined, content, stauts = true) { //下�
   if ($('.ndConfig[name=format]')[0].checked === true) content = wordFormat(content);
   if ($('.ndConfig[name=section]').val() !== '0') content = wordSection(content);
   if (!$('.ndConfig[name=nourl]')[0].checked) content = '来源地址：' + $(window).data('dataDownload')[num].url + '\r\n' + content;
-  name = tranStr(name, $('.ndLang:checked').val() * 1);
-  content = tranStr(content, $('.ndLang:checked').val() * 1);
+  if ($('.ndLang:checked').val() * 1 >= 0){
+    name = tranStr(name, $('.ndLang:checked').val() * 1);
+    content = tranStr(content, $('.ndLang:checked').val() * 1);
+  }
   $(window).data('dataDownload')[num].name = name.trim();
   $(window).data('dataDownload')[num].content = content;
   $(window).data('dataDownload')[num].ok = stauts;
