@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [H]CopyInfo
-// @version     1.01.2
+// @version     1.01.3
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -97,7 +97,7 @@
   info = [
     typeof rule.code === 'string' ? $(rule.code).text().trim() : location.href.match(rule.code)[1], //code
     $(rule.name).text().replace(/^(\w+(_|-))?\w+ /, '').replace(/\n/g, '').trim(), //name
-    stars.join(' '), //star
+    stars.sort().join(' '), //star
     genres.join(' '), //genre
   ];
   if (!info[0]) return;
