@@ -2,7 +2,7 @@
 // @name        [NH]nhentai Downloader
 // @description
 // @include     https://nhentai.net/g/*
-// @version     0.0.1
+// @version     0.0.2
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -69,7 +69,7 @@
       let blob = new Blob([generateInfo()], {
         type: 'text/plain;charset=utf-8'
       })
-      $('<a class="btn btn-primary">Click to download</a>').attr('download', info.title.english + '.txt').attr('href', URL.createObjectURL(blob))[0].click();
+      $('<a class="btn btn-primary">Click to download</a>').attr('download', $('#info>h1').text() + '.txt').attr('href', URL.createObjectURL(blob))[0].click();
     }).appendTo('.nhD-box');
     $('<button class="btn btn-primary">Settings</button>').on('click', function() {
       if ($('.nhD-config-box').length === 0) {
@@ -139,11 +139,13 @@
     if ($('.nhD-log-box').length) $('.nhD-log-box').remove();
     $('<div class="nhD-log-box"></div>').html('<div class="nhD-task-total-box"><div class="nhD-task-total" name="succeed"></div><div class="nhD-task-total" name="error"></div><div class="nhD-task-total" name="downloading"></div><div class="nhD-task-total" name="queue"></div></div><ol></ol><button class="nhD-task-pause btn btn-primary"></button>').appendTo('body');
 
-    var length = info.num_pages;
-    task = [...Array(length).keys()].map(i => {
+    let length = info.num_pages;
+    task = unsafeWindow.gallery.images.pages.map((i, order) => {
+      let type = i.t === 'j' ? 'jpg' : 'png';
       return {
-        url: `https://i.nhentai.net/galleries/${info.media_id}/${i + 1}.jpg`,
-        refer: `https://nhentai.net/g/${info.media_id}/${i + 1}/`,
+        url: `https://i.nhentai.net/galleries/${info.media_id}/${order + 1}.${type}`,
+        type: type,
+        refer: `https://nhentai.net/g/${info.media_id}/${order + 1}/`,
         loaded: 0
       }
     });
@@ -201,6 +203,7 @@
           updateStatus();
           callback(order, {
             order: order + 1,
+            type: _task.type,
             content: res.response
           });
         },
@@ -233,7 +236,7 @@
       });
     }, (result) => {
       result.forEach(i => {
-        zip.file(preZeroFill(i.order, String(length).length) + '.jpg', i.content);
+        zip.file(preZeroFill(i.order, String(length).length) + '.' + i.type, i.content);
       });
       zip.generateAsync({
         type: 'blob',
@@ -244,7 +247,7 @@
       }).then(function(content) {
         $('.nhD-task-pause').remove();
         let url = URL.createObjectURL(content);
-        $('<a class="btn btn-primary">Click to download</a>').attr('download', info.title.english + '.cbz').attr('href', url).appendTo('.nhD-log-box')[0].click();
+        $('<a class="btn btn-primary">Click to download</a>').attr('download', $('#info>h1').text() + '.cbz').attr('href', url).appendTo('.nhD-log-box')[0].click();
       });
     }, (order) => {
 
@@ -281,8 +284,8 @@
       return '> ' + main + ' ' + sub.join(', ');
     });
     let arr = [
-      info.title.english,
-      info.title.japanese,
+      $('#info>h1').text(),
+      $('#info>h2').text(),
       location.href,
       '',
       'Category: ' + $('.tag-container:contains("Categories") a').text().match(/\w+/)[0].toUpperCase(),
