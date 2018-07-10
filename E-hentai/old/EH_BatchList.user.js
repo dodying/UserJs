@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        EH_BatchList
 // @name:zh-CN  【EH】批列表
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @description:zh-CN 
+// @description:zh-CN
 // @include     http*://exhentai.org/favorites.php*
 // @include     http*://g.e-hentai.org/favorites.php*
 // @version     1

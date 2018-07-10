@@ -2,6 +2,8 @@
 // @name        []newTab
 // @author      daysv dodying
 // @namespace   http://daysv.github.com
+// @namespace   https://github.com/dodying/UserJs
+// @supportURL  https://github.com/dodying/UserJs/issues
 // @description 链接强制在新建标签中打开 Open a URL in a new tab
 // @version     0.2.0.0+1
 // @include     http*://*/*

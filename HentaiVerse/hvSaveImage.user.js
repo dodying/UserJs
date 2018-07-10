@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [HV]SaveImage
-// @author      Dodying
+// @author      dodying
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
 // @version     1.00

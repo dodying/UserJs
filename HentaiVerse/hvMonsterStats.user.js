@@ -5,7 +5,7 @@
 // @include     http*://hentaiverse.org/?s=Bazaar&ss=ml&slot=*
 // @version     1.01
 // @grant       none
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png

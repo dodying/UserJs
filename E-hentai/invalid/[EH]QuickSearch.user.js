@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]QuickSearch
 // @name:zh-CN  [EH]快捷搜索
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png

@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        GithubCopyCodeInIssues
 // @name:zh-CN  【GitHub】复制Issues里的代码
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @description:zh-CN 
+// @description:zh-CN
 // @include     https://github.com/*/*/issues/*
 // @version     1
 // @grant       GM_setClipboard

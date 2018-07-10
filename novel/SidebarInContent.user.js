@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        SidebarInContent
 // @name:zh-CN  【小说】目录页侧边分卷导航栏
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @description:zh-CN 
+// @description:zh-CN
 // @include     http://read.qidian.com/BookReader/*.aspx*
 // @include     http://b.faloo.com/f/*.html*
 // @include     http://chuangshi.qq.com/bk/*/*-l.html*

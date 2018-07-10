@@ -2,11 +2,11 @@
 // @name        baiduShareCopyForZhidao
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @name:zh-CN  【百度云】分享-答题专用
-// @description:zh-CN  
+// @description:zh-CN
 // @include     http://pan.baidu.com/disk/home*
 // @version     1.02
 // @grant       GM_setClipboard
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png

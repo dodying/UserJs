@@ -7,7 +7,7 @@
 // @include     http://alt.hentaiverse.org/?s=Character&ss=ch
 // @version     1.01a
 // @grant       none
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/
 // @supportURL  https://github.com/dodying//UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png

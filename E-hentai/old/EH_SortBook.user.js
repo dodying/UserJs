@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        EH_SortBook
 // @name:zh-CN  【EH】搜索结果排序
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        http://cdn4.iconfinder.com/data/icons/mood-smiles/80/mood-29-48.png
-// @description:zh-CN 
+// @description:zh-CN
 // @include     http*://exhentai.org/*
 // @exclude     http*://exhentai.org/g/*
 // @version     1

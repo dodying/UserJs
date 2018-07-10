@@ -2,11 +2,11 @@
 // @name        GithubCopyRawLink
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @name:zh-CN  【Github】复制原始链接
-// @description:zh-CN  
+// @description:zh-CN
 // @include     https://github.com/*/tree/*
 // @version     1
 // @grant       GM_setClipboard
-// @author      Dodying
+// @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
