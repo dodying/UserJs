@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [H]ParkingLot
-// @version     1.11.0
+// @version     1.11.1
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -47,7 +47,7 @@
 // @include     https://btso.pw/*
 // 网盘
 // include     http://115.com/*
-// @include     http://115.com/?tab=offline&mode=wangpan
+// include     http://115.com/?tab=offline&mode=wangpan
 // 正规站点
 // @include     http://www.dmm.co.jp/*
 // @include     http://www.mgstage.com/*
@@ -76,9 +76,10 @@
 (function($) {
   var linkLib = { //待续-插入位置
     /*
-      'example.com': {
+      'example.com': { //名称, 随意
         on: 布尔，是否开启,
         online: 布尔，是否在线播放,
+        check: 选择器-验证是否该网站,
         name: 标识,
         search: 网站，搜索地址，搜索字样用{searchTerms}代替,
         text: 选择器-要标记的文本,
@@ -94,6 +95,7 @@
     // 种子站点
     'btdb.to': {
       on: true,
+      check: '[name="author"][content="btdb.to"]',
       name: 'BTDB',
       search: 'https://btdb.to/q/{searchTerms}/?sort=popular',
       text: 'h1.torrent-name,.file-name,.item-title>a',
@@ -101,6 +103,7 @@
     },
     'sukebei.nyaa.si': {
       on: true,
+      check:'[property="og:site_name"][content="Sukebei"]',
       name: 'Sukebei',
       search: 'https://sukebei.nyaa.si/?q={searchTerms}',
       text: 'td[colspan="2"]>a',
@@ -108,6 +111,7 @@
     },
     'torrentz2.eu': {
       on: true,
+      check:'[title="Torrents Search"]',
       name: 'Torrentz2',
       search: 'https://torrentz2.eu/search?f={searchTerms}',
       text: '.results>dl>dt>a,.files .t>ul>li',
@@ -115,6 +119,7 @@
     },
     'btso.pw': {
       on: false,
+      check:'[name="author"][content="BTSOW"]',
       name: 'BTSOW',
       search: 'http://btso.pw/search/{searchTerms}/',
       text: 'h3,.file',
@@ -123,6 +128,7 @@
     // 网盘
     '115.com': {
       on: false,
+      check:'[itemprop="name"][content="115，一生相伴"]',
       name: '115网盘',
       search: 'http://115.com/?url=%2F%3Faid%3D-1%26search_value%3D{searchTerms}%26ct%3Dfile%26ac%3Dsearch%26is_wl_tpl%3D1&mode=wangpan',
       text: '.file-name>em>a',
@@ -133,6 +139,7 @@
     // 正规站点
     'www.dmm.co.jp': {
       on: true,
+      check:'[name="application-name"][content="DMM.R18"]',
       name: 'DMM',
       search: 'http://www.dmm.co.jp/search/=/searchstr={searchTerms}',
       text: '.txt,table.mg-b20 td:not(:has(a))',
@@ -176,6 +183,7 @@
     },
     'www.mgstage.com': {
       on: false,
+      check:'[href="https://www.mgstage.com/"][rel="canonical"]',
       name: 'mgstage',
       search: 'https://www.google.com/search?q=site%3Amgstage.com+{searchTerms}',
       text: '.detail_data tr:contains("品番")>td,.detail_txt>li:contains("品番")',
@@ -409,8 +417,8 @@
         Popularity: '.item-meta-info>span:nth-child(5)'
       }
     },
-    'savebt.org': {
-      searchPage: 'http://savebt.org/q/{q}/0/0/1.html',
+    'savebt.net': {
+      searchPage: 'http://savebt.net/q/{q}/0/0/1.html',
       title: '.item>dt>a',
       magnet: '.item>.attr>span:nth-child(6)>a',
       size: '.item>.attr>span:nth-child(2)>b',
@@ -519,7 +527,7 @@
       }
     },
     'btdiggs.com': {
-      searchPage: code => `http://btdiggs.com/search/${btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))).replace(/[=]+$/g,'')}/1/0/0.html`,
+      searchPage: code => `http://btdigg.cc/search/${btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))).replace(/[=]+$/g,'')}/1/0/0.html`,
       title: '.list>dl>dt>a',
       magnet: '.list>dl>dd.attr>span>a',
       size: '.list>dl>dd.attr>span:nth-child(2)>b',
@@ -653,6 +661,8 @@
       color: 'black'
     }
   ];
+
+
   if (linkLib[location.host].manual) {
     $(window).on('keydown', function(e) {
       if (e.keyCode === 65 && e.shiftKey) { //Shift+A
@@ -663,7 +673,7 @@
   } else {
     _init();
   }
-  if (location.href === 'http://115.com/?tab=offline&mode=wangpan') downloadIn115();
+  //if (location.href === 'http://115.com/?tab=offline&mode=wangpan') downloadIn115();
 
   function _init() {
     init();
@@ -860,7 +870,7 @@
         var _html = $(this).html();
         $(this).empty();
         for (var i in lib) {
-          keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi');
+          keyword = new RegExp(`${i}|${i.replace(/-/g, '')}|${i.replace(/-/g, ' ')}|${i.replace(/ /g, '-')}|${i.replace(/ /g, '')}`, 'gi');
           if (keyword.test(_html)) {
             if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
             _html = _html.replace(keyword, '<span class="hMark_' + lib[i].mark + '" title="' + markLib[lib[i].mark].name + '">' + i + '</span>');
