@@ -16,9 +16,9 @@
 // @include     *
 // @connect     *
 // ==/UserScript==
-(function() {
-  const $ = e => document.querySelector(e);
-  const $$ = e => document.querySelectorAll(e);
+(function () {
+  const $ = e => document.querySelector(e)
+  const $$ = e => document.querySelectorAll(e)
   const getFav = (url, func = undefined) => {
     GM_xmlhttpRequest({
       method: 'GET',
@@ -27,57 +27,58 @@
       responseType: 'blob',
       onload: res => {
         if (res.status === 200 && res.responseHeaders.match('content-type: image') && !!res.response && res.response.size !== 492) {
-          setIcon();
+          setIcon()
         } else {
-          if (func) func();
+          if (func) func()
         }
       },
       onerror: () => {
-        if (func) func();
+        if (func) func()
       },
       ontimeout: () => {
-        if (func) func();
+        if (func) func()
       }
-    });
-  };
+    })
+  }
   const setIcon = (f = true) => {
-    var icon = GM_getValue('icon', {});
-    icon[location.host] = f;
-    GM_setValue('icon', icon);
-  };
+    var icon = GM_getValue('icon', {})
+    icon[window.location.host] = f
+    GM_setValue('icon', icon)
+  }
   const canvasFav = a => {
-    var c = document.createElement('canvas');
-    var r = 8;
-    c.width = 2 * r;
-    c.height = 2 * r;
-    var ctx = c.getContext('2d');
-    ctx.fillStyle = '#000';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = "center";
-    ctx.font = 'bold ' + (r * 2) + 'px sans-serif';
-    ctx.fillText(a, r, r);
-    return c.toDataURL();
-  };
+    var c = document.createElement('canvas')
+    var r = 8
+    c.width = 2 * r
+    c.height = 2 * r
+    var ctx = c.getContext('2d')
+    ctx.fillStyle = '#000'
+    ctx.textBaseline = 'middle'
+    ctx.textAlign = 'center'
+    ctx.font = 'bold ' + (r * 2) + 'px sans-serif'
+    ctx.fillText(a, r, r)
+    return c.toDataURL()
+  }
   const newFav = () => {
-    var fav = document.createElement('link');
-    fav.rel = 'shortcut icon';
-    fav.href = canvasFav(psl.parse(location.host).sld.substr(0, 1));
-    document.head.appendChild(fav);
-    setIcon(false);
-  };
+    var fav = document.createElement('link')
+    fav.rel = 'shortcut icon'
+    /* global psl */
+    fav.href = canvasFav(psl.parse(window.location.host).sld.substr(0, 1))
+    document.head.appendChild(fav)
+    setIcon(false)
+  }
   if ($('link[type="application/rss+xml"],link[type="application/atom+xml"]')) {
     [...$$('link[type="application/rss+xml"],link[type="application/atom+xml"]')].forEach((i, j) => {
       GM_registerMenuCommand('RSS-' + j + ':' + (i.title || ''), () => {
-        window.open(i.href);
-      });
-    });
+        window.open(i.href)
+      })
+    })
   }
-  var icon = GM_getValue('icon', {});
-  if (location.host in icon) {
-    if (icon[location.host] === false) newFav();
+  var icon = GM_getValue('icon', {})
+  if (window.location.host in icon) {
+    if (icon[window.location.host] === false) newFav()
   } else if (!$('link[rel*="icon"]')) {
-    getFav(location.origin + '/favicon.ico', () => {
-      getFav('https://www.google.com/s2/favicons?domain=' + location.host, newFav);
-    });
+    getFav(window.location.origin + '/favicon.ico', () => {
+      getFav('https://www.google.com/s2/favicons?domain=' + window.location.host, newFav)
+    })
   }
-})();
+})()

@@ -10,7 +10,7 @@
 // @include     *
 // ==/UserScript==
 (function () {
-  let id = 'style_' + Math.random();
+  let id = 'style_' + Math.random()
   let init = function () {
     if (!document.getElementById(id)) {
       let rule = [
@@ -46,22 +46,22 @@
             '#bilibiliPlayer.mode-webfullscreen .bilibili-player-video-sendbar .bilibili-player-mode-selection-container {height:120px;border-radius:5px;top:100%}',
             '#bilibiliPlayer.mode-webfullscreen .bilibili-player-video-sendbar .bilibili-player-color-picker-container {height:208px;border-radius:5px;top:100%}',
             '#bilibiliPlayer.mode-webfullscreen .bilibili-player-video-info-container {top:40px}',
-            '#bilibiliPlayer.mode-webfullscreen .bilibili-player-video-float-lastplay {bottom:30px}',
+            '#bilibiliPlayer.mode-webfullscreen .bilibili-player-video-float-lastplay {bottom:30px}'
           ]
         }
-      ];
-      let style = rule.filter(i => location.href.match(i.url)).map(i => [].concat(i.style).join('\n'));
-      let ele = document.createElement('style');
-      ele.id = id;
-      ele.textContent = style.join('\n');
-      document.head.appendChild(ele);
+      ]
+      let style = rule.filter(i => window.location.href.match(i.url)).map(i => [].concat(i.style).join('\n'))
+      let ele = document.createElement('style')
+      ele.id = id
+      ele.textContent = style.join('\n')
+      document.head.appendChild(ele)
     }
-  };
+  }
 
-  init();
-  var observer = new MutationObserver(init);
+  init()
+  var observer = new window.MutationObserver(init)
   observer.observe(document.head, {
     childList: true,
     subtree: true
-  });
-})();
+  })
+})()

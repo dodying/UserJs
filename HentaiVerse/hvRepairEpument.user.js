@@ -36,52 +36,52 @@
       'name': 'Energy Cell',
       'code': '60071',
       'cost': '200'
-    },
-  ];
-  var Materials_List = document.querySelectorAll('#repairall+div span');
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', location.origin + '/?s=Bazaar&ss=is&filter=ma');
-  xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.responseType = 'document';
+    }
+  ]
+  var materialsList = document.querySelectorAll('#repairall+div span')
+  var xhr = new window.XMLHttpRequest()
+  xhr.open('GET', window.location.origin + '/?s=Bazaar&ss=is&filter=ma')
+  xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+  xhr.responseType = 'document'
   xhr.onload = function () {
-    var token = xhr.response.querySelector('input[name="storetoken"]').value;
-    if (Materials_List.length > 0) {
-      for (var i = 0; i < Materials_List.length; i++) {
-        var amount = Materials_List[i].innerHTML.match(/\d+/) [0];
-        var code = Material[Materials_Name2Code(Materials_List[i].innerHTML.match(/\d+x (.*)/) [1])].code;
-        Buy(code, amount, Material[i].cost, token);
+    var token = xhr.response.querySelector('input[name="storetoken"]').value
+    if (materialsList.length > 0) {
+      for (var i = 0; i < materialsList.length; i++) {
+        var amount = materialsList[i].innerHTML.match(/\d+/)[0]
+        var code = Material[materialsName2Code(materialsList[i].innerHTML.match(/\d+x (.*)/)[1])].code
+        Buy(code, amount, Material[i].cost, token)
       }
       setTimeout(function () {
-        document.querySelector('#repairall div').click();
-      }, 3000);
+        document.querySelector('#repairall div').click()
+      }, 3000)
     }
   }
-  xhr.send(null);
-}) ();
-///////////////////////////////////////////////////////////////
-function Materials_Name2Code(name) {
+  xhr.send(null)
+})()
+/// ////////////////////////////////////////////////////////////
+function materialsName2Code (name) {
   switch (name) {
     case 'Scrap Cloth':
-      return '0';
+      return '0'
     case 'Scrap Leather':
-      return '1';
+      return '1'
     case 'Scrap Metal':
-      return '2';
+      return '2'
     case 'Scrap Wood':
-      return '3';
+      return '3'
     case 'Energy Cell':
-      return '4';
+      return '4'
   }
 }
-function Buy(code, amount, cost, token) {
-  var xhr = 'xhr_Buy' + Math.random().toString();
-  xhr = new XMLHttpRequest();
-  xhr.open('POST', location.origin + '/?s=Bazaar&ss=is&filter=ma');
-  var parm = 'storetoken=' + token + '&select_mode=shop_pane&select_item=' + code + '&select_count=' + amount; //item_pane卖 shop_pane买
-  xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  xhr.send(parm);
+function Buy (code, amount, cost, token) {
+  var xhr = 'xhr_Buy' + Math.random().toString()
+  xhr = new window.XMLHttpRequest()
+  xhr.open('POST', window.location.origin + '/?s=Bazaar&ss=is&filter=ma')
+  var parm = 'storetoken=' + token + '&select_mode=shop_pane&select_item=' + code + '&select_count=' + amount // item_pane卖 shop_pane买
+  xhr.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+  xhr.send(parm)
   xhr.onload = function () {
   }
 }

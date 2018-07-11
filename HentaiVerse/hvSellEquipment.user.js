@@ -13,7 +13,7 @@
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
-(function() {
+(function () {
   /**
    * [keepEqps description]
    * the Equipment that you DON'T want to sell
@@ -21,72 +21,68 @@
    * Eg. ['Magnificent', 'Legendary', 'Peerless']
    * Eg. ['Legendary Arctic Redwood Staff of Destruction']
    */
-  var keepEqps = ['Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless'];
+  var keepEqps = ['Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless']
   /**
    * [func description]
    * here put in what you want to do after sell the eqps
    * the default is the page reload.
    */
-  var func = function() {
-    location.href = location.href;
-  };
-  if (!gE('#navbar')) return;
-  var regexp = new RegExp(keepEqps.join('|'));
-  var soldEqps = localStorage.soldEqps || [];
-  var sellEids = [];
-  post('?s=Bazaar&ss=es', function(data) {
-    post(gE('#mainpane>script[src]', data).src, function(data1) {
-      var json = JSON.parse(data1.match(/{.*}/)[0]);
+  var func = function () {
+    window.location.href = window.location.href
+  }
+  if (!gE('#navbar')) return
+  var regexp = new RegExp(keepEqps.join('|'))
+  var soldEqps = window.localStorage.soldEqps || []
+  var sellEids = []
+  post('?s=Bazaar&ss=es', function (data) {
+    post(gE('#mainpane>script[src]', data).src, function (data1) {
+      var json = JSON.parse(data1.match(/{.*}/)[0])
       for (var i in json) {
-        if (soldEqps.indexOf(i) === -1 && !regexp.test(json[i].t)) sellEids.push(i);
+        if (soldEqps.indexOf(i) === -1 && !regexp.test(json[i].t)) sellEids.push(i)
       }
-      if (sellEids.length === 0) return;
-      localStorage.soldEqps = soldEqps.concat(sellEids);
-      post('?s=Bazaar&ss=es', function() {
-        func();
-      }, 'storetoken=' + gE('input[name="storetoken"]', data).value + '&select_group=item_pane&select_eids=' + encodeURIComponent(sellEids.join()));
-    }, null, 'text');
-  });
+      if (sellEids.length === 0) return
+      window.localStorage.soldEqps = soldEqps.concat(sellEids)
+      post('?s=Bazaar&ss=es', function () {
+        func()
+      }, 'storetoken=' + gE('input[name="storetoken"]', data).value + '&select_group=item_pane&select_eids=' + encodeURIComponent(sellEids.join()))
+    }, null, 'text')
+  })
 
-  function gE(ele, mode, parent) { //获取元素
+  function gE (ele, mode, parent) { // 获取元素
     if (typeof ele === 'object') {
-      return ele;
+      return ele
     } else if (mode === undefined && parent === undefined) {
-      return (isNaN(ele * 1)) ? document.querySelector(ele) : document.getElementById(ele);
+      return (isNaN(ele * 1)) ? document.querySelector(ele) : document.getElementById(ele)
     } else if (mode === 'all') {
-      return (parent === undefined) ? document.querySelectorAll(ele) : parent.querySelectorAll(ele);
+      return (parent === undefined) ? document.querySelectorAll(ele) : parent.querySelectorAll(ele)
     } else if (typeof mode === 'object' && parent === undefined) {
-      return mode.querySelector(ele);
+      return mode.querySelector(ele)
     }
   }
 
-  function cE(name) { //创建元素
-    return document.createElement(name);
-  }
-
-  function post(href, func, parm, type) { //post
-    var xhr = new XMLHttpRequest();
-    xhr.open(parm ? 'POST' : 'GET', href);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-    xhr.responseType = type || 'document';
-    xhr.onerror = function() {
-      xhr = null;
-      post(href, func, parm, type);
-    };
-    xhr.onload = function(e) {
+  function post (href, func, parm, type) { // post
+    var xhr = new window.XMLHttpRequest()
+    xhr.open(parm ? 'POST' : 'GET', href)
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
+    xhr.responseType = type || 'document'
+    xhr.onerror = function () {
+      xhr = null
+      post(href, func, parm, type)
+    }
+    xhr.onload = function (e) {
       if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
-        var data = e.target.response;
+        var data = e.target.response
         if (xhr.responseType === 'document' && gE('#messagebox', data)) {
           if (gE('#messagebox')) {
-            gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
+            gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'))
           } else {
-            gE('#csp').appendChild(gE('#messagebox', data));
+            gE('#csp').appendChild(gE('#messagebox', data))
           }
         }
-        func(data, e);
+        func(data, e)
       }
-      xhr = null;
-    };
-    xhr.send(parm);
+      xhr = null
+    }
+    xhr.send(parm)
   }
-})();
+})()

@@ -73,8 +73,8 @@
 // @include     http://www.av539.com/*
 // @run-at      document-end
 // ==/UserScript==
-(function($) {
-  var linkLib = { //待续-插入位置
+(function ($) {
+  var linkLib = { // 待续-插入位置
     /*
       'example.com': { //名称, 随意
         on: 布尔，是否开启,
@@ -103,7 +103,7 @@
     },
     'sukebei.nyaa.si': {
       on: true,
-      check:'[property="og:site_name"][content="Sukebei"]',
+      check: '[property="og:site_name"][content="Sukebei"]',
       name: 'Sukebei',
       search: 'https://sukebei.nyaa.si/?q={searchTerms}',
       text: 'td[colspan="2"]>a',
@@ -111,7 +111,7 @@
     },
     'torrentz2.eu': {
       on: true,
-      check:'[title="Torrents Search"]',
+      check: '[title="Torrents Search"]',
       name: 'Torrentz2',
       search: 'https://torrentz2.eu/search?f={searchTerms}',
       text: '.results>dl>dt>a,.files .t>ul>li',
@@ -119,7 +119,7 @@
     },
     'btso.pw': {
       on: false,
-      check:'[name="author"][content="BTSOW"]',
+      check: '[name="author"][content="BTSOW"]',
       name: 'BTSOW',
       search: 'http://btso.pw/search/{searchTerms}/',
       text: 'h3,.file',
@@ -128,77 +128,77 @@
     // 网盘
     '115.com': {
       on: false,
-      check:'[itemprop="name"][content="115，一生相伴"]',
+      check: '[itemprop="name"][content="115，一生相伴"]',
       name: '115网盘',
       search: 'http://115.com/?url=%2F%3Faid%3D-1%26search_value%3D{searchTerms}%26ct%3Dfile%26ac%3Dsearch%26is_wl_tpl%3D1&mode=wangpan',
       text: '.file-name>em>a',
-      code: () => prompt('请输入番号', $('.file-path>a:eq(-1)').text()),
+      code: () => window.prompt('请输入番号', $('.file-path>a:eq(-1)').text()),
       codeManual: true,
       manual: true
     },
     // 正规站点
     'www.dmm.co.jp': {
       on: true,
-      check:'[name="application-name"][content="DMM.R18"]',
+      check: '[name="application-name"][content="DMM.R18"]',
       name: 'DMM',
       search: 'http://www.dmm.co.jp/search/=/searchstr={searchTerms}',
       text: '.txt,table.mg-b20 td:not(:has(a))',
       img: '.img img,.tdmm,.crs_full>img',
       time: '.nw:contains(発売日)+td',
-      code() {
-        let code = $('.nw:contains(品番)+td').text();
-        code = code.match(/[^h_0-9].*/)[0];
-        code = code.replace(/^tk|tk$/g, '').replace(/00([0-9]{3})/, '$1').replace(/([a-z]+)([0-9]+)/, '$1-$2');
-        code = code.toUpperCase();
-        return prompt('请输入番号', code);
+      code () {
+        let code = $('.nw:contains(品番)+td').text()
+        code = code.match(/[^h_0-9].*/)[0]
+        code = code.replace(/^tk|tk$/g, '').replace(/00([0-9]{3})/, '$1').replace(/([a-z]+)([0-9]+)/, '$1-$2')
+        code = code.toUpperCase()
+        return window.prompt('请输入番号', code)
       },
       codeManual: true,
-      extra() {
-        if (!$('#sample-image-block>a>img').length) return;
-        let preview_src = linkLib['www.dmm.co.jp']['preview_src'];
+      extra () {
+        if (!$('#sample-image-block>a>img').length) return
+        let previewSrc = linkLib['www.dmm.co.jp']['previewSrc']
         $(document).on({
-          click() {
+          click () {
             $('#sample-image-block>a>img').each((i, _) => {
-              _.src = preview_src(_.src);
-            });
-            $(document).off('click');
+              _.src = previewSrc(_.src)
+            })
+            $(document).off('click')
           }
-        });
+        })
       },
-      preview_src(src) {
+      previewSrc (src) {
         if (src.match(/(p[a-z]\.)jpg/)) {
-          return src.replace(RegExp.$1, 'pl.');
+          return src.replace(RegExp.$1, 'pl.')
         } else if (src.match(/consumer_game/)) {
-          return src.replace('js-', '-');
-        } else if (src.match(/js\-([0-9]+)\.jpg$/)) {
-          return src.replace('js-', 'jp-');
-        } else if (src.match(/ts\-([0-9]+)\.jpg$/)) {
-          return src.replace('ts-', 'tl-');
-        } else if (src.match(/(\-[0-9]+\.)jpg$/)) {
-          return src.replace(RegExp.$1, 'jp' + RegExp.$1);
+          return src.replace('js-', '-')
+        } else if (src.match(/js-([0-9]+)\.jpg$/)) {
+          return src.replace('js-', 'jp-')
+        } else if (src.match(/ts-([0-9]+)\.jpg$/)) {
+          return src.replace('ts-', 'tl-')
+        } else if (src.match(/(-[0-9]+\.)jpg$/)) {
+          return src.replace(RegExp.$1, 'jp' + RegExp.$1)
         } else {
-          return src.replace('-', 'jp-');
+          return src.replace('-', 'jp-')
         }
       }
     },
     'www.mgstage.com': {
       on: false,
-      check:'[href="https://www.mgstage.com/"][rel="canonical"]',
+      check: '[href="https://www.mgstage.com/"][rel="canonical"]',
       name: 'mgstage',
       search: 'https://www.google.com/search?q=site%3Amgstage.com+{searchTerms}',
       text: '.detail_data tr:contains("品番")>td,.detail_txt>li:contains("品番")',
       img: '.detail_data img,.sample_image img,.push_title_list img',
       time: '.detail_data tr:contains("配信開始日")>td',
-      code() {
-        let arr = location.href.split('/');
-        return arr[arr.length - 2];
+      code () {
+        let arr = window.location.href.split('/')
+        return arr[arr.length - 2]
       },
-      extra() {
-        if (!$('.sample_image').length) return;
-        $('<style></style>').text('#sample-photo li{float:none!important;}').appendTo('head');
+      extra () {
+        if (!$('.sample_image').length) return
+        $('<style></style>').text('#sample-photo li{float:none!important;}').appendTo('head')
         $('.sample_image').each((i, _) => {
-          $(_).html(`<img src="${$(_).attr('href')}">`).removeAttr('href').off('click');
-        });
+          $(_).html(`<img src="${$(_).attr('href')}">`).removeAttr('href').off('click')
+        })
       }
     },
     'www.tokyo-hot.com': {
@@ -216,7 +216,7 @@
       search: 'http://www.caribbeancom.com/moviepages/{searchTerms}/index.html',
       img: 'img[itemprop=thumbnail]',
       time: 'dd[itemprop=uploadDate]',
-      code: () => location.pathname.match(/[\d\-]+/)[0]
+      code: () => window.location.pathname.match(/[\d-]+/)[0]
     },
     'www.1pondo.tv': {
       on: false,
@@ -224,16 +224,16 @@
       search: 'http://www.1pondo.tv/movies/{searchTerms}/',
       img: '.figure>img,.ng-scope>a>img,img.ng-scope',
       time: 'dd.ng-binding:eq(1)',
-      code: () => location.pathname.match(/[\d\_]+/)[0],
+      code: () => window.location.pathname.match(/[\d_]+/)[0],
       manual: true
     },
     'www.heyzo.com': {
       on: false,
       name: 'HEYZO',
       search: 'http://www.heyzo.com/search/{searchTerms}/1.html?sort=pop',
-      //img: '.soundplay>img,.sample-images img,.relateive-movie img,.ranking-img>img,.withInfo>img,.new-movies>img,.actor>img',
+      // img: '.soundplay>img,.sample-images img,.relateive-movie img,.ranking-img>img,.withInfo>img,.new-movies>img,.actor>img',
       time: '.dataInfo:eq(0)',
-      code: () => 'HEYZO-' + location.pathname.match(/\d+/)[0]
+      code: () => 'HEYZO-' + window.location.pathname.match(/\d+/)[0]
     },
     'cn.10musume.com': {
       on: false,
@@ -241,7 +241,7 @@
       search: 'http://cn.10musume.com/cn/moviepages/{searchTerms}/index.html',
       img: 'img',
       time: '#movie-table1:eq(5)',
-      code: () => location.pathname.match(/[\d\_]+/)[0]
+      code: () => window.location.pathname.match(/[\d_]+/)[0]
     },
     // JAVLibrary
     'www.javlibrary.com': {
@@ -253,21 +253,21 @@
       time: '.text:eq(2)',
       code: '#video_id .text',
       after: '#video_favorite_edit',
-      extra() {
-        let preview_src = linkLib['www.dmm.co.jp']['preview_src'];
-        if (!$('#video_jacket_img').length) return;
+      extra () {
+        let previewSrc = linkLib['www.dmm.co.jp']['previewSrc']
+        if (!$('#video_jacket_img').length) return
         if ($('.previewthumbs').length) {
           $('.previewthumbs>img').each((i, _) => {
-            if ($(_).attr('src').match('//pics.dmm.co.jp')) $(_).attr('src', preview_src($(_).attr('src'))).removeAttr('width').removeAttr('height').attr('style', 'margin:2px 0;');
+            if ($(_).attr('src').match('//pics.dmm.co.jp')) $(_).attr('src', previewSrc($(_).attr('src'))).removeAttr('width').removeAttr('height').attr('style', 'margin:2px 0;')
           })
         }
-        let code = $('#video_jacket_img').attr('src').match(/http:\/\/pics.dmm.co.jp\/mono\/movie\/adult\/(.*?)\/(.*?)pl\.jpg/);
-        if (!code) return;
-        let url = `http://www.dmm.co.jp/mono/dvd/-/detail/=/cid=${code[1]}/`;
-        $('#video_jacket_img').wrap(() => `<a target="_blank" href="${url}"></a>`);
+        let code = $('#video_jacket_img').attr('src').match(/http:\/\/pics.dmm.co.jp\/mono\/movie\/adult\/(.*?)\/(.*?)pl\.jpg/)
+        if (!code) return
+        let url = `http://www.dmm.co.jp/mono/dvd/-/detail/=/cid=${code[1]}/`
+        $('#video_jacket_img').wrap(() => `<a target="_blank" href="${url}"></a>`)
         if (!$('.previewthumbs').length) {
           $('#video_jacket').one('click', e => {
-            e.preventDefault();
+            e.preventDefault()
             /*
             GM_xmlhttpRequest({
               method: 'GET',
@@ -276,7 +276,7 @@
               onload(res) {
                 let data = res.response;
                 if ($('#sample-image-block>a>img', data).length) {
-                  let img = $('#sample-image-block>a>img', data).toArray().map(i => `<img src="${preview_src(i.src)}" style="margin:2px 0;">`).join('');
+                  let img = $('#sample-image-block>a>img', data).toArray().map(i => `<img src="${previewSrc(i.src)}" style="margin:2px 0;">`).join('');
                   $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia');
                 }
               }
@@ -286,15 +286,15 @@
               method: 'GET',
               url: 'https://www.javbus.com/' + $('#video_id .text').text(),
               timeout: 30 * 1000,
-              onload(res) {
-                let data = res.response;
+              onload (res) {
+                let data = res.response
                 if ($('#sample-waterfall', data).length) {
-                  let img = $('.sample-box', data).toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`).join('');
-                  $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia');
+                  let img = $('.sample-box', data).toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`).join('')
+                  $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia')
                 }
               }
-            });
-          });
+            })
+          })
         }
       }
     },
@@ -306,8 +306,8 @@
       time: '.info>p:eq(1)',
       code: '.info>p>span:eq(1)',
       after: '.row.movie',
-      extra() {
-        if ($('#sample-waterfall').length) $('#sample-waterfall').html($('.sample-box').toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`));
+      extra () {
+        if ($('#sample-waterfall').length) $('#sample-waterfall').html($('.sample-box').toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`))
       }
     },
     'javfree.me': {
@@ -391,7 +391,7 @@
       search: 'http://bejav.net/search/{searchTerms}/',
       text: '.name>a,.breadcrumb_last,.body>ul>li>a',
       img: '.img-responsive,.thumbnail>img,.body>ul>li>img',
-      code: () => prompt('请输入番号', $('.breadcrumb_last').text()),
+      code: () => window.prompt('请输入番号', $('.breadcrumb_last').text()),
       codeManual: true
     },
     'hpjav.com': {
@@ -400,10 +400,10 @@
       name: 'HPJAV',
       search: 'http://hpjav.com/tw/?s={searchTerms}',
       text: '.entry-title a,h1,.current',
-      code: () => prompt('请输入番号', $('.current').text().match(/(.*?) (.*?)/)[1]),
+      code: () => window.prompt('请输入番号', $('.current').text().match(/(.*?) (.*?)/)[1]),
       codeManual: true
-    },
-  };
+    }
+  }
   var magnetLib = {
     'btdb.to': {
       searchPage: 'https://btdb.to/q/{q}/',
@@ -471,7 +471,7 @@
       page: '.pagination',
       sort: data => $('.table-responsive thead>tr>th>a', data).toArray().map(i => i.outerHTML.replace('</a>', $(i).attr('href').match(/s=(.*?)&/)[1] + '</a>')).join(' / '),
       more: {
-        Torrent: (data, lib) => $('.torrent-list tr>td:nth-child(3)>a:nth-child(1)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'),lib.searchPage).href}" target="blank">Torrent</a>`),
+        Torrent: (data, lib) => $('.torrent-list tr>td:nth-child(3)>a:nth-child(1)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'), lib.searchPage).href}" target="blank">Torrent</a>`),
         S: '.torrent-list tr>td:nth-child(6)',
         L: '.torrent-list tr>td:nth-child(7)',
         D: '.torrent-list tr>td:nth-child(8)'
@@ -527,7 +527,7 @@
       }
     },
     'btdiggs.com': {
-      searchPage: code => `http://btdigg.cc/search/${btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))).replace(/[=]+$/g,'')}/1/0/0.html`,
+      searchPage: code => `http://btdigg.cc/search/${window.btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))).replace(/[=]+$/g, '')}/1/0/0.html`,
       title: '.list>dl>dt>a',
       magnet: '.list>dl>dd.attr>span>a',
       size: '.list>dl>dd.attr>span:nth-child(2)>b',
@@ -546,7 +546,7 @@
       magnet: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => 'magnet:?xt=urn:btih:' + i.hash),
       size: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => parseInt(i.size / 1024 / 1024) + 'Mb'),
       time: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.createdAt),
-      page: data => new Array(JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.pages).fill(1).map((_, i) => `<a href="?page=${i+1}">${i+1}</a>`).join(''),
+      page: data => new Array(JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.pages).fill(1).map((_, i) => `<a href="?page=${i + 1}">${i + 1}</a>`).join(''),
       more: {
         Seeds: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.seeds),
         Peers: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.peers),
@@ -569,7 +569,7 @@
       searchPage: 'https://www.digbt.org/search/{q}',
       title: '.x-item>div:nth-child(1)>a.title',
       magnet: '.tail>a.title',
-      size: data => $('.tail', data).toArray().map(i => i.textContent.match(/Size:\s+([\d\.]+\s+\w+)/)[1]),
+      size: data => $('.tail', data).toArray().map(i => i.textContent.match(/Size:\s+([\d.]+\s+\w+)/)[1]),
       time: data => $('.tail', data).toArray().map(i => i.textContent.match(/Updated:\s+(.*?)\s{2}/)[1]),
       sort: '.btn-group',
       page: '.pagination',
@@ -616,7 +616,7 @@
         S: '.tl tr>td:nth-child(6)',
         L: '.tl tr>td:nth-child(7)'
       }
-    },
+    }
     /*
     'katcr.co': {
       searchPage: 'https://katcr.co/katsearch/page/1/{q}',
@@ -632,60 +632,59 @@
       }
     },
     */
-  };
+  }
   var m2tLib = [
     'http://btcache.me/torrent/{hash}',
     'http://storetorrents.com/hash/{hash}',
     'https://itorrents.org/torrent/{hash}.torrent',
     'https://torrage.info/torrent.php?h={hash}',
     'https://www.seedpeer.eu/torrent/{hashLow}'
-  ];
+  ]
   var markLib = [
-    { //0
+    { // 0
       name: '等待中',
       color: 'gray'
-    }, { //1
+    }, { // 1
       name: '有种子无配额',
       color: 'gray'
-    }, { //2
+    }, { // 2
       name: '下载中',
       color: 'blue'
-    }, { //3
+    }, { // 3
       name: '已下-骑兵',
       color: 'green'
-    }, { //4
+    }, { // 4
       name: '已下-步兵',
       color: 'green'
-    }, { //5
+    }, { // 5
       name: '已删-不喜欢的',
       color: 'black'
     }
-  ];
+  ]
 
-
-  if (linkLib[location.host].manual) {
-    $(window).on('keydown', function(e) {
-      if (e.keyCode === 65 && e.shiftKey) { //Shift+A
-        _init();
-        $(window).off('keydown');
+  if (linkLib[window.location.host].manual) {
+    $(window).on('keydown', function (e) {
+      if (e.keyCode === 65 && e.shiftKey) { // Shift+A
+        _init()
+        $(window).off('keydown')
       }
-    });
+    })
   } else {
-    _init();
+    _init()
   }
-  //if (location.href === 'http://115.com/?tab=offline&mode=wangpan') downloadIn115();
+  // if (location.href === 'http://115.com/?tab=offline&mode=wangpan') downloadIn115();
 
-  function _init() {
-    init();
-    getCode(true);
-    if (linkLib[location.host]['extra']) linkLib[location.host]['extra']();
-    markAdded();
+  function _init () {
+    init()
+    getCode(true)
+    if (linkLib[window.location.host]['extra']) linkLib[window.location.host]['extra']()
+    markAdded()
   }
 
-  function init() {
+  function init () {
     $('<style></style>').appendTo('head').text(() => {
-      let mark = markLib.map((_, i) => '.hMark_' + i + '{background-color:' + _.color + ';color:#FFF;}');
-      let markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}');
+      let mark = markLib.map((_, i) => '.hMark_' + i + '{background-color:' + _.color + ';color:#FFF;}')
+      let markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}')
       let style = [
         '.hBanner{position:fixed;background-color:#F2F2F2;z-index:999999;}',
         '.hBanner{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}',
@@ -719,537 +718,537 @@
         '.tablesorter-headerDesc{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);}',
         '.sorter-false{background:none;cursor:default;}',
         '.hHighlight{font-weight:bold;font-size:110%;color:#F00;}'
-        ];
-      return style.concat(mark, markImg).join('');
-    });
+      ]
+      return style.concat(mark, markImg).join('')
+    })
     $('<div class="hBanner"></div>').on({
-      mousedown: function(e1) {
-        if (e1.target !== $('.hasCode')[0]) return;
-        $(this).off('mouseout');
-        $('body').mouseup(function(e2) {
-          var width = 152;
-          var topBorder = $(window).height() - $('.hBanner').height();
-          var leftBorder = $(window).width() - $('.hBanner').width();
-          var top = (e2.clientY - e1.offsetY > 0) ? e2.clientY - e1.offsetY : 0;
-          top = (top > topBorder) ? topBorder : top;
-          var left = (e2.clientX - e1.offsetX > width) ? e2.clientX - e1.offsetX - width : 0;
-          left = (left > leftBorder) ? leftBorder : left;
+      mousedown: function (e1) {
+        if (e1.target !== $('.hasCode')[0]) return
+        $(this).off('mouseout')
+        $('body').mouseup(function (e2) {
+          var width = 152
+          var topBorder = $(window).height() - $('.hBanner').height()
+          var leftBorder = $(window).width() - $('.hBanner').width()
+          var top = (e2.clientY - e1.offsetY > 0) ? e2.clientY - e1.offsetY : 0
+          top = (top > topBorder) ? topBorder : top
+          var left = (e2.clientX - e1.offsetX > width) ? e2.clientX - e1.offsetX - width : 0
+          left = (left > leftBorder) ? leftBorder : left
           $('.hBanner').css({
             top: top + 'px',
             left: left + 'px'
-          });
-          GM_setValue('top', top);
-          GM_setValue('left', left);
-          $(this).off('mouseup');
+          })
+          GM_setValue('top', top)
+          GM_setValue('left', left)
+          $(this).off('mouseup')
           $('.hBanner').on({
-            mouseout: function() {
-              $('.hasCode>a').hide();
+            mouseout: function () {
+              $('.hasCode>a').hide()
             }
-          });
-        });
+          })
+        })
       },
-      mouseover: function() {
-        $('.hasCode>a').show();
+      mouseover: function () {
+        $('.hasCode>a').show()
       },
-      mouseout: function() {
-        $('.hasCode>a').hide();
+      mouseout: function () {
+        $('.hasCode>a').hide()
       }
     }).css({
       'top': GM_getValue('top', 0),
       'left': GM_getValue('left', 0)
-    }).appendTo('body');
+    }).appendTo('body')
     $('<div class="switcher"></div>').html('<span>on</span>').appendTo('.hBanner').on({
-      click: function() {
+      click: function () {
         if ($(this).text() === 'on') {
-          $(this).find('span').text('off').css('color', 'red');
-          undoMarkAdded();
+          $(this).find('span').text('off').css('color', 'red')
+          undoMarkAdded()
         } else {
-          $(this).find('span').text('on').css('color', 'green');
-          markAdded();
+          $(this).find('span').text('on').css('color', 'green')
+          markAdded()
         }
       },
-      contextmenu: function(e) {
-        e.preventDefault();
-        $(this).find('span').text('on').css('color', 'green');
-        undoMarkAdded();
-        markAdded();
+      contextmenu: function (e) {
+        e.preventDefault()
+        $(this).find('span').text('on').css('color', 'green')
+        undoMarkAdded()
+        markAdded()
       }
-    });
-    $('<div class="links"></div>').html(function() {
-      var _html = '';
+    })
+    $('<div class="links"></div>').html(function () {
+      var _html = ''
       for (var i in linkLib) {
-        if (!linkLib[i].on || i === location.host) continue;
-        _html += `<img${linkLib[i].online ? ' class="avOnline"' : ''} src="//${i}/favicon.ico" url="${linkLib[i].search}" title="${linkLib[i].name}" onerror="this.src='//www.google.com/s2/favicons?domain=${i}';this.onerror=null;">`;
+        if (!linkLib[i].on || i === window.location.host) continue
+        _html += `<img${linkLib[i].online ? ' class="avOnline"' : ''} src="//${i}/favicon.ico" url="${linkLib[i].search}" title="${linkLib[i].name}" onerror="this.src='//www.google.com/s2/favicons?domain=${i}';this.onerror=null;">`
       }
-      return _html;
+      return _html
     }).on({
-      click: function(e) {
-        var code = getCode();
-        GM_openInTab($(e.target).attr('url').replace('{searchTerms}', code));
+      click: function (e) {
+        var code = getCode()
+        GM_openInTab($(e.target).attr('url').replace('{searchTerms}', code))
       },
-      contextmenu: function(e) {
-        e.preventDefault();
-        var code = getCode().match(/[a-z0-9]+/gi).join(' ');
-        GM_openInTab($(e.target).attr('url').replace('{searchTerms}', code));
-      },
-    }).appendTo('.hBanner');
+      contextmenu: function (e) {
+        e.preventDefault()
+        var code = getCode().match(/[a-z0-9]+/gi).join(' ')
+        GM_openInTab($(e.target).attr('url').replace('{searchTerms}', code))
+      }
+    }).appendTo('.hBanner')
     $('.links>.avOnline').on({
-      mouseover: function() {
+      mouseover: function () {
         $(this).attr({
           rawSrc: this.src,
           src: GM_getResourceURL('play')
-        });
+        })
       },
-      mouseout: function() {
-        $(this).attr('src', $(this).attr('rawSrc'));
+      mouseout: function () {
+        $(this).attr('src', $(this).attr('rawSrc'))
       }
-    });
-    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + GM_getResourceURL('add') + '">').click(function() {
-      addValue(GM_getValue('lastMark', 0));
-    }).appendTo('.hBanner');
-    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + GM_getResourceURL('del') + '">').click(function() {
-      delValue();
-    }).appendTo('.hBanner');
-    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + GM_getResourceURL('import') + '">').click(function() {
-      importValue();
-    }).appendTo('.hBanner');
+    })
+    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + GM_getResourceURL('add') + '">').click(function () {
+      addValue(GM_getValue('lastMark', 0))
+    }).appendTo('.hBanner')
+    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + GM_getResourceURL('del') + '">').click(function () {
+      delValue()
+    }).appendTo('.hBanner')
+    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + GM_getResourceURL('import') + '">').click(function () {
+      importValue()
+    }).appendTo('.hBanner')
     $('<div title="左键:数据库展示\n右键:下载数据库(网页格式)"></div>').html('<img src="' + GM_getResourceURL('table') + '">').on({
-      click: function() {
-        showValue(0);
-        $(this).off('click').on('click', function() {
-          $('.showTable').toggle();
-        });
+      click: function () {
+        showValue(0)
+        $(this).off('click').on('click', function () {
+          $('.showTable').toggle()
+        })
       },
-      contextmenu: function(e) {
-        e.preventDefault();
-        showValue(1);
+      contextmenu: function (e) {
+        e.preventDefault()
+        showValue(1)
       }
-    }).appendTo('.hBanner');
-    $('<div title="重启"></div>').html('<img src="' + GM_getResourceURL('restart') + '">').click(function() {
-      $('.hBanner').remove();
-      undoMarkAdded();
-      $(window).removeData('code');
-      init();
-      markAdded();
-    }).appendTo('.hBanner');
-    $('<div class="hasCode">Marked: </div>').appendTo('.hBanner');
+    }).appendTo('.hBanner')
+    $('<div title="重启"></div>').html('<img src="' + GM_getResourceURL('restart') + '">').click(function () {
+      $('.hBanner').remove()
+      undoMarkAdded()
+      $(window).removeData('code')
+      init()
+      markAdded()
+    }).appendTo('.hBanner')
+    $('<div class="hasCode">Marked: </div>').appendTo('.hBanner')
     for (var i = 0; i < markLib.length; i++) {
-      $('<img src="' + GM_getResourceURL('mark' + i) + '"title="' + i + '|' + markLib[i].name + '">').val(i).click(function() {
-        addValue($(this).val());
-      }).appendTo('.addCode');
+      $('<img src="' + GM_getResourceURL('mark' + i) + '"title="' + i + '|' + markLib[i].name + '">').val(i).click(function () {
+        addValue($(this).val())
+      }).appendTo('.addCode')
     }
   }
 
-  function markAdded() {
-    $('.hasCode a').remove();
-    var lib = GM_getValue('lib', null);
-    if (!lib) return;
-    if (linkLib[location.host].img) {
-      $(linkLib[location.host].img).removeAttr('onerror').attr({
-        rawSrc: function() {
-          return $(this).attr('src');
+  function markAdded () {
+    $('.hasCode a').remove()
+    var lib = GM_getValue('lib', null)
+    if (!lib) return
+    if (linkLib[window.location.host].img) {
+      $(linkLib[window.location.host].img).removeAttr('onerror').attr({
+        rawSrc: function () {
+          return $(this).attr('src')
         },
-        src: function() {
-          var keyword;
-          var _src = $(this).attr('src');
+        src: function () {
+          var keyword
+          var _src = $(this).attr('src')
           for (var i in lib) {
-            keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi');
+            keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi')
             if (keyword.test(_src)) {
-              if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
-              _src = GM_getResourceURL('mark' + lib[i].mark);
-              break;
+              if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode')
+              _src = GM_getResourceURL('mark' + lib[i].mark)
+              break
             }
           }
-          return _src;
+          return _src
         }
-      });
+      })
     }
-    if (linkLib[location.host].text) {
-      $(linkLib[location.host].text).each(function() {
-        var keyword;
-        var _html = $(this).html();
-        $(this).empty();
+    if (linkLib[window.location.host].text) {
+      $(linkLib[window.location.host].text).each(function () {
+        var keyword
+        var _html = $(this).html()
+        $(this).empty()
         for (var i in lib) {
-          keyword = new RegExp(`${i}|${i.replace(/-/g, '')}|${i.replace(/-/g, ' ')}|${i.replace(/ /g, '-')}|${i.replace(/ /g, '')}`, 'gi');
+          keyword = new RegExp(`${i}|${i.replace(/-/g, '')}|${i.replace(/-/g, ' ')}|${i.replace(/ /g, '-')}|${i.replace(/ /g, '')}`, 'gi')
           if (keyword.test(_html)) {
-            if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
-            _html = _html.replace(keyword, '<span class="hMark_' + lib[i].mark + '" title="' + markLib[lib[i].mark].name + '">' + i + '</span>');
+            if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode')
+            _html = _html.replace(keyword, '<span class="hMark_' + lib[i].mark + '" title="' + markLib[lib[i].mark].name + '">' + i + '</span>')
           }
         }
-        $('<span>' + _html + '</span>').appendTo(this);
-      });
+        $('<span>' + _html + '</span>').appendTo(this)
+      })
     }
   }
 
-  function undoMarkAdded() {
-    var lib = GM_getValue('lib', null);
-    if (!lib) return;
-    if (linkLib[location.host].img) {
-      $(linkLib[location.host].img).attr({
-        src: function() {
-          return $(this).attr('rawSrc');
+  function undoMarkAdded () {
+    var lib = GM_getValue('lib', null)
+    if (!lib) return
+    if (linkLib[window.location.host].img) {
+      $(linkLib[window.location.host].img).attr({
+        src: function () {
+          return $(this).attr('rawSrc')
         }
-      }).removeAttr('rawSrc');
+      }).removeAttr('rawSrc')
     }
-    $(linkLib[location.host].text).html(function() {
-      return $(this).text();
-    });
+    $(linkLib[window.location.host].text).html(function () {
+      return $(this).text()
+    })
   }
 
-  function addValue(mark, code = undefined) {
-    mark = parseInt(mark);
+  function addValue (mark, code = undefined) {
+    mark = parseInt(mark)
     if (mark >= markLib.length) {
-      alert('请输入正确的标记，范围: 0-' + (markLib.length - 1));
-      return;
+      window.alert('请输入正确的标记，范围: 0-' + (markLib.length - 1))
+      return
     }
-    var lib = GM_getValue('lib', null) || {};
-    code = code || getCode();
-    if (!code) return;
-    GM_setValue('lastMark', mark);
+    var lib = GM_getValue('lib', null) || {}
+    code = code || getCode()
+    if (!code) return
+    GM_setValue('lastMark', mark)
     lib[code] = {
       mark: mark
-    };
-    if (mark === 0 || mark === 6) lib[code].time = $(linkLib[location.host].time).text();
-    GM_setValue('lib', lib);
-    undoMarkAdded();
-    markAdded();
-  }
-
-  function delValue(code = undefined) {
-    var lib = GM_getValue('lib', null);
-    if (!lib) return;
-    code = code || getCode();
-    if (!code) return;
-    delete lib[code];
-    GM_setValue('lib', lib);
-    undoMarkAdded();
-    markAdded();
-  }
-
-  function importValue() {
-    let mark = prompt('请输入车位\n-1. 删除\n' + markLib.map((_, i) => `${i}. ${_.name}\n`).join('')) * 1;
-    if (isNaN(mark) || mark >= markLib.length || mark < -1) {
-      alert(`请输入正确的标记，范围: -1 ==> ${markLib.length - 1}`);
-      return;
     }
-    let codeArr = prompt('请输入车牌号，以|为分割');
-    if (!codeArr) return;
-    codeArr = codeArr.split('|');
-    let lib = GM_getValue('lib', {});
+    if (mark === 0 || mark === 6) lib[code].time = $(linkLib[window.location.host].time).text()
+    GM_setValue('lib', lib)
+    undoMarkAdded()
+    markAdded()
+  }
+
+  function delValue (code = undefined) {
+    var lib = GM_getValue('lib', null)
+    if (!lib) return
+    code = code || getCode()
+    if (!code) return
+    delete lib[code]
+    GM_setValue('lib', lib)
+    undoMarkAdded()
+    markAdded()
+  }
+
+  function importValue () {
+    let mark = window.prompt('请输入车位\n-1. 删除\n' + markLib.map((_, i) => `${i}. ${_.name}\n`).join('')) * 1
+    if (isNaN(mark) || mark >= markLib.length || mark < -1) {
+      window.alert(`请输入正确的标记，范围: -1 ==> ${markLib.length - 1}`)
+      return
+    }
+    let codeArr = window.prompt('请输入车牌号，以|为分割')
+    if (!codeArr) return
+    codeArr = codeArr.split('|')
+    let lib = GM_getValue('lib', {})
     for (let i = 0; i < codeArr.length; i++) {
       if (mark === -1 && codeArr[i] in lib) {
-        delete lib[codeArr[i]];
+        delete lib[codeArr[i]]
       } else {
         lib[codeArr[i]] = {
           mark: mark
-        };
+        }
       }
     }
-    GM_setValue('lib', lib);
-    undoMarkAdded();
-    markAdded();
+    GM_setValue('lib', lib)
+    undoMarkAdded()
+    markAdded()
   }
 
-  function showValue(type) {
-    let lib = GM_getValue('lib', {});
-    let _html = '<table class="tablesorter"><thead><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>';
-    let num = 1;
+  function showValue (type) {
+    let lib = GM_getValue('lib', {})
+    let _html = '<table class="tablesorter"><thead><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>'
+    let num = 1
     for (let i in lib) {
-      _html += `<tr><td>${num++}</td><td>${lib[i].mark}</td><td><img class="hMarkImg_${lib[i].mark}">${markLib[lib[i].mark].name}</td><td><a href="${linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)}"target="_blank">${i}</a></td><td>${lib[i].time || ''}</td></tr>`;
+      _html += `<tr><td>${num++}</td><td>${lib[i].mark}</td><td><img class="hMarkImg_${lib[i].mark}">${markLib[lib[i].mark].name}</td><td><a href="${linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)}"target="_blank">${i}</a></td><td>${lib[i].time || ''}</td></tr>`
     }
-    _html += '</tbody></table>';
+    _html += '</tbody></table>'
     if (type === 0) {
-      $('<div class="showTable"></div>').html(_html).appendTo('body');
+      $('<div class="showTable"></div>').html(_html).appendTo('body')
     } else if (type === 1) {
-      let markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}').join('');
-      _html = '<html><head><script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script><script src="https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>';
-      let blob = new Blob([_html], {
+      let markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}').join('')
+      _html = '<html><head><script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script><script src="https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>'
+      let blob = new window.Blob([_html], {
         type: 'text/html;charset=utf-8'
-      });
-      $(`<a href="${URL.createObjectURL(blob)}" download="1.html"></a>`)[0].click();
+      })
+      $(`<a href="${URL.createObjectURL(blob)}" download="1.html"></a>`)[0].click()
     }
   }
 
-  function getCode(first = undefined) {
-    if ($(window).data('code')) return $(window).data('code');
-    let code = '';
-    let lib = linkLib[location.host];
+  function getCode (first = undefined) {
+    if ($(window).data('code')) return $(window).data('code')
+    let code = ''
+    let lib = linkLib[window.location.host]
     if (typeof lib.code === 'string') {
-      let temp = $(lib.code);
-      if (temp.length > 0) code = (temp[0].tagName === 'INPUT') ? temp.val() : temp.text();
+      let temp = $(lib.code)
+      if (temp.length > 0) code = (temp[0].tagName === 'INPUT') ? temp.val() : temp.text()
     } else if (typeof lib.code === 'function' && (!first || !lib.codeManual)) {
-      code = lib.code();
+      code = lib.code()
     }
-    code = code.toUpperCase();
-    $(window).data('code', code);
-    if (code) getMagnet(code, undefined, GM_getValue('lastSearch', undefined));
-    return code;
+    code = code.toUpperCase()
+    $(window).data('code', code)
+    if (code) getMagnet(code, undefined, GM_getValue('lastSearch', undefined))
+    return code
   }
 
-  function getMagnet(code, page = undefined, searchUrl = undefined) {
-    searchUrl = searchUrl in magnetLib ? searchUrl : Object.keys(magnetLib)[0];
-    var lib = magnetLib[searchUrl];
-    var searchPage = typeof lib.searchPage === 'string' ? lib.searchPage.replace('{q}', encodeURIComponent(code)) : lib.searchPage(code);
-    var url = page ? new URL(page, searchPage).href : searchPage;
+  function getMagnet (code, page = undefined, searchUrl = undefined) {
+    searchUrl = searchUrl in magnetLib ? searchUrl : Object.keys(magnetLib)[0]
+    var lib = magnetLib[searchUrl]
+    var searchPage = typeof lib.searchPage === 'string' ? lib.searchPage.replace('{q}', encodeURIComponent(code)) : lib.searchPage(code)
+    var url = page ? new URL(page, searchPage).href : searchPage
     if ($('.hSearch').length === 0) {
-      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${searchUrl}"><select class="hSearchSite">${Object.keys(magnetLib).map(i=>`<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter(linkLib[location.host].after || 'body>:eq(-1)');
-      $('.hSearchSite').val(searchUrl);
-      //排序翻页事件
+      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${searchUrl}"><select class="hSearchSite">${Object.keys(magnetLib).map(i => `<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter(linkLib[window.location.host].after || 'body>:eq(-1)')
+      $('.hSearchSite').val(searchUrl)
+      // 排序翻页事件
       $('.hSearch').on('click', '.hSearchSort a,.hSearchPage a', e => {
-        e.preventDefault();
-        $('.hSearch').trigger('destroy');
-        let target = e.target;
-        if (!$(target).is('a')) target = $(target).parents().filter('a')[0];
-        getMagnet(getCode(), $(target).attr('href'), $('.hSearchSite').val());
-      });
-      //选择其他站点
+        e.preventDefault()
+        $('.hSearch').trigger('destroy')
+        let target = e.target
+        if (!$(target).is('a')) target = $(target).parents().filter('a')[0]
+        getMagnet(getCode(), $(target).attr('href'), $('.hSearchSite').val())
+      })
+      // 选择其他站点
       $('.hSearch').on('change', '.hSearchSite', () => {
-        GM_setValue('lastSearch', $('.hSearchSite').val());
-        if (typeof $('.hSearch').data('abort') === 'function') $('.hSearch').data('abort')();
-        $('.hSearchSiteImg').attr('src', '//www.google.com/s2/favicons?domain=' + $('.hSearchSite').val());
-        $('.hSearch').trigger('destroy');
-        getMagnet(getCode(), undefined, $('.hSearchSite').val());
-      });
-      //按钮
+        GM_setValue('lastSearch', $('.hSearchSite').val())
+        if (typeof $('.hSearch').data('abort') === 'function') $('.hSearch').data('abort')()
+        $('.hSearchSiteImg').attr('src', '//www.google.com/s2/favicons?domain=' + $('.hSearchSite').val())
+        $('.hSearch').trigger('destroy')
+        getMagnet(getCode(), undefined, $('.hSearchSite').val())
+      })
+      // 按钮
       $('.hSearch').on('click', '.hSearchCopy', e => {
-        let target = $(e.target).parents('tr').find('td>a')[0];
-        setNotice(target.innerText, target.href);
-        GM_setClipboard(target.href);
-      });
+        let target = $(e.target).parents('tr').find('td>a')[0]
+        setNotice(target.innerText, target.href)
+        GM_setClipboard(target.href)
+      })
       $('.hSearch').on('click', '.hMagnet_115', e => {
-        let target = $(e.target).parents('tr').find('td>a')[0];
-        GM_setValue('link', target.href);
-        GM_setValue('name', target.innerText);
-        addValue(2);
-      });
+        let target = $(e.target).parents('tr').find('td>a')[0]
+        GM_setValue('link', target.href)
+        GM_setValue('name', target.innerText)
+        addValue(2)
+      })
     }
-    $('.hSearch>thead>tr:nth-child(1)').html(`<th>#</th><th><a href="${url}" target="_blank">名称</a></th><th>大小</th><th>时间</th>${lib['more']&&Object.keys(lib['more']).length ? '<th>' + Object.keys(lib['more']).join('</th><th>') + '</th>' : ''}<th data-sorter="false">下载种子</th><th data-sorter="false">操作</th>`);
-    $('.hSearchSort,.hSearch>tbody>tr,.hSearchPage').remove();
-    var codeArr = code.split('-');
-    var expArr = [];
+    $('.hSearch>thead>tr:nth-child(1)').html(`<th>#</th><th><a href="${url}" target="_blank">名称</a></th><th>大小</th><th>时间</th>${lib['more'] && Object.keys(lib['more']).length ? '<th>' + Object.keys(lib['more']).join('</th><th>') + '</th>' : ''}<th data-sorter="false">下载种子</th><th data-sorter="false">操作</th>`)
+    $('.hSearchSort,.hSearch>tbody>tr,.hSearchPage').remove()
+    var codeArr = code.split('-')
+    var expArr = []
     for (var i = 0; i < codeArr.length; i++) {
-      expArr.push(new RegExp(re_escape(codeArr[i]), 'gi'));
+      expArr.push(new RegExp(reEscape(codeArr[i]), 'gi'))
     }
     var abort = GM_xmlhttpRequest({
       method: 'GET',
       url: url,
       timeout: 30 * 1000,
-      onload(res) {
-        let data = res.response;
-        let info = {};
-        for (let i in lib) { //获取信息
-          if (['searchPage', 'more'].includes(i)) continue;
+      onload (res) {
+        let data = res.response
+        let info = {}
+        for (let i in lib) { // 获取信息
+          if (['searchPage', 'more'].includes(i)) continue
           if (typeof lib[i] === 'string') {
             info[i] = $(lib[i], data).toArray().map(j => {
               if (i === 'title') {
-                return j;
+                return j
               } else if (['sort', 'page'].includes(i)) {
-                return j.innerHTML.replace(/<(|\/)(td|th)>/g, '<$1span>');
+                return j.innerHTML.replace(/<(|\/)(td|th)>/g, '<$1span>')
               } else if (i === 'magnet') {
-                return j.href;
+                return j.href
               } else {
-                return j.textContent;
+                return j.textContent
               }
-            });
+            })
           } else {
-            info[i] = lib[i](data);
+            info[i] = lib[i](data)
           }
         }
-        let hash = info['magnet'].map(i => i.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toUpperCase());
+        let hash = info['magnet'].map(i => i.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toUpperCase())
         if (lib['more'] && Object.keys(lib['more']).length) {
-          info['more'] = {};
+          info['more'] = {}
           for (let i in lib['more']) {
-            info['more'][i] = typeof lib['more'][i] === 'string' ? $(lib['more'][i], data).toArray().map(i => i.outerHTML.replace(/<(|\/)(td|th)( |>)/g, '<$1span$3')) : lib['more'][i](data, lib);
+            info['more'][i] = typeof lib['more'][i] === 'string' ? $(lib['more'][i], data).toArray().map(i => i.outerHTML.replace(/<(|\/)(td|th)( |>)/g, '<$1span$3')) : lib['more'][i](data, lib)
           }
         }
-        console.log('load: ', url, '\ndata: ', [data], '\ninfo: ', info);
+        console.log('load: ', url, '\ndata: ', [data], '\ninfo: ', info)
         for (let i = 0; i < info['title'].length; i++) {
-          let name = info['title'][i].title || info['title'][i].textContent;
-          let downloadHTML = m2tLib.map(j => `<a href="${j.replace('{hash}', hash[i]).replace('{hashLow}', hash[i].toLowerCase()).replace('{name}', name)}" target="_blank"><img src="//www.google.com/s2/favicons?domain=${new URL(j).host}"></a>`).join('');
+          let name = info['title'][i].title || info['title'][i].textContent
+          let downloadHTML = m2tLib.map(j => `<a href="${j.replace('{hash}', hash[i]).replace('{hashLow}', hash[i].toLowerCase()).replace('{name}', name)}" target="_blank"><img src="//www.google.com/s2/favicons?domain=${new URL(j).host}"></a>`).join('')
           for (let j = 0; j < codeArr.length; j++) {
-            name = name.replace(expArr[j], '<span class="hHighlight">' + codeArr[j] + '</span>');
+            name = name.replace(expArr[j], '<span class="hHighlight">' + codeArr[j] + '</span>')
           }
           $('<tr></tr>').appendTo('.hSearch>tbody').html(`
             <td>${i + 1}</td>
             <td><a href="${info['magnet'][i]}">${name}</a></td>
             <td><a href="${new URL(info['title'][i].pathname, searchPage).href}" target="_blank">${info['size'][i]}</a></td>
             <td>${info['time'][i]}</td>
-            ${lib['more']&&Object.keys(lib['more']).length ? '<td>' + Object.keys(lib['more']).map(j => info['more'][j][i]).join('</td><td>') + '</td>' : ''}
+            ${lib['more'] && Object.keys(lib['more']).length ? '<td>' + Object.keys(lib['more']).map(j => info['more'][j][i]).join('</td><td>') + '</td>' : ''}
             <td>${downloadHTML}</td>
             <td>
               <button class="hSearchCopy">复制</button>
               <a href class="hMagnet_115"><img src="//115.com/favicon.ico"></a>
-              <a href="https://d.miwifi.com/d2r/?url=${btoa(info['magnet'][i])}" target="_blank"><img src="//d.miwifi.com/favicon.ico"></a>
+              <a href="https://d.miwifi.com/d2r/?url=${window.btoa(info['magnet'][i])}" target="_blank"><img src="//d.miwifi.com/favicon.ico"></a>
               <a href="https://m.zbigz.com/startcache?url=${encodeURIComponent(info['magnet'][i])}" target="_blank"><img src="//zbigz.com/img/favicon.ico"></a>
               </td>
-            `);
+            `)
         }
-        $('.hSearch').tablesorter();
-        let colspan = lib['more'] ? Object.keys(lib['more']).length + 6 : 6;
-        if (info['title'].length === 0) { //无搜索结果
-          $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${colspan}">No search result</td>`);
+        $('.hSearch').tablesorter()
+        let colspan = lib['more'] ? Object.keys(lib['more']).length + 6 : 6
+        if (info['title'].length === 0) { // 无搜索结果
+          $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${colspan}">No search result</td>`)
         } else {
-          if (info['sort']) $('<tr class="hSearchSort"></tr>').appendTo('.hSearch>thead').html(`<td colspan="${colspan}">${info['sort']}</td>`).show(); //排序
-          if (info['page']) $('<tr class="hSearchPage"></tr>').appendTo('.hSearch>tfoot').html(`<td colspan="${colspan}">${info['page']}</td>`); //翻页
+          if (info['sort']) $('<tr class="hSearchSort"></tr>').appendTo('.hSearch>thead').html(`<td colspan="${colspan}">${info['sort']}</td>`).show() // 排序
+          if (info['page']) $('<tr class="hSearchPage"></tr>').appendTo('.hSearch>tfoot').html(`<td colspan="${colspan}">${info['page']}</td>`) // 翻页
         }
       },
-      onerror() {
-        $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load<a href="${url}" target="_blank">${url}</a> Error</td>`);
+      onerror () {
+        $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load<a href="${url}" target="_blank">${url}</a> Error</td>`)
       },
-      ontimeout() {
-        $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load <a href="${url}" target="_blank">${url}</a> Timeout</td>`);
+      ontimeout () {
+        $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load <a href="${url}" target="_blank">${url}</a> Timeout</td>`)
       }
-    }).abort;
-    $('.hSearch').data('abort', abort);
+    }).abort
+    $('.hSearch').data('abort', abort)
   }
 
-  function downloadIn115() {
+  function downloadIn115 () {
     if (document.readyState !== 'complete') {
-      setTimeout(downloadIn115, 200);
+      setTimeout(downloadIn115, 200)
     } else {
       $('<a href="javascript:;" class="opmenu-clean">清空所有任务</a>').prependTo(unsafeWindow.frames.wangpan.document.querySelector('.operate-menu')).on({
-        click: function() {
-          unsafeWindow.Core.OFFL5Plug.GetDataCtl().list(function(e) {
-            var tasks = e.tasks;
-            tasks.forEach(function(task) {
-              unsafeWindow.Core.OFFL5Plug.Delete(task, null);
-            });
-          });
+        click: function () {
+          unsafeWindow.Core.OFFL5Plug.GetDataCtl().list(function (e) {
+            var tasks = e.tasks
+            tasks.forEach(function (task) {
+              unsafeWindow.Core.OFFL5Plug.Delete(task, null)
+            })
+          })
         }
-      });
-      setInterval(function() {
+      })
+      setInterval(function () {
         if (GM_getValue('link')) {
-          var link = GM_getValue('link');
-          GM_setValue('task', link.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toLowerCase());
-          unsafeWindow.Core.OFFL5Plug.OpenLink();
-          setTimeout(function() {
+          var link = GM_getValue('link')
+          GM_setValue('task', link.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toLowerCase())
+          unsafeWindow.Core.OFFL5Plug.OpenLink()
+          setTimeout(function () {
             if ($('#js_offline_new_add')) {
-              $('#js_offline_new_add').val(link);
-              GM_deleteValue('link');
-              unsafeWindow.$('.con>.button').click();
-              var checkResult = setInterval(function() {
-                if ($('iframe[src^="//captchaapi.115.com"]').length > 0) { //验证
-                  clearInterval(checkResult);
-                  setNotice('请重新验证你的帐号', null, GM_getResourceURL('warn'));
-                } else if ($('.exph-suc').length > 0) { //成功
-                  //clearInterval(checkResult);
-                  //setNotice($('.exph-suc').text(), null, GM_getResourceURL('downloading'));
-                } else if ($('.exph-war').length > 0) { //错误
-                  clearInterval(checkResult);
-                  setNotice($('.exph-war').text(), null, GM_getResourceURL('error'));
-                  unsafeWindow.$('.btn-link').click();
+              $('#js_offline_new_add').val(link)
+              GM_deleteValue('link')
+              unsafeWindow.$('.con>.button').click()
+              var checkResult = setInterval(function () {
+                if ($('iframe[src^="//captchaapi.115.com"]').length > 0) { // 验证
+                  clearInterval(checkResult)
+                  setNotice('请重新验证你的帐号', null, GM_getResourceURL('warn'))
+                } else if ($('.exph-suc').length > 0) { // 成功
+                  // clearInterval(checkResult);
+                  // setNotice($('.exph-suc').text(), null, GM_getResourceURL('downloading'));
+                } else if ($('.exph-war').length > 0) { // 错误
+                  clearInterval(checkResult)
+                  setNotice($('.exph-war').text(), null, GM_getResourceURL('error'))
+                  unsafeWindow.$('.btn-link').click()
                 }
-              }, 200);
+              }, 200)
             }
-          }, 300);
+          }, 300)
         } else {
-          unsafeWindow.Core.OFFL5Plug.Reload(); //刷新任务
-          if (GM_getValue('task') && $('iframe[src^="//captchaapi.115.com"]').length === 0) { //检查下载情况
-            unsafeWindow.Core.OFFL5Plug.GetDataCtl().list(function(e) {
-              var tasks = e.tasks;
+          unsafeWindow.Core.OFFL5Plug.Reload() // 刷新任务
+          if (GM_getValue('task') && $('iframe[src^="//captchaapi.115.com"]').length === 0) { // 检查下载情况
+            unsafeWindow.Core.OFFL5Plug.GetDataCtl().list(function (e) {
+              var tasks = e.tasks
               for (var i = 0; i < tasks.length; i++) {
-                if (tasks[i].info_hash === GM_getValue('task')) break;
+                if (tasks[i].info_hash === GM_getValue('task')) break
               }
               if (i === tasks.length) {
-                GM_deleteValue('task');
-                return;
+                GM_deleteValue('task')
+                return
               }
-              var p = Math.round(tasks[i].percentDone * 100) / 100;
-              var now = Math.floor(p / 4);
-              setNotice(tasks[i].name, '▉'.repeat(now) + '▁'.repeat(25 - now) + ' ' + p + '%', tasks[i].status === 2 ? GM_getResourceURL('success') : getProcess(p, 128));
-              if (tasks[i].status === 2) GM_deleteValue('task'); //1:下载中 2:下载完成
-            });
+              var p = Math.round(tasks[i].percentDone * 100) / 100
+              var now = Math.floor(p / 4)
+              setNotice(tasks[i].name, '▉'.repeat(now) + '▁'.repeat(25 - now) + ' ' + p + '%', tasks[i].status === 2 ? GM_getResourceURL('success') : getProcess(p, 128))
+              if (tasks[i].status === 2) GM_deleteValue('task') // 1:下载中 2:下载完成
+            })
           }
         }
-      }, 2000);
+      }, 2000)
     }
   }
 
-  function setNotice(title, body = undefined, icon = undefined) {
-    if (window.Notification && Notification.permission !== 'denied') {
-      Notification.requestPermission(function(status) {
+  function setNotice (title, body = undefined, icon = undefined) {
+    if (window.Notification && window.Notification.permission !== 'denied') {
+      window.Notification.requestPermission(function (status) {
         if (status === 'granted') {
           var option = {
             tag: 'hParkingLot',
             icon: icon || GM_getResourceURL('success')
-          };
-          if (body) option.body = body;
-          var n = new Notification(cutByte(title, 28), option);
-          n.onclick = function() {
-            n.close();
-          };
-          setTimeout(function() {
-            if (n) n.close();
-          }, 3000);
+          }
+          if (body) option.body = body
+          var n = new window.Notification(cutByte(title, 28), option)
+          n.onclick = function () {
+            n.close()
+          }
+          setTimeout(function () {
+            if (n) n.close()
+          }, 3000)
         }
-      });
+      })
     }
   }
 
-  function getProcess(process, radius) { //https://imys.net/20150722/canvas-annulus-process.html
-    var c = document.createElement('canvas');
-    radius = radius || 100;
-    c.width = 2 * radius;
-    c.height = 2 * radius;
-    var ctx = c.getContext('2d');
+  function getProcess (process, radius) { // https://imys.net/20150722/canvas-annulus-process.html
+    var c = document.createElement('canvas')
+    radius = radius || 100
+    c.width = 2 * radius
+    c.height = 2 * radius
+    var ctx = c.getContext('2d')
     // 画灰色的圆
-    ctx.beginPath();
-    ctx.arc(radius, radius, 0.8 * radius, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.fillStyle = '#F6F6F6';
-    ctx.fill();
+    ctx.beginPath()
+    ctx.arc(radius, radius, 0.8 * radius, 0, Math.PI * 2)
+    ctx.closePath()
+    ctx.fillStyle = '#F6F6F6'
+    ctx.fill()
     // 画进度环
-    ctx.beginPath();
-    ctx.moveTo(radius, radius);
-    ctx.arc(radius, radius, 0.8 * radius, Math.PI * 1.5, Math.PI * (1.5 + 2 * process / 100));
-    ctx.closePath();
-    ctx.fillStyle = '#00CD00';
-    ctx.fill();
+    ctx.beginPath()
+    ctx.moveTo(radius, radius)
+    ctx.arc(radius, radius, 0.8 * radius, Math.PI * 1.5, Math.PI * (1.5 + 2 * process / 100))
+    ctx.closePath()
+    ctx.fillStyle = '#00CD00'
+    ctx.fill()
     // 画内填充圆
-    ctx.beginPath();
-    ctx.arc(radius, radius, 0.6 * radius, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.fillStyle = '#fff';
-    ctx.fill();
+    ctx.beginPath()
+    ctx.arc(radius, radius, 0.6 * radius, 0, Math.PI * 2)
+    ctx.closePath()
+    ctx.fillStyle = '#fff'
+    ctx.fill()
     // 填充文字
-    ctx.font = 'bold ' + 0.2 * radius + 'pt Microsoft YaHei';
-    ctx.fillStyle = '#333';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.moveTo(radius, radius);
-    ctx.fillText(process + '%', radius, radius);
-    return c.toDataURL();
+    ctx.font = 'bold ' + 0.2 * radius + 'pt Microsoft YaHei'
+    ctx.fillStyle = '#333'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.moveTo(radius, radius)
+    ctx.fillText(process + '%', radius, radius)
+    return c.toDataURL()
   }
 
-  function cutByte(str, len, endstr = '...') { //http://www.cnblogs.com/whyoop/p/3680228.html
-    function n2(a) { //用于二分法查找
-      var n = a / 2 | 0;
-      return (n > 0 ? n : 1);
+  function cutByte (str, len, endstr = '...') { // http://www.cnblogs.com/whyoop/p/3680228.html
+    function n2 (a) { // 用于二分法查找
+      var n = a / 2 | 0
+      return (n > 0 ? n : 1)
     }
 
-    function getBlength(str) {
+    function getBlength (str) {
       for (var i = str.length, n = 0; i--;) {
-        n += str.charCodeAt(i) > 255 ? 2 : 1;
+        n += str.charCodeAt(i) > 255 ? 2 : 1
       }
-      return n;
+      return n
     }
-    if (str.length <= len) return str;
-    if (!(str + '').length || !len || len <= 0) return '';
+    if (str.length <= len) return str
+    if (!(str + '').length || !len || len <= 0) return ''
     if (getBlength(str) <= len) {
-      return str;
-    } //整个函数中最耗时的一个判断,欢迎优化
-    var lenS = len,
-      _lenS = 0,
-      _strl = 0;
+      return str
+    } // 整个函数中最耗时的一个判断,欢迎优化
+    var lenS = len
+    var _lenS = 0
+    var _strl = 0
     while (_strl <= lenS) {
-      var _lenS1 = n2(lenS - _strl);
-      _strl += getBlength(str.substr(_lenS, _lenS1));
-      _lenS += _lenS1;
+      var _lenS1 = n2(lenS - _strl)
+      _strl += getBlength(str.substr(_lenS, _lenS1))
+      _lenS += _lenS1
     }
-    return str.substr(0, _lenS - 1) + endstr;
+    return str.substr(0, _lenS - 1) + endstr
   }
 
-  function re_escape(s) {
-    return s.replace(/[\$\(\)\*\+\.\[\]\?\^\{\}\|]+/g, '\\$&');
+  function reEscape (s) {
+    return s.replace(/[$()*+.[\]?^{}|]+/g, '\\$&')
   }
-})(jQuery);
+})(jQuery)

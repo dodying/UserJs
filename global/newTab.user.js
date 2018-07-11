@@ -14,7 +14,7 @@
 // @grant       GM_setValue
 // @run-at      document-end
 // ==/UserScript==
-(function total() {
+(function total () {
   /*
     var observer = new MutationObserver(init);
     observer.observe(document.body, {
@@ -22,43 +22,43 @@
       subtree: true
     });
   */
-  let blacklist = GM_getValue('blacklist', []);
-  let host = location.host;
+  let blacklist = GM_getValue('blacklist', [])
+  let host = window.location.host
   if (blacklist.includes(host)) {
-    let id;
-    id = GM_registerMenuCommand('newTab: Effect ' + host, function() {
-      let blacklist = GM_getValue('blacklist', []);
+    let id
+    id = GM_registerMenuCommand('newTab: Effect ' + host, function () {
+      let blacklist = GM_getValue('blacklist', [])
       if (blacklist.includes(host)) {
-        blacklist.splice(blacklist.indexOf(host), 1);
-        GM_setValue('blacklist', blacklist);
-        GM_unregisterMenuCommand(id);
-        total();
+        blacklist.splice(blacklist.indexOf(host), 1)
+        GM_setValue('blacklist', blacklist)
+        GM_unregisterMenuCommand(id)
+        total()
       }
-    }, 'N');
+    }, 'N')
   } else {
-    init();
-    let id;
-    id = GM_registerMenuCommand('newTab: DO NOT Effect ' + host, function() {
-      let blacklist = GM_getValue('blacklist', []);
+    init()
+    let id
+    id = GM_registerMenuCommand('newTab: DO NOT Effect ' + host, function () {
+      let blacklist = GM_getValue('blacklist', [])
       if (!blacklist.includes(host)) {
-        blacklist.push(host);
-        GM_setValue('blacklist', blacklist);
-        GM_unregisterMenuCommand(id);
-        total();
+        blacklist.push(host)
+        GM_setValue('blacklist', blacklist)
+        GM_unregisterMenuCommand(id)
+        total()
       }
-    }, 'N');
+    }, 'N')
   }
 
-  function init() {
-    var raw = [];
-    var changed = [];
+  function init () {
+    var raw = []
+    var changed = []
     var protocol, host, hash, next, text;
     [...document.links].forEach(link => {
-      protocol = !link.protocol.match(/^(http.?|ftp):$/);
-      host = link.href === location.origin || link.href === location.origin + '/';
-      hash = !!link.href.match('#') && link.pathname === location.pathname;
-      next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/);
-      text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后)一(章|页)|Previous|Next|首页|末页/i);
+      protocol = !link.protocol.match(/^(http.?|ftp):$/)
+      host = link.href === window.location.origin || link.href === window.location.origin + '/'
+      hash = !!link.href.match('#') && link.pathname === window.location.pathname
+      next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/)
+      text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后)一(章|页)|Previous|Next|首页|末页/i)
       if (protocol || host || hash || next || text) {
         raw.push({
           target: link,
@@ -72,12 +72,12 @@
             next: next,
             textMatch: text
           }
-        });
+        })
       } else {
-        changed.push(link);
-        link.setAttribute('target', '_blank');
+        changed.push(link)
+        link.setAttribute('target', '_blank')
       }
-    });
-    /*console.error('Set newtab: ', changed, '\ndon\'t change: ', raw);*/
+    })
+    /* console.error('Set newtab: ', changed, '\ndon\'t change: ', raw); */
   }
-})();
+})()

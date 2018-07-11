@@ -20,76 +20,76 @@
 // @compatible  chrome 55+(ES2017)
 // ==/UserScript==
 
-const CONFIG = GM_getValue('config', {});
-const EHT = JSON.parse(GM_getResourceText('EHT')).dataset;
+const CONFIG = GM_getValue('config', {})
+const EHT = JSON.parse(GM_getResourceText('EHT')).dataset
 let tag = {
   name: 'tag',
   cname: [{ type: 0, text: '标签' }],
   tags: []
-};
-let category = EHT.filter(j => j.name === 'reclass')[0];
-category.name = 'category';
+}
+let category = EHT.filter(j => j.name === 'reclass')[0]
+category.name = 'category'
 category.cname = [{ type: 0, text: '分类' }];
 ['female', 'male', 'misc'].forEach(i => {
-  let filtered = EHT.filter(j => j.name === i)[0];
-  tag.tags = tag.tags.concat(filtered.tags);
-  EHT.splice(EHT.indexOf(filtered), 1);
+  let filtered = EHT.filter(j => j.name === i)[0]
+  tag.tags = tag.tags.concat(filtered.tags)
+  EHT.splice(EHT.indexOf(filtered), 1)
 })
-tag.tags = tag.tags.filter(i => i.name).sort((a, b) => a.name > b.name ? 1 : a.name == b.name ? 0 : -1);
+tag.tags = tag.tags.filter(i => i.name).sort((a, b) => a.name > b.name ? 1 : a.name === b.name ? 0 : -1)
 for (let i = 0; i < tag.tags.length - 1; i++) {
   if (tag.tags[i].name === tag.tags[i + 1].name) {
-    tag.tags.splice(i, 1);
-    i = i - 1;
+    tag.tags.splice(i, 1)
+    i = i - 1
   }
 }
-EHT.push(tag);
+EHT.push(tag)
 
-async function init() {
-  addStyle(); //添加样式
-  $('<div class="nhNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body');
+async function init () {
+  addStyle() // 添加样式
+  $('<div class="nhNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body')
   $(window).on({
     scroll: () => {
-      $('.nhNavBar').attr('style', $(window).scrollTop() >= 30 && $('.ido').length === 0 ? 'top:0;' : 'bottom:0;');
+      $('.nhNavBar').attr('style', $(window).scrollTop() >= 30 && $('.ido').length === 0 ? 'top:0;' : 'bottom:0;')
     }
-  });
-  if ($('#cover').length) { //信息页
-    changeName('#info>h1,#info>h2'); //修改本子标题（移除集会名）
-    document.title = $('#info>h1').text();
-    tagTranslate(); //标签翻译
-    btnAddFav(); //按钮 -> 加入黑名单
-    btnSearch(); //按钮 -> 搜索(信息页)
-    tagEvent(); //标签事件
-    copyInfo(); //复制信息
+  })
+  if ($('#cover').length) { // 信息页
+    changeName('#info>h1,#info>h2') // 修改本子标题（移除集会名）
+    document.title = $('#info>h1').text()
+    tagTranslate() // 标签翻译
+    btnAddFav() // 按钮 -> 加入黑名单
+    btnSearch() // 按钮 -> 搜索(信息页)
+    tagEvent() // 标签事件
+    copyInfo() // 复制信息
   } else {
-    if ($('[name="q"]').val()) document.title = translateText($('[name="q"]').val());
-    changeName('.caption'); //修改本子标题（移除集会名）
-    $('<div class="nhContainer"></div>').insertAfter('.gallery>.cover');
-    btnAddFav(); //按钮 -> 加入黑名单
-    btnSearch2(); //按钮 -> 搜索(搜索页)
-    if (CONFIG['checkExist']) checkExist(); //检查本地是否存在
-    let gmetadata = await getInfo();
-    window.gmetadata = gmetadata;
-    tagPreview(gmetadata); //标签预览
-    hideGalleries(gmetadata); //隐藏某些画集
-    if (CONFIG['checkExistAtStart']) $('input:button[name="checkExist"]').click();
-    autoComplete(); //自动填充
-    checkForNew(gmetadata); //检查有无新本子
+    if ($('[name="q"]').val()) document.title = translateText($('[name="q"]').val())
+    changeName('.caption') // 修改本子标题（移除集会名）
+    $('<div class="nhContainer"></div>').insertAfter('.gallery>.cover')
+    btnAddFav() // 按钮 -> 加入黑名单
+    btnSearch2() // 按钮 -> 搜索(搜索页)
+    if (CONFIG['checkExist']) checkExist() // 检查本地是否存在
+    let gmetadata = await getInfo()
+    window.gmetadata = gmetadata
+    tagPreview(gmetadata) // 标签预览
+    hideGalleries(gmetadata) // 隐藏某些画集
+    if (CONFIG['checkExistAtStart']) $('input:button[name="checkExist"]').click()
+    autoComplete() // 自动填充
+    checkForNew(gmetadata) // 检查有无新本子
   }
-  highlightBlacklist(); //高亮黑名单相关的画廊(通用)
-  showConfig();
-  searchInOtherSite();
-  if (CONFIG['saveLink']) saveLink(); //保存链接
-  showTooltip(); //显示提示
+  highlightBlacklist() // 高亮黑名单相关的画廊(通用)
+  showConfig()
+  searchInOtherSite()
+  if (CONFIG['saveLink']) saveLink() // 保存链接
+  showTooltip() // 显示提示
   $('body').on('mousedown', '[copy]', e => {
-    e.preventDefault();
+    e.preventDefault()
     let copy = $(e.target).attr('copy')
-    setNotification(copy, '已复制');
-    GM_setClipboard(copy);
-  }).on('contextmenu', 'input[type="button"]', () => false);
+    setNotification(copy, '已复制')
+    GM_setClipboard(copy)
+  }).on('contextmenu', 'input[type="button"]', () => false)
 }
 
-function addStyle() { //添加样式
-  //backgroundColor = #0d0d0d;
+function addStyle () { // 添加样式
+  // backgroundColor = #0d0d0d;
   $('<style></style>').text([
     '.menu>li>a{padding:0 5px!important;}',
     'input[type="number"]{width:60px;border:1px solid #B5A4A4;margin:3px 1px 0;padding:1px 3px 3px;border-radius:3px;}',
@@ -160,149 +160,149 @@ function addStyle() { //添加样式
     '.nhCheckTable a{text-decoration:none;}',
     '.nhPages>a{display:inline;margin:0 1px;cursor:pointer;}',
     '.nhPages>a::before{content:attr(name)}',
-    '.nhPagesHover{color:red;font-weight:bold;}',
-  ].join('\n')).appendTo('head');
+    '.nhPagesHover{color:red;font-weight:bold;}'
+  ].join('\n')).appendTo('head')
 }
 
-function autoComplete() { //自动填充
-  let main = (CONFIG['acItem'] || 'language,artist,parody,character,group,tag').split(',');
-  main = EHT.filter(i => main.includes(i.name));
+function autoComplete () { // 自动填充
+  let main = (CONFIG['acItem'] || 'language,artist,parody,character,group,tag').split(',')
+  main = EHT.filter(i => main.includes(i.name))
   $('<div class="nhDatalist"><ol start="0"></ol></div>').on('click', 'li', function (e) {
-    let value = $('[name="q"]').val().split(/\s+/);
-    value[value.length - 1] = e.target.textContent;
-    $('[name="q"]').val(value.filter(i => i).join(' ')).focus();
-    $('.nhDatalist>ol').empty();
-    $('.nhDatalist').show();
-  }).appendTo('form:has([name="q"])');
-  let lastValue;
+    let value = $('[name="q"]').val().split(/\s+/)
+    value[value.length - 1] = e.target.textContent
+    $('[name="q"]').val(value.filter(i => i).join(' ')).focus()
+    $('.nhDatalist>ol').empty()
+    $('.nhDatalist').show()
+  }).appendTo('form:has([name="q"])')
+  let lastValue
   $('[name="q"]').attr('title', `当输入大于${CONFIG['acLength'] || 0}个字符时，显示选单<br>使用主键盘区的数字/加减/方向键快速选择<br>点击/Enter/Insert键填充<br>使用输入法时，无法使用数字/加减选择`).on({
     focusin: function () {
-      $('.nhDatalist').show();
+      $('.nhDatalist').show()
     },
     focusout: function () {
       setTimeout(() => {
-        $('.nhDatalist').hide();
-      }, 100);
+        $('.nhDatalist').hide()
+      }, 100)
     },
     keydown: function (e) {
-      let hasItem = $('.nhDatalist li').length;
-      let onItem = $('.nhDatalistHover').index();
-      if (hasItem && e.keyCode <= 57 && e.keyCode >= 48) { //选择选项: 0-9
-        e.preventDefault();
-        $('.nhDatalist li').eq(e.keyCode - 48).click();
-      } else if (hasItem && [187, 189, 37, 38, 39, 40].includes(e.keyCode)) { //选择选项: 加减/方向键
-        e.preventDefault();
-        if ([187, 40].includes(e.keyCode)) { //选择选项: +下
-          onItem = onItem + 1;
-        } else if ([189, 38].includes(e.keyCode)) { //选择选项: -上
-          onItem = onItem - 1;
-        } else if (e.keyCode === 39) { //选择选项: 右
-          onItem = onItem + 10;
-        } else if (e.keyCode === 37) { //选择选项: 左
-          onItem = onItem - 10;
+      let hasItem = $('.nhDatalist li').length
+      let onItem = $('.nhDatalistHover').index()
+      if (hasItem && e.keyCode <= 57 && e.keyCode >= 48) { // 选择选项: 0-9
+        e.preventDefault()
+        $('.nhDatalist li').eq(e.keyCode - 48).click()
+      } else if (hasItem && [187, 189, 37, 38, 39, 40].includes(e.keyCode)) { // 选择选项: 加减/方向键
+        e.preventDefault()
+        if ([187, 40].includes(e.keyCode)) { // 选择选项: +下
+          onItem = onItem + 1
+        } else if ([189, 38].includes(e.keyCode)) { // 选择选项: -上
+          onItem = onItem - 1
+        } else if (e.keyCode === 39) { // 选择选项: 右
+          onItem = onItem + 10
+        } else if (e.keyCode === 37) { // 选择选项: 左
+          onItem = onItem - 10
         }
         if (onItem < 0) {
-          onItem = 0;
+          onItem = 0
         } else if (onItem > hasItem - 1) {
-          onItem = hasItem - 1;
+          onItem = hasItem - 1
         }
-        $('.nhDatalist li').removeClass('nhDatalistHover');
-        $('.nhDatalist li').eq(onItem).addClass('nhDatalistHover');
-        $('.nhDatalist').scrollTop($('.nhDatalistHover').position().top - $('.nhDatalist>ol').position().top - 150 + $('.nhDatalistHover').height() / 2);
-      } else if (onItem >= 0 && [13, 45].includes(e.keyCode)) { //选择选项: Insert
-        e.preventDefault();
-        $('.nhDatalistHover').click();
+        $('.nhDatalist li').removeClass('nhDatalistHover')
+        $('.nhDatalist li').eq(onItem).addClass('nhDatalistHover')
+        $('.nhDatalist').scrollTop($('.nhDatalistHover').position().top - $('.nhDatalist>ol').position().top - 150 + $('.nhDatalistHover').height() / 2)
+      } else if (onItem >= 0 && [13, 45].includes(e.keyCode)) { // 选择选项: Insert
+        e.preventDefault()
+        $('.nhDatalistHover').click()
       }
     },
     keyup: function (e) {
-      let value = e.target.value.split(/\s+/);
-      value = value[value.length - 1];
-      if (value === lastValue) return;
-      $('.nhDatalist>ol').empty();
-      if (!value || (value.length <= (CONFIG['acLength'] || 0) && !value.match(/[\u4e00-\u9fa5]/))) return;
-      lastValue = value;
-      value = new RegExp(value, 'i');
+      let value = e.target.value.split(/\s+/)
+      value = value[value.length - 1]
+      if (value === lastValue) return
+      $('.nhDatalist>ol').empty()
+      if (!value || (value.length <= (CONFIG['acLength'] || 0) && !value.match(/[\u4e00-\u9fa5]/))) return
+      lastValue = value
+      value = new RegExp(value, 'i')
       main.forEach(i => {
         i.tags.filter(j => j.name && (j.name.match(value) || combineText(j.cname, true).match(value))).forEach(j => {
-          $(`<li cname="${combineText(j.cname, true)}">${i.name}:"${j.name}"</li>`).appendTo('.nhDatalist>ol');
-        });
-      });
-      $('.nhDatalist').show();
+          $(`<li cname="${combineText(j.cname, true)}">${i.name}:"${j.name}"</li>`).appendTo('.nhDatalist>ol')
+        })
+      })
+      $('.nhDatalist').show()
     }
-  });
+  })
 }
 
-function btnAddFav() { //按钮 -> 加入黑名单
+function btnAddFav () { // 按钮 -> 加入黑名单
   $('<div class="btnAddFav" title="加入黑名单/从黑名单中移除"></div>').on({
     contextmenu: () => false,
     mousedown: e => {
-      let keyword = $('#info>h1').length ? $('#info>h1').text() : $(e.target).parentsUntil('.index-container').find('.caption').text();
-      keyword = prompt('请输入加入黑名单或从黑名单中移除的关键词', keyword);
-      if (keyword) toggleBlacklist(keyword.trim());
-      highlightBlacklist();
+      let keyword = $('#info>h1').length ? $('#info>h1').text() : $(e.target).parentsUntil('.index-container').find('.caption').text()
+      keyword = window.prompt('请输入加入黑名单或从黑名单中移除的关键词', keyword)
+      if (keyword) toggleBlacklist(keyword.trim())
+      highlightBlacklist()
     }
-  }).appendTo('.nhContainer,.buttons');
+  }).appendTo('.nhContainer,.buttons')
 }
 
-function btnSearch() { //按钮 -> 搜索(信息页)
-  let text = $('#info>h1').text() || $('#info>h2').text();
-  if (text === '') return;
-  $('<div class="nhSearch"></div>').insertBefore('#tags');
-  text = text.split(/[\[\]\(\)\{\}【】\|\-\d]+/);
+function btnSearch () { // 按钮 -> 搜索(信息页)
+  let text = $('#info>h1').text() || $('#info>h2').text()
+  if (text === '') return
+  $('<div class="nhSearch"></div>').insertBefore('#tags')
+  text = text.split(/[[\](){}【】|\-\d]+/)
   for (let i = 0; i < text.length; i++) {
-    text[i] = text[i].trim();
-    if (text[i]) $('<span></span>').html(`<input id="nhSearch_${i}" type="checkbox"><label for="nhSearch_${i}">${text[i]}</label>`).appendTo('.nhSearch');
+    text[i] = text[i].trim()
+    if (text[i]) $('<span></span>').html(`<input id="nhSearch_${i}" type="checkbox"><label for="nhSearch_${i}">${text[i]}</label>`).appendTo('.nhSearch')
   }
   $('<input class="btn btn-primary" type="button" value="Search" title="搜索">').appendTo('.nhSearch').click(() => {
-    let keyword = $('.nhSearch input:checked+label').toArray().map(i => '"' + i.textContent + '"').join(' ');
-    if (keyword.length > 0) openUrl('/search/?q=' + encodeURIComponent(keyword));
-  });
+    let keyword = $('.nhSearch input:checked+label').toArray().map(i => '"' + i.textContent + '"').join(' ')
+    if (keyword.length > 0) openUrl('/search/?q=' + encodeURIComponent(keyword))
+  })
 }
 
-function btnSearch2() { //按钮 -> 搜索(搜索页)
+function btnSearch2 () { // 按钮 -> 搜索(搜索页)
   $('<div class="btnSearch"></div>').attr('title', CONFIG['searchEventChs']).appendTo('.nhContainer').on({
     contextmenu: () => false,
     mousedown: e => {
-      let event = CONFIG['searchEvent'].split('|').filter(i => i.match(new RegExp(`^${e.button},`)));
+      let event = CONFIG['searchEvent'].split('|').filter(i => i.match(new RegExp(`^${e.button},`)))
       for (let i = 0; i < event.length; i++) {
-        let arr = event[i].split(',');
-        let keydown = arr[1] === '-1' ? true : e[['altKey', 'ctrlKey', 'shiftKey'][arr[1]]];
+        let arr = event[i].split(',')
+        let keydown = arr[1] === '-1' ? true : e[['altKey', 'ctrlKey', 'shiftKey'][arr[1]]]
         if (keydown) {
-          let name;
-          let id = $(e.target).parentsUntil('.index-container').eq(-1).find('.cover').attr('href').match(/\d+/)[0] * 1;
-          let tags = window.gmetadata.filter(i => i.id * 1 === id)[0].tags.map(i => `${i.type}:"${i.name}"`);
+          let name
+          let id = $(e.target).parentsUntil('.index-container').eq(-1).find('.cover').attr('href').match(/\d+/)[0] * 1
+          let tags = window.gmetadata.filter(i => i.id * 1 === id)[0].tags.map(i => `${i.type}:"${i.name}"`)
           if (arr[2] === '-1') {
-            let order = prompt(tags.map((i, j) => `${j}: ${translateText(i)}`).join('\n'));
+            let order = window.prompt(tags.map((i, j) => `${j}: ${translateText(i)}`).join('\n'))
             if (order) {
-              name = tags[order];
+              name = tags[order]
             } else {
-              return;
+              return
             }
           } else if (arr[2] === '0') {
-            name = $(e.target).parentsUntil('.index-container').eq(-1).find('.caption').text();
-            name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|\-|!/g, '').replace(/\|.*/, '').trim();
-            name = '"' + name + '"';
+            name = $(e.target).parentsUntil('.index-container').eq(-1).find('.caption').text()
+            name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|-|!/g, '').replace(/\|.*/, '').trim()
+            name = '"' + name + '"'
           } else if (arr[2] === '1' && tags.filter(i => i.match(/^(artist|group):/)).length) {
-            name = tags.filter(i => i.match(/^artist:/)).length ? tags.filter(i => i.match(/^artist:/))[0] : tags.filter(i => i.match(/^group:/))[0];
+            name = tags.filter(i => i.match(/^artist:/)).length ? tags.filter(i => i.match(/^artist:/))[0] : tags.filter(i => i.match(/^group:/))[0]
           } else {
-            return;
+            return
           }
-          if (arr[3] === '1') name += ' language:"chinese"';
-          openUrl('/search/?q=' + encodeURIComponent(name));
+          if (arr[3] === '1') name += ' language:"chinese"'
+          openUrl('/search/?q=' + encodeURIComponent(name))
           if ($(e.target).attr('style')) {
-            $(e.target).css('border-width', parseInt($(e.target).css('border-width')) + 1 + 'px');
+            $(e.target).css('border-width', parseInt($(e.target).css('border-width')) + 1 + 'px')
           } else {
-            $(e.target).css('border-color', 'red').css('border-style', 'solid').css('border-width', '1px');
+            $(e.target).css('border-color', 'red').css('border-style', 'solid').css('border-width', '1px')
           }
-          break;
+          break
         }
       }
     }
-  });
+  })
 }
 
-function calcRelativeTime(time) { //计算相对时间
-  let delta = new Date().getTime() - new Date(time).getTime();
+function calcRelativeTime (time) { // 计算相对时间
+  let delta = new Date().getTime() - new Date(time).getTime()
   let info = {
     millisecond: 1,
     second: 1000,
@@ -311,262 +311,263 @@ function calcRelativeTime(time) { //计算相对时间
     day: 24,
     month: 30,
     year: 12
-  };
-  let suf;
-  let t = delta;
+  }
+  let suf
+  let t = delta
   for (let i in info) {
-    let m = t / info[i]; //倍数
-    let r = t % info[i]; //语数
-    if (m >= 1 || info[i] - r <= 2) { //进阶
-      t = m;
-      suf = i;
+    let m = t / info[i] // 倍数
+    let r = t % info[i] // 语数
+    if (m >= 1 || info[i] - r <= 2) { // 进阶
+      t = m
+      suf = i
     } else {
-      break;
+      break
     }
   }
-  t = Math.round(t);
-  let text = `about ${t} ${suf}${t > 1 ? 's' : ''} ago`;
-  if (delta <= 1000 * 60 * 60 * 24 * 7) text = '<span class="nhHighlight">' + text + '</span>';
-  return text;
+  t = Math.round(t)
+  let text = `about ${t} ${suf}${t > 1 ? 's' : ''} ago`
+  if (delta <= 1000 * 60 * 60 * 24 * 7) text = '<span class="nhHighlight">' + text + '</span>'
+  return text
 }
 
-function changeName(e) { //修改本子标题（移除集会名）
+function changeName (e) { // 修改本子标题（移除集会名）
   $(e).toArray().forEach(i => {
-    i.textContent = htmlUnescape(i.textContent).replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim();
-  });
+    i.textContent = htmlUnescape(i.textContent).replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim()
+  })
 }
 
-function checkExist() { //检查本地是否存在
+function checkExist () { // 检查本地是否存在
   $('.gallery').toArray().forEach(i => {
-    $('<div class="nhExistContainer"></div>').insertAfter($(i).find('.nhContainer>.btnSearch'));
-  });
+    $('<div class="nhExistContainer"></div>').insertAfter($(i).find('.nhContainer>.btnSearch'))
+  })
   $('<input class="btn btn-primary" type="button" name="checkExist" value="Check Exist" title="只检查可见的，且之前检查无结果">').on('click', async (e) => {
+    let uselessStrRE = /\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|～|~/g
+    let langRE = /\[(Chinese|English|Digital)\].*/gi
 
-    let uselessStrRE = /\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|～|~/g;
-    let langRE = /\[(Chinese|English|Digital)\].*/gi;
-
-    $(e.target).val('Checking').prop('disabled', true);
-    let lst = $('.gallery:visible:not(:has(.nhExist[name="force"])) .caption').toArray();
-    let name = {};
+    $(e.target).val('Checking').prop('disabled', true)
+    let lst = $('.gallery:visible:not(:has(.nhExist[name="force"])) .caption').toArray()
+    let name = {}
     lst.forEach((i, j) => {
       if (CONFIG['checkExistName2']) {
-        name[j] = i.textContent.replace(uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
+        name[j] = i.textContent.replace(uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim()
       } else {
-        let arr = i.textContent.replace(/\|.*?([\(\[\{【［（]|$)/, '$1').replace(/[\\/:*?"<>|]/g, '-').replace(langRE, '').split(/[\[\]\(\)\{\}【】［］（）～~]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i);
-        name[j] = arr.join();
-        if (name[j] === '') name[j] = i.textContent.replace(uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
+        let arr = i.textContent.replace(/\|.*?([([{【［（]|$)/, '$1').replace(/[\\/:*?"<>|]/g, '-').replace(langRE, '').split(/[[\](){}【】［］（）～~]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i)
+        name[j] = arr.join()
+        if (name[j] === '') name[j] = i.textContent.replace(uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim()
       }
-    });
+    })
     let res = await xhrSync('http://127.0.0.1:3000/', 'names=' + encodeURIComponent(JSON.stringify(name)), {
       responseType: 'json',
       timeout: 120 * 1000
-    });
+    })
     lst.forEach((i, j) => {
-      let name = i.textContent;
-      let name2 = name.match(/\|.*?([\(\[\{【［（]|$)/) ? name.replace(/\|.*?([\(\[\{【［（]|$)/, '$1') : name;
-      name = name.replace(/[\\/:*?"<>|]/g, '-');
-      name2 = name2.replace(/[\\/:*?"<>|]/g, '-');
-      let name3 = name.replace(langRE, '').replace(/\.$/, '').trim();
-      let name4 = name2.replace(langRE, '').replace(/\.$/, '').trim();
-      name = name.replace(/\.$/, '').trim();
-      name2 = name.replace(/\.$/, '').trim();
+      let name = i.textContent
+      let name2 = name.match(/\|.*?([([{【［（]|$)/) ? name.replace(/\|.*?([([{【［（]|$)/, '$1') : name
+      name = name.replace(/[\\/:*?"<>|]/g, '-')
+      name2 = name2.replace(/[\\/:*?"<>|]/g, '-')
+      let name3 = name.replace(langRE, '').replace(/\.$/, '').trim()
+      let name4 = name2.replace(langRE, '').replace(/\.$/, '').trim()
+      name = name.replace(/\.$/, '').trim()
+      name2 = name.replace(/\.$/, '').trim()
       res.response[j].forEach(k => {
-        if (k.match(/\.jpg$/)) return;
-        let fileSize = (k.match(/^([\d,]+)/)[1].replace(/,/g, '') * 1 / 1024 / 1024).toFixed(2);
-        let fileName = k.replace(/^[\d,]+\s+/, '');
-        let noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').trim();
-        let noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$');
-        let noLang = noExt.replace(langRE, '').trim();
-        let noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$');
-        let p = $(i).parentsUntil('.index-container').eq(-1).find('.nhExistContainer');
-        let _name = (noExtRE.exec(name) || noExtRE.exec(name2)) ? 'force' :
-          noExt.match(/\[Incomplete\]/i) ? 'incomplete' :
-            (noLangRE.exec(name3) || noLangRE.exec(name4)) ? 'force1' : '';
-        let ed = _name === 'force' ? 0 : getEditDistance(noExt, name);
-        if (p.find(`[copy="${fileName}"][fileSize="${fileSize}"]`).length === 0) $(`<span class="nhExist" fileSize="${fileSize}" name="${_name}" copy="${fileName}" similar="${ed}" tooltip="EditDistance: ${ed}"></span>`).appendTo(p);
-        $(p).find('.nhExist').toArray().sort((a, b) => $(a).attr('similar') * 1 - $(b).attr('similar') * 1).forEach(ele => $(ele).appendTo(p));
-      });
-    });
-    $(e.target).val('Check Exist').prop('disabled', false);
-  }).appendTo('.nhNavBar>div:eq(1)');
+        if (k.match(/\.jpg$/)) return
+        let fileSize = (k.match(/^([\d,]+)/)[1].replace(/,/g, '') * 1 / 1024 / 1024).toFixed(2)
+        let fileName = k.replace(/^[\d,]+\s+/, '')
+        let noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').trim()
+        let noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$')
+        let noLang = noExt.replace(langRE, '').trim()
+        let noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$')
+        let p = $(i).parentsUntil('.index-container').eq(-1).find('.nhExistContainer')
+        let _name = (noExtRE.exec(name) || noExtRE.exec(name2)) ? 'force'
+          : noExt.match(/\[Incomplete\]/i) ? 'incomplete'
+            : (noLangRE.exec(name3) || noLangRE.exec(name4)) ? 'force1' : ''
+        let ed = _name === 'force' ? 0 : getEditDistance(noExt, name)
+        if (p.find(`[copy="${fileName}"][fileSize="${fileSize}"]`).length === 0) $(`<span class="nhExist" fileSize="${fileSize}" name="${_name}" copy="${fileName}" similar="${ed}" tooltip="EditDistance: ${ed}"></span>`).appendTo(p)
+        $(p).find('.nhExist').toArray().sort((a, b) => $(a).attr('similar') * 1 - $(b).attr('similar') * 1).forEach(ele => $(ele).appendTo(p))
+      })
+    })
+    $(e.target).val('Check Exist').prop('disabled', false)
+  }).appendTo('.nhNavBar>div:eq(1)')
 }
 
-function checkForNew(gmetadata) { //检查有无新本子
+function checkForNew (gmetadata) { // 检查有无新本子
   $('<li class="desktop"><a href="javascript:;">Add List</a></li>').on({
     contextmenu: () => false,
     mousedown: e => {
-      e.preventDefault();
-      let keyword = $('[name="q"]').val();
-      let list = GM_getValue('checkList', {});
-      let name;
-      let nameInput;
-      if (keyword in list && list[keyword].name) name = list[keyword].name;
+      e.preventDefault()
+      let keyword = $('[name="q"]').val()
+      let list = GM_getValue('checkList', {})
+      let name
+      let nameInput
+      if (keyword in list && list[keyword].name) name = list[keyword].name
       if (e.button === 0) {
-        if (!name) name = translateText(keyword);
-        nameInput = prompt('请输入名称\n留空: ' + name);
-        if (nameInput === null) return;
+        if (!name) name = translateText(keyword)
+        nameInput = window.prompt('请输入名称\n留空: ' + name)
+        if (nameInput === null) return
       }
-      $(e.target).remove();
+      $(e.target).remove()
       list[keyword] = {
         time: new Date().getTime(),
         result: $('h1,h2').text().match(/[\d,]+/) ? $('h1,h2').text().match(/[\d,]+/)[0].replace(/,/g, '') * 1 : 0
       }
-      if (nameInput || name !== translateText(keyword)) list[keyword].name = nameInput || name;
-      GM_setValue('checkList', sortObj(list, 'time'));
+      if (nameInput || name !== translateText(keyword)) list[keyword].name = nameInput || name
+      GM_setValue('checkList', sortObj(list, 'time'))
     }
-  }).appendTo('.menu.left');
+  }).appendTo('.menu.left')
 
   $('<li class="desktop"><a href="javascript:;">Show List</a></li>').on('click', e => {
     if ($('.nhCheckTableContainer').length) {
-      $('.nhCheckTableContainer').toggle();
-      return;
+      $('.nhCheckTableContainer').toggle()
+      return
     }
-    $('<div class="nhCheckTableContainer"></div>').html('<div class="nhPages"></div><div class="nhCheckTable"><table><thead><tr><th>#</th><th>Keyword</th><th>Name</th><th><a class="nhCheckTableSort" href="javascript:;" name="time" title="sort by time">Time</a></th><th><a class="nhCheckTableSort" href="javascript:;" name="result" title="sort by result">Result</a></th><th><input name="selectAll" type="checkbox" title="全选"></th></tr></thead><tbody></tbody></table></div><div class="nhCheckTableBtn"></div>').appendTo('body');
-    let list = GM_getValue('checkList', {});
-    let keys = Object.keys(list);
-    let pages = Math.ceil(keys.length / CONFIG['checkListPerPage']);
+    $('<div class="nhCheckTableContainer"></div>').html('<div class="nhPages"></div><div class="nhCheckTable"><table><thead><tr><th>#</th><th>Keyword</th><th>Name</th><th><a class="nhCheckTableSort" href="javascript:;" name="time" title="sort by time">Time</a></th><th><a class="nhCheckTableSort" href="javascript:;" name="result" title="sort by result">Result</a></th><th><input name="selectAll" type="checkbox" title="全选"></th></tr></thead><tbody></tbody></table></div><div class="nhCheckTableBtn"></div>').appendTo('body')
+    let list = GM_getValue('checkList', {})
+    let keys = Object.keys(list)
+    let pages = Math.ceil(keys.length / CONFIG['checkListPerPage'])
     let getSomeList = page => {
-      $('.nhCheckTable tbody').empty();
+      $('.nhCheckTable tbody').empty()
       for (let key = (page - 1) * CONFIG['checkListPerPage']; key < page * CONFIG['checkListPerPage']; key++) {
-        if (key >= keys.length) break;
-        let i = keys[key];
-        let tr = $('<tr><td></td><td></td><td></td><td></td><td></td><td><input type="checkbox"></td></tr>');
-        $('<a target="_blank"></a>').attr('href', '/search/?q=' + encodeURIComponent(i)).text(i).appendTo($(tr).find('td:eq(1)'));
-        $(tr).find('td:eq(2)').text(list[i].name || translateText(i));
-        $(tr).find('td:eq(3)').html(`<time title="${new Date(list[i].time).toLocaleString()}" datetime="${list[i].time}">${calcRelativeTime(list[i].time)}</time>`);
-        $(tr).find('td:eq(4)').text(list[i].result);
-        $(tr).appendTo('.nhCheckTableContainer tbody');
+        if (key >= keys.length) break
+        let i = keys[key]
+        let tr = $('<tr><td></td><td></td><td></td><td></td><td></td><td><input type="checkbox"></td></tr>')
+        $('<a target="_blank"></a>').attr('href', '/search/?q=' + encodeURIComponent(i)).text(i).appendTo($(tr).find('td:eq(1)'))
+        $(tr).find('td:eq(2)').text(list[i].name || translateText(i))
+        $(tr).find('td:eq(3)').html(`<time title="${new Date(list[i].time).toLocaleString()}" datetime="${list[i].time}">${calcRelativeTime(list[i].time)}</time>`)
+        $(tr).find('td:eq(4)').text(list[i].result)
+        $(tr).appendTo('.nhCheckTableContainer tbody')
       }
-    };
-    getSomeList(1);
+    }
+    getSomeList(1)
     if (pages > 1) {
       $('.nhPages').html([...Array(pages).keys()].map(i => `<a name="${i + 1}"></a>`)).on('click', 'a', function (e) {
-        $('.nhPages>a').removeClass('nhPagesHover');
-        $(e.target).addClass('nhPagesHover');
-        getSomeList(e.target.name);
-      });
-      $('.nhPages>a[name="1"]').addClass('nhPagesHover');
+        $('.nhPages>a').removeClass('nhPagesHover')
+        $(e.target).addClass('nhPagesHover')
+        getSomeList(e.target.name)
+      })
+      $('.nhPages>a[name="1"]').addClass('nhPagesHover')
     }
     $('.nhCheckTable th>input[name="selectAll"]').on('click', e => {
-      $('.nhCheckTable td>input').prop('checked', e.target.checked);
-    });
+      $('.nhCheckTable td>input').prop('checked', e.target.checked)
+    })
     $('.nhCheckTable .nhCheckTableSort').on('click', e => {
-      let list = GM_getValue('checkList', {});
-      GM_setValue('checkList', sortObj(list, e.target.name));
-      $('.nhCheckTableContainer').remove();
-      $('.menu.left>.desktop:contains("Show List")').click();
-    });
+      let list = GM_getValue('checkList', {})
+      GM_setValue('checkList', sortObj(list, e.target.name))
+      $('.nhCheckTableContainer').remove()
+      $('.menu.left>.desktop:contains("Show List")').click()
+    })
     $('<input class="btn btn-primary" type="button" value="Select Invert" title="反选">').on('click', function () {
       $('.nhCheckTable td>input').toArray().forEach(i => {
-        i.checked = !i.checked;
-      });
-    }).appendTo('.nhCheckTableBtn');
+        i.checked = !i.checked
+      })
+    }).appendTo('.nhCheckTableBtn')
     $('<input class="btn btn-primary" type="button" value="Delete" title="移除">').on('click', function () {
-      let list = GM_getValue('checkList', {});
+      let list = GM_getValue('checkList', {})
       $('.nhCheckTable td>input:checked').toArray().forEach(i => {
-        let keyword = $(i).parentsUntil('tbody').eq(-1).find('td>a').html();
-        delete list[keyword];
-      });
-      GM_setValue('checkList', list);
-      $('.nhCheckTableContainer').remove();
-    }).appendTo('.nhCheckTableBtn');
+        let keyword = $(i).parentsUntil('tbody').eq(-1).find('td>a').html()
+        delete list[keyword]
+      })
+      GM_setValue('checkList', list)
+      $('.nhCheckTableContainer').remove()
+    }).appendTo('.nhCheckTableBtn')
     $('<input class="btn btn-primary" type="button" value="Cancel" title="取消">').on('click', function () {
-      $('.nhCheckTableContainer').hide();
-    }).appendTo('.nhCheckTableBtn');
-  }).appendTo('.menu.left');
+      $('.nhCheckTableContainer').hide()
+    }).appendTo('.nhCheckTableBtn')
+  }).appendTo('.menu.left')
 
-  let keyword = $('[name="q"]').val();
-  if (!keyword) return;
-  let list = GM_getValue('checkList', {});
-  if (!(keyword in list)) return;
-  let info = list[keyword];
-  let tr = $('.gallery').toArray();
-  let i;
-  let time = info.time;
+  let keyword = $('[name="q"]').val()
+  if (!keyword) return
+  let list = GM_getValue('checkList', {})
+  if (!(keyword in list)) return
+  let info = list[keyword]
+  let tr = $('.gallery').toArray()
+  let i
+  let time = info.time
   for (i = 0; i < gmetadata.length; i++) {
-    let d = new Date(gmetadata[i].upload_date * 1000);
-    if (time > d.getTime()) break;
+    let d = new Date(gmetadata[i].upload_date * 1000)
+    if (time > d.getTime()) break
   }
-  let ele = $(`<div class="gallery">Last Check Time: <time title="${new Date(info.time).toLocaleString()}" datetime="${info.time}">${calcRelativeTime(info.time)}</time><br>Results: ${info.result}<div class="caption">Name: ${info.name || translateText(keyword)}</div></div>`);
+  let ele = $(`<div class="gallery">Last Check Time: <time title="${new Date(info.time).toLocaleString()}" datetime="${info.time}">${calcRelativeTime(info.time)}</time><br>Results: ${info.result}<div class="caption">Name: ${info.name || translateText(keyword)}</div></div>`)
   if (i === tr.length) {
-    ele.insertAfter(tr[i - 1]);
+    ele.insertAfter(tr[i - 1])
   } else {
-    ele.insertBefore(tr[i]);
+    ele.insertBefore(tr[i])
   }
-  let result = $('h1,h2').text().match(/[\d,]+/) ? $('h1,h2').text().match(/[\d,]+/)[0].replace(/,/g, '') * 1 : 0;
+  let result = $('h1,h2').text().match(/[\d,]+/) ? $('h1,h2').text().match(/[\d,]+/)[0].replace(/,/g, '') * 1 : 0
   if (result - info.result <= CONFIG['autoUpdateCheck'] && $('.page.current').text() === '1') {
     list[keyword] = {
       time: new Date().getTime(),
       result: result
     }
-    if (info.name) list[keyword].name = info.name;
-    GM_setValue('checkList', sortObj(list, 'time'));
-    setNotification((info.name || translateText(keyword)), 'CheckList updated');
+    if (info.name) list[keyword].name = info.name
+    GM_setValue('checkList', sortObj(list, 'time'))
+    setNotification((info.name || translateText(keyword)), 'CheckList updated')
   }
 }
 
-function combineText(arr, textOnly = undefined) {
+function combineText (arr, textOnly = undefined) {
   return arr instanceof Array ? arr.map(i => {
     if (i.type === 0) {
-      return i.text;
+      return i.text
     } else if (!textOnly && i.type === 2) {
-      return `"url("${i.src.replace(/http.?:/g, '')}")"`;
+      return `"url("${i.src.replace(/http.?:/g, '')}")"`
     } else {
-      return null;
+      return null
     }
-  }).filter(i => i).join('\\A') : '';
+  }).filter(i => i).join('\\A') : ''
 }
 
-function copyInfo() { //复制信息
-  if ($('#info>h1').text().match(/\[(.*?)\]/) && $('#info>h2').text().match(/\[(.*?)\]/)) { //artist
-    var name = $('#info>h1').text().match(/\[(.*?)\]/)[1];
-    var nameJpn = $('#info>h2').text().match(/\[(.*?)\]/)[1];
-    if (name.match(/\(.*?\)/)) name = name.match(/\((.*?)\)/)[1];
-    if (nameJpn.match(/\(.*?\)/)) nameJpn = nameJpn.match(/\((.*?)\)/)[1];
-    $(`<input class="btn btn-primary" type="button" value="[${name}]${nameJpn}" copy="[${name}]${nameJpn}">`).appendTo('.nhNavBar>div:eq(0)');
+function copyInfo () { // 复制信息
+  if ($('#info>h1').text().match(/\[(.*?)\]/) && $('#info>h2').text().match(/\[(.*?)\]/)) { // artist
+    var name = $('#info>h1').text().match(/\[(.*?)\]/)[1]
+    var nameJpn = $('#info>h2').text().match(/\[(.*?)\]/)[1]
+    if (name.match(/\(.*?\)/)) name = name.match(/\((.*?)\)/)[1]
+    if (nameJpn.match(/\(.*?\)/)) nameJpn = nameJpn.match(/\((.*?)\)/)[1]
+    $(`<input class="btn btn-primary" type="button" value="[${name}]${nameJpn}" copy="[${name}]${nameJpn}">`).appendTo('.nhNavBar>div:eq(0)')
   }
-  if ($('.tag-container:contains("Parodies") a.tag').length > 0) { //parody
-    let sub = $('.tag-container:contains("Parodies") a.tag')[0].childNodes[0].textContent.trim();
-    let parody = findData('parody', sub, true);
+  if ($('.tag-container:contains("Parodies") a.tag').length > 0) { // parody
+    let sub = $('.tag-container:contains("Parodies") a.tag')[0].childNodes[0].textContent.trim()
+    let parody = findData('parody', sub, true)
     if (Object.keys(parody).length) {
-      parody = parody.cname;
+      parody = parody.cname
     } else {
-      parody = $('#info>h2').text().match(/\(.*?\)/g) ? $('#info>h2').text().match(/\(.*?\)/g) : $('#info>h1').text().match(/\(.*?\)/g);
+      parody = $('#info>h2').text().match(/\(.*?\)/g) ? $('#info>h2').text().match(/\(.*?\)/g) : $('#info>h1').text().match(/\(.*?\)/g)
       if (parody) {
-        parody = parody[parody.length - 1].match(/\((.*?)\)/)[1];
+        parody = parody[parody.length - 1].match(/\((.*?)\)/)[1]
       } else {
-        return;
+        return
       }
     }
-    let parodyKeyword = $('.tag-container:contains("Parodies") a.tag')[0].childNodes[0].textContent.trim().replace(/ \| .*/, '');
-    $(`<input class="btn btn-primary" type="button" value="【${parody}】${parodyKeyword}" copy="【${parody}】${parodyKeyword}">`).appendTo('.nhNavBar>div:eq(0)');
+    let parodyKeyword = $('.tag-container:contains("Parodies") a.tag')[0].childNodes[0].textContent.trim().replace(/ \| .*/, '')
+    $(`<input class="btn btn-primary" type="button" value="【${parody}】${parodyKeyword}" copy="【${parody}】${parodyKeyword}">`).appendTo('.nhNavBar>div:eq(0)')
   }
 }
 
-function findData(main, sub, textOnly = true) {
-  let data = EHT.filter(i => i.name === main);
-  if (data.length === 0 || data[0].tags.length === 0) return {};
-  if (sub === undefined) return {
-    name: main,
-    cname: combineText(data[0].cname, textOnly),
-    info: combineText(data[0].info, textOnly)
-  };
-  let data1 = data[0].tags.filter(i => i.name === sub.replace(/_/g, ' '));
+function findData (main, sub, textOnly = true) {
+  let data = EHT.filter(i => i.name === main)
+  if (data.length === 0 || data[0].tags.length === 0) return {}
+  if (sub === undefined) {
+    return {
+      name: main,
+      cname: combineText(data[0].cname, textOnly),
+      info: combineText(data[0].info, textOnly)
+    }
+  }
+  let data1 = data[0].tags.filter(i => i.name === sub.replace(/_/g, ' '))
   if (data1.length === 0) {
     if (sub.match(' \\| ')) {
-      let arr = sub.split(' | ').map(i => i.replace(/_/g, ' '));
-      data1 = data[0].tags.filter(i => arr.includes(i.name));
+      let arr = sub.split(' | ').map(i => i.replace(/_/g, ' '))
+      data1 = data[0].tags.filter(i => arr.includes(i.name))
     }
   }
   return data1.length ? {
     name: main === 'misc' ? sub : main + ':' + sub,
     cname: combineText(data1[0].cname, textOnly),
     info: combineText(data1[0].info, textOnly)
-  } : {};
+  } : {}
 }
 
-function getEditDistance(a, b) { //获取EditDistance
-  //来源: https://gist.github.com/andrei-m/982927
+function getEditDistance (a, b) { // 获取EditDistance
+  // 来源: https://gist.github.com/andrei-m/982927
   /*
   Copyright (c) 2011 Andrei Mackenzie
   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -574,196 +575,186 @@ function getEditDistance(a, b) { //获取EditDistance
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   */
 
-  if (a.length == 0) return b.length;
-  if (b.length == 0) return a.length;
+  if (a.length === 0) return b.length
+  if (b.length === 0) return a.length
 
-  var matrix = [];
+  var matrix = []
 
   // increment along the first column of each row
-  var i;
+  var i
   for (i = 0; i <= b.length; i++) {
-    matrix[i] = [i];
+    matrix[i] = [i]
   }
 
   // increment each column in the first row
-  var j;
+  var j
   for (j = 0; j <= a.length; j++) {
-    matrix[0][j] = j;
+    matrix[0][j] = j
   }
 
   // Fill in the rest of the matrix
   for (i = 1; i <= b.length; i++) {
     for (j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) == a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1]
       } else {
         matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
           Math.min(matrix[i][j - 1] + 1, // insertion
-            matrix[i - 1][j] + 1)); // deletion
+            matrix[i - 1][j] + 1)) // deletion
       }
     }
   }
 
-  return matrix[b.length][a.length];
+  return matrix[b.length][a.length]
 }
 
-async function getInfo() { //获取信息
-  let keyword = $('[name="q"]').val() || ($('h1').text() ? $('h1>span')[0].textContent + ":\"" + $('h1>span')[1].textContent + "\"" : null);
+async function getInfo () { // 获取信息
+  let keyword = $('[name="q"]').val() || ($('h1').text() ? $('h1>span')[0].textContent + ':"' + $('h1>span')[1].textContent + '"' : null)
   let res = await xhrSync(keyword ? '/api/galleries/search?query=' + encodeURIComponent(keyword) : 'api/galleries/all', null, {
     responseType: 'json'
-  });
-  return res.response.result;
+  })
+  return res.response.result
 }
 
-function hideGalleries(gmetadata) { //隐藏某些画集
+function hideGalleries (gmetadata) { // 隐藏某些画集
   let tags = {};
   ['Unlike', 'Alert', 'Like'].forEach(i => {
-    let tag = GM_getValue('tag' + i, []);
-    tags[i] = tag;
-  });
+    let tag = GM_getValue('tag' + i, [])
+    tags[i] = tag
+  })
   $('.cover').toArray().forEach(i => {
-    let info = gmetadata.filter(j => j.id * 1 === i.href.split('/')[4] * 1)[0];
-    if (!info) return;
-    let container = $(i).parentsUntil('.index-container').eq(-1).find('.nhContainer');
-    if (info.num_pages * 1 < CONFIG['fewPages']) $('<span class="nhTagNotice" name="Unlike" title="页面少">页面少</span>').appendTo(container);
+    let info = gmetadata.filter(j => j.id * 1 === i.href.split('/')[4] * 1)[0]
+    if (!info) return
+    let container = $(i).parentsUntil('.index-container').eq(-1).find('.nhContainer')
+    if (info.num_pages * 1 < CONFIG['fewPages']) $('<span class="nhTagNotice" name="Unlike" title="页面少">页面少</span>').appendTo(container)
     for (let j in tags) {
-      let check = info.tags.filter(k => tags[j].includes(k.type + ':' + k.name));
+      let check = info.tags.filter(k => tags[j].includes(k.type + ':' + k.name))
       if (check.length) {
         check.forEach(k => {
-          let main = k.type;
-          let sub = k.name;
-          let tagChs = findData(main, sub, true).cname;
-          tagChs = tagChs || k;
-          $(`<span class="nhTagNotice" name="${j}" title="${k}">${tagChs}</span>`).appendTo(container);
-        });
+          let main = k.type
+          let sub = k.name
+          let tagChs = findData(main, sub, true).cname
+          tagChs = tagChs || k
+          $(`<span class="nhTagNotice" name="${j}" title="${k}">${tagChs}</span>`).appendTo(container)
+        })
       }
     }
-  });
+  })
   if (!CONFIG['notHideUnlike']) {
-    let length = $('.gallery').filter(':has(.nhTagNotice[name="Unlike"])').hide().length;
-    if (CONFIG['alwaysShowLike']) length -= $('.gallery').filter(':has(.nhTagNotice[name="Unlike"]):has(.nhTagNotice[name="Like"])').show().length;
-    $('#content>h2').html($('#content>h2').html() + ' 过滤' + length + '本 ');
+    let length = $('.gallery').filter(':has(.nhTagNotice[name="Unlike"])').hide().length
+    if (CONFIG['alwaysShowLike']) length -= $('.gallery').filter(':has(.nhTagNotice[name="Unlike"]):has(.nhTagNotice[name="Like"])').show().length
+    $('#content>h2').html($('#content>h2').html() + ' 过滤' + length + '本 ')
     $('<input class="btn btn-primary" type="button" value="Show">').on('click', function (e) {
       if (CONFIG['alwaysShowLike']) {
-        $('.gallery').filter(':has(.nhTagNotice[name="Unlike"]):not(:has(.nhTagNotice[name="Like"]))').toggle();
+        $('.gallery').filter(':has(.nhTagNotice[name="Unlike"]):not(:has(.nhTagNotice[name="Like"]))').toggle()
       } else {
-        $('.gallery').filter(':has(.nhTagNotice[name="Unlike"])').toggle();
+        $('.gallery').filter(':has(.nhTagNotice[name="Unlike"])').toggle()
       }
-      $(e.target).val($(e.target).val() === 'Show' ? 'Hide' : 'Show');
-    }).appendTo('#content>h2');
+      $(e.target).val($(e.target).val() === 'Show' ? 'Hide' : 'Show')
+    }).appendTo('#content>h2')
   }
 }
 
-function highlightBlacklist() { //高亮黑名单相关的画廊(通用)
-  let blacklist = GM_getValue('blacklist', []);
+function highlightBlacklist () { // 高亮黑名单相关的画廊(通用)
+  let blacklist = GM_getValue('blacklist', [])
   $('.caption,#info>h1,#info>h2').toArray().forEach(i => {
-    let title = htmlEscape($(i).text());
+    let title = htmlEscape($(i).text())
     for (let j of blacklist) {
-      let re = new RegExp(j, 'gi');
+      let re = new RegExp(j, 'gi')
       if (title.match(re)) {
-        title = title.replace(re, '<span class="nhBlacklist" copy="$&">$&</span>');
+        title = title.replace(re, '<span class="nhBlacklist" copy="$&">$&</span>')
       }
     }
-    $(i).html(title);
-  });
+    $(i).html(title)
+  })
 }
 
-function htmlEscape(text) {
+function htmlEscape (text) {
   return text.replace(/["&<>]/g, function (match) {
     return {
       '"': '&quot;',
       '&': '&amp;',
       '<': '&lt;',
-      '>': '&gt;',
-    }[match];
-  });
+      '>': '&gt;'
+    }[match]
+  })
 }
 
-function htmlUnescape(text) {
+function htmlUnescape (text) {
   return text.replace(/(&.*?;)/g, function (match) {
     return {
       '&quot;': '"',
       '&amp;': '&',
       '&lt;': '<',
       '&gt;': '>',
-      '&#34;':'"',
+      '&#34;': '"',
       '&#39;': '\'',
       '&#034;': '"',
-      '&#039;': '\'',
-    }[match];
-  });
+      '&#039;': '\''
+    }[match]
+  })
 }
 
-function openUrl(url) { //打开链接
-  url = (url.match('//') ? '' : location.origin) + url;
+function openUrl (url) { // 打开链接
+  url = (url.match('//') ? '' : window.location.origin) + url
   if (!CONFIG['openInTab']) {
-    let popup = window.open(url, '', 'resizable,scrollbars,status');
+    let popup = window.open(url, '', 'resizable,scrollbars,status')
     if (popup) {
-      popup.moveTo(0, 0);
-      popup.resizeTo(screen.width, screen.height);
+      popup.moveTo(0, 0)
+      popup.resizeTo(window.screen.width, window.screen.height)
     }
   } else {
-    GM_openInTab(url, true);
+    GM_openInTab(url, true)
   }
 }
 
-function quickDownload() { //右键下载
-  $('.itg,#pp').on('contextmenu', e => {
-    if ($(e.target).is('.it5>a,.id3>a>img,.id2>a')) {
-      e.preventDefault();
-      let target = $(e.target).is('.id3>a>img') ? $(e.target).parent()[0] : e.target;
-      openUrl(target.href + '#2');
-    }
-  });
+function reEscape (text) {
+  return text.replace(/[$()*+.[\]?^{}|]/g, '\\$&')
 }
 
-function reEscape(text) {
-  return text.replace(/[\$\(\)\*\+\.\[\]\?\^\{\}\|]/g, '\\$&');
-}
-
-function saveLink() { //保存链接
+function saveLink () { // 保存链接
   $('<input class="btn btn-primary" type="button" title="创建链接" value="Shortcut">').click(function () {
     var content = [
       '[InternetShortcut]\r\nURL={{url}}',
       '<?xml version=\'1.0\' encoding=\'UTF-8\'?><!DOCTYPE plist PUBLIC \'-//Apple//DTD PLIST 1.0//EN\' \'http://www.apple.com/DTDs/PropertyList-1.0.dtd\'><plist version=\'1.0\'><dict><key>URL</key><string>{{url}}</string></dict></plist>',
       '[Desktop Entry]\r\nType=Link\r\nURL={{url}}'
-    ];
-    var platform = navigator.platform;
-    var fileType;
+    ]
+    var platform = navigator.platform
+    var fileType
     if (platform.match(/^Win/)) {
-      platform = 0;
-      fileType = '.url';
+      platform = 0
+      fileType = '.url'
     } else if (platform.match(/^Mac/)) {
-      platform = 1;
-      fileType = '.webloc';
+      platform = 1
+      fileType = '.webloc'
     } else {
-      platform = 2;
-      fileType = '.desktop';
+      platform = 2
+      fileType = '.desktop'
     }
-    let blob = new Blob([content[platform].replace('{{url}}', location.href)], {
+    let blob = new window.Blob([content[platform].replace('{{url}}', window.location.href)], {
       type: 'application/octet-stream'
-    });
-    $(`<a href="${URL.createObjectURL(blob)}"></a>`).attr('download', document.title + fileType)[0].click();
-  }).prependTo('.nhNavBar>div:eq(2)');
+    })
+    $(`<a href="${URL.createObjectURL(blob)}"></a>`).attr('download', document.title + fileType)[0].click()
+  }).prependTo('.nhNavBar>div:eq(2)')
 }
 
-function setNotification(title, body) { //发出桌面通知
-  if (Notification && Notification.permission !== 'denied') {
-    Notification.requestPermission(function (status) {
+function setNotification (title, body) { // 发出桌面通知
+  if (window.Notification && window.Notification.permission !== 'denied') {
+    window.Notification.requestPermission(function (status) {
       if (status === 'granted') {
-        var n = (body) ? new Notification(title, {
+        var n = (body) ? new window.Notification(title, {
           body: body,
           tag: GM_info.script.name
-        }) : new Notification(title);
+        }) : new window.Notification(title)
         setTimeout(function () {
-          if (n) n.close();
-        }, 3000);
+          if (n) n.close()
+        }, 3000)
       }
-    });
+    })
   }
 }
 
-function searchInOtherSite() { //在其他站点搜索
+function searchInOtherSite () { // 在其他站点搜索
   let sites = {
     'exhentai.net': {
       url: 'https://exhentai.org/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_sh=on&q={q}',
@@ -794,34 +785,34 @@ function searchInOtherSite() { //在其他站点搜索
     'hentai2read.com': {
       url: 'https://asmhentai.com/search/{q}/'
     }
-  };
-  let keyword, keywordJ;
-  if ($('#info>h1').length) {
-    keyword = $('#info>h1').text();
-    keywordJ = $('#info>h1').text();
-  } else {
-    keyword = $('[name="q"]').val();
-    keywordJ = $('[name="q"]').val();
   }
-  $('<li class="desktop ehSites"></li>').appendTo('.menu.left');
+  let keyword, keywordJ
+  if ($('#info>h1').length) {
+    keyword = $('#info>h1').text()
+    keywordJ = $('#info>h1').text()
+  } else {
+    keyword = $('[name="q"]').val()
+    keywordJ = $('[name="q"]').val()
+  }
+  $('<li class="desktop ehSites"></li>').appendTo('.menu.left')
   for (let i in sites) {
-    let url;
+    let url
     if ('url' in sites[i]) {
-      url = sites[i].url instanceof Function ? sites[i].url(keyword) : sites[i].url.replace('{q}', keyword);
+      url = sites[i].url instanceof Function ? sites[i].url(keyword) : sites[i].url.replace('{q}', keyword)
     } else if ('urlJ' in sites[i]) {
-      url = sites[i].urlJ instanceof Function ? sites[i].urlJ(keywordJ) : sites[i].urlJ.replace('{q}', keywordJ);
+      url = sites[i].urlJ instanceof Function ? sites[i].urlJ(keywordJ) : sites[i].urlJ.replace('{q}', keywordJ)
     }
-    $(`<a target="_blank" title="${i}"><img src="${sites[i].icon || '//www.google.com/s2/favicons?domain=' + i}"></img></a>`).attr('href', url).appendTo('.ehSites');
+    $(`<a target="_blank" title="${i}"><img src="${sites[i].icon || '//www.google.com/s2/favicons?domain=' + i}"></img></a>`).attr('href', url).appendTo('.ehSites')
   }
 }
 
-function showConfig() { //显示设置
+function showConfig () { // 显示设置
   $('<li class="desktop"><a href="javascript:;">[NH]Config</a></li>').on('click', function (e) {
     if ($('.nhConfig').length) {
-      $('.nhConfig').toggle();
-      return;
+      $('.nhConfig').toggle()
+      return
     }
-    let config = GM_getValue('config', {});
+    let config = GM_getValue('config', {})
     let _html = [
       '<label for="nhConfig_openInTab"><input type="checkbox" id="nhConfig_openInTab">在新标签页中打开，而不是弹窗</label>',
       '<label for="nhConfig_checkExist"><input type="checkbox" id="nhConfig_checkExist">显示按钮: 检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label>',
@@ -837,214 +828,214 @@ function showConfig() { //显示设置
       '搜索栏自动完成显示项目: <input name="nhConfig_acItem" type="text" placeholder="language,artist,parody,character,group,tag" title="以,分割">',
       '隐藏页数 < <input name="nhConfig_fewPages" type="number" placeholder="5" min="1"> 的本子',
       '当结果数目变化 <= <input name="nhConfig_autoUpdateCheck" type="number" placeholder="10" min="0">时, 自动更新Check',
-      '每页 <input name="nhConfig_checkListPerPage" type="number" placeholder="25" min="25" max="100"> 条CheckList',
-    ].map(i => i ? '<li>' + i + '</li>' : '<hr>').join('');
+      '每页 <input name="nhConfig_checkListPerPage" type="number" placeholder="25" min="25" max="100"> 条CheckList'
+    ].map(i => i ? '<li>' + i + '</li>' : '<hr>').join('')
     $('<div class="nhConfig"></div>').html('<ul>' + _html + '</ul><div class="nhConfigBtn"><input class="btn btn-primary" type="button" name="save" value="Save" title="保存"><input class="btn btn-primary" type="button" name="cancel" value="Cancel" title="取消"></div>').appendTo('body').on('click', function (e) {
       if ($(e.target).is('.nhConfigBtn>input[type="button"]')) {
         if (e.target.name === 'save') {
           $('.nhConfig input:not([type="button"]),.nhConfig select').toArray().forEach(i => {
-            let name, value;
+            let name, value
             if (i.type === 'number') {
-              name = i.name;
-              value = (i.value || i.placeholder) * 1;
-              if (isNaN(value)) return;
+              name = i.name
+              value = (i.value || i.placeholder) * 1
+              if (isNaN(value)) return
             } else if (i.type === 'text' || i.type === 'hidden') {
-              name = i.name;
-              value = i.value || i.placeholder;
+              name = i.name
+              value = i.value || i.placeholder
             } else if (i.type === 'checkbox') {
-              name = i.id;
-              value = i.checked;
+              name = i.id
+              value = i.checked
             } else if (i.type === 'select-one') {
-              name = i.name;
-              value = i.value;
+              name = i.name
+              value = i.value
             }
-            config[name.replace('nhConfig_', '')] = value;
-          });
+            config[name.replace('nhConfig_', '')] = value
+          })
 
-          let searchEvent = config['searchEvent'].split('|');
-          let searchEventChs = [];
+          let searchEvent = config['searchEvent'].split('|')
+          let searchEventChs = []
           for (let i of searchEvent) {
-            let arr = i.split(',').map(i => isNaN(i * 1) ? i : i * 1);
-            let chs = [];
-            chs.push('鼠标' + '左中右'.split('')[arr[0]] + '键');
-            chs.push(arr[1] === -1 ? '任意按键' : ['altKey', 'ctrlKey', 'shiftKey'][arr[1]]);
+            let arr = i.split(',').map(i => isNaN(i * 1) ? i : i * 1)
+            let chs = []
+            chs.push('鼠标' + '左中右'.split('')[arr[0]] + '键')
+            chs.push(arr[1] === -1 ? '任意按键' : ['altKey', 'ctrlKey', 'shiftKey'][arr[1]])
             if (arr[2] === -1) {
-              chs.push('自行选择');
+              chs.push('自行选择')
             } else if (arr[2] === 0) {
-              chs.push('主要名称');
+              chs.push('主要名称')
             } else if (arr[2] === 1) {
-              chs.push('作者或组织(顺位)');
+              chs.push('作者或组织(顺位)')
             }
-            if (arr[3] === 1) chs.push(' + chinese');
-            searchEventChs.push(chs[0] + ' + ' + chs[1] + ' -> ' + chs[2] + (chs[3] || ''));
+            if (arr[3] === 1) chs.push(' + chinese')
+            searchEventChs.push(chs[0] + ' + ' + chs[1] + ' -> ' + chs[2] + (chs[3] || ''))
           }
-          config.searchEventChs = searchEventChs.join('<br>');
+          config.searchEventChs = searchEventChs.join('<br>')
 
-          Object.assign(CONFIG, config);
-          GM_setValue('config', config);
+          Object.assign(CONFIG, config)
+          GM_setValue('config', config)
         }
-        $('.nhConfig').remove();
+        $('.nhConfig').remove()
       }
-    });
+    })
     $('.nhConfig input:not([type="button"]),.nhConfig select').toArray().forEach(i => {
-      let name, value;
-      name = i.name || i.id;
-      name = name.replace('nhConfig_', '');
-      if (!(name in config)) return;
-      value = config[name];
+      let name, value
+      name = i.name || i.id
+      name = name.replace('nhConfig_', '')
+      if (!(name in config)) return
+      value = config[name]
       if (i.type === 'text' || i.type === 'hidden' || i.type === 'select-one' || i.type === 'number') {
-        i.value = value;
+        i.value = value
       } else if (i.type === 'checkbox') {
-        i.checked = value;
+        i.checked = value
       }
-    });
-  }).appendTo('.menu.left');
+    })
+  }).appendTo('.menu.left')
 }
 
-function showTooltip() { //显示提示
-  $('<div class="nhTooltip"></div>').appendTo('body');
-  let preEle;
+function showTooltip () { // 显示提示
+  $('<div class="nhTooltip"></div>').appendTo('body')
+  let preEle
   $('body').on('mousemove keydown', function (e) {
-    if ((e.target === preEle || $(e.target).parents().filter(preEle).length) && e.type !== 'keydown') return;
-    let title = $(preEle).attr('raw-title');
-    $(preEle).removeAttr('raw-title').attr('title', title);
-    $('.nhTooltip').hide();
-  });
+    if ((e.target === preEle || $(e.target).parents().filter(preEle).length) && e.type !== 'keydown') return
+    let title = $(preEle).attr('raw-title')
+    $(preEle).removeAttr('raw-title').attr('title', title)
+    $('.nhTooltip').hide()
+  })
   $('body').on('mouseenter', ':visible[title],:visible[raw-title],[copy]', function (e) {
-    preEle = e.target;
-    let title;
+    preEle = e.target
+    let title
     if ($(preEle).is('[copy]:not([title])')) {
-      title = ($(preEle).attr('tooltip') ? $(preEle).attr('tooltip') + '<br><br>' : '') + '点击复制: <span class="nhHighlight">' + $(preEle).attr('copy') + '</span>';
-      $(preEle).attr('raw-title', title);
+      title = ($(preEle).attr('tooltip') ? $(preEle).attr('tooltip') + '<br><br>' : '') + '点击复制: <span class="nhHighlight">' + $(preEle).attr('copy') + '</span>'
+      $(preEle).attr('raw-title', title)
     } else {
-      title = $(preEle).attr('title') || $(preEle).attr('raw-title');
+      title = $(preEle).attr('title') || $(preEle).attr('raw-title')
       if (!title) {
-        preEle = $(preEle).parents().filter('[title]').eq(-1)[0];
-        title = $(preEle).attr('title') || $(preEle).attr('raw-title');
+        preEle = $(preEle).parents().filter('[title]').eq(-1)[0]
+        title = $(preEle).attr('title') || $(preEle).attr('raw-title')
       }
-      $(preEle).removeAttr('title').attr('raw-title', title);
+      $(preEle).removeAttr('title').attr('raw-title', title)
     }
-    $('.nhTooltip').html(title);
+    $('.nhTooltip').html(title)
 
-    let top = $(preEle).offset().top - $(window).scrollTop();
-    let height = $(preEle).height() + parseInt($(preEle).css('padding-bottom')) + parseInt($(preEle).css('border-bottom-width')) + parseInt($(preEle).css('margin-bottom'));
-    let _height = $('.nhTooltip').height() + parseInt($('.nhTooltip').css('padding-bottom')) + parseInt($('.nhTooltip').css('border-bottom-width')) + parseInt($('.nhTooltip').css('margin-bottom'));
-    top = top + height + 5 + _height > window.innerHeight ? top - _height - 5 : top + height + 5;
+    let top = $(preEle).offset().top - $(window).scrollTop()
+    let height = $(preEle).height() + parseInt($(preEle).css('padding-bottom')) + parseInt($(preEle).css('border-bottom-width')) + parseInt($(preEle).css('margin-bottom'))
+    let _height = $('.nhTooltip').height() + parseInt($('.nhTooltip').css('padding-bottom')) + parseInt($('.nhTooltip').css('border-bottom-width')) + parseInt($('.nhTooltip').css('margin-bottom'))
+    top = top + height + 5 + _height > window.innerHeight ? top - _height - 5 : top + height + 5
 
-    let left = $(preEle).offset().left - $('body').scrollLeft();
-    let width = $(preEle).width() + parseInt($(preEle).css('padding-left')) + parseInt($(preEle).css('border-left-width')) + parseInt($(preEle).css('margin-left'));
-    let _width = $('.nhTooltip').width() + parseInt($('.nhTooltip').css('padding-left')) + parseInt($('.nhTooltip').css('border-left-width')) + parseInt($('.nhTooltip').css('margin-left'));
-    left = left + _width > window.innerWidth ? left + width - _width : left;
+    let left = $(preEle).offset().left - $('body').scrollLeft()
+    let width = $(preEle).width() + parseInt($(preEle).css('padding-left')) + parseInt($(preEle).css('border-left-width')) + parseInt($(preEle).css('margin-left'))
+    let _width = $('.nhTooltip').width() + parseInt($('.nhTooltip').css('padding-left')) + parseInt($('.nhTooltip').css('border-left-width')) + parseInt($('.nhTooltip').css('margin-left'))
+    left = left + _width > window.innerWidth ? left + width - _width : left
     $('.nhTooltip').show().css({
       top: top,
       left: left
-    });
-  });
+    })
+  })
 }
 
-function sortObj(obj, key = undefined) { //Object排序
-  let objNew = {};
+function sortObj (obj, key = undefined) { // Object排序
+  let objNew = {}
   Object.entries(obj).map(i => {
     return {
       key: i[0],
       value: i[1]
-    };
+    }
   }).sort((o1, o2) => key ? o1.value[key] - o2.value[key] : o1.value - o2.value).forEach(i => {
-    objNew[i.key] = i.value;
-  });
-  return objNew;
+    objNew[i.key] = i.value
+  })
+  return objNew
 }
 
-function tagEvent() { //标签事件
-  $('<div class="nhTagEvent"></div>').insertAfter('#tags');
+function tagEvent () { // 标签事件
+  $('<div class="nhTagEvent"></div>').insertAfter('#tags')
   let tags = {};
   ['Unlike', 'Alert', 'Like'].forEach(i => {
-    tags[i] = GM_getValue('tag' + i, []);
+    tags[i] = GM_getValue('tag' + i, [])
     $('<a class="nhTagEventNotice" name="' + i + '" href="javascript:;" on="true"></a>').appendTo('.nhTagEvent').on('click', e => {
-      let tag = GM_getValue('tag' + i, []);
-      let keyword = $('.nhTagEvent').attr('name');
-      let target = $('.tag-' + $('.nhTagEvent').attr('target'));
+      let tag = GM_getValue('tag' + i, [])
+      let keyword = $('.nhTagEvent').attr('name')
+      let target = $('.tag-' + $('.nhTagEvent').attr('target'))
       if ($(e.target).attr('on') === 'true' && !tag.includes(keyword)) {
-        tag.push(keyword);
-        target.attr('name', i);
+        tag.push(keyword)
+        target.attr('name', i)
       } else if ($(e.target).attr('on') === 'false' && tag.includes(keyword)) {
-        tag.splice(tag.indexOf(keyword), 1);
-        target.removeAttr('name');
+        tag.splice(tag.indexOf(keyword), 1)
+        target.removeAttr('name')
       }
-      GM_setValue('tag' + i, tag);
-    });
-  });
+      GM_setValue('tag' + i, tag)
+    })
+  })
   $('a.tag').on({
-    contextmenu: e => { //搜索标签+中文
-      let target = e.target.href ? e.target : e.target.parentNode;
-      var keyword = target.childNodes[0].textContent.trim();
-      keyword = '"' + keyword + '"';
-      openUrl('/search/?q=' + encodeURIComponent(keyword + ' language:"chinese"'));
-      return false;
+    contextmenu: e => { // 搜索标签+中文
+      let target = e.target.href ? e.target : e.target.parentNode
+      var keyword = target.childNodes[0].textContent.trim()
+      keyword = '"' + keyword + '"'
+      openUrl('/search/?q=' + encodeURIComponent(keyword + ' language:"chinese"'))
+      return false
     },
-    click: e => { //标签
-      e.preventDefault();
-      let target = e.target.href ? e.target : e.target.parentNode;
-      $('a.tag').not(target).css('color', '');
-      target.style.color = target.style.color ? '' : 'blue';
-      let main = target.href.split('/')[3];
-      let sub = target.childNodes[0].textContent.trim();
-      $('.nhTagEvent').css('display', target.style.color ? 'block' : 'none').attr('name', main + ':' + sub).attr('target', target.className.match(/\d+/)[0]);
-      let name = $(target).attr('name');
-      $('.nhTagEvent>a[name="' + name + '"]').attr('on', 'false');
-      $('.nhTagEvent>a:not([name="' + name + '"])').attr('on', 'true');
+    click: e => { // 标签
+      e.preventDefault()
+      let target = e.target.href ? e.target : e.target.parentNode
+      $('a.tag').not(target).css('color', '')
+      target.style.color = target.style.color ? '' : 'blue'
+      let main = target.href.split('/')[3]
+      let sub = target.childNodes[0].textContent.trim()
+      $('.nhTagEvent').css('display', target.style.color ? 'block' : 'none').attr('name', main + ':' + sub).attr('target', target.className.match(/\d+/)[0])
+      let name = $(target).attr('name')
+      $('.nhTagEvent>a[name="' + name + '"]').attr('on', 'false')
+      $('.nhTagEvent>a:not([name="' + name + '"])').attr('on', 'true')
     }
-  });
+  })
   $('.tag').toArray().forEach(i => {
-    let main = i.href.split('/')[3];
-    let sub = i.childNodes[0].textContent.trim();
+    let main = i.href.split('/')[3]
+    let sub = i.childNodes[0].textContent.trim()
     for (let j in tags) {
       if (tags[j].includes(main + ':' + sub)) {
-        $(i).attr('name', j);
-        break;
+        $(i).attr('name', j)
+        break
       }
     }
-  });
+  })
 }
 
-function tagPreview(gmetadata) { //标签预览
-  $('<div class="nhTagPreview"></div>').appendTo('body');
+function tagPreview (gmetadata) { // 标签预览
+  $('<div class="nhTagPreview"></div>').appendTo('body')
   $('body').on({
-    mousemove(e) {
+    mousemove (e) {
       if (!$('.gallery:has(.cover)').has(e.target).length) {
-        $('.nhTagPreview').hide();
-        return;
+        $('.nhTagPreview').hide()
+        return
       }
-      let target = $(e.target).parentsUntil('.index-container').find('.cover')[0];
-      let info = gmetadata.filter(i => i.id * 1 === target.href.split('/')[4] * 1)[0];
-      if (!info) return;
-      $('.nhTagPreview').html(`<div>${info.title.japanese}</div><div style="color:#f00;">${info.num_pages}P Fav: ${info.num_favorites}</div><div style="height:2px;background-color:#000000;"></div>`).show();
-      let tagsHTML = $('<div></div>').appendTo('.nhTagPreview');
+      let target = $(e.target).parentsUntil('.index-container').find('.cover')[0]
+      let info = gmetadata.filter(i => i.id * 1 === target.href.split('/')[4] * 1)[0]
+      if (!info) return
+      $('.nhTagPreview').html(`<div>${info.title.japanese}</div><div style="color:#f00;">${info.num_pages}P Fav: ${info.num_favorites}</div><div style="height:2px;background-color:#000000;"></div>`).show()
+      let tagsHTML = $('<div></div>').appendTo('.nhTagPreview')
       info.tags.forEach(i => {
-        let main = i.type;
-        let sub = i.name;
-        let chs = findData(main, sub, true);
-        if ($(`.nhTagPreviewLi[name="${main}"]`, tagsHTML).length === 0) $(`<li class="nhTagPreviewLi" name="${main}"></li>`).appendTo(tagsHTML);
-        $('<span></span>').text(chs.cname || sub).appendTo($(`.nhTagPreviewLi[name="${main}"]`, tagsHTML));
-      });
-      let _width = $('.nhTagPreview').outerWidth();
-      let _height = $('.nhTagPreview').outerHeight();
+        let main = i.type
+        let sub = i.name
+        let chs = findData(main, sub, true)
+        if ($(`.nhTagPreviewLi[name="${main}"]`, tagsHTML).length === 0) $(`<li class="nhTagPreviewLi" name="${main}"></li>`).appendTo(tagsHTML)
+        $('<span></span>').text(chs.cname || sub).appendTo($(`.nhTagPreviewLi[name="${main}"]`, tagsHTML))
+      })
+      let _width = $('.nhTagPreview').outerWidth()
+      let _height = $('.nhTagPreview').outerHeight()
       $('.nhTagPreview').css({
         left: _width + e.clientX + 10 < window.innerWidth ? e.clientX + 5 : e.clientX - _width - 5,
         top: _height + e.clientY + 10 < window.innerHeight ? e.clientY + 5 : e.clientY - _height - 5
-      });
+      })
     }
-  });
+  })
 }
 
-function tagTranslate() { //标签翻译
+function tagTranslate () { // 标签翻译
   let data = $('a.tag').toArray().map(i => {
-    let main = i.href.split('/')[3];
-    let sub = i.childNodes[0].textContent.trim();
+    let main = i.href.split('/')[3]
+    let sub = i.childNodes[0].textContent.trim()
     return Object.assign({
       id: i.className.match(/\d+/)[0]
-    }, findData(main, sub, !CONFIG['tagTranslateImage']));
-  }).filter(i => Object.keys(i).length > 1);
+    }, findData(main, sub, !CONFIG['tagTranslateImage']))
+  }).filter(i => Object.keys(i).length > 1)
   let css = [
     'a.tag::before{font-size:12px;overflow:hidden;line-height:20px;height:20px}',
     'a.tag>.count{position:relative;font-size:12px;top:0;left:0;}',
@@ -1057,77 +1048,55 @@ function tagTranslate() { //标签翻译
     `a.tag>.count::after{color:#fff;}`,
     ...data.map(i => `a.tag-${i.id}{font-size:0;}`),
     'a.tag::before{text-decoration:line-through;}'
-  ];
+  ]
   data.forEach(i => {
-    css.push(`a.tag-${i.id}::before{content:"${i.cname}"}`);
-    if (i.info) css.push(`a.tag-${i.id}>.count::after{content:"${i.info}"}`);
-  });
-  $('<style name="EHT"></style>').text(css.join('\n')).appendTo('head');
+    css.push(`a.tag-${i.id}::before{content:"${i.cname}"}`)
+    if (i.info) css.push(`a.tag-${i.id}>.count::after{content:"${i.info}"}`)
+  })
+  $('<style name="EHT"></style>').text(css.join('\n')).appendTo('head')
 }
 
-function toggleBlacklist(keyword) { //加入黑名单或从黑名单中移除
-  let blacklist = GM_getValue('blacklist', []);
-  keyword = reEscape(keyword);
-  if (!blacklist.includes(keyword)) { //加入黑名单
-    blacklist.push(keyword);
-  } else if (blacklist.includes(keyword)) { //从黑名单中移除
-    blacklist.splice(blacklist.indexOf(keyword), 1);
+function toggleBlacklist (keyword) { // 加入黑名单或从黑名单中移除
+  let blacklist = GM_getValue('blacklist', [])
+  keyword = reEscape(keyword)
+  if (!blacklist.includes(keyword)) { // 加入黑名单
+    blacklist.push(keyword)
+  } else if (blacklist.includes(keyword)) { // 从黑名单中移除
+    blacklist.splice(blacklist.indexOf(keyword), 1)
   }
-  GM_setValue('blacklist', blacklist);
+  GM_setValue('blacklist', blacklist)
 }
 
-function translateText(text) {
-  if (!text) return text;
-  let arr = [];
-  let re = /(\w+):("|)(.*?)(\$"|"\$|")/;
-  let result;
+function translateText (text) {
+  if (!text) return text
+  let arr = []
+  let re = /(\w+):("|)(.*?)(\$"|"\$|")/
+  let result
   for (let i = 0; ; i++) {
-    result = re.exec(text);
+    result = re.exec(text)
     if (result) {
-      text = text.replace(result[0], `{${i}}`);
-      let temp;
+      text = text.replace(result[0], `{${i}}`)
+      let temp
       if (findData(result[1]).cname) {
-        let chs = findData(result[1], result[3], true).cname;
+        let chs = findData(result[1], result[3], true).cname
 
-        temp = findData(result[1]).cname + ':"';
-        temp += chs || result[3];
-        temp += '"';
+        temp = findData(result[1]).cname + ':"'
+        temp += chs || result[3]
+        temp += '"'
       }
-      arr.push(temp || result[0]);
-      result = re.exec(text);
+      arr.push(temp || result[0])
+      result = re.exec(text)
     } else {
-      break;
+      break
     }
   }
   arr.forEach((i, j) => {
-    text = text.replace(`{${j}}`, i);
-  });
-  return text;
+    text = text.replace(`{${j}}`, i)
+  })
+  return text
 }
 
-function xhr(url, onload, parm = null, opt = {}) {
-  GM_xmlhttpRequest({
-    method: parm ? 'POST' : 'GET',
-    url: url,
-    data: parm,
-    timeout: opt.timeout || 60 * 1000,
-    responseType: opt.responseType || 'text',
-    headers: opt.headers || {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-    },
-    onload(res) {
-      onload(res);
-    },
-    ontimeout(res) {
-      if (typeof opt.ontimeout === 'function') opt.ontimeout(res);
-    },
-    onerror(res) {
-      if (typeof opt.onerror === 'function') opt.onerror(res);
-    }
-  });
-}
-
-function xhrSync(url, parm = null, opt = {}) {
+function xhrSync (url, parm = null, opt = {}) {
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
       method: parm ? 'POST' : 'GET',
@@ -1138,21 +1107,21 @@ function xhrSync(url, parm = null, opt = {}) {
       headers: opt.headers || {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
-      onload(res) {
-        resolve(res);
+      onload (res) {
+        resolve(res)
       },
-      ontimeout(res) {
-        reject(res);
+      ontimeout (res) {
+        reject(res)
       },
-      onerror(res) {
-        reject(res);
+      onerror (res) {
+        reject(res)
       }
-    });
-  });
+    })
+  })
 }
 
 init().then(() => {
   //
 }, (err) => {
-  console.log(err);
-});
+  console.log(err)
+})
