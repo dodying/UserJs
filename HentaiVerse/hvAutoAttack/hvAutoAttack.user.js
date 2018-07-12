@@ -65,8 +65,7 @@
     openUrl('https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README' + (g('lang') === '2' ? '_en.md#about-font' : '.md#关于字体的说明'), true)
     return
   }
-  /* global W */
-  W = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
+  unsafeWindow = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
   if (gE('#riddlecounter')) { // 需要答题
     if (g('option').riddlePopup && !window.opener) {
       window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707')
@@ -1465,7 +1464,7 @@ function riddleAlert () { // 答题警报
       gE('#riddleanswer+img').click()
     } else {
       post(window.location.href, function () { // 待续
-        window.opener.document.window.location.href = window.location.href
+        window.opener.document.location.href = window.location.href
         window.close()
       }, 'riddleanswer=' + answer)
     }
@@ -1679,7 +1678,7 @@ function reloader () {
   var eventStart = cE('a')
   eventStart.id = 'eventStart'
   eventStart.onclick = function () {
-    a = W.info
+    a = unsafeWindow.info
     if (g('option').delayAlert) delayAlert = setTimeout(setAlarm, g('option').delayAlertTime * 1000)
     if (g('option').delayReload) delayReload = setTimeout(goto, g('option').delayReloadTime * 1000)
     if (g('option').recordUsage) {
@@ -1734,8 +1733,8 @@ function reloader () {
           }
           gE('#battle_main').replaceChild(gE('#battle_right', data), gE('#battle_right'))
           gE('#battle_main').replaceChild(gE('#battle_left', data), gE('#battle_left'))
-          W.battle = new W.Battle()
-          W.battle.clear_infopane()
+          unsafeWindow.battle = new unsafeWindow.Battle()
+          unsafeWindow.battle.clear_infopane()
           newRound()
           main()
         })
@@ -1789,7 +1788,7 @@ function reloader () {
       if (b.status === 200) {
         var a = JSON.parse(b.responseText)
         if (a.login !== undefined) {
-          W.top.window.location.href = W.login_url
+          unsafeWindow.top.window.location.href = unsafeWindow.login_url
         } else {
           if (a.error || a.reload) window.location.href = window.location.search
           return a
