@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.15.1
+// @version     1.16.0
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -26,17 +26,22 @@
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_listValues
+// @grant       GM_deleteValue
 // @grant       GM_xmlhttpRequest
+// @grant       GM_registerMenuCommand
 // @grant       GM_notification
 // @connect     *
 // @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
+// @require     https://cdn.bootcss.com/jszip/3.1.5/jszip.min.js
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)
 // @compatible  chrome 55+(ES2017)
 // ==/UserScript==
+/* global JSZip */
 
 const G = { // 全局变量
   config: GM_getValue('config', {}),
+  'ehD-setting': JSON.parse(GM_getValue('ehD-setting', '{}')),
   EHT: [],
   gmetadata: [],
   favicon: {
@@ -49,10 +54,22 @@ const G = { // 全局变量
     d: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABTSURBVHjaYvj//z8DJZiBKgaksQn+R8cMSABdjmIDkA1BMYABB0DXhMwfZAYgG4SNTXsDCHmBgYFhgA1IYxNUJioMyE5IZCflAc2NAAAAAP//AwAC/Mv3iQhmBgAAAABJRU5ErkJggg==',
     p: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABTSURBVHjaYvj//z8DJZiBKgaksQn+R8cMSACbfBqb4H/qG8CAA6DLD2IDkBViYxMdiGQbQIwX8KYDmhuQxiaoTGlKlKXUAG7aZCZKMAAAAP//AwCS0Ls1SQllgAAAAABJRU5ErkJggg=='
   },
-  timeout: null
+  timeout: null,
+  downloading: false,
+  imageD: [],
+  imageS: [],
+  imageEnd: false,
+  imageData: null,
+  autoDownload: false,
+  downloadSizeChanged: false
 }
+G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config['autoStartDownload']
+G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.autoDownload && G.config['enableEHD'] && G.config['showAllThumb'] && G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD'] && G.config['downloadSizeChanged']
 
 async function init () {
+  GM_registerMenuCommand(GM_info.script.name + ': Show Global', function () {
+    console.log(G)
+  }, 'S')
   defaultConfig() // 默认设置
   addStyle() // 添加样式
   $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body')
@@ -82,33 +99,54 @@ async function init () {
     if (G.config['enableEHD']) {
       let now = new Date().getTime()
       let lastTime = GM_getValue('EHD_checkTime', 0)
-      if (G.config['updateIntervalEHD'] !== 0 && now - lastTime >= G.config['updateIntervalEHD'] * 24 * 60 * 60 * 1000) {
+      if (!GM_getValue('EHD_code') || (G.config['updateIntervalEHD'] !== 0 && now - lastTime >= G.config['updateIntervalEHD'] * 24 * 60 * 60 * 1000)) {
         try {
           await updateEHD()
         } catch (err) { }
       }
+      let recordEHDUrl = [
+        'let __record = false',
+        'console.log = function (...msg) {',
+        `  if (msg.length && typeof msg[0] === 'string' && msg[0].match(/\\[EHD\\] #\\d+: Network Error/)) {`,
+        '    __record = true',
+        '  } else if (__record && msg.length === 10) {',
+        `    let record = GM_getValue('EHD_record', [])`,
+        '    let host = new URL(msg[8]).hostname',
+        '    if (!record.includes(host)) {',
+        '      record.push(host)',
+        `      GM_setValue('EHD_record', record)`,
+        '    }',
+        '    __record = false',
+        '  }',
+        '}'
+      ]
+      let toEavl = [
+        '(function () {',
+        `var loadSetting = function () { return new Promise(resolve => { resolve(GM_getValue('ehD-setting')) }) }`,
+        'let console = {}',
+        'for (let i in window.console) { console[i] = new Function() }',
+        'let checkFetchCount = function () {',
+        ' if (fetchCount < 0) fetchCount = 0',
+        '}',
+        (G.config['recordEHDUrl'] ? recordEHDUrl.join('\n') : ''),
+        GM_getValue('EHD_code'),
+        'setInterval(checkFetchCount, 3000)',
+        '})()'
+      ]
       /* eslint-disable no-eval */
-      eval('(function(){let console={};for(let i in window.console){console[i]=new Function();}' + (G.config['recordEHDUrl'] ? 'let __record=false;console.log=function(...msg){if(msg.length&&typeof msg[0]===\'string\'&&msg[0].match(/\\[EHD\\] #\\d+: Network Error/)){__record=true;}else if(__record&&msg.length==12){let record=GM_getValue(\'EHD_record\',[]);let host=new URL(msg[10]||msg[8]).hostname;if(!record.includes(host)){record.push(host);GM_setValue(\'EHD_record\',record);}__record=false;}}' : '') + GM_getValue('EHD_code') + '})();') // 运行EHD
+      eval(toEavl.join('\n')) // 运行EHD
     } else {
       let loaded = await waitForElement('.ehD-box', 30 * 1000)
       if (!loaded) console.error('载入 E-Hentai-Downloader 超时')
       setNotification('载入 E-Hentai-Downloader 超时')
     }
     $('.g2:contains("Download Archive")').click(e => { // 使用EHD下载时, 添加到下载列表
-      window.downloading = true
-      let downloading = GM_getValue('downloading', [])
-      downloading.push(unsafeWindow.gid)
-      GM_setValue('downloading', downloading)
+      downloadAdd()
       if ($('[rel="shortcut icon"]').length === 0) changeFav(G.favicon.d)
       $('.ehNavBar').attr('style', 'top:0;')
-      $(window).off('scroll')
     })
     $(window).on('unload', () => { // 关闭页面时, 从下载列表中移除
-      let downloading = GM_getValue('downloading', [])
-      if (window.downloading && downloading.includes(unsafeWindow.gid)) {
-        downloading.splice(downloading.indexOf(unsafeWindow.gid), 1)
-        GM_setValue('downloading', downloading)
-      }
+      downloadRemove()
     })
     if (G.config['ex2eh'] && jumpHost()) return // 里站跳转
     changeName('#gn') // 修改本子标题（移除集会名）
@@ -123,12 +161,11 @@ async function init () {
     tagEvent() // 标签事件
     copyInfo() // 复制信息
     abortPending() // 终止EHD所有下载
-    introPic() // 宣传图
     if (G.config['showAllThumb']) await showAllThumb()
-    if (G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD'] && G.config['rateS'] < G.config['rateD']) await checkImageSize()
+    introPic() // 宣传图
+    if (G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD']) await checkImageSize()
     await waitInMs(500)
-    if (window.location.hash.match(/^#[0-2]$/) && G.config['autoClose']) autoClose() // 下载完成后自动关闭
-    if (window.location.hash.match(/^#[0-2]$/) && G.config['autoStartDownload']) $('.ehD-box>.g2:eq(0)').click() // 自动开始下载
+    if (G.autoDownload) await autoDownload() // 自动开始下载
   } else { // 搜索页
     if (G.config['eh2ex'] && window.location.host === 'e-hentai.org' && $('[name="f_search"]').val()) {
       window.location = window.location.href.replace('//e-hentai.org', '//exhentai.org')
@@ -322,16 +359,22 @@ function arrUnique (arr) { // 数组去重
   return [...(new Set(arr))]
 }
 
-function autoClose () { // 下载完成后自动关闭
-  setTimeout(() => {
-    if ($('.ehD-dialog>.ehD-pt-gen-filename+button').text() === 'Not download? Click here to download' || $('.ehD-dialog span:contains("Not download or file is broken? "):has(a[href^="filesystem:https://"])').length > 0) {
-      setTimeout(() => {
-        window.close()
-      }, 3000)
+async function autoDownload (isEnd) { // 自动开始下载
+  // isEnd false: 下载小图, true: 下载大图
+  if (G.downloadSizeChanged) {
+    if (G.imageD.length && G.imageS.length) {
+      $('#gdd tr:contains("File Size")>td:nth-child(2)').text('1 MB') // Fake Size
+      let imageSize = isEnd ? G.config['sizeD'] : G.config['sizeS']
+      await changeEConfig('xr', imageSize)
+      changeFav(G.favicon[imageSize])
+      $('label:contains("Pages Range")>input').val(isEnd ? G.imageD : G.imageS)
+      G.imageEnd = isEnd
     } else {
-      autoClose()
+      G.downloadSizeChanged = false
+      $('label:contains("Pages Range")>input').val(G.imageD.length ? G.imageD : G.imageS)
     }
-  }, 3000)
+  }
+  $('.ehD-box>.g2:eq(0)').click()
 }
 
 function autoComplete () { // 自动填充
@@ -426,10 +469,7 @@ function batchDownload () { // 批量下载
   window.sessionStorage.setItem('batch', 0)
   $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', e => {
     $('.ehBatchHover .it5>a').toArray().forEach(i => {
-      let blob = new window.Blob([''], {
-        type: 'application/octet-stream'
-      })
-      $(`<a href="${URL.createObjectURL(blob)}"></a>`).attr('download', i.textContent.trim() + '.cbz')[0].click()
+      saveAs('', i.textContent.trim() + '.cbz')
     })
   }).appendTo('.ehNavBar>div:eq(2)')
   $('<input type="button" value="Batch" title="' + htmlEscape('左键: Batch<br>右键: 重置Batch') + '">').on('mousedown', e => {
@@ -856,26 +896,25 @@ async function checkImageSize () { // 检查图片尺寸
   let s = G.config['sizeS']
   let d = G.config['sizeD']
   let imageSize = await getEConfig('xr')
-  // let numS = 0 // 单页
   let numD = 0 // 双页
-  let pics = $('.gdtm>div>a>img').toArray().filter(i => !ads.includes($(i).parent().attr('href').split('/')[4]))
-  pics.forEach(function (i) {
+  $('.gdtm>div>a>img').toArray().forEach(function (i, j) {
+    if (ads.includes($(i).parent().attr('href').split('/')[4])) return
     let rate = $(i).width() / $(i).height() // 宽高比
     if (rate > G.config['rateD']) {
       numD++
+      G.imageD.push(j + 1)
+    } else {
+      G.imageS.push(j + 1)
     }
-    /*  else if (rate < G.config['rateS']) {
-      numS++
-    } */
   })
   let imageSizeNew
-  if (2 * numD > pics.length) { // 双页超过一半
+  if (2 * numD > G.imageD.length + G.imageS.length) { // 双页超过一半
     if (imageSize !== d) imageSizeNew = d
   } else if (imageSize !== s) {
     imageSizeNew = s
   }
   if (imageSizeNew !== undefined) {
-    if (window.location.hash.match(/^#[0-2]$/) && G.config['autoStartDownload'] && GM_getValue('downloading', []).length === 0) {
+    if (G.autoDownload && GM_getValue('downloading', []).length === 0) {
       document.title = imageSizeNew + '|' + document.title
       await changeEConfig('xr', imageSizeNew)
       changeFav(G.favicon[imageSizeNew])
@@ -940,7 +979,6 @@ function defaultConfig () { // 默认设置
     bookmark: '0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist',
     bookmarkEvent: '0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0',
     rateD: 1.1,
-    rateS: 0.9,
     sizeD: '0',
     sizeS: '0',
     uconfig: '',
@@ -982,10 +1020,29 @@ function defaultConfig () { // 默认设置
     recordEHDUrl: false,
     searchArguments: '/?f_search={q}&f_sh=on',
     enableChangeSize: false,
-    exportUrlFormat: '{url} +Proxy{cr}{lf}'
+    exportUrlFormat: '{url} +Proxy{cr}{lf}',
+    downloadSizeChanged: false
   }
   for (let i in config) {
     if (!(i in G.config)) G.config[i] = config[i]
+  }
+}
+
+function downloadAdd () {
+  if (G.downloading) return
+  G.downloading = true
+  let downloading = GM_getValue('downloading', [])
+  downloading.push(unsafeWindow.gid)
+  GM_setValue('downloading', downloading)
+}
+
+function downloadRemove () {
+  if (!G.downloading) return
+  G.downloading = false
+  let downloading = GM_getValue('downloading', [])
+  if (downloading.includes(unsafeWindow.gid)) {
+    downloading.splice(downloading.indexOf(unsafeWindow.gid), 1)
+    GM_setValue('downloading', downloading)
   }
 }
 
@@ -1333,6 +1390,56 @@ function reEscape (text) {
   return text.replace(/[$()*+.[\]?{}|]/g, '\\$&')
 }
 
+function saveAs (text, name) {
+  downloadRemove()
+  if (text instanceof window.Blob && text.type.match(/^application.*zip$/)) {
+    if (G.downloadSizeChanged) {
+      if (!G.imageEnd) {
+        G.imageData = text
+        autoDownload(true)
+      } else {
+        new Promise(async resolve => {
+          let zipS = await JSZip.loadAsync(text)
+          let zip = await JSZip.loadAsync(G.imageData)
+          let files = Object.keys(zipS.files)
+          let infoStr = ''
+          for (let i = 0; i < files.length; i++) {
+            let file = files[i]
+            let ab = await zipS.files[file].async('arraybuffer')
+            zip.file(file, ab)
+            if (file.match(/\/info.txt$/)) infoStr = await zipS.files[file].async('text')
+          }
+          let data = await zip.generateAsync({
+            type: 'arraybuffer',
+            compression: G['ehD-setting']['compression-level'] ? 'DEFLATE' : 'STORE',
+            compressionOptions: {
+              level: G['ehD-setting']['compression-level'] > 0 ? (G['ehD-setting']['compression-level'] < 10 ? G['ehD-setting']['compression-level'] : 9) : 1
+            },
+            streamFiles: !!G['ehD-setting']['file-descriptor'],
+            comment: G['ehD-setting']['save-info'] === 'comment' ? infoStr.replace(/\n/gi, '\r\n') : undefined
+          })
+          resolve(data)
+        }).then(data => {
+          saveAs2(data, name, text.type)
+          window.close()
+        })
+      }
+    } else {
+      saveAs2(text, name, text.type)
+      window.close()
+    }
+  } else {
+    saveAs2(text, name)
+  }
+}
+
+function saveAs2 (content, name, type = 'application/octet-stream;charset=utf-8') {
+  let blob = new window.Blob([content], {
+    type: type
+  })
+  $(`<a href="${URL.createObjectURL(blob)}" download="${name}"></a>`)[0].click()
+}
+
 function saveLink () { // 保存链接
   $('<input type="button" value="Shortcut" title="创建链接">').click(function () {
     var content = [
@@ -1352,10 +1459,8 @@ function saveLink () { // 保存链接
       platform = 2
       fileType = '.desktop'
     }
-    let blob = new window.Blob([content[platform].replace('{{url}}', window.location.href)], {
-      type: 'application/octet-stream'
-    })
-    $(`<a href="${URL.createObjectURL(blob)}"></a>`).attr('download', document.title + fileType)[0].click()
+    let text = content[platform].replace('{{url}}', window.location.href)
+    saveAs(text, document.title + fileType)
   }).prependTo('.ehNavBar>div:eq(2)')
 }
 
@@ -1496,11 +1601,11 @@ function showConfig () { // 显示设置
       return
     }
     let _html = [
-      GM_info.script.name + '<span class="ehHighlight">v' + GM_info.script.version + '</span> <a href="' + GM_info.script.namespace + '" target="_blank">@' + GM_info.script.author + '</a>',
+      GM_info.script.name + '<span class="ehHighlight">v' + GM_info.script.version + '</span> <a href="' + GM_info.script.namespace + '" target="_blank">@' + (GM_info.script.author || 'dodying') + '</a>',
       '',
       '<input type="button" name="exportValues" value="Export Values" title="导出脚本储存的信息"> <input type="file" name="selectFile" accept=".json"><input type="button" name="fakeSelectFile" value="Select File" title="选择文件"> <input type="button" name="importValues" value="Import Values" title="导入脚本储存的信息">',
-      '更新 EHT: 更新频率: <input name="ehConfig_updateIntervalEHT" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHT" value="Update Now" tooltip="立即更新标签数据，来自[Mapaler/EhTagTranslator]"> <input type="button" name="exportEHT" value="Export Now" title="导出EHT数据">',
-      '更新 EHD: 更新频率: <input name="ehConfig_updateIntervalEHD" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHD" value="Update Now" tooltip="立即更新内置 [E-Hentai-Downloader]"> <input type="button" name="exportEHD" value="Export Now" title="导出EHD数据">',
+      '更新 EHT: 更新频率: <input name="ehConfig_updateIntervalEHT" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHT" value="Update Now" tooltip="立即更新标签数据，来自[Mapaler/EhTagTranslator]"> <input type="button" name="exportEHT" value="Export Now" title="导出EHT数据"> <input type="button" name="emptyEHT" value="Empty Now" title="重置EHT数据">',
+      '更新 EHD: 更新频率: <input name="ehConfig_updateIntervalEHD" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHD" value="Update Now" tooltip="立即更新内置 [E-Hentai-Downloader]"> <input type="button" name="exportEHD" value="Export Now" title="导出EHD数据"> <input type="button" name="emptyEHD" value="Empty Now" title="重置EHD数据">',
       '',
       '<span class="ehHighlight">通用设置:</span>',
       '时间显示: <label for="ehConfig_timeShow_local"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_local" value="local" checked>本地时间</label> <label for="ehConfig_timeShow_iso"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_iso" value="iso">ISO时间</label>',
@@ -1510,7 +1615,7 @@ function showConfig () { // 显示设置
       '收藏夹提示信息: <input name="ehConfig_bookmark" type="text" title="' + htmlEscape('以<span class="ehHighlight">,</span>分割') + '" placeholder="0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist">',
       '收藏按钮事件: <input name="ehConfig_bookmarkEvent" title="' + htmlEscape('事件格式: 鼠标按键,键盘按键,收藏事件<br>多个事件以<span class="ehHighlight">|</span>分割<br>鼠标按键:<ul><li>0 -> 左键</li><li>1 -> 中键</li><li>2 -> 右键</li></ul>键盘按键:<ul><li>-1 -> 任意</li><li>0 -> altKey</li><li>1 -> ctrlKey</li><li>2 -> shiftKey</li></ul>收藏事件:<ul><li>留空 -> 上次选择</li><li>-1 -> 自行选择</li><li>0-9 -> 0-9</li><li>10 -> 移除</li><li>b -> 加入黑名单</li></ul>') + '" type="text" placeholder="0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0"><input name="ehConfig_bookmarkEventChs" type="hidden">',
       '搜索参数: <input name="ehConfig_searchArguments" title="' + htmlEscape('以<span class="ehHighlight">{q}</span>代替搜索关键词') + '" type="text" placeholder="/?f_search={q}&f_sh=on" min="1">',
-      '<div class="ehNew"></div>通知显示方式: <select name="ehConfig_notification"><option value="0">Web API: Notification</option><option value="1">GM_notification</option><option value="2">window.alert</option><option value="3">页面元素</option><option value="-1">不显示</option></select>',
+      '通知显示方式: <select name="ehConfig_notification"><option value="0">Web API: Notification</option><option value="1">GM_notification</option><option value="2">window.alert</option><option value="3">页面元素</option><option value="-1">不显示</option></select>',
       '',
       '<span class="ehHighlight">搜索页:</span>',
       '<label for="ehConfig_preloadPaneImage"><input type="checkbox" id="ehConfig_preloadPaneImage">自动载入预览图</label>; <label for="ehConfig_languageCode"><input type="checkbox" id="ehConfig_languageCode">显示ISO语言代码</label>',
@@ -1531,11 +1636,12 @@ function showConfig () { // 显示设置
       '默认设置: <input name="ehConfig_uconfig" title="' + htmlEscape('在Settings页面使用$.serialize获取，可留空<br>留空表示每次使用当前设置') + '" type="text"> <input type="button" name="getUconfig" value="Get NOW" title="立即获取">',
       '下载相关: <label for="ehConfig_autoStartDownload"><input type="checkbox" id="ehConfig_autoStartDownload">锚部分不为空时，自动开始下载</label>; <label for="ehConfig_autoClose" title="' + htmlEscape('Firefox: 需打开about:config并设置dom.allow_scripts_to_close_windows为true<br>Chromium: 无法关闭非脚本打开的页面') + '"><input type="checkbox" id="ehConfig_autoClose">锚部分不为空时，下载完成后自动关闭标签</label>',
       '下载-EHD相关: <label for="ehConfig_enableEHD"><input type="checkbox" id="ehConfig_enableEHD">启用内置 [E-Hentai-Downloader]</label>; <label for="ehConfig_recordEHDUrl"><input type="checkbox" id="ehConfig_recordEHDUrl">记录内置EHD下载失败的链接</label>',
-      '下载-EHD相关-链接相关: 导出格式: <input name="ehConfig_exportUrlFormat" title="' + htmlEscape('以<span class="ehHighlight">{url}</span>表示搜索链接<br>以<span class="ehHighlight">{cr}</span>表示\\r<br>以<span class="ehHighlight">{lf}</span>表示\\n') + '" type="text" placeholder="{url} +Proxy{cr}{lf}"> <input type="button" name="exportUrl" value="Export URL" title="导出链接"> <input type="button" name="emptyUrl" value="Empty URL" title="清空链接">',
+      '下载-EHD相关-链接相关: 导出格式: <input name="ehConfig_exportUrlFormat" title="' + htmlEscape('以<span class="ehHighlight">{url}</span>表示搜索链接<br>以<span class="ehHighlight">{cr}</span>表示\\r<br>以<span class="ehHighlight">{lf}</span>表示\\n') + '" type="text" placeholder="{url} +Proxy{cr}{lf}"> <input type="button" name="exportUrl" value="Copy URL" title="复制链接"> <input type="button" name="emptyUrl" value="Empty URL" title="清空链接">',
       '<label for="ehConfig_tagTranslateImage"><input type="checkbox" id="ehConfig_tagTranslateImage">标签翻译显示图片</label>; <label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">显示所有预览图</label>',
-      '<label for="ehConfig_enableChangeSize" title="' + htmlEscape('当大图(双页)宽高比 ≤ 小图(单页)宽高比时，失效<br>当大图(双页)尺寸与小图(单页)尺寸相同时，失效') + '"><input type="checkbox" id="ehConfig_enableChangeSize">启用自动调整图片尺寸</label>',
-      '调整图片尺寸: 大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1" step="0.1">; 小图(单页)宽高比: <input name="ehConfig_rateS" type="number" placeholder="0.9" step="0.1">',
-      '调整图片尺寸: 大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>'
+      '<label for="ehConfig_enableChangeSize" title="' + htmlEscape('当大图(双页)尺寸与小图(单页)尺寸相同时，失效') + '"><input type="checkbox" id="ehConfig_enableChangeSize">启用自动调整图片尺寸</label>',
+      '调整图片尺寸: 大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1" step="0.1">; 其他默认视为小图(单页)',
+      '调整图片尺寸: 大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>',
+      '<div class="ehNew"></div><label for="ehConfig_downloadSizeChanged" title="需关闭: Request File System to handle large Zip file<br>需开启: 锚部分不为空时，自动开始下载, 启用内置 [E-Hentai-Downloader], 显示所有预览图, 启用自动调整图片尺寸<br>注意: 避免出错，应一次下载一个画廊"><input type="checkbox" id="ehConfig_downloadSizeChanged">下载调整过大小的图片压缩档</label>'
     ].map(i => i ? '<li>' + i + '</li>' : '<hr>').join('')
     $('<div class="ehConfig"></div>').html('<ul>' + _html + '</ul><div class="ehConfigBtn"><input type="button" name="reset" value="Reset" title="重置"><input type="button" name="save" value="Save" title="保存"><input type="button" name="cancel" value="Cancel" title="取消"></div>').appendTo('body').on('click', function (e) {
       if ($(e.target).is('.ehConfigBtn>input[type="button"][name="reset"]')) {
@@ -1624,10 +1730,7 @@ function showConfig () { // 显示设置
           obj[value] = GM_getValue(value)
         })
         let text = JSON.stringify(obj, null, 2)
-        let blob = new window.Blob([text], {
-          type: 'text/plain;charset=utf-8'
-        })
-        $(`<a href="${URL.createObjectURL(blob)}" download="[EH]Enhance.json"></a>`)[0].click()
+        saveAs(text, '[EH]Enhance.json')
       } else if ($(e.target).is('.ehConfig input[name="fakeSelectFile"]')) {
         $('[name="selectFile"]').click()
       } else if ($(e.target).is('.ehConfig input[name="importValues"]')) {
@@ -1654,10 +1757,10 @@ function showConfig () { // 显示设置
         })
       } else if ($(e.target).is('.ehConfig input[name="exportEHT"]')) {
         let text = GM_getValue('EHT', '')
-        let blob = new window.Blob([text], {
-          type: 'text/plain;charset=utf-8'
-        })
-        $(`<a href="${URL.createObjectURL(blob)}" download="EHT.json"></a>`)[0].click()
+        saveAs(text, 'EHT.json')
+      } else if ($(e.target).is('.ehConfig input[name="emptyEHT"]')) {
+        GM_deleteValue('EHT')
+        GM_deleteValue('EHT_checkTime')
       } else if ($(e.target).is('.ehConfig input[name="updateEHD"]')) {
         $(e.target).prop('disabled', true).val('Updating...')
         updateEHD().then(() => {
@@ -1665,10 +1768,11 @@ function showConfig () { // 显示设置
         })
       } else if ($(e.target).is('.ehConfig input[name="exportEHD"]')) {
         let text = GM_getValue('EHD_code', '')
-        let blob = new window.Blob([text], {
-          type: 'text/plain;charset=utf-8'
-        })
-        $(`<a href="${URL.createObjectURL(blob)}" download="E-Hentai-Downloader.user.js"></a>`)[0].click()
+        saveAs(text, 'E-Hentai-Downloader.user.js')
+      } else if ($(e.target).is('.ehConfig input[name="emptyEHD"]')) {
+        GM_deleteValue('EHD_code')
+        GM_deleteValue('EHD_checkTime')
+        GM_deleteValue('EHD_version')
       } else if ($(e.target).is('.ehConfig input[name="getUconfig"]')) {
         $(e.target).prop('disabled', true).val('Getting...')
         getEConfig().then(uconfig => {
@@ -1677,10 +1781,7 @@ function showConfig () { // 显示设置
         })
       } else if ($(e.target).is('.ehConfig input[name="exportUrl"]')) {
         let text = arrUnique(GM_getValue('EHD_record', [])).sort().map(i => G.config['exportUrlFormat'].replace(/{url}/g, i).replace(/{cr}/g, '\r').replace(/{lf}/g, '\n')).join('')
-        let blob = new window.Blob([text], {
-          type: 'text/plain;charset=utf-8'
-        })
-        $(`<a href="${URL.createObjectURL(blob)}" download="url.txt"></a>`)[0].click()
+        GM_setClipboard(text)
       } else if ($(e.target).is('.ehConfig input[name="emptyUrl"]')) {
         GM_setValue('EHD_record', [])
       }
@@ -1947,7 +2048,7 @@ async function updateEHD () { // 更新EHD
   let version = res.response.match(/\/\/ @version\s+([\d.]+)/)[1]
   if (version > GM_getValue('EHD_version', '0')) {
     GM_setValue('EHD_version', version)
-    let res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/e-hentai-downloader.user.js')
+    let res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/src/main.js')
     setNotification('E-Hentai-Downloader has been updated to ' + version)
     GM_setValue('EHD_code', res.response)
   }
