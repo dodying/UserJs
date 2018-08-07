@@ -4,125 +4,136 @@
 
 #### 目录说明
 
+
 ##### E-hentai
 
-[[EH]Enhance](https://github.com/dodying/UserJs/tree/master/E-hentai/[EH]Enhance.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/[EH]Enhance.user.js) v1.08:
+[[EH]Enhance](E-hentai/ehEnhance.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) v1.16.0.30: 
 
-[ExHentai2E-Hantai](https://github.com/dodying/UserJs/tree/master/E-hentai/[EH]EX2EH.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/[EH]EX2EH.user.js) v1.02: 已整合到[EH]Enhance
+[[NH]nhentai Downloader](E-hentai/nhDownloader.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhDownloader.user.js) v0.0.2: 
 
-[[EH]本地书签](https://github.com/dodying/UserJs/tree/master/E-hentai/[EH]LocalBookmark.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/[EH]LocalBookmark.user.js) v1.02: 储存为本地书签
+[[NH]Enhance](E-hentai/nhEnhance.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhEnhance.user.js) v1.0.0: 
 
-[[EH]标签预览+隐藏画集](https://github.com/dodying/UserJs/tree/master/E-hentai/[EH]TagsPreview&HideSomeGalleries.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/[EH]TagsPreview&HideSomeGalleries.user.js) v1.2.3: 移动到画廊上可预览标签，同时如果标签里有不喜欢的标签则会隐藏该画集
+##### E-hentai/invalid
 
-[[EHD]合并压缩卷](https://github.com/dodying/UserJs/tree/master/E-hentai/[EHD]CombineArchive2One.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/[EHD]CombineArchive2One.user.js) v1.00b: 合并下载自EHD的压缩包
+[[EH]CheckForNew](E-hentai/invalid/[EH]CheckForNew.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/invalid/[EH]CheckForNew.user.js) v1.00: A monitor for EH
 
-##### E-hentai\invalid
+[[EH]QuickSearch](E-hentai/invalid/[EH]QuickSearch.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/invalid/[EH]QuickSearch.user.js) v1.040: Add a button to top-right; Left Click:choose the keywords;Right Click:search in other site;
 
-[[EH]检查新本子](https://github.com/dodying/UserJs/tree/master/E-hentai/invalid/[EH]CheckForNew.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/invalid/[EH]CheckForNew.user.js) v1.00: 详见帮助
+##### E-hentai/old
 
-[[EH]快捷搜索](https://github.com/dodying/UserJs/tree/master/E-hentai/invalid/[EH]QuickSearch.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/invalid/[EH]QuickSearch.user.js) v1.040: 在右上角添加一个按钮；左键：选择搜索关键词，中间：添加\删除关键词：中文，右键：在其他站点搜索
+[ExHentai2E-Hantai](E-hentai/old/[EH]EX2EH.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EH]EX2EH.user.js) v1.02: 已整合到[EH]Enhance
 
-##### E-hentai\old
+[[EH]LocalBookmark](E-hentai/old/[EH]LocalBookmark.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EH]LocalBookmark.user.js) v1.02: set a local bookmark
 
-[【EH】批列表](https://github.com/dodying/UserJs/tree/master/E-hentai/old/EH_BatchList.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_BatchList.user.js) v1:
+[[EH]TagsPreview&HideSomeGalleries](E-hentai/old/[EH]TagsPreview&HideSomeGalleries.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EH]TagsPreview&HideSomeGalleries.user.js) v1.2.3: Show tags when move to a title or thumb, while hiding the gallery which tagged you unlike
 
-[【EH】扫图助手](https://github.com/dodying/UserJs/tree/master/E-hentai/old/EH_FavHelper.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_FavHelper.user.js) v1.01:
+[[EHD]CombineArchive2One](E-hentai/old/[EHD]CombineArchive2One.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EHD]CombineArchive2One.user.js) v1.00b: Combine the Archive from EHD A too One Archive
 
-[【EH】快速收藏](https://github.com/dodying/UserJs/tree/master/E-hentai/old/EH_QuickAddToFav.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_QuickAddToFav.user.js) v1.040: 左键：加入到fav0，中键：弹出选项，右键：快速添加到上次的收藏夹，双击：移除收藏
+[EH_BatchList](E-hentai/old/EH_BatchList.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_BatchList.user.js) v1: 
 
-[【EH】搜索结果排序](https://github.com/dodying/UserJs/tree/master/E-hentai/old/EH_SortBook.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_SortBook.user.js) v1:
+[EH_FavHelper](E-hentai/old/EH_FavHelper.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_FavHelper.user.js) v1.01: 
+
+[EH_QuickAddToFav](E-hentai/old/EH_QuickAddToFav.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_QuickAddToFav.user.js) v1.040: 左键：加入到fav0，中键：弹出选项，右键：快速添加到上次的收藏夹，双击：移除收藏
+
+[EH_SortBook](E-hentai/old/EH_SortBook.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_SortBook.user.js) v1: 
 
 ##### global
 
-[[]emptyName](https://github.com/dodying/UserJs/tree/master/global/[]emptyName.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/[]emptyName.user.js) v1.0:
+[[]emptyName](global/emptyName.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/emptyName.user.js) v1.0: 
 
-[[]Meta](https://github.com/dodying/UserJs/tree/master/global/[]Meta.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/[]Meta.user.js) v1.00:
+[[]Highlight](global/highlight.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/highlight.user.js) v1.0.1: 
 
-[[]newTab](https://github.com/dodying/UserJs/tree/master/global/[]newTab.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/[]newTab.user.js) v0.2.0.0: 链接强制在新建标签中打开
+[[]insertJquery](global/insertJquery.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/insertJquery.user.js) v1.0.0: 
 
-[[]Style](https://github.com/dodying/UserJs/tree/master/global/[]Style.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/[]Style.user.js) v1.00:
+[[]Meta](global/meta.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/meta.user.js) v1.00: 
+
+[[]newTab](global/newTab.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/newTab.user.js) v0.2.0.0+1: 链接强制在新建标签中打开 Open a URL in a new tab
+
+[[]S](global/s.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/s.user.js) v1.0.1: 
+
+[[]Style](global/style.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/global/style.user.js) v1.00.2: 
 
 ##### H
 
-[[H]CopyInfo](https://github.com/dodying/UserJs/tree/master/H/[H]CopyInfo.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/H/[H]CopyInfo.user.js) v1.01.2:
+[[H]CopyInfo](H/hCopyInfo.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/H/hCopyInfo.user.js) v1.01.3: 
 
-[[H]NFO](https://github.com/dodying/UserJs/tree/master/H/[H]NFO.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/H/[H]NFO.user.js) v1.0.0:
+[[H]ParkingLot](H/hParkingLot.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) v1.11.1: 
 
-[[H]ParkingLot](https://github.com/dodying/UserJs/tree/master/H/[H]ParkingLot.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/H/[H]ParkingLot.user.js) v1.10.0:
+[[H]ParkingLot2](H/hParkingLot2.doing.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot2.doing.user.js) v0.0.1: [H]ParkingLot2
 
-##### HentaiVerse\hvAutoAttack
+##### HentaiVerse/hvAutoAttack
 
-[[HV]AutoAttack](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) v2.88.4: HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
+[[HV]AutoAttack](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) v2.90.0: HV auto attack script, for the first user, should configure before use it.
 
 ##### HentaiVerse
 
-[[HV]BazaarList](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvBazaarList.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js) v1.03:
+[[HV]BazaarList](HentaiVerse/hvBazaarList.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvBazaarList.user.js) v1.03: 
 
-[[HV]Challenge](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvChallenge.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvChallenge.user.js) v1.01:
+[[HV]Challenge](HentaiVerse/hvChallenge.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvChallenge.user.js) v1.01: 
 
-[[HV]CharacterStats](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvCharacterStats.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvCharacterStats.user.js) v1.00a:
+[[HV]CharacterStats](HentaiVerse/hvCharacterStats.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvCharacterStats.user.js) v1.00a: 
 
-[[HV]IW](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvIW.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvIW.user.js) v1.0.2:
+[[HV]IW](HentaiVerse/hvIW.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvIW.user.js) v1.0.3: 
 
-[[HV]MonsterStats](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvMonsterStats.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvMonsterStats.user.js) v1.01:
+[[HV]MonsterStats](HentaiVerse/hvMonsterStats.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvMonsterStats.user.js) v1.01: 
 
-[[HV]RepairEpument](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvRepairEpument.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvRepairEpument.user.js) v1.00:
+[[HV]RepairEpument](HentaiVerse/hvRepairEpument.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvRepairEpument.user.js) v1.00: 
 
-[[HV]SaveImage](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvSaveImage.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSaveImage.user.js) v1.00:
+[[HV]SaveImage](HentaiVerse/hvSaveImage.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSaveImage.user.js) v1.00: 
 
-[[HV]SellEquipment](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvSellEquipment.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js) v1.01a:
+[[HV]SellEquipment](HentaiVerse/hvSellEquipment.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment.user.js) v1.01a: 
 
-[[HV]SellEquipment2](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvSellEquipment2.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment2.user.js) v1.01:
+[[HV]SellEquipment2](HentaiVerse/hvSellEquipment2.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvSellEquipment2.user.js) v1.01: 
 
-[[HV]Shrine](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvShrine.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvShrine.user.js) v1.02:
+[[HV]Shrine](HentaiVerse/hvShrine.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvShrine.user.js) v1.02: 
 
-[[HV]Trainer](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvTrainer.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvTrainer.user.js) v1.02a:
+[[HV]Trainer](HentaiVerse/hvTrainer.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvTrainer.user.js) v1.02b: 
 
-[[HV]Translator](https://github.com/dodying/UserJs/tree/master/HentaiVerse/hvTranslator.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvTranslator.user.js) v1.00:
+[[HV]Translator](HentaiVerse/hvTranslator.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvTranslator.user.js) v1.00: 
 
 ##### modify
 
-[【HV】翻译](https://github.com/dodying/UserJs/tree/master/modify/hvTranslator.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) v1.0:
+[hvTranslator](modify/hvTranslator.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) v1.0: 
 
-[【nH】下载器-修改自Doying](https://github.com/dodying/UserJs/tree/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) v1.2.0: 相对于原脚本，添加了输入框，可以下载某张图片
+[nHentai Downloader modify by Dodying](modify/nHentai Downloader modify by Dodying.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/modify/nHentai%20Downloader%20modify%20by%20Dodying.user.js) v1.2.0: Download manga on nHentai.net
 
-[搜索引擎跳转-小说版+高亮](https://github.com/dodying/UserJs/tree/master/modify/searchEngineJumpForNovel.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/modify/searchEngineJumpForNovel.user.js) v1.05:
+[searchEngineJumpForNovel](modify/searchEngineJumpForNovel.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/modify/searchEngineJumpForNovel.user.js) v1.05: 
 
 ##### novel
 
-[[小说]污客增强](https://github.com/dodying/UserJs/tree/master/novel/hbookerEnhance.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/hbookerEnhance.user.js) v1.039a: 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
+[hbookerEnhance](novel/hbookerEnhance.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/hbookerEnhance.user.js) v1.039a: 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 
-[【小说】起点书签](https://github.com/dodying/UserJs/tree/master/novel/Qidian_Bookmark.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) v1.02: 在“起点个人中心-我的书架”里增加阅读记录，通过点击章节页里的按钮添加到阅读记录里
+[Qidian_Bookmark](novel/Qidian_Bookmark.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) v1.02: 在“起点个人中心-我的书架”里增加阅读记录，通过点击章节页里的按钮添加到阅读记录里
 
-[【小说】目录页侧边分卷导航栏](https://github.com/dodying/UserJs/tree/master/novel/SidebarInContent.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/SidebarInContent.user.js) v1:
+[SidebarInContent](novel/SidebarInContent.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/SidebarInContent.user.js) v1: 
 
-##### novel\novelDownloader
+##### novel/novelDownloader
 
-[[小说]下载脚本2](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader/novelDownloader-new.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader-new.user.js) v0.0.0: 按“Shift+D”来显示面板，现支持自定义规则
+[novelDownloader2](novel/novelDownloader/novelDownloader-new.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader-new.user.js) v0.0.0: novelDownloaderHelper，press key "shift+d" to show up.
 
-[[Novel]Downloader](https://github.com/dodying/UserJs/tree/master/novel/novelDownloader/novelDownloader.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader.user.js) v1.44.3: novelDownloaderHelper,
+[[Novel]Downloader](novel/novelDownloader/novelDownloader.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader.user.js) v1.45.17: novelDownloaderHelper, press key "shift+d" to show up.
 
 ##### other
 
-[[google]Enhance](https://github.com/dodying/UserJs/tree/master/other/[google]Enhance.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/[google]Enhance.user.js) v1.00:
+[[google]Enhance](other/googleEnhance.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/googleEnhance.user.js) v1.00: 
 
-##### other\old
+##### other/old
 
-[163LyricDownloader](https://github.com/dodying/UserJs/tree/master/other/old/163LyricDownloader.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/163LyricDownloader.user.js) v1.00:
+[163LyricDownloader](other/old/163LyricDownloader.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/163LyricDownloader.user.js) v1.00: 
 
-[【百度云】分享页复制](https://github.com/dodying/UserJs/tree/master/other/old/baiduShareCopy.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopy.user.js) v1: 作者Firefox，常禁用Flash
+[baiduShareCopy](other/old/baiduShareCopy.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopy.user.js) v1: 
 
-[【百度云】分享-答题专用](https://github.com/dodying/UserJs/tree/master/other/old/baiduShareCopyForZhidao.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopyForZhidao.user.js) v1.02:
+[baiduShareCopyForZhidao](other/old/baiduShareCopyForZhidao.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopyForZhidao.user.js) v1.02: 
 
-[【百度云】分享-答题专用V2](https://github.com/dodying/UserJs/tree/master/other/old/baiduShareCopyForZhidaoV2.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopyForZhidaoV2.user.js) v2.0:
+[baiduShareCopyForZhidaoV2](other/old/baiduShareCopyForZhidaoV2.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopyForZhidaoV2.user.js) v2.0: 
 
-[chs2chtForInputbox](https://github.com/dodying/UserJs/tree/master/other/old/chs2chtForInputbox.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/chs2chtForInputbox.user.js) v1:
+[chs2chtForInputbox](other/old/chs2chtForInputbox.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/chs2chtForInputbox.user.js) v1: 
 
-[【GitHub】复制Issues里的代码](https://github.com/dodying/UserJs/tree/master/other/old/GithubCopyCodeInIssues.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/GithubCopyCodeInIssues.user.js) v1:
+[GithubCopyCodeInIssues](other/old/GithubCopyCodeInIssues.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/GithubCopyCodeInIssues.user.js) v1: 
 
-[【Github】复制原始链接](https://github.com/dodying/UserJs/tree/master/other/old/GithubCopyRawLink.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/GithubCopyRawLink.user.js) v1:
+[GithubCopyRawLink](other/old/GithubCopyRawLink.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/GithubCopyRawLink.user.js) v1: 
 
-[[Github]强制Commit](https://github.com/dodying/UserJs/tree/master/other/old/githubEnforceCommit.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/githubEnforceCommit.user.js) v1: 养成好习惯
+[githubEnforceCommit](other/old/githubEnforceCommit.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/githubEnforceCommit.user.js) v1: 
 
-[【维基】跳转到中文](https://github.com/dodying/UserJs/tree/master/other/old/wikiJump2Chinese.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/wikiJump2Chinese.user.js) v1:
+[wikiJump2Chinese](other/old/wikiJump2Chinese.user.js) [Raw](https://github.com/dodying/UserJs/raw/master/other/old/wikiJump2Chinese.user.js) v1: 
 
