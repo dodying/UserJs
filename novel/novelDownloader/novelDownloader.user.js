@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.16
+// @version     1.45.17.1537081612100
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -46,6 +46,9 @@
 // @include     http://book.qq.com/intro.html*
 // @include     http://book.tianya.cn/html2/dir.aspx?bookid=*
 // @include     http://book.tianya.cn/chapter-*
+// @include     http*://www.ciweimao.com/book/*
+// @include     http*://www.ciweimao.com/chapter-list/*/book_detail
+// @include     http*://www.ciweimao.com/chapter/book_chapter_detail*
 // @include     http*://www.hbooker.com/book/*
 // @include     http*://www.hbooker.com/chapter-list/*/book_detail
 // @include     http*://www.hbooker.com/chapter/book_chapter_detail*
@@ -181,6 +184,7 @@
 // @include     http://www.piaotian.com/html/*
 // @include     http://www.23xs.org/shu/*
 // @include     http://www.cuisiliu.com/book/*
+// @include     http://yi-see.com/art_*.html
 //              18X
 // @include     http://www.lewenxs.net/read/*.html
 // @include     http://www.wodexiaoshuo.cc/*/*
@@ -827,20 +831,26 @@ function addRule () {
             var p = k[i]
             var j = base64.encode(n.substr(0, 16))
             var f = base64.encode(n.substr(16))
-            var h = window.CryptoJS.format.OpenSSL.parse(f)
-            n = window.CryptoJS.AES.decrypt(h, window.CryptoJS.enc.Base64.parse(p), {
-              iv: window.CryptoJS.enc.Base64.parse(j),
-              format: window.CryptoJS.format.OpenSSL
+            var h = unsafeWindow.CryptoJS.format.OpenSSL.parse(f)
+            n = unsafeWindow.CryptoJS.AES.decrypt(h, unsafeWindow.CryptoJS.enc.Base64.parse(p), {
+              iv: unsafeWindow.CryptoJS.enc.Base64.parse(j),
+              format: unsafeWindow.CryptoJS.format.OpenSSL
             })
             if (i < k.length - 1) {
-              n = n.toString(window.CryptoJS.enc.Base64)
+              n = n.toString(unsafeWindow.CryptoJS.enc.Base64)
               n = base64.decode(n)
             }
           }
-          var content = n.toString(window.CryptoJS.enc.Utf8)
+          var content = n.toString(unsafeWindow.CryptoJS.enc.Utf8)
           thisDownloaded(num, '', content)
         }
       })
+    }
+  }
+  addIRule('www.ciweimao.com', '刺猬猫', 'h3', '.book-chapter-list a', '.book-chapter-list a:has(.icon-vip-s)', false, 1)
+  chapterRule['www.ciweimao.com'] = {
+    'Deal': function (num, url) {
+      return chapterRule['www.hbooker.com']['Deal'](num, url)
     }
   }
   addIRule('www.3gsc.com.cn', '3G书城', 'h1>a', '.menu-area>p>a', '.menu-area>p>a:has(span.vip)')
@@ -1554,6 +1564,8 @@ function addRule () {
   addCRule('www.23xs.org', 'h2', '.novel_content', 1)
   addIRule('www.cuisiliu.com', '垂丝柳(请使用批量下载)', 'h1', '.book a')
   addCRule('www.cuisiliu.com', 'h1', '.content')
+  addIRule('yi-see.com', '易读', '.T1>b', 'table[width="900px"][border="0"] a')
+  addCRule('yi-see.com', '.MC>b', '.ART', 1)
   // 18X
   addIRule('www.lewenxs.net', '乐文小说网', '.kui-left.kui-fs32', '.kui-item>a')
   addCRule('www.lewenxs.net', 'h1.kui-ac', '#kui-page-read-txt', 1)
@@ -1650,6 +1662,8 @@ function addRule () {
   addCRule('www.xiaoqiangxs.com', 'h2', '#content', 1)
   addIRule('18av.mm-cg.com', '18H', '.label>div', '.novel_leftright>span>a:visible')
   addCRule('18av.mm-cg.com', 'h1', '#novel_content_txtsize')
+  addIRule('www.diyibanzhu.xyz', '第一版主网', '.title', '.dd a')
+  addCRule('www.diyibanzhu.xyz', 'h2', '.box_box', 1)
 }
 
 function addUI () {
@@ -1892,13 +1906,13 @@ function downloadTo () { // 下载到...
 
 function download (fileType) { // 下载
   var host = window.location.host
-  var chapter = $(indexRule[host].chapter)
+  var chapter = $(indexRule[host].chapter).toArray()
   var bookName = $('.ndTitle').val()
   $(window).data('bookName', bookName)
   $(window).data('fileType', fileType)
   if (fileType === 'epub') getCover(bookName)
   var i
-  if ($('#ndVip')[0].checked === false && indexRule[host].vip !== '') chapter = $(chapter).not($(indexRule[host].vip))
+  if ($('#ndVip')[0].checked === false && indexRule[host].vip !== '') chapter = $(chapter).not($(indexRule[host].vip)).toArray()
   if ($('.ndMain [name=empty]')[0].checked) {
     chapter = []
   } else if ($('.ndSplitInput').val() !== '') {
