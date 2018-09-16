@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.0
+// @version     1.16.1.1537082136635
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -54,6 +54,16 @@ const G = { // 全局变量
     d: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABTSURBVHjaYvj//z8DJZiBKgaksQn+R8cMSABdjmIDkA1BMYABB0DXhMwfZAYgG4SNTXsDCHmBgYFhgA1IYxNUJioMyE5IZCflAc2NAAAAAP//AwAC/Mv3iQhmBgAAAABJRU5ErkJggg==',
     p: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAABTSURBVHjaYvj//z8DJZiBKgaksQn+R8cMSACbfBqb4H/qG8CAA6DLD2IDkBViYxMdiGQbQIwX8KYDmhuQxiaoTGlKlKXUAG7aZCZKMAAAAP//AwCS0Ls1SQllgAAAAABJRU5ErkJggg=='
   },
+  introPicName: [
+    /999\.(png|jpg)$/i,
+    /^i_\.(png|jpg)$/i,
+    /^zCREDIT/i,
+    '招募圖',
+    '無邪気',
+    /^Read(|_)(|\d+)\.(png|jpg)$/i,
+    /^CEwanted\.(png|jpg)$/i,
+    /\.gif$/i
+  ],
   timeout: null,
   downloading: false,
   imageD: [],
@@ -61,10 +71,23 @@ const G = { // 全局变量
   imageEnd: false,
   imageData: null,
   autoDownload: false,
-  downloadSizeChanged: false
+  downloadSizeChanged: false,
+  taskInterval: null,
+  this: (() => {
+    let used = [ 'addEventListener', 'alert', 'applicationCache', 'atob', 'blur', 'browser', 'btoa', 'caches', 'cancelAnimationFrame', 'cancelIdleCallback', 'captureEvents', 'chrome', 'clearInterval', 'clearTimeout', 'clientInformation', 'close', 'closed', 'confirm', 'createImageBitmap', 'crypto', 'customElements', 'decodeURI', 'decodeURI', 'decodeURIComponent', 'defaultStatus', 'defaultstatus', 'devicePixelRatio', 'dispatchEvent', 'document', 'encodeURI', 'encodeURIComponent', 'eval', 'external', 'fetch', 'find', 'focus', 'frameElement', 'frames', 'getComputedStyle', 'getSelection', 'history', 'indexedDB', 'innerHeight', 'innerWidth', 'isFinite', 'isNaN', 'isSecureContext', 'length', 'localStorage', 'location', 'locationbar', 'matchMedia', 'menubar', 'moveBy', 'moveTo', 'name', 'navigator', 'onabort', 'onafterprint', 'onanimationend', 'onanimationiteration', 'onanimationstart', 'onappinstalled', 'onauxclick', 'onbeforeinstallprompt', 'onbeforeprint', 'onbeforeunload', 'onblur', 'oncancel', 'oncanplay', 'oncanplaythrough', 'onchange', 'onclick', 'onclose', 'oncontextmenu', 'oncuechange', 'ondblclick', 'ondevicemotion', 'ondeviceorientation', 'ondeviceorientationabsolute', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'ondurationchange', 'onemptied', 'onended', 'onerror', 'onfocus', 'ongotpointercapture', 'onhashchange', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress', 'onkeyup', 'onlanguagechange', 'onload', 'onloadeddata', 'onloadedmetadata', 'onloadstart', 'onlostpointercapture', 'onmessage', 'onmessageerror', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onoffline', 'ononline', 'onpagehide', 'onpageshow', 'onpause', 'onplay', 'onplaying', 'onpointercancel', 'onpointerdown', 'onpointerenter', 'onpointerleave', 'onpointermove', 'onpointerout', 'onpointerover', 'onpointerup', 'onpopstate', 'onprogress', 'onratechange', 'onrejectionhandled', 'onreset', 'onresize', 'onscroll', 'onsearch', 'onseeked', 'onseeking', 'onselect', 'onstalled', 'onstorage', 'onsubmit', 'onsuspend', 'ontimeupdate', 'ontoggle', 'ontransitionend', 'onunhandledrejection', 'onunload', 'onvolumechange', 'onwaiting', 'onwebkitanimationend', 'onwebkitanimationiteration', 'onwebkitanimationstart', 'onwebkittransitionend', 'onwheel', 'open', 'openDatabase', 'opener', 'origin', 'outerHeight', 'outerWidth', 'pageXOffset', 'pageYOffset', 'parent', 'parseFloat', 'parseInt', 'performance', 'personalbar', 'postMessage', 'print', 'prompt', 'releaseEvents', 'removeEventListener', 'requestAnimationFrame', 'requestIdleCallback', 'resizeBy', 'resizeTo', 'screen', 'screenLeft', 'screenTop', 'screenX', 'screenY', 'scroll', 'scrollBy', 'scrollTo', 'scrollX', 'scrollY', 'scrollbars', 'self', 'sessionStorage', 'setInterval', 'setTimeout', 'speechSynthesis', 'status', 'statusbar', 'stop', 'styleMedia', 'toolbar', 'top', 'visualViewport', 'webkitCancelAnimationFrame', 'webkitRequestAnimationFrame', 'webkitRequestFileSystem', 'webkitResolveLocalFileSystemURL', 'webkitStorageInfo' ]
+
+    let variabled = {}
+    for (let i in this) {
+      if (!used.includes(i)) {
+        variabled[i] = this[i]
+      }
+    }
+    return variabled
+  })(),
+  function: {init, abortPending, add2Fav, addStyle, arrUnique, autoDownload, autoComplete, batchDownload, btnAddFav0, btnAddFav, btnAddFav2, btnFake, btnFake2, btnSearch, btnSearch2, btnTask, btnTask2, calcRelativeTime, changeEConfig, changeFav, changeName, checkExist, checkForNew, checkImageSize, combineText, copyInfo, defaultConfig, downloadAdd, downloadRemove, findData, getEConfig, getEditDistance, getInfo, hideGalleries, highlightBlacklist, htmlEscape, introPic, jumpHost, languageCode, makeRange, openUrl, quickDownload, rateInSearchPage, reEscape, saveAs, saveAs2, saveLink, setNotification, setNotification2, searchInOtherSite, showAllThumb, showConfig, showTooltip, sortObj, tagEvent, tagPreview, task, taskRemove, tagTranslate, toggleBlacklist, translateText, updateEHD, updateEHT, waitInMs, waitForElement, xhr, xhrSync}
 }
 G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config['autoStartDownload']
-G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.autoDownload && G.config['enableEHD'] && G.config['showAllThumb'] && G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD'] && G.config['downloadSizeChanged']
+G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.config['enableEHD'] && G.config['showAllThumb'] && G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD'] && G.config['downloadSizeChanged']
 
 async function init () {
   GM_registerMenuCommand(GM_info.script.name + ': Show Global', function () {
@@ -125,12 +148,20 @@ async function init () {
         `var loadSetting = function () { return new Promise(resolve => { resolve(GM_getValue('ehD-setting')) }) }`,
         'let console = {}',
         'for (let i in window.console) { console[i] = new Function() }',
-        'let checkFetchCount = function () {',
-        ' if (fetchCount < 0) fetchCount = 0',
-        '}',
+        'let alert = function () { }',
+        'let confirm = function () { return true }',
         (G.config['recordEHDUrl'] ? recordEHDUrl.join('\n') : ''),
         GM_getValue('EHD_code'),
-        'setInterval(checkFetchCount, 3000)',
+        'let checkInterval = function () {',
+        '  if (totalCount <= 0) return',
+        '  if (totalCount === downloadedCount && failedCount > 0) { failedCount = 0; checkFailed() }',
+        `  if (fetchCount < 0) { fetchCount = [...document.querySelectorAll('.ehD-pt-progress')].filter(i => { let value = i.getAttribute('value'); return value === null || (value * 1 < 1 && value * 1 > 0) }).length; updateTotalStatus(); checkFailed() }`,
+        `  if (downloadedCount + failedCount >= totalCount && failedCount > 0 && fetchCount > 0) { retryAllFailed() }`,
+        // '  window.console.log("totalCount:\t", totalCount, "\nfetchCount:\t", fetchCount, "\ndownloadedCount:\t", downloadedCount, "\nfailedCount:\t", failedCount)',
+        '  window.console.log(JSON.stringify({"总计": totalCount, "下载中": fetchCount, "已完成": downloadedCount, "下载失败": failedCount}))',
+        // '  window.console.log(totalCount, fetchCount, downloadedCount, failedCount)',
+        '}',
+        'setInterval(checkInterval, 300)',
         '})()'
       ]
       /* eslint-disable no-eval */
@@ -141,6 +172,7 @@ async function init () {
       setNotification('载入 E-Hentai-Downloader 超时')
     }
     $('.g2:contains("Download Archive")').click(e => { // 使用EHD下载时, 添加到下载列表
+      if (e.originalEvent && G.downloadSizeChanged) autoDownload()
       downloadAdd()
       if ($('[rel="shortcut icon"]').length === 0) changeFav(G.favicon.d)
       $('.ehNavBar').attr('style', 'top:0;')
@@ -158,6 +190,8 @@ async function init () {
     }
     btnAddFav() // 按钮 -> 加入收藏(信息页)
     btnSearch() // 按钮 -> 搜索(信息页)
+    btnFake() // 按钮 -> 下载空文档(信息页)
+    btnTask() // 按钮 -> 添加到下载任务(信息页)
     tagEvent() // 标签事件
     copyInfo() // 复制信息
     abortPending() // 终止EHD所有下载
@@ -190,6 +224,8 @@ async function init () {
     btnSearch2() // 按钮 -> 搜索(搜索页)
     quickDownload() // 右键：下载
     if ($('table.itg').length) batchDownload() // Displsy: List => 批量下载
+    btnFake2() // 按钮 -> 下载空文档(搜索页)
+    btnTask2() // 按钮 -> 添加到下载任务(搜索页)
     if (G.config['checkExist']) checkExist() // 检查本地是否存在
     let _gmetadata = await getInfo() || []
     G.gmetadata.push(..._gmetadata)
@@ -214,6 +250,19 @@ async function init () {
       $(e.target).attr('title', '当前下载列表:<br> ' + GM_getValue('downloading', []).join('<br> '))
     }
   }).prependTo('.ehNavBar>div:eq(2)')
+  $('<input type="button" value="Start Task" tooltip="' + htmlEscape('左键: 开始下载任务<br>右键: 重置当前下载任务') + '">').on({
+    mousedown: e => {
+      if (e.button === 0) {
+        task()
+      } else if (e.button === 2) {
+        GM_deleteValue('tasking')
+      }
+    },
+    mouseenter: e => {
+      let task = GM_getValue('task', [])
+      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
+    }
+  }).appendTo('.ehNavBar>div:eq(2)')
   showTooltip() // 显示提示
   $('body').on('mousedown', 'a,button,input[type="button"],div:empty', e => {
     $(e.target).css('border-color', 'red').css('border-style', 'solid').css('border-width', '1px')
@@ -223,7 +272,8 @@ async function init () {
     let copy = $(e.target).attr('copy')
     setNotification(copy, '已复制')
     GM_setClipboard(copy)
-  }).on('contextmenu', 'input[type="button"]', () => false)
+  }).on('contextmenu', () => false)
+  $('.ehNavBar').attr('oncontextmenu', 'return false')
 }
 
 function abortPending () { // 终止EHD所有下载
@@ -334,9 +384,9 @@ function addStyle () { // 添加样式
     '.ehBlacklist:hover{color:inherit;background-color:inherit;}',
     'table.itg>tbody>tr.ehBatchHover{background-color:#669933;}',
     'table.itg>tbody>tr:hover{background-color:#4a86e8;}',
-    'table.itg>tbody>tr>th:nth-child(5),table.itg>tbody>tr>td:nth-child(5){cursor:pointer;}',
-    '.gdtm [name="intro"][on="true"]::after{content:"Block";}',
-    '.gdtm [name="intro"][on="false"]::after{content:"Unblock";}',
+    '.gdtm [name="intro"]{white-space:nowrap;}',
+    '.gdtm [name="intro"][on="true"]::after{content:"Block: " attr(file);}',
+    '.gdtm [name="intro"][on="false"]::after{content:"Unblock: " attr(file);}',
     '[copy]{cursor:pointer;}',
     '.ehSites{display:inline-block;}',
     '.ehSites>a{display:none;}',
@@ -350,7 +400,9 @@ function addStyle () { // 添加样式
     '.ehNotification>div:nth-child(1){flex:1;}',
     '.ehNotification>div:nth-child(2){flex:4;}',
     '.ehNotification>div:nth-child(2)>div:nth-child(1){font-size:16px;font-weight:bold;white-space:nowrap;}',
-    '.ehFavicion{background: url(favicon.ico) no-repeat center center;}'
+    '.ehFavicion{background: url(favicon.ico) no-repeat center center;}',
+    '.ehIgnore{filter:blur(1px) grayscale(1);}',
+    '.ehIgnore:hover{filter:none;}'
   ].join('\n')).appendTo('head')
   $('.i:has(.n),.id44>div>a:has(.tn)').css('float', 'right') // .hide(); //隐藏种子图标
 }
@@ -363,15 +415,14 @@ async function autoDownload (isEnd) { // 自动开始下载
   // isEnd false: 下载小图, true: 下载大图
   if (G.downloadSizeChanged) {
     if (G.imageD.length && G.imageS.length) {
-      $('#gdd tr:contains("File Size")>td:nth-child(2)').text('1 MB') // Fake Size
       let imageSize = isEnd ? G.config['sizeD'] : G.config['sizeS']
       await changeEConfig('xr', imageSize)
       changeFav(G.favicon[imageSize])
-      $('label:contains("Pages Range")>input').val(isEnd ? G.imageD : G.imageS)
+      $('label:contains("Pages Range")>input').val(makeRange(isEnd ? G.imageD : G.imageS))
       G.imageEnd = isEnd
     } else {
       G.downloadSizeChanged = false
-      $('label:contains("Pages Range")>input').val(G.imageD.length ? G.imageD : G.imageS)
+      $('label:contains("Pages Range")>input').val(makeRange(G.imageD.length ? G.imageD : G.imageS))
     }
   }
   $('.ehD-box>.g2:eq(0)').click()
@@ -456,6 +507,10 @@ function batchDownload () { // 批量下载
     }
   })
   $('<td><input type="checkbox"></td>').appendTo('table.itg tr:gt(0):not(.ehCheckContainer)')
+  $('table.itg tr:gt(0):not(.ehCheckContainer)').on('click', e => {
+    if ($(e.target).is('a,input') || $(e.target).parents().filter('a,input').length) return
+    $(e.currentTarget).find('input[type="checkbox"]').click()
+  })
   $('table.itg tr:gt(0) input').on('click', function (e) {
     if (e.target.checked) {
       $(e.target).parentsUntil('tbody').eq(-1).addClass('ehBatchHover')
@@ -463,15 +518,7 @@ function batchDownload () { // 批量下载
       $(e.target).parentsUntil('tbody').eq(-1).removeClass('ehBatchHover')
     }
   })
-  $('table.itg tr>th:has(input),table.itg tr>td:has(input)').on('click', function (e) {
-    if ($(e.target).find('input').length) $(e.target).find('input').click()
-  })
   window.sessionStorage.setItem('batch', 0)
-  $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', e => {
-    $('.ehBatchHover .it5>a').toArray().forEach(i => {
-      saveAs('', i.textContent.trim() + '.cbz')
-    })
-  }).appendTo('.ehNavBar>div:eq(2)')
   $('<input type="button" value="Batch" title="' + htmlEscape('左键: Batch<br>右键: 重置Batch') + '">').on('mousedown', e => {
     if (e.button === 2) {
       window.sessionStorage.setItem('batch', 0)
@@ -561,6 +608,20 @@ function btnAddFav2 () { // 按钮 -> 加入收藏(搜索页)
   })
 }
 
+function btnFake () { // 按钮 -> 下载空文档(信息页)
+  $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', e => {
+    saveAs('', $('#gn').text().trim() + '.cbz')
+  }).appendTo('.ehNavBar>div:eq(2)')
+}
+
+function btnFake2 () { // 按钮 -> 下载空文档(搜索页)
+  $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', e => {
+    $('.ehBatchHover .it5>a').toArray().forEach(i => {
+      saveAs('', i.textContent.trim() + '.cbz')
+    })
+  }).appendTo('.ehNavBar>div:eq(2)')
+}
+
 function btnSearch () { // 按钮 -> 搜索(信息页)
   let text = $('#gn').text() || $('#gj').text()
   if (text === '') return
@@ -611,6 +672,60 @@ function btnSearch2 () { // 按钮 -> 搜索(搜索页)
       }
     }
   })
+}
+
+function btnTask () { // 按钮 -> 添加到下载任务(信息页)
+  $('<input type="button" value="Add Task" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">').on({
+    mousedown: e => {
+      if (e.button === 0) {
+        let task = GM_getValue('task', [])
+        let url = window.location.href.replace(/#\d+$/, '')
+        if (!(task.includes(url))) {
+          task.push(url)
+          GM_setValue('task', task)
+        }
+      } else if (e.button === 1) {
+        GM_setValue('task', [])
+      } else if (e.button === 2) {
+        let task = GM_getValue('task', [])
+        let url = window.location.href.replace(/#\d+$/, '')
+        if (task.includes(url)) {
+          task.splice(task.indexOf(url), 1)
+          GM_setValue('task', task)
+        }
+      }
+    },
+    mouseenter: e => {
+      let task = GM_getValue('task', [])
+      $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
+    }
+  }).appendTo('.ehNavBar>div:eq(2)')
+}
+
+function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
+  $('<input type="button" value="Add Task" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">').on({
+    mousedown: e => {
+      if (e.button === 0) {
+        let task = GM_getValue('task', [])
+        $('.ehBatchHover .it5>a').toArray().forEach(i => {
+          if (!(task.includes(i.href))) task.push(i.href)
+        })
+        GM_setValue('task', task)
+      } else if (e.button === 1) {
+        GM_setValue('task', [])
+      } else if (e.button === 2) {
+        let task = GM_getValue('task', [])
+        $('.ehBatchHover .it5>a').toArray().forEach(i => {
+          if (task.includes(i.href)) task.splice(task.indexOf(i.href), 1)
+        })
+        GM_setValue('task', task)
+      }
+    },
+    mouseenter: e => {
+      let task = GM_getValue('task', [])
+      $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
+    }
+  }).appendTo('.ehNavBar>div:eq(2)')
 }
 
 function calcRelativeTime (time) { // 计算相对时间
@@ -898,7 +1013,22 @@ async function checkImageSize () { // 检查图片尺寸
   let imageSize = await getEConfig('xr')
   let numD = 0 // 双页
   $('.gdtm>div>a>img').toArray().forEach(function (i, j) {
-    if (ads.includes($(i).parent().attr('href').split('/')[4])) return
+    let url = $(i).parent().attr('href')
+    let id = url.split('/')[4]
+    let name = $(i).attr('title').match(/Page \d+:\s+(.*)/)[1]
+    if (ads.includes(id) || G.introPicName.some(j => name.match(j))) {
+      $(i).parent().parent().addClass('ehIgnore')
+      if (ads.includes(id)) {
+        let introPicStat = GM_getValue('introPicStat', {})
+        introPicStat[id] = id in introPicStat ? introPicStat[id] + 1 : 1
+        GM_setValue('introPicStat', introPicStat)
+
+        let introPicUrl = GM_getValue('introPicUrl', {})
+        introPicUrl[id] = url
+        GM_setValue('introPicUrl', introPicUrl)
+      }
+      return
+    }
     let rate = $(i).width() / $(i).height() // 宽高比
     if (rate > G.config['rateD']) {
       numD++
@@ -1215,7 +1345,7 @@ function htmlEscape (text) {
 }
 
 function introPic () { // 宣传图
-  $('<a type="button" name="intro" href="javascript:;" on="true"></a>').on('click', function (e) {
+  let toggleIgnore = e => {
     let introPic = GM_getValue('introPic', [])
     let id = $(e.target).prev().attr('href').split('/')[4]
     if ($(e.target).attr('on') === 'true' && !introPic.includes(id)) {
@@ -1226,9 +1356,11 @@ function introPic () { // 宣传图
       $(e.target).attr('on', 'true')
     }
     GM_setValue('introPic', introPic)
-  }).appendTo('.gdtm>div')
+  }
   let introPic = GM_getValue('introPic', [])
   $('.gdtm>div>a:nth-child(1)').toArray().forEach(i => {
+    let file = $(i).find('img:eq(0)').attr('title').replace(/^Page\s+\d+:\s+/, '')
+    $(`<a type="button" name="intro" href="javascript:;" on="true" file="${file}"></a>`).on('click', toggleIgnore).appendTo(i.parentNode)
     let id = i.href.split('/')[4]
     if (introPic.includes(id)) $(i).next().attr('on', 'false')
   })
@@ -1313,6 +1445,24 @@ function languageCode () { // 显示iso语言代码
       }
     })
   })
+}
+
+function makeRange (arr) {
+  arr = [...new Set(arr.sort((a, b) => a - b))]
+  let arr2 = [arr[0].toString()]
+
+  for (let i = 1; i < arr.length; i++) {
+    let index = arr[i]
+    let last = arr2[arr2.length - 1]
+    let start = last.match(/^\d+/)[0] * 1
+    let end = last.match(/\d+$/)[0] * 1
+    if (index - end === 1) {
+      arr2[arr2.length - 1] = `${start}-${index}`
+    } else {
+      arr2.push(index.toString())
+    }
+  }
+  return arr2
 }
 
 function openUrl (url) { // 打开链接
@@ -1421,12 +1571,20 @@ function saveAs (text, name) {
           resolve(data)
         }).then(data => {
           saveAs2(data, name, text.type)
-          window.close()
+          window.onbeforeunload = null
+          waitInMs(500).then(() => {
+            taskRemove()
+            window.close()
+          })
         })
       }
     } else {
       saveAs2(text, name, text.type)
-      window.close()
+      window.onbeforeunload = null
+      waitInMs(500).then(() => {
+        taskRemove()
+        window.close()
+      })
     }
   } else {
     saveAs2(text, name)
@@ -1603,9 +1761,10 @@ function showConfig () { // 显示设置
     let _html = [
       GM_info.script.name + '<span class="ehHighlight">v' + GM_info.script.version + '</span> <a href="' + GM_info.script.namespace + '" target="_blank">@' + (GM_info.script.author || 'dodying') + '</a>',
       '',
-      '<input type="button" name="exportValues" value="Export Values" title="导出脚本储存的信息"> <input type="file" name="selectFile" accept=".json"><input type="button" name="fakeSelectFile" value="Select File" title="选择文件"> <input type="button" name="importValues" value="Import Values" title="导入脚本储存的信息">',
+      '<input type="button" name="exportValues" value="Export Values" title="导出脚本储存的信息<br>(除EHT与EHD的数据)"> <input type="file" name="selectFile" accept=".json"><input type="button" name="fakeSelectFile" value="Select File" title="选择文件"> <input type="button" name="importValues" value="Import Values" title="导入脚本储存的信息">',
       '更新 EHT: 更新频率: <input name="ehConfig_updateIntervalEHT" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHT" value="Update Now" tooltip="立即更新标签数据，来自[Mapaler/EhTagTranslator]"> <input type="button" name="exportEHT" value="Export Now" title="导出EHT数据"> <input type="button" name="emptyEHT" value="Empty Now" title="重置EHT数据">',
       '更新 EHD: 更新频率: <input name="ehConfig_updateIntervalEHD" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHD" value="Update Now" tooltip="立即更新内置 [E-Hentai-Downloader]"> <input type="button" name="exportEHD" value="Export Now" title="导出EHD数据"> <input type="button" name="emptyEHD" value="Empty Now" title="重置EHD数据">',
+      '宣传图相关: 导出格式: <input name="ehConfig_exportIntroPicFormat" title="' + htmlEscape('以<span class="ehHighlight">{id}</span>表示宣传图id<br>以<span class="ehHighlight">{cr}</span>表示\\r<br>以<span class="ehHighlight">{lf}</span>表示\\n') + '" type="text" placeholder="\'{id}\',{cr}{lf}"> <input type="button" name="exportIntroPic" value="Copy Text" title="复制文本">',
       '',
       '<span class="ehHighlight">通用设置:</span>',
       '时间显示: <label for="ehConfig_timeShow_local"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_local" value="local" checked>本地时间</label> <label for="ehConfig_timeShow_iso"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_iso" value="iso">ISO时间</label>',
@@ -1641,7 +1800,7 @@ function showConfig () { // 显示设置
       '<label for="ehConfig_enableChangeSize" title="' + htmlEscape('当大图(双页)尺寸与小图(单页)尺寸相同时，失效') + '"><input type="checkbox" id="ehConfig_enableChangeSize">启用自动调整图片尺寸</label>',
       '调整图片尺寸: 大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1" step="0.1">; 其他默认视为小图(单页)',
       '调整图片尺寸: 大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>',
-      '<div class="ehNew"></div><label for="ehConfig_downloadSizeChanged" title="需关闭: Request File System to handle large Zip file<br>需开启: 锚部分不为空时，自动开始下载, 启用内置 [E-Hentai-Downloader], 显示所有预览图, 启用自动调整图片尺寸<br>注意: 避免出错，应一次下载一个画廊"><input type="checkbox" id="ehConfig_downloadSizeChanged">下载调整过大小的图片压缩档</label>'
+      '<div class="ehNew"></div><label for="ehConfig_downloadSizeChanged" title="需关闭: Request File System to handle large Zip file<br>需开启: 启用内置 [E-Hentai-Downloader], 显示所有预览图, 启用自动调整图片尺寸<br>注意: 避免出错，应一次下载一个画廊"><input type="checkbox" id="ehConfig_downloadSizeChanged">下载调整过大小的图片压缩档</label>'
     ].map(i => i ? '<li>' + i + '</li>' : '<hr>').join('')
     $('<div class="ehConfig"></div>').html('<ul>' + _html + '</ul><div class="ehConfigBtn"><input type="button" name="reset" value="Reset" title="重置"><input type="button" name="save" value="Save" title="保存"><input type="button" name="cancel" value="Cancel" title="取消"></div>').appendTo('body').on('click', function (e) {
       if ($(e.target).is('.ehConfigBtn>input[type="button"][name="reset"]')) {
@@ -1726,8 +1885,9 @@ function showConfig () { // 显示设置
         $('.ehConfig').remove()
       } else if ($(e.target).is('.ehConfig input[name="exportValues"]')) {
         let obj = {}
-        GM_listValues().forEach(value => {
-          obj[value] = GM_getValue(value)
+        GM_listValues().forEach(key => {
+          if (['EHD_code', 'EHT'].includes(key)) return
+          obj[key] = GM_getValue(key)
         })
         let text = JSON.stringify(obj, null, 2)
         saveAs(text, '[EH]Enhance.json')
@@ -1773,6 +1933,9 @@ function showConfig () { // 显示设置
         GM_deleteValue('EHD_code')
         GM_deleteValue('EHD_checkTime')
         GM_deleteValue('EHD_version')
+      } else if ($(e.target).is('.ehConfig input[name="exportIntroPic"]')) {
+        let text = arrUnique(GM_getValue('introPic', [])).sort().map(i => G.config['exportIntroPicFormat'].replace(/{id}/g, i).replace(/{cr}/g, '\r').replace(/{lf}/g, '\n')).join('')
+        GM_setClipboard(text)
       } else if ($(e.target).is('.ehConfig input[name="getUconfig"]')) {
         $(e.target).prop('disabled', true).val('Getting...')
         getEConfig().then(uconfig => {
@@ -1800,7 +1963,8 @@ function showConfig () { // 显示设置
         let timeText = d.toLocaleString(navigator.language, {
           hour12: false
         })
-        $(e.target).attr('title', `<time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`)
+        let length = G.EHT.map(i => i.tags).reduce((a, c) => [].concat(a, c)).length
+        $(e.target).attr('title', `当前总数: <span class="ehHighlight">${length}</span><hr><time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`)
       }
     })
     $('[name="updateEHD"]').on({
@@ -1811,7 +1975,8 @@ function showConfig () { // 显示设置
         let timeText = d.toLocaleString(navigator.language, {
           hour12: false
         })
-        $(e.target).attr('title', `<time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`)
+        let version = GM_getValue('EHD_version', '')
+        $(e.target).attr('title', `当前版本: <span class="ehHighlight">${version}</span><hr><time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`)
       }
     })
 
@@ -1971,6 +2136,43 @@ function tagPreview () { // 标签预览
       })
     }
   })
+}
+
+function task () { // 下载任务
+  if (G.taskInterval) return
+  let main = async () => {
+    let task = GM_getValue('task', [])
+    if (task.length === 0) {
+      G.taskInterval = null
+      return
+    }
+
+    let downloading = GM_getValue('downloading', [])
+    if (downloading.length) {
+      await waitInMs(2 * 1000)
+      await main()
+      return
+    }
+
+    let tasking = GM_getValue('tasking')
+    if (tasking) {
+      await waitInMs(2 * 1000)
+      await main()
+      return
+    }
+
+    tasking = task.splice(0, 1)[0]
+    GM_setValue('tasking', tasking)
+    GM_setValue('task', task)
+    openUrl(tasking + '#2')
+    await main()
+  }
+  G.taskInterval = setTimeout(main, 200)
+}
+
+function taskRemove () {
+  let tasking = GM_getValue('tasking')
+  if (tasking.match(unsafeWindow.gid)) GM_deleteValue('tasking')
 }
 
 function tagTranslate () { // 标签翻译
