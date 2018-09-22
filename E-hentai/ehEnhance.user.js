@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.1.1537082136635
+// @version     1.16.2.1537614467949
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -40,6 +40,8 @@
 /* global JSZip */
 
 const G = { // 全局变量
+  debug: false,
+  infoPage: $('.ido').length === 0,
   config: GM_getValue('config', {}),
   'ehD-setting': JSON.parse(GM_getValue('ehD-setting', '{}')),
   EHT: [],
@@ -64,6 +66,32 @@ const G = { // 全局变量
     /^CEwanted\.(png|jpg)$/i,
     /\.gif$/i
   ],
+  digitalJpRe: /[0-9０-９零一二三四五六七八九十百千万零壹贰参肆伍陆柒捌玖拾佰仟萬]/g,
+  digitalRomaji: {
+    rei: 0,
+    ichi: 1,
+    ni: 2,
+    san: 3,
+    yon: 4,
+    shi: 4,
+    go: 5,
+    roku: 6,
+    nana: 7,
+    shichi: 7,
+    hachi: 8,
+    kyu: 9,
+    jyu: 10,
+    ix: 9,
+    x: 10,
+    viii: 8,
+    vii: 7,
+    vi: 6,
+    iv: 4,
+    v: 5,
+    iii: 3,
+    ii: 2,
+    i: 1
+  },
   timeout: null,
   downloading: false,
   imageD: [],
@@ -74,7 +102,7 @@ const G = { // 全局变量
   downloadSizeChanged: false,
   taskInterval: null,
   this: (() => {
-    let used = [ 'addEventListener', 'alert', 'applicationCache', 'atob', 'blur', 'browser', 'btoa', 'caches', 'cancelAnimationFrame', 'cancelIdleCallback', 'captureEvents', 'chrome', 'clearInterval', 'clearTimeout', 'clientInformation', 'close', 'closed', 'confirm', 'createImageBitmap', 'crypto', 'customElements', 'decodeURI', 'decodeURI', 'decodeURIComponent', 'defaultStatus', 'defaultstatus', 'devicePixelRatio', 'dispatchEvent', 'document', 'encodeURI', 'encodeURIComponent', 'eval', 'external', 'fetch', 'find', 'focus', 'frameElement', 'frames', 'getComputedStyle', 'getSelection', 'history', 'indexedDB', 'innerHeight', 'innerWidth', 'isFinite', 'isNaN', 'isSecureContext', 'length', 'localStorage', 'location', 'locationbar', 'matchMedia', 'menubar', 'moveBy', 'moveTo', 'name', 'navigator', 'onabort', 'onafterprint', 'onanimationend', 'onanimationiteration', 'onanimationstart', 'onappinstalled', 'onauxclick', 'onbeforeinstallprompt', 'onbeforeprint', 'onbeforeunload', 'onblur', 'oncancel', 'oncanplay', 'oncanplaythrough', 'onchange', 'onclick', 'onclose', 'oncontextmenu', 'oncuechange', 'ondblclick', 'ondevicemotion', 'ondeviceorientation', 'ondeviceorientationabsolute', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'ondurationchange', 'onemptied', 'onended', 'onerror', 'onfocus', 'ongotpointercapture', 'onhashchange', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress', 'onkeyup', 'onlanguagechange', 'onload', 'onloadeddata', 'onloadedmetadata', 'onloadstart', 'onlostpointercapture', 'onmessage', 'onmessageerror', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onoffline', 'ononline', 'onpagehide', 'onpageshow', 'onpause', 'onplay', 'onplaying', 'onpointercancel', 'onpointerdown', 'onpointerenter', 'onpointerleave', 'onpointermove', 'onpointerout', 'onpointerover', 'onpointerup', 'onpopstate', 'onprogress', 'onratechange', 'onrejectionhandled', 'onreset', 'onresize', 'onscroll', 'onsearch', 'onseeked', 'onseeking', 'onselect', 'onstalled', 'onstorage', 'onsubmit', 'onsuspend', 'ontimeupdate', 'ontoggle', 'ontransitionend', 'onunhandledrejection', 'onunload', 'onvolumechange', 'onwaiting', 'onwebkitanimationend', 'onwebkitanimationiteration', 'onwebkitanimationstart', 'onwebkittransitionend', 'onwheel', 'open', 'openDatabase', 'opener', 'origin', 'outerHeight', 'outerWidth', 'pageXOffset', 'pageYOffset', 'parent', 'parseFloat', 'parseInt', 'performance', 'personalbar', 'postMessage', 'print', 'prompt', 'releaseEvents', 'removeEventListener', 'requestAnimationFrame', 'requestIdleCallback', 'resizeBy', 'resizeTo', 'screen', 'screenLeft', 'screenTop', 'screenX', 'screenY', 'scroll', 'scrollBy', 'scrollTo', 'scrollX', 'scrollY', 'scrollbars', 'self', 'sessionStorage', 'setInterval', 'setTimeout', 'speechSynthesis', 'status', 'statusbar', 'stop', 'styleMedia', 'toolbar', 'top', 'visualViewport', 'webkitCancelAnimationFrame', 'webkitRequestAnimationFrame', 'webkitRequestFileSystem', 'webkitResolveLocalFileSystemURL', 'webkitStorageInfo' ]
+    let used = ['addEventListener', 'alert', 'applicationCache', 'atob', 'blur', 'browser', 'btoa', 'caches', 'cancelAnimationFrame', 'cancelIdleCallback', 'captureEvents', 'chrome', 'clearInterval', 'clearTimeout', 'clientInformation', 'close', 'closed', 'confirm', 'createImageBitmap', 'crypto', 'customElements', 'decodeURI', 'decodeURI', 'decodeURIComponent', 'defaultStatus', 'defaultstatus', 'devicePixelRatio', 'dispatchEvent', 'document', 'encodeURI', 'encodeURIComponent', 'eval', 'external', 'fetch', 'find', 'focus', 'frameElement', 'frames', 'getComputedStyle', 'getSelection', 'history', 'indexedDB', 'innerHeight', 'innerWidth', 'isFinite', 'isNaN', 'isSecureContext', 'length', 'localStorage', 'location', 'locationbar', 'matchMedia', 'menubar', 'moveBy', 'moveTo', 'name', 'navigator', 'onabort', 'onafterprint', 'onanimationend', 'onanimationiteration', 'onanimationstart', 'onappinstalled', 'onauxclick', 'onbeforeinstallprompt', 'onbeforeprint', 'onbeforeunload', 'onblur', 'oncancel', 'oncanplay', 'oncanplaythrough', 'onchange', 'onclick', 'onclose', 'oncontextmenu', 'oncuechange', 'ondblclick', 'ondevicemotion', 'ondeviceorientation', 'ondeviceorientationabsolute', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'ondurationchange', 'onemptied', 'onended', 'onerror', 'onfocus', 'ongotpointercapture', 'onhashchange', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress', 'onkeyup', 'onlanguagechange', 'onload', 'onloadeddata', 'onloadedmetadata', 'onloadstart', 'onlostpointercapture', 'onmessage', 'onmessageerror', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onoffline', 'ononline', 'onpagehide', 'onpageshow', 'onpause', 'onplay', 'onplaying', 'onpointercancel', 'onpointerdown', 'onpointerenter', 'onpointerleave', 'onpointermove', 'onpointerout', 'onpointerover', 'onpointerup', 'onpopstate', 'onprogress', 'onratechange', 'onrejectionhandled', 'onreset', 'onresize', 'onscroll', 'onsearch', 'onseeked', 'onseeking', 'onselect', 'onstalled', 'onstorage', 'onsubmit', 'onsuspend', 'ontimeupdate', 'ontoggle', 'ontransitionend', 'onunhandledrejection', 'onunload', 'onvolumechange', 'onwaiting', 'onwebkitanimationend', 'onwebkitanimationiteration', 'onwebkitanimationstart', 'onwebkittransitionend', 'onwheel', 'open', 'openDatabase', 'opener', 'origin', 'outerHeight', 'outerWidth', 'pageXOffset', 'pageYOffset', 'parent', 'parseFloat', 'parseInt', 'performance', 'personalbar', 'postMessage', 'print', 'prompt', 'releaseEvents', 'removeEventListener', 'requestAnimationFrame', 'requestIdleCallback', 'resizeBy', 'resizeTo', 'screen', 'screenLeft', 'screenTop', 'screenX', 'screenY', 'scroll', 'scrollBy', 'scrollTo', 'scrollX', 'scrollY', 'scrollbars', 'self', 'sessionStorage', 'setInterval', 'setTimeout', 'speechSynthesis', 'status', 'statusbar', 'stop', 'styleMedia', 'toolbar', 'top', 'visualViewport', 'webkitCancelAnimationFrame', 'webkitRequestAnimationFrame', 'webkitRequestFileSystem', 'webkitResolveLocalFileSystemURL', 'webkitStorageInfo']
 
     let variabled = {}
     for (let i in this) {
@@ -84,10 +112,11 @@ const G = { // 全局变量
     }
     return variabled
   })(),
-  function: {init, abortPending, add2Fav, addStyle, arrUnique, autoDownload, autoComplete, batchDownload, btnAddFav0, btnAddFav, btnAddFav2, btnFake, btnFake2, btnSearch, btnSearch2, btnTask, btnTask2, calcRelativeTime, changeEConfig, changeFav, changeName, checkExist, checkForNew, checkImageSize, combineText, copyInfo, defaultConfig, downloadAdd, downloadRemove, findData, getEConfig, getEditDistance, getInfo, hideGalleries, highlightBlacklist, htmlEscape, introPic, jumpHost, languageCode, makeRange, openUrl, quickDownload, rateInSearchPage, reEscape, saveAs, saveAs2, saveLink, setNotification, setNotification2, searchInOtherSite, showAllThumb, showConfig, showTooltip, sortObj, tagEvent, tagPreview, task, taskRemove, tagTranslate, toggleBlacklist, translateText, updateEHD, updateEHT, waitInMs, waitForElement, xhr, xhrSync}
+  function: { init, abortPending, add2Fav, addStyle, arrUnique, autoDownload, autoComplete, batchDownload, btnAddFav0, btnAddFav, btnAddFav2, btnFake, btnFake2, btnSearch, btnSearch2, btnTask, btnTask2, calcRelativeTime, changeEConfig, changeFav, changeName, checkExist, checkForNew, checkImageSize, combineText, copyInfo, defaultConfig, downloadAdd, downloadRemove, findData, getEConfig, getEditDistance, getInfo, hideGalleries, highlightBlacklist, htmlEscape, introPic, jumpHost, languageCode, makeRange, openUrl, quickDownload, rateInSearchPage, reEscape, saveAs, saveAs2, saveLink, setNotification, setNotification2, searchInOtherSite, showAllThumb, showConfig, showTooltip, sortObj, tagEvent, tagPreview, task, taskRemove, tagTranslate, toggleBlacklist, translateText, updateEHD, updateEHT, waitInMs, waitForElement, xhr, xhrSync }
 }
 G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config['autoStartDownload']
 G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.config['enableEHD'] && G.config['showAllThumb'] && G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD'] && G.config['downloadSizeChanged']
+G.digitalRomajiRe = new RegExp('(\\W)(' + Object.keys(G.digitalRomaji).join('|') + ')(\\W)', 'gi')
 
 async function init () {
   GM_registerMenuCommand(GM_info.script.name + ': Show Global', function () {
@@ -98,7 +127,7 @@ async function init () {
   $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body')
   $(window).on({
     scroll: () => {
-      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && $('.ido').length === 0 ? 'top:0;' : 'bottom:0;')
+      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && G.infoPage ? 'top:0;' : 'bottom:0;')
     }
   })
 
@@ -118,7 +147,7 @@ async function init () {
     G.EHT = JSON.parse(EHT).dataset
   }
 
-  if ($('.ido').length === 0) { // 信息页
+  if (G.infoPage) { // 信息页
     if (G.config['enableEHD']) {
       let now = new Date().getTime()
       let lastTime = GM_getValue('EHD_checkTime', 0)
@@ -158,7 +187,7 @@ async function init () {
         `  if (fetchCount < 0) { fetchCount = [...document.querySelectorAll('.ehD-pt-progress')].filter(i => { let value = i.getAttribute('value'); return value === null || (value * 1 < 1 && value * 1 > 0) }).length; updateTotalStatus(); checkFailed() }`,
         `  if (downloadedCount + failedCount >= totalCount && failedCount > 0 && fetchCount > 0) { retryAllFailed() }`,
         // '  window.console.log("totalCount:\t", totalCount, "\nfetchCount:\t", fetchCount, "\ndownloadedCount:\t", downloadedCount, "\nfailedCount:\t", failedCount)',
-        '  window.console.log(JSON.stringify({"总计": totalCount, "下载中": fetchCount, "已完成": downloadedCount, "下载失败": failedCount}))',
+        // '  window.console.log(JSON.stringify({"总计": totalCount, "下载中": fetchCount, "已完成": downloadedCount, "下载失败": failedCount}))',
         // '  window.console.log(totalCount, fetchCount, downloadedCount, failedCount)',
         '}',
         'setInterval(checkInterval, 300)',
@@ -218,7 +247,6 @@ async function init () {
       }
     }).insertBefore('[name="f_apply"]')
     if ($('[name="f_search"]').val()) document.title = translateText($('[name="f_search"]').val())
-    changeName('.it5>a,.id2>a') // 修改本子标题（移除集会名）
     $('<div class="ehContainer"></div>').insertAfter('.it3,.id4')
     btnAddFav2() // 按钮 -> 加入收藏(搜索页)
     btnSearch2() // 按钮 -> 搜索(搜索页)
@@ -229,6 +257,7 @@ async function init () {
     if (G.config['checkExist']) checkExist() // 检查本地是否存在
     let _gmetadata = await getInfo() || []
     G.gmetadata.push(..._gmetadata)
+    changeName('.it5>a,.id2>a') // 修改本子标题（移除集会名）
     if (G.config['languageCode']) languageCode() // 显示iso语言代码
     tagPreview() // 标签预览
     hideGalleries() // 隐藏某些画集
@@ -778,7 +807,18 @@ function changeFav (url) { // 修改Favicon
 
 function changeName (e) { // 修改本子标题（移除集会名）
   $(e).toArray().forEach(i => {
-    i.textContent = i.textContent.replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim()
+    let title = i.textContent.replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim()
+    if (G.config.changeRomajiName) {
+      let jTitle = G.infoPage ? $('#gj').text() : G.gmetadata.filter(j => j.gid === i.href.match(/g\/(\d+)\//)[1] * 1)[0].title_jpn
+      jTitle = jTitle.replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim()
+      if (jTitle.match(G.digitalJpRe) && title.match(G.digitalRomajiRe)) {
+        title = title.replace(G.digitalRomajiRe, (matched, p1, p2, p3, offset, string) => {
+          if (G.debug) console.log({matched, p1, p2, p3, offset, string, title, i})
+          return p1 + (p1.match(/[-—~～]/) ? ' ' : '') + G.digitalRomaji[p2.toLowerCase()] + (p1.match(/[-—~～]/) ? ' ' : '') + p3
+        })
+      }
+    }
+    i.textContent = title
   })
 }
 
@@ -1103,55 +1143,57 @@ function copyInfo () { // 复制信息
 
 function defaultConfig () { // 默认设置
   let config = {
-    ex2eh: false,
-    autoStartDownload: false,
-    autoClose: false,
-    bookmark: '0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist',
-    bookmarkEvent: '0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0',
-    rateD: 1.1,
-    sizeD: '0',
-    sizeS: '0',
-    uconfig: '',
-    openInTab: true,
-    acLength: 3,
-    acItem: 'language,artist,female,male,parody,character,group,misc',
-    showAllThumb: false,
-    checkExist: false,
-    batch: 4,
-    bookmarkEventChs: '鼠标左键 + 任意按键 -> 移除<br>鼠标中键 + 任意按键 -> 自行选择<br>鼠标右键 + ctrlKey -> 加入黑名单<br>鼠标右键 + 任意按键 -> 上次选择<br>鼠标右键 + shiftKey -> 0',
-    saveLink: false,
-    checkExistInterval: 120,
-    auto2Fav: '0',
-    ads: '',
-    checkExistName2: false,
-    tagTranslateImage: false,
-    checkExistLimit: 3,
-    checkExistOld: false,
-    checkExistAtStart: false,
-    lowRating: 4,
-    fewPages: 5,
-    preloadPaneImage: false,
-    eh2ex: false,
-    alwaysShowLike: false,
-    autoUpdateCheck: 10,
-    checkListPerPage: 25,
-    playEmptyAudio: false,
-    searchEvent: '0,-1,0,0|2,-1,0,1',
-    searchEventChs: '鼠标左键 + 任意按键 -> 主要名称<br>鼠标右键 + 任意按键 -> 主要名称 + chinese',
-    distroyEHDLog: true,
-    notHideUnlike: false,
-    languageCode: false,
-    enableEHD: false,
-    updateIntervalEHT: 0,
-    updateIntervalEHD: 0,
-    timeShow: 'local',
-    openUrl: '0',
-    checkTimeDeviation: 3,
-    recordEHDUrl: false,
-    searchArguments: '/?f_search={q}&f_sh=on',
-    enableChangeSize: false,
-    exportUrlFormat: '{url} +Proxy{cr}{lf}',
-    downloadSizeChanged: false
+    'updateIntervalEHT': 0,
+    'updateIntervalEHD': 0,
+    'exportIntroPicFormat': "'{id}', ",
+    'timeShow': 'local',
+
+    // 通用设置
+    'ex2eh': false,
+    'eh2ex': true,
+    'openUrl': '0',
+    'saveLink': true,
+    'bookmark': '0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist',
+    'bookmarkEvent': '0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0',
+    'bookmarkEventChs': '鼠标左键 + 任意按键 -> 移除<br>鼠标中键 + 任意按键 -> 自行选择<br>鼠标右键 + ctrlKey -> 加入黑名单<br>鼠标右键 + 任意按键 -> 上次选择<br>鼠标右键 + shiftKey -> 0',
+    'searchArguments': '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_search={q}&f_sh=on',
+    'notification': '3',
+    'changeRomajiName': true,
+
+    // 搜索页
+    'preloadPaneImage': true,
+    'languageCode': true,
+    'auto2Fav': '2',
+    'searchEvent': '0,-1,0,1|1,-1,-1,1|2,-1,1,1',
+    'searchEventChs': '鼠标左键 + 任意按键 -> 主要名称 + chinese<br>鼠标中键 + 任意按键 -> 自行选择 + chinese<br>鼠标右键 + 任意按键 -> 作者或组织(顺位) + chinese',
+    'checkExist': true,
+    'checkExistAtStart': true,
+    'checkExistName2': false,
+    'acLength': 3,
+    'acItem': 'language,artist,female,male,parody,character,group,misc',
+    'batch': 3,
+    'notHideUnlike': true,
+    'alwaysShowLike': true,
+    'lowRating': 0,
+    'fewPages': 1,
+    'checkTimeDeviation': 12,
+    'autoUpdateCheck': 25,
+    'checkListPerPage': 25,
+
+    // 信息页
+    'uconfig': '',
+    'autoStartDownload': true,
+    'autoClose': true,
+    'enableEHD': true,
+    'recordEHDUrl': true,
+    'exportUrlFormat': '{url} +Proxy{cr}{lf}',
+    'tagTranslateImage': false,
+    'showAllThumb': true,
+    'enableChangeSize': true,
+    'rateD': 1,
+    'sizeD': '3',
+    'sizeS': '1',
+    'downloadSizeChanged': true
   }
   for (let i in config) {
     if (!(i in G.config)) G.config[i] = config[i]
@@ -1766,6 +1808,7 @@ function showConfig () { // 显示设置
       '更新 EHD: 更新频率: <input name="ehConfig_updateIntervalEHD" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHD" value="Update Now" tooltip="立即更新内置 [E-Hentai-Downloader]"> <input type="button" name="exportEHD" value="Export Now" title="导出EHD数据"> <input type="button" name="emptyEHD" value="Empty Now" title="重置EHD数据">',
       '宣传图相关: 导出格式: <input name="ehConfig_exportIntroPicFormat" title="' + htmlEscape('以<span class="ehHighlight">{id}</span>表示宣传图id<br>以<span class="ehHighlight">{cr}</span>表示\\r<br>以<span class="ehHighlight">{lf}</span>表示\\n') + '" type="text" placeholder="\'{id}\',{cr}{lf}"> <input type="button" name="exportIntroPic" value="Copy Text" title="复制文本">',
       '',
+      // 通用设置
       '<span class="ehHighlight">通用设置:</span>',
       '时间显示: <label for="ehConfig_timeShow_local"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_local" value="local" checked>本地时间</label> <label for="ehConfig_timeShow_iso"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_iso" value="iso">ISO时间</label>',
       '跳转相关: <label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">信息页: 里站自动跳转到表站</label>; <label for="ehConfig_eh2ex"><input type="checkbox" id="ehConfig_eh2ex">搜索页: 表站自动跳转到里站</label>',
@@ -1775,7 +1818,9 @@ function showConfig () { // 显示设置
       '收藏按钮事件: <input name="ehConfig_bookmarkEvent" title="' + htmlEscape('事件格式: 鼠标按键,键盘按键,收藏事件<br>多个事件以<span class="ehHighlight">|</span>分割<br>鼠标按键:<ul><li>0 -> 左键</li><li>1 -> 中键</li><li>2 -> 右键</li></ul>键盘按键:<ul><li>-1 -> 任意</li><li>0 -> altKey</li><li>1 -> ctrlKey</li><li>2 -> shiftKey</li></ul>收藏事件:<ul><li>留空 -> 上次选择</li><li>-1 -> 自行选择</li><li>0-9 -> 0-9</li><li>10 -> 移除</li><li>b -> 加入黑名单</li></ul>') + '" type="text" placeholder="0,-1,10|1,-1,-1|2,1,b|2,-1|2,2,0"><input name="ehConfig_bookmarkEventChs" type="hidden">',
       '搜索参数: <input name="ehConfig_searchArguments" title="' + htmlEscape('以<span class="ehHighlight">{q}</span>代替搜索关键词') + '" type="text" placeholder="/?f_search={q}&f_sh=on" min="1">',
       '通知显示方式: <select name="ehConfig_notification"><option value="0">Web API: Notification</option><option value="1">GM_notification</option><option value="2">window.alert</option><option value="3">页面元素</option><option value="-1">不显示</option></select>',
+      '<div class="ehNew"></div><label for="ehConfig_changeRomajiName"><input type="checkbox" id="ehConfig_changeRomajiName">标题: 替换其中的罗马数字</label>',
       '',
+      // 搜索页
       '<span class="ehHighlight">搜索页:</span>',
       '<label for="ehConfig_preloadPaneImage"><input type="checkbox" id="ehConfig_preloadPaneImage">自动载入预览图</label>; <label for="ehConfig_languageCode"><input type="checkbox" id="ehConfig_languageCode">显示ISO语言代码</label>',
       '收藏按钮事件: 当用<select name="ehConfig_auto2Fav"><option value="0">左键</option><option value="1">中键</option><option value="2">右键</option></select>点击Open时，自动添加到收藏',
@@ -1791,6 +1836,7 @@ function showConfig () { // 显示设置
       '检测新本子-自动更新时间: 结果数目变化 <= <input name="ehConfig_autoUpdateCheck" type="number" placeholder="10" min="0">',
       '检测新本子-列表: 每页 <input name="ehConfig_checkListPerPage" type="number" placeholder="25" min="25" max="100"> 条CheckList',
       '',
+      // 信息页
       '<span class="ehHighlight">信息页:</span>',
       '默认设置: <input name="ehConfig_uconfig" title="' + htmlEscape('在Settings页面使用$.serialize获取，可留空<br>留空表示每次使用当前设置') + '" type="text"> <input type="button" name="getUconfig" value="Get NOW" title="立即获取">',
       '下载相关: <label for="ehConfig_autoStartDownload"><input type="checkbox" id="ehConfig_autoStartDownload">锚部分不为空时，自动开始下载</label>; <label for="ehConfig_autoClose" title="' + htmlEscape('Firefox: 需打开about:config并设置dom.allow_scripts_to_close_windows为true<br>Chromium: 无法关闭非脚本打开的页面') + '"><input type="checkbox" id="ehConfig_autoClose">锚部分不为空时，下载完成后自动关闭标签</label>',
@@ -1800,7 +1846,7 @@ function showConfig () { // 显示设置
       '<label for="ehConfig_enableChangeSize" title="' + htmlEscape('当大图(双页)尺寸与小图(单页)尺寸相同时，失效') + '"><input type="checkbox" id="ehConfig_enableChangeSize">启用自动调整图片尺寸</label>',
       '调整图片尺寸: 大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1" step="0.1">; 其他默认视为小图(单页)',
       '调整图片尺寸: 大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>',
-      '<div class="ehNew"></div><label for="ehConfig_downloadSizeChanged" title="需关闭: Request File System to handle large Zip file<br>需开启: 启用内置 [E-Hentai-Downloader], 显示所有预览图, 启用自动调整图片尺寸<br>注意: 避免出错，应一次下载一个画廊"><input type="checkbox" id="ehConfig_downloadSizeChanged">下载调整过大小的图片压缩档</label>'
+      '<label for="ehConfig_downloadSizeChanged" title="' + htmlEscape('需关闭: Request File System to handle large Zip file<br>需开启: 启用内置 [E-Hentai-Downloader], 显示所有预览图, 启用自动调整图片尺寸<br>注意: 避免出错，应一次下载一个画廊') + '"><input type="checkbox" id="ehConfig_downloadSizeChanged">下载调整过大小的图片压缩档</label>'
     ].map(i => i ? '<li>' + i + '</li>' : '<hr>').join('')
     $('<div class="ehConfig"></div>').html('<ul>' + _html + '</ul><div class="ehConfigBtn"><input type="button" name="reset" value="Reset" title="重置"><input type="button" name="save" value="Save" title="保存"><input type="button" name="cancel" value="Cancel" title="取消"></div>').appendTo('body').on('click', function (e) {
       if ($(e.target).is('.ehConfigBtn>input[type="button"][name="reset"]')) {
