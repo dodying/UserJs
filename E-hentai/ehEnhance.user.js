@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.2.1537614467949
+// @version     1.16.3.1537695260578
+// @Date        2018-9-23 17:34:20
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -66,6 +67,7 @@ const G = { // 全局变量
     /^CEwanted\.(png|jpg)$/i,
     /\.gif$/i
   ],
+  uselessStrRE: /\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|～|~/g,
   digitalJpRe: /[0-9０-９零一二三四五六七八九十百千万零壹贰参肆伍陆柒捌玖拾佰仟萬]/g,
   digitalRomaji: {
     rei: 0,
@@ -810,11 +812,12 @@ function changeName (e) { // 修改本子标题（移除集会名）
     let title = i.textContent.replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim()
     if (G.config.changeRomajiName) {
       let jTitle = G.infoPage ? $('#gj').text() : G.gmetadata.filter(j => j.gid === i.href.match(/g\/(\d+)\//)[1] * 1)[0].title_jpn
-      jTitle = jTitle.replace(/^\(.*?\)( |)/, '').replace(/\s+/g, ' ').trim()
+      jTitle = jTitle.replace(/^\(.*?\)( |)/, '').replace(G.uselessStrRE, '').replace(/\s+/g, ' ').trim()
       if (jTitle.match(G.digitalJpRe) && title.match(G.digitalRomajiRe)) {
         title = title.replace(G.digitalRomajiRe, (matched, p1, p2, p3, offset, string) => {
           if (G.debug) console.log({matched, p1, p2, p3, offset, string, title, i})
-          return p1 + (p1.match(/[-—~～]/) ? ' ' : '') + G.digitalRomaji[p2.toLowerCase()] + (p1.match(/[-—~～]/) ? ' ' : '') + p3
+          if (p1 === '-' && p2.match(/^san$/i)) return matched
+          return p1 + (p1.match(/[-—~～]/) ? ' ' : '') + G.digitalRomaji[p2.toLowerCase()] + (p3.match(/[-—~～]/) ? ' ' : '') + p3
         })
       }
     }
@@ -827,7 +830,6 @@ function checkExist () { // 检查本地是否存在
     $('<div class="ehExistContainer"></div>').prependTo($(i).parent().find('.ehContainer'))
   })
   $('<input type="button" value="Check Exist" name="checkExist" title="只检查可见的，且之前检查无结果">').on('click', async (e) => {
-    let uselessStrRE = /\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|～|~/g
     let langRE = /\[(Chinese|English|Digital)\].*/gi
 
     $(e.target).val('Checking').prop('disabled', true)
@@ -835,11 +837,11 @@ function checkExist () { // 检查本地是否存在
     let name = {}
     lst.forEach((i, j) => {
       if (G.config['checkExistName2']) {
-        name[j] = i.textContent.replace(uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim()
+        name[j] = i.textContent.replace(G.uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim()
       } else {
         let arr = i.textContent.replace(/\|.*?([([{【［（]|$)/, '$1').replace(/[\\/:*?"<>|]/g, '-').replace(langRE, '').split(/[[\](){}【】［］（）～~]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i)
         name[j] = arr.join()
-        if (name[j] === '') name[j] = i.textContent.replace(uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim()
+        if (name[j] === '') name[j] = i.textContent.replace(G.uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim()
       }
     })
     try {
@@ -1288,6 +1290,44 @@ function getEditDistance (a, b) { // 获取EditDistance
   }
 
   return matrix[b.length][a.length]
+}
+
+function getProcessImg (process, radius = 16) { // 创建环形进度条
+  while (process < 0 || process > 100) {
+    process = process < 0 ? process + 100 : process - 100
+  }
+  // https://imys.net/20150722/canvas-annulus-process.html
+  var c = document.createElement('canvas')
+  c.width = 2 * radius
+  c.height = 2 * radius
+  var ctx = c.getContext('2d')
+  // 画灰色的圆
+  ctx.beginPath()
+  ctx.arc(radius, radius, 0.8 * radius, 0, Math.PI * 2)
+  ctx.closePath()
+  ctx.fillStyle = '#F6F6F6'
+  ctx.fill()
+  // 画进度环
+  ctx.beginPath()
+  ctx.moveTo(radius, radius)
+  ctx.arc(radius, radius, 0.8 * radius, Math.PI * 1.5, Math.PI * (1.5 + 2 * process / 100))
+  ctx.closePath()
+  ctx.fillStyle = '#00CD00'
+  ctx.fill()
+  // 画内填充圆
+  ctx.beginPath()
+  ctx.arc(radius, radius, 0, 0, Math.PI * 2)
+  ctx.closePath()
+  ctx.fillStyle = '#fff'
+  ctx.fill()
+  // 填充文字
+  ctx.font = 'bold ' + 0.2 * radius + 'pt Microsoft YaHei'
+  ctx.fillStyle = '#333'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.moveTo(radius, radius)
+  ctx.fillText(process.toFixed(2).replace(/\.0+$/, '') + '%', radius, radius)
+  return c.toDataURL()
 }
 
 async function getInfo () { // 获取信息
@@ -2186,12 +2226,17 @@ function tagPreview () { // 标签预览
 
 function task () { // 下载任务
   if (G.taskInterval) return
+  let max = GM_getValue('task', []).length
   let main = async () => {
     let task = GM_getValue('task', [])
-    if (task.length === 0) {
+    if (task.length === 0 && !GM_getValue('tasking')) {
       G.taskInterval = null
+      changeFav('https://exhentai.org/favicon.ico')
       return
     }
+
+    let done = max - task.length
+    changeFav(getProcessImg(done / max * 100, 128))
 
     let downloading = GM_getValue('downloading', [])
     if (downloading.length) {
