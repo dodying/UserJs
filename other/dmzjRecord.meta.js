@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        [dmzj]record
-// @description 这是一个 [Manga Loader](https://greasyfork.org/zh-CN/scripts/692) 的插件，页面滚动时自动更新浏览记录
+// @description 自动更新浏览记录
 // @include     https://manhua.dmzj.com/*.shtml*
-// @version     1.0.0.${now}
+// @version     1.0.1.${now}
 // @Date        ${nowStr}
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
@@ -10,4 +10,6 @@
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
 // @grant       none
+// @require     https://static.dmzj.com/public/js/jquery-1.8.2.min.js
+// @require     https://static.dmzj.com/public/js/jquery.cookie.js
 // ==/UserScript==
