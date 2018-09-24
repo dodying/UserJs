@@ -3,8 +3,8 @@
 // @description 请通过脚本命令来进行授权与数据同步
 // @include     https://i.dmzj.com/record
 // @include     https://i.dmzj.com/record#*
-// @version     1.0.0.1537692308792
-// @Date        2018-9-23 16:45:08
+// @version     1.0.1.1537764144604
+// @Date        2018-9-24 12:42:24
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -59,10 +59,10 @@ async function main () {
     await refreshToken()
     token = GM_getValue('token')
   }
-  let update = async (dmzjId, bgmId, progress, eleToRemove) => {
-    await updateStatus(bgmId, token.access_token, progress) // 更新进度
-    await delDmzjRecord(dmzjId)
-    $(eleToRemove).remove()
+  let update = async (dmzjId, bgmId, progress, tags, eleToRemove) => {
+    await updateStatus(bgmId, token.access_token, progress, tags) // 更新进度
+    // await delDmzjRecord(dmzjId)
+    $(eleToRemove).hide()
   }
 
   let type
@@ -73,19 +73,41 @@ async function main () {
     type = 2
   }
 
-  let idLib = GM_getValue('idLib', {})
+  let idLib = GM_getValue('idLib', {漫画: {}, 小说: {}, 动画: {}})
+  let tagLib = GM_getValue('tagLib', {漫画: {}, 小说: {}, 动画: {}})
 
   for (let i of $('#my_record_id li').toArray()) {
     let name = $('h3', i).text()
     let progress = $('em', i).text()
     let dmzjId = $('.delOne', i).attr('id').match(/\d+/)[0]
-    if (progress.match(/第\d+(话|集)/)) {
-      progress = progress.match(/第(0+|)(\d+)(话|集)/)[2]
+    if (progress.match(/第[\d.]+(话|集)/)) {
+      progress = parseInt(progress.match(/第(0+|)([\d.]+)(话|集)/)[2]).toString()
     } else {
       continue
     }
-    if (dmzjId in idLib) {
-      await update(dmzjId, idLib[dmzjId], progress, i) // 更新进度
+
+    let tags
+    if (dmzjId in tagLib[typeSpecific]) {
+      tags = tagLib[typeSpecific][dmzjId]
+    } else if (type === 1) {
+      let dmzjInfo = await xhrSync(`https://v3api.dmzj.com/${typeSpecific === '漫画' ? 'comic' : 'novel'}/${dmzjId}.json`)
+
+      try {
+        dmzjInfo = JSON.parse(dmzjInfo.response)
+      } catch (error) {
+        continue
+      }
+
+      tags = dmzjInfo.types.some(i => typeof i === 'string') ? dmzjInfo.types.split('/') : dmzjInfo.types.map(i => i.tag_name)
+      tags.push(typeSpecific)
+      tagLib[typeSpecific][dmzjId] = tags
+    } else {
+      tags = [typeSpecific]
+      tagLib[typeSpecific][dmzjId] = tags
+    }
+
+    if (dmzjId in idLib[typeSpecific]) {
+      await update(dmzjId, idLib[typeSpecific][dmzjId], progress, tags, i) // 更新进度
       continue
     }
     let result = await xhrSync('https://api.bgm.tv/search/subject/' + name + '?responseGroup=large')
@@ -94,20 +116,31 @@ async function main () {
       if (prompt) result = await xhrSync('https://api.bgm.tv/search/subject/' + prompt + '?responseGroup=large')
       if (!result || !result.response) continue
     }
-    result = JSON.parse(result.response)
+
+    try {
+      result = JSON.parse(result.response)
+    } catch (error) {
+      continue
+    }
+
     if (result.code === 404) {
       let prompt = window.prompt('无法找到项目，您可以指定搜索关键词', name)
       if (prompt) result = await xhrSync('https://api.bgm.tv/search/subject/' + prompt + '?responseGroup=large')
       if (!result || !result.response) continue
-      result = JSON.parse(result.response)
+
+      try {
+        result = JSON.parse(result.response)
+      } catch (error) {
+        continue
+      }
     }
     if (!result.list) continue
     let list = result.list.filter(i => i.type === type)
     if (!list.length) continue
     let filter = list.filter(i => i.name_cn === name)
     if (filter.length === 1) {
-      await update(dmzjId, filter[0].id, progress, i) // 更新进度
-      idLib[dmzjId] = filter[0].id
+      await update(dmzjId, filter[0].id, progress, tags, i) // 更新进度
+      idLib[typeSpecific][dmzjId] = filter[0].id
     } else {
       console.log(list)
       let id = await new Promise((resolve, reject) => {
@@ -123,13 +156,14 @@ async function main () {
         container.html(`<div><img src="${$('img', i).attr('src')}"></img><br><span>${name}</span><span class="subjectIgnore">X</span></div><ol>${html}</ol>`)
       })
       if (id) {
-        await update(dmzjId, id, progress, i) // 更新进度
-        idLib[dmzjId] = id
+        await update(dmzjId, id, progress, tags, i) // 更新进度
+        idLib[typeSpecific][dmzjId] = id
       }
     }
   }
 
   GM_setValue('idLib', idLib)
+  GM_setValue('tagLib', tagLib)
 
   window.alert('任务完成')
 }
@@ -209,12 +243,13 @@ async function refreshToken () {
   GM_setValue('token', token)
 }
 
-async function updateStatus (id, token, progress) { // 更新进度
+async function updateStatus (id, token, progress, tags) { // 更新进度
   // 改变状态为阅读中
   await xhrSync('https://api.bgm.tv/collection/' + id + '/update', {
     action: 'update',
     subject_id: id,
-    status: 'do'
+    status: 'do',
+    tags: tags
   }, {
     headers: {
       Authorization: 'Bearer ' + token,
