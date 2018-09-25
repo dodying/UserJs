@@ -2,8 +2,8 @@
 // @name        [dmzj]record
 // @description 自动更新浏览记录
 // @include     https://manhua.dmzj.com/*.shtml*
-// @version     1.0.1.1537764010826
-// @Date        2018-9-24 12:40:10
+// @version     1.0.2.1537869263042
+// @Date        2018-9-25 17:54:23
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -18,9 +18,10 @@
   /* eslint-disable camelcase  */
   let getReadingPage = () => {
     let top = $(window).scrollTop()
-    let imgTop = $('.ml-chap-nav,.inner_img img').toArray().map(i => i.offsetTop)
-    let page = imgTop.map(i => i > top).indexOf(true) + 1
-    return page
+    let imgTop = $('.ml-images>img,.inner_img img').toArray().map(i => i.offsetTop)
+    let page = imgTop.map(i => i > top).indexOf(true)
+    let length = imgTop.length
+    return page === -1 ? length : page || page + 1
   }
   let getReadingPage2 = () => $('#page_select>option:selected').index() + 1
   let historyLog = historyJson => {
@@ -58,7 +59,7 @@
         item_obj['comicId'] = comic_id // 漫画id
         item_obj['chapterId'] = chapter_id // 话id
       }
-      item_obj['page'] = $('.ml-chap-nav,.inner_img img').length ? getReadingPage() : getReadingPage2() // 第几页
+      item_obj['page'] = $('.ml-images>img,.inner_img img').length ? getReadingPage() : getReadingPage2() // 第几页
       item_obj['time'] = Date.parse(new Date()).toString().substr(0, 10) // 观看时间
       $.cookie('history_CookieR', JSON.stringify([item_obj]), { path: '/', expires: 99999 })
     }
