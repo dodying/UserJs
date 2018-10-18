@@ -3,8 +3,8 @@
 // @description 请通过脚本命令来进行授权与数据同步
 // @include     https://i.dmzj.com/record
 // @include     https://i.dmzj.com/record#*
-// @version     1.0.1.1537764144604
-// @Date        2018-9-24 12:42:24
+// @version     1.0.2.1539865615380
+// @Date        2018-10-18 20:26:55
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -43,10 +43,33 @@ const G = { // 全局变量
   }
 }
 
+const type = 1
+
+const log = (...args) => {
+  console.log(...args)
+  try {
+    args = args.map(i => typeof i === 'object' ? JSON.stringify(i, null, 2) : i).map(i => `<pre>${i}</pre>`).join('<br>')
+    $('.console').html(args)
+  } catch (error) {}
+}
+
 async function init () {
   addStyle()
   GM_registerMenuCommand('Authorize', authorize)
-  GM_registerMenuCommand('dmzj2bgm', main)
+  GM_registerMenuCommand('dmzj2bgm', async () => {
+    let checkSubjectInterval = setInterval(() => {
+      if ($('.subjectList').is(':visible')) {
+        $('.console').hide()
+      } else {
+        $('.console').show()
+      }
+    }, 200)
+    $('#dmzj2bgm').show()
+    await main()
+    $('#dmzj2bgm').hide()
+    clearInterval(checkSubjectInterval)
+  })
+  $('<div id="dmzj2bgm"></div>').html(`<div class="console"></div><div class="subjectList"><div><img></img><br><input type="text" class="subjectSearch"><span class="subjectIgnore">X</span></div><ol></ol></div>`).appendTo('body')
 }
 
 async function main () {
@@ -59,33 +82,97 @@ async function main () {
     await refreshToken()
     token = GM_getValue('token')
   }
-  let update = async (dmzjId, bgmId, progress, tags, eleToRemove) => {
+
+  let update = async (bgmId, dmzjId, progress, tags) => {
+    if (!dmzjId) dmzjId = $('#dmzj2bgm').data().dmzjId
+    if (!progress) progress = $('#dmzj2bgm').data().progress
+    if (!tags) tags = $('#dmzj2bgm').data().tags
+
     await updateStatus(bgmId, token.access_token, progress, tags) // 更新进度
     // await delDmzjRecord(dmzjId)
-    $(eleToRemove).hide()
+    $(`#my_record_id>ul>li:has(#del_${dmzjId})`).hide()
   }
 
-  let type
+  let showList = async keyword => {
+    try {
+      let res = await xhrSync('https://api.bgm.tv/search/subject/' + keyword + '?responseGroup=large')
+      let result = JSON.parse(res.response)
+      let list = result.list.filter(i => i.type === type)
+
+      if (list.length === 0) {
+        $('.subjectList>ol').html('')
+        throw Error('eof')
+      }
+
+      let filter = list.filter(i => i.name_cn === $('#dmzj2bgm').data().name || i.name_cn === keyword)
+      if (filter.length === 1) {
+        await update(filter[0].id) // 更新进度
+        idLib[typeSpecific][$('#dmzj2bgm').data().dmzjId] = filter[0].id
+        return true
+      } else {
+        let html = list.map(i => `<li name="${i.id}" class="subjectBox"><div><a href="${i.images.large.replace('http://', 'https://')}" target="_blank" title="点击查看大图"><img src="${i.images.common.replace('http://', 'https://')}"></img></a><br>${G.SubjectType[i.type]} <a href="${i.url.replace('http://', 'https://')}" target="_blank">${i.name_cn || i.name}</a></div><div>${i.summary.replace(/\n/g, '<br>')}</div></li>`).join('')
+        $('.subjectList>ol').html(html)
+      }
+    } catch (error) {
+      if (error.message !== 'eof') console.error(error)
+      $('.subjectList>ol').html('')
+    }
+    $('.subjectList').show()
+  }
+
+  // 获取类型
   let typeSpecific = $('.optioned').text()
   if (typeSpecific === '漫画' || typeSpecific === '小说') {
-    type = 1
-  } else if (typeSpecific === '动画') {
-    type = 2
+  } else {
+    return window.alert('不支持动画记录')
   }
 
-  let idLib = GM_getValue('idLib', {漫画: {}, 小说: {}, 动画: {}})
-  let tagLib = GM_getValue('tagLib', {漫画: {}, 小说: {}, 动画: {}})
+  let idLib = GM_getValue('idLib', {漫画: {}, 小说: {}})
+  let tagLib = GM_getValue('tagLib', {漫画: {}, 小说: {}})
 
-  for (let i of $('#my_record_id li').toArray()) {
-    let name = $('h3', i).text()
-    let progress = $('em', i).text()
-    let dmzjId = $('.delOne', i).attr('id').match(/\d+/)[0]
+  // 获取记录
+  let userId = decodeURI(document.cookie).match(/my=(\d+)\|/)[1]
+  let record = await xhrSync(`https://interface.dmzj.com/api/getReInfo/${typeSpecific === '漫画' ? 'comic' : 'novel'}/${userId}/0`)
+  record = JSON.parse(record.response)
+  log(record)
+
+  $('.subjectList>div>input.subjectSearch').on({
+    keyup: async e => {
+      if (e.keyCode === 13) {
+        let keyword = $('.subjectSearch').val()
+        $('.subjectList').hide()
+        let autoUpdate = await showList(keyword)
+        if (autoUpdate) $('#dmzj2bgm').data({done: true})
+      }
+    }
+  })
+  $('.subjectList').off('click').on('click', '.subjectBox', e => {
+    if ($(e.target).parents().filter('a').length || $(e.target).is('a')) return
+    $('.subjectList').hide()
+    $('#dmzj2bgm').data({result: $(e.currentTarget).attr('name')})
+  }).on('click', '.subjectIgnore', e => {
+    $('.subjectList').hide()
+    $('#dmzj2bgm').data({result: null})
+  })
+
+  for (let i of record) {
+    let name = i.comic_name
+    let progress = i.chapter_name
+    let dmzjId = i.comic_id
+    $('.subjectList>div>img').attr('src', i.cover)
+    $('.subjectList>div>input.subjectSearch').val(name)
     if (progress.match(/第[\d.]+(话|集)/)) {
       progress = parseInt(progress.match(/第(0+|)([\d.]+)(话|集)/)[2]).toString()
     } else {
       continue
     }
+    $('#dmzj2bgm').removeData().data({
+      name: name,
+      progress: progress,
+      dmzjId: dmzjId
+    })
 
+    // 获取标签
     let tags
     if (dmzjId in tagLib[typeSpecific]) {
       tags = tagLib[typeSpecific][dmzjId]
@@ -105,76 +192,47 @@ async function main () {
       tags = [typeSpecific]
       tagLib[typeSpecific][dmzjId] = tags
     }
+    $('#dmzj2bgm').data({tags: tags})
 
+    // 如果之前保存过id，则使用之前id
     if (dmzjId in idLib[typeSpecific]) {
-      await update(dmzjId, idLib[typeSpecific][dmzjId], progress, tags, i) // 更新进度
-      continue
-    }
-    let result = await xhrSync('https://api.bgm.tv/search/subject/' + name + '?responseGroup=large')
-    if (!result || !result.response) {
-      let prompt = window.prompt('无法找到项目，您可以指定搜索关键词', name)
-      if (prompt) result = await xhrSync('https://api.bgm.tv/search/subject/' + prompt + '?responseGroup=large')
-      if (!result || !result.response) continue
-    }
-
-    try {
-      result = JSON.parse(result.response)
-    } catch (error) {
+      await update(idLib[typeSpecific][dmzjId], dmzjId, progress, tags) // 更新进度
       continue
     }
 
-    if (result.code === 404) {
-      let prompt = window.prompt('无法找到项目，您可以指定搜索关键词', name)
-      if (prompt) result = await xhrSync('https://api.bgm.tv/search/subject/' + prompt + '?responseGroup=large')
-      if (!result || !result.response) continue
+    let autoUpdate = await showList(name)
+    if (autoUpdate) continue
 
-      try {
-        result = JSON.parse(result.response)
-      } catch (error) {
-        continue
-      }
-    }
-    if (!result.list) continue
-    let list = result.list.filter(i => i.type === type)
-    if (!list.length) continue
-    let filter = list.filter(i => i.name_cn === name)
-    if (filter.length === 1) {
-      await update(dmzjId, filter[0].id, progress, tags, i) // 更新进度
-      idLib[typeSpecific][dmzjId] = filter[0].id
-    } else {
-      console.log(list)
-      let id = await new Promise((resolve, reject) => {
-        let container
-        container = $('<div class="subjectList"></div>').appendTo('body').on('click', '.subjectBox', e => {
-          $(container).remove()
-          resolve($(e.currentTarget).attr('name'))
-        }).on('click', '.subjectIgnore', e => {
-          $(container).remove()
-          resolve(null)
-        })
-        let html = list.map(i => `<li name="${i.id}" class="subjectBox"><div><img src="${i.images.common.replace('http://', 'https://')}"></img><br>${G.SubjectType[i.type]} <a href="${i.url.replace('http://', 'https://')}" target="_blank">${i.name_cn || i.name}</a></div><div>${i.summary.replace(/\n/g, '<br>')}</div></li>`).join('')
-        container.html(`<div><img src="${$('img', i).attr('src')}"></img><br><span>${name}</span><span class="subjectIgnore">X</span></div><ol>${html}</ol>`)
-      })
-      if (id) {
-        await update(dmzjId, id, progress, tags, i) // 更新进度
-        idLib[typeSpecific][dmzjId] = id
-      }
-    }
+    await new Promise((resolve, reject) => {
+      let interval
+      interval = setInterval(async () => {
+        if ('result' in $('#dmzj2bgm').data()) {
+          clearInterval(interval)
+          await update($('#dmzj2bgm').data().result)
+          resolve()
+        } else if ('done' in $('#dmzj2bgm').data()) {
+          clearInterval(interval)
+          resolve()
+        }
+      }, 200)
+    })
+
+    GM_setValue('idLib', idLib)
+    GM_setValue('tagLib', tagLib)
   }
-
-  GM_setValue('idLib', idLib)
-  GM_setValue('tagLib', tagLib)
 
   window.alert('任务完成')
 }
 
 function addStyle () {
   let style = [
-    '.subjectList{position:fixed;top:0;width:600px;left:50%;margin-left:-300px;background:#fff;text-align:center;max-height:100%;overflow-y:auto;}',
+    '#dmzj2bgm{display:none;position:fixed;top:0;width:600px;left:50%;margin-left:-300px;background:#fff;max-height:100%;overflow-y:auto;}',
+    '.subjectList{text-align:center;display:none;}',
     '.subjectIgnore{cursor:pointer;float:right;color:red;}',
     '.subjectBox{display:flex;justify-content:center;align-items:center;margin:5px 1px;border:solid 1px black;}',
     '.subjectBox>div:nth-child(2){text-align:justify;}',
-    '.subjectList img{width:150px;}'
+    '.subjectList img{width:150px;}',
+    '.subjectSearch{width:98%;text-align:center;}'
   ]
   $('<style></style>').text(style.join('')).appendTo('head')
 }
@@ -271,6 +329,7 @@ async function updateStatus (id, token, progress, tags) { // 更新进度
 }
 
 function xhrSync (url, parm = null, opt = {}) {
+  log({url, parm, opt})
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
       method: parm ? 'POST' : 'GET',
