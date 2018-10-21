@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.17.1537081612100
+// @version     1.45.18.1540085464894
+// @Date        2018-10-21 09:31:04
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -49,9 +50,6 @@
 // @include     http*://www.ciweimao.com/book/*
 // @include     http*://www.ciweimao.com/chapter-list/*/book_detail
 // @include     http*://www.ciweimao.com/chapter/book_chapter_detail*
-// @include     http*://www.hbooker.com/book/*
-// @include     http*://www.hbooker.com/chapter-list/*/book_detail
-// @include     http*://www.hbooker.com/chapter/book_chapter_detail*
 // @include     http://www.3gsc.com.cn/bookreader/*
 // @include     http://www.3gsc.com.cn/bookcon/*
 // @include     http://book.zongheng.com/showchapter/*
@@ -771,20 +769,20 @@ function addRule () {
       })
     }
   }
-  addIRule('www.hbooker.com', '欢乐书客', '.book-title>h1', '.book-chapter-list>.clearfix>li>a', '.book-chapter-list>.clearfix>li>a:has(.icon-vip)', false, 1)
-  chapterRule['www.hbooker.com'] = {
+  addIRule('www.ciweimao.com', '刺猬猫', 'h3', '.book-chapter-list a', '.book-chapter-list a:has(.icon-vip-s)', false, 1)
+  chapterRule['www.ciweimao.com'] = {
     'Deal': function (num, url) {
       if (!$(window).data('firstRun')) {
         $(window).data('firstRun', true)
-        $('head').append('<script type="text/javascript" src="' + window.location.protocol + '//www.hbooker.com/resources/js/enjs.min.js"></script>')
+        $('head').append('<script type="text/javascript" src="' + window.location.protocol + '//www.ciweimao.com/resources/js/enjs.min.js"></script>')
       }
-      var chapterId = url.replace(window.location.protocol + '//www.hbooker.com/chapter/book_chapter_detail/', '')
+      var chapterId = url.replace(window.location.protocol + '//www.ciweimao.com/chapter/book_chapter_detail/', '')
       GM_xmlhttpRequest({
         method: 'POST',
-        url: window.location.protocol + '//www.hbooker.com/chapter/ajax_get_session_code',
+        url: window.location.protocol + '//www.ciweimao.com/chapter/ajax_get_session_code',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'Referer': window.location.protocol + '//www.hbooker.com/chapter/book_chapter_detail/' + chapterId,
+          'Referer': window.location.protocol + '//www.ciweimao.com/chapter/book_chapter_detail/' + chapterId,
           'X-Requested-With': 'XMLHttpRequest'
         },
         data: 'chapter_id=' + chapterId,
@@ -792,7 +790,7 @@ function addRule () {
         onload: function (response) {
           var json = response.response
           var accessKey = json.chapter_access_key
-          chapterRule['www.hbooker.com'].Deal2(num, url, accessKey)
+          chapterRule['www.ciweimao.com'].Deal2(num, url, accessKey)
         }
       })
     },
@@ -800,10 +798,10 @@ function addRule () {
       var chapterId = url.match(/\d+/)[0]
       GM_xmlhttpRequest({
         method: 'POST',
-        url: window.location.protocol + '//www.hbooker.com/chapter/get_book_chapter_detail_info',
+        url: window.location.protocol + '//www.ciweimao.com/chapter/get_book_chapter_detail_info',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'Referer': window.location.protocol + '//www.hbooker.com/chapter/book_chapter_detail/' + chapterId,
+          'Referer': window.location.protocol + '//www.ciweimao.com/chapter/book_chapter_detail/' + chapterId,
           'X-Requested-With': 'XMLHttpRequest'
         },
         data: 'chapter_id=' + chapterId + '&chapter_access_key=' + accessKey,
@@ -811,7 +809,7 @@ function addRule () {
         onload: function (response) {
           var json = response.response
           var i
-          /* 以下代码来自https://www.hbooker.com/resources/js/myEncrytExtend-min.js */
+          /* 以下代码来自https://www.ciweimao.com/resources/js/myEncrytExtend-min.js */
           var s = {
             content: json.chapter_content,
             keys: json.encryt_keys,
@@ -845,12 +843,6 @@ function addRule () {
           thisDownloaded(num, '', content)
         }
       })
-    }
-  }
-  addIRule('www.ciweimao.com', '刺猬猫', 'h3', '.book-chapter-list a', '.book-chapter-list a:has(.icon-vip-s)', false, 1)
-  chapterRule['www.ciweimao.com'] = {
-    'Deal': function (num, url) {
-      return chapterRule['www.hbooker.com']['Deal'](num, url)
     }
   }
   addIRule('www.3gsc.com.cn', '3G书城', 'h1>a', '.menu-area>p>a', '.menu-area>p>a:has(span.vip)')

@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.17.${now}
+// @version     1.45.18.${now}
+// @Date        ${nowStr}
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -49,9 +50,6 @@
 // @include     http*://www.ciweimao.com/book/*
 // @include     http*://www.ciweimao.com/chapter-list/*/book_detail
 // @include     http*://www.ciweimao.com/chapter/book_chapter_detail*
-// @include     http*://www.hbooker.com/book/*
-// @include     http*://www.hbooker.com/chapter-list/*/book_detail
-// @include     http*://www.hbooker.com/chapter/book_chapter_detail*
 // @include     http://www.3gsc.com.cn/bookreader/*
 // @include     http://www.3gsc.com.cn/bookcon/*
 // @include     http://book.zongheng.com/showchapter/*
