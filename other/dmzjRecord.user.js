@@ -2,8 +2,8 @@
 // @name        [dmzj]record
 // @description 自动更新浏览记录，获取书签
 // @include     https://manhua.dmzj.com/*
-// @version     1.0.3.1540011842852
-// @Date        2018-10-20 13:04:02
+// @version     1.0.4.1540564549194
+// @Date        2018-10-26 22:35:49
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -80,46 +80,48 @@ let forIndex = async () => {
     }
   }
   GM_setValue('bookmark', bookmarkLocal)
-  let comicId = unsafeWindow.g_comic_id
-  if (comicId in bookmarkLocal) {
-    let info = bookmarkLocal[comicId]
-    let getChapter = () => {
-      let chapter = $('.cartoon_online_border>ul>li>a').toArray()
-      chapter = chapter.filter(i => i.href.split(/\/|\./)[6] * 1 === info[0])
+  let getChapter = () => {
+    let comicId = unsafeWindow.g_comic_id
+    if (comicId in bookmarkLocal) { // 存在记录
+      let info = bookmarkLocal[comicId]
+      let chapters = $('.cartoon_online_border>ul>li>a')
+      let chapter = chapters.toArray().filter(i => i.href.split(/\/|\./)[6] * 1 === info[0] * 1)
       if (chapter.length === 1) {
         chapter = chapter[0]
-        $('#last_read_history').html('上次看到：').append($(chapter).clone().removeAttr('class')).append(` <a href="${chapter.href}#@page=${info[1]}" target="_blank">第${info[1]}页</a>`).show()
+        $('#last_read_history').html('上次看到：').append($(chapter).clone().removeAttr('class')).append(` <a href="${chapter.href}#page=${info[1]}" target="_blank">第${info[1]}页</a>`).show()
       } else {
         let href = window.location.href + info[0] + '.shtml'
-        $('#last_read_history').html(`上次看到： <a href="${href}" target="_blank">未知话</a> <a href="${href}#@page=${info[1]}" target="_blank">第${info[1]}页</a>`).show()
+        $('#last_read_history').html(`上次看到： <a href="${href}" target="_blank">未知话</a> <a href="${href}#page=${info[1]}" target="_blank">第${info[1]}页</a>`).show()
       }
+    } else {
+      $('#last_read_history').html('没有阅读记录，请开始阅读：').append($('.cartoon_online_border>ul>li>a').eq(0).clone()).show()
     }
-    if ($('.cartoon_online_border>ul>li>a').length) {
-      getChapter()
-    } else { // 被屏蔽的漫画
-      // 监视DOM
-      let observer
-      observer = new window.MutationObserver((mutationsList) => {
-        for (let i of mutationsList) {
-          if (i.addedNodes.length && [...i.addedNodes].filter(j => j.classList && [...j.classList].includes('cartoon_online_button')).length) {
-            observer.disconnect()
-            getChapter()
-            return
-          }
+  }
+  if ($('.cartoon_online_border>ul>li>a').length) {
+    getChapter()
+  } else { // 被屏蔽的漫画
+    // 监视DOM
+    let observer
+    observer = new window.MutationObserver((mutationsList) => {
+      for (let i of mutationsList) {
+        if (i.addedNodes.length && [...i.addedNodes].filter(j => j.classList && [...j.classList].includes('cartoon_online_button')).length) {
+          observer.disconnect()
+          getChapter()
+          return
         }
-      })
-      observer.observe($('.middleright_mr')[0], {
-        childList: true,
-        subtree: true
-      })
-    }
+      }
+    })
+    observer.observe($('.middleright_mr')[0], {
+      childList: true,
+      subtree: true
+    })
   }
 }
 
 let forRead = () => {
-  // setInterval(() => {
-  //   if ($.cookie('history_CookieR')) historyLog($.cookie('history_CookieR'))
-  // }, 1 * 1000)
+  setInterval(() => {
+    if ($.cookie('history_CookieR')) historyLog($.cookie('history_CookieR'))
+  }, 10 * 1000)
   $(window).on({
     scroll: () => {
       if (!$.cookie('my')) return
@@ -145,6 +147,9 @@ let forRead = () => {
       GM_setValue('bookmark', bookmark)
     },
     click: () => {
+      if ($.cookie('history_CookieR')) historyLog($.cookie('history_CookieR'))
+    },
+    unload: () => {
       if ($.cookie('history_CookieR')) historyLog($.cookie('history_CookieR'))
     }
   })

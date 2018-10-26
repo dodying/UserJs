@@ -2,7 +2,7 @@
 // @name        [dmzj]record
 // @description 自动更新浏览记录，获取书签
 // @include     https://manhua.dmzj.com/*
-// @version     1.0.3.${now}
+// @version     1.0.4.${now}
 // @Date        ${nowStr}
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
