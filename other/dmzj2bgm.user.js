@@ -3,8 +3,8 @@
 // @description 请通过脚本命令来进行授权与数据同步
 // @include     https://i.dmzj.com/record
 // @include     https://i.dmzj.com/record#*
-// @version     1.0.2.1539865615380
-// @Date        2018-10-18 20:26:55
+// @version     1.0.3.1541170209774
+// @Date        2018-11-2 22:50:09
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -107,7 +107,7 @@ async function main () {
       let filter = list.filter(i => i.name_cn === $('#dmzj2bgm').data().name || i.name_cn === keyword)
       if (filter.length === 1) {
         await update(filter[0].id) // 更新进度
-        idLib[typeSpecific][$('#dmzj2bgm').data().dmzjId] = filter[0].id
+        $('#dmzj2bgm').data({result: filter[0].id})
         return true
       } else {
         let html = list.map(i => `<li name="${i.id}" class="subjectBox"><div><a href="${i.images.large.replace('http://', 'https://')}" target="_blank" title="点击查看大图"><img src="${i.images.common.replace('http://', 'https://')}"></img></a><br>${G.SubjectType[i.type]} <a href="${i.url.replace('http://', 'https://')}" target="_blank">${i.name_cn || i.name}</a></div><div>${i.summary.replace(/\n/g, '<br>')}</div></li>`).join('')
@@ -201,21 +201,23 @@ async function main () {
     }
 
     let autoUpdate = await showList(name)
-    if (autoUpdate) continue
+    if (!autoUpdate) {
+      await new Promise((resolve, reject) => {
+        let interval
+        interval = setInterval(async () => {
+          if ('result' in $('#dmzj2bgm').data()) {
+            clearInterval(interval)
+            await update($('#dmzj2bgm').data().result)
+            resolve()
+          } else if ('done' in $('#dmzj2bgm').data()) {
+            clearInterval(interval)
+            resolve()
+          }
+        }, 200)
+      })
+    }
 
-    await new Promise((resolve, reject) => {
-      let interval
-      interval = setInterval(async () => {
-        if ('result' in $('#dmzj2bgm').data()) {
-          clearInterval(interval)
-          await update($('#dmzj2bgm').data().result)
-          resolve()
-        } else if ('done' in $('#dmzj2bgm').data()) {
-          clearInterval(interval)
-          resolve()
-        }
-      }, 200)
-    })
+    if ($('#dmzj2bgm').data().result) idLib[typeSpecific][dmzjId] = $('#dmzj2bgm').data().result
 
     GM_setValue('idLib', idLib)
     GM_setValue('tagLib', tagLib)
@@ -336,7 +338,7 @@ function xhrSync (url, parm = null, opt = {}) {
       url: url,
       data: parm instanceof Object ? Object.keys(parm).map(i => i + '=' + parm[i]).join('&') : parm,
       timeout: opt.timeout || 60 * 1000,
-      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : 'text',
+      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : null,
       headers: opt.headers || {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
