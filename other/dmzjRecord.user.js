@@ -2,8 +2,9 @@
 // @name        [dmzj]record
 // @description 自动更新浏览记录，获取书签
 // @include     https://manhua.dmzj.com/*
-// @version     1.0.4.1540564549194
-// @Date        2018-10-26 22:35:49
+// @include     https://i.dmzj.com/subscribe
+// @version     1.0.5.1541170212333
+// @Date        2018-11-2 22:50:12
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -42,7 +43,7 @@ let xhrSync = (url, parm = null, opt = {}) => {
       url: url,
       data: parm instanceof Object ? Object.keys(parm).map(i => i + '=' + parm[i]).join('&') : parm,
       timeout: opt.timeout || 60 * 1000,
-      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : 'text',
+      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : null,
       headers: opt.headers || {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
@@ -153,6 +154,25 @@ let forRead = () => {
       if ($.cookie('history_CookieR')) historyLog($.cookie('history_CookieR'))
     }
   })
+  if (window.location.hash.match(/^#@page=\d+/)) window.location.hash = window.location.hash.replace('#@page=', '#page=')
+}
+
+let forSubscribe = () => {
+  let observer = new window.MutationObserver((mutationsList) => {
+    let bookmark = GM_getValue('bookmark', {})
+    let contents = $('.dy_content_li').toArray()
+    for (let i of contents) {
+      let comicId = $(i).find('.qx').attr('value')
+      if (comicId in bookmark) {
+        let href = $(i).find('.begin').attr('href')
+        href = href.trim() + '/' + bookmark[comicId][0] + '.shtml#page=' + bookmark[comicId][1]
+        $(i).find('.begin').attr('href', href).text('继续阅读')
+      }
+    }
+  })
+  observer.observe($('.dy_content')[0], {
+    childList: true
+  })
 }
 
 (function () {
@@ -160,5 +180,7 @@ let forRead = () => {
     forRead()
   } else if ($('.path_lv3').length) {
     forIndex()
+  } else if (window.location.href === 'https://i.dmzj.com/subscribe' && $('#sf-resetcontent').length === 0) {
+    forSubscribe()
   }
 })()
