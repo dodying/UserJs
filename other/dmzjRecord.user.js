@@ -3,8 +3,8 @@
 // @description 自动更新浏览记录，获取书签
 // @include     https://manhua.dmzj.com/*
 // @include     https://i.dmzj.com/subscribe
-// @version     1.0.5.1541170212333
-// @Date        2018-11-2 22:50:12
+// @version     1.0.6.1542891504588
+// @Date        2018-11-22 20:58:24
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -60,31 +60,33 @@ let xhrSync = (url, parm = null, opt = {}) => {
   })
 }
 
-let getBookmark = async () => {
+let updateBookmark = async () => {
+  let now = new Date().getTime()
+  let last = GM_getValue('update', 0)
+  if (now - last < 60 * 60 * 1000) return
   let userId = $.cookie('my').split('|')[0]
-  if (!userId) return []
+  if (!userId) return
   let res = await xhrSync(`//interface.dmzj.com/api/getReInfo/comic/${userId}/0`)
   try {
-    let json = JSON.parse(res.response)
-    return json
-  } catch (error) {
-    return []
-  }
+    let bookmark = JSON.parse(res.response)
+    let bookmarkLocal = GM_getValue('bookmark', {})
+    for (let i of bookmark) {
+      if (!(i.comic_id in bookmarkLocal) || i.viewing_time > bookmarkLocal[i.comic_id][2]) { // 保留网上的记录
+        bookmarkLocal[i.comic_id] = [i.chapter_id, i.record, i.viewing_time]
+      }
+    }
+    GM_setValue('bookmark', bookmarkLocal)
+    GM_setValue('update', now)
+    window.location.reload()
+  } catch (error) {}
 }
 
 let forIndex = async () => {
-  let bookmark = await getBookmark()
-  let bookmarkLocal = GM_getValue('bookmark', {})
-  for (let i of bookmark) {
-    if (!(i.comic_id in bookmarkLocal) || i.viewing_time > bookmarkLocal[i.comic_id][2]) { // 保留网上的记录
-      bookmarkLocal[i.comic_id] = [i.chapter_id, i.record, i.viewing_time]
-    }
-  }
-  GM_setValue('bookmark', bookmarkLocal)
+  let bookmark = GM_getValue('bookmark', {})
   let getChapter = () => {
     let comicId = unsafeWindow.g_comic_id
-    if (comicId in bookmarkLocal) { // 存在记录
-      let info = bookmarkLocal[comicId]
+    if (comicId in bookmark) { // 存在记录
+      let info = bookmark[comicId]
       let chapters = $('.cartoon_online_border>ul>li>a')
       let chapter = chapters.toArray().filter(i => i.href.split(/\/|\./)[6] * 1 === info[0] * 1)
       if (chapter.length === 1) {
@@ -140,7 +142,7 @@ let forRead = () => {
         item_obj['chapterId'] = chapter_id
       }
       item_obj['page'] = $('.ml-images>img,.inner_img img').length ? getReadingPage() : getReadingPage2()
-      item_obj['time'] = Date.parse(new Date()).toString().substr(0, 10) // 观看时间
+      item_obj['time'] = Date.parse(new Date()) / 1000 // 观看时间
       $.cookie('history_CookieR', JSON.stringify([item_obj]), { path: '/', expires: 99999 })
 
       let bookmark = GM_getValue('bookmark', {})
@@ -167,6 +169,7 @@ let forSubscribe = () => {
         let href = $(i).find('.begin').attr('href')
         href = href.trim() + '/' + bookmark[comicId][0] + '.shtml#page=' + bookmark[comicId][1]
         $(i).find('.begin').attr('href', href).text('继续阅读')
+        if (bookmark[comicId][0] === $(i).find('.c_space>a').attr('href').split(/[/.]/)[6] * 1) $(i).find('.begin').text('已阅读完')
       }
     }
   })
@@ -175,7 +178,8 @@ let forSubscribe = () => {
   })
 }
 
-(function () {
+(async function () {
+  await updateBookmark()
   if (window.location.href.match(/dmzj.com\/.*?\/\d+.shtml/)) {
     forRead()
   } else if ($('.path_lv3').length) {
