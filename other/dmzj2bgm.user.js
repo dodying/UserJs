@@ -3,8 +3,8 @@
 // @description 请通过脚本命令来进行授权与数据同步
 // @include     https://i.dmzj.com/record
 // @include     https://i.dmzj.com/record#*
-// @version     1.0.3.1541170209774
-// @Date        2018-11-2 22:50:09
+// @version     1.0.4.1542891536544
+// @Date        2018-11-22 20:58:56
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -107,7 +107,7 @@ async function main () {
       let filter = list.filter(i => i.name_cn === $('#dmzj2bgm').data().name || i.name_cn === keyword)
       if (filter.length === 1) {
         await update(filter[0].id) // 更新进度
-        $('#dmzj2bgm').data({result: filter[0].id})
+        $('#dmzj2bgm').data({ result: filter[0].id })
         return true
       } else {
         let html = list.map(i => `<li name="${i.id}" class="subjectBox"><div><a href="${i.images.large.replace('http://', 'https://')}" target="_blank" title="点击查看大图"><img src="${i.images.common.replace('http://', 'https://')}"></img></a><br>${G.SubjectType[i.type]} <a href="${i.url.replace('http://', 'https://')}" target="_blank">${i.name_cn || i.name}</a></div><div>${i.summary.replace(/\n/g, '<br>')}</div></li>`).join('')
@@ -127,8 +127,8 @@ async function main () {
     return window.alert('不支持动画记录')
   }
 
-  let idLib = GM_getValue('idLib', {漫画: {}, 小说: {}})
-  let tagLib = GM_getValue('tagLib', {漫画: {}, 小说: {}})
+  let idLib = GM_getValue('idLib', { 漫画: {}, 小说: {} })
+  let tagLib = GM_getValue('tagLib', { 漫画: {}, 小说: {} })
 
   // 获取记录
   let userId = decodeURI(document.cookie).match(/my=(\d+)\|/)[1]
@@ -142,30 +142,40 @@ async function main () {
         let keyword = $('.subjectSearch').val()
         $('.subjectList').hide()
         let autoUpdate = await showList(keyword)
-        if (autoUpdate) $('#dmzj2bgm').data({done: true})
+        if (autoUpdate) $('#dmzj2bgm').data({ done: true })
       }
     }
   })
   $('.subjectList').off('click').on('click', '.subjectBox', e => {
     if ($(e.target).parents().filter('a').length || $(e.target).is('a')) return
     $('.subjectList').hide()
-    $('#dmzj2bgm').data({result: $(e.currentTarget).attr('name')})
+    $('#dmzj2bgm').data({ result: $(e.currentTarget).attr('name') })
   }).on('click', '.subjectIgnore', e => {
     $('.subjectList').hide()
-    $('#dmzj2bgm').data({result: null})
+    $('#dmzj2bgm').data({ result: null })
   })
 
   for (let i of record) {
-    let name = i.comic_name
-    let progress = i.chapter_name
-    let dmzjId = i.comic_id
+    let name = typeSpecific === '漫画' ? i.comic_name : i.novel_name
+    let progress = [i.chapter_name, i.volume_name]
+    let dmzjId = typeSpecific === '漫画' ? i.comic_id : i.lnovel_id
     $('.subjectList>div>img').attr('src', i.cover)
     $('.subjectList>div>input.subjectSearch').val(name)
-    if (progress.match(/第[\d.]+(话|集)/)) {
-      progress = parseInt(progress.match(/第(0+|)([\d.]+)(话|集)/)[2]).toString()
+
+    if (typeSpecific === '漫画' && progress[0].match(/第[\d.]+(话|集)/)) {
+      progress = [parseInt(progress[0].match(/第(0+|)([\d.]+)(话|集)/)[2]).toString()]
+    } else if (typeSpecific === '小说' && progress[1].match(/第[一二三四五六七八九十]+卷/)) {
+      let volume = parseZhNumber(progress[1].match(/第([一二三四五六七八九十]+)卷/)[1])
+      let chapter = progress[0].match(/第[一二三四五六七八九十]+章/) ? parseZhNumber(progress[0].match(/第([一二三四五六七八九十]+)章/)[1]) : 0
+      if (progress[0].match(/^(序|转载)/)) {
+        chapter = 1
+      }
+      if (volume === 1 && chapter === 1) volume = 0
+      progress = [chapter, volume]
     } else {
       continue
     }
+
     $('#dmzj2bgm').removeData().data({
       name: name,
       progress: progress,
@@ -185,14 +195,24 @@ async function main () {
         continue
       }
 
-      tags = dmzjInfo.types.some(i => typeof i === 'string') ? dmzjInfo.types.split('/') : dmzjInfo.types.map(i => i.tag_name)
+      tags = dmzjInfo.types.some(i => typeof i === 'string') ? dmzjInfo.types[0].split('/') : dmzjInfo.types.map(i => i.tag_name)
       tags.push(typeSpecific)
-      tagLib[typeSpecific][dmzjId] = tags
     } else {
       tags = [typeSpecific]
-      tagLib[typeSpecific][dmzjId] = tags
     }
-    $('#dmzj2bgm').data({tags: tags})
+    if (typeSpecific === '漫画' && tags.includes('轻小说')) {
+      tags.splice(tags.indexOf('轻小说'), 1)
+      tags.push('轻改')
+    } else if (typeSpecific === '小说') {
+      tags.splice(tags.indexOf('小说'), 1)
+      tags.push('轻小说')
+      if (tags.includes('漫画')) {
+        tags.splice(tags.indexOf('漫画'), 1)
+        tags.push('漫改')
+      }
+    }
+    tagLib[typeSpecific][dmzjId] = tags
+    $('#dmzj2bgm').data({ tags: tags })
 
     // 如果之前保存过id，则使用之前id
     if (dmzjId in idLib[typeSpecific]) {
@@ -318,10 +338,12 @@ async function updateStatus (id, token, progress, tags) { // 更新进度
     }
   })
   // 更新进度
-  await xhrSync('https://api.bgm.tv/subject/' + id + '/update/watched_eps', {
+  let parms = {
     subject_id: id,
-    watched_eps: progress
-  }, {
+    watched_eps: progress[0]
+  }
+  if (progress[1] !== undefined) parms['watched_vols'] = progress[1]
+  await xhrSync('https://api.bgm.tv/subject/' + id + '/update/watched_eps', parms, {
     headers: {
       Authorization: 'Bearer ' + token,
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
@@ -331,7 +353,7 @@ async function updateStatus (id, token, progress, tags) { // 更新进度
 }
 
 function xhrSync (url, parm = null, opt = {}) {
-  log({url, parm, opt})
+  log({ url, parm, opt })
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
       method: parm ? 'POST' : 'GET',
@@ -353,6 +375,22 @@ function xhrSync (url, parm = null, opt = {}) {
       }
     })
   })
+}
+
+function parseZhNumber (text) {
+  let number = '一二三四五六七八九'
+  let num = 0
+  for (let i = 0; i < text.length; i++) {
+    let t = text[i]
+    if (t === '十' && i === 0) {
+      num = 10
+    } else if (t === '十' && i !== 0) {
+      num = 10 * num
+    } else if (number.includes(t)) {
+      num = num + number.indexOf(t) + 1
+    }
+  }
+  return num
 }
 
 init().then(() => {

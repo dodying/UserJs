@@ -3,7 +3,7 @@
 // @description 请通过脚本命令来进行授权与数据同步
 // @include     https://i.dmzj.com/record
 // @include     https://i.dmzj.com/record#*
-// @version     1.0.3.${now}
+// @version     1.0.4.${now}
 // @Date        ${nowStr}
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
