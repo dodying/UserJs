@@ -2,8 +2,8 @@
 // @name        [dmzj]Novel
 // @description 在动漫之家上看小说
 // @include     http*://xs.dmzj.com/*
-// @version     1.0.0.1542891920935
-// @Date        2018-11-22 21:05:20
+// @version     1.0.1.1542962621582
+// @Date        2018-11-23 16:43:41
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -18,10 +18,17 @@
 function addStyle () {
   let style = [
     // common
-    '.flex-center{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;}',
+    '.flex-center,.flex-center2{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;}',
+    '.flex-row{display:flex;flex-direction:row}',
+    '.flex-column{display:flex;flex-direction:column}',
+    '.flex-row-center{display:flex;flex-direction:row;align-items:center;}',
     '.flex-column-center{display:flex;flex-direction:column;align-items:center;}',
     '.loading{border:16px solid #f3f3f3;border-radius:50%;border-top:16px solid #3498db;animation:spin 2s linear infinite}',
     '@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}',
+    '.cover{height:200px;width:150px;border:1px solid #dbdbdb;padding:1px;}',
+    '.nav>ul{list-style:none;}',
+    '.nav>ul>li,.page>a{margin:0 10px;}',
+    '.nav>ul>li>a{color:#167990;background:url(//xs.dmzj.com/images/navlistbtn.png) no-repeat left top;width:79px;height:33px;line-height:33px;text-decoration:none;display:block;font-size:15px;font-weight:bold;text-align:center;}',
     // forIndex
     '.subscribe_num{height:25px;line-height:25px;margin:5px 0;text-align:center;}',
     '.subscribe_num span{color:#f30;}',
@@ -29,14 +36,17 @@ function addStyle () {
     '.cartoon_online_button>li{overflow:hidden;float:none!important;display:inline-block;}',
     // forRead
     '.content img{margin:10px 0;}',
-    '.footer>a{margin:0 15px;font-size:larger;text-decoration:none;color:#065488;}'
+    '.footer>a{margin:0 15px;font-size:larger;text-decoration:none;color:#065488;}',
+    // forSearch
+    '.box{border:solid 1px #666;margin:10px;}',
+    '.aLike{color:-webkit-link;cursor:pointer;text-decoration:underline;}'
   ]
   $('<style></style>').html(style).appendTo('head')
 }
 
 async function forIndex () {
   let id = window.location.href.split('/')[3]
-  let info = await xhrSync(`https://v3api.dmzj.com/novel/${id}.json`)
+  let info = await xhrSync(`//v3api.dmzj.com/novel/${id}.json`)
   document.title = info.name
 
   info = JSON.parse(info.response)
@@ -47,7 +57,7 @@ async function forIndex () {
     `    <div class="odd_anim_title">`,
     `      <div class="odd_anim_title_l"></div>`,
     `      <div class="odd_anim_title_m">`,
-    `        <span class="anim_title_text"><a href="" target="_blank"><h1>${info.name}</h1></a></span>${info.status}&nbsp;(&nbsp;最新收录：<a id="newest_volume" target="_blank">${info.last_update_volume_name}</a>&nbsp;<a id="newest_chapter" target="_blank">${info.last_update_chapter_name}</a>)`,
+    `        <span class="anim_title_text"><a href="" target="_blank"><h1>${info.name}</h1></a></span>${info.status}&nbsp;(&nbsp;最新收录：<a href="/${info.id}/${info.last_update_volume_id}/${info.last_update_chapter_id}.shtml" target="_blank" id="newest_chapter" target="_blank">${info.last_update_volume_name} - ${info.last_update_chapter_name}</a>)`,
     `      </div>`,
     `      <div class="odd_anim_title_r"></div>`,
     `    </div>`,
@@ -88,7 +98,7 @@ async function forIndex () {
     `              <tr><th>状态：</th><td>${info.status}</td></tr>`,
     `              <tr><th>人气：</th><td id="hot_hits">${info.hot_hits}℃</td></tr>`,
     `              <tr><th>题材：</th><td>${info.types}</td></tr>`,
-    `              <tr><th>最新收录：</th><td><a id="newest_volume" target="_blank">${info.last_update_volume_name}</a>&nbsp;<a id="newest_chapter" target="_blank">${info.last_update_chapter_name}</a><br><span class="update2">${new Date(info.last_update_time * 1000).toLocaleString(navigator.language, { hour12: false })}</span></td></tr>`,
+    `              <tr><th>最新收录：</th><td><a href="/${info.id}/${info.last_update_volume_id}/${info.last_update_chapter_id}.shtml" target="_blank" id="newest_chapter" target="_blank">${info.last_update_volume_name} - ${info.last_update_chapter_name}</a><br><span class="update2">${new Date(info.last_update_time * 1000).toLocaleString(navigator.language, { hour12: false })}</span></td></tr>`,
     `            </tbody></table>`,
     `          </div>`,
     `        </div>`,
@@ -98,14 +108,14 @@ async function forIndex () {
     `  </div>`,
     `</div>`
   ].join('')
-  $('head').append(`<link rel="stylesheet" type="text/css" href="https://manhua.dmzj.com/css/base.css"><link rel="stylesheet" type="text/css" href="https://manhua.dmzj.com/css/style2011.css?t=20131210">`)
+  $('head').append(`<link rel="stylesheet" type="text/css" href="//manhua.dmzj.com/css/base.css"><link rel="stylesheet" type="text/css" href="//manhua.dmzj.com/css/style2011.css?t=20131210">`)
   $('body').html('<div class="wrap">' + html + '</div>')
 
-  let volumes = await xhrSync(`https://v3api.dmzj.com/novel/chapter/${id}.json`)
+  let volumes = await xhrSync(`//v3api.dmzj.com/novel/chapter/${id}.json`)
   volumes = JSON.parse(volumes.response)
   for (let volume of volumes) {
     $(`<li class="b2 t1" style="cursor: pointer;" name="${volume.volume_id}" title="${volume.volume_name}">${volume.volume_name}</li>`).appendTo('.cartoon_online_button')
-    $(`<div class="cartoon_online_border" name="${volume.volume_id}"><ul>${volume.chapters.map(chapter => `<li><a title="${volume.volume_name} - ${chapter.chapter_name}" href="https://xs.dmzj.com/${id}/${volume.volume_id}/${chapter.chapter_id}.shtml" target="_blank">${chapter.chapter_name}</a></li>`).join('')}</ul><div class="clearfix"></div></div>`).appendTo('.middleright>.middleright_mr:nth-child(1)')
+    $(`<div class="cartoon_online_border" name="${volume.volume_id}"><ul>${volume.chapters.map(chapter => `<li><a title="${volume.volume_name} - ${chapter.chapter_name}" href="/${id}/${volume.volume_id}/${chapter.chapter_id}.shtml" target="_blank">${chapter.chapter_name}</a></li>`).join('')}</ul><div class="clearfix"></div></div>`).appendTo('.middleright>.middleright_mr:nth-child(1)')
   }
   $('.cartoon_online_border').hide().eq(-1).show()
   $('.cartoon_online_button>li').on({
@@ -120,9 +130,8 @@ async function forIndex () {
 }
 
 async function forRead () {
-  let { 1: id, 2: volumeId, 3: chapterId } = window.location.href.match(/xs.dmzj.com\/(\d+)\/(\d+)\/(\d+).shtml/)
-  let content = await xhrSync(`http://v3api.dmzj.com/novel/download/${id}_${volumeId}_${chapterId}.txt`)
-  console.log(content)
+  let [, id, volumeId, chapterId] = window.location.href.match(/xs.dmzj.com\/(\d+)\/(\d+)\/(\d+).shtml/)
+  let content = await xhrSync(`//v3api.dmzj.com/novel/download/${id}_${volumeId}_${chapterId}.txt`)
   let html = [
     '<div class="header">',
     '  背景与字体颜色: ',
@@ -134,9 +143,9 @@ async function forRead () {
     '    <option value="4" color="#000" background="#E7F4FE" style="color:#000;background:#E7F4FE;">蓝色</option>',
     '    <option value="5" color="#000" background="#C2A886" style="color:#000;background:#C2A886;">棕黄</option>',
     '    <option value="6" color="#000" background="#EAEAEE" style="color:#000;background:#EAEAEE;">经典</option>',
-    '    <option value="7" color="#000" background="url(\'http://qidian.gtimg.com/qd/images/read.qidian.com/theme/body_theme1_bg_2x.0.3.png\')">起点牛皮纸（深色）</option>',
-    '    <option value="8" color="#000" background="url(\'http://qidian.gtimg.com/qd/images/read.qidian.com/theme/theme_1_bg_2x.0.3.png\')">起点牛皮纸（浅色）</option>',
-    '    <option value="9" color="#666" background="#111 url(\'https://qidian.gtimg.com/qd/images/read.qidian.com/theme/theme_6_bg.45ad3.png\') repeat">起点黑色</option>',
+    '    <option value="7" color="#000" background="url(\'//qidian.gtimg.com/qd/images/read.qidian.com/theme/body_theme1_bg_2x.0.3.png\')">起点牛皮纸（深色）</option>',
+    '    <option value="8" color="#000" background="url(\'//qidian.gtimg.com/qd/images/read.qidian.com/theme/theme_1_bg_2x.0.3.png\')">起点牛皮纸（浅色）</option>',
+    '    <option value="9" color="#666" background="#111 url(\'//qidian.gtimg.com/qd/images/read.qidian.com/theme/theme_6_bg.45ad3.png\') repeat">起点黑色</option>',
     '    <option value="10" color="#BBD7BC" background="#122C14">绿色亮字</option>',
     '  </select>',
     '  字体: ',
@@ -153,7 +162,7 @@ async function forRead () {
     '</div>',
     '<div class="footer"></div>'
   ].join('')
-  $('body').addClass('flex-column-center').html(html)
+  $('body').html(html)
   $('.content').css({
     'font-size': '18px',
     'font-family': '微软雅黑,宋体,黑体,楷体',
@@ -186,7 +195,7 @@ async function forRead () {
     $(`.header>[name=${i}]`).val(settings[i]).trigger('change')
   }
 
-  let volumes = await xhrSync(`https://v3api.dmzj.com/novel/chapter/${id}.json`)
+  let volumes = await xhrSync(`//v3api.dmzj.com/novel/chapter/${id}.json`)
   volumes = JSON.parse(volumes.response)
   volumes = volumes.map(i => i.chapters.map(j => [i.volume_id, i.volume_name, j.chapter_id, j.chapter_name]))
   volumes = [].concat.apply([], volumes)
@@ -202,7 +211,6 @@ async function forRead () {
   $(window).one('scroll', e => {
     let cookie = document.cookie.split(/;\s{0,}/).map(i => i.split('='))
     let my = cookie.filter(i => i[0] === 'my')
-    console.log(cookie, my)
     if (my.length) {
       let userId = decodeURI(my[0][1]).split('|')[0]
       let json = JSON.stringify([{
@@ -217,6 +225,155 @@ async function forRead () {
       xhrSync(`//interface.dmzj.com/api/record/getRe?callback=callback&uid=${userId}&type=3&st=novel&json=${encodeURIComponent(json)}`)
     }
   })
+}
+
+async function forRecommend () {
+  let result = await xhrSync(`//v3api.dmzj.com/novel/recommend.json`)
+  result = JSON.parse(result.response)
+  console.log(result)
+  let html = ''
+  for (let item of result) {
+    html += '<div class="flex-row-center" style="flex-wrap:wrap;">'
+    html += `<div><div class="box">${item.title}</div></div>`
+    for (let i of item.data) {
+      html += `<div class="flex-row-center box">`
+      // 左侧
+      html += `<div class="flex-column-center">`
+      html += `<img class="cover" src="${i.cover}">`
+      html += `<a href="/${i.obj_id}/index.shtml" target="_blank"><span>${i.title}</span></a>`
+      html += `</div>`
+      // 右侧
+      html += `<div class="flex-column">`
+      if (i.sub_title) html += `<span>${i.sub_title}</span>`
+      html += `<span>状态: ${i.status}</span>`
+      html += `</div>`
+
+      html += `</div>`
+    }
+    html += '</div>'
+  }
+  $('body').html(html)
+}
+
+async function forUpdate () {
+  $('body').html(`<div class="result flex-row" style="flex-wrap:wrap;"></div><div class="page"></div>`)
+  let { page } = formatSearch(window.location.search)
+  await updateResult(page)
+
+  async function updateResult (page = 0) {
+    window.history.pushState(null, null, `?page=${page}`)
+    let result = await xhrSync(`//v3api.dmzj.com/novel/recentUpdate/${page}.json`)
+    result = JSON.parse(result.response)
+    let html = ''
+    for (let i of result) {
+      html += `<div class="flex-row-center box">`
+      // 左侧
+      html += `<div class="flex-column-center">`
+      html += `<img class="cover" src="${i.cover}">`
+      html += `<a href="/${i.id}/index.shtml" target="_blank"><span>${i.name}</span></a>`
+      html += `</div>`
+      // 右侧
+      html += `<div class="flex-column">`
+      html += `<span>作者: ${i.authors}</span>`
+      html += `<span>最近更新: <a href="/${i.id}/${i.last_update_volume_id}/${i.last_update_chapter_id}.shtml" target="_blank">${i.last_update_volume_name} - ${i.last_update_chapter_name}</a></span>`
+      html += `<span>更新时间: ${new Date(i.last_update_time * 1000).toLocaleString(navigator.language, { hour12: false })}</span>`
+      html += `<span>状态: ${i.status}</span>`
+      html += `<span>标签: ${i.types.join('/')}</span>`
+      html += `</div>`
+
+      html += `</div>`
+    }
+    $('.result').html(html)
+
+    let htmlPage = ''
+    if (page > 0) htmlPage += `<a class="aLike prev">上一页</a>`
+    htmlPage += `<a class="aLike next">下一页</a>`
+    $('.page').html(htmlPage)
+    $('.prev').on({
+      click: () => updateResult(page * 1 - 1)
+    })
+    $('.next').on({
+      click: () => updateResult(page * 1 + 1)
+    })
+  }
+}
+
+async function forSearch () {
+  $('body').html(`<div class="flex-column-center"><div class="flex-row"><input class="search" type="keyword" placeholder="输入关键词搜索" style="margin: 0 10px;"><input class="apply" type="button" value="搜索"></div><div><div class="fuzzy"></div></div></div><div class="result flex-row" style="flex-wrap:wrap;"></div><div class="page"></div>`)
+  $('.search').on({
+    keyup: e => {
+      if (e.keyCode === 13) {
+        updateResult($('.search').val())
+      } else {
+        if ($('.search').val()) updateFuzzy($('.search').val())
+      }
+    }
+  })
+  $('.apply').on({
+    click: () => updateResult($('.search').val())
+  })
+
+  let { s: keyword, page } = formatSearch(window.location.search)
+  if (keyword) updateResult(keyword, page)
+
+  async function updateResult (keyword, page = 0) {
+    window.history.pushState(null, null, `?s=${encodeURIComponent(keyword)}&page=${page}`)
+    let result = await xhrSync(`//v3api.dmzj.com/search/show/1/${keyword}/${page}.json`)
+    result = JSON.parse(result.response)
+    let html = ''
+    for (let i of result) {
+      html += `<div class="flex-row-center box">`
+      // 左侧
+      html += `<div class="flex-column-center">`
+      html += `<img class="cover" src="${i.cover}">`
+      html += `<a href="/${i.id}/index.shtml" target="_blank"><span>${i.title}</span></a>`
+      html += `</div>`
+      // 右侧
+      html += `<div class="flex-column">`
+      html += `<span>作者: ${i.authors}</span>`
+      html += `<span>人气: ${i.hot_hits}</span>`
+      html += `<span>最近更新: ${i.last_name}</span>`
+      html += `<span>状态: ${i.status}</span>`
+      html += `<span>标签: ${i.types}</span>`
+      html += `</div>`
+
+      html += `</div>`
+    }
+    if (result.length === 0) html = '未找到相关小说'
+    $('.result').html(html)
+
+    let htmlPage = ''
+    if (page > 0) htmlPage += `<a class="aLike prev">上一页</a>`
+    if (result.length === 10) htmlPage += `<a class="aLike next">下一页</a>`
+    $('.page').html(htmlPage)
+    $('.prev').on({
+      click: () => updateResult($('.search').val(), page * 1 - 1)
+    })
+    $('.next').on({
+      click: () => updateResult($('.search').val(), page * 1 + 1)
+    })
+  }
+
+  async function updateFuzzy (keyword) {
+    let result = await xhrSync(`//v3api.dmzj.com/search/fuzzy/1/${keyword}.json`)
+    result = JSON.parse(result.response)
+    let html = '<ul>'
+    for (let i of result) {
+      html += '<ol>'
+      html += `<a href="/${i.id}/index.shtml" target="_blank"><span>${i.title}</span></a>`
+      html += `<a class="aLike putin" name="${i.title}">\u25e2</a>`
+      html += '</ol>'
+    }
+    html += '</ul>'
+    if (result.length === 0) html = '未找到相关小说'
+    $('.fuzzy').html(html).show()
+    $('.putin').on({
+      click: e => {
+        $('.search').val($(e.target).attr('name'))
+        $('.fuzzy').hide()
+      }
+    })
+  }
 }
 
 function xhrSync (url, parm = null, opt = {}) {
@@ -243,16 +400,39 @@ function xhrSync (url, parm = null, opt = {}) {
   })
 }
 
+function formatSearch (text) {
+  let arr = text.replace(/^\?/, '').split('&')
+  let obj = {}
+  for (let i of arr) {
+    let t = i.split('=')
+    obj[t[0]] = decodeURIComponent(t[1])
+  }
+  return obj
+}
+
 (async function () {
   let html = $('body').html()
-  $('body').html('<div class="loading" style="width:120px;height:120px;"></div>').addClass('flex-center')
+  $('body').html('<div class="loading" style="width:120px;height:120px;"></div>').addClass('flex-column-center')
   addStyle()
   if (window.location.href.match(/xs.dmzj.com\/\d+\/index.shtml/)) {
     await forIndex()
   } else if (window.location.href.match(/xs.dmzj.com\/\d+\/\d+\/\d+.shtml/)) {
     await forRead()
+  } else if (window.location.href.match(/xs.dmzj.com\/recommend.shtml/)) {
+    await forRecommend()
+  } else if (window.location.href.match(/xs.dmzj.com\/update.shtml/)) {
+    await forUpdate()
+  } else if (window.location.href.match(/xs.dmzj.com\/tags\/search.shtml/)) {
+    await forSearch()
   } else {
     $('body').html(html)
   }
-  $('body').removeClass('flex-center')
+  let htmlNav = [
+    '<div class="nav"><ul class="flex-row">',
+    '<li><a href="/recommend.shtml" target="_blank">推荐</a></li>',
+    '<li><a href="/update.shtml" target="_blank">最近更新</a></li>',
+    '<li><a href="/tags/search.shtml" target="_blank">搜索</a></li>',
+    '</ul></div>'
+  ].join('')
+  $('body').prepend(htmlNav)
 })()

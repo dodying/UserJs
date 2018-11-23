@@ -2,7 +2,7 @@
 // @name        [dmzj]Novel
 // @description 在动漫之家上看小说
 // @include     http*://xs.dmzj.com/*
-// @version     1.0.0.${now}
+// @version     1.0.1.${now}
 // @Date        ${nowStr}
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
