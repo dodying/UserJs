@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.3.1537695260578
-// @Date        2018-9-23 17:34:20
+// @version     1.16.11
+// @date        2019-2-17 12:15:38
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -68,7 +68,7 @@ const G = { // 全局变量
     /\.gif$/i
   ],
   uselessStrRE: /\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|～|~/g,
-  digitalJpRe: /[0-9０-９零一二三四五六七八九十百千万零壹贰参肆伍陆柒捌玖拾佰仟萬]/g,
+  digitalJpRe: /[0-9０-９零一二三四五六七八九十百千万零壹贰参肆伍陆柒捌玖拾佰仟萬壱弐參]/g,
   digitalRomaji: {
     rei: 0,
     ichi: 1,
@@ -281,9 +281,21 @@ async function init () {
       $(e.target).attr('title', '当前下载列表:<br> ' + GM_getValue('downloading', []).join('<br> '))
     }
   }).prependTo('.ehNavBar>div:eq(2)')
-  $('<input type="button" value="Start Task" tooltip="' + htmlEscape('左键: 开始下载任务<br>右键: 重置当前下载任务') + '">').on({
+  $('<input type="button" value="Start Task" tooltip="' + htmlEscape('左键: 开始下载任务<br>中键: 从当前任务开始<br>右键: 重置当前下载任务') + '">').on({
     mousedown: e => {
       if (e.button === 0) {
+        task()
+      } else if (e.button === 1) {
+        let tasking = GM_getValue('tasking')
+        if (tasking) {
+          GM_deleteValue('tasking')
+          let task = GM_getValue('task', [])
+          let url = tasking.replace(/#\d+$/, '')
+          if (!(task.includes(url))) {
+            task.unshift(url)
+            GM_setValue('task', task)
+          }
+        }
         task()
       } else if (e.button === 2) {
         GM_deleteValue('tasking')
@@ -397,7 +409,7 @@ function addStyle () { // 添加样式
     '.ehTagNotice[name="Like"],#taglist div[id][name="Like"]{color:#000;background-color:#0ff;}',
     '.ehTagEvent>.ehTagEventNotice[on="true"]::after{content:attr(name);}',
     '.ehTagEvent>.ehTagEventNotice[on="false"]::after{content:"NOT " attr(name);}',
-    '.ehTooltip{max-width:50%;display:none;position:fixed;text-align:left;z-index:99999;border:2px solid #8d8d8d;background-color:' + backgroundColor + ';}',
+    '.ehTooltip{max-width:50%;max-height:85%;overflow:auto;display:none;position:fixed;text-align:left;z-index:99999;border:2px solid #8d8d8d;background-color:' + backgroundColor + ';}',
     '.ehTooltip>ul{margin:0;}',
     '.ehCheckTableContainer{position:fixed;top:23px;bottom:16px;left:0;right:0;min-width:950px;max-width:1200px;margin:10px auto;padding:5px;border:solid 1px black;z-index:2;background-color:' + backgroundColor + ';}',
     '.ehCheckTableContainer>div{overflow:auto;}',
@@ -813,9 +825,9 @@ function changeName (e) { // 修改本子标题（移除集会名）
     if (G.config.changeRomajiName) {
       let jTitle = G.infoPage ? $('#gj').text() : G.gmetadata.filter(j => j.gid === i.href.match(/g\/(\d+)\//)[1] * 1)[0].title_jpn
       jTitle = jTitle.replace(/^\(.*?\)( |)/, '').replace(G.uselessStrRE, '').replace(/\s+/g, ' ').trim()
-      if (jTitle.match(G.digitalJpRe) && title.match(G.digitalRomajiRe)) {
+      if (jTitle.match(G.digitalJpRe) && jTitle.match(G.digitalJpRe).length - (title.match(/\d/g) || []).length && title.match(G.digitalRomajiRe)) {
         title = title.replace(G.digitalRomajiRe, (matched, p1, p2, p3, offset, string) => {
-          if (G.debug) console.log({matched, p1, p2, p3, offset, string, title, i})
+          if (G.debug) console.log({ matched, p1, p2, p3, offset, string, title, i })
           if (p1 === '-' && p2.match(/^san$/i)) return matched
           return p1 + (p1.match(/[-—~～]/) ? ' ' : '') + G.digitalRomaji[p2.toLowerCase()] + (p3.match(/[-—~～]/) ? ' ' : '') + p3
         })
@@ -845,7 +857,7 @@ function checkExist () { // 检查本地是否存在
       }
     })
     try {
-      let res = await xhrSync('http://127.0.0.1:3000/', 'names=' + encodeURIComponent(JSON.stringify(name)), {
+      let res = await xhrSync(G.config['checkExistSever'], 'names=' + encodeURIComponent(JSON.stringify(name)), {
         responseType: 'json',
         timeout: 120 * 1000
       })
@@ -859,9 +871,8 @@ function checkExist () { // 检查本地是否存在
         name = name.replace(/\.$/, '').trim()
         name2 = name.replace(/\.$/, '').trim()
         res.response[j].forEach(k => {
-          if (k.match(/\.jpg$/)) return
-          let fileSize = (k.match(/^([\d,]+)/)[1].replace(/,/g, '') * 1 / 1024 / 1024).toFixed(2)
-          let fileName = k.replace(/^[\d,]+\s+/, '')
+          let fileSize = k.size
+          let fileName = k.name
           let noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').trim()
           let noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$')
           let noLang = noExt.replace(langRE, '').trim()
@@ -1171,6 +1182,7 @@ function defaultConfig () { // 默认设置
     'checkExist': true,
     'checkExistAtStart': true,
     'checkExistName2': false,
+    'checkExistSever': 'http://127.0.0.1:3000/',
     'acLength': 3,
     'acItem': 'language,artist,female,male,parody,character,group,misc',
     'batch': 3,
@@ -1677,7 +1689,7 @@ function saveAs2 (content, name, type = 'application/octet-stream;charset=utf-8'
   let blob = new window.Blob([content], {
     type: type
   })
-  $(`<a href="${URL.createObjectURL(blob)}" download="${name}"></a>`)[0].click()
+  $(`<a href="${URL.createObjectURL(blob)}" download="${name}"></a>`).appendTo('body').hide()[0].click()
 }
 
 function saveLink () { // 保存链接
@@ -1866,7 +1878,7 @@ function showConfig () { // 显示设置
       '收藏按钮事件: 当用<select name="ehConfig_auto2Fav"><option value="0">左键</option><option value="1">中键</option><option value="2">右键</option></select>点击Open时，自动添加到收藏',
       '搜索按钮事件: <input name="ehConfig_searchEvent" title="' + htmlEscape('事件格式: 鼠标按键,键盘按键,搜索文本,是否中文<br>多个事件以<span class="ehHighlight">|</span>分割<br>鼠标按键:<ul><li>0 -> 左键</li><li>1 -> 中键</li><li>2 -> 右键</li></ul>键盘按键:<ul><li>-1 -> 任意</li><li>0 -> altKey</li><li>1 -> ctrlKey</li><li>2 -> shiftKey</li></ul>搜索事件:<ul><li>-1 -> 自行选择</li><li>0 -> 主要名称</li><li>1 -> 作者或组织(顺位)</li></ul>是否中文:<ul><li>0 -> 否</li><li>1 -> 是</li></ul>') + '" type="text" placeholder="0,-1,0,0|2,-1,0,1"><input name="ehConfig_searchEventChs" type="hidden">',
       '<label for="ehConfig_checkExist"><input type="checkbox" id="ehConfig_checkExist">显示按钮: 检查本地是否存在 (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/checkExistSever/index.js" target="_blank">checkExistSever</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及下载<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label>',
-      '检查本地是否存在: <label for="ehConfig_checkExistAtStart"><input type="checkbox" id="ehConfig_checkExistAtStart">页面载入后检查一次</label>; <label for="ehConfig_checkExistName2" title="去除集会号/作者/原作名/翻译组织/语言等"><input type="checkbox" id="ehConfig_checkExistName2">只搜索主要名称</label>',
+      '检查本地是否存在: <label for="ehConfig_checkExistAtStart"><input type="checkbox" id="ehConfig_checkExistAtStart">页面载入后检查一次</label>; <label for="ehConfig_checkExistName2" title="去除集会号/作者/原作名/翻译组织/语言等"><input type="checkbox" id="ehConfig_checkExistName2">只搜索主要名称</label>; 本地服务器: <input name="ehConfig_checkExistSever" type="text" placeholder="http://127.0.0.1:3000/" min="0">',
       '搜索栏自动完成: 字符数 > <input name="ehConfig_acLength" type="number" placeholder="3" min="0"> 时，显示',
       '搜索栏自动完成-显示项目: <input name="ehConfig_acItem" type="text" placeholder="language,artist,female,male,parody,character,group,misc" title="' + htmlEscape('以<span class="ehHighlight">,</span>分割') + '">',
       '批量下载数: <input name="ehConfig_batch" type="number" placeholder="4" min="1">',
@@ -2087,12 +2099,27 @@ function showConfig () { // 显示设置
 function showTooltip () { // 显示提示
   $('<div class="ehTooltip"></div>').appendTo('body')
   let preEle
+  let animateTimeout
+
+  let animate = () => {
+    let height = $('.ehTooltip')[0].scrollHeight
+    if (height === $('.ehTooltip').height()) return
+    if (animateTimeout) clearTimeout(animateTimeout)
+    animateTimeout = setTimeout(() => {
+      let top = $('.ehTooltip').scrollTop()
+      $('.ehTooltip').scrollTop(top > height ? 0 : top + 30)
+      animate()
+    }, 1000)
+  }
+
   $('body').on('mousemove keydown', function (e) {
     if ((e.target === preEle || $(e.target).parents().filter(preEle).length) && e.type !== 'keydown') return
     let title = $(preEle).attr('raw-title')
     $(preEle).removeAttr('raw-title').attr('title', title)
-    $('.ehTooltip').hide()
+    $('.ehTooltip').hide().scrollTop(0)
+    if (animateTimeout) clearTimeout(animateTimeout)
   })
+
   $('body').on('mouseenter', ':visible[title],:visible[raw-title],:visible[tooltip],[copy]', function (e) {
     preEle = e.target
     let title = $(preEle).attr('tooltip') ? $(preEle).attr('tooltip') + '<hr>' : ''
@@ -2125,6 +2152,8 @@ function showTooltip () { // 显示提示
       top: top,
       left: left
     })
+
+    animate()
   })
 }
 
@@ -2231,12 +2260,12 @@ function task () { // 下载任务
     let task = GM_getValue('task', [])
     if (task.length === 0 && !GM_getValue('tasking')) {
       G.taskInterval = null
-      changeFav('https://exhentai.org/favicon.ico')
+      changeFav('/favicon.ico')
       return
     }
 
     let done = max - task.length
-    changeFav(getProcessImg(done / max * 100, 128))
+    changeFav(getProcessImg((done - 1) / max * 100, 128))
 
     let downloading = GM_getValue('downloading', [])
     if (downloading.length) {
@@ -2477,7 +2506,7 @@ function xhr (url, onload, parm = null, opt = {}) {
     url: url,
     data: parm,
     timeout: opt.timeout || 60 * 1000,
-    responseType: opt.responseType || 'text',
+    responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : null,
     headers: opt.headers || {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
     },
@@ -2500,7 +2529,7 @@ function xhrSync (url, parm = null, opt = {}) {
       url: url,
       data: parm,
       timeout: opt.timeout || 60 * 1000,
-      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : 'text',
+      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : null,
       headers: opt.headers || {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
