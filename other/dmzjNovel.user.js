@@ -2,8 +2,8 @@
 // @name        [dmzj]Novel
 // @description 在动漫之家上看小说
 // @include     http*://xs.dmzj.com/*
-// @version     1.0.1.1542962621582
-// @Date        2018-11-23 16:43:41
+// @version     1.0.3
+// @modified    2019-8-6 13:30:19
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -34,7 +34,9 @@ function addStyle () {
     '.subscribe_num span{color:#f30;}',
     '.cartoon_online_button{height:auto!important;}',
     '.cartoon_online_button>li{overflow:hidden;float:none!important;display:inline-block;}',
+    '.part_collection_bnt[disabled]{color:#808080;}',
     // forRead
+    'h1.title{clear:both;line-height:50px;font-size:39.6px;font-weight:normal;margin:25px -20px;padding:0 20px 10px;border-bottom:1px solid rgba(0,0,0,.25);font-weight:normal;text-transform:none;}',
     '.content img{margin:10px 0;}',
     '.footer>a{margin:0 15px;font-size:larger;text-decoration:none;color:#065488;}',
     // forSearch
@@ -47,7 +49,13 @@ function addStyle () {
 async function forIndex () {
   let id = window.location.href.split('/')[3]
   let info = await xhrSync(`//v3api.dmzj.com/novel/${id}.json`)
-  document.title = info.name
+
+  let bookmark = GM_getValue('bookmark', {})
+  let record = ''
+  if (id in bookmark) {
+    let i = bookmark[id]
+    record = `<div id="last_read_history" class="cartoon_online_history margin_top_10px" style="">上次看到： <a href="/${id}/${i.volumeId}/${i.chapterId}.shtml" target="_blank">${i.volumeName}  ${i.chapterName}</a></div>`
+  }
 
   info = JSON.parse(info.response)
   let html = [
@@ -64,6 +72,7 @@ async function forIndex () {
     `    <div class="photo_part">`,
     `      <div class="h2_title2"><span class="h2_icon h2_icon22"></span><h2>${info.name} 在线小说全集</h2></div>`,
     `    </div>`,
+    `    ${record}`,
     // 插入目录
     `    <ul class="cartoon_online_button margin_top_10px"></ul>`,
     `    <div class="flex-center"><div class="loading" style="width:60px;height:60px;"></div></div>`,
@@ -88,6 +97,8 @@ async function forIndex () {
     `          </div>`,
     `          <div class="part_collection">`,
     `            <p class="subscribe_num"><span id="subscribe_num">${info.subscribe_num}</span>人订阅</p>`,
+    `            <input class="part_collection_bnt subscribe_action" type="button" name="add" value="添加订阅">`,
+    `            <input class="part_collection_bnt subscribe_action" type="button" name="del" value="取消订阅">`,
     `          </div>`,
     `          <div class="part_collection">`,
     `          </div>`,
@@ -108,8 +119,29 @@ async function forIndex () {
     `  </div>`,
     `</div>`
   ].join('')
+
+  document.title = info.name
   $('head').append(`<link rel="stylesheet" type="text/css" href="//manhua.dmzj.com/css/base.css"><link rel="stylesheet" type="text/css" href="//manhua.dmzj.com/css/style2011.css?t=20131210">`)
   $('body').html('<div class="wrap">' + html + '</div>')
+
+  $('.subscribe_action').on({
+    click: async e => {
+      $(e.target).attr('disabled', 'disabled')
+      let cookie = document.cookie.split(/;\s{0,}/).map(i => i.split('='))
+      let my = cookie.filter(i => i[0] === 'my')
+      if (my.length) {
+        let userId = decodeURI(my[0][1]).split('|')[0]
+        let action = e.target.name
+        let res = await xhrSync(`https://interface.dmzj.com/api/subscribe/${action}?callback=callback&sub_id=${id}&uid=${userId}&sub_type=2&_=${Date.parse(new Date()) / 1000}`)
+        res = res.response.match(/^\s+callback\((.*)\)$/)[1]
+        res = JSON.parse(res)
+        window.alert(res.msg)
+      } else {
+        window.alert('请先登陆')
+      }
+      $(e.target).removeAttr('disabled')
+    }
+  })
 
   let volumes = await xhrSync(`//v3api.dmzj.com/novel/chapter/${id}.json`)
   volumes = JSON.parse(volumes.response)
@@ -132,6 +164,7 @@ async function forIndex () {
 async function forRead () {
   let [, id, volumeId, chapterId] = window.location.href.match(/xs.dmzj.com\/(\d+)\/(\d+)\/(\d+).shtml/)
   let content = await xhrSync(`//v3api.dmzj.com/novel/download/${id}_${volumeId}_${chapterId}.txt`)
+
   let html = [
     '<div class="header">',
     '  背景与字体颜色: ',
@@ -157,11 +190,13 @@ async function forRead () {
     '  行宽: ',
     '  <input class="style" type="text" name="width" placeholder="800px">',
     '</div>',
+    `<h1 class="title"></h1>`,
     '<div class="content">',
     content.response.replace(/<br ?\/>/g, '').split(/[\r\n]/).filter(i => i).map(i => `<p>\u3000\u3000${i}</p>`).join(''),
     '</div>',
     '<div class="footer"></div>'
   ].join('')
+
   $('body').html(html)
   $('.content').css({
     'font-size': '18px',
@@ -201,6 +236,11 @@ async function forRead () {
   volumes = [].concat.apply([], volumes)
   let current, index, prev, next
   current = volumes.filter(i => i[0] === volumeId * 1 && i[2] === chapterId * 1)[0]
+
+  let title = current[1] + '  ' + current[3]
+  $('h1.title').text(title)
+  document.title = title
+
   index = volumes.indexOf(current)
   prev = index > 0 ? volumes[index - 1] : null
   prev = prev ? `<a href="/${id}/${prev[0]}/${prev[2]}.shtml" title="${prev[1]} - ${prev[3]}">上一章</a>` : '<a href="#">此为第一章</a>'
@@ -224,6 +264,18 @@ async function forRead () {
       json[id] = chapterId
       xhrSync(`//interface.dmzj.com/api/record/getRe?callback=callback&uid=${userId}&type=3&st=novel&json=${encodeURIComponent(json)}`)
     }
+
+    let bookmark = GM_getValue('bookmark', {})
+    console.log(current)
+    bookmark[id] = {
+      time: Date.parse(new Date()) / 1000,
+      name: bookmark[id].name,
+      volumeId: current[0],
+      volumeName: current[1],
+      chapterId: current[2],
+      chapterName: current[3]
+    }
+    GM_setValue('bookmark', bookmark)
   })
 }
 
@@ -252,10 +304,12 @@ async function forRecommend () {
     }
     html += '</div>'
   }
+  document.title = '推荐'
   $('body').html(html)
 }
 
 async function forUpdate () {
+  document.title = '最近更新'
   $('body').html(`<div class="result flex-row" style="flex-wrap:wrap;"></div><div class="page"></div>`)
   let { page } = formatSearch(window.location.search)
   await updateResult(page)
@@ -299,6 +353,7 @@ async function forUpdate () {
 }
 
 async function forSearch () {
+  document.title = '搜索'
   $('body').html(`<div class="flex-column-center"><div class="flex-row"><input class="search" type="keyword" placeholder="输入关键词搜索" style="margin: 0 10px;"><input class="apply" type="button" value="搜索"></div><div><div class="fuzzy"></div></div></div><div class="result flex-row" style="flex-wrap:wrap;"></div><div class="page"></div>`)
   $('.search').on({
     keyup: e => {
@@ -410,10 +465,41 @@ function formatSearch (text) {
   return obj
 }
 
+async function updateBookmark () {
+  let now = new Date().getTime()
+  let last = GM_getValue('update', 0)
+  if (now - last < 60 * 60 * 1000) return
+  let userId = $.cookie('my').split('|')[0]
+  if (!userId) return
+  let res = await xhrSync(`//interface.dmzj.com/api/getReInfo/novel/${userId}/0`)
+  try {
+    let bookmark = JSON.parse(res.response)
+    console.log(bookmark)
+    let bookmarkLocal = GM_getValue('bookmark', {})
+    for (let i of bookmark) {
+      if (!(i.lnovel_id in bookmarkLocal) || i.viewing_time > bookmarkLocal[i.lnovel_id].time) { // 保留网上的记录
+        bookmarkLocal[i.lnovel_id] = {
+          time: i.viewing_time,
+          name: i.novel_name,
+          volumeId: i.volume_id,
+          volumeName: i.volume_name,
+          chapterId: i.chapter_id,
+          chapterName: i.chapter_name
+        }
+      }
+    }
+    GM_setValue('bookmark', bookmarkLocal)
+    GM_setValue('update', now)
+    window.location.reload()
+  } catch (error) {}
+}
+
 (async function () {
   let html = $('body').html()
   $('body').html('<div class="loading" style="width:120px;height:120px;"></div>').addClass('flex-column-center')
   addStyle()
+
+  await updateBookmark()
   if (window.location.href.match(/xs.dmzj.com\/\d+\/index.shtml/)) {
     await forIndex()
   } else if (window.location.href.match(/xs.dmzj.com\/\d+\/\d+\/\d+.shtml/)) {
@@ -427,6 +513,7 @@ function formatSearch (text) {
   } else {
     $('body').html(html)
   }
+
   let htmlNav = [
     '<div class="nav"><ul class="flex-row">',
     '<li><a href="/recommend.shtml" target="_blank">推荐</a></li>',
