@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name        []emptyName
 // @namespace   https://github.com/dodying/UserJs
-// @version     1.0
+// @version     1.1
 // @grant       GM_registerMenuCommand
 // @grant       GM_setValue
 // @grant       GM_getValue
-// @grant       @noframes
+// @noframes
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
