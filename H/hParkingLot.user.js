@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [H]ParkingLot
-// @version     1.11.1
+// @version     1.11.169
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -17,14 +17,15 @@
 //
 // @connect     *
 //
-// @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js
 //
 // 工具栏
 // @resource add https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519691-199_CircledPlus-128.png
 // @resource del https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/trash-128.png
 // @resource import https://cdn1.iconfinder.com/data/icons/design-2d-cad-solid-set-2/60/079-Import-128.png
 // @resource table https://cdn2.iconfinder.com/data/icons/freecns-cumulus/16/519904-098_Spreadsheet-128.png
+// @resource copy https://cdn3.iconfinder.com/data/icons/text-icons-1/512/BT_copy-128.png
 // @resource restart https://cdn2.iconfinder.com/data/icons/social-messaging-productivity-1/128/power-128.png
 // 标记
 // @resource mark0 https://cdn2.iconfinder.com/data/icons/lightly-icons/24/time-96.png
@@ -41,106 +42,115 @@
 // @resource downloading https://cdn4.iconfinder.com/data/icons/miu/24/circle-arrow_down-download-glyph-128.png
 //
 // 种子站点
-// @include     https://btdb.to/*
-// @include     https://sukebei.nyaa.si/*
-// @include     https://torrentz2.eu/*
-// @include     https://btso.pw/*
+// @include     *://sukebei.nyaa.si/*
+// @include     *://torrentz2.eu/*
+// @include     *://btsow.pw/*
 // 网盘
-// include     http://115.com/*
-// include     http://115.com/?tab=offline&mode=wangpan
+// include     *://115.com/*
+// include     *://115.com/?tab=offline&mode=wangpan
 // 正规站点
-// @include     http://www.dmm.co.jp/*
-// @include     http://www.mgstage.com/*
-// @include     http://www.tokyo-hot.com/*
-// @include     http://www.caribbeancom.com/*
-// @include     http://www.1pondo.tv/*
-// @include     http://www.heyzo.com/*
-// @include     http://cn.10musume.com/*
+// @include     *://www.dmm.co.jp/*
+// @include     *://www.mgstage.com/*
+// @include     *://www.tokyo-hot.com/*
+// @include     *://*.caribbeancom.com/*
+// @include     *://www.1pondo.tv/*
+// @include     *://www.heyzo.com/*
+// @include     *://cn.10musume.com/*
 // JAVLibrary
-// @include     http://www.javlibrary.com/*
-// @include     https://www.javbus.com/*
-// @include     https://javfree.me/*
-// @include     http://javdownloader.info/*
-// @include     http://javpop.com/*
-// @include     https://javpee.com/*
-// @include     https://javhip.com/*
-// @include     https://www.inoreader.com/*
+// @include     *://www.javlibrary.com/*
+// @include     *://www.javbus.*/*
+// @include     *://javfree.me/*
+// @include     *://javdownloader.info/*
+// @include     *://javpop.com/*
+
+// @include     *://avmoo.com/*
+// @include     *://javzoo.com/*
+
+// @include     *://avsox.com/*
+// @include     *://avme.pw/*
+
+// @include     *://avmemo.com/*
+// @include     *://avxo.club/*
+
+// @include     *://www.inoreader.com/*
 // 在线观看
-// @include     http://avpapa.co/*
-// @include     http://av99.us/*
-// @include     http://bejav.net/*
-// @include     http://hpjav.com/*
-// @include     http://www.av539.com/*
+// @include     *://avpapa.co/*
+// @include     *://av99.us/*
+// @include     *://bejav.net/*
+// @include     *://hpjav.tv/*
+// @include     *://www.av539.com/*
 // @run-at      document-end
 // ==/UserScript==
-(function ($) {
-  var linkLib = { // 待续-插入位置
+(async function ($) {
+  const $$ = {}
+  $$.siteLib = [
     /*
-      'example.com': { //名称, 随意
-        on: 布尔，是否开启,
-        online: 布尔，是否在线播放,
-        check: 选择器-验证是否该网站,
-        name: 标识,
-        search: 网站，搜索地址，搜索字样用{searchTerms}代替,
-        text: 选择器-要标记的文本,
-        img: 选择器-要标记的图片,
-        time: 选择器-发布日期,
-        code: 选择器-番号/函数-返回值为番号,
-        codeManual: 布尔，是否手动获取番号,
-        after: 选择器，搜索结果要插入的位置,
-        manual: 布尔，是否要按键后在启用脚本,
-        extra: 函数，init时执行
-      },
+    { //名称, 随意
+      filter: string or func
+      on: 布尔，是否开启
+      online: 布尔，是否在线播放
+      check: 选择器-验证是否该网站
+      name: 标识
+      search: 网站，搜索地址，搜索字样用{searchTerms}代替
+      text: 选择器-要标记的文本
+      img: 选择器-要标记的图片
+      time: 选择器-发布日期
+      code: 选择器-番号/函数-返回值为番号
+      codeManual: 布尔，是否手动获取番号
+      after: 选择器，搜索结果要插入的位置
+      manual: 布尔，是否要按键后在启用脚本
+      extra: func, init时执行
+      info: object of selector or func, 要复制的信息
+    },
     */
     // 种子站点
-    'btdb.to': {
-      on: true,
-      check: '[name="author"][content="btdb.to"]',
-      name: 'BTDB',
-      search: 'https://btdb.to/q/{searchTerms}/?sort=popular',
-      text: 'h1.torrent-name,.file-name,.item-title>a',
-      code: '#search-input'
-    },
-    'sukebei.nyaa.si': {
-      on: true,
-      check: '[property="og:site_name"][content="Sukebei"]',
+    { // Nyaa Sukebei
       name: 'Sukebei',
+      on: true,
+      filter: 'sukebei.nyaa.si',
+      check: '[property="og:site_name"][content="Sukebei"]',
       search: 'https://sukebei.nyaa.si/?q={searchTerms}',
       text: 'td[colspan="2"]>a',
       code: '.search-bar'
     },
-    'torrentz2.eu': {
-      on: true,
-      check: '[title="Torrents Search"]',
+    { // Torrentz2
       name: 'Torrentz2',
+      on: true,
+      filter: 'torrentz2.eu',
+      check: '[title="Torrents Search"]',
       search: 'https://torrentz2.eu/search?f={searchTerms}',
       text: '.results>dl>dt>a,.files .t>ul>li',
       code: '#thesearchbox'
     },
-    'btso.pw': {
-      on: false,
-      check: '[name="author"][content="BTSOW"]',
+    { // BTSOW
       name: 'BTSOW',
-      search: 'http://btso.pw/search/{searchTerms}/',
+      on: false,
+      filter: 'btsow.pw',
+      check: '[name="author"][content="BTSOW"]',
+      search: 'http://btsow.pw/search/{searchTerms}/',
       text: 'h3,.file',
       code: '.form-control:visible'
     },
+
     // 网盘
-    '115.com': {
-      on: false,
-      check: '[itemprop="name"][content="115，一生相伴"]',
+    { // 115
       name: '115网盘',
+      on: false,
+      filter: '115.com',
+      check: '[itemprop="name"][content="115，一生相伴"]',
       search: 'http://115.com/?url=%2F%3Faid%3D-1%26search_value%3D{searchTerms}%26ct%3Dfile%26ac%3Dsearch%26is_wl_tpl%3D1&mode=wangpan',
       text: '.file-name>em>a',
       code: () => window.prompt('请输入番号', $('.file-path>a:eq(-1)').text()),
       codeManual: true,
       manual: true
     },
+
     // 正规站点
-    'www.dmm.co.jp': {
-      on: true,
-      check: '[name="application-name"][content="DMM.R18"]',
+    { // DMM
       name: 'DMM',
+      on: true,
+      filter: 'www.dmm.co.jp',
+      check: '[name="application-name"][content="DMM.R18"]',
       search: 'http://www.dmm.co.jp/search/=/searchstr={searchTerms}',
       text: '.txt,table.mg-b20 td:not(:has(a))',
       img: '.img img,.tdmm,.crs_full>img',
@@ -155,7 +165,7 @@
       codeManual: true,
       extra () {
         if (!$('#sample-image-block>a>img').length) return
-        let previewSrc = linkLib['www.dmm.co.jp']['previewSrc']
+        let previewSrc = $$.siteLib.filter(i => i.name === 'DMM')[0]['previewSrc']
         $(document).on({
           click () {
             $('#sample-image-block>a>img').each((i, _) => {
@@ -181,10 +191,11 @@
         }
       }
     },
-    'www.mgstage.com': {
-      on: false,
-      check: '[href="https://www.mgstage.com/"][rel="canonical"]',
+    { // mgstage
       name: 'mgstage',
+      on: false,
+      filter: 'www.mgstage.com',
+      check: '[href="https://www.mgstage.com/"][rel="canonical"]',
       search: 'https://www.google.com/search?q=site%3Amgstage.com+{searchTerms}',
       text: '.detail_data tr:contains("品番")>td,.detail_txt>li:contains("品番")',
       img: '.detail_data img,.sample_image img,.push_title_list img',
@@ -201,24 +212,59 @@
         })
       }
     },
-    'www.tokyo-hot.com': {
-      on: false,
+    { // Tokyo-Hot
       name: 'Tokyo-Hot',
+      on: false,
+      filter: 'www.tokyo-hot.com',
       search: 'http://www.tokyo-hot.com/product/?q={searchTerms}',
       text: '.actor,.info:eq(1)>dd:eq(0)',
       img: '.rm>img,.popular img,.free img,.ranking img',
       time: '.info:eq(1)>dd:eq(0)',
       code: '.info:eq(1)>dd:eq(2)'
     },
-    'www.caribbeancom.com': {
-      on: false,
+    { // caribbeancom.com
       name: '加勒比',
+      on: false,
+      filter: 'caribbeancom.com',
       search: 'http://www.caribbeancom.com/moviepages/{searchTerms}/index.html',
       img: 'img[itemprop=thumbnail]',
       time: 'dd[itemprop=uploadDate]',
-      code: () => window.location.pathname.match(/[\d-]+/)[0]
+      code: () => window.location.pathname.match(/[\d-]+/)[0],
+      extra: () => {
+        if (window.location.hostname !== 'www.caribbeancom.com') window.location.href = `https://www.caribbeancom.com/moviepages/${getCode()}/index.html`
+      },
+      info: [
+        '.heading>h1',
+        '.spec-title:contains("出演")+span>a',
+        '.spec-title:contains("タグ")+span>a',
+        function () {
+          var time = $('.spec-title:contains("再生時間")+span').text().trim()
+          time = new Date('1970-01-01 ' + time + ' GMT+000').getTime()
+          return Math.round(time / 1000 / 60)
+        }
+      ]
     },
-    'www.1pondo.tv': {
+    { // caribbeancompr.com ?
+      name: '加勒比-会员',
+      on: false,
+      filter: 'caribbeancompr.com',
+      search: 'http://www.caribbeancompr.com/moviepages/{searchTerms}/index.html',
+      img: 'img[itemprop=thumbnail]',
+      time: 'dd[itemprop=uploadDate]',
+      code: () => window.location.pathname.match(/[\d-]+/)[0],
+      info: [
+        '.video-detail>h1',
+        '.movie-info>dl:contains("出演") a,.movie-info>dl:contains("演员") a',
+        '.movie-info-cat>dd>a',
+        function () {
+          var time = $('.movie-info>dl:contains("再生時間")>dd,.movie-info>dl:contains("片长")>dd').text()
+          time = new Date('1970-01-01 ' + time + ' GMT+000').getTime()
+          return Math.round(time / 1000 / 60)
+        }
+      ]
+    },
+    { // 1pondo.tv
+      filter: 'www.1pondo.tv',
       on: false,
       name: '一本道',
       search: 'http://www.1pondo.tv/movies/{searchTerms}/',
@@ -227,7 +273,8 @@
       code: () => window.location.pathname.match(/[\d_]+/)[0],
       manual: true
     },
-    'www.heyzo.com': {
+    { // heyzo.com
+      filter: 'www.heyzo.com',
       on: false,
       name: 'HEYZO',
       search: 'http://www.heyzo.com/search/{searchTerms}/1.html?sort=pop',
@@ -235,7 +282,8 @@
       time: '.dataInfo:eq(0)',
       code: () => 'HEYZO-' + window.location.pathname.match(/\d+/)[0]
     },
-    'cn.10musume.com': {
+    { // 10musume.com
+      filter: 'cn.10musume.com',
       on: false,
       name: '10musume.com',
       search: 'http://cn.10musume.com/cn/moviepages/{searchTerms}/index.html',
@@ -243,8 +291,30 @@
       time: '#movie-table1:eq(5)',
       code: () => window.location.pathname.match(/[\d_]+/)[0]
     },
-    // JAVLibrary
-    'www.javlibrary.com': {
+
+    // 第三方
+    { // JavBus
+      filter: () => $('.footer>.container-fluid:contains("Copyright © 2013 JavBus. All Rights Reserved")').length,
+      on: true,
+      name: 'JavBus',
+      search: 'https://www.javbus.com/{searchTerms}',
+      text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,date',
+      time: '.info>p:eq(1)',
+      code: '.info>p>span:eq(1)',
+      after: '.row.movie',
+      extra () {
+        if ($('#sample-waterfall').length) $('#sample-waterfall').html($('.sample-box').toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`))
+      },
+      info: [
+        'h3',
+        '.star-show~p:eq(0)>.genre>a',
+        '.header:contains(類別)~p:eq(0)>.genre>a',
+        '',
+        '.info>p:eq(2)'
+      ]
+    },
+    { // JAVLibrary
+      filter: 'javlibrary.com',
       on: true,
       name: 'JAVLibrary',
       search: 'http://www.javlibrary.com/cn/vl_searchbyid.php?keyword={searchTerms}',
@@ -254,7 +324,7 @@
       code: '#video_id .text',
       after: '#video_favorite_edit',
       extra () {
-        let previewSrc = linkLib['www.dmm.co.jp']['previewSrc']
+        let previewSrc = $$.siteLib.filter(i => i.name === 'DMM')[0]['previewSrc']
         if (!$('#video_jacket_img').length) return
         if ($('.previewthumbs').length) {
           $('.previewthumbs>img').each((i, _) => {
@@ -269,19 +339,19 @@
           $('#video_jacket').one('click', e => {
             e.preventDefault()
             /*
-            GM_xmlhttpRequest({
-              method: 'GET',
-              url: url,
-              timeout: 30 * 1000,
-              onload(res) {
-                let data = res.response;
-                if ($('#sample-image-block>a>img', data).length) {
-                  let img = $('#sample-image-block>a>img', data).toArray().map(i => `<img src="${previewSrc(i.src)}" style="margin:2px 0;">`).join('');
-                  $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia');
+              GM_xmlhttpRequest({
+                method: 'GET',
+                url: url,
+                timeout: 30 * 1000,
+                onload(res) {
+                  let data = res.response;
+                  if ($('#sample-image-block>a>img', data).length) {
+                    let img = $('#sample-image-block>a>img', data).toArray().map(i => `<img src="${previewSrc(i.src)}" style="margin:2px 0;">`).join('');
+                    $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia');
+                  }
                 }
-              }
-            });
-            */
+              });
+              */
             GM_xmlhttpRequest({
               method: 'GET',
               url: 'https://www.javbus.com/' + $('#video_id .text').text(),
@@ -296,40 +366,38 @@
             })
           })
         }
-      }
+      },
+      info: [
+        '.post-title',
+        'span.star>a',
+        '.genre>a',
+        'span.score',
+        '#video_length .text'
+      ]
     },
-    'www.javbus.com': {
-      on: true,
-      name: 'JavBus',
-      search: 'https://www.javbus.com/{searchTerms}',
-      text: 'h3,.info>p>span:eq(1),#magnet-table>tr>td:nth-child(1)>a,date',
-      time: '.info>p:eq(1)',
-      code: '.info>p>span:eq(1)',
-      after: '.row.movie',
-      extra () {
-        if ($('#sample-waterfall').length) $('#sample-waterfall').html($('.sample-box').toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`))
-      }
-    },
-    'javfree.me': {
-      on: true,
+    { // javfree.me
+      filter: 'javfree.me',
+      on: false,
       name: 'Free JAV Share',
       search: 'https://javfree.me/?s={searchTerms}',
       text: 'h1.entry-title,h2.entry-title>a,.entry-wrap>a',
       img: '.entry-content img,.thumbnail-wrap>img',
       time: '.post-author',
-      code: () => $('h1.entry-title').text().replace('[HD]', '').match(/\[(.*?)\]/)[1],
+      code: () => window.location.href.split('/')[4],
       after: 'article'
     },
-    'javdownloader.info': {
-      on: true,
+    { // javdownloader.info
+      filter: 'javdownloader.info',
+      on: false,
       name: 'javdownloader',
-      search: 'http://javdownloader.info/?s={searchTerms}',
+      search: 'https://javdownloader.info/?s={searchTerms}',
       text: '.title,.wp_rp_title,#nav-below a,.widget_recent_entries a',
       img: '.entry img',
       code: () => $('.title').text().replace('[HD]', '').match(/\[(.*?)\]/)[1],
       after: '.post-info-bottom'
     },
-    'javpop.com': {
+    { // javpop.com
+      filter: 'javpop.com',
       on: false,
       name: 'JavPOP',
       search: 'http://javpop.com/index.php?s={searchTerms}',
@@ -338,44 +406,61 @@
       code: () => $('h1').text().match(/\[(.*?)\]/)[1],
       after: '.box-b>h1'
     },
-    'javpee.com': {
-      on: false,
-      name: 'AVSOX',
-      search: 'https://javpee.com/cn/search/{searchTerms}',
-      text: 'date,h3',
-      img: '.photo-frame>img,.bigImage>img',
-      time: '.info>p:eq(1)',
-      code: '.info>p>span:eq(1)',
-      after: '.row.movie'
-    },
-    'javhip.com': {
+    { // AVMOO
+      filter: () => document.title.match('AVMOO'),
       on: false,
       name: 'AVMOO',
-      search: 'https://javhip.com/cn/search/{searchTerms}',
+      search: 'https://avmoo.com/cn/search/{searchTerms}',
       text: 'date,h3',
       img: '.photo-frame>img,.bigImage>img',
       time: '.info>p:eq(1)',
       code: '.info>p>span:eq(1)',
       after: '.row.movie'
     },
-    'www.inoreader.com': {
+    { // AVSOX
+      filter: () => document.title.match('AVSOX'),
+      on: false,
+      name: 'AVSOX',
+      search: 'https://avsox.com/cn/search/{searchTerms}',
+      text: 'date,h3',
+      img: '.photo-frame>img,.bigImage>img',
+      time: '.info>p:eq(1)',
+      code: '.info>p>span:eq(1)',
+      after: '.row.movie'
+    },
+    { // AVMEMO
+      filter: () => document.title.match('AVMEMO'),
+      on: false,
+      name: 'AVMEMO',
+      search: 'https://avmemo.com/search/{searchTerms}',
+      text: 'date,h3',
+      img: '.photo-frame>img,.bigImage>img',
+      time: '.info>p:eq(1)',
+      code: '.info>p>span:eq(1)',
+      after: '.row.movie'
+    },
+    { // inoreader
+      filter: 'www.inoreader.com',
       on: false,
       name: 'Inoreader',
       search: 'https://www.inoreader.com/search/{searchTerms}',
       text: '.article_title_link,.article_header_title'
     },
+
     // 在线观看
-    'avpapa.co': {
-      on: false,
+    { // Avpapa
+      filter: 'avpapa.co',
+      on: true,
       online: true,
       name: 'Avpapa',
-      search: 'http://avpapa.co/search?q={searchTerms}',
+      search: 'https://avpapa.co/search?q={searchTerms}',
       text: '.tit,h4',
       img: '.thumbs>a>img,#click_to_show>img',
       code: () => $('h4').text().match(/^\[(.*?)\]/)[1]
     },
-    'av99.us': {
-      on: false,
+    { // av99.us
+      filter: 'av99.us',
+      on: true,
       online: true,
       name: 'AV99免費A片',
       search: 'http://tw.search.yahoo.com/search?p={searchTerms}&vs=av99.us',
@@ -384,41 +469,48 @@
       time: '.viewimfor>li:eq(1)',
       code: () => $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/)[1]
     },
-    'bejav.net': {
-      on: false,
+    { // BeJav.Com
+      filter: () => $('meta[name=description]').attr('content').match('BEJAV'),
+      on: true,
       online: true,
-      name: 'BeJav.Me',
-      search: 'http://bejav.net/search/{searchTerms}/',
+      name: 'BeJav.Com',
+      search: 'https://bejav.com/search/{searchTerms}/',
       text: '.name>a,.breadcrumb_last,.body>ul>li>a',
       img: '.img-responsive,.thumbnail>img,.body>ul>li>img',
       code: () => window.prompt('请输入番号', $('.breadcrumb_last').text()),
       codeManual: true
     },
-    'hpjav.com': {
-      on: false,
+    { // HPJAV
+      filter: () => document.title.match('HPJAV'),
+      on: true,
       online: true,
       name: 'HPJAV',
-      search: 'http://hpjav.com/tw/?s={searchTerms}',
+      search: 'https://hpjav.tv/tw/?s={searchTerms}',
       text: '.entry-title a,h1,.current',
       code: () => window.prompt('请输入番号', $('.current').text().match(/(.*?) (.*?)/)[1]),
       codeManual: true
     }
-  }
+  ]
+  $$._siteFavorite = $$.siteLib.filter(i => i.name === 'JAVLibrary')[0]
+
   var magnetLib = {
-    'btdb.to': {
-      searchPage: 'https://btdb.to/q/{q}/',
-      title: 'h2.item-title>a',
-      magnet: '.magnet',
-      size: '.item-meta-info>span:nth-child(2)',
-      time: '.item-meta-info>span:nth-child(4)',
-      sort: '.toolbar',
+    'sukebei.nyaa.si': {
+      searchPage: 'https://sukebei.nyaa.si/?q={q}',
+      title: '.torrent-list tr>td:nth-child(2)>a',
+      magnet: '.torrent-list tr>td:nth-child(3)>a[href^="magnet"]',
+      size: '.torrent-list tr>td:nth-child(4)',
+      time: '.torrent-list tr>td:nth-child(5)',
       page: '.pagination',
+      sort: data => $('.table-responsive thead>tr>th>a', data).toArray().map(i => i.outerHTML.replace('</a>', $(i).attr('href').match(/s=(.*?)&/)[1] + '</a>')).join(' / '),
       more: {
-        Popularity: '.item-meta-info>span:nth-child(5)'
+        Torrent: (data, lib) => $('.torrent-list tr>td:nth-child(3)>a:nth-child(1)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'), lib.searchPage).href}" target="blank">Torrent</a>`),
+        S: '.torrent-list tr>td:nth-child(6)',
+        L: '.torrent-list tr>td:nth-child(7)',
+        D: '.torrent-list tr>td:nth-child(8)'
       }
     },
-    'savebt.net': {
-      searchPage: 'http://savebt.net/q/{q}/0/0/1.html',
+    'savebts.org': {
+      searchPage: 'http://savebts.org/q/{q}/0/0/1.html',
       title: '.item>dt>a',
       magnet: '.item>.attr>span:nth-child(6)>a',
       size: '.item>.attr>span:nth-child(2)>b',
@@ -445,7 +537,6 @@
         LE: '.vertTh+td+td+td+td+td+td'
       }
     },
-    /*
     'sukebei.pantsu.cat': {
       searchPage: 'https://sukebei.pantsu.cat/search?q={q}',
       title: '.torrent-info>.tr-name>a',
@@ -461,22 +552,6 @@
         D: '.torrent-info>.tr-dl'
       }
     },
-    */
-    'sukebei.nyaa.si': {
-      searchPage: 'https://sukebei.nyaa.si/?q={q}',
-      title: '.torrent-list tr>td:nth-child(2)>a',
-      magnet: '.torrent-list tr>td:nth-child(3)>a[href^="magnet"]',
-      size: '.torrent-list tr>td:nth-child(4)',
-      time: '.torrent-list tr>td:nth-child(5)',
-      page: '.pagination',
-      sort: data => $('.table-responsive thead>tr>th>a', data).toArray().map(i => i.outerHTML.replace('</a>', $(i).attr('href').match(/s=(.*?)&/)[1] + '</a>')).join(' / '),
-      more: {
-        Torrent: (data, lib) => $('.torrent-list tr>td:nth-child(3)>a:nth-child(1)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'), lib.searchPage).href}" target="blank">Torrent</a>`),
-        S: '.torrent-list tr>td:nth-child(6)',
-        L: '.torrent-list tr>td:nth-child(7)',
-        D: '.torrent-list tr>td:nth-child(8)'
-      }
-    },
     'torrentz2.eu': {
       searchPage: 'https://torrentz2.eu/search?f={q}',
       title: '.results>dl>dt>a',
@@ -490,8 +565,8 @@
         rating: '.results>dl>dd>span:nth-child(5)'
       }
     },
-    'btso.pw': {
-      searchPage: 'https://btso.pw/search/{q}/',
+    'btsow.pw': {
+      searchPage: 'https://btsow.pw/search/{q}/',
       title: '.data-list>.row>a',
       magnet: data => $('.data-list>.row>a', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.href.match(/hash\/(.*)/)[1].toUpperCase()),
       size: '.size',
@@ -635,10 +710,11 @@
   }
   var m2tLib = [
     'http://btcache.me/torrent/{hash}',
-    'http://storetorrents.com/hash/{hash}',
-    'https://itorrents.org/torrent/{hash}.torrent',
+    'http://storetorrents.me/hash/{hash}',
+    'https://itorrents.org/torrent/{hash}.torrent?title={name}',
     'https://torrage.info/torrent.php?h={hash}',
-    'https://www.seedpeer.eu/torrent/{hashLow}'
+    'https://www.seedpeer.eu/torrent/{hashLow}',
+    'http://www.torrent.org.cn/home/convert/magnet2torrent.html?hash=={hashLow}'
   ]
   var markLib = [
     { // 0
@@ -662,7 +738,16 @@
     }
   ]
 
-  if (linkLib[window.location.host].manual) {
+  for (let _site of $$.siteLib) {
+    let filtered = typeof _site.filter === 'function' ? (await _site.filter()) : window.location.href.match(_site.filter)
+    if (filtered) {
+      $$._site = _site
+      break
+    }
+  }
+  if (!$$._site) return
+
+  if ($$._site.manual) {
     $(window).on('keydown', function (e) {
       if (e.keyCode === 65 && e.shiftKey) { // Shift+A
         _init()
@@ -672,12 +757,15 @@
   } else {
     _init()
   }
+
+  console.log($$)
+
   // if (location.href === 'http://115.com/?tab=offline&mode=wangpan') downloadIn115();
 
   function _init () {
     init()
     getCode(true)
-    if (linkLib[window.location.host]['extra']) linkLib[window.location.host]['extra']()
+    if ($$._site.extra && typeof $$._site.extra === 'function') $$._site.extra()
     markAdded()
   }
 
@@ -776,9 +864,10 @@
     })
     $('<div class="links"></div>').html(function () {
       var _html = ''
-      for (var i in linkLib) {
-        if (!linkLib[i].on || i === window.location.host) continue
-        _html += `<img${linkLib[i].online ? ' class="avOnline"' : ''} src="//${i}/favicon.ico" url="${linkLib[i].search}" title="${linkLib[i].name}" onerror="this.src='//www.google.com/s2/favicons?domain=${i}';this.onerror=null;">`
+      for (let site of $$.siteLib) {
+        if (!site.on || site === $$._site) continue
+        let hostname = new URL(site.search).hostname
+        _html += `<img${site.online ? ' class="avOnline"' : ''} src="//${hostname}/favicon.ico" url="${site.search}" title="${site.name}" onerror="this.src='//www.google.com/s2/favicons?domain=${hostname}';this.onerror=null;">`
       }
       return _html
     }).on({
@@ -824,6 +913,29 @@
         showValue(1)
       }
     }).appendTo('.hBanner')
+    $('<div title="复制信息"></div>').html('<img src="' + GM_getResourceURL('copy') + '">').on({
+      click: async () => {
+        if (!$$._site.info) return
+        let code = getCode()
+        let info = [code]
+        for (let i = 0; i < $$._site.info.length; i++) {
+          let value = $$._site.info[i]
+          let result
+          if (typeof value === 'string') {
+            result = $(value).toArray().map(i => i.textContent.trim()).sort().join(', ')
+          } else if (typeof value === 'function') {
+            result = await value()
+          } else {
+            result = ''
+          }
+          result = result.toString()
+          if ([0].includes(i)) result = result.replace(code, '')
+          if ([3, 4].includes(i)) result = result.match(/[\d.]+/) ? result.match(/[\d.]+/)[0] : result
+          info.push(result.replace(code, '').trim())
+        }
+        GM_setClipboard(info.join('\t'))
+      }
+    }).appendTo('.hBanner')
     $('<div title="重启"></div>').html('<img src="' + GM_getResourceURL('restart') + '">').click(function () {
       $('.hBanner').remove()
       undoMarkAdded()
@@ -843,8 +955,8 @@
     $('.hasCode a').remove()
     var lib = GM_getValue('lib', null)
     if (!lib) return
-    if (linkLib[window.location.host].img) {
-      $(linkLib[window.location.host].img).removeAttr('onerror').attr({
+    if ($$._site.img) {
+      $($$._site.img).removeAttr('onerror').attr({
         rawSrc: function () {
           return $(this).attr('src')
         },
@@ -854,7 +966,7 @@
           for (var i in lib) {
             keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi')
             if (keyword.test(_src)) {
-              if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode')
+              if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', $$._siteFavorite.search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode')
               _src = GM_getResourceURL('mark' + lib[i].mark)
               break
             }
@@ -863,15 +975,15 @@
         }
       })
     }
-    if (linkLib[window.location.host].text) {
-      $(linkLib[window.location.host].text).each(function () {
+    if ($$._site.text) {
+      $($$._site.text).each(function () {
         var keyword
         var _html = $(this).html()
         $(this).empty()
         for (var i in lib) {
           keyword = new RegExp(`${i}|${i.replace(/-/g, '')}|${i.replace(/-/g, ' ')}|${i.replace(/ /g, '-')}|${i.replace(/ /g, '')}`, 'gi')
           if (keyword.test(_html)) {
-            if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode')
+            if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', $$._siteFavorite.search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode')
             _html = _html.replace(keyword, '<span class="hMark_' + lib[i].mark + '" title="' + markLib[lib[i].mark].name + '">' + i + '</span>')
           }
         }
@@ -883,14 +995,14 @@
   function undoMarkAdded () {
     var lib = GM_getValue('lib', null)
     if (!lib) return
-    if (linkLib[window.location.host].img) {
-      $(linkLib[window.location.host].img).attr({
+    if ($$._site.img) {
+      $($$._site.img).attr({
         src: function () {
           return $(this).attr('rawSrc')
         }
       }).removeAttr('rawSrc')
     }
-    $(linkLib[window.location.host].text).html(function () {
+    $($$._site.text).html(function () {
       return $(this).text()
     })
   }
@@ -908,7 +1020,7 @@
     lib[code] = {
       mark: mark
     }
-    if (mark === 0 || mark === 6) lib[code].time = $(linkLib[window.location.host].time).text()
+    if (mark === 0 || mark === 6) lib[code].time = $($$._site.time).text()
     GM_setValue('lib', lib)
     undoMarkAdded()
     markAdded()
@@ -954,14 +1066,14 @@
     let _html = '<table class="tablesorter"><thead><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>'
     let num = 1
     for (let i in lib) {
-      _html += `<tr><td>${num++}</td><td>${lib[i].mark}</td><td><img class="hMarkImg_${lib[i].mark}">${markLib[lib[i].mark].name}</td><td><a href="${linkLib['www.javlibrary.com'].search.replace('{searchTerms}', i)}"target="_blank">${i}</a></td><td>${lib[i].time || ''}</td></tr>`
+      _html += `<tr><td>${num++}</td><td>${lib[i].mark}</td><td><img class="hMarkImg_${lib[i].mark}">${markLib[lib[i].mark].name}</td><td><a href="${$$._siteFavorite.search.replace('{searchTerms}', i)}"target="_blank">${i}</a></td><td>${lib[i].time || ''}</td></tr>`
     }
     _html += '</tbody></table>'
     if (type === 0) {
       $('<div class="showTable"></div>').html(_html).appendTo('body')
     } else if (type === 1) {
       let markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}').join('')
-      _html = '<html><head><script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script><script src="https://cdn.bootcss.com/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>'
+      _html = '<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>'
       let blob = new window.Blob([_html], {
         type: 'text/html;charset=utf-8'
       })
@@ -972,7 +1084,7 @@
   function getCode (first = undefined) {
     if ($(window).data('code')) return $(window).data('code')
     let code = ''
-    let lib = linkLib[window.location.host]
+    let lib = $$._site
     if (typeof lib.code === 'string') {
       let temp = $(lib.code)
       if (temp.length > 0) code = (temp[0].tagName === 'INPUT') ? temp.val() : temp.text()
@@ -991,7 +1103,7 @@
     var searchPage = typeof lib.searchPage === 'string' ? lib.searchPage.replace('{q}', encodeURIComponent(code)) : lib.searchPage(code)
     var url = page ? new URL(page, searchPage).href : searchPage
     if ($('.hSearch').length === 0) {
-      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${searchUrl}"><select class="hSearchSite">${Object.keys(magnetLib).map(i => `<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter(linkLib[window.location.host].after || 'body>:eq(-1)')
+      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${searchUrl}"><select class="hSearchSite">${Object.keys(magnetLib).map(i => `<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter($$._site.after || 'body>:eq(-1)')
       $('.hSearchSite').val(searchUrl)
       // 排序翻页事件
       $('.hSearch').on('click', '.hSearchSort a,.hSearchPage a', e => {
@@ -1004,7 +1116,11 @@
       // 选择其他站点
       $('.hSearch').on('change', '.hSearchSite', () => {
         GM_setValue('lastSearch', $('.hSearchSite').val())
-        if (typeof $('.hSearch').data('abort') === 'function') $('.hSearch').data('abort')()
+        if (typeof $('.hSearch').data('abort') === 'function') {
+          try {
+            $('.hSearch').data('abort')()
+          } catch (error) {}
+        }
         $('.hSearchSiteImg').attr('src', '//www.google.com/s2/favicons?domain=' + $('.hSearchSite').val())
         $('.hSearch').trigger('destroy')
         getMagnet(getCode(), undefined, $('.hSearchSite').val())
