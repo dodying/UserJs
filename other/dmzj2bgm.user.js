@@ -3,8 +3,8 @@
 // @description 请通过脚本命令来进行授权与数据同步
 // @include     https://i.dmzj.com/record
 // @include     https://i.dmzj.com/record#*
-// @version     1.0.4.1542891536544
-// @Date        2018-11-22 20:58:56
+// @version     1.0.7
+// @modified    2019-8-6 13:30:18
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -162,8 +162,8 @@ async function main () {
     $('.subjectList>div>img').attr('src', i.cover)
     $('.subjectList>div>input.subjectSearch').val(name)
 
-    if (typeSpecific === '漫画' && progress[0].match(/第[\d.]+(话|集)/)) {
-      progress = [parseInt(progress[0].match(/第(0+|)([\d.]+)(话|集)/)[2]).toString()]
+    if (typeSpecific === '漫画' && progress[0].match(/[\d.]+(话|集)/)) {
+      progress = [parseInt(progress[0].match(/(0+|)([\d.]+)(话|集)/)[2]).toString()]
     } else if (typeSpecific === '小说' && progress[1].match(/第[一二三四五六七八九十]+卷/)) {
       let volume = parseZhNumber(progress[1].match(/第([一二三四五六七八九十]+)卷/)[1])
       let chapter = progress[0].match(/第[一二三四五六七八九十]+章/) ? parseZhNumber(progress[0].match(/第([一二三四五六七八九十]+)章/)[1]) : 0

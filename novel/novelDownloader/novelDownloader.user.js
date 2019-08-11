@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.18.1540085464894
-// @Date        2018-10-21 09:31:04
+// @version     1.45.23
+// @modified    2019-8-6 13:30:24
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require     https://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
-// @require     https://cdn.bootcss.com/FileSaver.js/1.3.8/FileSaver.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.0.0/jszip.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
 // @require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
 // @grant       GM_xmlhttpRequest
@@ -239,6 +239,10 @@
 // @include     http://www.xiaoqiangxs.com/*
 // @include     http://18av.mm-cg.com/novel*
 // @include     http://18av.mm-cg.com/serch*
+// @include     http://18av.tv/novel*
+// @include     http://18av.tv/serch*
+// @include     http://18h.tv/novel*
+// @include     http://18h.tv/serch*
 // ==/UserScript==
 /* global tranStr base64 JSZip saveAs */
 var debug = {
@@ -1654,6 +1658,10 @@ function addRule () {
   addCRule('www.xiaoqiangxs.com', 'h2', '#content', 1)
   addIRule('18av.mm-cg.com', '18H', '.label>div', '.novel_leftright>span>a:visible')
   addCRule('18av.mm-cg.com', 'h1', '#novel_content_txtsize')
+  addIRule('18av.tv', '18H', '.label>div', '.novel_leftright>span>a:visible')
+  addCRule('18av.tv', 'h1', '#novel_content_txtsize')
+  addIRule('18h.tv', '18H', '.label>div', '.novel_leftright>span>a:visible')
+  addCRule('18h.tv', 'h1', '#novel_content_txtsize')
   addIRule('www.diyibanzhu.xyz', '第一版主网', '.title', '.dd a')
   addCRule('www.diyibanzhu.xyz', 'h2', '.box_box', 1)
 }

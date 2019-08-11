@@ -3,17 +3,17 @@
 // @name:zh-CN  【nH】下载器-修改自Doying
 // @description  Download manga on nHentai.net
 // @description:zh-CN  相对于原脚本，添加了输入框，可以下载某张图片
-// @version      1.2.0
+// @version      1.2.3
 // @icon         http://i.imgur.com/FAsQ4vZ.png
 // @namespace    https://github.com/dodying/Dodying-UserJs
-// @author       Dodying
+// @author       dodying
 // @author       Zzbaivong
 // @license      MIT
 // @match        http://nhentai.net/g/*
 // @match        https://nhentai.net/g/*
-// @require      https://code.jquery.com/jquery-2.2.4.min.js
-// @require      https://greasyfork.org/scripts/19855-jszip/code/jszip.js?version=126859
-// @require      https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=128198
+// @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
 // @noframes
 // @connect      nhentai.net
 // @run-at       document-idle
@@ -140,7 +140,7 @@ jQuery(function($) {
         window.total = 0;
         window.images = [];
         downloading = true;
-        
+
         $download.attr('href', '#download');
 
         $(window).on('beforeunload', function() {

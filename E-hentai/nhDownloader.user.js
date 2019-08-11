@@ -2,7 +2,7 @@
 // @name        [NH]nhentai Downloader
 // @description
 // @include     https://nhentai.net/g/*
-// @version     0.0.2
+// @version     0.0.4
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -13,9 +13,9 @@
 // @grant       GM_setValue
 // @grant       GM_xmlhttpRequest
 // @connect     i.nhentai.net
-// @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
 // @require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/queue.js
-// @require     https://cdn.bootcss.com/jszip/3.1.5/jszip.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js
 // ==/UserScript==
 (function () {
   'use strict'

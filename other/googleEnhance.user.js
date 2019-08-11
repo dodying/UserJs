@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [google]Enhance
 // @description
-// @version     1.00
+// @version     1.10
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_xmlhttpRequest
@@ -9,7 +9,7 @@
 // @namespace   https://github.com/dodying/
 // @supportURL  https://github.com/dodying//UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
 // @run-at      document-end
 // @include     https://www.google.co.jp/search?*
 // ==/UserScript==

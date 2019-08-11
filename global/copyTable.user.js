@@ -2,15 +2,15 @@
 // @name        copyTable
 // @description copyTable
 // @include     *
-// @version     1.0.1
-// @date        2019-1-26 15:44:48
+// @version     1.0.3
+// @modified    2019-8-6 13:30:18
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
 // @grant       GM_setClipboard
-// require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
+// require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 (function () {

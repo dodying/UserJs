@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name        [NH]Enhance
-// @version     1.0.0
+// @version     1.0.3
+// @modified    2019-8-6 13:30:21
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -13,7 +14,7 @@
 // @grant       GM_getResourceText
 // @grant       GM_xmlhttpRequest
 // @connect     *
-// @require     https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
 // @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1522933172772
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)
@@ -1103,7 +1104,7 @@ function xhrSync (url, parm = null, opt = {}) {
       url: url,
       data: parm,
       timeout: opt.timeout || 60 * 1000,
-      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : 'text',
+      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : null,
       headers: opt.headers || {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },

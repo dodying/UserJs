@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        []Meta
 // @description
-// @version     1.00
+// @version     1.10
 // @grant       GM_xmlhttpRequest
 // @grant       GM_registerMenuCommand
 // @grant       GM_setValue
@@ -11,7 +11,7 @@
 // @supportURL  https://github.com/dodying//UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
-// @require     https://raw.githubusercontent.com/wrangr/psl/master/dist/psl.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/psl/1.1.31/psl.min.js
 // @noframes
 // @include     *
 // @connect     *

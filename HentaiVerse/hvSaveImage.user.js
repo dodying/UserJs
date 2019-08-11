@@ -3,9 +3,9 @@
 // @author      dodying
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
-// @version     1.00
+// @version     1.10
 // @grant       GM_xmlhttpRequest
-// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
+// @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
 // @run-at      document-idle
 // ==/UserScript==
 (function () {

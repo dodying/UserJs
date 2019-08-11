@@ -4,17 +4,17 @@
 // @namespace    https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version      0.0.0
-// @author       Dodying
+// @version      0.0.3
+// @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at       document-end
 // @noframes
 //
-// @require      https://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
-// @require      https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
-// @require      https://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.0.0/jszip.min.js
 // @require      https://greasyfork.org/scripts/21541/code/chs2cht.js?version=137286
 //
 // @grant        unsafeWindow

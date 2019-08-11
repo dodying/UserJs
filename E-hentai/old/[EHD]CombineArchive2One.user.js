@@ -9,9 +9,9 @@
 // @description:zh-CN 合并下载自EHD的压缩包
 // @include     http*://e-hentai.org/g/*
 // @include     http*://exhentai.org/g/*
-// @version     1.00b
+// @version     1.10b
 // @grant       none
-// @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
+// @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
 // @run-at      document-idle
 // ==/UserScript==
 var div = document.createElement('div');
