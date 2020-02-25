@@ -3,8 +3,8 @@
 // @description 自动更新浏览记录，获取书签
 // @include     https://manhua.dmzj.com/*
 // @include     https://i.dmzj.com/subscribe
-// @version     1.0.43
-// @modified    2019-8-11 16:04:49
+// @version     1.0.102
+// @modified    2019-8-27 15:27:09
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -29,10 +29,11 @@ let getReadingPage = () => {
 
 let getReadingPage2 = () => $('#page_select>option:selected').index() + 1
 
-let historyLog = historyJson => {
+let historyLog = async historyJson => {
   if ($.cookie('my') !== null) {
     let userId = $.cookie('my').split('|')[0]
-    xhrSync(`//interface.dmzj.com/api/record/getRe?callback=callback&uid=${userId}&type=1&st=comic&json=${encodeURIComponent(historyJson)}`)
+    await xhrSync(`//interface.dmzj.com/api/record/getRe?callback=callback&uid=${userId}&type=1&st=comic&json=${encodeURIComponent(historyJson)}`)
+    unsafeWindow.$.cookie('history_CookieR', '[]', { path: '/', expiress: 7, sucue: true })
   }
 }
 
@@ -93,7 +94,7 @@ let forIndex = async () => {
         chapter = chapter[0]
         $('#last_read_history').html('上次看到：').append($(chapter).clone().removeAttr('class')).append(` <a href="${chapter.href}#page=${info[1]}" target="_blank">第${info[1]}页</a>`).show()
       } else {
-        let href = window.location.href + info[0] + '.shtml?cid=' + comicId
+        let href = window.location.href + '/' + info[0] + '.shtml?cid=' + comicId
         $('#last_read_history').html(`上次看到： <a href="${href}" target="_blank">未知话</a> <a href="${href}#page=${info[1]}" target="_blank">第${info[1]}页</a>`).show()
       }
     } else {
@@ -107,8 +108,18 @@ let forIndex = async () => {
         parm += '&signature=' + md5(parm)
         await xhrSync('https://i.dmzj.com/record/delOne', parm)
         await xhrSync('https://interface.dmzj.com/api/record/delRecords', parm)
+
+        let cookie = $.cookie('history_CookieR')
+        if (cookie) {
+          try {
+            cookie = JSON.parse(cookie)
+            if (cookie[0].comicId === comicId) unsafeWindow.$.cookie('history_CookieR', '[]', { path: '/', expiress: 7, sucue: true })
+          } catch (error) {}
+        }
+
         delete bookmark[comicId]
         GM_setValue('bookmark', bookmark)
+
         window.location.reload()
       }
     }).appendTo('#last_read_history')
@@ -122,6 +133,7 @@ let forIndex = async () => {
       for (let i of mutationsList) {
         if (i.addedNodes.length && [...i.addedNodes].filter(j => j.classList && [...j.classList].includes('cartoon_online_button')).length) {
           observer.disconnect()
+          $('.dmzjRecord').remove()
           getChapter()
           return
         }
@@ -131,6 +143,62 @@ let forIndex = async () => {
       childList: true,
       subtree: true
     })
+
+    $('<a class="dmzjRecord">显示记录</a>').on({
+      click: async () => {
+        let chapters = await xhrSync(`https://v3api.dmzj.com/comic/comic_${unsafeWindow.g_comic_id}.json`, null, { responseType: 'json' })
+        chapters = chapters.response.chapters
+
+        // 来自动漫之家助手
+        // https://greasyfork.org/scripts/33087
+        var pagenum = 160
+
+        var part = []
+        for (let x = 0; x < chapters.length; x++) {
+          var list = chapters[x].data.reverse(); var ary = []; var chapter; var prefix
+          for (let i = 0; i < list.length; i++) {
+            chapter = list[i]
+            prefix = ((x === 0 && (/^\d/).test(chapter.chapter_title)) ? '第' : '')
+            ary.push('<li><a title="' + unsafeWindow.g_comic_name + '-' + prefix + chapter.chapter_title + '" href="/' + unsafeWindow.g_comic_url + chapter.chapter_id + '.shtml?cid=' + unsafeWindow.g_comic_id + '"' + ((i === list.length - 1) ? ' class="color_red"' : '') + '>' + prefix + chapter.chapter_title + '</a></li>')
+          }
+
+          var border = []
+          if (x === 0) {
+            var h2 = $('div.middleright div.middleright_mr:eq(0) div.photo_part:eq(0) h2:eq(0)')
+            h2.text(h2.text() + '全集')
+
+            var maxpage = Math.ceil(list.length / pagenum); var button = []
+            for (let i = 1; i <= maxpage; i++) {
+              button.push('<li class="t1 ' + ((i === maxpage) ? 'b1' : 'b2') + '" style="cursor: pointer;">第' + i + '页</li>')
+              border.push('<div class="cartoon_online_border"' + ((i === maxpage) ? '' : ' style="display:none"') + '><ul>' + ary.splice(0, pagenum).join('') + '</ul><div class="clearfix"></div></div>')
+            }
+
+            var $button = $('<ul class="cartoon_online_button margin_top_10px">' + button.join('') + '</ul>')
+            $button.children('li').each(function (i) {
+              $(this).click(function () {
+                $('.t1').addClass('b2')
+                $(this).removeClass('b2')
+                $(this).addClass('b1')
+                $('.cartoon_online_border').hide()
+                $('.cartoon_online_border').eq(i).show()
+              })
+            })
+
+            part.unshift($button)
+          } else {
+            var photo_part = '<div class="photo_part" style="margin-top: 20px;"><div class="h2_title2"><span class="h2_icon h2_icon22"></span><h2>' + unsafeWindow.g_comic_name + ' 漫画其它版本：' + chapters[x].title + '</h2></div></div>'
+            border.push('<div class="cartoon_online_border_other" style="border-top: 1px dashed #0187c5;"><ul>' + ary.join('') + '</ul><div class="clearfix"></div></div>')
+            part.unshift(photo_part)
+          }
+
+          part.unshift(border.join(''))
+        }
+
+        for (let x = 0; x < part.length; x++) {
+          $('#last_read_history').after(part[x])
+        }
+      }
+    }).appendTo('.odd_anim_title_m')
   }
 }
 
