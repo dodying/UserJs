@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        mark
+// @name        []mark
 // @description mark
 // @include     *
-// @version     1.0.498
-// @modified    2019-8-8 09:03:30
+// @version     1.0.767
+// @modified    2020-2-21 16:55:00
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -12,7 +12,7 @@
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @noframes
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 (function () {
@@ -41,74 +41,196 @@
   }
 
   let libs = {
-    novel: [{
-      /**
-       * filter <= Array
-       * string / RegExp 检测链接
-       * Function 无参，返回true
-       *
-       * 特定网站生效
-       */
-      filter: 'my.qidian.com/bookcase',
+    novel: [
+      {
+        /**
+         * filter <= Array
+         * string / RegExp 检测链接
+         * Function 无参，返回true
+         *
+         * 特定网站生效
+         */
+        filter: 'my.qidian.com/bookcase',
 
-      /**
-       * elems <= Array
-       * string 选择器
-       * Function 无参，返回元素
-       *
-       * 元素
-       */
+        /**
+         * elems <= Array
+         * string 选择器
+         * Function 无参，返回元素
+         *
+         * 元素
+         */
+        elems: ['.shelf-table-name [data-bid]'],
 
-      /**
-        * dealWithElems
-        * Function 参数(elemNow, elemBefore)，返回elemNew[]
-        */
+        /**
+         * dealWithElems
+         * Function 参数(elemNow, elemBefore)，返回elemNew[]
+         */
 
-      elems: ['.shelf-table-name [data-bid]']
-    }, {
-      filter: 'qidian.com',
-      elems: '.book-mid-info>h4>a,.book-info>h4>a'
-    }],
-    manga: [{
-      filter: /i.dmzj.com\/(record|subscribe)/,
-      elems: [
-        '.dy_content_li h3>a',
-        '.history_des>h3>a'
-      ]
-    }, {
-      filter: 'manhua.dmzj.com/rank',
-      elems: [
-        '.middlerighter1 .title>a',
-        '.support+[class^="guide"]+a'
-      ]
-    }, {
-      filter: () => window.location.pathname === '/' && window.location.host === 'manhua.dmzj.com',
-      elems: [
-        '.icn-02_index>a:nth-child(2)',
-        '.tt_comic',
-        '[class^="tcaricature_see"][class*="a2"] ul>li:nth-child(1)>a', '[class^="tcaricature_see"][class*="a3"] ul>li>a',
-        '[class^="today_recommended_bigpic2_a2"] ul>li:nth-child(1)>a', '[class^="today_recommended_bigpic2_b"] ul>li>a',
-        '.caricature_nav p>a'
-      ]
-    }, {
-      filter: 'manhua.dmzj.com',
-      elems: [
-        '.tcaricature_block>ul>li>a',
-        '.hotblood1 ul>li>a+a',
-        '.linehidden',
-        '.anim_title_text>a>h1'
-      ],
-      dealWithElems: (elemNow, elemBefore) => {
-        [].concat(elemNow, elemBefore).forEach(i => {
-          if (i.textContent.match(/^\+/) && !$(i).is('.mark-deal-ignore')) {
-            $(i).addClass('mark-deal-ignore')
-            $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/^\+/, '')
-            // i.innerHTML = i.innerHTML.replace(/^\+/, '')
-          }
-        })
-        return elemNow
+        /**
+          * search
+          * string '名称|网址' 包含%s
+          */
+        search: '书架搜索|https://my.qidian.com/bookcase/search?kw=%s'
+      },
+      {
+        filter: () => window.location.href.match('qidian.com') && !window.location.href.match('read.qidian.com'),
+        elems: ['.book-mid-info>h4>a,.book-info>h4>a', '[data-bid]'],
+        search: '起点|https://www.qidian.com/search?kw=%s'
+      },
+      {
+        filter: 'book.qidian.com/info/',
+        elems: '.book-info h1>em'
+      },
+
+      {
+        filter: 'yousuu.com',
+        elems: '.book-name-and-score>a,.RecBooks a',
+        dealWithElems: (elemNow, elemBefore) => {
+          [].concat(elemNow, elemBefore).forEach(i => {
+            if (i.textContent.trim().match(/^《.*》$/) && !$(i).is('.mark-deal-ignore')) {
+              $(i).addClass('mark-deal-ignore')
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.trim().match(/^《(.*)》$/)[1]
+            }
+          })
+          return elemNow
+        },
+        search: '优书网|https://www.yousuu.com/search/?SearchType=title&SearchValue=%s'
+      },
+      {
+        filter: 'yousuu.com/book/',
+        elems: '.book-name'
+      },
+      {
+        filter: ['yousuu.com/Booklist/', 'yousuu.com/search/'],
+        elems: '.bookname'
+      },
+
+      {
+        filter: ['booklink.me'],
+        elems: 'a[href^="/book-"][href$=".html"]'
+      },
+
+      {
+        filter: ['qidianshuju.com'],
+        elems: 'a[href*="qidianshuju.com/book"][href$=".html"]',
+        dealWithElems: (elemNow, elemBefore) => {
+          [].concat(elemNow, elemBefore).forEach(i => {
+            if (i.textContent.trim().match(/^(\[.*?\])(.*)/) && !$(i).is('.mark-deal-ignore')) {
+              let [, tag, name] = i.textContent.trim().match(/^(\[.*?\])(.*)$/)
+              $('<span></span>').text(tag).insertBefore(i)
+              $(i).addClass('mark-deal-ignore')
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = name
+            }
+          })
+          return elemNow
+        },
+        search: '起点数据|http://www.qidianshuju.com/find/%s.html'
+      },
+
+      {
+        filter: ['uukanshu.com'],
+        elems: [
+          () => $('a').toArray().filter(i => i.href.match(/\/b\/\d+\/$/))
+        ],
+        dealWithElems: (elemNow, elemBefore) => {
+          [].concat(elemNow, elemBefore).forEach(i => {
+            if (i.textContent.trim().match(/最新章节(列表|)$/) && !$(i).is('.mark-deal-ignore')) {
+              $(i).addClass('mark-deal-ignore')
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.trim().replace(/最新章节(列表|)$/, '')
+            }
+          })
+          return elemNow
+        },
+        search: 'UU看书|https://cse.google.com/cse?oe=utf8&ie=utf8&source=uds&q=%s&safe=off&cx=008945028460834109019:saffovty4iu'
+      },
+      {
+        filter: ['bqg5200.com'],
+        elems: [
+          () => $('a').toArray().filter(i => i.href.match(/\/book\/\d+\/$/))
+        ]
+      },
+      {
+        filter: 'chuangshi.qq.com',
+        elems: ['.green[href^="http://chuangshi.qq.com/bk/"][href$=".html"]', 'a[bid]', '.title>a:eq(0)'],
+        search: '创世|http://chuangshi.qq.com/search/searchindex/type/all/wd/%s.html'
       }
-    }]
+    ],
+    manga: [
+      {
+        filter: /i.dmzj.com\/(record|subscribe)/,
+        elems: [
+          '.dy_content_li h3>a',
+          '.history_des>h3>a'
+        ]
+      },
+      {
+        filter: /i.dmzj.com\/otherCenter\/hisSubscribe/,
+        elems: [
+          '#his_subscribe_id>dl>dd>a.title'
+        ]
+      },
+      {
+        filter: 'manhua.dmzj.com/rank',
+        elems: [
+          '.middlerighter1 .title>a',
+          '.support+[class^="guide"]+a'
+        ]
+      },
+      {
+        filter: () => window.location.pathname === '/' && window.location.host === 'manhua.dmzj.com',
+        elems: [
+          '.icn-02_index>a:nth-child(2)',
+          '.tt_comic',
+          '[class^="tcaricature_see"][class*="a2"] ul>li:nth-child(1)>a', '[class^="tcaricature_see"][class*="a3"] ul>li>a',
+          '[class^="today_recommended_bigpic2_a2"] ul>li:nth-child(1)>a', '[class^="today_recommended_bigpic2_b"] ul>li>a',
+          '.caricature_nav p>a'
+        ]
+      },
+      {
+        filter: 'manhua.dmzj.com',
+        elems: [
+          '.tcaricature_block>ul>li>a',
+          '.hotblood1 ul>li>a+a',
+          '.linehidden',
+          '.anim_title_text>a>h1'
+        ],
+        dealWithElems: (elemNow, elemBefore) => {
+          [].concat(elemNow, elemBefore).forEach(i => {
+            if (i.textContent.match(/^\+/) && !$(i).is('.mark-deal-ignore')) {
+              $(i).addClass('mark-deal-ignore')
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/^\+/, '')
+            }
+          })
+          return elemNow
+        },
+        search: '动漫之家|https://manhua.dmzj.com/tags/search.shtml?s=%s'
+      },
+      {
+        filter: 'manhuadui.com',
+        elems: [
+          '.comic_deCon h1',
+          '[data-key] a'
+        ],
+        search: '漫画堆|https://www.manhuadui.com/search/?keywords=%s'
+      },
+      {
+        filter: 'kukudm.com',
+        elems: [
+          'body > table:nth-child(5) > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(1) > td',
+          '[href^="/comiclist/"][href$="/index.htm"]'
+        ],
+        dealWithElems: (elemNow, elemBefore) => {
+          [].concat(elemNow, elemBefore).forEach(i => {
+            if (i.textContent.match(/(漫画|\[\d+\])$/) && !$(i).is('.mark-deal-ignore')) {
+              $(i).addClass('mark-deal-ignore')
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/(漫画|\[\d+\])$/, '')
+            }
+          })
+          return elemNow
+        },
+        search: 'KuKu动漫|https://so.kukudm.com/search.asp?kw=%s&Submit=%C8%B7%B6%A8'
+      }
+    ]
   }
 
   let libName, lib
@@ -140,7 +262,23 @@
     '.mark-mark{background:#F00;}',
     '.mark-mark.mark-mark-on{background:#0F0;}',
     '[data-mark]:hover{background-color:white!important;}',
-    '[data-mark]{border:1px black solid;}'
+    '[data-mark]{border:1px black solid;margin: -1px;}',
+
+    '.mark-less.mark-less-on::after{content:">>";}',
+    '.mark-less::after{content:"<<";}',
+    //
+    '.mark-show-container,.mark-edit-container{position:fixed;left:0;right:0;top:0;bottom:0;margin-left:auto;margin-right:auto;margin-top:auto;margin-bottom:auto;}',
+    '.mark-show-container,.mark-edit-container{z-index:99999;background:white;max-width:800px;max-height:600px;overflow:scroll;}',
+    '.mark-show-nav,.mark-show-nav-select{display:inline}',
+    '.mark-show-nav-select:before{content:attr(name)}',
+    '.mark-show-nav-select{margin:2px;border:solid 1px black}',
+    '.mark-show-nav-selected{color:red}',
+    '.mark-show-pre{white-space:pre-wrap;word-break:break-word;font-family:Consolas,Monaco,monospace;}',
+    '.mark-show-pre::before{content:"《"}',
+    '.mark-show-pre::after{content:"》"}',
+    '.mark-show-search{margin:0 10px;color:#00f;}',
+    //
+    '.mark-edit-textarea{width:99%;height:calc(99% - 16px);}'
   ].join('\n')).appendTo('head')
 
   /**
@@ -154,6 +292,8 @@
    * -- type -> color
    */
 
+  let searchLib = []
+  let searchLibFirstRun = true
   let ask = (q, a) => {
     let database = getValue()
     let answer = window.prompt(q, a || database.answer || '')
@@ -173,15 +313,19 @@
         function: func => func()
       })
       if (!actived.some(i => i)) continue
+      if (searchLibFirstRun && i.search) searchLib.push(i.search)
 
       let elem = selectCalc(i.elems, {
         string: text => $(text).toArray(),
         function: func => func()
       }).reduce((pre, cur) => [].concat(cur, pre))
 
+      elem = elem.filter(i => i.textContent.trim() && i.textContent.trim().length < 32)
+
       if (typeof i.dealWithElems === 'function') elem = i.dealWithElems(elem, temp)
       temp = temp.concat(elem)
     }
+    searchLibFirstRun = false
     elems = temp
   }
   let updateHighlight = () => {
@@ -210,15 +354,15 @@
   let promptSetting = keyName => {
     let database = getValue()
     let obj = database[keyName] || {}
-    let answer = ask(`已存在:\n- - -\n${Object.keys(obj).map(i => `${i}:${obj[i]}`).join('\n')}\n- - -\n请使用:分割，值为null表示删除`)
+    let answer = ask(`已存在:\n- - -\n${Object.keys(obj).map(i => `${i}:  ${obj[i]}`).join('\n')}\n- - -\n请使用:分割，值为null表示删除`)
     if (!answer) return
     let arr = answer.split(/:|：/)
-    if (arr.length === 2) {
+    if (arr.length > 1) {
       if (arr[0] === 'null') return
       if (arr[1] === 'null') {
         delete obj[arr[0]]
       } else {
-        obj[arr[0]] = arr[1]
+        obj[arr[0]] = arr.slice(1).join(':')
       }
       database[keyName] = obj
       setValue(database)
@@ -271,10 +415,10 @@
       }
     }
   }).appendTo('.mark-panel')
-  $('<button class="mark-color">color</button>').on({
+  $('<button class="mark-color mark-less-hide">color</button>').on({
     click: () => promptSetting('color')
   }).appendTo('.mark-panel')
-  $('<button class="mark-match">match</button>').on({
+  $('<button class="mark-match mark-less-hide">match</button>').on({
     click: () => promptSetting('match')
   }).appendTo('.mark-panel')
   $('<button class="mark-mark">mark</button>').on({
@@ -313,10 +457,85 @@
       }
     }
   }).appendTo('.mark-panel')
-  $('<button class="mark-mark-all">mark-all</button>').on({
+  $('<button class="mark-mark-all mark-less-hide">mark-all</button>').on({
     click: () => markBatch($('[data-mark]').toArray())
   }).appendTo('.mark-panel')
-  $('<button class="mark-mark-null">mark-null</button>').on({
+  $('<button class="mark-mark-null mark-less-hide">mark-null</button>').on({
     click: () => markBatch($('[data-mark="null"]').toArray())
   }).appendTo('.mark-panel')
+  $('<button class="mark-show mark-less-hide">show</button>').on({
+    click: () => {
+      if ($('.mark-show-container').length) {
+        $('.mark-show-container').remove()
+        return
+      }
+
+      let database = getValue()
+      let books = database.book || {}
+      let types = Object.values(books).sort().filter((item, index, array) => array.indexOf(item) === index)
+
+      let elem = $('<div class="mark-show-container"><ul class="mark-show-nav"></ul><div class="mark-show-content"></div></div>')
+      for (let type of types) {
+        $('<li class="mark-show-nav-select"></li>').attr('name', type).appendTo($(elem).find('.mark-show-nav'))
+        let html = '<ol>'
+        let names = Object.keys(books).filter(i => books[i] === type)
+        for (let name of names) {
+          html += '<li>'
+          html += `<span class="mark-show-pre">${name}</span>`
+          html += searchLib.map(str => {
+            let [info, url] = str.split('|')
+            return `<a class="mark-show-search" href="${url.replace('%s', encodeURIComponent(name))}">${info}</a>`
+          }).join('')
+          html += '</li>'
+        }
+        html += `</ol>`
+        $(html).attr('name', type).appendTo($(elem).find('.mark-show-content'))
+      }
+      elem.appendTo('body')
+      $('.mark-show-nav-select').on({
+        click: e => {
+          $('.mark-show-nav-select').removeClass('mark-show-nav-selected')
+          $(e.target).addClass('mark-show-nav-selected')
+          $('.mark-show-content>ol').hide()
+          $('.mark-show-content>ol').filter((order, i) => $(i).attr('name') === $(e.target).attr('name')).show()
+        }
+      })
+      $('.mark-show-nav-select:eq(0)').addClass('mark-show-nav-selected')
+      $('.mark-show-content>ol').hide()
+      $('.mark-show-content>ol:eq(0)').show()
+    }
+  }).appendTo('.mark-panel')
+  $('<button class="mark-edit mark-less-hide">edit</button>').on({
+    click: () => {
+      if ($('.mark-edit-container').length) {
+        $('.mark-edit-container').remove()
+        return
+      }
+
+      let database = getValue()
+
+      $('<div class="mark-edit-container"><textarea class="mark-edit-textarea"></textarea></div>').appendTo('body')
+      $('<button class="mark-edit-save">Save</button>').on({
+        click: () => {
+          try {
+            let obj = JSON.parse($('.mark-edit-textarea').val())
+            setValue(obj)
+          } catch (error) {
+            console.log(error)
+            window.alert('Save Failed')
+          }
+        }
+      }).appendTo('.mark-edit-container')
+      $('.mark-edit-textarea').text(JSON.stringify(database, null, 2))
+    }
+  }).appendTo('.mark-panel')
+
+  // 最后
+  $('<button class="mark-less"></button>').on({
+    click: (e) => {
+      $(e.target).toggleClass('mark-less-on')
+      $('.mark-less-hide').toggle()
+    }
+  }).appendTo('.mark-panel')
+  $('.mark-less').click()
 })()
