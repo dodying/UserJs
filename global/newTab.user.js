@@ -1,12 +1,21 @@
 // ==UserScript==
 // @name        []newTab
-// @author      daysv dodying
-// @namespace   http://daysv.github.com
+// @raw-author  daysv
+// @raw-namespace http://daysv.github.com
+// @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @description 链接强制在新建标签中打开 Open a URL in a new tab
-// @version     0.2.0.0+0.0.63
+// @raw-version 0.2.0.0
+// @version     0.0.78
+
 // @include     http*://*/*
+
+// @exclude     http*://*.gitbooks.io/*/content/*
+// @exclude     http*://*.github.io/*/docs/*
+// @exclude     http*://mail.*/*
+// @exclude     http*://*.mail.*/*
+
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @grant       GM_registerMenuCommand
 // @grant       GM_unregisterMenuCommand
@@ -15,8 +24,13 @@
 // @run-at      document-end
 // ==/UserScript==
 (function total () {
+  if (document.title.match(/^Index of /) && document.querySelector('[href="../"]')) {
+    return
+  }
+
   let blacklist = GM_getValue('blacklist', [])
   let host = window.location.host
+
   if (blacklist.includes(host)) {
     GM_registerMenuCommand('newTab: Effect ' + host, function () {
       let blacklist = GM_getValue('blacklist', [])
@@ -61,7 +75,7 @@
       host = link.href === window.location.origin || link.href === window.location.origin + '/'
       hash = !!link.href.match('#') && link.pathname === window.location.pathname
       next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/)
-      text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后)一(章|页)|Previous|Next|首页|末页/i)
+      text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后|第)一?(章|页|话|集)|Previous|Next|首页|末页|尾页/i)
       if (protocol || host || hash || next || text) {
         // raw.push({
         //   target: link,
