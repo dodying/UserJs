@@ -8,9 +8,9 @@
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[[EH]Enhance](E-hentai/ehEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) | 1.16.590 | 2019-8-6 13:30:20 |  | 
-[[NH]nhentai Downloader](E-hentai/nhDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhDownloader.user.js) | 0.0.4 |  |  | 
-[[NH]Enhance](E-hentai/nhEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhEnhance.user.js) | 1.0.3 | 2019-8-6 13:30:21 |  | 
+[[EH]Enhance](E-hentai/ehEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) | 1.16.795 | 2020-2-19 13:53:21 |  | 
+[[NH]nhentai Downloader](E-hentai/nhDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhDownloader.user.js) | 0.0.5 |  |  | 
+[[NH]Enhance](E-hentai/nhEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhEnhance.user.js) | 1.0.4 | 2020-2-7 11:11:14 |  | 
 
 ##### E-hentai/invalid
 
@@ -24,7 +24,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [ExHentai2E-Hantai](E-hentai/old/[EH]EX2EH.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EH]EX2EH.user.js) | 1.02 |  |  | 已整合到[EH]Enhance
-[[EH]LocalBookmark](E-hentai/old/[EH]LocalBookmark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EH]LocalBookmark.user.js) | 1.03 |  |  | set a local bookmark
+[[EH]LocalBookmark](E-hentai/old/[EH]LocalBookmark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EH]LocalBookmark.user.js) | 1.04 |  |  | set a local bookmark
 [[EH]TagsPreview&HideSomeGalleries](E-hentai/old/[EH]TagsPreview&HideSomeGalleries.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EH]TagsPreview&HideSomeGalleries.user.js) | 1.2.3 |  |  | Show tags when move to a title or thumb, while hiding the gallery which tagged you unlike
 [[EHD]CombineArchive2One](E-hentai/old/[EHD]CombineArchive2One.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/[EHD]CombineArchive2One.user.js) | 1.10b |  |  | Combine the Archive from EHD A too One Archive
 [EH_BatchList](E-hentai/old/EH_BatchList.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/old/EH_BatchList.user.js) | 1 |  |  | 
@@ -36,24 +36,25 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[copyTable](global/copyTable.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/copyTable.user.js) | 1.0.3 | 2019-8-6 13:30:18 |  | copyTable
+[[]cached](global/cached.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/cached.user.js) | 1.0.109 | 2019-11-25 09:31:55 | 2019-11-24 18:48:14 | cached
+[[]copyTable](global/copyTable.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/copyTable.user.js) | 1.0.5 | 2020-2-7 11:11:26 |  | copyTable
 [[]emptyName](global/emptyName.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/emptyName.user.js) | 1.1 |  |  | 
-[[]Highlight](global/highlight.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/highlight.user.js) | 1.0.1 |  |  | 
-[[]insertJquery](global/insertJquery.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/insertJquery.user.js) | 1.0.26 |  |  | 
-[mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.0.498 | 2019-8-8 09:03:30 |  | mark
-[[]Meta](global/meta.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/meta.user.js) | 1.10 |  |  | 
-[[]newTab](global/newTab.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/newTab.user.js) | 0.2.0.0+0.0.63 |  |  | 链接强制在新建标签中打开 Open a URL in a new tab
-[prettyJSON](global/prettyJSON.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/prettyJSON.user.js) | 1.0.37 | 2019-8-6 13:30:18 |  | prettyJSON
-[[]S](global/s.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/s.user.js) | 1.0.1 |  |  | 
-[[]Style](global/style.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/style.user.js) | 1.0.4 |  |  | 
+[[]highlight](global/highlight.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/highlight.user.js) | 1.0.2 |  |  | 
+[[]insertJquery](global/insertJquery.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/insertJquery.user.js) | 1.0.30 |  |  | 
+[[]mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.0.767 | 2020-2-21 16:55:00 |  | mark
+[[]meta](global/meta.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/meta.user.js) | 1.11 |  |  | 
+[[]newTab](global/newTab.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/newTab.user.js) | 0.0.78 |  |  | 链接强制在新建标签中打开 Open a URL in a new tab
+[[]prettyJSON](global/prettyJSON.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/prettyJSON.user.js) | 1.0.38 | 2019-11-24 20:03:53 |  | prettyJSON
+[[]https](global/s.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/s.user.js) | 1.0.7 |  |  | 
+[[]style](global/style.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/style.user.js) | 1.0.35 |  |  | 
 
 ##### H
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[[H]CopyInfo](H/hCopyInfo.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hCopyInfo.user.js) | 1.01.4 |  |  | 
-[[H]ParkingLot](H/hParkingLot.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) | 1.11.169 |  |  | 
-[[H]ParkingLot2](H/hParkingLot2.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot2.doing.user.js) | 0.0.10 |  |  | [H]ParkingLot2
+[[H]CopyInfo](H/hCopyInfo.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hCopyInfo.user.js) | 1.01.5 |  |  | 
+[[H]ParkingLot](H/hParkingLot.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) | 1.11.252 |  |  | 
+[[H]ParkingLot2](H/hParkingLot2.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot2.doing.user.js) | 0.0.11 |  |  | [H]ParkingLot2
 
 ##### HentaiVerse/hvAutoAttack
 
@@ -98,8 +99,8 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[novelDownloader2](novel/novelDownloader/novelDownloader-new.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader-new.user.js) | 0.0.3 |  |  | novelDownloaderHelper，press key "shift+d" to show up.
-[[Novel]Downloader](novel/novelDownloader/novelDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader.user.js) | 1.45.23 | 2019-8-6 13:30:24 |  | novelDownloaderHelper, press key "shift+d" to show up.
+[novelDownloader2](novel/novelDownloader/novelDownloader-new.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader-new.user.js) | 0.0.4 |  |  | novelDownloaderHelper，press key "shift+d" to show up.
+[[Novel]Downloader](novel/novelDownloader/novelDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader.user.js) | 1.45.30 | 2020-2-24 11:31:32 |  | novelDownloaderHelper, press key "shift+d" to show up.
 
 ##### other
 
@@ -107,19 +108,19 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [dmzj2bgm](other/dmzj2bgm.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/dmzj2bgm.user.js) | 1.0.7 | 2019-8-6 13:30:18 |  | 请通过脚本命令来进行授权与数据同步
 [[dmzj]Novel](other/dmzjNovel.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/dmzjNovel.user.js) | 1.0.3 | 2019-8-6 13:30:19 |  | 在动漫之家上看小说
-[[dmzj]record](other/dmzjRecord.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/dmzjRecord.user.js) | 1.0.43 | 2019-8-11 16:04:49 |  | 自动更新浏览记录，获取书签
-[[google]Enhance](other/googleEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/googleEnhance.user.js) | 1.10 |  |  | 
-[nsane.forums Sharecode](other/nsane.forums Sharecode.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/nsane.forums%20Sharecode.user.js) | 1.0.47 | 2019-8-6 13:30:22 |  | nsane.forums Sharecode
+[[dmzj]record](other/dmzjRecord.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/dmzjRecord.user.js) | 1.0.102 | 2019-8-27 15:27:09 |  | 自动更新浏览记录，获取书签
+[[google]Enhance](other/googleEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/googleEnhance.user.js) | 1.11 |  |  | 
+[nsane.forums Sharecode](other/nsane.forums Sharecode.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/nsane.forums%20Sharecode.user.js) | 1.0.48 | 2020-2-7 11:10:50 |  | nsane.forums Sharecode
 
 ##### other/old
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [163LyricDownloader](other/old/163LyricDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/163LyricDownloader.user.js) | 1.00 |  |  | 
-[baiduShareCopy](other/old/baiduShareCopy.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopy.user.js) | 1 |  |  | 
+[baiduShareCopy](other/old/baiduShareCopy.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopy.user.js) | 1.02 |  |  | 
 [baiduShareCopyForZhidao](other/old/baiduShareCopyForZhidao.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopyForZhidao.user.js) | 1.02 |  |  | 
 [baiduShareCopyForZhidaoV2](other/old/baiduShareCopyForZhidaoV2.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/baiduShareCopyForZhidaoV2.user.js) | 2.0 |  |  | 
-[chs2chtForInputbox](other/old/chs2chtForInputbox.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/chs2chtForInputbox.user.js) | 1 |  |  | 
+[chs2chtForInputbox](other/old/chs2chtForInputbox.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/chs2chtForInputbox.user.js) | 1.10 |  |  | 
 [GithubCopyCodeInIssues](other/old/GithubCopyCodeInIssues.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/GithubCopyCodeInIssues.user.js) | 1 |  |  | 
 [GithubCopyRawLink](other/old/GithubCopyRawLink.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/GithubCopyRawLink.user.js) | 1 |  |  | 
 [githubEnforceCommit](other/old/githubEnforceCommit.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/githubEnforceCommit.user.js) | 1 |  |  | 
