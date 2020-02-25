@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [H]ParkingLot
-// @version     1.11.169
+// @version     1.11.252
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -17,7 +17,7 @@
 //
 // @connect     *
 //
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js
 //
 // 工具栏
@@ -44,7 +44,7 @@
 // 种子站点
 // @include     *://sukebei.nyaa.si/*
 // @include     *://torrentz2.eu/*
-// @include     *://btsow.pw/*
+// @include     *://btos.pw/*
 // 网盘
 // include     *://115.com/*
 // include     *://115.com/?tab=offline&mode=wangpan
@@ -59,6 +59,7 @@
 // JAVLibrary
 // @include     *://www.javlibrary.com/*
 // @include     *://www.javbus.*/*
+// @include     *://javdb*.com/*
 // @include     *://javfree.me/*
 // @include     *://javdownloader.info/*
 // @include     *://javpop.com/*
@@ -125,9 +126,9 @@
     { // BTSOW
       name: 'BTSOW',
       on: false,
-      filter: 'btsow.pw',
+      filter: 'btos.pw',
       check: '[name="author"][content="BTSOW"]',
-      search: 'http://btsow.pw/search/{searchTerms}/',
+      search: 'http://btos.pw/search/{searchTerms}/',
       text: 'h3,.file',
       code: '.form-control:visible'
     },
@@ -303,7 +304,7 @@
       code: '.info>p>span:eq(1)',
       after: '.row.movie',
       extra () {
-        if ($('#sample-waterfall').length) $('#sample-waterfall').html($('.sample-box').toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`))
+        // if ($('#sample-waterfall').length) $('#sample-waterfall').html($('.sample-box').toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`))
       },
       info: [
         'h3',
@@ -375,6 +376,16 @@
         '#video_length .text'
       ]
     },
+    { // javdb.com
+      filter: () => $('title').text().match('JavDB'),
+      on: true,
+      name: 'JavDB',
+      search: 'https://javdb.com/search?q={searchTerms}',
+      text: '.box .uid,.box .video-title,.title,.tile-item',
+      img: '.box .item-image>img,.video-cover,.tile-item>img',
+      code: '.item-title+.value:eq(0)',
+      after: '#search-bar-container'
+    },
     { // javfree.me
       filter: 'javfree.me',
       on: false,
@@ -383,13 +394,16 @@
       text: 'h1.entry-title,h2.entry-title>a,.entry-wrap>a',
       img: '.entry-content img,.thumbnail-wrap>img',
       time: '.post-author',
-      code: () => window.location.href.split('/')[4],
-      after: 'article'
+      code: () => {
+        let matched = $('[id^="post"] .entry-title').eq(0).text().replace(/^\[HD\]/, '').match(/^\[(.*?)\]/)
+        return (matched ? matched[1] : window.location.href.split('/')[4]).replace('heyzo-', 'heyzo ').replace(/(carib|caribpr|1pondo|1000giri|10musume|pacopacomama|tokyo-hot)-/, '')
+      },
+      after: '#start'
     },
     { // javdownloader.info
       filter: 'javdownloader.info',
       on: false,
-      name: 'javdownloader',
+      name: 'JavDownloader',
       search: 'https://javdownloader.info/?s={searchTerms}',
       text: '.title,.wp_rp_title,#nav-below a,.widget_recent_entries a',
       img: '.entry img',
@@ -403,8 +417,8 @@
       search: 'http://javpop.com/index.php?s={searchTerms}',
       text: '.thumb_post a:nth-child(2),h1',
       img: '.thumb_post img,.box-b img',
-      code: () => $('h1').text().match(/\[(.*?)\]/)[1],
-      after: '.box-b>h1'
+      code: () => $('h1').text().match(/\[(.*?)\]/)[1].replace('FC2_PPV-', ''),
+      after: '#header'
     },
     { // AVMOO
       filter: () => document.title.match('AVMOO'),
@@ -494,7 +508,7 @@
   $$._siteFavorite = $$.siteLib.filter(i => i.name === 'JAVLibrary')[0]
 
   var magnetLib = {
-    'sukebei.nyaa.si': {
+    'nyaa.si Sukebei': {
       searchPage: 'https://sukebei.nyaa.si/?q={q}',
       title: '.torrent-list tr>td:nth-child(2)>a',
       magnet: '.torrent-list tr>td:nth-child(3)>a[href^="magnet"]',
@@ -509,7 +523,7 @@
         D: '.torrent-list tr>td:nth-child(8)'
       }
     },
-    'savebts.org': {
+    'SaveBt (Down)': {
       searchPage: 'http://savebts.org/q/{q}/0/0/1.html',
       title: '.item>dt>a',
       magnet: '.item>.attr>span:nth-child(6)>a',
@@ -523,7 +537,7 @@
         Hot: '.item>.attr>span:nth-child(5)>b'
       }
     },
-    'thepiratebay.org': {
+    'The Pirate Bay': {
       searchPage: 'https://thepiratebay.org/search/{q}/0/1/0',
       title: '.vertTh+td>a',
       magnet: 'nobr>a:nth-child(1)',
@@ -537,7 +551,7 @@
         LE: '.vertTh+td+td+td+td+td+td'
       }
     },
-    'sukebei.pantsu.cat': {
+    'Sukebei Pantsu': {
       searchPage: 'https://sukebei.pantsu.cat/search?q={q}',
       title: '.torrent-info>.tr-name>a',
       magnet: '.tr-links>a:nth-child(1)',
@@ -552,7 +566,7 @@
         D: '.torrent-info>.tr-dl'
       }
     },
-    'torrentz2.eu': {
+    'Torrentz2': {
       searchPage: 'https://torrentz2.eu/search?f={q}',
       title: '.results>dl>dt>a',
       magnet: data => $('.results>dl>dt>a', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.getAttribute('href').match(/\/(.*)/)[1].toUpperCase()),
@@ -565,15 +579,15 @@
         rating: '.results>dl>dd>span:nth-child(5)'
       }
     },
-    'btsow.pw': {
-      searchPage: 'https://btsow.pw/search/{q}/',
+    'BTSOW': {
+      searchPage: 'https://btos.pw/search/{q}/',
       title: '.data-list>.row>a',
       magnet: data => $('.data-list>.row>a', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.href.match(/hash\/(.*)/)[1].toUpperCase()),
       size: '.size',
       time: '.date',
       page: '.pagination'
     },
-    'tokyotosho.info': {
+    'Tokyo Toshokan': {
       searchPage: 'https://www.tokyotosho.info/search.php?terms={q}',
       title: 'a[type="application/x-bittorrent"]',
       magnet: '.desc-top>a[href^="magnet"]',
@@ -588,7 +602,7 @@
         C: '.stats>span:nth-child(3)'
       }
     },
-    'btku.org': {
+    'BTKu (Down)': {
       searchPage: 'https://btku.org/q/{q}/',
       title: '.results>h2>a',
       magnet: '.downLink>a[href^="magnet"]',
@@ -601,8 +615,8 @@
         Files: '.resultsIntroduction>label:nth-child(2)'
       }
     },
-    'btdiggs.com': {
-      searchPage: code => `http://btdigg.cc/search/${window.btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))).replace(/[=]+$/g, '')}/1/0/0.html`,
+    'BTDigg': {
+      searchPage: code => `http://btdig.com/search/${window.btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))).replace(/[=]+$/g, '')}/1/0/0.html`,
       title: '.list>dl>dt>a',
       magnet: '.list>dl>dd.attr>span>a',
       size: '.list>dl>dd.attr>span:nth-child(2)>b',
@@ -615,7 +629,7 @@
         Hot: '.list>dl>dd.attr>span:nth-child(5)>b'
       }
     },
-    'seedpeer.eu': {
+    'Seedpeer (Down)': {
       searchPage: 'https://www.seedpeer.eu/search/{q}',
       title: '.table a[href]',
       magnet: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => 'magnet:?xt=urn:btih:' + i.hash),
@@ -628,7 +642,7 @@
         Health: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.ratio)
       }
     },
-    'bitcq.com': {
+    'BitCQ': {
       searchPage: 'https://bitcq.com/search?q={q}',
       title: '.table-hover tr>td:nth-child(2)>a',
       magnet: '.table-hover tr>td:nth-child(1)>a[href^="magnet"]',
@@ -640,7 +654,7 @@
         Peers: '.table-hover tr>td:nth-child(5)'
       }
     },
-    'digbt.org': {
+    'Digbt (Down)': {
       searchPage: 'https://www.digbt.org/search/{q}',
       title: '.x-item>div:nth-child(1)>a.title',
       magnet: '.tail>a.title',
@@ -653,21 +667,21 @@
         Downloads: data => $('.tail', data).toArray().map(i => i.textContent.match(/Downloads:\s+(\d+)/)[1])
       }
     },
-    // 'kickasstorrents.to': {
-    //   searchPage: 'https://kickasstorrents.to/usearch/{q}/',
-    //   title: '.cellMainLink',
-    //   magnet: data => $('.iaconbox>div', data).toArray().map(i => JSON.parse($(i).attr('data-sc-params').replace(/'/g, '"')).magnet),
-    //   size: '[id^="torrent_"]>td:nth-child(2)',
-    //   time: '[id^="torrent_"]>td:nth-child(4)',
-    //   sort: '.tabNavigation:gt(0)',
-    //   page: data => $('.pages', data).html().replace(/[\r\n]+/g, '').replace(/<script.*/, ''),
-    //   more: {
-    //     Files: '[id^="torrent_"]>td:nth-child(3)',
-    //     Speed: '[id^="torrent_"]>td:nth-child(5)',
-    //     Leech: '[id^="torrent_"]>td:nth-child(6)'
-    //   }
-    // },
-    'idope.se': {
+    'KickassTorrents': {
+      searchPage: 'https://kickasstorrents.to/usearch/{q}/',
+      title: '.cellMainLink',
+      magnet: data => $('.iaconbox>div', data).toArray().map(i => JSON.parse($(i).attr('data-sc-params').replace(/'/g, '"')).magnet),
+      size: '[id^="torrent_"]>td:nth-child(2)',
+      time: '[id^="torrent_"]>td:nth-child(4)',
+      sort: '.tabNavigation:gt(0)',
+      page: data => $('.pages', data).html().replace(/[\r\n]+/g, '').replace(/<script.*/, ''),
+      more: {
+        Files: '[id^="torrent_"]>td:nth-child(3)',
+        Speed: '[id^="torrent_"]>td:nth-child(5)',
+        Leech: '[id^="torrent_"]>td:nth-child(6)'
+      }
+    },
+    'iDope': {
       searchPage: 'https://idope.se/torrent-list/{q}/',
       title: '.resultdivtop>a',
       magnet: data => $('[id^="hideinfohash"]', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.textContent.toUpperCase()),
@@ -679,7 +693,7 @@
         Files: '.resultdivbottonfiles'
       }
     },
-    'extratorrent.cd': {
+    'Extratorrent': {
       searchPage: 'https://extratorrent.cd/search/?search={q}',
       title: '.tli>a',
       magnet: 'a[title="Magnet link"]',
@@ -691,9 +705,8 @@
         S: '.tl tr>td:nth-child(6)',
         L: '.tl tr>td:nth-child(7)'
       }
-    }
-    /*
-    'katcr.co': {
+    },
+    'KAT - Kickass Torrents': {
       searchPage: 'https://katcr.co/katsearch/page/1/{q}',
       title: '.tli>a',
       magnet: 'a[title="Magnet link"]',
@@ -706,15 +719,28 @@
         L: '.tl tr>td:nth-child(7)'
       }
     },
-    */
+    'BTAnt': {
+      searchPage: 'http://www.btunt.com/search/{q}-hot-desc-1',
+      title: '.search-item>.item-title>a',
+      magnet: '.search-item>.item-bar>a[href^="magnet"]',
+      size: '.search-item>.item-bar>span:nth-child(4)>b',
+      time: '.search-item>.item-bar>span:nth-child(1)>b',
+      sort: '.order',
+      page: '.bottom-pager',
+      more: {
+        Hot: '.search-item>.item-bar>span:nth-child(2)>b',
+        LastActived: '.search-item>.item-bar>span:nth-child(3)>b'
+      }
+    }
   }
   var m2tLib = [
     'http://btcache.me/torrent/{hash}',
-    'http://storetorrents.me/hash/{hash}',
+    // 'http://storetorrents.me/hash/{hash}',
     'https://itorrents.org/torrent/{hash}.torrent?title={name}',
     'https://torrage.info/torrent.php?h={hash}',
-    'https://www.seedpeer.eu/torrent/{hashLow}',
-    'http://www.torrent.org.cn/home/convert/magnet2torrent.html?hash=={hashLow}'
+    // 'https://www.seedpeer.eu/torrent/{hashLow}',
+    'http://www.torrent.org.cn/home/convert/magnet2torrent.html?hash=={hashLow}',
+    'http://v2.uploadbt.com/?r=down&hash={hashLow}&name={name}'
   ]
   var markLib = [
     { // 0
@@ -1073,7 +1099,7 @@
       $('<div class="showTable"></div>').html(_html).appendTo('body')
     } else if (type === 1) {
       let markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}').join('')
-      _html = '<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>'
+      _html = '<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>'
       let blob = new window.Blob([_html], {
         type: 'text/html;charset=utf-8'
       })
@@ -1103,7 +1129,7 @@
     var searchPage = typeof lib.searchPage === 'string' ? lib.searchPage.replace('{q}', encodeURIComponent(code)) : lib.searchPage(code)
     var url = page ? new URL(page, searchPage).href : searchPage
     if ($('.hSearch').length === 0) {
-      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${searchUrl}"><select class="hSearchSite">${Object.keys(magnetLib).map(i => `<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter($$._site.after || 'body>:eq(-1)')
+      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${new URL(searchPage).host}"><select class="hSearchSite">${Object.keys(magnetLib).map(i => `<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter($$._site.after || 'body>:eq(-1)')
       $('.hSearchSite').val(searchUrl)
       // 排序翻页事件
       $('.hSearch').on('click', '.hSearchSort a,.hSearchPage a', e => {
@@ -1121,7 +1147,7 @@
             $('.hSearch').data('abort')()
           } catch (error) {}
         }
-        $('.hSearchSiteImg').attr('src', '//www.google.com/s2/favicons?domain=' + $('.hSearchSite').val())
+        $('.hSearchSiteImg').attr('src', '//www.google.com/s2/favicons?domain=' + magnetLib[$('.hSearchSite').val()].searchPage)
         $('.hSearch').trigger('destroy')
         getMagnet(getCode(), undefined, $('.hSearchSite').val())
       })
