@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.590
-// @modified    2019-8-6 13:30:20
+// @version     1.16.795
+// @modified    2020-2-19 13:53:21
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -31,15 +31,27 @@
 // @grant       GM_xmlhttpRequest
 // @grant       GM_registerMenuCommand
 // @grant       GM_notification
+// @grant       GM_getResourceText
 // @connect     *
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.js
+// @resource diff https://raw.githubusercontent.com/jhchen/fast-diff/master/diff.js
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)
 // @compatible  chrome 55+(ES2017)
 // ==/UserScript==
 /* global JSZip */
 /* eslint-disable no-debugger */
+(function () {
+  /* eslint-disable no-new-func */
+  let obj = {}
+  let diffFunc = new Function('module', GM_getResourceText('diff'))
+  diffFunc(obj)
+  let diff = obj.exports
+  Object.assign(window, { diff })
+})()
+
+let diff = window.diff
 
 const SEL = {
   EH: {
@@ -181,7 +193,6 @@ const G = { // 全局变量
     }
     return variabled
   })()
-  // function: { init, abortPending, addStyle, arrUnique, autoDownload, autoComplete, batchDownload, btnFake, btnFake2, btnSearch, btnSearch2, btnTask, btnTask2, calcRelativeTime, changeEConfig, changeFav, changeName, checkExist, checkForNew, checkImageSize, combineText, copyInfo, defaultConfig, downloadAdd, downloadRemove, findData, getEConfig, getEditDistance, getInfo, hideGalleries, highlightBlacklist, htmlEscape, introPic, jumpHost, languageCode, makeRange, openUrl, quickDownload, reEscape, saveAs, saveAs2, saveLink, setNotification, setNotification2, searchInOtherSite, showAllThumb, showConfig, showTooltip, sortObj, tagEvent, tagPreview, task, taskRemove, tagTranslate, toggleBlacklist, translateText, updateEHD, updateEHT, waitInMs, waitForElement, xhr, xhrSync }
 }
 G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config['autoStartDownload']
 G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.config['enableEHD'] && G.config['showAllThumb'] && G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD'] && G.config['downloadSizeChanged']
@@ -246,7 +257,9 @@ async function init () {
         '}'
       ]
       let fixEHDCounter = [
-        'let checkInterval = function () {',
+        'window.fixEHDCounterTime = 0',
+        'window.fixEHDCounter = function () {',
+        '  fixEHDCounterTime++',
         '  if (totalCount <= 0) return',
         '  if (totalCount === downloadedCount && failedCount > 0) { failedCount = 0; checkFailed() }',
         `  if (fetchCount < 0) { fetchCount = [...document.querySelectorAll('.ehD-pt-progress')].filter(i => { let value = i.getAttribute('value'); return value === null || (value * 1 < 1 && value * 1 > 0) }).length; updateTotalStatus(); checkFailed() }`,
@@ -255,8 +268,39 @@ async function init () {
         // '  window.console.log("totalCount:\t", totalCount, "\nfetchCount:\t", fetchCount, "\ndownloadedCount:\t", downloadedCount, "\nfailedCount:\t", failedCount)',
         // '  window.console.log(JSON.stringify({"总计": totalCount, "下载中": fetchCount, "已完成": downloadedCount, "下载失败": failedCount}))',
         // '  window.console.log(totalCount, fetchCount, downloadedCount, failedCount)',
+        '  let node = document.createElement("tr")',
+        '  node.innerHTML = "<td colspan=\\"3\\">fixEHDCounter: " + fixEHDCounterTime + "</td>"',
+        '  document.querySelector(".ehD-pt").appendChild(node)',
+        '}'
+      ]
+      $('<input type="button" value="Fix EHD Counter" tooltip="重置EHTD计数">').on({
+        click: () => {
+          window.fixEHDCounter()
+        }
+      }).prependTo('.ehNavBar>div:nth-child(2)')
+      let checkAndFix = [
+        'window.EHDCounter = {}',
+        'let checkAndFixEHDCounter = function () {',
+        '  let timeout = 1 * 1000',
+        '  if (totalCount !== 0) {',
+        '    let obj = { totalCount, downloadedCount, failedCount, fetchCount }',
+        '    let changed = false',
+        '    for (let i in obj) {',
+        '      if (window.EHDCounter[i] !== obj[i]) {',
+        '        changed = true',
+        '        break',
+        '      }',
+        '    }',
+        '    if (changed) {',
+        '      window.EHDCounter = obj',
+        '      timeout = 2 * 1000',
+        '    } else if (obj.fetchCount <= -1) {',
+        '      window.fixEHDCounter()',
+        '    }',
+        '  }',
+        '  setTimeout(checkAndFixEHDCounter, timeout)',
         '}',
-        'setInterval(checkInterval, 300)'
+        'checkAndFixEHDCounter()'
       ]
       let toEavl = [
         '(function () {',
@@ -266,8 +310,14 @@ async function init () {
         'let alert = function () { }',
         'let confirm = function () { return true }',
         (G.config['recordEHDUrl'] ? recordEHDUrl.join('\n') : ''),
+        '\n',
         GM_getValue('EHD_code'),
-        (G.config['fixEHDCounter'] ? fixEHDCounter.join('\n') : ''),
+        '\n',
+        fixEHDCounter.join('\n'),
+        '\n',
+        // (G.config['fixEHDCounter'] ? 'setInterval(window.fixEHDCounter, 300)' : ''),
+        (G.config['fixEHDCounter'] ? checkAndFix.join('\n') : ''),
+        '\n',
         '})()'
       ]
       /* eslint-disable no-eval */
@@ -353,7 +403,7 @@ async function init () {
     mouseenter: e => {
       $(e.target).attr('title', '当前下载列表:<br> ' + GM_getValue('downloading', []).join('<br> '))
     }
-  }).prependTo('.ehNavBar>div:eq(2)')
+  }).prependTo('.ehNavBar>div:nth-child(3)')
   $('<input type="button" value="Start Task" tooltip="' + htmlEscape('左键: 开始下载任务<br>中键: 从当前任务开始<br>右键: 重置当前下载任务') + '">').on({
     mousedown: e => {
       if (e.button === 0) {
@@ -371,7 +421,7 @@ async function init () {
       let task = GM_getValue('task', [])
       $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
     }
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
   $('<input type="file" id="selectFileTask" name="selectFile" accept=".txt">').on({
     change: e => {
       if (!e.target.files || !e.target.files.length) {
@@ -388,7 +438,7 @@ async function init () {
       }
       fr.readAsText(e.target.files[0])
     }
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
   $('<input type="button" value="Export Task" tooltip="' + htmlEscape('左键: 导出下载列表（包括正在下载）<br>右键: 导入下载列表（自动清除重复项）') + '">').on({
     mousedown: e => {
       if (e.button === 0) {
@@ -404,7 +454,31 @@ async function init () {
       let task = GM_getValue('task', [])
       $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
     }
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
+  $('<input type="button" value="Toggle Blacklist" title="' + htmlEscape('左键: 加入或移除黑名单<br>右键: 显示黑名单列表') + '">').on({
+    mousedown: e => {
+      if (e.button === 0) {
+        let value = window.prompt('keyword:')
+        if (value && value.trim()) {
+          toggleBlacklist(value.trim())
+          highlightBlacklist()
+        }
+      } else if (e.button === 1) {
+
+      } else if (e.button === 2) {
+        if ($('.ehBlackListContainer').length) {
+          $('.ehBlackListContainer').remove()
+        } else {
+          let blacklist = GM_getValue('blacklist', [])
+          let html = '<ul>'
+          html += blacklist.map(keyword => `<li><a href="${G.config['searchArguments'].replace(/{q}/g, encodeURIComponent(keyword))}" target="_blank">${htmlEscape(keyword)}</a> <span copy="${htmlEscape(keyword)}">复制</span></li>`).join('')
+          html += '</ul>'
+          $('<div class="ehBlackListContainer"></div>').html(html).appendTo('body')
+        }
+      }
+    }
+  }).appendTo('.ehNavBar>div:nth-child(3)')
+
   showTooltip() // 显示提示
   $('body').on('mousedown', 'a,button,input[type="button"],div:empty', e => {
     $(e.target).css('border-color', 'red').css('border-style', 'solid').css('border-width', '1px')
@@ -423,7 +497,7 @@ function abortPending () { // 终止EHD所有下载
     click: () => {
       $(SEL.EHD.abort).click()
     }
-  }).appendTo('.ehNavBar>div:eq(1)')
+  }).appendTo('.ehNavBar>div:nth-child(2)')
 }
 
 function addStyle () { // 添加样式
@@ -485,7 +559,7 @@ function addStyle () { // 添加样式
     '.ehTagPreviewLi>span{display:inline;margin:0 2px;border:1px #456F78 solid;}',
     '.ehTagEvent>.ehTagEventNotice[on="true"]::after{content:attr(name);}',
     '.ehTagEvent>.ehTagEventNotice[on="false"]::after{content:"NOT " attr(name);}',
-    '.ehTooltip{max-width:50%;max-height:85%;overflow:auto;display:none;position:fixed;text-align:left;z-index:99999;border:2px solid #8d8d8d;background-color:' + backgroundColor + ';}',
+    '.ehTooltip{max-width:50%;max-height:85%;overflow:auto;display:none;position:fixed;text-align:left;z-index:99999;border:2px solid #8d8d8d;background-color:' + backgroundColor + ';font-size:110%;}',
     '.ehTooltip>ul{margin:0;}',
     '.ehCheckTableContainer{position:fixed;top:23px;bottom:16px;left:0;right:0;min-width:950px;max-width:1200px;margin:10px auto;padding:5px;border:solid 1px black;z-index:2;background-color:' + backgroundColor + ';}',
     '.ehCheckTableContainer>div{overflow:auto;}',
@@ -514,6 +588,13 @@ function addStyle () { // 添加样式
     '.ehFavicion{background: url(favicon.ico) no-repeat center center;}',
     '.ehIgnore{filter:blur(1px) grayscale(1);}',
     '.ehIgnore:hover{filter:none;}',
+
+    '.ehPreLike{white-space:pre-wrap;word-break:break-word;font-family:Consolas,Monaco,monospace;}',
+    '.ehDiffNone{color:' + backgroundColor + ';background-color:' + backgroundColor + ';}',
+    '.ehDiffDel{background:#9d0b0b;font-size:110%;}',
+    '.ehDiffAdd{background:#007944;font-size:110%;}',
+
+    '.ehBlackListContainer{position:fixed;top:23px;bottom:16px;left:0;right:0;min-width:950px;max-width:1200px;margin:10px auto;padding:5px;border:solid 1px black;z-index:2;background-color:' + backgroundColor + ';overflow:auto;text-align:justify;}',
 
     // html
     SEL.EH.common.navBar + '{max-width:100%;max-height:100%;}',
@@ -652,27 +733,27 @@ function batchDownload () { // 批量下载
       })
       window.sessionStorage.setItem('batch', batch * G.config['batch'] <= books.length ? batch + 1 : 0)
     }
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
   $('<input type="button" value="Open" title="打开">').on('mousedown', e => {
-    $('.ehBatchHover').find(SEL.EH.search.galleryA).toArray().forEach(i => {
+    $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
       openUrl(i.href + '#' + e.button)
     })
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
 }
 
 function btnFake () { // 按钮 -> 下载空文档(信息页)
   $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', e => {
     saveAs2('', $(SEL.EH.info.title).text().trim() + '.cbz')
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
 }
 
 function btnFake2 () { // 按钮 -> 下载空文档(搜索页)
   $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', async e => {
-    for (let i of $('.ehBatchHover').find(SEL.EH.search.galleryA).toArray()) {
+    for (let i of $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray()) {
       saveAs2('', i.textContent.trim() + '.cbz')
       await waitInMs(200)
     }
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
 }
 
 function btnInfoText () { // 按钮 -> 下载info.txt(信息页)
@@ -712,7 +793,7 @@ function btnInfoText () { // 按钮 -> 下载info.txt(信息页)
     infoStr += '\n\nDownloaded at ' + new Date() + '\n\nGenerated by E-Hentai Downloader. https://github.com/ccloli/E-Hentai-Downloader'
 
     saveAs2(htmlUnescape(infoStr.replace(/\n/g, '\r\n')), 'info.txt')
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
 }
 
 function btnSearch () { // 按钮 -> 搜索(信息页)
@@ -792,7 +873,7 @@ function btnTask () { // 按钮 -> 添加到下载任务(信息页)
       let task = GM_getValue('task', [])
       $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
     }
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
 }
 
 function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
@@ -800,7 +881,7 @@ function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
     mousedown: e => {
       if (e.button === 0) {
         let task = GM_getValue('task', [])
-        $('.ehBatchHover').find(SEL.EH.search.galleryA).toArray().forEach(i => {
+        $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
           if (!(task.includes(i.href))) task.push(i.href)
         })
         GM_setValue('task', task)
@@ -808,7 +889,7 @@ function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
         GM_setValue('task', [])
       } else if (e.button === 2) {
         let task = GM_getValue('task', [])
-        $('.ehBatchHover').find(SEL.EH.search.galleryA).toArray().forEach(i => {
+        $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
           if (task.includes(i.href)) task.splice(task.indexOf(i.href), 1)
         })
         GM_setValue('task', task)
@@ -818,7 +899,7 @@ function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
       let task = GM_getValue('task', [])
       $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
     }
-  }).appendTo('.ehNavBar>div:eq(2)')
+  }).appendTo('.ehNavBar>div:nth-child(3)')
 }
 
 function calcRelativeTime (time) { // 计算相对时间
@@ -846,7 +927,7 @@ function calcRelativeTime (time) { // 计算相对时间
   }
   t = Math.round(t)
   let text = `about ${t} ${suf}${t > 1 ? 's' : ''} ago`
-  if (delta <= 1000 * 60 * 60 * 24 * 7) text = '<span class="ehHighlight">' + text + '</span>'
+  if (delta <= 1000 * 60 * 60 * 24 * 7 * 2) text = '<span class="ehHighlight">' + text + '</span>'
   return text
 }
 
@@ -1015,8 +1096,32 @@ function checkExist () { // 检查本地是否存在
           let _name = (noExtRE.exec(name) || noExtRE.exec(name2)) ? 'force'
             : noExt.match(/\[Incomplete\]/i) ? 'incomplete'
               : (noLangRE.exec(name3) || noLangRE.exec(name4)) ? 'force1' : ''
-          let ed = _name === 'force' ? 0 : getEditDistance(noExt, name)
-          if (p.find(`[copy="${noExt}"][fileSize="${fileSize}"]`).length === 0) $(`<span class="ehExist" fileSize="${fileSize}" name="${_name}" copy="${noExt}" similar="${ed}" tooltip="EditDistance: ${ed}"></span>`).appendTo(p)
+
+          let diffThis = diff(name, noExt)
+          let similar = _name === 'force' ? 0 : diffThis.reduce((total, now) => total + (now[0] === 0 ? 0 : now[1].length), 0)
+
+          let diffFlag = 0
+          let diffHTML = [['Remote: '], [' Local: ']]
+
+          for (let i = 0; i < diffThis.length; i++) {
+            let arr = diffThis[i]
+            if (arr[0] === 0) {
+              if (diffFlag) diffHTML[diffFlag > 0 ? 1 : 0].push(`<span class="ehDiffNone">${' '.repeat(Math.abs(diffFlag))}</span>`)
+              diffFlag = 0
+              diffHTML[0].push(arr[1])
+              diffHTML[1].push(arr[1])
+            } else if (arr[0] === -1) {
+              diffHTML[0].push(`<span class="ehDiffDel">${arr[1]}</span>`)
+              diffFlag += getStringSize(arr[1])
+            } else if (arr[0] === 1) {
+              diffHTML[1].push(`<span class="ehDiffAdd">${arr[1]}</span>`)
+              diffFlag -= getStringSize(arr[1])
+            }
+          }
+          diffHTML = '<br><span class="ehPreLike">' + diffHTML.map(i => i.join('')).join('<br>') + '</span>'
+          if (noExt === name) diffHTML = ''
+
+          if (p.find(`[copy="${noExt}"][fileSize="${fileSize}"]`).length === 0) $(`<span class="ehExist" fileSize="${fileSize}" name="${_name}" copy="${noExt}" similar="${similar}" tooltip="EditDistance: ${similar}${htmlEscape(diffHTML)}"></span>`).appendTo(p)
           $(p).find('.ehExist').toArray().sort((a, b) => $(a).attr('similar') * 1 - $(b).attr('similar') * 1).forEach(ele => $(ele).appendTo(p))
         })
       })
@@ -1032,7 +1137,7 @@ function checkExist () { // 检查本地是否存在
     if (G.config['hideExist']) {
       $('.ehHideExist').dblclick()
     }
-  }).appendTo('.ehNavBar>div:eq(1)')
+  }).appendTo('.ehNavBar>div:nth-child(2)')
 }
 
 function checkForNew () { // 检查有无新本子
@@ -1246,7 +1351,7 @@ function copyInfo () { // 复制信息
     var nameJpn = $(SEL.EH.info.titleJp).text().match(/\[(.*?)\]/)[1]
     if (name.match(/\(.*?\)/)) name = name.match(/\((.*?)\)/)[1]
     if (nameJpn.match(/\(.*?\)/)) nameJpn = nameJpn.match(/\((.*?)\)/)[1]
-    $(`<input type="button" value="[${name}]${nameJpn}" copy="[${name}]${nameJpn}">`).appendTo('.ehNavBar>div:eq(0)')
+    $(`<input type="button" value="[${name}]${nameJpn}" copy="[${name}]${nameJpn}">`).appendTo('.ehNavBar>div:nth-child(1)')
   }
   if ($(SEL.EH.info.tagParody).length > 0) { // parody
     let info = $(SEL.EH.info.tagParody).attr('id').split(/ta_|:/)
@@ -1262,7 +1367,7 @@ function copyInfo () { // 复制信息
       }
     }
     let parodyKeyword = $(SEL.EH.info.tagParody).text().replace(/ \| .*/, '')
-    $(`<input type="button" value="【${parody}】${parodyKeyword}" copy="【${parody}】${parodyKeyword}">`).appendTo('.ehNavBar>div:eq(0)')
+    $(`<input type="button" value="【${parody}】${parodyKeyword}" copy="【${parody}】${parodyKeyword}">`).appendTo('.ehNavBar>div:nth-child(1)')
   }
 }
 
@@ -1631,7 +1736,7 @@ function quickDownload () { // 右键下载
   })
 }
 
-function saveAs (text, name) {
+async function saveAs (text, name) {
   downloadRemove(SEL.EH.info.galleryId)
   if (text instanceof window.Blob && text.type.match(/^application.*zip$/)) {
     if (G.downloadSizeChanged) {
@@ -1660,22 +1765,22 @@ function saveAs (text, name) {
             comment: G['ehD-setting']['save-info'] === 'comment' ? infoStr.replace(/\n/gi, '\r\n') : undefined
           })
           resolve(data)
-        }).then(data => {
+        }).then(async data => {
           saveAs2(data, name, text.type)
           window.onbeforeunload = null
-          waitInMs(500).then(() => {
-            taskRemove(SEL.EH.info.galleryId)
-            window.close()
-          })
+          await waitInMs(500)
+          taskRemove(SEL.EH.info.galleryId)
+          await waitInMs(200)
+          window.close()
         })
       }
     } else {
       saveAs2(text, name, text.type)
       window.onbeforeunload = null
-      waitInMs(500).then(() => {
-        taskRemove(SEL.EH.info.galleryId)
-        window.close()
-      })
+      await waitInMs(500)
+      taskRemove(SEL.EH.info.galleryId)
+      await waitInMs(200)
+      window.close()
     }
   } else {
     saveAs2(text, name)
@@ -1711,7 +1816,7 @@ function saveLink () { // 保存链接
     }
     let text = content[platform].replace('{{url}}', window.location.href)
     saveAs2(text, document.title + fileType)
-  }).prependTo('.ehNavBar>div:eq(2)')
+  }).prependTo('.ehNavBar>div:nth-child(3)')
 }
 
 function setNotification (text, title = undefined, timeout = 3 * 1000) { // 发出桌面通知
@@ -1818,7 +1923,7 @@ function searchInOtherSite () { // 在其他站点搜索
     } else if ('urlJ' in sites[i]) {
       url = sites[i].urlJ instanceof Function ? sites[i].urlJ(keywordJ) : sites[i].urlJ.replace(/{q}/g, keywordJ)
     }
-    $('<div></div>').append($(`<a target="_blank"><img class="icon" src="${sites[i].icon || '//www.google.com/s2/favicons?domain=' + i}"></img>${i}</a>`).attr('href', url)).appendTo(navBar)
+    $('<div></div>').append($(`<a target="_blank"><img class="icon" src="${sites[i].icon || 'https://icons.duckduckgo.com/ip2/' + i}.ico"></img>${i}</a>`).attr('href', url)).appendTo(navBar)
   }
 }
 
@@ -2095,10 +2200,13 @@ function showTooltip () { // 显示提示
       title1 = '点击复制: <span class="ehHighlight">' + $(preEle).attr('copy') + '</span>'
       $(preEle).attr('raw-title', title1)
     } else {
-      title1 = $(preEle).attr('title') || $(preEle).attr('raw-title')
+      title1 = $(preEle).attr('title') || $(preEle).attr('raw-title') || ''
       if (!title1) {
-        preEle = $(preEle).parents().filter('[title]').eq(-1)[0]
-        title1 = $(preEle).attr('title') || $(preEle).attr('raw-title')
+        let preEleTrue = $(preEle).parents().filter('[title]').eq(-1)[0]
+        if (preEleTrue) {
+          preEle = preEleTrue
+          title1 = $(preEle).attr('title') || $(preEle).attr('raw-title')
+        }
       }
       $(preEle).removeAttr('title').attr('raw-title', title1)
     }
@@ -2234,6 +2342,7 @@ function task () { // 下载任务
     tasking = task.splice(0, 1)[0]
     GM_setValue('tasking', tasking)
     GM_setValue('task', task)
+    await waitInMs(2 * 1000)
     openUrl(tasking + '#2')
     await main()
   }
@@ -2331,7 +2440,7 @@ async function updateEHD () { // 更新EHD
 }
 
 async function updateEHT () { // 更新EHT
-  let url = 'https://github.com/Mapaler/EhTagTranslator/wiki/'
+  let url = 'https://github.com/EhTagTranslation/Database/blob/master/database/'
   let InfoToArray = function (infoDom) {
     let arr = []
     if (infoDom.childNodes !== undefined) {
@@ -2383,7 +2492,7 @@ async function updateEHT () { // 更新EHT
   let dealTags = function (response) {
     let rowTags = []
     let PageDOM = new window.DOMParser().parseFromString(response, 'text/html')
-    let tBody = PageDOM.querySelector('#wiki-body div table').tBodies[0]
+    let tBody = PageDOM.querySelector('.markdown-body table').tBodies[0]
     for (let ri = 0, rilen = tBody.rows.length; ri < rilen; ri++) {
       let trow = tBody.rows[ri]
       let tag = {}
@@ -2400,10 +2509,10 @@ async function updateEHT () { // 更新EHT
   }
 
   let dataset = []
-  let rows = await xhrSync(url + 'rows')
+  let rows = await xhrSync(url + 'rows' + '.md')
   rows = rows.response
   let rowsPageDOM = new window.DOMParser().parseFromString(rows, 'text/html')
-  let table = rowsPageDOM.querySelector('#wiki-body div table').tBodies[0]
+  let table = rowsPageDOM.querySelector('.markdown-body table').tBodies[0]
   let rowsCount = table.rows.length
   for (let ri = 0; ri < rowsCount; ri++) {
     let trow = table.rows[ri]
@@ -2415,7 +2524,7 @@ async function updateEHT () { // 更新EHT
     row.info = InfoToArray(trow.cells[2])
     row.links = LinksToArray(trow.cells[3])
 
-    let tagRows = await xhrSync(url + row.name)
+    let tagRows = await xhrSync(url + row.name + '.md')
     tagRows = tagRows.response
     row.tags = dealTags(tagRows)
     dataset.push(row)
@@ -2434,48 +2543,6 @@ async function updateEHT () { // 更新EHT
 
 function arrUnique (arr) { // 数组去重
   return [...(new Set(arr))]
-}
-
-function getEditDistance (a, b) { // 获取EditDistance
-  // 来源: https://gist.github.com/andrei-m/982927
-  /*
-  Copyright (c) 2011 Andrei Mackenzie
-  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-  */
-
-  if (a.length === 0) return b.length
-  if (b.length === 0) return a.length
-
-  var matrix = []
-
-  // increment along the first column of each row
-  var i
-  for (i = 0; i <= b.length; i++) {
-    matrix[i] = [i]
-  }
-
-  // increment each column in the first row
-  var j
-  for (j = 0; j <= a.length; j++) {
-    matrix[0][j] = j
-  }
-
-  // Fill in the rest of the matrix
-  for (i = 1; i <= b.length; i++) {
-    for (j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1]
-      } else {
-        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
-          Math.min(matrix[i][j - 1] + 1, // insertion
-            matrix[i - 1][j] + 1)) // deletion
-      }
-    }
-  }
-
-  return matrix[b.length][a.length]
 }
 
 function getProcessImg (process, radius = 16) { // 创建环形进度条
@@ -2644,6 +2711,36 @@ function xhrSync (url, parm = null, opt = {}) {
       }
     })
   })
+}
+
+function getStringSize (_string) {
+  // from: https://stackoverflow.com/a/29955838
+  'use strict'
+
+  var codePoint
+  var accum = 0
+
+  for (var stringIndex = 0, endOfString = _string.length; stringIndex < endOfString; stringIndex++) {
+    codePoint = _string.charCodeAt(stringIndex)
+
+    if (codePoint < 0x100) {
+      accum += 1
+      continue
+    }
+
+    if (codePoint < 0x10000) {
+      accum += 2
+      continue
+    }
+
+    if (codePoint < 0x1000000) {
+      accum += 3
+    } else {
+      accum += 4
+    }
+  }
+
+  return accum
 }
 
 init().then(() => {
