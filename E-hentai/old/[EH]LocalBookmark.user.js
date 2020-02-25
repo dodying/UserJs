@@ -8,14 +8,14 @@
 // @include     http*://e-hentai.org/*
 // @exclude     http*://exhentai.org/s/*
 // @exclude     http*://e-hentai.org/s/*
-// @version     1.03
+// @version     1.04
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_registerMenuCommand
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==

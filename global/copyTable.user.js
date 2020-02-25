@@ -1,16 +1,16 @@
 // ==UserScript==
-// @name        copyTable
+// @name        []copyTable
 // @description copyTable
 // @include     *
-// @version     1.0.3
-// @modified    2019-8-6 13:30:18
+// @version     1.0.5
+// @modified    2020-2-7 11:11:26
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
 // @grant       GM_setClipboard
-// require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 (function () {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [NH]Enhance
-// @version     1.0.3
-// @modified    2019-8-6 13:30:21
+// @version     1.0.4
+// @modified    2020-2-7 11:11:14
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -14,7 +14,7 @@
 // @grant       GM_getResourceText
 // @grant       GM_xmlhttpRequest
 // @connect     *
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1522933172772
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)

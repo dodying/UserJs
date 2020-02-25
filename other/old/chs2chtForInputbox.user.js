@@ -4,13 +4,13 @@
 // @name:zh-CN
 // @description:zh-CN
 // @include     *
-// @version     1
+// @version     1.10
 // @grant       GM_registerMenuCommand
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @require     https://greasyfork.org/scripts/21541/code/chs2cht.js?version=137286
 // @run-at      document-end
 // ==/UserScript==
@@ -24,13 +24,13 @@ document.onkeydown = function (e) {
 }
 */
 GM_registerMenuCommand('转为繁体', function () {
-  tran(true);
-}, 'T');
+  tran(true)
+}, 'T')
 GM_registerMenuCommand('转为简体', function () {
-  tran(false);
-}, 'S');
-function tran(toBig5) {
+  tran(false)
+}, 'S')
+function tran (toBig5) {
   jQuery('input:text,textarea,[contenteditable="true"]').val(function () {
-    return tranStr(this.value, toBig5);
-  });
+    return tranStr(this.value, toBig5)
+  })
 }

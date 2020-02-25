@@ -2,8 +2,8 @@
 // @name        nsane.forums Sharecode
 // @description nsane.forums Sharecode
 // @include     https://www.nsaneforums.com/topic/*
-// @version     1.0.47
-// @modified    2019-8-6 13:30:22
+// @version     1.0.48
+// @modified    2020-2-7 11:10:50
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -11,7 +11,7 @@
 // @run-at      document-end
 // @grant       none
 // @noframes
-// require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js
+// require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 (function () {

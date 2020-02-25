@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [H]CopyInfo
-// @version     1.01.4
+// @version     1.01.5
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -10,7 +10,7 @@
 // @include     http*://www.caribbeancom.com/moviepages/*
 // @include     http*://www.caribbeancompr.com/moviepages/*
 // @grant       GM_setClipboard
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @run-at      document-end
 // ==/UserScript==
 (function () {
