@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name        []Meta
+// @name        []meta
 // @description
-// @version     1.10
+// @version     1.11
 // @grant       GM_xmlhttpRequest
 // @grant       GM_registerMenuCommand
 // @grant       GM_setValue

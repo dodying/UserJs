@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name        []Highlight
+// @name        []highlight
 // @include     *
-// @version     1.0.1
+// @version     1.0.2
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues

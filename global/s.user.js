@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        []S
+// @name        []https
 // @description
 // @include     http://*
 // @include     https://*
-// @version     1.0.1
+// @version     1.0.7
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -40,7 +40,7 @@
         method: 'HEAD',
         timeout: 5 * 1000,
         onload: function (res) {
-          if (new URL(res.finalUrl).protocol === 'https:' && res.status < 400) window.location.href = res.finalUrl
+          if (new URL(res.finalUrl).protocol === 'https:' && res.status === 200) window.location.href = res.finalUrl
         }
       })
     }

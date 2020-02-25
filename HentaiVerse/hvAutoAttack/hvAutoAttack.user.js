@@ -2529,7 +2529,7 @@ function dropMonitor (battleLog) { // 掉落监测
     '#Credit': 0
   }
   var item, name, amount, regexp
-  for (var i = 0; ; i++) {
+  for (var i = 0; i < battleLog.length; i++) {
     if (/^You gain \d+ (EXP|Credit)/.test(battleLog[i].textContent)) {
       regexp = battleLog[i].textContent.match(/^You gain (\d+) (EXP|Credit)/)
       if (regexp) drop['#' + regexp[2]] += regexp[1] * 1

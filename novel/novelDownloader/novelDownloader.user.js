@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name        [Novel]Downloader
 // @description novelDownloaderHelper, press key "shift+d" to show up.
-// @version     1.45.23
-// @modified    2019-8-6 13:30:24
+// @version     1.45.30
+// @modified    2020-2-24 11:31:32
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.0.0/jszip.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
@@ -218,6 +218,8 @@
 // @include     http://www.6mxs.com/pages.asp?id=*
 // @include     http://www.3mxs.com/novel.asp?id=*
 // @include     http://www.3mxs.com/pages.asp?id=*
+// @include     http://www.iqqxs.com/iqq.asp?id=*
+// @include     http://www.iqqxs.com/iqqxs.asp?id=*
 // @include     http://www.bsl8.la/read/*
 // @include     http://www.fafaxs.cc/read/*
 // @include     http://www.shushuwu.cc/novel/*
@@ -1622,6 +1624,9 @@ function addRule () {
   addIRule('www.6mxs.com', '流氓小说网', '.lookmc>strong', '.mread:eq(0) a', '', true)
   addCRule('www.6mxs.com', 'strong', '.ll', 1)
   addRRule('www.6mxs.com', '<img src="(\\w+)/(\\w+).jpg">|||{$2}', '{ai}|||爱', '{ba}|||巴', '{bang}|||棒', '{bao}|||饱', '{bi}|||逼', '{bi2}|||屄', '{bo}|||勃', '{cao}|||操', '{cha}|||插', '{chan}|||缠', '{chao}|||潮', '{chi}|||耻', '{chou}|||抽', '{chuan}|||喘', '{chuang}|||床', '{chun}|||春', '{chun2}|||唇', '{cu}|||粗', '{cuo}|||搓', '{diao}|||屌', '{dong}|||洞', '{dong2}|||胴', '{fei}|||肥', '{feng}|||缝', '{fu}|||腹', '{gan}|||感', '{gang}|||肛', '{gao}|||高', '{gao2}|||睾', '{gen}|||根', '{gong}|||宫', '{gu}|||股', '{gui}|||龟', '{gun}|||棍', '{huan}|||欢', '{ji}|||激', '{ji2}|||鸡', '{jian}|||贱', '{jian2}|||奸', '{jiao}|||交', '{jing}|||精', '{ku}|||裤', '{kua}|||胯', '{lang}|||浪', '{liao}|||撩', '{liu}|||流', '{lou}|||露', '{lu}|||撸', '{luan}|||乱', '{luo}|||裸', '{man}|||满', '{mao}|||毛', '{mi}|||密', '{mi2}|||迷', '{min}|||敏', '{nai}|||奶', '{nen}|||嫩', '{niang}|||娘', '{niao}|||尿', '{nong}|||弄', '{nue}|||虐', '{nv}|||女', '{pen}|||喷', '{pi}|||屁', '{qi}|||骑', '{ri}|||日', '{rou}|||肉', '{rou2}|||揉', '{ru}|||乳', '{ru2}|||蠕', '{rui}|||蕊', '{sa2i}|||塞', '{sao}|||骚', '{se}|||色', '{she}|||射', '{shen}|||身', '{shi}|||湿', '{shu}|||熟', '{shuang}|||爽', '{shun}|||吮', '{tian}|||舔', '{ting}|||挺', '{tun}|||吞', '{tun2}|||臀', '{tuo}|||脱', '{xi}|||吸', '{xie}|||泄', '{xing}|||性', '{xiong}|||胸', '{xue}|||穴', '{ya}|||压', '{yang}|||阳', '{yang2}|||痒', '{yao}|||腰', '{ye}|||液', '{yi}|||旖', '{yi2}|||衣', '{yin}|||阴', '{yin2}|||淫', '{ying}|||迎', '{you}|||诱', '{yu}|||欲', '{zhang}|||胀', '{zuo}|||坐')
+  addIRule('www.iqqxs.com', '亲亲小说网', '.lookmc>strong', '[href*="iqqxs.asp?id="]', '', true)
+  addCRule('www.iqqxs.com', 'strong', '.content', 1)
+  addRRule('www.iqqxs.com', '<img src="(\\w+)/(\\w+).jpg">|||{$2}', '{ai}|||爱', '{ba}|||巴', '{bang}|||棒', '{bao}|||饱', '{bi}|||逼', '{bi2}|||屄', '{bo}|||勃', '{cao}|||操', '{cha}|||插', '{chan}|||缠', '{chao}|||潮', '{chi}|||耻', '{chou}|||抽', '{chuan}|||喘', '{chuang}|||床', '{chun}|||春', '{chun2}|||唇', '{cu}|||粗', '{cuo}|||搓', '{diao}|||屌', '{dong}|||洞', '{dong2}|||胴', '{fei}|||肥', '{feng}|||缝', '{fu}|||腹', '{gan}|||感', '{gang}|||肛', '{gao}|||高', '{gao2}|||睾', '{gen}|||根', '{gong}|||宫', '{gu}|||股', '{gui}|||龟', '{gun}|||棍', '{huan}|||欢', '{ji}|||激', '{ji2}|||鸡', '{jian}|||贱', '{jian2}|||奸', '{jiao}|||交', '{jing}|||精', '{ku}|||裤', '{kua}|||胯', '{lang}|||浪', '{liao}|||撩', '{liu}|||流', '{lou}|||露', '{lu}|||撸', '{luan}|||乱', '{luo}|||裸', '{man}|||满', '{mao}|||毛', '{mi}|||密', '{mi2}|||迷', '{min}|||敏', '{nai}|||奶', '{nen}|||嫩', '{niang}|||娘', '{niao}|||尿', '{nong}|||弄', '{nue}|||虐', '{nv}|||女', '{pen}|||喷', '{pi}|||屁', '{qi}|||骑', '{ri}|||日', '{rou}|||肉', '{rou2}|||揉', '{ru}|||乳', '{ru2}|||蠕', '{rui}|||蕊', '{sa2i}|||塞', '{sao}|||骚', '{se}|||色', '{she}|||射', '{shen}|||身', '{shi}|||湿', '{shu}|||熟', '{shuang}|||爽', '{shun}|||吮', '{tian}|||舔', '{ting}|||挺', '{tun}|||吞', '{tun2}|||臀', '{tuo}|||脱', '{xi}|||吸', '{xie}|||泄', '{xing}|||性', '{xiong}|||胸', '{xue}|||穴', '{ya}|||压', '{yang}|||阳', '{yang2}|||痒', '{yao}|||腰', '{ye}|||液', '{yi}|||旖', '{yi2}|||衣', '{yin}|||阴', '{yin2}|||淫', '{ying}|||迎', '{you}|||诱', '{yu}|||欲', '{zhang}|||胀', '{zuo}|||坐', '{yan}|||艳', '{jin}|||禁')
   addIRule('www.3mxs.com', '三毛小说网', '.lookmc>strong', '.mread:eq(0) a', '', true)
   addCRule('www.3mxs.com', 'strong', '.ll', 1)
   addRRule('www.3mxs.com', '<img src="(\\w+)/(\\w+).jpg">|||{$2}', '{ai}|||爱', '{ba}|||巴', '{bang}|||棒', '{bao}|||饱', '{bi}|||逼', '{bi2}|||屄', '{bo}|||勃', '{cao}|||操', '{cha}|||插', '{chan}|||缠', '{chao}|||潮', '{chi}|||耻', '{chou}|||抽', '{chuan}|||喘', '{chuang}|||床', '{chun}|||春', '{chun2}|||唇', '{cu}|||粗', '{cuo}|||搓', '{diao}|||屌', '{dong}|||洞', '{dong2}|||胴', '{fei}|||肥', '{feng}|||缝', '{fu}|||腹', '{gan}|||感', '{gang}|||肛', '{gao}|||高', '{gao2}|||睾', '{gen}|||根', '{gong}|||宫', '{gu}|||股', '{gui}|||龟', '{gun}|||棍', '{huan}|||欢', '{ji}|||激', '{ji2}|||鸡', '{jian}|||贱', '{jian2}|||奸', '{jiao}|||交', '{jing}|||精', '{ku}|||裤', '{kua}|||胯', '{lang}|||浪', '{liao}|||撩', '{liu}|||流', '{lou}|||露', '{lu}|||撸', '{luan}|||乱', '{luo}|||裸', '{man}|||满', '{mao}|||毛', '{mi}|||密', '{mi2}|||迷', '{min}|||敏', '{nai}|||奶', '{nen}|||嫩', '{niang}|||娘', '{niao}|||尿', '{nong}|||弄', '{nue}|||虐', '{nv}|||女', '{pen}|||喷', '{pi}|||屁', '{qi}|||骑', '{ri}|||日', '{rou}|||肉', '{rou2}|||揉', '{ru}|||乳', '{ru2}|||蠕', '{rui}|||蕊', '{sa2i}|||塞', '{sao}|||骚', '{se}|||色', '{she}|||射', '{shen}|||身', '{shi}|||湿', '{shu}|||熟', '{shuang}|||爽', '{shun}|||吮', '{tian}|||舔', '{ting}|||挺', '{tun}|||吞', '{tun2}|||臀', '{tuo}|||脱', '{xi}|||吸', '{xie}|||泄', '{xing}|||性', '{xiong}|||胸', '{xue}|||穴', '{ya}|||压', '{yang}|||阳', '{yang2}|||痒', '{yao}|||腰', '{ye}|||液', '{yi}|||旖', '{yi2}|||衣', '{yin}|||阴', '{yin2}|||淫', '{ying}|||迎', '{you}|||诱', '{yu}|||欲', '{zhang}|||胀', '{zuo}|||坐')
@@ -2311,7 +2316,7 @@ function wordSection (word) { // 文本强制分段-测试功能
   if ($('.ndConfig[name=section]').val() === '2') word = word.replace(/([\r\n]+\s+)/g, '').replace(/[\r\n]+/g, '')
   var arr = word.split(/[\r\n]+/)
   var lastWord, i, j
-  for (i = 0; i < arr.length; i++) {
+  for (i = 0; i < arr.length;) {
     // if (arr[i].length <= 30) continue;
     var arrNew = arr[i].split('')
     for (j = 1; j < arrNew.length; j++) {

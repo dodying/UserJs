@@ -1,12 +1,13 @@
 // ==UserScript==
-// @name        []Style
-// @version     1.00.2
+// @name        []style
+// @version     1.0.35
 // @grant       none
 // @author      dodying
 // @namespace   https://github.com/dodying/
 // @supportURL  https://github.com/dodying//UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @run-at      document-end
+// @noframes
 // @include     *
 // ==/UserScript==
 (function () {
@@ -17,8 +18,8 @@
         {
           url: '.*',
           style: [
-            'a:visited{color:rgb(35,173,173);}',
-            '::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track-piece{background-color:transparent}body::-webkit-scrollbar-track-piece{background-color:white}::-webkit-scrollbar-thumb{background-color:#7d7d7d;border-radius:3px}::-webkit-scrollbar-thumb:hover{background-color:#999}::-webkit-scrollbar-thumb:active{background-color:#666}'
+            'a:visited{color:rgb(35,173,173)!important;}',
+            '::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track-piece{background-color:transparent}body::-webkit-scrollbar-track-piece{background-color:white}::-webkit-scrollbar-thumb{background-color:#7d7d7d;border-radius:3px;min-height:10vh;}::-webkit-scrollbar-thumb:hover{background-color:#999}::-webkit-scrollbar-thumb:active{background-color:#666}'
           ]
         },
         {
@@ -47,6 +48,31 @@
             '#bilibiliPlayer.mode-webfullscreen .bilibili-player-video-sendbar .bilibili-player-color-picker-container {height:208px;border-radius:5px;top:100%}',
             '#bilibiliPlayer.mode-webfullscreen .bilibili-player-video-info-container {top:40px}',
             '#bilibiliPlayer.mode-webfullscreen .bilibili-player-video-float-lastplay {bottom:30px}'
+          ]
+        },
+        {
+          url: 'live\\.bilibili\\.com/(\\d+)',
+          style: [
+            '#sidebar-vm,#gift-control-vm,#sections-vm,#link-navbar-vm,#link-footer-vm,.announcement-wrapper,#activity-welcome-area-vm{display:none!important;}'
+          ]
+        },
+        {
+          url: 'manhua\\.dmzj\\.com/.*?/\\d+.shtml',
+          style: [
+            'img[id^="img_"]{width:1169px;}'
+          ]
+        },
+        {
+          url: 'manhuadui\\.com/manhua/.*?/\\d+.html',
+          style: [
+            '#images>img{width:960px;}'
+          ]
+        },
+        {
+          url: 'sehuatang\\.org/thread-(\\d+)-1-1.html',
+          style: [
+            '.pls{display:none;}',
+            'ignore_js_op>img{width:100%;height:auto}'
           ]
         }
       ]

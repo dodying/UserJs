@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        prettyJSON
+// @name        []prettyJSON
 // @description prettyJSON
 // @include     *
-// @version     1.0.37
-// @modified    2019-8-6 13:30:18
+// @version     1.0.38
+// @modified    2019-11-24 20:03:53
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
