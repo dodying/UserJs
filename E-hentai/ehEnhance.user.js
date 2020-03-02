@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.806
-// @modified    2020-3-1 14:17:57
+// @version     1.16.888
+// @modified    2020-3-2 14:34:06
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -219,16 +219,15 @@ async function init () {
       await updateEHT()
     } catch (err) { }
   }
-  if (GM_getValue('EHT')) {
-    G.EHT = JSON.parse(GM_getValue('EHT')).dataset
+  if (GM_getValue('EHT') && JSON.parse(GM_getValue('EHT')).version === 5) {
+    G.EHT = JSON.parse(GM_getValue('EHT')).data
   } else {
     try {
-      let res = await xhrSync('https://github.com/dodying/UserJs/raw/master/E-hentai/EHT.json')
-      let EHT = res.response
-      GM_setValue('EHT', EHT)
-      G.EHT = JSON.parse(EHT).dataset
+      await updateEHT()
+      G.EHT = JSON.parse(GM_getValue('EHT')).data
     } catch (error) {
-      window.alert('Load EHT.json failed, please reload this page')
+      console.log(error)
+      window.alert('update EHT failed, please reload this page')
       return
     }
   }
@@ -245,11 +244,14 @@ async function init () {
       let recordEHDUrl = [
         'let __record = false',
         'console.log = function (...msg) {',
-        `  if (msg.length && typeof msg[0] === 'string' && msg[0].match(/\\[EHD\\] #\\d+: Network Error/)) {`,
+        '  if (!msg || !msg.length) return',
+        `  if (typeof msg[0] === 'string' && msg[0].match(/\\[EHD\\] #\\d+: Network Error/)) {`,
         '    __record = true',
-        '  } else if (__record && msg.length === 10) {',
+        '  } else if (__record && msg.filter(i => i.toString().match(/^https?:/)).length) {',
+        '    let url = msg.filter(i => i.toString().match(/^https?:/))[0]',
+        '    window.console.log("Request Failed: " + url)',
         `    let record = GM_getValue('EHD_record', [])`,
-        `    let host = new URL(msg[8]).hostname.replace(/\\d+$/g, '')`,
+        `    let host = new URL(url).hostname.replace(/\\d+$/g, '')`,
         '    if (!record.includes(host)) {',
         '      record.push(host)',
         `      GM_setValue('EHD_record', record)`,
@@ -638,7 +640,7 @@ async function autoDownload (isEnd) { // 自动开始下载
 
 function autoComplete () { // 自动填充
   let main = (G.config['acItem'] || 'language,artist,female,male,parody,character,group,misc').split(',')
-  main = G.EHT.filter(i => main.includes(i.name))
+  main = G.EHT.filter(i => main.includes(i.namespace))
   $('<div class="ehDatalist"><ol start="0"></ol></div>').on('click', 'li', function (e) {
     let value = $(SEL.EH.search.keyword).val().split(/\s+/)
     value[value.length - 1] = e.target.textContent
@@ -695,9 +697,11 @@ function autoComplete () { // 自动填充
       lastValue = value
       value = new RegExp(value, 'i')
       main.forEach(i => {
-        i.tags.filter(j => j.name && (j.name.match(value) || combineText(j.cname, true).match(value))).forEach(j => {
-          $(`<li cname="${combineText(j.cname, true)}">${i.name}:"${j.name}"$</li>`).appendTo('.ehDatalist>ol')
-        })
+        for (let key in i.data) {
+          if (key.match(value) || i.data[key].name.match(value)) {
+            $(`<li cname="${i.data[key].name}">${i.namespace}:"${key}"$</li>`).appendTo('.ehDatalist>ol')
+          }
+        }
       })
       $('.ehDatalist').show()
     }
@@ -1335,18 +1339,6 @@ async function checkImageSize () { // 检查图片尺寸
   }
 }
 
-function combineText (arr, textOnly = undefined) {
-  return arr instanceof Array ? arr.map(i => {
-    if (i.type === 0) {
-      return i.text
-    } else if (!textOnly && i.type === 2) {
-      return `"url("${i.src.replace(/http.?:/g, '')}")"`
-    } else {
-      return null
-    }
-  }).filter(i => i).join('\\A') : ''
-}
-
 function copyInfo () { // 复制信息
   if ($(SEL.EH.info.title).text().match(/\[(.*?)\]/) && $(SEL.EH.info.titleJp).text().match(/\[(.*?)\]/)) { // artist
     var name = $(SEL.EH.info.title).text().match(/\[(.*?)\]/)[1]
@@ -1450,28 +1442,39 @@ function downloadRemove (id) {
   }
 }
 
-function findData (main, sub, textOnly = true) {
-  let data = G.EHT.filter(i => i.name === main)
-  if (data.length === 0 || data[0].tags.length === 0) return {}
+function findData (main, sub, textOnly = true) { // TODO textOnly
+  let data = G.EHT.filter(i => i.namespace === main)
+  if (data.length === 0) return {}
   if (sub === undefined) {
     return {
       name: main,
-      cname: combineText(data[0].cname, textOnly),
-      info: combineText(data[0].info, textOnly)
+      cname: data[0].frontMatters.name,
+      info: data[0].frontMatters.description
     }
   }
-  let data1 = data[0].tags.filter(i => i.name === sub.replace(/_/g, ' '))
-  if (data1.length === 0) {
+  let data1 = data[0].data[sub.replace(/_/g, ' ')]
+  if (!data1) {
     if (sub.match(' \\| ')) {
       let arr = sub.split(' | ').map(i => i.replace(/_/g, ' '))
-      data1 = data[0].tags.filter(i => arr.includes(i.name))
+      data1 = data[0].data[arr[0]]
     }
   }
-  return data1.length ? {
-    name: main === 'misc' ? sub : main + ':' + sub,
-    cname: combineText(data1[0].cname, textOnly),
-    info: combineText(data1[0].info, textOnly)
-  } : {}
+  if (data1) {
+    let info = data1.intro
+    let cname = data1.name
+    if (textOnly) {
+      info = info.replace(/!\[(.*?)\]\((.*?)\)/g, '').replace(G.emojiRegExp, '')
+      cname = cname.replace(/!\[(.*?)\]\((.*?)\)/g, '').replace(G.emojiRegExp, '')
+    }
+    console.log({ info, cname })
+    return {
+      name: main === 'misc' ? sub : main + ':' + sub,
+      cname: cname,
+      info: info
+    }
+  } else {
+    return {}
+  }
 }
 
 async function getEConfig (key) { // 获取EH设置
@@ -2135,7 +2138,7 @@ function showConfig () { // 显示设置
         let timeText = d.toLocaleString(navigator.language, {
           hour12: false
         })
-        let length = G.EHT.map(i => i.tags).reduce((a, c) => [].concat(a, c)).length
+        let length = G.EHT.map(i => i.count).reduce((a, c) => a + c)
         $(e.target).attr('title', `当前总数: <span class="ehHighlight">${length}</span><hr><time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`)
       }
     })
@@ -2381,9 +2384,23 @@ function tagTranslate () { // 标签翻译
     ...data.map(i => SEL.EH.info.tagFromName(i.name) + '{font-size:0;}'),
     SEL.EH.info.tag + '::before{text-decoration:line-through;}'
   ]
+  let dealWithContent = (text) => {
+    let arr = text.split(/(!\[.*?\]\(.*?\))/)
+    console.log(arr)
+    let output = []
+    for (let i of arr) {
+      if (i.match(/!\[(.*?)\]\((.*?)\)/)) {
+        let match = i.match(/!\[(.*?)\]\((.*?)\)/)
+        output.push(`url(${match[2].replace(/^# "(.*)"$/, '$1')})`)
+      } else {
+        output.push(`"${window.CSS.escape(i)}"`)
+      }
+    }
+    return output.join('')
+  }
   data.forEach(i => {
-    css.push(SEL.EH.info.tagFromName(i.name) + `::before{content:"${i.cname}"}`)
-    if (i.info) css.push(SEL.EH.info.tagFromName(i.name) + `::after{content:"${i.info}"}`)
+    css.push(SEL.EH.info.tagFromName(i.name) + `::before{content:${dealWithContent(i.cname)}}`)
+    if (i.info) css.push(SEL.EH.info.tagFromName(i.name) + `::after{content:${dealWithContent(i.info)}}`)
   })
 
   $('<style></style>').text(css.join('\n')).appendTo('head')
@@ -2441,102 +2458,14 @@ async function updateEHD () { // 更新EHD
   GM_setValue('EHD_checkTime', new Date().getTime())
 }
 
-async function updateEHT () { // 更新EHT // TODO 直接使用release的db.raw.json
-  let url = 'https://github.com/EhTagTranslation/Database/blob/master/database/'
-  let InfoToArray = function (infoDom) {
-    let arr = []
-    if (infoDom.childNodes !== undefined) {
-      for (let ci = 0, cilen = infoDom.childNodes.length; ci < cilen; ci++) {
-        let node = infoDom.childNodes[ci]
-        let InfoObj = {}
-        switch (node.nodeName) {
-          case '#text':
-            InfoObj.type = 0
-            if (node.textContent === '\n') continue
-            InfoObj.text = node.textContent.replace('"', '\\"')
-            break
-          case 'BR':
-            InfoObj.type = 1
-            break
-          case 'IMG':
-            InfoObj.type = 2
-            let osrc = node.getAttribute('data-canonical-src')
-            if (osrc) {
-              InfoObj.src = osrc
-            } else if (node.title.length > 0) {
-              InfoObj.src = node.title
-            } else if (node.src.length > 0) {
-              InfoObj.src = node.src
-            }
-            InfoObj.alt = node.alt
-            break
-          default:
-            continue
-        }
-        arr.push(InfoObj)
-      }
-    }
-    return arr
-  }
-  let LinksToArray = function (linksDom) {
-    let arr = []
-    let as = linksDom.querySelectorAll('a')
-    for (let ai = 0; ai < as.length; ai++) {
-      let a = as[ai]
-      arr.push({
-        text: a.textContent || '',
-        href: a.href || '',
-        title: a.title || ''
-      })
-    }
-    return arr
-  }
-  let dealTags = function (response) {
-    let rowTags = []
-    let PageDOM = new window.DOMParser().parseFromString(response, 'text/html')
-    let tBody = PageDOM.querySelector('.markdown-body [data-table-type="yaml-metadata"]+table').tBodies[0]
-    for (let ri = 0, rilen = tBody.rows.length; ri < rilen; ri++) {
-      let trow = tBody.rows[ri]
-      let tag = {}
-      if (trow.cells.length > 2) {
-        tag.name = trow.cells[0].textContent.trim()
-        tag.cname = InfoToArray(trow.cells[1])
-        tag.info = InfoToArray(trow.cells[2])
-        tag.links = LinksToArray(trow.cells[3])
-        tag.type = tag.name.replace(/\s/ig, '').length < 1 ? 1 : 0
-        rowTags.push(tag)
-      }
-    }
-    return rowTags
-  }
+async function updateEHT () {
+  let name = 'db.raw.json'
+  let url = 'https://api.github.com/repos/EhTagTranslation/Database/releases'
+  let res = await xhrSync(url, null, { responseType: 'json' })
+  let url1 = res.response.filter(i => i.assets.filter(i => i.name === name).length)[0].assets.filter(i => i.name === name)[0].browser_download_url
+  let res1 = await xhrSync(url1)
 
-  let dataset = []
-  let rows = await xhrSync(url + 'rows' + '.md')
-  rows = rows.response
-  let rowsPageDOM = new window.DOMParser().parseFromString(rows, 'text/html')
-  let table = rowsPageDOM.querySelector('.markdown-body [data-table-type="yaml-metadata"]+table').tBodies[0]
-  let rowsCount = table.rows.length
-  for (let ri = 0; ri < rowsCount; ri++) {
-    let trow = table.rows[ri]
-    let row = {
-      tags: []
-    }
-    row.name = trow.cells[0].textContent.trim()
-    row.cname = InfoToArray(trow.cells[1])
-    row.info = InfoToArray(trow.cells[2])
-    row.links = LinksToArray(trow.cells[3])
-
-    let tagRows = await xhrSync(url + row.name + '.md')
-    tagRows = tagRows.response
-    row.tags = dealTags(tagRows)
-    dataset.push(row)
-  }
-
-  GM_setValue('EHT', JSON.stringify({
-    'database-structure-version': 4,
-    date: new Date().getTime(),
-    dataset: dataset
-  }))
+  GM_setValue('EHT', res1.response)
   setNotification('EhTagTranslator has been up-to-date')
   GM_setValue('EHT_checkTime', new Date().getTime())
 }
