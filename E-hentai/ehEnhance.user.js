@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.888
-// @modified    2020-3-2 14:34:06
+// @version     1.16.890
+// @modified    2020-3-2 14:58:03
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1442,7 +1442,7 @@ function downloadRemove (id) {
   }
 }
 
-function findData (main, sub, textOnly = true) { // TODO textOnly
+function findData (main, sub, textOnly = true) {
   let data = G.EHT.filter(i => i.namespace === main)
   if (data.length === 0) return {}
   if (sub === undefined) {
@@ -1466,7 +1466,6 @@ function findData (main, sub, textOnly = true) { // TODO textOnly
       info = info.replace(/!\[(.*?)\]\((.*?)\)/g, '').replace(G.emojiRegExp, '')
       cname = cname.replace(/!\[(.*?)\]\((.*?)\)/g, '').replace(G.emojiRegExp, '')
     }
-    console.log({ info, cname })
     return {
       name: main === 'misc' ? sub : main + ':' + sub,
       cname: cname,
