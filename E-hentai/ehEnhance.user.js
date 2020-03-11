@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.890
-// @modified    2020-3-2 14:58:03
+// @version     1.16.896
+// @modified    2020-3-11 11:42:25
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -44,14 +44,14 @@
 /* eslint-disable no-debugger */
 (function () {
   /* eslint-disable no-new-func */
-  let obj = {}
-  let diffFunc = new Function('module', GM_getResourceText('diff'))
-  diffFunc(obj)
-  let diff = obj.exports
-  Object.assign(window, { diff })
-})()
+  const obj = {};
+  const diffFunc = new Function('module', GM_getResourceText('diff'));
+  diffFunc(obj);
+  const diff = obj.exports;
+  Object.assign(window, { diff });
+})();
 
-let diff = window.diff
+const diff = window.diff;
 
 const SEL = {
   EH: {
@@ -61,7 +61,7 @@ const SEL = {
       pageCur: '.ptds:eq(0)',
       pages: '.ptt td:gt(0):lt(-1)>a'
     },
-    search: {// 搜索页
+    search: { // 搜索页
       checker: '.ido', // 检查是否为搜索页
       displayMode: '#dms select',
 
@@ -86,7 +86,7 @@ const SEL = {
       galleryA: '[href*="hentai.org/g/"]'
 
     },
-    info: {// 信息页
+    info: { // 信息页
       checker: '#gdt,.d', // 检查是否为信息页
       urlMatch: /^https?:\/\/e[-x]hentai\.org\/g\/\d+\/[a-z0-9]+/,
 
@@ -116,7 +116,7 @@ const SEL = {
 
       deleted: '.d'
     },
-    setting: {// 设置页
+    setting: { // 设置页
       // changeEConfig
       form: 'form:has(#apply)'
     }
@@ -128,7 +128,7 @@ const SEL = {
     pageRange: 'label:contains("Pages Range")>input'
     // download: '.ehD-box>.g2:eq(0)'
   }
-}
+};
 
 const G = { // 全局变量
   debug: false,
@@ -184,91 +184,91 @@ const G = { // 全局变量
   downloadSizeChanged: false,
   taskInterval: null,
   this: (() => {
-    let used = ['addEventListener', 'alert', 'applicationCache', 'atob', 'blur', 'browser', 'btoa', 'caches', 'cancelAnimationFrame', 'cancelIdleCallback', 'captureEvents', 'chrome', 'clearInterval', 'clearTimeout', 'clientInformation', 'close', 'closed', 'confirm', 'createImageBitmap', 'crypto', 'customElements', 'decodeURI', 'decodeURI', 'decodeURIComponent', 'defaultStatus', 'defaultstatus', 'devicePixelRatio', 'dispatchEvent', 'document', 'encodeURI', 'encodeURIComponent', 'eval', 'external', 'fetch', 'find', 'focus', 'frameElement', 'frames', 'getComputedStyle', 'getSelection', 'history', 'indexedDB', 'innerHeight', 'innerWidth', 'isFinite', 'isNaN', 'isSecureContext', 'length', 'localStorage', 'location', 'locationbar', 'matchMedia', 'menubar', 'moveBy', 'moveTo', 'name', 'navigator', 'onabort', 'onafterprint', 'onanimationend', 'onanimationiteration', 'onanimationstart', 'onappinstalled', 'onauxclick', 'onbeforeinstallprompt', 'onbeforeprint', 'onbeforeunload', 'onblur', 'oncancel', 'oncanplay', 'oncanplaythrough', 'onchange', 'onclick', 'onclose', 'oncontextmenu', 'oncuechange', 'ondblclick', 'ondevicemotion', 'ondeviceorientation', 'ondeviceorientationabsolute', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'ondurationchange', 'onemptied', 'onended', 'onerror', 'onfocus', 'ongotpointercapture', 'onhashchange', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress', 'onkeyup', 'onlanguagechange', 'onload', 'onloadeddata', 'onloadedmetadata', 'onloadstart', 'onlostpointercapture', 'onmessage', 'onmessageerror', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onoffline', 'ononline', 'onpagehide', 'onpageshow', 'onpause', 'onplay', 'onplaying', 'onpointercancel', 'onpointerdown', 'onpointerenter', 'onpointerleave', 'onpointermove', 'onpointerout', 'onpointerover', 'onpointerup', 'onpopstate', 'onprogress', 'onratechange', 'onrejectionhandled', 'onreset', 'onresize', 'onscroll', 'onsearch', 'onseeked', 'onseeking', 'onselect', 'onstalled', 'onstorage', 'onsubmit', 'onsuspend', 'ontimeupdate', 'ontoggle', 'ontransitionend', 'onunhandledrejection', 'onunload', 'onvolumechange', 'onwaiting', 'onwebkitanimationend', 'onwebkitanimationiteration', 'onwebkitanimationstart', 'onwebkittransitionend', 'onwheel', 'open', 'openDatabase', 'opener', 'origin', 'outerHeight', 'outerWidth', 'pageXOffset', 'pageYOffset', 'parent', 'parseFloat', 'parseInt', 'performance', 'personalbar', 'postMessage', 'print', 'prompt', 'releaseEvents', 'removeEventListener', 'requestAnimationFrame', 'requestIdleCallback', 'resizeBy', 'resizeTo', 'screen', 'screenLeft', 'screenTop', 'screenX', 'screenY', 'scroll', 'scrollBy', 'scrollTo', 'scrollX', 'scrollY', 'scrollbars', 'self', 'sessionStorage', 'setInterval', 'setTimeout', 'speechSynthesis', 'status', 'statusbar', 'stop', 'styleMedia', 'toolbar', 'top', 'visualViewport', 'webkitCancelAnimationFrame', 'webkitRequestAnimationFrame', 'webkitRequestFileSystem', 'webkitResolveLocalFileSystemURL', 'webkitStorageInfo']
+    const used = ['addEventListener', 'alert', 'applicationCache', 'atob', 'blur', 'browser', 'btoa', 'caches', 'cancelAnimationFrame', 'cancelIdleCallback', 'captureEvents', 'chrome', 'clearInterval', 'clearTimeout', 'clientInformation', 'close', 'closed', 'confirm', 'createImageBitmap', 'crypto', 'customElements', 'decodeURI', 'decodeURI', 'decodeURIComponent', 'defaultStatus', 'defaultstatus', 'devicePixelRatio', 'dispatchEvent', 'document', 'encodeURI', 'encodeURIComponent', 'eval', 'external', 'fetch', 'find', 'focus', 'frameElement', 'frames', 'getComputedStyle', 'getSelection', 'history', 'indexedDB', 'innerHeight', 'innerWidth', 'isFinite', 'isNaN', 'isSecureContext', 'length', 'localStorage', 'location', 'locationbar', 'matchMedia', 'menubar', 'moveBy', 'moveTo', 'name', 'navigator', 'onabort', 'onafterprint', 'onanimationend', 'onanimationiteration', 'onanimationstart', 'onappinstalled', 'onauxclick', 'onbeforeinstallprompt', 'onbeforeprint', 'onbeforeunload', 'onblur', 'oncancel', 'oncanplay', 'oncanplaythrough', 'onchange', 'onclick', 'onclose', 'oncontextmenu', 'oncuechange', 'ondblclick', 'ondevicemotion', 'ondeviceorientation', 'ondeviceorientationabsolute', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'ondurationchange', 'onemptied', 'onended', 'onerror', 'onfocus', 'ongotpointercapture', 'onhashchange', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress', 'onkeyup', 'onlanguagechange', 'onload', 'onloadeddata', 'onloadedmetadata', 'onloadstart', 'onlostpointercapture', 'onmessage', 'onmessageerror', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onoffline', 'ononline', 'onpagehide', 'onpageshow', 'onpause', 'onplay', 'onplaying', 'onpointercancel', 'onpointerdown', 'onpointerenter', 'onpointerleave', 'onpointermove', 'onpointerout', 'onpointerover', 'onpointerup', 'onpopstate', 'onprogress', 'onratechange', 'onrejectionhandled', 'onreset', 'onresize', 'onscroll', 'onsearch', 'onseeked', 'onseeking', 'onselect', 'onstalled', 'onstorage', 'onsubmit', 'onsuspend', 'ontimeupdate', 'ontoggle', 'ontransitionend', 'onunhandledrejection', 'onunload', 'onvolumechange', 'onwaiting', 'onwebkitanimationend', 'onwebkitanimationiteration', 'onwebkitanimationstart', 'onwebkittransitionend', 'onwheel', 'open', 'openDatabase', 'opener', 'origin', 'outerHeight', 'outerWidth', 'pageXOffset', 'pageYOffset', 'parent', 'parseFloat', 'parseInt', 'performance', 'personalbar', 'postMessage', 'print', 'prompt', 'releaseEvents', 'removeEventListener', 'requestAnimationFrame', 'requestIdleCallback', 'resizeBy', 'resizeTo', 'screen', 'screenLeft', 'screenTop', 'screenX', 'screenY', 'scroll', 'scrollBy', 'scrollTo', 'scrollX', 'scrollY', 'scrollbars', 'self', 'sessionStorage', 'setInterval', 'setTimeout', 'speechSynthesis', 'status', 'statusbar', 'stop', 'styleMedia', 'toolbar', 'top', 'visualViewport', 'webkitCancelAnimationFrame', 'webkitRequestAnimationFrame', 'webkitRequestFileSystem', 'webkitResolveLocalFileSystemURL', 'webkitStorageInfo'];
 
-    let variabled = {}
-    for (let i in this) {
+    const variabled = {};
+    for (const i in this) {
       if (!used.includes(i)) {
-        variabled[i] = this[i]
+        variabled[i] = this[i];
       }
     }
-    return variabled
+    return variabled;
   })(),
   emojiRegExp: /\u{2139}|[\u{2194}-\u{2199}]|[\u{21A9}-\u{21AA}]|[\u{231A}-\u{231B}]|\u{2328}|\u{23CF}|[\u{23E9}-\u{23F3}]|[\u{23F8}-\u{23FA}]|\u{24C2}|[\u{25AA}-\u{25AB}]|\u{25B6}|\u{25C0}|[\u{25FB}-\u{25FE}]|[\u{2600}-\u{2604}]|\u{260E}|\u{2611}|[\u{2614}-\u{2615}]|\u{2618}|\u{261D}|\u{2620}|[\u{2622}-\u{2623}]|\u{2626}|\u{262A}|[\u{262E}-\u{262F}]|[\u{2638}-\u{263A}]|[\u{2648}-\u{2653}]|\u{2660}|\u{2663}|\u{2666}|\u{2668}|\u{267B}|\u{267F}|[\u{2692}-\u{2697}]|\u{2699}|[\u{269B}-\u{269C}]|[\u{26A0}-\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26B0}-\u{26B1}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|\u{26C8}|\u{26CE}|\u{26CF}|\u{26D1}|[\u{26D3}-\u{26D4}]|[\u{26E9}-\u{26EA}]|[\u{26F0}-\u{26F5}]|[\u{26F7}-\u{26FA}]|\u{26FD}|\u{2702}|\u{2705}|[\u{2708}-\u{2709}]|[\u{270A}-\u{270B}]|[\u{270C}-\u{270D}]|\u{270F}|\u{2712}|\u{2714}|\u{2716}|\u{271D}|\u{2721}|\u{2728}|[\u{2733}-\u{2734}]|\u{2744}|\u{2747}|\u{274C}|\u{274E}|[\u{2753}-\u{2755}]|\u{2757}|\u{2763}|[\u{2795}-\u{2797}]|\u{27A1}|\u{27B0}|\u{27BF}|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|\u{2B50}|\u{2B55}|\u{3030}|\u{303D}|\u{3297}|\u{3299}|\u{1F004}|\u{1F0CF}|[\u{1F170}-\u{1F171}]|\u{1F17E}|\u{1F17F}|\u{1F18E}|[\u{1F191}-\u{1F19A}]|[\u{1F1E6}-\u{1F1FF}]|[\u{1F201}-\u{1F202}]|\u{1F21A}|\u{1F22F}|[\u{1F232}-\u{1F23A}]|[\u{1F250}-\u{1F251}]|[\u{1F300}-\u{1F320}]|\u{1F321}|[\u{1F324}-\u{1F32C}]|[\u{1F32D}-\u{1F32F}]|[\u{1F330}-\u{1F335}]|\u{1F336}|[\u{1F337}-\u{1F37C}]|\u{1F37D}|[\u{1F37E}-\u{1F37F}]|[\u{1F380}-\u{1F393}]|[\u{1F396}-\u{1F397}]|[\u{1F399}-\u{1F39B}]|[\u{1F39E}-\u{1F39F}]|[\u{1F3A0}-\u{1F3C4}]|\u{1F3C5}|[\u{1F3C6}-\u{1F3CA}]|[\u{1F3CB}-\u{1F3CE}]|[\u{1F3CF}-\u{1F3D3}]|[\u{1F3D4}-\u{1F3DF}]|[\u{1F3E0}-\u{1F3F0}]|[\u{1F3F3}-\u{1F3F5}]|\u{1F3F7}|[\u{1F3F8}-\u{1F3FF}]|[\u{1F400}-\u{1F43E}]|\u{1F43F}|\u{1F440}|\u{1F441}|[\u{1F442}-\u{1F4F7}]|\u{1F4F8}|[\u{1F4F9}-\u{1F4FC}]|\u{1F4FD}|\u{1F4FF}|[\u{1F500}-\u{1F53D}]|[\u{1F549}-\u{1F54A}]|[\u{1F54B}-\u{1F54E}]|[\u{1F550}-\u{1F567}]|[\u{1F56F}-\u{1F570}]|[\u{1F573}-\u{1F579}]|\u{1F57A}|\u{1F587}|[\u{1F58A}-\u{1F58D}]|\u{1F590}|[\u{1F595}-\u{1F596}]|\u{1F5A4}|\u{1F5A5}|\u{1F5A8}|[\u{1F5B1}-\u{1F5B2}]|\u{1F5BC}|[\u{1F5C2}-\u{1F5C4}]|[\u{1F5D1}-\u{1F5D3}]|[\u{1F5DC}-\u{1F5DE}]|\u{1F5E1}|\u{1F5E3}|\u{1F5E8}|\u{1F5EF}|\u{1F5F3}|\u{1F5FA}|[\u{1F5FB}-\u{1F5FF}]|\u{1F600}|[\u{1F601}-\u{1F610}]|\u{1F611}|[\u{1F612}-\u{1F614}]|\u{1F615}|\u{1F616}|\u{1F617}|\u{1F618}|\u{1F619}|\u{1F61A}|\u{1F61B}|[\u{1F61C}-\u{1F61E}]|\u{1F61F}|[\u{1F620}-\u{1F625}]|[\u{1F626}-\u{1F627}]|[\u{1F628}-\u{1F62B}]|\u{1F62C}|\u{1F62D}|[\u{1F62E}-\u{1F62F}]|[\u{1F630}-\u{1F633}]|\u{1F634}|[\u{1F635}-\u{1F640}]|[\u{1F641}-\u{1F642}]|[\u{1F643}-\u{1F644}]|[\u{1F645}-\u{1F64F}]|[\u{1F680}-\u{1F6C5}]|[\u{1F6CB}-\u{1F6CF}]|\u{1F6D0}|[\u{1F6D1}-\u{1F6D2}]|[\u{1F6E0}-\u{1F6E5}]|\u{1F6E9}|[\u{1F6EB}-\u{1F6EC}]|\u{1F6F0}|\u{1F6F3}|[\u{1F6F4}-\u{1F6F6}]|[\u{1F6F7}-\u{1F6F8}]|[\u{1F910}-\u{1F918}]|[\u{1F919}-\u{1F91E}]|\u{1F91F}|[\u{1F920}-\u{1F927}]|[\u{1F928}-\u{1F92F}]|\u{1F930}|[\u{1F931}-\u{1F932}]|[\u{1F933}-\u{1F93A}]|[\u{1F93C}-\u{1F93E}]|[\u{1F940}-\u{1F945}]|[\u{1F947}-\u{1F94B}]|\u{1F94C}|[\u{1F950}-\u{1F95E}]|[\u{1F95F}-\u{1F96B}]|[\u{1F980}-\u{1F984}]|[\u{1F985}-\u{1F991}]|[\u{1F992}-\u{1F997}]|\u{1F9C0}|[\u{1F9D0}-\u{1F9E6}]|❤/gu
-}
-G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config['autoStartDownload']
-G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.config['enableEHD'] && G.config['showAllThumb'] && G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD'] && G.config['downloadSizeChanged']
+};
+G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config.autoStartDownload;
+G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.config.enableEHD && G.config.showAllThumb && G.config.enableChangeSize && G.config.sizeS !== G.config.sizeD && G.config.downloadSizeChanged;
 
 async function init () {
   GM_registerMenuCommand(GM_info.script.name + ': Show Global', function () {
-    console.log({ SEL, G })
-  }, 'S')
-  defaultConfig() // 默认设置
-  addStyle() // 添加样式
-  $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body')
+    console.log({ SEL, G });
+  }, 'S');
+  defaultConfig(); // 默认设置
+  addStyle(); // 添加样式
+  $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body');
   $(window).on({
     scroll: () => {
-      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && G.infoPage ? 'top:0;' : 'bottom:0;')
+      $('.ehNavBar').attr('style', $(window).scrollTop() >= 30 && G.infoPage ? 'top:0;' : 'bottom:0;');
     }
-  })
+  });
 
-  let now = new Date().getTime()
-  let lastTime = GM_getValue('EHT_checkTime', 0)
-  if (G.config['updateIntervalEHT'] !== 0 && now - lastTime >= G.config['updateIntervalEHT'] * 24 * 60 * 60 * 1000) {
+  const now = new Date().getTime();
+  const lastTime = GM_getValue('EHT_checkTime', 0);
+  if (G.config.updateIntervalEHT !== 0 && now - lastTime >= G.config.updateIntervalEHT * 24 * 60 * 60 * 1000) {
     try {
-      await updateEHT()
+      await updateEHT();
     } catch (err) { }
   }
   if (GM_getValue('EHT') && JSON.parse(GM_getValue('EHT')).version === 5) {
-    G.EHT = JSON.parse(GM_getValue('EHT')).data
+    G.EHT = JSON.parse(GM_getValue('EHT')).data;
   } else {
     try {
-      await updateEHT()
-      G.EHT = JSON.parse(GM_getValue('EHT')).data
+      await updateEHT();
+      G.EHT = JSON.parse(GM_getValue('EHT')).data;
     } catch (error) {
-      console.log(error)
-      window.alert('update EHT failed, please reload this page')
-      return
+      console.log(error);
+      window.alert('update EHT failed, please reload this page');
+      return;
     }
   }
   if (G.infoPage) { // 信息页
-    if (jumpHost()) return // 里站跳转
-    if (G.config['enableEHD']) {
-      let now = new Date().getTime()
-      let lastTime = GM_getValue('EHD_checkTime', 0)
-      if (!GM_getValue('EHD_code') || (G.config['updateIntervalEHD'] !== 0 && now - lastTime >= G.config['updateIntervalEHD'] * 24 * 60 * 60 * 1000)) {
+    if (jumpHost()) return; // 里站跳转
+    if (G.config.enableEHD) {
+      const now = new Date().getTime();
+      const lastTime = GM_getValue('EHD_checkTime', 0);
+      if (!GM_getValue('EHD_code') || (G.config.updateIntervalEHD !== 0 && now - lastTime >= G.config.updateIntervalEHD * 24 * 60 * 60 * 1000)) {
         try {
-          await updateEHD()
+          await updateEHD();
         } catch (err) { }
       }
-      let recordEHDUrl = [
+      const recordEHDUrl = [
         'let __record = false',
         'console.log = function (...msg) {',
         '  if (!msg || !msg.length) return',
-        `  if (typeof msg[0] === 'string' && msg[0].match(/\\[EHD\\] #\\d+: Network Error/)) {`,
+        '  if (typeof msg[0] === \'string\' && msg[0].match(/\\[EHD\\] #\\d+: Network Error/)) {',
         '    __record = true',
         '  } else if (__record && msg.filter(i => i.toString().match(/^https?:/)).length) {',
         '    let url = msg.filter(i => i.toString().match(/^https?:/))[0]',
         '    window.console.log("Request Failed: " + url)',
-        `    let record = GM_getValue('EHD_record', [])`,
-        `    let host = new URL(url).hostname.replace(/\\d+$/g, '')`,
+        '    let record = GM_getValue(\'EHD_record\', [])',
+        '    let host = new URL(url).hostname.replace(/\\d+$/g, \'\')',
         '    if (!record.includes(host)) {',
         '      record.push(host)',
-        `      GM_setValue('EHD_record', record)`,
+        '      GM_setValue(\'EHD_record\', record)',
         '    }',
         '    __record = false',
         '  }',
         '}'
-      ]
-      let fixEHDCounter = [
+      ];
+      const fixEHDCounter = [
         'window.fixEHDCounterTime = 0',
         'window.fixEHDCounter = function () {',
         '  fixEHDCounterTime++',
         '  if (totalCount <= 0) return',
         '  if (totalCount === downloadedCount && failedCount > 0) { failedCount = 0; checkFailed() }',
-        `  if (fetchCount < 0) { fetchCount = [...document.querySelectorAll('.ehD-pt-progress')].filter(i => { let value = i.getAttribute('value'); return value === null || (value * 1 < 1 && value * 1 > 0) }).length; updateTotalStatus(); checkFailed() }`,
-        `  if (downloadedCount + failedCount >= totalCount && failedCount > 0 && fetchCount > 0) { retryAllFailed() }`,
-        `  if (downloadedCount >= totalCount) { ehDownloadPauseBtn(); saveDownloaded(true); }`,
+        '  if (fetchCount < 0) { fetchCount = [...document.querySelectorAll(\'.ehD-pt-progress\')].filter(i => { let value = i.getAttribute(\'value\'); return value === null || (value * 1 < 1 && value * 1 > 0) }).length; updateTotalStatus(); checkFailed() }',
+        '  if (downloadedCount + failedCount >= totalCount && failedCount > 0 && fetchCount > 0) { retryAllFailed() }',
+        '  if (downloadedCount >= totalCount) { ehDownloadPauseBtn(); saveDownloaded(true); }',
         // '  window.console.log("totalCount:\t", totalCount, "\nfetchCount:\t", fetchCount, "\ndownloadedCount:\t", downloadedCount, "\nfailedCount:\t", failedCount)',
         // '  window.console.log(JSON.stringify({"总计": totalCount, "下载中": fetchCount, "已完成": downloadedCount, "下载失败": failedCount}))',
         // '  window.console.log(totalCount, fetchCount, downloadedCount, failedCount)',
@@ -276,13 +276,13 @@ async function init () {
         '  node.innerHTML = "<td colspan=\\"3\\">fixEHDCounter: " + fixEHDCounterTime + "</td>"',
         '  document.querySelector(".ehD-pt").appendChild(node)',
         '}'
-      ]
+      ];
       $('<input type="button" value="Fix EHD Counter" tooltip="重置EHTD计数">').on({
         click: () => {
-          window.fixEHDCounter()
+          window.fixEHDCounter();
         }
-      }).prependTo('.ehNavBar>div:nth-child(2)')
-      let checkAndFix = [
+      }).prependTo('.ehNavBar>div:nth-child(2)');
+      const checkAndFix = [
         'window.EHDCounter = {}',
         'let checkAndFixEHDCounter = function () {',
         '  let timeout = 1 * 1000',
@@ -305,207 +305,207 @@ async function init () {
         '  setTimeout(checkAndFixEHDCounter, timeout)',
         '}',
         'checkAndFixEHDCounter()'
-      ]
-      let toEavl = [
+      ];
+      const toEavl = [
         '(function () {',
-        `var loadSetting = function () { return new Promise(resolve => { resolve(GM_getValue('ehD-setting')) }) }`,
+        'var loadSetting = function () { return new Promise(resolve => { resolve(GM_getValue(\'ehD-setting\')) }) }',
         'let console = {}',
         'for (let i in window.console) { console[i] = new Function() }',
         'let alert = function () { }',
         'let confirm = function () { return true }',
-        (G.config['recordEHDUrl'] ? recordEHDUrl.join('\n') : ''),
+        (G.config.recordEHDUrl ? recordEHDUrl.join('\n') : ''),
         '\n',
         GM_getValue('EHD_code'),
         '\n',
         fixEHDCounter.join('\n'),
         '\n',
         // (G.config['fixEHDCounter'] ? 'setInterval(window.fixEHDCounter, 300)' : ''),
-        (G.config['fixEHDCounter'] ? checkAndFix.join('\n') : ''),
+        (G.config.fixEHDCounter ? checkAndFix.join('\n') : ''),
         '\n',
         '})()'
-      ]
+      ];
       /* eslint-disable no-eval */
-      eval(toEavl.join('\n')) // 运行EHD
+      eval(toEavl.join('\n')); // 运行EHD
     } else {
-      let loaded = await waitForElement(SEL.EHD.checker, 30 * 1000)
-      if (!loaded) console.error('载入 E-Hentai-Downloader 超时')
-      setNotification('载入 E-Hentai-Downloader 超时')
+      const loaded = await waitForElement(SEL.EHD.checker, 30 * 1000);
+      if (!loaded) console.error('载入 E-Hentai-Downloader 超时');
+      setNotification('载入 E-Hentai-Downloader 超时');
     }
     $(SEL.EHD.download).click(e => { // 使用EHD下载时, 添加到下载列表
-      if (e.originalEvent && G.downloadSizeChanged) autoDownload()
-      downloadAdd(SEL.EH.info.galleryId)
-      if ($('[rel="shortcut icon"]').length === 0) changeFav(G.favicon.d)
-      $('.ehNavBar').attr('style', 'top:0;')
-    })
+      if (e.originalEvent && G.downloadSizeChanged) autoDownload();
+      downloadAdd(SEL.EH.info.galleryId);
+      if ($('[rel="shortcut icon"]').length === 0) changeFav(G.favicon.d);
+      $('.ehNavBar').attr('style', 'top:0;');
+    });
     $(window).on('unload', () => { // 关闭页面时, 从下载列表中移除
-      downloadRemove(SEL.EH.info.galleryId)
-    })
-    if (G.config.changeName) changeName(SEL.EH.info.title) // 修改本子标题（删除集会名、替换其中的罗马数字）
-    document.title = $(SEL.EH.info.title).text()
-    tagTranslate() // 标签翻译
-    btnSearch() // 按钮 -> 搜索(信息页)
-    btnFake() // 按钮 -> 下载空文档(信息页)
-    btnInfoText() // 按钮 -> 下载info.txt(信息页)
-    btnTask() // 按钮 -> 添加到下载任务(信息页)
-    tagEvent() // 标签事件
-    copyInfo() // 复制信息
-    abortPending() // 终止EHD所有下载
+      downloadRemove(SEL.EH.info.galleryId);
+    });
+    if (G.config.changeName) changeName(SEL.EH.info.title); // 修改本子标题（删除集会名、替换其中的罗马数字）
+    document.title = $(SEL.EH.info.title).text();
+    tagTranslate(); // 标签翻译
+    btnSearch(); // 按钮 -> 搜索(信息页)
+    btnFake(); // 按钮 -> 下载空文档(信息页)
+    btnInfoText(); // 按钮 -> 下载info.txt(信息页)
+    btnTask(); // 按钮 -> 添加到下载任务(信息页)
+    tagEvent(); // 标签事件
+    copyInfo(); // 复制信息
+    abortPending(); // 终止EHD所有下载
     $('<input type="button" class="ehThumbBtn" value="Hide" style="width:36px;height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;">').on('click', function (e) { // 隐藏预览图
-      $(SEL.EH.info.previewContainer).toggle()
-      $(e.target).val($(e.target).val() === 'Show' ? 'Hide' : 'Show')
-    }).prependTo(SEL.EH.info.btnContainer)
-    if (G.config['showAllThumb']) await showAllThumb()
-    introPic() // 宣传图
-    if (G.config['enableChangeSize'] && G.config['sizeS'] !== G.config['sizeD']) await checkImageSize()
-    await waitInMs(500)
-    if (G.autoDownload) await autoDownload() // 自动开始下载
+      $(SEL.EH.info.previewContainer).toggle();
+      $(e.target).val($(e.target).val() === 'Show' ? 'Hide' : 'Show');
+    }).prependTo(SEL.EH.info.btnContainer);
+    if (G.config.showAllThumb) await showAllThumb();
+    introPic(); // 宣传图
+    if (G.config.enableChangeSize && G.config.sizeS !== G.config.sizeD) await checkImageSize();
+    await waitInMs(500);
+    if (G.autoDownload) await autoDownload(); // 自动开始下载
   } else { // 搜索页
     if ($(SEL.EH.search.resultTotal).length && !G.isPreferDisplayMode) {
-      window.alert('Please change display mode to "Minimal" or "Minimal+"')
-      return
+      window.alert('Please change display mode to "Minimal" or "Minimal+"');
+      return;
     }
-    if (jumpHost()) return // 里站跳转
-    $(SEL.EH.search.apply).hide()
+    if (jumpHost()) return; // 里站跳转
+    $(SEL.EH.search.apply).hide();
     $('<input type="button" value="Apply Filter" title="右键: 添加/删除 中文">').on({
       click: () => {
-        $(SEL.EH.search.apply).click()
+        $(SEL.EH.search.apply).click();
       },
       contextmenu: () => {
-        let value = $(SEL.EH.search.keyword).val()
-        value = value.match('language:"chinese"\\$') ? value.replace('language:"chinese"$', '').trim() : value + ' language:"chinese"$'
-        $(SEL.EH.search.keyword).val(value)
-        $(SEL.EH.search.apply).click()
+        let value = $(SEL.EH.search.keyword).val();
+        value = value.match('language:"chinese"\\$') ? value.replace('language:"chinese"$', '').trim() : value + ' language:"chinese"$';
+        $(SEL.EH.search.keyword).val(value);
+        $(SEL.EH.search.apply).click();
       }
-    }).insertBefore(SEL.EH.search.apply)
-    if ($(SEL.EH.search.keyword).val()) document.title = translateText($(SEL.EH.search.keyword).val())
-    $('<div class="ehContainer"></div>').prependTo(SEL.EH.search.nameTd)
-    btnSearch2() // 按钮 -> 搜索(搜索页)
-    quickDownload() // 右键：下载
-    if ($(SEL.EH.search.resultTable).length) batchDownload() // Displsy: List => 批量下载
-    btnFake2() // 按钮 -> 下载空文档(搜索页)
-    btnTask2() // 按钮 -> 添加到下载任务(搜索页)
-    if (G.config['checkExist']) checkExist() // 检查本地是否存在
-    let _gmetadata = await getInfo() || []
-    G.gmetadata.push(..._gmetadata)
-    if (G.config.changeName) changeName(SEL.EH.search.galleryA) // 修改本子标题（删除集会名、替换其中的罗马数字）
-    if (G.config['languageCode']) languageCode() // 显示iso语言代码
-    if (G.config['checkExistAtStart']) $('input:button[name="checkExist"]').click()
-    tagPreview() // 标签预览
-    hideGalleries() // 隐藏某些画集
-    if ($(SEL.EH.search.resultTable).length && G.config['preloadPaneImage']) $(SEL.EH.search.thumb).each((index, elem) => { unsafeWindow.load_pane_image(elem) })
-    autoComplete() // 自动填充
-    checkForNew() // 检查有无新本子
+    }).insertBefore(SEL.EH.search.apply);
+    if ($(SEL.EH.search.keyword).val()) document.title = translateText($(SEL.EH.search.keyword).val());
+    $('<div class="ehContainer"></div>').prependTo(SEL.EH.search.nameTd);
+    btnSearch2(); // 按钮 -> 搜索(搜索页)
+    quickDownload(); // 右键：下载
+    if ($(SEL.EH.search.resultTable).length) batchDownload(); // Displsy: List => 批量下载
+    btnFake2(); // 按钮 -> 下载空文档(搜索页)
+    btnTask2(); // 按钮 -> 添加到下载任务(搜索页)
+    if (G.config.checkExist) checkExist(); // 检查本地是否存在
+    const _gmetadata = await getInfo() || [];
+    G.gmetadata.push(..._gmetadata);
+    if (G.config.changeName) changeName(SEL.EH.search.galleryA); // 修改本子标题（删除集会名、替换其中的罗马数字）
+    if (G.config.languageCode) languageCode(); // 显示iso语言代码
+    if (G.config.checkExistAtStart) $('input:button[name="checkExist"]').click();
+    tagPreview(); // 标签预览
+    hideGalleries(); // 隐藏某些画集
+    if ($(SEL.EH.search.resultTable).length && G.config.preloadPaneImage) $(SEL.EH.search.thumb).each((index, elem) => { unsafeWindow.load_pane_image(elem); });
+    autoComplete(); // 自动填充
+    checkForNew(); // 检查有无新本子
   }
-  highlightBlacklist() // 高亮黑名单相关的画廊(通用)
-  showConfig()
-  searchInOtherSite()
-  if (G.config['saveLink']) saveLink() // 保存链接
+  highlightBlacklist(); // 高亮黑名单相关的画廊(通用)
+  showConfig();
+  searchInOtherSite();
+  if (G.config.saveLink) saveLink(); // 保存链接
   $('<input type="button" value="Clear Downloading" tooltip="重置下载列表">').on({
     click: () => {
-      GM_setValue('downloading', [])
+      GM_setValue('downloading', []);
     },
     mouseenter: e => {
-      $(e.target).attr('title', '当前下载列表:<br> ' + GM_getValue('downloading', []).join('<br> '))
+      $(e.target).attr('title', '当前下载列表:<br> ' + GM_getValue('downloading', []).join('<br> '));
     }
-  }).prependTo('.ehNavBar>div:nth-child(3)')
+  }).prependTo('.ehNavBar>div:nth-child(3)');
   $('<input type="button" value="Start Task" tooltip="' + htmlEscape('左键: 开始下载任务<br>中键: 从当前任务开始<br>右键: 重置当前下载任务') + '">').on({
     mousedown: e => {
       if (e.button === 0) {
-        task()
+        task();
       } else if (e.button === 1) {
-        let task = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i)
-        GM_deleteValue('tasking')
-        GM_setValue('task', task)
-        task()
+        const task = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i);
+        GM_deleteValue('tasking');
+        GM_setValue('task', task);
+        task();
       } else if (e.button === 2) {
-        GM_deleteValue('tasking')
+        GM_deleteValue('tasking');
       }
     },
     mouseenter: e => {
-      let task = GM_getValue('task', [])
-      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
+      const task = GM_getValue('task', []);
+      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+  }).appendTo('.ehNavBar>div:nth-child(3)');
   $('<input type="file" id="selectFileTask" name="selectFile" accept=".txt">').on({
     change: e => {
       if (!e.target.files || !e.target.files.length) {
-        e.target.value = null
-        return
+        e.target.value = null;
+        return;
       }
-      let fr = new window.FileReader()
+      const fr = new window.FileReader();
       fr.onload = e => {
-        let text = e.target.result
-        let tasking = GM_getValue('tasking', [])
-        let task = [].concat(GM_getValue('task', []), text.split(/[\r\n]+/)).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i && i !== tasking && i.match(SEL.EH.info.urlMatch))
-        GM_setValue('task', task)
-        e.target.value = null
-      }
-      fr.readAsText(e.target.files[0])
+        const text = e.target.result;
+        const tasking = GM_getValue('tasking', []);
+        const task = [].concat(GM_getValue('task', []), text.split(/[\r\n]+/)).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i && i !== tasking && i.match(SEL.EH.info.urlMatch));
+        GM_setValue('task', task);
+        e.target.value = null;
+      };
+      fr.readAsText(e.target.files[0]);
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+  }).appendTo('.ehNavBar>div:nth-child(3)');
   $('<input type="button" value="Export Task" tooltip="' + htmlEscape('左键: 导出下载列表（包括正在下载）<br>右键: 导入下载列表（自动清除重复项）') + '">').on({
     mousedown: e => {
       if (e.button === 0) {
-        let task = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i)
-        saveAs2(task.join('\n'), 'task-list.txt')
+        const task = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i);
+        saveAs2(task.join('\n'), 'task-list.txt');
       } else if (e.button === 1) {
 
       } else if (e.button === 2) {
-        $('#selectFileTask').click()
+        $('#selectFileTask').click();
       }
     },
     mouseenter: e => {
-      let task = GM_getValue('task', [])
-      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
+      const task = GM_getValue('task', []);
+      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+  }).appendTo('.ehNavBar>div:nth-child(3)');
   $('<input type="button" value="Toggle Blacklist" title="' + htmlEscape('左键: 加入或移除黑名单<br>右键: 显示黑名单列表') + '">').on({
     mousedown: e => {
       if (e.button === 0) {
-        let value = window.prompt('keyword:')
+        const value = window.prompt('keyword:');
         if (value && value.trim()) {
-          toggleBlacklist(value.trim())
-          highlightBlacklist()
+          toggleBlacklist(value.trim());
+          highlightBlacklist();
         }
       } else if (e.button === 1) {
 
       } else if (e.button === 2) {
         if ($('.ehBlackListContainer').length) {
-          $('.ehBlackListContainer').remove()
+          $('.ehBlackListContainer').remove();
         } else {
-          let blacklist = GM_getValue('blacklist', [])
-          let html = '<ul>'
-          html += blacklist.map(keyword => `<li><a href="${G.config['searchArguments'].replace(/{q}/g, encodeURIComponent(keyword))}" target="_blank">${htmlEscape(keyword)}</a> <span copy="${htmlEscape(keyword)}">复制</span></li>`).join('')
-          html += '</ul>'
-          $('<div class="ehBlackListContainer"></div>').html(html).appendTo('body')
+          const blacklist = GM_getValue('blacklist', []);
+          let html = '<ul>';
+          html += blacklist.map(keyword => `<li><a href="${G.config.searchArguments.replace(/{q}/g, encodeURIComponent(keyword))}" target="_blank">${htmlEscape(keyword)}</a> <span copy="${htmlEscape(keyword)}">复制</span></li>`).join('');
+          html += '</ul>';
+          $('<div class="ehBlackListContainer"></div>').html(html).appendTo('body');
         }
       }
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+  }).appendTo('.ehNavBar>div:nth-child(3)');
 
-  showTooltip() // 显示提示
+  showTooltip(); // 显示提示
   $('body').on('mousedown', 'a,button,input[type="button"],div:empty', e => {
-    $(e.target).css('border-color', 'red').css('border-style', 'solid').css('border-width', '1px')
-  })
+    $(e.target).css('border-color', 'red').css('border-style', 'solid').css('border-width', '1px');
+  });
   $('body').on('mousedown', '[copy]', e => {
-    e.preventDefault()
-    let copy = $(e.target).attr('copy')
-    setNotification(copy, '已复制')
-    GM_setClipboard(copy)
-  }).on('contextmenu', () => false)
-  $('.ehNavBar').attr('oncontextmenu', 'return false')
+    e.preventDefault();
+    const copy = $(e.target).attr('copy');
+    setNotification(copy, '已复制');
+    GM_setClipboard(copy);
+  }).on('contextmenu', () => false);
+  $('.ehNavBar').attr('oncontextmenu', 'return false');
 }
 
 function abortPending () { // 终止EHD所有下载
   $('<input type="button" value="Force Abort" title="终止EHD所有下载">').on({
     click: () => {
-      $(SEL.EHD.abort).click()
+      $(SEL.EHD.abort).click();
     }
-  }).appendTo('.ehNavBar>div:nth-child(2)')
+  }).appendTo('.ehNavBar>div:nth-child(2)');
 }
 
 function addStyle () { // 添加样式
-  let backgroundColor = $('body').css('background-color')
+  const backgroundColor = $('body').css('background-color');
   $('<style></style>').text([
     // global
     'input[type="number"]{width:60px;border:1px solid #B5A4A4;margin:3px 1px 0;padding:1px 3px 3px;border-radius:3px;}',
@@ -618,299 +618,299 @@ function addStyle () { // 添加样式
     // '.ih>li{margin:0 2px;cursor:pointer;list-style:none;}',
     // '.ih>li::before{content:attr(name) ": ";}',
     // '.ih>li>span{margin:1px;}'
-  ].join('\n')).appendTo('head')
+  ].join('\n')).appendTo('head');
 }
 
 async function autoDownload (isEnd) { // 自动开始下载
   // isEnd false: 下载小图, true: 下载大图
   if (G.downloadSizeChanged) {
     if (G.imageD.length && G.imageS.length) {
-      let imageSize = isEnd ? G.config['sizeD'] : G.config['sizeS']
-      await changeEConfig('xr', imageSize)
-      changeFav(G.favicon[imageSize])
-      $(SEL.EHD.pageRange).val(makeRange(isEnd ? G.imageD : G.imageS))
-      G.imageEnd = isEnd
+      const imageSize = isEnd ? G.config.sizeD : G.config.sizeS;
+      await changeEConfig('xr', imageSize);
+      changeFav(G.favicon[imageSize]);
+      $(SEL.EHD.pageRange).val(makeRange(isEnd ? G.imageD : G.imageS));
+      G.imageEnd = isEnd;
     } else {
-      G.downloadSizeChanged = false
-      $(SEL.EHD.pageRange).val(makeRange(G.imageD.length ? G.imageD : G.imageS))
+      G.downloadSizeChanged = false;
+      $(SEL.EHD.pageRange).val(makeRange(G.imageD.length ? G.imageD : G.imageS));
     }
   }
-  $(SEL.EHD.download).click()
+  $(SEL.EHD.download).click();
 }
 
 function autoComplete () { // 自动填充
-  let main = (G.config['acItem'] || 'language,artist,female,male,parody,character,group,misc').split(',')
-  main = G.EHT.filter(i => main.includes(i.namespace))
+  let main = (G.config.acItem || 'language,artist,female,male,parody,character,group,misc').split(',');
+  main = G.EHT.filter(i => main.includes(i.namespace));
   $('<div class="ehDatalist"><ol start="0"></ol></div>').on('click', 'li', function (e) {
-    let value = $(SEL.EH.search.keyword).val().split(/\s+/)
-    value[value.length - 1] = e.target.textContent
-    $(SEL.EH.search.keyword).val(value.filter(i => i).join(' ')).focus()
-    $('.ehDatalist>ol').empty()
-    $('.ehDatalist').show()
-  }).appendTo($('form').has(SEL.EH.search.keyword))
-  let lastValue
-  $(SEL.EH.search.keyword).attr('title', `当输入大于${G.config['acLength']}个字符时，显示选单<br>使用主键盘区的数字/加减/方向键快速选择<br>点击/Enter/Insert键填充<br>使用输入法时，无法使用数字/加减选择`).on({
+    const value = $(SEL.EH.search.keyword).val().split(/\s+/);
+    value[value.length - 1] = e.target.textContent;
+    $(SEL.EH.search.keyword).val(value.filter(i => i).join(' ')).focus();
+    $('.ehDatalist>ol').empty();
+    $('.ehDatalist').show();
+  }).appendTo($('form').has(SEL.EH.search.keyword));
+  let lastValue;
+  $(SEL.EH.search.keyword).attr('title', `当输入大于${G.config.acLength}个字符时，显示选单<br>使用主键盘区的数字/加减/方向键快速选择<br>点击/Enter/Insert键填充<br>使用输入法时，无法使用数字/加减选择`).on({
     focusin: function () {
-      $('.ehDatalist').show()
+      $('.ehDatalist').show();
     },
     focusout: function () {
       setTimeout(() => {
-        $('.ehDatalist').hide()
-      }, 100)
+        $('.ehDatalist').hide();
+      }, 100);
     },
     keydown: function (e) {
-      let hasItem = $('.ehDatalist li').length
-      let onItem = $('.ehDatalistHover').index()
+      const hasItem = $('.ehDatalist li').length;
+      let onItem = $('.ehDatalistHover').index();
       if (hasItem && e.keyCode <= 57 && e.keyCode >= 48) { // 选择选项: 0-9
-        e.preventDefault()
-        $('.ehDatalist li').eq(e.keyCode - 48).click()
+        e.preventDefault();
+        $('.ehDatalist li').eq(e.keyCode - 48).click();
       } else if (hasItem && [187, 189, 37, 38, 39, 40].includes(e.keyCode)) { // 选择选项: 加减/方向键
-        e.preventDefault()
+        e.preventDefault();
         if ([187, 40].includes(e.keyCode)) { // 选择选项: +下
-          onItem = onItem + 1
+          onItem = onItem + 1;
         } else if ([189, 38].includes(e.keyCode)) { // 选择选项: -上
-          onItem = onItem - 1
+          onItem = onItem - 1;
         } else if (e.keyCode === 39) { // 选择选项: 右
-          onItem = onItem + 10
+          onItem = onItem + 10;
         } else if (e.keyCode === 37) { // 选择选项: 左
-          onItem = onItem - 10
+          onItem = onItem - 10;
         }
         if (onItem < 0) {
-          onItem = 0
+          onItem = 0;
         } else if (onItem > hasItem - 1) {
-          onItem = hasItem - 1
+          onItem = hasItem - 1;
         }
-        $('.ehDatalist li').removeClass('ehDatalistHover')
-        $('.ehDatalist li').eq(onItem).addClass('ehDatalistHover')
-        $('.ehDatalist').scrollTop($('.ehDatalistHover').position().top - $('.ehDatalist>ol').position().top - 150 + $('.ehDatalistHover').height() / 2)
+        $('.ehDatalist li').removeClass('ehDatalistHover');
+        $('.ehDatalist li').eq(onItem).addClass('ehDatalistHover');
+        $('.ehDatalist').scrollTop($('.ehDatalistHover').position().top - $('.ehDatalist>ol').position().top - 150 + $('.ehDatalistHover').height() / 2);
       } else if (onItem >= 0 && [13, 45].includes(e.keyCode)) { // 选择选项: Insert
-        e.preventDefault()
-        $('.ehDatalistHover').click()
+        e.preventDefault();
+        $('.ehDatalistHover').click();
       }
     },
     keyup: function (e) {
-      let value = e.target.value.split(/\s+/)
-      value = value[value.length - 1]
-      if (value === lastValue) return
-      $('.ehDatalist>ol').empty()
-      if (!value || (value.length <= G.config['acLength'] && !value.match(/[\u4e00-\u9fa5]/))) return
-      lastValue = value
-      value = new RegExp(value, 'i')
+      let value = e.target.value.split(/\s+/);
+      value = value[value.length - 1];
+      if (value === lastValue) return;
+      $('.ehDatalist>ol').empty();
+      if (!value || (value.length <= G.config.acLength && !value.match(/[\u4e00-\u9fa5]/))) return;
+      lastValue = value;
+      value = new RegExp(value, 'i');
       main.forEach(i => {
-        for (let key in i.data) {
+        for (const key in i.data) {
           if (key.match(value) || i.data[key].name.match(value)) {
-            $(`<li cname="${i.data[key].name}">${i.namespace}:"${key}"$</li>`).appendTo('.ehDatalist>ol')
+            $(`<li cname="${i.data[key].name}">${i.namespace}:"${key}"$</li>`).appendTo('.ehDatalist>ol');
           }
         }
-      })
-      $('.ehDatalist').show()
+      });
+      $('.ehDatalist').show();
     }
-  })
+  });
 }
 
 function batchDownload () { // 批量下载
-  $('<th><input type="checkbox" title="全选"></th>').appendTo(SEL.EH.search.resultTr0)
+  $('<th><input type="checkbox" title="全选"></th>').appendTo(SEL.EH.search.resultTr0);
   $(SEL.EH.search.resultTr0).find('input').on('click', function (e) {
-    $(SEL.EH.search.resultTrGt0).find('input:visible').prop('checked', e.target.checked)
-    $(SEL.EH.search.resultTrGt0).filter(':visible:not(.ehCheckContainer)').toggleClass('ehBatchHover', e.target.checked)
-  })
-  $('<td><input type="checkbox"></td>').appendTo($(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer)'))
+    $(SEL.EH.search.resultTrGt0).find('input:visible').prop('checked', e.target.checked);
+    $(SEL.EH.search.resultTrGt0).filter(':visible:not(.ehCheckContainer)').toggleClass('ehBatchHover', e.target.checked);
+  });
+  $('<td><input type="checkbox"></td>').appendTo($(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer)'));
   $(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer)').on('click', e => {
-    if ($(e.target).is('a,input') || $(e.target).parents().filter('a,input').length) return
-    $(e.currentTarget).find('input[type="checkbox"]').click()
-  })
+    if ($(e.target).is('a,input') || $(e.target).parents().filter('a,input').length) return;
+    $(e.currentTarget).find('input[type="checkbox"]').click();
+  });
   $(SEL.EH.search.resultTrGt0).find('input').on('click', function (e) {
     if (e.target.checked) {
-      $(e.target).parentsUntil('tbody').eq(-1).addClass('ehBatchHover')
+      $(e.target).parentsUntil('tbody').eq(-1).addClass('ehBatchHover');
     } else {
-      $(e.target).parentsUntil('tbody').eq(-1).removeClass('ehBatchHover')
+      $(e.target).parentsUntil('tbody').eq(-1).removeClass('ehBatchHover');
     }
-  })
-  window.sessionStorage.setItem('batch', 0)
+  });
+  window.sessionStorage.setItem('batch', 0);
   $('<input type="button" value="Batch" title="' + htmlEscape('左键: Batch<br>右键: 重置Batch') + '">').on('mousedown', e => {
     if (e.button === 2) {
-      window.sessionStorage.setItem('batch', 0)
+      window.sessionStorage.setItem('batch', 0);
     } else {
-      let batch = window.sessionStorage.getItem('batch') * 1
-      $(SEL.EH.search.resultTr).find('input:checked').click()
-      let books = $(SEL.EH.search.resultTrGt0).filter(':visible:not(:has(.ehExist,.ehBlacklist),.ehCheckContainer)').toArray()
-      books.splice(batch * G.config['batch'], G.config['batch']).forEach(i => {
-        $(i).find('input[type="checkbox"]').click()
-      })
-      window.sessionStorage.setItem('batch', batch * G.config['batch'] <= books.length ? batch + 1 : 0)
+      const batch = window.sessionStorage.getItem('batch') * 1;
+      $(SEL.EH.search.resultTr).find('input:checked').click();
+      const books = $(SEL.EH.search.resultTrGt0).filter(':visible:not(:has(.ehExist,.ehBlacklist),.ehCheckContainer)').toArray();
+      books.splice(batch * G.config.batch, G.config.batch).forEach(i => {
+        $(i).find('input[type="checkbox"]').click();
+      });
+      window.sessionStorage.setItem('batch', batch * G.config.batch <= books.length ? batch + 1 : 0);
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+  }).appendTo('.ehNavBar>div:nth-child(3)');
   $('<input type="button" value="Open" title="打开">').on('mousedown', e => {
     $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
-      openUrl(i.href + '#' + e.button)
-    })
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+      openUrl(i.href + '#' + e.button);
+    });
+  }).appendTo('.ehNavBar>div:nth-child(3)');
 }
 
 function btnFake () { // 按钮 -> 下载空文档(信息页)
   $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', e => {
-    saveAs2('', $(SEL.EH.info.title).text().trim() + '.cbz')
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+    saveAs2('', $(SEL.EH.info.title).text().trim() + '.cbz');
+  }).appendTo('.ehNavBar>div:nth-child(3)');
 }
 
 function btnFake2 () { // 按钮 -> 下载空文档(搜索页)
   $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', async e => {
-    for (let i of $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray()) {
-      saveAs2('', i.textContent.trim() + '.cbz')
-      await waitInMs(200)
+    for (const i of $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray()) {
+      saveAs2('', i.textContent.trim() + '.cbz');
+      await waitInMs(200);
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+  }).appendTo('.ehNavBar>div:nth-child(3)');
 }
 
 function btnInfoText () { // 按钮 -> 下载info.txt(信息页)
   $('<input type="button" value="info.txt" title="' + htmlEscape('下载一个 <span class="ehHighlight">info.txt</span>') + '">').on('mousedown', () => {
-    let infoStr = ''
-    infoStr += $('#gn').text() + '\n'
-    infoStr += $('#gj').text() + '\n'
-    infoStr += window.location.href + '\n\n'
+    let infoStr = '';
+    infoStr += $('#gn').text() + '\n';
+    infoStr += $('#gj').text() + '\n';
+    infoStr += window.location.href + '\n\n';
 
-    infoStr += 'Category: ' + $('#gdc .cs').eq(0).text().trim() + '\n'
-    infoStr += 'Uploader: ' + $('#gdn a').eq(0).text() + '\n'
+    infoStr += 'Category: ' + $('#gdc .cs').eq(0).text().trim() + '\n';
+    infoStr += 'Uploader: ' + $('#gdn a').eq(0).text() + '\n';
 
     $('#gdd tr').toArray().forEach(i => {
-      var c1 = $('.gdt1', i).eq(0).text()
-      var c2 = $('.gdt2', i).eq(0).text()
-      infoStr += c1 + ' ' + c2 + '\n'
-    })
+      var c1 = $('.gdt1', i).eq(0).text();
+      var c2 = $('.gdt2', i).eq(0).text();
+      infoStr += c1 + ' ' + c2 + '\n';
+    });
 
-    infoStr += 'Rating: ' + unsafeWindow.average_rating + '\n\n'
+    infoStr += 'Rating: ' + unsafeWindow.average_rating + '\n\n';
 
-    infoStr += 'Tags:\n'
+    infoStr += 'Tags:\n';
     $('#taglist tr').toArray().forEach(i => {
-      let tds = $('td', i)
-      infoStr += '> ' + tds.eq(0).text() + ' '
-      infoStr += $('a', tds.eq(1)).toArray().map(i => i.textContent).join(', ') + '\n'
-    })
-    infoStr += '\n'
+      const tds = $('td', i);
+      infoStr += '> ' + tds.eq(0).text() + ' ';
+      infoStr += $('a', tds.eq(1)).toArray().map(i => i.textContent).join(', ') + '\n';
+    });
+    infoStr += '\n';
 
-    if ($('#comment_0')) infoStr += 'Uploader Comment:\n' + $('#comment_0').html().replace(/<br>|<br \/>/gi, '\n') + '\n\n'
+    if ($('#comment_0')) infoStr += 'Uploader Comment:\n' + $('#comment_0').html().replace(/<br>|<br \/>/gi, '\n') + '\n\n';
 
     $('.gdtm img').toArray().forEach(i => {
-      infoStr += '\n\nPage ' + i.alt + ': ' + $(i).parent().attr('href') + '\n'
-      let title = $(i).attr('title') || $(i).attr('raw-title')
-      infoStr += 'Image ' + i.alt + ': ' + title.match(/^Page \d+: (.*)$/)[1]
-    })
+      infoStr += '\n\nPage ' + i.alt + ': ' + $(i).parent().attr('href') + '\n';
+      const title = $(i).attr('title') || $(i).attr('raw-title');
+      infoStr += 'Image ' + i.alt + ': ' + title.match(/^Page \d+: (.*)$/)[1];
+    });
 
-    infoStr += '\n\nDownloaded at ' + new Date() + '\n\nGenerated by E-Hentai Downloader. https://github.com/ccloli/E-Hentai-Downloader'
+    infoStr += '\n\nDownloaded at ' + new Date() + '\n\nGenerated by E-Hentai Downloader. https://github.com/ccloli/E-Hentai-Downloader';
 
-    saveAs2(htmlUnescape(infoStr.replace(/\n/g, '\r\n')), 'info.txt')
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+    saveAs2(htmlUnescape(infoStr.replace(/\n/g, '\r\n')), 'info.txt');
+  }).appendTo('.ehNavBar>div:nth-child(3)');
 }
 
 function btnSearch () { // 按钮 -> 搜索(信息页)
-  let text = $(SEL.EH.info.title).text() || $(SEL.EH.info.titleJp).text()
-  if (text === '') return
-  $('<div class="ehSearch"></div>').insertAfter(SEL.EH.info.titleJp)
-  text = text.split(/[[\](){}【】|\-\d]+/)
+  let text = $(SEL.EH.info.title).text() || $(SEL.EH.info.titleJp).text();
+  if (text === '') return;
+  $('<div class="ehSearch"></div>').insertAfter(SEL.EH.info.titleJp);
+  text = text.split(/[[\](){}【】|\-\d]+/);
   for (let i = 0; i < text.length; i++) {
-    text[i] = text[i].trim()
-    if (text[i]) $('<span></span>').html(`<input id="ehSearch_${i}" type="checkbox"><label for="ehSearch_${i}">${text[i]}</label>`).appendTo('.ehSearch')
+    text[i] = text[i].trim();
+    if (text[i]) $('<span></span>').html(`<input id="ehSearch_${i}" type="checkbox"><label for="ehSearch_${i}">${text[i]}</label>`).appendTo('.ehSearch');
   }
   $('<input type="button" value="Search" title="搜索">').appendTo('.ehSearch').click(() => {
-    let keyword = $('.ehSearch input:checked+label').toArray().map(i => '"' + i.textContent + '"').join(' ')
-    if (keyword.length > 0) openUrl(G.config['searchArguments'].replace(/{q}/g, encodeURIComponent(keyword)))
-  })
+    const keyword = $('.ehSearch input:checked+label').toArray().map(i => '"' + i.textContent + '"').join(' ');
+    if (keyword.length > 0) openUrl(G.config.searchArguments.replace(/{q}/g, encodeURIComponent(keyword)));
+  });
 }
 
 function btnSearch2 () { // 按钮 -> 搜索(搜索页)
-  $('<div class="btnSearch"></div>').attr('title', G.config['searchEventChs']).prependTo(SEL.EH.search.nameTd).on({
+  $('<div class="btnSearch"></div>').attr('title', G.config.searchEventChs).prependTo(SEL.EH.search.nameTd).on({
     contextmenu: () => false,
     mousedown: e => {
-      let event = G.config['searchEvent'].split('|').filter(i => i.match(new RegExp(`^${e.button},`)))
+      const event = G.config.searchEvent.split('|').filter(i => i.match(new RegExp(`^${e.button},`)));
       for (let i = 0; i < event.length; i++) {
-        let arr = event[i].split(',')
-        let keydown = arr[1] === '-1' ? true : e[['altKey', 'ctrlKey', 'shiftKey'][arr[1]]]
+        const arr = event[i].split(',');
+        const keydown = arr[1] === '-1' ? true : e[['altKey', 'ctrlKey', 'shiftKey'][arr[1]]];
         if (keydown) {
-          let name
-          let gid = $(e.target).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find(SEL.EH.search.galleryA).attr('href').match(/\/g\/(\d+)/)[1] * 1
-          let tags = G.gmetadata.filter(i => i.gid === gid)[0].tags.map(i => i.match(/^\w+:/) ? i.replace(/^(\w+:)/, '$1"') + '"$' : `misc:"${i}"$`)
+          let name;
+          const gid = $(e.target).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find(SEL.EH.search.galleryA).attr('href').match(/\/g\/(\d+)/)[1] * 1;
+          const tags = G.gmetadata.filter(i => i.gid === gid)[0].tags.map(i => i.match(/^\w+:/) ? i.replace(/^(\w+:)/, '$1"') + '"$' : `misc:"${i}"$`);
           if (arr[2] === '-1') {
-            let order = window.prompt(tags.map((i, j) => `${j}: ${translateText(i)}`).join('\n'))
+            const order = window.prompt(tags.map((i, j) => `${j}: ${translateText(i)}`).join('\n'));
             if (order) {
-              name = tags[order]
+              name = tags[order];
             } else {
-              return
+              return;
             }
           } else if (arr[2] === '0') {
-            name = $(e.target).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find(SEL.EH.search.galleryA).text()
-            name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|-|!/g, '').replace(/\|.*/, '').trim()
-            name = '"' + name + '"'
+            name = $(e.target).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find(SEL.EH.search.galleryA).text();
+            name = name.replace(/\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|-|!/g, '').replace(/\|.*/, '').trim();
+            name = '"' + name + '"';
           } else if (arr[2] === '1' && tags.filter(i => i.match(/^(artist|group):/)).length) {
-            name = tags.filter(i => i.match(/^artist:/)).length ? tags.filter(i => i.match(/^artist:/))[0] : tags.filter(i => i.match(/^group:/))[0]
+            name = tags.filter(i => i.match(/^artist:/)).length ? tags.filter(i => i.match(/^artist:/))[0] : tags.filter(i => i.match(/^group:/))[0];
           } else {
-            return
+            return;
           }
-          if (arr[3] === '1') name += ' language:"chinese"$'
-          openUrl(G.config['searchArguments'].replace(/{q}/g, encodeURIComponent(name)))
-          break
+          if (arr[3] === '1') name += ' language:"chinese"$';
+          openUrl(G.config.searchArguments.replace(/{q}/g, encodeURIComponent(name)));
+          break;
         }
       }
     }
-  })
+  });
 }
 
 function btnTask () { // 按钮 -> 添加到下载任务(信息页)
   $('<input type="button" value="Add Task" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">').on({
     mousedown: e => {
       if (e.button === 0) {
-        let task = GM_getValue('task', [])
-        let url = window.location.href.replace(/#\d+$/, '')
+        const task = GM_getValue('task', []);
+        const url = window.location.href.replace(/#\d+$/, '');
         if (!(task.includes(url))) {
-          task.push(url)
-          GM_setValue('task', task)
+          task.push(url);
+          GM_setValue('task', task);
         }
       } else if (e.button === 1) {
-        GM_setValue('task', [])
+        GM_setValue('task', []);
       } else if (e.button === 2) {
-        let task = GM_getValue('task', [])
-        let url = window.location.href.replace(/#\d+$/, '')
+        const task = GM_getValue('task', []);
+        const url = window.location.href.replace(/#\d+$/, '');
         if (task.includes(url)) {
-          task.splice(task.indexOf(url), 1)
-          GM_setValue('task', task)
+          task.splice(task.indexOf(url), 1);
+          GM_setValue('task', task);
         }
       }
     },
     mouseenter: e => {
-      let task = GM_getValue('task', [])
-      $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
+      const task = GM_getValue('task', []);
+      $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+  }).appendTo('.ehNavBar>div:nth-child(3)');
 }
 
 function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
   $('<input type="button" value="Add Task" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">').on({
     mousedown: e => {
       if (e.button === 0) {
-        let task = GM_getValue('task', [])
+        const task = GM_getValue('task', []);
         $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
-          if (!(task.includes(i.href))) task.push(i.href)
-        })
-        GM_setValue('task', task)
+          if (!(task.includes(i.href))) task.push(i.href);
+        });
+        GM_setValue('task', task);
       } else if (e.button === 1) {
-        GM_setValue('task', [])
+        GM_setValue('task', []);
       } else if (e.button === 2) {
-        let task = GM_getValue('task', [])
+        const task = GM_getValue('task', []);
         $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
-          if (task.includes(i.href)) task.splice(task.indexOf(i.href), 1)
-        })
-        GM_setValue('task', task)
+          if (task.includes(i.href)) task.splice(task.indexOf(i.href), 1);
+        });
+        GM_setValue('task', task);
       }
     },
     mouseenter: e => {
-      let task = GM_getValue('task', [])
-      $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '))
+      const task = GM_getValue('task', []);
+      $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)')
+  }).appendTo('.ehNavBar>div:nth-child(3)');
 }
 
 function calcRelativeTime (time) { // 计算相对时间
-  let delta = new Date().getTime() - new Date(time).getTime()
-  let info = {
+  const delta = new Date().getTime() - new Date(time).getTime();
+  const info = {
     millisecond: 1,
     second: 1000,
     minute: 60,
@@ -918,814 +918,813 @@ function calcRelativeTime (time) { // 计算相对时间
     day: 24,
     month: 30,
     year: 12
-  }
-  let suf
-  let t = delta
-  for (let i in info) {
-    let m = t / info[i] // 倍数
-    let r = t % info[i] // 语数
+  };
+  let suf;
+  let t = delta;
+  for (const i in info) {
+    const m = t / info[i]; // 倍数
+    const r = t % info[i]; // 语数
     if (m >= 1 || info[i] - r <= 2) { // 进阶
-      t = m
-      suf = i
+      t = m;
+      suf = i;
     } else {
-      break
+      break;
     }
   }
-  t = Math.round(t)
-  let text = `about ${t} ${suf}${t > 1 ? 's' : ''} ago`
-  if (delta <= 1000 * 60 * 60 * 24 * 7 * 2) text = '<span class="ehHighlight">' + text + '</span>'
-  return text
+  t = Math.round(t);
+  let text = `about ${t} ${suf}${t > 1 ? 's' : ''} ago`;
+  if (delta <= 1000 * 60 * 60 * 24 * 7 * 2) text = '<span class="ehHighlight">' + text + '</span>';
+  return text;
 }
 
 async function changeEConfig (key, value) { // 修改EH设置
-  let uconfig
-  if (G.config['uconfig']) {
-    uconfig = G.config['uconfig']
+  let uconfig;
+  if (G.config.uconfig) {
+    uconfig = G.config.uconfig;
   } else {
-    uconfig = await getEConfig()
+    uconfig = await getEConfig();
   }
-  uconfig = uconfig.replace(new RegExp(key + '=.*?(&|$)'), key + '=' + value + '$1') + '&apply=Apply'
-  await xhrSync('/uconfig.php', uconfig)
+  uconfig = uconfig.replace(new RegExp(key + '=.*?(&|$)'), key + '=' + value + '$1') + '&apply=Apply';
+  await xhrSync('/uconfig.php', uconfig);
 }
 
 function changeFav (url) { // 修改Favicon
   if ($('[rel="shortcut icon"]').length === 0) {
-    $('<link rel="shortcut icon" href="' + url + '" type="image/x-icon">').appendTo('head')
+    $('<link rel="shortcut icon" href="' + url + '" type="image/x-icon">').appendTo('head');
   } else {
-    $('[rel="shortcut icon"]').attr('href', url)
+    $('[rel="shortcut icon"]').attr('href', url);
   }
 }
 
 function changeName (e) { // 修改本子标题（删除集会名、替换其中的罗马数字）
   // test https://exhentai.org/?page=1&f_search=%22Fugudoku%22+%22Katou+Fuguo%22+%22Surudake%22&f_sh=on
-  let infoGroup = ['[]', '()', '{}', '【】']
-  let removeOtherInfo = (text, reverse = false) => {
-    if (reverse) text = text.split('').reverse().join('')
-    let group = reverse ? infoGroup.map(i => i.split('').reverse().join('')) : infoGroup
-    group = group.map(i => i.split('').map(j => reEscape(j)))
-    let re = group.map(i => `${i[0]}.*?${i[1]}`).join('|')
-    re = new RegExp(`^(${re})`)
-    let matched = text.match(re)
+  const infoGroup = ['[]', '()', '{}', '【】'];
+  const removeOtherInfo = (text, reverse = false) => {
+    if (reverse) text = text.split('').reverse().join('');
+    let group = reverse ? infoGroup.map(i => i.split('').reverse().join('')) : infoGroup;
+    group = group.map(i => i.split('').map(j => reEscape(j)));
+    let re = group.map(i => `${i[0]}.*?${i[1]}`).join('|');
+    re = new RegExp(`^(${re})`);
+    let matched = text.match(re);
     while (matched) {
-      text = text.replace(re, '').trim()
-      matched = text.match(re)
+      text = text.replace(re, '').trim();
+      matched = text.match(re);
     }
-    if (reverse) text = text.split('').reverse().join('')
-    return text
-  }
+    if (reverse) text = text.split('').reverse().join('');
+    return text;
+  };
 
   $(e).toArray().forEach(i => {
-    let title = fullWidth2Half(i.textContent).replace(/^\(.*?\)( |)/, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/, ' ').replace(G.emojiRegExp, '').trim()
-    i.textContent = title
+    const title = fullWidth2Half(i.textContent).replace(/^\(.*?\)( |)/, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/, ' ').replace(G.emojiRegExp, '').trim();
+    i.textContent = title;
 
     // 去除标题中首尾的信息，如作者，组织，原作，语言，翻译组
-    let titleJp = G.infoPage ? $(SEL.EH.info.titleJp).text() : G.gmetadata.filter(j => j.gid === i.href.match(/g\/(\d+)\//)[1] * 1)[0].title_jpn
-    let mainTitleJp = removeOtherInfo(titleJp)
-    mainTitleJp = removeOtherInfo(mainTitleJp, true)
+    const titleJp = G.infoPage ? $(SEL.EH.info.titleJp).text() : G.gmetadata.filter(j => j.gid === i.href.match(/g\/(\d+)\//)[1] * 1)[0].title_jpn;
+    let mainTitleJp = removeOtherInfo(titleJp);
+    mainTitleJp = removeOtherInfo(mainTitleJp, true);
 
-    let digitalRomajiJpRe = Object.values(G.digitalRomaji).map(i => i[1].join('|')).join('|')
-    digitalRomajiJpRe = new RegExp(`(${digitalRomajiJpRe})(\\W+|$)`)
+    let digitalRomajiJpRe = Object.values(G.digitalRomaji).map(i => i[1].join('|')).join('|');
+    digitalRomajiJpRe = new RegExp(`(${digitalRomajiJpRe})(\\W+|$)`);
 
-    if (!mainTitleJp.match(digitalRomajiJpRe)) return
+    if (!mainTitleJp.match(digitalRomajiJpRe)) return;
 
-    let mainTitle = removeOtherInfo(title)
-    mainTitle = removeOtherInfo(mainTitle, true)
-    mainTitle = mainTitle.replace(/[|~].*/, '').replace(/\s+/, ' ').trim()
+    let mainTitle = removeOtherInfo(title);
+    mainTitle = removeOtherInfo(mainTitle, true);
+    mainTitle = mainTitle.replace(/[|~].*/, '').replace(/\s+/, ' ').trim();
 
-    let index = title.indexOf(mainTitle)
-    let prefix = title.substr(0, index).trim()
-    let suffix = title.substr(index + mainTitle.length).trim()
+    const index = title.indexOf(mainTitle);
+    const prefix = title.substr(0, index).trim();
+    const suffix = title.substr(index + mainTitle.length).trim();
 
-    let mianTitleArr = mainTitle.split(/\s+/).reverse()
+    const mianTitleArr = mainTitle.split(/\s+/).reverse();
     for (let i = 0; i < mianTitleArr.length; i++) {
-      let text = mianTitleArr[i]
+      const text = mianTitleArr[i];
 
-      let re = G.digitalRomaji[10][0].join('|')
-      re = new RegExp(`(${re})`, 'i')
+      let re = G.digitalRomaji[10][0].join('|');
+      re = new RegExp(`(${re})`, 'i');
       if (text.match(re)) {
-        let arr = text.split(re).filter(i => i)
+        const arr = text.split(re).filter(i => i);
         if (arr.length > 1) {
-          let digitalRomajiRe = Object.values(G.digitalRomaji).map(i => i[0].join('|')).join('|')
-          digitalRomajiRe = new RegExp(`(\\W+|^)(${digitalRomajiRe})(\\W+|$)`, 'i')
+          let digitalRomajiRe = Object.values(G.digitalRomaji).map(i => i[0].join('|')).join('|');
+          digitalRomajiRe = new RegExp(`(\\W+|^)(${digitalRomajiRe})(\\W+|$)`, 'i');
           if (arr.every(j => j.match(digitalRomajiRe))) {
-            mianTitleArr.splice(i, 1, ...arr.reverse())
-            i--
-            continue
+            mianTitleArr.splice(i, 1, ...arr.reverse());
+            i--;
+            continue;
           }
         }
       }
 
-      let matched = false
-      for (let j in G.digitalRomaji) {
-        let re = G.digitalRomaji[j][0].join('|')
-        re = new RegExp(`^(${re})(\\W+|$)`, 'i')
-        if (!text.match(re)) continue
-        matched = true
-        mianTitleArr[i] = text.replace(re, G.digitalRomaji[j][1][0] + '$2')
+      let matched = false;
+      for (const j in G.digitalRomaji) {
+        let re = G.digitalRomaji[j][0].join('|');
+        re = new RegExp(`^(${re})(\\W+|$)`, 'i');
+        if (!text.match(re)) continue;
+        matched = true;
+        mianTitleArr[i] = text.replace(re, G.digitalRomaji[j][1][0] + '$2');
 
         if (i > 0 && mianTitleArr[i].match(/^\d+$/) && mianTitleArr[i - 1].match(/^(\d+)(\W+)$/)) {
-          let number1 = mianTitleArr[i] * 1
-          let re0 = mianTitleArr[i - 1].match(/^(\d+)(\W+)$/)
-          let number0 = re0[1] * 1
-          mianTitleArr[i - 1] = number1 < 10 && number0 < 10 ? number1.toString() + number0.toString() : (number1 + number0).toString()
-          mianTitleArr[i - 1] += re0[2]
-          mianTitleArr.splice(i, 1)
-          i--
+          const number1 = mianTitleArr[i] * 1;
+          const re0 = mianTitleArr[i - 1].match(/^(\d+)(\W+)$/);
+          const number0 = re0[1] * 1;
+          mianTitleArr[i - 1] = number1 < 10 && number0 < 10 ? number1.toString() + number0.toString() : (number1 + number0).toString();
+          mianTitleArr[i - 1] += re0[2];
+          mianTitleArr.splice(i, 1);
+          i--;
         }
-        break
+        break;
       }
-      if (!matched) break
+      if (!matched) break;
     }
-    mainTitle = mianTitleArr.reverse().join(' ')
+    mainTitle = mianTitleArr.reverse().join(' ');
 
-    i.textContent = `${prefix} ${mainTitle} ${suffix}`
-  })
+    i.textContent = `${prefix} ${mainTitle} ${suffix}`;
+  });
 }
 
 function checkExist () { // 检查本地是否存在
-  if (G.config['hideExist']) {
-    $(`<input class="ehHideExist" type="button" status="Hide" value="Hide Exist: 0">`).on({
+  if (G.config.hideExist) {
+    $('<input class="ehHideExist" type="button" status="Hide" value="Hide Exist: 0">').on({
       click: e => {
-        let status = $(e.target).attr('status')
-        let ele = $(SEL.EH.search.resultTr).filter(':has(.ehExist[name="force"],.ehExist[name="force1"])')
-        ele.toggle(status === 'Hide')
-        let now = status === 'Hide' ? 'Show' : 'Hide'
-        $(e.target).attr('status', now)
-        $(e.target).val(`${now} Exist: ${ele.length}`)
+        const status = $(e.target).attr('status');
+        const ele = $(SEL.EH.search.resultTr).filter(':has(.ehExist[name="force"],.ehExist[name="force1"])');
+        ele.toggle(status === 'Hide');
+        const now = status === 'Hide' ? 'Show' : 'Hide';
+        $(e.target).attr('status', now);
+        $(e.target).val(`${now} Exist: ${ele.length}`);
       },
       dblclick: e => {
-        let status = $(e.target).attr('status')
-        let ele = $(SEL.EH.search.resultTr).filter(':has(.ehExist[name="force"],.ehExist[name="force1"])')
-        ele.toggle($(e.target).attr('status') !== 'Hide')
-        $(e.target).val(`${status} Exist: ${ele.length}`)
+        const status = $(e.target).attr('status');
+        const ele = $(SEL.EH.search.resultTr).filter(':has(.ehExist[name="force"],.ehExist[name="force1"])');
+        ele.toggle($(e.target).attr('status') !== 'Hide');
+        $(e.target).val(`${status} Exist: ${ele.length}`);
       }
-    }).appendTo(SEL.EH.search.resultTotal)
+    }).appendTo(SEL.EH.search.resultTotal);
   }
-  $('<div class="ehExistContainer"></div>').prependTo('.ehContainer')
+  $('<div class="ehExistContainer"></div>').prependTo('.ehContainer');
   $('<input type="button" value="Check Exist" name="checkExist" title="只检查可见的，且之前检查无结果">').on('click', async (e) => {
-    let langRE = /\[(Chinese|English|Digital)\].*/gi
+    const langRE = /\[(Chinese|English|Digital)\].*/gi;
 
-    $(e.target).val('Checking').prop('disabled', true)
-    let lst = $(SEL.EH.search.resultTr).filter(':visible').not(':has(.ehExist[name^="force"])').find(SEL.EH.search.galleryA).toArray()
-    let name = {}
+    $(e.target).val('Checking').prop('disabled', true);
+    const lst = $(SEL.EH.search.resultTr).filter(':visible').not(':has(.ehExist[name^="force"])').find(SEL.EH.search.galleryA).toArray();
+    const name = {};
     lst.forEach((i, j) => {
-      if (G.config['checkExistName2']) {
-        name[j] = i.textContent.replace(G.uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim()
+      if (G.config.checkExistName2) {
+        name[j] = i.textContent.replace(G.uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
       } else {
-        let arr = i.textContent.replace(/\|.*?([([{【［（]|$)/, '$1').replace(/[\\/:*?"<>|]/g, '-').replace(langRE, '').split(/[[\](){}【】［］（）～~]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i)
-        name[j] = arr.join()
-        if (name[j] === '') name[j] = i.textContent.replace(G.uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim()
+        const arr = i.textContent.replace(/\|.*?([([{【［（]|$)/, '$1').replace(/[\\/:*?"<>|]/g, '-').replace(langRE, '').split(/[[\](){}【】［］（）～~]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i);
+        name[j] = arr.join();
+        if (name[j] === '') name[j] = i.textContent.replace(G.uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
       }
-    })
+    });
     try {
-      let res = await xhrSync(G.config['checkExistSever'], 'names=' + encodeURIComponent(JSON.stringify(name)), {
+      const res = await xhrSync(G.config.checkExistSever, 'names=' + encodeURIComponent(JSON.stringify(name)), {
         responseType: 'json',
         timeout: 120 * 1000
-      })
+      });
       lst.forEach((i, j) => {
-        let name = i.textContent
-        let name2 = name.match(/\|.*?([([{【［（]|$)/) ? name.replace(/\|.*?([([{【［（]|$)/, '$1') : name
-        name = name.replace(/[\\/:*?"<>|]/g, '-')
-        name2 = name2.replace(/[\\/:*?"<>|]/g, '-')
-        let name3 = name.replace(langRE, '').replace(/\.$/, '').trim()
-        let name4 = name2.replace(langRE, '').replace(/\.$/, '').trim()
-        name = name.replace(/\.$/, '').trim()
-        name2 = name.replace(/\.$/, '').trim()
+        let name = i.textContent;
+        let name2 = name.match(/\|.*?([([{【［（]|$)/) ? name.replace(/\|.*?([([{【［（]|$)/, '$1') : name;
+        name = name.replace(/[\\/:*?"<>|]/g, '-');
+        name2 = name2.replace(/[\\/:*?"<>|]/g, '-');
+        const name3 = name.replace(langRE, '').replace(/\.$/, '').trim();
+        const name4 = name2.replace(langRE, '').replace(/\.$/, '').trim();
+        name = name.replace(/\.$/, '').trim();
+        name2 = name.replace(/\.$/, '').trim();
         res.response[j].forEach(k => {
-          let fileSize = k.size
-          let fileName = k.name
-          let noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').trim()
-          let noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$')
-          let noLang = noExt.replace(langRE, '').trim()
-          let noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$')
-          let p = $(i).parent().find('.ehExistContainer')
-          let _name = (noExtRE.exec(name) || noExtRE.exec(name2)) ? 'force'
+          const fileSize = k.size;
+          const fileName = k.name;
+          const noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').trim();
+          const noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$');
+          const noLang = noExt.replace(langRE, '').trim();
+          const noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$');
+          const p = $(i).parent().find('.ehExistContainer');
+          const _name = (noExtRE.exec(name) || noExtRE.exec(name2)) ? 'force'
             : noExt.match(/\[Incomplete\]/i) ? 'incomplete'
-              : (noLangRE.exec(name3) || noLangRE.exec(name4)) ? 'force1' : ''
+              : (noLangRE.exec(name3) || noLangRE.exec(name4)) ? 'force1' : '';
+          const diffThis = diff(name, noExt);
+          const similar = _name === 'force' ? 0 : diffThis.reduce((total, now) => total + (now[0] === 0 ? 0 : now[1].length), 0);
 
-          let diffThis = diff(name, noExt)
-          let similar = _name === 'force' ? 0 : diffThis.reduce((total, now) => total + (now[0] === 0 ? 0 : now[1].length), 0)
-
-          let diffFlag = 0
-          let diffHTML = [['Remote: '], [' Local: ']]
+          let diffFlag = 0;
+          let diffHTML = [['Remote: '], [' Local: ']];
 
           for (let i = 0; i < diffThis.length; i++) {
-            let arr = diffThis[i]
+            const arr = diffThis[i];
             if (arr[0] === 0) {
-              if (diffFlag) diffHTML[diffFlag > 0 ? 1 : 0].push(`<span class="ehDiffNone">${' '.repeat(Math.abs(diffFlag))}</span>`)
-              diffFlag = 0
-              diffHTML[0].push(arr[1])
-              diffHTML[1].push(arr[1])
+              if (diffFlag) diffHTML[diffFlag > 0 ? 1 : 0].push(`<span class="ehDiffNone">${' '.repeat(Math.abs(diffFlag))}</span>`);
+              diffFlag = 0;
+              diffHTML[0].push(arr[1]);
+              diffHTML[1].push(arr[1]);
             } else if (arr[0] === -1) {
-              diffHTML[0].push(`<span class="ehDiffDel">${arr[1]}</span>`)
-              diffFlag += getStringSize(arr[1])
+              diffHTML[0].push(`<span class="ehDiffDel">${arr[1]}</span>`);
+              diffFlag += getStringSize(arr[1]);
             } else if (arr[0] === 1) {
-              diffHTML[1].push(`<span class="ehDiffAdd">${arr[1]}</span>`)
-              diffFlag -= getStringSize(arr[1])
+              diffHTML[1].push(`<span class="ehDiffAdd">${arr[1]}</span>`);
+              diffFlag -= getStringSize(arr[1]);
             }
           }
-          diffHTML = '<br><span class="ehPreLike">' + diffHTML.map(i => i.join('')).join('<br>') + '</span>'
-          if (noExt === name) diffHTML = ''
+          diffHTML = '<br><span class="ehPreLike">' + diffHTML.map(i => i.join('')).join('<br>') + '</span>';
+          if (noExt === name) diffHTML = '';
 
-          if (p.find(`[copy="${noExt}"][fileSize="${fileSize}"]`).length === 0) $(`<span class="ehExist" fileSize="${fileSize}" name="${_name}" copy="${noExt}" similar="${similar}" tooltip="EditDistance: ${similar}${htmlEscape(diffHTML)}"></span>`).appendTo(p)
-          $(p).find('.ehExist').toArray().sort((a, b) => $(a).attr('similar') * 1 - $(b).attr('similar') * 1).forEach(ele => $(ele).appendTo(p))
-        })
-      })
+          if (p.find(`[copy="${noExt}"][fileSize="${fileSize}"]`).length === 0) $(`<span class="ehExist" fileSize="${fileSize}" name="${_name}" copy="${noExt}" similar="${similar}" tooltip="EditDistance: ${similar}${htmlEscape(diffHTML)}"></span>`).appendTo(p);
+          $(p).find('.ehExist').toArray().sort((a, b) => $(a).attr('similar') * 1 - $(b).attr('similar') * 1).forEach(ele => $(ele).appendTo(p));
+        });
+      });
     } catch (err) {
       if (err.status === 0) {
-        setNotification('checkExistSever', ' is not running')
+        setNotification('checkExistSever', ' is not running');
       } else {
-        console.error(err)
+        console.error(err);
       }
     }
-    $(e.target).val('Check Exist').prop('disabled', false)
+    $(e.target).val('Check Exist').prop('disabled', false);
 
-    if (G.config['hideExist']) {
-      $('.ehHideExist').dblclick()
+    if (G.config.hideExist) {
+      $('.ehHideExist').dblclick();
     }
-  }).appendTo('.ehNavBar>div:nth-child(2)')
+  }).appendTo('.ehNavBar>div:nth-child(2)');
 }
 
 function checkForNew () { // 检查有无新本子
-  let searchKey
+  let searchKey;
   $('<div><a href="javascript:;">Add to CheckList</a></div>').on({
     contextmenu: () => false,
     mousedown: e => {
-      e.preventDefault()
-      let keyword = $(SEL.EH.search.keyword).val()
-      let list = GM_getValue('checkList', {})
-      let name
-      let nameInput
-      if (keyword in list && list[keyword].name) name = list[keyword].name
+      e.preventDefault();
+      const keyword = $(SEL.EH.search.keyword).val();
+      const list = GM_getValue('checkList', {});
+      let name;
+      let nameInput;
+      if (keyword in list && list[keyword].name) name = list[keyword].name;
       if (e.button === 0) {
-        if (!name) name = translateText(keyword)
-        nameInput = window.prompt('请输入名称\n留空: ' + name)
-        if (nameInput === null) return
+        if (!name) name = translateText(keyword);
+        nameInput = window.prompt('请输入名称\n留空: ' + name);
+        if (nameInput === null) return;
       }
-      let time = new Date().getTime()
-      time = time - new Date(G.gmetadata[0].posted * 1000).getTime() <= G.config['checkTimeDeviation'] * 60 * 60 * 1000 ? new Date(G.gmetadata[0].posted * 1000).getTime() + 1 : time
+      let time = new Date().getTime();
+      time = time - new Date(G.gmetadata[0].posted * 1000).getTime() <= G.config.checkTimeDeviation * 60 * 60 * 1000 ? new Date(G.gmetadata[0].posted * 1000).getTime() + 1 : time;
       list[keyword] = {
         time: time,
         result: $(SEL.EH.search.resultTotal).text().match(SEL.EH.search.resultTotalMatch) ? $(SEL.EH.search.resultTotal).text().match(SEL.EH.search.resultTotalMatch)[1].replace(/,/g, '') * 1 : 0
-      }
-      if (nameInput || name !== translateText(keyword)) list[keyword].name = nameInput || name
-      GM_setValue('checkList', sortObj(list, 'time'))
+      };
+      if (nameInput || name !== translateText(keyword)) list[keyword].name = nameInput || name;
+      GM_setValue('checkList', sortObj(list, 'time'));
     }
-  }).appendTo(SEL.EH.common.navBar)
+  }).appendTo(SEL.EH.common.navBar);
   $('<div><a href="javascript:;">Show CheckList</a></div>').on('click', e => {
     if ($('.ehCheckTableContainer').length) {
-      $('.ehCheckTableContainer').toggle()
-      return
+      $('.ehCheckTableContainer').toggle();
+      return;
     }
-    $('<div class="ehCheckTableContainer"></div>').html('<div>过滤: <input name="search" type="text"></div><div class="ehPages"></div><div class="ehCheckTable"><table><thead><tr><th>#</th><th>Keyword</th><th>Name</th><th><a class="ehCheckTableSort" href="javascript:;" name="time" title="sort by time">Time</a></th><th><a class="ehCheckTableSort" href="javascript:;" name="result" title="sort by result">Result</a></th><th><input name="selectAll" type="checkbox" title="全选"></th></tr></thead><tbody></tbody></table></div><div class="ehCheckTableBtn"></div>').appendTo('body')
-    let buildBody = (filter = undefined) => {
-      searchKey = filter
-      let list = GM_getValue('checkList', {})
-      let keys = Object.keys(list)
+    $('<div class="ehCheckTableContainer"></div>').html('<div>过滤: <input name="search" type="text"></div><div class="ehPages"></div><div class="ehCheckTable"><table><thead><tr><th>#</th><th>Keyword</th><th>Name</th><th><a class="ehCheckTableSort" href="javascript:;" name="time" title="sort by time">Time</a></th><th><a class="ehCheckTableSort" href="javascript:;" name="result" title="sort by result">Result</a></th><th><input name="selectAll" type="checkbox" title="全选"></th></tr></thead><tbody></tbody></table></div><div class="ehCheckTableBtn"></div>').appendTo('body');
+    const buildBody = (filter = undefined) => {
+      searchKey = filter;
+      const list = GM_getValue('checkList', {});
+      let keys = Object.keys(list);
       if (searchKey) {
-        let searchKeyRE = new RegExp(searchKey, 'gi')
+        const searchKeyRE = new RegExp(searchKey, 'gi');
         keys = keys.map(i => {
           return Object.assign({
             key: i
-          }, list[i])
-        }).filter(i => i.key.match(searchKeyRE) || (i.name || translateText(i.key)).match(searchKeyRE)).map(i => i.key)
+          }, list[i]);
+        }).filter(i => i.key.match(searchKeyRE) || (i.name || translateText(i.key)).match(searchKeyRE)).map(i => i.key);
       }
-      let getSomeList = page => {
-        $('.ehCheckTable tbody').empty()
-        for (let key = (page - 1) * G.config['checkListPerPage']; key < page * G.config['checkListPerPage']; key++) {
-          if (key >= keys.length) break
-          let i = keys[key]
-          let tr = $('<tr><td></td><td></td><td></td><td></td><td></td><td><input type="checkbox"></td></tr>')
-          $('<a target="_blank"></a>').attr('href', G.config['searchArguments'].replace(/{q}/g, encodeURIComponent(i))).text(i).appendTo($(tr).find('td:eq(1)'))
-          $(tr).find('td:eq(2)').text(list[i].name || translateText(i))
-          let d = new Date(list[i].time)
-          d = G.config['timeShow'] === 'iso' ? new Date(d.getTime() + d.getTimezoneOffset() * 60 * 1000) : d
-          let timeText = d.toLocaleString(navigator.language, {
+      const getSomeList = page => {
+        $('.ehCheckTable tbody').empty();
+        for (let key = (page - 1) * G.config.checkListPerPage; key < page * G.config.checkListPerPage; key++) {
+          if (key >= keys.length) break;
+          const i = keys[key];
+          const tr = $('<tr><td></td><td></td><td></td><td></td><td></td><td><input type="checkbox"></td></tr>');
+          $('<a target="_blank"></a>').attr('href', G.config.searchArguments.replace(/{q}/g, encodeURIComponent(i))).text(i).appendTo($(tr).find('td:eq(1)'));
+          $(tr).find('td:eq(2)').text(list[i].name || translateText(i));
+          let d = new Date(list[i].time);
+          d = G.config.timeShow === 'iso' ? new Date(d.getTime() + d.getTimezoneOffset() * 60 * 1000) : d;
+          const timeText = d.toLocaleString(navigator.language, {
             hour12: false
-          })
-          $(tr).find('td:eq(3)').html(`<time title="${timeText}" datetime="${list[i].time}">${calcRelativeTime(list[i].time)}</time>`)
-          $(tr).find('td:eq(4)').text(list[i].result)
-          $(tr).appendTo('.ehCheckTableContainer tbody')
+          });
+          $(tr).find('td:eq(3)').html(`<time title="${timeText}" datetime="${list[i].time}">${calcRelativeTime(list[i].time)}</time>`);
+          $(tr).find('td:eq(4)').text(list[i].result);
+          $(tr).appendTo('.ehCheckTableContainer tbody');
         }
-      }
-      getSomeList(1)
-      let pages = Math.ceil(keys.length / G.config['checkListPerPage'])
-      $('.ehPages').empty()
+      };
+      getSomeList(1);
+      const pages = Math.ceil(keys.length / G.config.checkListPerPage);
+      $('.ehPages').empty();
       if (pages > 1) {
         $('.ehPages').html([...Array(pages).keys()].map(i => `<a name="${i + 1}"></a>`)).on('click', 'a', function (e) {
-          $('.ehPages>a').removeClass('ehPagesHover')
-          $(e.target).addClass('ehPagesHover')
-          getSomeList(e.target.name)
-        })
-        $('.ehPages>a[name="1"]').addClass('ehPagesHover')
+          $('.ehPages>a').removeClass('ehPagesHover');
+          $(e.target).addClass('ehPagesHover');
+          getSomeList(e.target.name);
+        });
+        $('.ehPages>a[name="1"]').addClass('ehPagesHover');
       }
-    }
-    buildBody(searchKey)
+    };
+    buildBody(searchKey);
     $('.ehCheckTableContainer input[name="search"]').on('change', e => {
-      buildBody(e.target.value)
-    }).val(searchKey)
+      buildBody(e.target.value);
+    }).val(searchKey);
     $('.ehCheckTable th>input[name="selectAll"]').on('click', e => {
-      $('.ehCheckTable td>input').prop('checked', e.target.checked)
-    })
+      $('.ehCheckTable td>input').prop('checked', e.target.checked);
+    });
     $('.ehCheckTable .ehCheckTableSort').on('click', e => {
-      let list = GM_getValue('checkList', {})
-      GM_setValue('checkList', sortObj(list, e.target.name))
-      $('.ehCheckTableContainer').remove()
-      $(SEL.EH.common.navBar).find('a:contains("Show CheckList")').click()
-    })
+      const list = GM_getValue('checkList', {});
+      GM_setValue('checkList', sortObj(list, e.target.name));
+      $('.ehCheckTableContainer').remove();
+      $(SEL.EH.common.navBar).find('a:contains("Show CheckList")').click();
+    });
     $('<input type="button" value="Select Invert" title="反选">').on('click', function () {
       $('.ehCheckTable td>input').toArray().forEach(i => {
-        i.checked = !i.checked
-      })
-    }).appendTo('.ehCheckTableBtn')
+        i.checked = !i.checked;
+      });
+    }).appendTo('.ehCheckTableBtn');
     $('<input type="button" value="Delete" title="移除">').on('click', function () {
-      let list = GM_getValue('checkList', {})
+      const list = GM_getValue('checkList', {});
       $('.ehCheckTable td>input:checked').toArray().forEach(i => {
-        let keyword = $(i).parentsUntil('tbody').eq(-1).find('td>a').html()
-        delete list[keyword]
-      })
-      GM_setValue('checkList', list)
-      $('.ehCheckTableContainer').remove()
-    }).appendTo('.ehCheckTableBtn')
+        const keyword = $(i).parentsUntil('tbody').eq(-1).find('td>a').html();
+        delete list[keyword];
+      });
+      GM_setValue('checkList', list);
+      $('.ehCheckTableContainer').remove();
+    }).appendTo('.ehCheckTableBtn');
     $('<input type="button" value="Cancel" title="取消">').on('click', function () {
-      $('.ehCheckTableContainer').hide()
-    }).appendTo('.ehCheckTableBtn')
-  }).appendTo(SEL.EH.common.navBar)
-  let keyword = $(SEL.EH.search.keyword).val()
-  if (!keyword) return
-  let list = GM_getValue('checkList', {})
-  if (!(keyword in list)) return
-  let info = list[keyword]
-  let tr = $(SEL.EH.search.resultTrGt0).toArray()
-  let i
-  let time = info.time
+      $('.ehCheckTableContainer').hide();
+    }).appendTo('.ehCheckTableBtn');
+  }).appendTo(SEL.EH.common.navBar);
+  const keyword = $(SEL.EH.search.keyword).val();
+  if (!keyword) return;
+  const list = GM_getValue('checkList', {});
+  if (!(keyword in list)) return;
+  const info = list[keyword];
+  const tr = $(SEL.EH.search.resultTrGt0).toArray();
+  let i;
+  const time = info.time;
   for (i = 0; i < G.gmetadata.length; i++) {
-    let d = new Date(G.gmetadata[i].posted * 1000)
-    if (time > d.getTime()) break
+    const d = new Date(G.gmetadata[i].posted * 1000);
+    if (time > d.getTime()) break;
   }
 
-  let d = new Date(info.time)
-  d = G.config['timeShow'] === 'iso' ? new Date(d.getTime() + d.getTimezoneOffset() * 60 * 1000) : d
-  let timeText = d.toLocaleString(navigator.language, {
+  let d = new Date(info.time);
+  d = G.config.timeShow === 'iso' ? new Date(d.getTime() + d.getTimezoneOffset() * 60 * 1000) : d;
+  const timeText = d.toLocaleString(navigator.language, {
     hour12: false
-  })
+  });
 
-  let ele = $(`<tr class="ehCheckContainer gtr${(i === tr.length ? i - 1 : i) % 2 ? '0' : '1'}"><td colspan="${$(SEL.EH.search.resultTr0).find('th').length}">Name: ${info.name || translateText(keyword)}<br>Last Check Time: <time title="${timeText}" datetime="${info.time}">${calcRelativeTime(info.time)}</time><br>Results: ${info.result}<br></td></tr>`)
+  const ele = $(`<tr class="ehCheckContainer gtr${(i === tr.length ? i - 1 : i) % 2 ? '0' : '1'}"><td colspan="${$(SEL.EH.search.resultTr0).find('th').length}">Name: ${info.name || translateText(keyword)}<br>Last Check Time: <time title="${timeText}" datetime="${info.time}">${calcRelativeTime(info.time)}</time><br>Results: ${info.result}<br></td></tr>`);
   if (i === tr.length) {
-    ele.insertAfter(tr[i - 1])
+    ele.insertAfter(tr[i - 1]);
   } else {
-    ele.insertBefore(tr[i])
+    ele.insertBefore(tr[i]);
   }
 
   $('<input type="button" value="Delete" title="移除该项">').click(() => {
     if (window.confirm('确认移除: \n' + keyword)) {
-      let list = GM_getValue('checkList', {})
-      delete list[keyword]
-      GM_setValue('checkList', list)
+      const list = GM_getValue('checkList', {});
+      delete list[keyword];
+      GM_setValue('checkList', list);
     }
-  }).appendTo('.ehCheckContainer>td')
-  let result = $(SEL.EH.search.resultTotal).text().match(SEL.EH.search.resultTotalMatch) ? $(SEL.EH.search.resultTotal).text().match(SEL.EH.search.resultTotalMatch)[1].replace(/,/g, '') * 1 : 0
-  if (result - info.result <= G.config['autoUpdateCheck'] && $(SEL.EH.common.pageCur).text() === '1') {
-    let time = new Date().getTime()
-    time = time - new Date(G.gmetadata[0].posted * 1000).getTime() <= G.config['checkTimeDeviation'] * 60 * 60 * 1000 ? new Date(G.gmetadata[0].posted * 1000).getTime() + 1 : time
+  }).appendTo('.ehCheckContainer>td');
+  const result = $(SEL.EH.search.resultTotal).text().match(SEL.EH.search.resultTotalMatch) ? $(SEL.EH.search.resultTotal).text().match(SEL.EH.search.resultTotalMatch)[1].replace(/,/g, '') * 1 : 0;
+  if (result - info.result <= G.config.autoUpdateCheck && $(SEL.EH.common.pageCur).text() === '1') {
+    let time = new Date().getTime();
+    time = time - new Date(G.gmetadata[0].posted * 1000).getTime() <= G.config.checkTimeDeviation * 60 * 60 * 1000 ? new Date(G.gmetadata[0].posted * 1000).getTime() + 1 : time;
     list[keyword] = {
       time: time,
       result: result
-    }
-    if (info.name) list[keyword].name = info.name
-    GM_setValue('checkList', sortObj(list, 'time'))
-    setNotification((info.name || translateText(keyword)), 'CheckList updated')
+    };
+    if (info.name) list[keyword].name = info.name;
+    GM_setValue('checkList', sortObj(list, 'time'));
+    setNotification((info.name || translateText(keyword)), 'CheckList updated');
   }
 }
 
 async function checkImageSize () { // 检查图片尺寸
-  let s = G.config['sizeS']
-  let d = G.config['sizeD']
-  let imageSize = await getEConfig('xr')
-  let numD = 0 // 双页
+  const s = G.config.sizeS;
+  const d = G.config.sizeD;
+  const imageSize = await getEConfig('xr');
+  let numD = 0; // 双页
   $(SEL.EH.info.previewImg).toArray().forEach(function (i, j) {
-    if ($(i).is($('.ehIgnore img'))) return
-    let rate = $(i).width() / $(i).height() // 宽高比
-    if (rate > G.config['rateD']) {
-      numD++
-      G.imageD.push(j + 1)
+    if ($(i).is($('.ehIgnore img'))) return;
+    const rate = $(i).width() / $(i).height(); // 宽高比
+    if (rate > G.config.rateD) {
+      numD++;
+      G.imageD.push(j + 1);
     } else {
-      G.imageS.push(j + 1)
+      G.imageS.push(j + 1);
     }
-  })
-  let imageSizeNew
+  });
+  let imageSizeNew;
   if (2 * numD > G.imageD.length + G.imageS.length) { // 双页超过一半
-    if (imageSize !== d) imageSizeNew = d
+    if (imageSize !== d) imageSizeNew = d;
   } else if (imageSize !== s) {
-    imageSizeNew = s
+    imageSizeNew = s;
   }
   if (imageSizeNew !== undefined) {
     if (G.autoDownload && GM_getValue('downloading', []).length === 0) {
-      document.title = imageSizeNew + '|' + document.title
-      await changeEConfig('xr', imageSizeNew)
-      changeFav(G.favicon[imageSizeNew])
+      document.title = imageSizeNew + '|' + document.title;
+      await changeEConfig('xr', imageSizeNew);
+      changeFav(G.favicon[imageSizeNew]);
     } else {
-      let rawBtn = $(SEL.EHD.download)
+      const rawBtn = $(SEL.EHD.download);
       rawBtn.clone(false).click(async e => {
-        if (GM_getValue('downloading', []).length !== 0 && !window.confirm('下载列表不为空, 是否开始下载?')) return
-        document.title = imageSizeNew + '|' + document.title
-        await changeEConfig('xr', imageSizeNew)
-        changeFav(G.favicon[imageSizeNew])
-        rawBtn.click()
-      }).insertBefore(rawBtn)
-      rawBtn.hide()
-      changeFav(G.favicon.p)
+        if (GM_getValue('downloading', []).length !== 0 && !window.confirm('下载列表不为空, 是否开始下载?')) return;
+        document.title = imageSizeNew + '|' + document.title;
+        await changeEConfig('xr', imageSizeNew);
+        changeFav(G.favicon[imageSizeNew]);
+        rawBtn.click();
+      }).insertBefore(rawBtn);
+      rawBtn.hide();
+      changeFav(G.favicon.p);
     }
   }
 }
 
 function copyInfo () { // 复制信息
   if ($(SEL.EH.info.title).text().match(/\[(.*?)\]/) && $(SEL.EH.info.titleJp).text().match(/\[(.*?)\]/)) { // artist
-    var name = $(SEL.EH.info.title).text().match(/\[(.*?)\]/)[1]
-    var nameJpn = $(SEL.EH.info.titleJp).text().match(/\[(.*?)\]/)[1]
-    if (name.match(/\(.*?\)/)) name = name.match(/\((.*?)\)/)[1]
-    if (nameJpn.match(/\(.*?\)/)) nameJpn = nameJpn.match(/\((.*?)\)/)[1]
-    $(`<input type="button" value="[${name}]${nameJpn}" copy="[${name}]${nameJpn}">`).appendTo('.ehNavBar>div:nth-child(1)')
+    var name = $(SEL.EH.info.title).text().match(/\[(.*?)\]/)[1];
+    var nameJpn = $(SEL.EH.info.titleJp).text().match(/\[(.*?)\]/)[1];
+    if (name.match(/\(.*?\)/)) name = name.match(/\((.*?)\)/)[1];
+    if (nameJpn.match(/\(.*?\)/)) nameJpn = nameJpn.match(/\((.*?)\)/)[1];
+    $(`<input type="button" value="[${name}]${nameJpn}" copy="[${name}]${nameJpn}">`).appendTo('.ehNavBar>div:nth-child(1)');
   }
   if ($(SEL.EH.info.tagParody).length > 0) { // parody
-    let info = $(SEL.EH.info.tagParody).attr('id').split(/ta_|:/)
-    let parody = findData(info[1], info[2], true)
+    const info = $(SEL.EH.info.tagParody).attr('id').split(/ta_|:/);
+    let parody = findData(info[1], info[2], true);
     if (Object.keys(parody).length) {
-      parody = parody.cname
+      parody = parody.cname;
     } else {
-      parody = $(SEL.EH.info.titleJp).text().match(/\(.*?\)/g) ? $(SEL.EH.info.titleJp).text().match(/\(.*?\)/g) : $(SEL.EH.info.title).text().match(/\(.*?\)/g)
+      parody = $(SEL.EH.info.titleJp).text().match(/\(.*?\)/g) ? $(SEL.EH.info.titleJp).text().match(/\(.*?\)/g) : $(SEL.EH.info.title).text().match(/\(.*?\)/g);
       if (parody) {
-        parody = parody[parody.length - 1].match(/\((.*?)\)/)[1]
+        parody = parody[parody.length - 1].match(/\((.*?)\)/)[1];
       } else {
-        return
+        return;
       }
     }
-    let parodyKeyword = $(SEL.EH.info.tagParody).text().replace(/ \| .*/, '')
-    $(`<input type="button" value="【${parody}】${parodyKeyword}" copy="【${parody}】${parodyKeyword}">`).appendTo('.ehNavBar>div:nth-child(1)')
+    const parodyKeyword = $(SEL.EH.info.tagParody).text().replace(/ \| .*/, '');
+    $(`<input type="button" value="【${parody}】${parodyKeyword}" copy="【${parody}】${parodyKeyword}">`).appendTo('.ehNavBar>div:nth-child(1)');
   }
 }
 
 function defaultConfig () { // 默认设置
-  let config = {
-    'updateIntervalEHT': 0,
-    'updateIntervalEHD': 0,
-    'exportIntroPicFormat': "'{id}', ",
-    'timeShow': 'local',
+  const config = {
+    updateIntervalEHT: 0,
+    updateIntervalEHD: 0,
+    exportIntroPicFormat: "'{id}', ",
+    timeShow: 'local',
 
     // 通用设置
-    'ex2eh': false,
-    'eh2ex': true,
-    'openUrl': '0',
-    'saveLink': true,
-    'bookmark': '0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist',
-    'searchArguments': '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_search={q}&f_sh=on',
-    'notification': '3',
-    'changeName': true,
+    ex2eh: false,
+    eh2ex: true,
+    openUrl: '0',
+    saveLink: true,
+    bookmark: '0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist',
+    searchArguments: '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_search={q}&f_sh=on',
+    notification: '3',
+    changeName: true,
 
     // 搜索页
-    'preloadPaneImage': true,
-    'languageCode': true,
-    'searchEvent': '0,-1,0,1|1,-1,-1,1|2,-1,1,1',
-    'searchEventChs': '鼠标左键 + 任意按键 -> 主要名称 + chinese<br>鼠标中键 + 任意按键 -> 自行选择 + chinese<br>鼠标右键 + 任意按键 -> 作者或组织(顺位) + chinese',
-    'checkExist': true,
-    'checkExistAtStart': true,
-    'checkExistName2': false,
-    'checkExistSever': 'http://127.0.0.1:3000/',
-    'hideExist': true,
-    'acLength': 3,
-    'acItem': 'language,artist,female,male,parody,character,group,misc',
-    'batch': 3,
-    'notHideUnlike': true,
-    'alwaysShowLike': true,
-    'lowRating': 0,
-    'fewPages': 1,
-    'checkTimeDeviation': 12,
-    'autoUpdateCheck': 25,
-    'checkListPerPage': 25,
+    preloadPaneImage: true,
+    languageCode: true,
+    searchEvent: '0,-1,0,1|1,-1,-1,1|2,-1,1,1',
+    searchEventChs: '鼠标左键 + 任意按键 -> 主要名称 + chinese<br>鼠标中键 + 任意按键 -> 自行选择 + chinese<br>鼠标右键 + 任意按键 -> 作者或组织(顺位) + chinese',
+    checkExist: true,
+    checkExistAtStart: true,
+    checkExistName2: false,
+    checkExistSever: 'http://127.0.0.1:3000/',
+    hideExist: true,
+    acLength: 3,
+    acItem: 'language,artist,female,male,parody,character,group,misc',
+    batch: 3,
+    notHideUnlike: true,
+    alwaysShowLike: true,
+    lowRating: 0,
+    fewPages: 1,
+    checkTimeDeviation: 12,
+    autoUpdateCheck: 25,
+    checkListPerPage: 25,
 
     // 信息页
-    'uconfig': '',
-    'autoStartDownload': true,
-    'autoClose': true,
-    'enableEHD': true,
-    'recordEHDUrl': true,
-    'fixEHDCounter': true,
-    'exportUrlFormat': '{url} +Proxy{cr}{lf}',
-    'tagTranslateImage': false,
-    'showAllThumb': true,
-    'enableChangeSize': true,
-    'rateD': 1,
-    'sizeD': '3',
-    'sizeS': '1',
-    'downloadSizeChanged': true
-  }
-  for (let i in config) {
-    if (!(i in G.config)) G.config[i] = config[i]
+    uconfig: '',
+    autoStartDownload: true,
+    autoClose: true,
+    enableEHD: true,
+    recordEHDUrl: true,
+    fixEHDCounter: true,
+    exportUrlFormat: '{url} +Proxy{cr}{lf}',
+    tagTranslateImage: false,
+    showAllThumb: true,
+    enableChangeSize: true,
+    rateD: 1,
+    sizeD: '3',
+    sizeS: '1',
+    downloadSizeChanged: true
+  };
+  for (const i in config) {
+    if (!(i in G.config)) G.config[i] = config[i];
   }
 }
 
 function downloadAdd (id) {
-  if (G.downloading) return
-  G.downloading = true
-  let downloading = GM_getValue('downloading', [])
-  downloading.push(id)
-  GM_setValue('downloading', downloading)
+  if (G.downloading) return;
+  G.downloading = true;
+  const downloading = GM_getValue('downloading', []);
+  downloading.push(id);
+  GM_setValue('downloading', downloading);
 }
 
 function downloadRemove (id) {
-  if (!G.downloading) return
-  G.downloading = false
-  let downloading = GM_getValue('downloading', [])
+  if (!G.downloading) return;
+  G.downloading = false;
+  const downloading = GM_getValue('downloading', []);
   if (downloading.includes(id)) {
-    downloading.splice(downloading.indexOf(id), 1)
-    GM_setValue('downloading', downloading)
+    downloading.splice(downloading.indexOf(id), 1);
+    GM_setValue('downloading', downloading);
   }
 }
 
 function findData (main, sub, textOnly = true) {
-  let data = G.EHT.filter(i => i.namespace === main)
-  if (data.length === 0) return {}
+  const data = G.EHT.filter(i => i.namespace === main);
+  if (data.length === 0) return {};
   if (sub === undefined) {
     return {
       name: main,
       cname: data[0].frontMatters.name,
       info: data[0].frontMatters.description
-    }
+    };
   }
-  let data1 = data[0].data[sub.replace(/_/g, ' ')]
+  let data1 = data[0].data[sub.replace(/_/g, ' ')];
   if (!data1) {
     if (sub.match(' \\| ')) {
-      let arr = sub.split(' | ').map(i => i.replace(/_/g, ' '))
-      data1 = data[0].data[arr[0]]
+      const arr = sub.split(' | ').map(i => i.replace(/_/g, ' '));
+      data1 = data[0].data[arr[0]];
     }
   }
   if (data1) {
-    let info = data1.intro
-    let cname = data1.name
+    let info = data1.intro;
+    let cname = data1.name;
     if (textOnly) {
-      info = info.replace(/!\[(.*?)\]\((.*?)\)/g, '').replace(G.emojiRegExp, '')
-      cname = cname.replace(/!\[(.*?)\]\((.*?)\)/g, '').replace(G.emojiRegExp, '')
+      info = info.replace(/!\[(.*?)\]\((.*?)\)/g, '').replace(G.emojiRegExp, '');
+      cname = cname.replace(/!\[(.*?)\]\((.*?)\)/g, '').replace(G.emojiRegExp, '');
     }
     return {
       name: main === 'misc' ? sub : main + ':' + sub,
       cname: cname,
       info: info
-    }
+    };
   } else {
-    return {}
+    return {};
   }
 }
 
 async function getEConfig (key) { // 获取EH设置
-  let res = await xhrSync('/uconfig.php')
-  let uconfig = $(SEL.EH.setting.form, res.response).serialize()
-  return key ? uconfig.match(new RegExp(key + '=(.*?)(&|$)'))[1] : uconfig
+  const res = await xhrSync('/uconfig.php');
+  const uconfig = $(SEL.EH.setting.form, res.response).serialize();
+  return key ? uconfig.match(new RegExp(key + '=(.*?)(&|$)'))[1] : uconfig;
 }
 
 async function getInfo () { // 获取信息
-  if (!$(SEL.EH.search.resultTable).length) return
-  let gidlist = $(SEL.EH.search.galleryA).toArray().map(i => {
-    let arr = i.href.split('/')
-    return [arr[4], arr[5]]
-  })
-  let lst = []
+  if (!$(SEL.EH.search.resultTable).length) return;
+  const gidlist = $(SEL.EH.search.galleryA).toArray().map(i => {
+    const arr = i.href.split('/');
+    return [arr[4], arr[5]];
+  });
+  const lst = [];
   while (gidlist.length) {
-    lst.push(gidlist.splice(0, 25))
+    lst.push(gidlist.splice(0, 25));
   }
-  let gmetadata = []
+  let gmetadata = [];
   for (let i = 0; i < lst.length; i++) {
-    let gdata = {
-      'method': 'gdata',
-      'gidlist': lst[i],
-      'namespace': 1
-    }
-    let res = await xhrSync('/api.php', JSON.stringify(gdata), {
+    const gdata = {
+      method: 'gdata',
+      gidlist: lst[i],
+      namespace: 1
+    };
+    const res = await xhrSync('/api.php', JSON.stringify(gdata), {
       responseType: 'json'
-    })
-    gmetadata = gmetadata.concat(res.response.gmetadata)
+    });
+    gmetadata = gmetadata.concat(res.response.gmetadata);
   }
-  return gmetadata
+  return gmetadata;
 }
 
 function hideGalleries () { // 隐藏某些画集
-  let tags = GM_getValue('tagAction', {})
+  const tags = GM_getValue('tagAction', {});
   $(SEL.EH.search.galleryA).toArray().forEach(i => {
-    let info = G.gmetadata.filter(j => j.gid === i.href.split('/')[4] * 1)[0]
-    if (!info) return
-    let container = $(i).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find('.ehContainer')
-    if (info.rating * 1 < G.config['lowRating']) $('<span class="ehTagNotice" name="Unlike" title="低评分">低评分</span>').appendTo(container)
-    if (info.filecount * 1 < G.config['fewPages']) $('<span class="ehTagNotice" name="Unlike" title="页面少">页面少</span>').appendTo(container)
+    const info = G.gmetadata.filter(j => j.gid === i.href.split('/')[4] * 1)[0];
+    if (!info) return;
+    const container = $(i).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find('.ehContainer');
+    if (info.rating * 1 < G.config.lowRating) $('<span class="ehTagNotice" name="Unlike" title="低评分">低评分</span>').appendTo(container);
+    if (info.filecount * 1 < G.config.fewPages) $('<span class="ehTagNotice" name="Unlike" title="页面少">页面少</span>').appendTo(container);
 
     info.tags.filter(j => j in tags).forEach(j => {
-      let tagArr = j.split(':')
-      let main = tagArr.length === 1 ? 'misc' : tagArr[0]
-      let sub = tagArr[tagArr.length - 1]
-      let data = findData(main, sub, true)
-      let tagChs = j
-      let tagInfo = j
+      const tagArr = j.split(':');
+      const main = tagArr.length === 1 ? 'misc' : tagArr[0];
+      const sub = tagArr[tagArr.length - 1];
+      const data = findData(main, sub, true);
+      let tagChs = j;
+      let tagInfo = j;
       if (Object.keys(data).length) {
-        tagChs = (main === 'male' ? '♂' : main === 'female' ? '♀' : main[0]) + ':' + data.cname
-        tagInfo += '<br>' + data.info
+        tagChs = (main === 'male' ? '♂' : main === 'female' ? '♀' : main[0]) + ':' + data.cname;
+        tagInfo += '<br>' + data.info;
       }
-      $(`<span class="ehTagNotice" name="${tags[j]}" title="${tagInfo}">${tagChs}</span>`).appendTo(container)
-    })
-  })
-  if (!G.config['notHideUnlike']) {
-    let ele = $(SEL.EH.search.resultTr).filter(':has(.ehTagNotice[name="Unlike"])')
-    if (G.config['alwaysShowLike']) ele = ele.not(':has(.ehTagNotice[name="Unlike"]):has(.ehTagNotice[name="Like"])')
-    let length = ele.length
-    ele.hide()
+      $(`<span class="ehTagNotice" name="${tags[j]}" title="${tagInfo}">${tagChs}</span>`).appendTo(container);
+    });
+  });
+  if (!G.config.notHideUnlike) {
+    let ele = $(SEL.EH.search.resultTr).filter(':has(.ehTagNotice[name="Unlike"])');
+    if (G.config.alwaysShowLike) ele = ele.not(':has(.ehTagNotice[name="Unlike"]):has(.ehTagNotice[name="Like"])');
+    const length = ele.length;
+    ele.hide();
     $(`<input type="button" status="Hide" value="Hide Tag: ${length}">`).on('click', function (e) {
-      let status = $(e.target).attr('status')
-      ele.toggle(status === 'Hide')
-      let now = status === 'Hide' ? 'Show' : 'Hide'
-      $(e.target).attr('status', now)
-      $(e.target).val(`${now} Tag: ${length}`)
-    }).appendTo(SEL.EH.search.resultTotal)
+      const status = $(e.target).attr('status');
+      ele.toggle(status === 'Hide');
+      const now = status === 'Hide' ? 'Show' : 'Hide';
+      $(e.target).attr('status', now);
+      $(e.target).val(`${now} Tag: ${length}`);
+    }).appendTo(SEL.EH.search.resultTotal);
   }
 }
 
 function highlightBlacklist () { // 高亮黑名单相关的画廊(通用)
-  let blacklist = GM_getValue('blacklist', [])
+  const blacklist = GM_getValue('blacklist', []);
   $(SEL.EH.search.galleryA).toArray().concat($(SEL.EH.info.title).toArray(), $(SEL.EH.info.titleJp).toArray()).forEach(i => {
-    let title = htmlEscape($(i).text())
-    for (let j of blacklist) {
-      let re = new RegExp(j, 'gi')
+    let title = htmlEscape($(i).text());
+    for (const j of blacklist) {
+      const re = new RegExp(j, 'gi');
       if (title.match(re)) {
-        title = title.replace(re, '<span class="ehBlacklist" copy="$&">$&</span>')
+        title = title.replace(re, '<span class="ehBlacklist" copy="$&">$&</span>');
       }
     }
-    $(i).html(title)
-  })
+    $(i).html(title);
+  });
 }
 
 function introPic () { // 宣传图
-  let toggleIgnore = e => {
-    let introPic = GM_getValue('introPic', [])
-    introPic = arrUnique(introPic)
-    let id = $(e.target).prev().attr('href').split('/')[4]
+  const toggleIgnore = e => {
+    let introPic = GM_getValue('introPic', []);
+    introPic = arrUnique(introPic);
+    const id = $(e.target).prev().attr('href').split('/')[4];
     if ($(e.target).attr('on') === 'true') {
-      introPic.push(id)
+      introPic.push(id);
     } else {
-      introPic.splice(introPic.indexOf(id), 1)
+      introPic.splice(introPic.indexOf(id), 1);
     }
-    $(e.target).parent().toggleClass('ehIgnore')
-    $(e.target).attr('on', !introPic.includes(id))
-    GM_setValue('introPic', introPic)
-  }
-  let introPic = GM_getValue('introPic', [])
+    $(e.target).parent().toggleClass('ehIgnore');
+    $(e.target).attr('on', !introPic.includes(id));
+    GM_setValue('introPic', introPic);
+  };
+  const introPic = GM_getValue('introPic', []);
   $(SEL.EH.info.previewA).toArray().forEach(i => {
-    let url = i.href
-    let id = url.split('/')[4]
-    let name = $(i).find('img:eq(0)').attr('title').match(/Page \d+:\s+(.*)/)[1]
-    let isIntroPic = introPic.includes(id)
-    let btnBlock = $(`<a type="button" name="intro" href="javascript:;" on="true" file="${name}"></a>`).on('click', toggleIgnore).appendTo(i.parentNode)
+    const url = i.href;
+    const id = url.split('/')[4];
+    const name = $(i).find('img:eq(0)').attr('title').match(/Page \d+:\s+(.*)/)[1];
+    const isIntroPic = introPic.includes(id);
+    const btnBlock = $(`<a type="button" name="intro" href="javascript:;" on="true" file="${name}"></a>`).on('click', toggleIgnore).appendTo(i.parentNode);
 
     if (isIntroPic || G.introPicName.some(j => name.match(j))) {
-      $(btnBlock).attr('on', 'false')
-      $(i).parent().addClass('ehIgnore')
+      $(btnBlock).attr('on', 'false');
+      $(i).parent().addClass('ehIgnore');
       if (isIntroPic) { // 收集数据
-        let introPicStat = GM_getValue('introPicStat', {})
-        introPicStat[id] = id in introPicStat ? introPicStat[id] + 1 : 1
-        GM_setValue('introPicStat', introPicStat)
+        const introPicStat = GM_getValue('introPicStat', {});
+        introPicStat[id] = id in introPicStat ? introPicStat[id] + 1 : 1;
+        GM_setValue('introPicStat', introPicStat);
 
-        let introPicUrl = GM_getValue('introPicUrl', {})
-        introPicUrl[id] = url
-        GM_setValue('introPicUrl', introPicUrl)
+        const introPicUrl = GM_getValue('introPicUrl', {});
+        introPicUrl[id] = url;
+        GM_setValue('introPicUrl', introPicUrl);
       }
     }
-  })
+  });
 }
 
 function jumpHost () { // 里站跳转
-  let l = window.location
+  const l = window.location;
   if (G.infoPage) {
-    if (G.config['ex2eh']) {
-      let gid = l.href.split('/')[4]
-      let jump = GM_getValue('jump', [])
-      jump = arrUnique(jump)
+    if (G.config.ex2eh) {
+      const gid = l.href.split('/')[4];
+      let jump = GM_getValue('jump', []);
+      jump = arrUnique(jump);
       if (l.host === 'exhentai.org') { // 里站
         if (!jump.includes(gid)) { // 尝试跳转
           if (!SEL.EH.info.tagBanned.some(i => document.getElementById(i))) {
-            l.assign(l.href.replace('//exhentai.org', '//e-hentai.org'))
-            return true
+            l.assign(l.href.replace('//exhentai.org', '//e-hentai.org'));
+            return true;
           }
         } else {
-          jump.splice(jump.indexOf(gid), 1)
-          GM_setValue('jump', jump)
+          jump.splice(jump.indexOf(gid), 1);
+          GM_setValue('jump', jump);
         }
       } else if (l.host === 'e-hentai.org') { // 表站
         if (document.querySelector(SEL.EH.info.deleted)) { // 不存在则返回
-          jump.push(gid)
-          GM_setValue('jump', jump)
-          return true
+          jump.push(gid);
+          GM_setValue('jump', jump);
+          return true;
         }
       }
     }
   } else {
-    if (G.config['ex2eh'] && l.href === 'https://e-hentai.org/' && document.referrer && document.referrer.match(SEL.EH.info.urlMatch) && GM_getValue('jump', []).includes(document.referrer.split('/')[4])) {
-      l.assign(document.referrer.replace('//e-hentai.org', '//exhentai.org'))
-      return true
-    } else if (G.config['eh2ex'] && l.host === 'e-hentai.org' && $(SEL.EH.search.keyword).val()) {
-      l.assign(l.href.replace('//e-hentai.org', '//exhentai.org'))
-      return true
+    if (G.config.ex2eh && l.href === 'https://e-hentai.org/' && document.referrer && document.referrer.match(SEL.EH.info.urlMatch) && GM_getValue('jump', []).includes(document.referrer.split('/')[4])) {
+      l.assign(document.referrer.replace('//e-hentai.org', '//exhentai.org'));
+      return true;
+    } else if (G.config.eh2ex && l.host === 'e-hentai.org' && $(SEL.EH.search.keyword).val()) {
+      l.assign(l.href.replace('//e-hentai.org', '//exhentai.org'));
+      return true;
     }
   }
 }
 
 function languageCode () { // 显示iso语言代码
-  let value = $(SEL.EH.search.keyword).val()
-  let iso = {
-    'chinese': 'zh',
-    'english': 'en',
-    'japanese': 'ja',
-    'korean': 'ko',
-    'albanian': 'sq',
-    'arabic': 'ar',
-    'bengali': 'bn',
-    'catalan': 'ca',
-    'czech': 'cs',
-    'danish': 'da',
-    'dutch': 'nl',
-    'esperanto': 'eo',
-    'estonian': 'et',
-    'finnish': 'fi',
-    'french': 'fr',
-    'german': 'de',
-    'greek': 'el',
-    'hebrew': 'he',
-    'hindi': 'hi',
-    'hungarian': 'hu',
-    'indonesian': 'id',
-    'italian': 'it',
-    'mongolian': 'mn',
-    'norwegian': 'no',
-    'polish': 'pl',
-    'portuguese': 'pt',
-    'romanian': 'ro',
-    'russian': 'ru',
-    'slovak': 'sk',
-    'slovenian': 'sl',
-    'spanish': 'es',
-    'swedish': 'sv',
-    'tagalog': 'tl',
-    'thai': 'th',
-    'turkish': 'tr',
-    'ukrainian': 'uk',
-    'vietnamese': 'vi'
-  }
-  value = value.match(/language:("|)(.*?)(\$"|"\$|")/)
-  if (value && value[2] in iso) return
+  let value = $(SEL.EH.search.keyword).val();
+  const iso = {
+    chinese: 'zh',
+    english: 'en',
+    japanese: 'ja',
+    korean: 'ko',
+    albanian: 'sq',
+    arabic: 'ar',
+    bengali: 'bn',
+    catalan: 'ca',
+    czech: 'cs',
+    danish: 'da',
+    dutch: 'nl',
+    esperanto: 'eo',
+    estonian: 'et',
+    finnish: 'fi',
+    french: 'fr',
+    german: 'de',
+    greek: 'el',
+    hebrew: 'he',
+    hindi: 'hi',
+    hungarian: 'hu',
+    indonesian: 'id',
+    italian: 'it',
+    mongolian: 'mn',
+    norwegian: 'no',
+    polish: 'pl',
+    portuguese: 'pt',
+    romanian: 'ro',
+    russian: 'ru',
+    slovak: 'sk',
+    slovenian: 'sl',
+    spanish: 'es',
+    swedish: 'sv',
+    tagalog: 'tl',
+    thai: 'th',
+    turkish: 'tr',
+    ukrainian: 'uk',
+    vietnamese: 'vi'
+  };
+  value = value.match(/language:("|)(.*?)(\$"|"\$|")/);
+  if (value && value[2] in iso) return;
   $(SEL.EH.search.galleryA).toArray().forEach(i => {
-    let info = G.gmetadata.filter(j => j.gid === i.href.split('/')[4] * 1)[0]
-    if (!info) return
-    let langs = info.tags.filter(i => i.match(/^language:/))
-    let container = $(i).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find('.ehContainer')
+    const info = G.gmetadata.filter(j => j.gid === i.href.split('/')[4] * 1)[0];
+    if (!info) return;
+    const langs = info.tags.filter(i => i.match(/^language:/));
+    const container = $(i).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find('.ehContainer');
     langs.forEach(j => {
-      let lang = j.match(/^language:(.*)/)[1]
+      const lang = j.match(/^language:(.*)/)[1];
       if (lang in iso) {
-        $(`<span class="ehLang" title="${lang}">${iso[lang]}</span>`).appendTo(container)
+        $(`<span class="ehLang" title="${lang}">${iso[lang]}</span>`).appendTo(container);
       }
-    })
-  })
+    });
+  });
 }
 
 function makeRange (arr) {
-  arr = [...new Set(arr.sort((a, b) => a - b))]
-  let arr2 = [arr[0].toString()]
+  arr = [...new Set(arr.sort((a, b) => a - b))];
+  const arr2 = [arr[0].toString()];
 
   for (let i = 1; i < arr.length; i++) {
-    let index = arr[i]
-    let last = arr2[arr2.length - 1]
-    let start = last.match(/^\d+/)[0] * 1
-    let end = last.match(/\d+$/)[0] * 1
+    const index = arr[i];
+    const last = arr2[arr2.length - 1];
+    const start = last.match(/^\d+/)[0] * 1;
+    const end = last.match(/\d+$/)[0] * 1;
     if (index - end === 1) {
-      arr2[arr2.length - 1] = `${start}-${index}`
+      arr2[arr2.length - 1] = `${start}-${index}`;
     } else {
-      arr2.push(index.toString())
+      arr2.push(index.toString());
     }
   }
-  return arr2
+  return arr2;
 }
 
 function openUrl (url) { // 打开链接
-  url = (url.match('//') ? '' : window.location.origin) + url
-  if (G.config['openUrl'] === '0') {
-    GM_openInTab(url, true)
-  } else if (G.config['openUrl'] === '1') {
-    GM_openInTab(url, false)
-  } else if (G.config['openUrl'] === '2' || G.config['openUrl'] === '3') {
+  url = (url.match('//') ? '' : window.location.origin) + url;
+  if (G.config.openUrl === '0') {
+    GM_openInTab(url, true);
+  } else if (G.config.openUrl === '1') {
+    GM_openInTab(url, false);
+  } else if (G.config.openUrl === '2' || G.config.openUrl === '3') {
     if (url.match(/\/g\/\d+\/[\da-z]+\//)) {
-      let popup = window.open(url, '', 'resizable,scrollbars,status')
+      const popup = window.open(url, '', 'resizable,scrollbars,status');
       if (popup) {
-        popup.moveTo(0, 0)
-        popup.resizeTo(window.screen.width, window.screen.height)
+        popup.moveTo(0, 0);
+        popup.resizeTo(window.screen.width, window.screen.height);
       } else {
-        setNotification('请允许该网页弹出窗口')
-        GM_openInTab(url, G.config['openUrl'] === '2')
+        setNotification('请允许该网页弹出窗口');
+        GM_openInTab(url, G.config.openUrl === '2');
       }
     } else {
-      GM_openInTab(url, G.config['openUrl'] === '2')
+      GM_openInTab(url, G.config.openUrl === '2');
     }
   }
 }
@@ -1733,33 +1732,33 @@ function openUrl (url) { // 打开链接
 function quickDownload () { // 右键下载
   $(SEL.EH.search.resultTable).on('contextmenu', e => {
     if ($(e.target).is(SEL.EH.search.galleryA)) {
-      e.preventDefault()
-      let target = e.target
-      openUrl(target.href + '#2')
+      e.preventDefault();
+      const target = e.target;
+      openUrl(target.href + '#2');
     }
-  })
+  });
 }
 
 async function saveAs (text, name) {
-  downloadRemove(SEL.EH.info.galleryId)
+  downloadRemove(SEL.EH.info.galleryId);
   if (text instanceof window.Blob && text.type.match(/^application.*zip$/)) {
     if (G.downloadSizeChanged) {
       if (!G.imageEnd) {
-        G.imageData = text
-        autoDownload(true)
+        G.imageData = text;
+        autoDownload(true);
       } else {
         new Promise(async resolve => {
-          let zipS = await JSZip.loadAsync(text)
-          let zip = await JSZip.loadAsync(G.imageData)
-          let files = Object.keys(zipS.files)
-          let infoStr = ''
+          const zipS = await JSZip.loadAsync(text);
+          const zip = await JSZip.loadAsync(G.imageData);
+          const files = Object.keys(zipS.files);
+          let infoStr = '';
           for (let i = 0; i < files.length; i++) {
-            let file = files[i]
-            let ab = await zipS.files[file].async('arraybuffer')
-            zip.file(file, ab)
-            if (file.match(/\/info.txt$/)) infoStr = await zipS.files[file].async('text')
+            const file = files[i];
+            const ab = await zipS.files[file].async('arraybuffer');
+            zip.file(file, ab);
+            if (file.match(/\/info.txt$/)) infoStr = await zipS.files[file].async('text');
           }
-          let data = await zip.generateAsync({
+          const data = await zip.generateAsync({
             type: 'arraybuffer',
             compression: G['ehD-setting']['compression-level'] ? 'DEFLATE' : 'STORE',
             compressionOptions: {
@@ -1767,36 +1766,36 @@ async function saveAs (text, name) {
             },
             streamFiles: !!G['ehD-setting']['file-descriptor'],
             comment: G['ehD-setting']['save-info'] === 'comment' ? infoStr.replace(/\n/gi, '\r\n') : undefined
-          })
-          resolve(data)
+          });
+          resolve(data);
         }).then(async data => {
-          saveAs2(data, name, text.type)
-          window.onbeforeunload = null
-          await waitInMs(500)
-          taskRemove(SEL.EH.info.galleryId)
-          await waitInMs(200)
-          window.close()
-        })
+          saveAs2(data, name, text.type);
+          window.onbeforeunload = null;
+          await waitInMs(500);
+          taskRemove(SEL.EH.info.galleryId);
+          await waitInMs(200);
+          window.close();
+        });
       }
     } else {
-      saveAs2(text, name, text.type)
-      window.onbeforeunload = null
-      await waitInMs(500)
-      taskRemove(SEL.EH.info.galleryId)
-      await waitInMs(200)
-      window.close()
+      saveAs2(text, name, text.type);
+      window.onbeforeunload = null;
+      await waitInMs(500);
+      taskRemove(SEL.EH.info.galleryId);
+      await waitInMs(200);
+      window.close();
     }
   } else {
-    saveAs2(text, name)
+    saveAs2(text, name);
   }
 }
 
 function saveAs2 (content, name, type = 'application/octet-stream;charset=utf-8') {
-  name = name.replace(/[\\/:*?"<>|]/g, '-').replace(/\u{2139}|[\u{2194}-\u{2199}]|[\u{21A9}-\u{21AA}]|[\u{231A}-\u{231B}]|\u{2328}|\u{23CF}|[\u{23E9}-\u{23F3}]|[\u{23F8}-\u{23FA}]|\u{24C2}|[\u{25AA}-\u{25AB}]|\u{25B6}|\u{25C0}|[\u{25FB}-\u{25FE}]|[\u{2600}-\u{2604}]|\u{260E}|\u{2611}|[\u{2614}-\u{2615}]|\u{2618}|\u{261D}|\u{2620}|[\u{2622}-\u{2623}]|\u{2626}|\u{262A}|[\u{262E}-\u{262F}]|[\u{2638}-\u{263A}]|[\u{2648}-\u{2653}]|\u{2660}|\u{2663}|\u{2666}|\u{2668}|\u{267B}|\u{267F}|[\u{2692}-\u{2697}]|\u{2699}|[\u{269B}-\u{269C}]|[\u{26A0}-\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26B0}-\u{26B1}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|\u{26C8}|\u{26CE}|\u{26CF}|\u{26D1}|[\u{26D3}-\u{26D4}]|[\u{26E9}-\u{26EA}]|[\u{26F0}-\u{26F5}]|[\u{26F7}-\u{26FA}]|\u{26FD}|\u{2702}|\u{2705}|[\u{2708}-\u{2709}]|[\u{270A}-\u{270B}]|[\u{270C}-\u{270D}]|\u{270F}|\u{2712}|\u{2714}|\u{2716}|\u{271D}|\u{2721}|\u{2728}|[\u{2733}-\u{2734}]|\u{2744}|\u{2747}|\u{274C}|\u{274E}|[\u{2753}-\u{2755}]|\u{2757}|\u{2763}|[\u{2795}-\u{2797}]|\u{27A1}|\u{27B0}|\u{27BF}|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|\u{2B50}|\u{2B55}|\u{3030}|\u{303D}|\u{3297}|\u{3299}|\u{1F004}|\u{1F0CF}|[\u{1F170}-\u{1F171}]|\u{1F17E}|\u{1F17F}|\u{1F18E}|[\u{1F191}-\u{1F19A}]|[\u{1F1E6}-\u{1F1FF}]|[\u{1F201}-\u{1F202}]|\u{1F21A}|\u{1F22F}|[\u{1F232}-\u{1F23A}]|[\u{1F250}-\u{1F251}]|[\u{1F300}-\u{1F320}]|\u{1F321}|[\u{1F324}-\u{1F32C}]|[\u{1F32D}-\u{1F32F}]|[\u{1F330}-\u{1F335}]|\u{1F336}|[\u{1F337}-\u{1F37C}]|\u{1F37D}|[\u{1F37E}-\u{1F37F}]|[\u{1F380}-\u{1F393}]|[\u{1F396}-\u{1F397}]|[\u{1F399}-\u{1F39B}]|[\u{1F39E}-\u{1F39F}]|[\u{1F3A0}-\u{1F3C4}]|\u{1F3C5}|[\u{1F3C6}-\u{1F3CA}]|[\u{1F3CB}-\u{1F3CE}]|[\u{1F3CF}-\u{1F3D3}]|[\u{1F3D4}-\u{1F3DF}]|[\u{1F3E0}-\u{1F3F0}]|[\u{1F3F3}-\u{1F3F5}]|\u{1F3F7}|[\u{1F3F8}-\u{1F3FF}]|[\u{1F400}-\u{1F43E}]|\u{1F43F}|\u{1F440}|\u{1F441}|[\u{1F442}-\u{1F4F7}]|\u{1F4F8}|[\u{1F4F9}-\u{1F4FC}]|\u{1F4FD}|\u{1F4FF}|[\u{1F500}-\u{1F53D}]|[\u{1F549}-\u{1F54A}]|[\u{1F54B}-\u{1F54E}]|[\u{1F550}-\u{1F567}]|[\u{1F56F}-\u{1F570}]|[\u{1F573}-\u{1F579}]|\u{1F57A}|\u{1F587}|[\u{1F58A}-\u{1F58D}]|\u{1F590}|[\u{1F595}-\u{1F596}]|\u{1F5A4}|\u{1F5A5}|\u{1F5A8}|[\u{1F5B1}-\u{1F5B2}]|\u{1F5BC}|[\u{1F5C2}-\u{1F5C4}]|[\u{1F5D1}-\u{1F5D3}]|[\u{1F5DC}-\u{1F5DE}]|\u{1F5E1}|\u{1F5E3}|\u{1F5E8}|\u{1F5EF}|\u{1F5F3}|\u{1F5FA}|[\u{1F5FB}-\u{1F5FF}]|\u{1F600}|[\u{1F601}-\u{1F610}]|\u{1F611}|[\u{1F612}-\u{1F614}]|\u{1F615}|\u{1F616}|\u{1F617}|\u{1F618}|\u{1F619}|\u{1F61A}|\u{1F61B}|[\u{1F61C}-\u{1F61E}]|\u{1F61F}|[\u{1F620}-\u{1F625}]|[\u{1F626}-\u{1F627}]|[\u{1F628}-\u{1F62B}]|\u{1F62C}|\u{1F62D}|[\u{1F62E}-\u{1F62F}]|[\u{1F630}-\u{1F633}]|\u{1F634}|[\u{1F635}-\u{1F640}]|[\u{1F641}-\u{1F642}]|[\u{1F643}-\u{1F644}]|[\u{1F645}-\u{1F64F}]|[\u{1F680}-\u{1F6C5}]|[\u{1F6CB}-\u{1F6CF}]|\u{1F6D0}|[\u{1F6D1}-\u{1F6D2}]|[\u{1F6E0}-\u{1F6E5}]|\u{1F6E9}|[\u{1F6EB}-\u{1F6EC}]|\u{1F6F0}|\u{1F6F3}|[\u{1F6F4}-\u{1F6F6}]|[\u{1F6F7}-\u{1F6F8}]|[\u{1F910}-\u{1F918}]|[\u{1F919}-\u{1F91E}]|\u{1F91F}|[\u{1F920}-\u{1F927}]|[\u{1F928}-\u{1F92F}]|\u{1F930}|[\u{1F931}-\u{1F932}]|[\u{1F933}-\u{1F93A}]|[\u{1F93C}-\u{1F93E}]|[\u{1F940}-\u{1F945}]|[\u{1F947}-\u{1F94B}]|\u{1F94C}|[\u{1F950}-\u{1F95E}]|[\u{1F95F}-\u{1F96B}]|[\u{1F980}-\u{1F984}]|[\u{1F985}-\u{1F991}]|[\u{1F992}-\u{1F997}]|\u{1F9C0}|[\u{1F9D0}-\u{1F9E6}]|❤/gu, '')
-  let blob = new window.Blob([content], {
+  name = name.replace(/[\\/:*?"<>|]/g, '-').replace(/\u{2139}|[\u{2194}-\u{2199}]|[\u{21A9}-\u{21AA}]|[\u{231A}-\u{231B}]|\u{2328}|\u{23CF}|[\u{23E9}-\u{23F3}]|[\u{23F8}-\u{23FA}]|\u{24C2}|[\u{25AA}-\u{25AB}]|\u{25B6}|\u{25C0}|[\u{25FB}-\u{25FE}]|[\u{2600}-\u{2604}]|\u{260E}|\u{2611}|[\u{2614}-\u{2615}]|\u{2618}|\u{261D}|\u{2620}|[\u{2622}-\u{2623}]|\u{2626}|\u{262A}|[\u{262E}-\u{262F}]|[\u{2638}-\u{263A}]|[\u{2648}-\u{2653}]|\u{2660}|\u{2663}|\u{2666}|\u{2668}|\u{267B}|\u{267F}|[\u{2692}-\u{2697}]|\u{2699}|[\u{269B}-\u{269C}]|[\u{26A0}-\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26B0}-\u{26B1}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|\u{26C8}|\u{26CE}|\u{26CF}|\u{26D1}|[\u{26D3}-\u{26D4}]|[\u{26E9}-\u{26EA}]|[\u{26F0}-\u{26F5}]|[\u{26F7}-\u{26FA}]|\u{26FD}|\u{2702}|\u{2705}|[\u{2708}-\u{2709}]|[\u{270A}-\u{270B}]|[\u{270C}-\u{270D}]|\u{270F}|\u{2712}|\u{2714}|\u{2716}|\u{271D}|\u{2721}|\u{2728}|[\u{2733}-\u{2734}]|\u{2744}|\u{2747}|\u{274C}|\u{274E}|[\u{2753}-\u{2755}]|\u{2757}|\u{2763}|[\u{2795}-\u{2797}]|\u{27A1}|\u{27B0}|\u{27BF}|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|\u{2B50}|\u{2B55}|\u{3030}|\u{303D}|\u{3297}|\u{3299}|\u{1F004}|\u{1F0CF}|[\u{1F170}-\u{1F171}]|\u{1F17E}|\u{1F17F}|\u{1F18E}|[\u{1F191}-\u{1F19A}]|[\u{1F1E6}-\u{1F1FF}]|[\u{1F201}-\u{1F202}]|\u{1F21A}|\u{1F22F}|[\u{1F232}-\u{1F23A}]|[\u{1F250}-\u{1F251}]|[\u{1F300}-\u{1F320}]|\u{1F321}|[\u{1F324}-\u{1F32C}]|[\u{1F32D}-\u{1F32F}]|[\u{1F330}-\u{1F335}]|\u{1F336}|[\u{1F337}-\u{1F37C}]|\u{1F37D}|[\u{1F37E}-\u{1F37F}]|[\u{1F380}-\u{1F393}]|[\u{1F396}-\u{1F397}]|[\u{1F399}-\u{1F39B}]|[\u{1F39E}-\u{1F39F}]|[\u{1F3A0}-\u{1F3C4}]|\u{1F3C5}|[\u{1F3C6}-\u{1F3CA}]|[\u{1F3CB}-\u{1F3CE}]|[\u{1F3CF}-\u{1F3D3}]|[\u{1F3D4}-\u{1F3DF}]|[\u{1F3E0}-\u{1F3F0}]|[\u{1F3F3}-\u{1F3F5}]|\u{1F3F7}|[\u{1F3F8}-\u{1F3FF}]|[\u{1F400}-\u{1F43E}]|\u{1F43F}|\u{1F440}|\u{1F441}|[\u{1F442}-\u{1F4F7}]|\u{1F4F8}|[\u{1F4F9}-\u{1F4FC}]|\u{1F4FD}|\u{1F4FF}|[\u{1F500}-\u{1F53D}]|[\u{1F549}-\u{1F54A}]|[\u{1F54B}-\u{1F54E}]|[\u{1F550}-\u{1F567}]|[\u{1F56F}-\u{1F570}]|[\u{1F573}-\u{1F579}]|\u{1F57A}|\u{1F587}|[\u{1F58A}-\u{1F58D}]|\u{1F590}|[\u{1F595}-\u{1F596}]|\u{1F5A4}|\u{1F5A5}|\u{1F5A8}|[\u{1F5B1}-\u{1F5B2}]|\u{1F5BC}|[\u{1F5C2}-\u{1F5C4}]|[\u{1F5D1}-\u{1F5D3}]|[\u{1F5DC}-\u{1F5DE}]|\u{1F5E1}|\u{1F5E3}|\u{1F5E8}|\u{1F5EF}|\u{1F5F3}|\u{1F5FA}|[\u{1F5FB}-\u{1F5FF}]|\u{1F600}|[\u{1F601}-\u{1F610}]|\u{1F611}|[\u{1F612}-\u{1F614}]|\u{1F615}|\u{1F616}|\u{1F617}|\u{1F618}|\u{1F619}|\u{1F61A}|\u{1F61B}|[\u{1F61C}-\u{1F61E}]|\u{1F61F}|[\u{1F620}-\u{1F625}]|[\u{1F626}-\u{1F627}]|[\u{1F628}-\u{1F62B}]|\u{1F62C}|\u{1F62D}|[\u{1F62E}-\u{1F62F}]|[\u{1F630}-\u{1F633}]|\u{1F634}|[\u{1F635}-\u{1F640}]|[\u{1F641}-\u{1F642}]|[\u{1F643}-\u{1F644}]|[\u{1F645}-\u{1F64F}]|[\u{1F680}-\u{1F6C5}]|[\u{1F6CB}-\u{1F6CF}]|\u{1F6D0}|[\u{1F6D1}-\u{1F6D2}]|[\u{1F6E0}-\u{1F6E5}]|\u{1F6E9}|[\u{1F6EB}-\u{1F6EC}]|\u{1F6F0}|\u{1F6F3}|[\u{1F6F4}-\u{1F6F6}]|[\u{1F6F7}-\u{1F6F8}]|[\u{1F910}-\u{1F918}]|[\u{1F919}-\u{1F91E}]|\u{1F91F}|[\u{1F920}-\u{1F927}]|[\u{1F928}-\u{1F92F}]|\u{1F930}|[\u{1F931}-\u{1F932}]|[\u{1F933}-\u{1F93A}]|[\u{1F93C}-\u{1F93E}]|[\u{1F940}-\u{1F945}]|[\u{1F947}-\u{1F94B}]|\u{1F94C}|[\u{1F950}-\u{1F95E}]|[\u{1F95F}-\u{1F96B}]|[\u{1F980}-\u{1F984}]|[\u{1F985}-\u{1F991}]|[\u{1F992}-\u{1F997}]|\u{1F9C0}|[\u{1F9D0}-\u{1F9E6}]|❤/gu, '');
+  const blob = new window.Blob([content], {
     type: type
-  })
-  $(`<a href="${URL.createObjectURL(blob)}" download="${name}"></a>`).appendTo('body').hide()[0].click()
+  });
+  $(`<a href="${URL.createObjectURL(blob)}" download="${name}"></a>`).appendTo('body').hide()[0].click();
 }
 
 function saveLink () { // 保存链接
@@ -1805,28 +1804,28 @@ function saveLink () { // 保存链接
       '[InternetShortcut]\r\nURL={{url}}',
       '<?xml version=\'1.0\' encoding=\'UTF-8\'?><!DOCTYPE plist PUBLIC \'-//Apple//DTD PLIST 1.0//EN\' \'http://www.apple.com/DTDs/PropertyList-1.0.dtd\'><plist version=\'1.0\'><dict><key>URL</key><string>{{url}}</string></dict></plist>',
       '[Desktop Entry]\r\nType=Link\r\nURL={{url}}'
-    ]
-    var platform = navigator.platform
-    var fileType
+    ];
+    var platform = navigator.platform;
+    var fileType;
     if (platform.match(/^Win/)) {
-      platform = 0
-      fileType = '.url'
+      platform = 0;
+      fileType = '.url';
     } else if (platform.match(/^Mac/)) {
-      platform = 1
-      fileType = '.webloc'
+      platform = 1;
+      fileType = '.webloc';
     } else {
-      platform = 2
-      fileType = '.desktop'
+      platform = 2;
+      fileType = '.desktop';
     }
-    let text = content[platform].replace('{{url}}', window.location.href)
-    saveAs2(text, document.title + fileType)
-  }).prependTo('.ehNavBar>div:nth-child(3)')
+    const text = content[platform].replace('{{url}}', window.location.href);
+    saveAs2(text, document.title + fileType);
+  }).prependTo('.ehNavBar>div:nth-child(3)');
 }
 
 function setNotification (text, title = undefined, timeout = 3 * 1000) { // 发出桌面通知
-  if (G.config['notification'] === '-1') {
+  if (G.config.notification === '-1') {
     // Nothing
-  } else if (G.config['notification'] === '0') {
+  } else if (G.config.notification === '0') {
     if (window.Notification && window.Notification.permission !== 'denied') {
       window.Notification.requestPermission(function (status) {
         if (status === 'granted') {
@@ -1834,29 +1833,29 @@ function setNotification (text, title = undefined, timeout = 3 * 1000) { // 发�
             body: title,
             icon: window.location.origin + '/favicon.ico',
             tag: GM_info.script.name
-          }) : new window.Notification(text)
+          }) : new window.Notification(text);
           setTimeout(function () {
-            if (n) n.close()
-          }, timeout)
+            if (n) n.close();
+          }, timeout);
         } else {
-          setNotification2(text, title, timeout)
+          setNotification2(text, title, timeout);
         }
-      })
+      });
     } else {
-      setNotification2(text, title, timeout)
+      setNotification2(text, title, timeout);
     }
-  } else if (G.config['notification'] === '1') {
+  } else if (G.config.notification === '1') {
     GM_notification({
       text: text,
       title: title || GM_info.script.name,
       image: window.location.origin + '/favicon.ico',
       tag: GM_info.script.name,
       timeout: timeout
-    })
-  } else if (G.config['notification'] === '2') {
-    window.alert(title ? text + '\n\n' + title : text)
-  } else if (G.config['notification'] === '3') {
-    setNotification2(text, title, timeout)
+    });
+  } else if (G.config.notification === '2') {
+    window.alert(title ? text + '\n\n' + title : text);
+  } else if (G.config.notification === '3') {
+    setNotification2(text, title, timeout);
   }
 }
 
@@ -1864,32 +1863,32 @@ function setNotification2 (text, title, timeout) {
   if ($('.ehNotification').length === 0) {
     $('<div class="ehNotification"></div>').on({
       click: e => {
-        $('.ehNotification').hide()
+        $('.ehNotification').hide();
       }
-    }).appendTo('body')
+    }).appendTo('body');
   }
-  title = title ? '<div>' + htmlEscape(title) + '</div><hr>' : ''
-  $('.ehNotification').show().html(`<div class="ehFavicion"></div><div>${title}<div>${htmlEscape(text)}</div></div>`)
+  title = title ? '<div>' + htmlEscape(title) + '</div><hr>' : '';
+  $('.ehNotification').show().html(`<div class="ehFavicion"></div><div>${title}<div>${htmlEscape(text)}</div></div>`);
   if (G.timeout) {
-    clearTimeout(G.timeout)
-    G.timeout = null
+    clearTimeout(G.timeout);
+    G.timeout = null;
   }
   G.timeout = setTimeout(() => {
-    G.timeout = null
-    $('.ehNotification').hide()
-  }, timeout)
+    G.timeout = null;
+    $('.ehNotification').hide();
+  }, timeout);
 }
 
 function searchInOtherSite () { // 在其他站点搜索
-  let navBar = $(SEL.EH.common.navBar).clone().empty().insertAfter(SEL.EH.common.navBar)
-  let sites = {
+  const navBar = $(SEL.EH.common.navBar).clone().empty().insertAfter(SEL.EH.common.navBar);
+  const sites = {
     'nhentai.net': {
       url: q => 'https://nhentai.net/search/?q=' + q.replace(/\$/g, '')
     },
     'doujinshi.org': {
       url: 'https://www.doujinshi.org/search/simple/?T=objects&sn={q}'
     },
-    'Google': {
+    Google: {
       url: 'https://www.google.com/search?q={q}',
       icon: '//www.google.com/images/branding/product/ico/googleg_lodp.ico'
     },
@@ -1911,47 +1910,47 @@ function searchInOtherSite () { // 在其他站点搜索
     'hentai2read.com': {
       url: 'https://asmhentai.com/search/{q}/'
     }
-  }
-  let keyword, keywordJ
+  };
+  let keyword, keywordJ;
   if ($(SEL.EH.search.keyword).length) {
-    keyword = $(SEL.EH.search.keyword).val()
-    keywordJ = $(SEL.EH.search.keyword).val()
+    keyword = $(SEL.EH.search.keyword).val();
+    keywordJ = $(SEL.EH.search.keyword).val();
   } else {
-    keyword = $(SEL.EH.info.title).text()
-    keywordJ = $(SEL.EH.info.titleJp).text()
+    keyword = $(SEL.EH.info.title).text();
+    keywordJ = $(SEL.EH.info.titleJp).text();
   }
-  for (let i in sites) {
-    let url
+  for (const i in sites) {
+    let url;
     if ('url' in sites[i]) {
-      url = sites[i].url instanceof Function ? sites[i].url(keyword) : sites[i].url.replace(/{q}/g, keyword)
+      url = sites[i].url instanceof Function ? sites[i].url(keyword) : sites[i].url.replace(/{q}/g, keyword);
     } else if ('urlJ' in sites[i]) {
-      url = sites[i].urlJ instanceof Function ? sites[i].urlJ(keywordJ) : sites[i].urlJ.replace(/{q}/g, keywordJ)
+      url = sites[i].urlJ instanceof Function ? sites[i].urlJ(keywordJ) : sites[i].urlJ.replace(/{q}/g, keywordJ);
     }
-    $('<div></div>').append($(`<a target="_blank"><img class="icon" src="${sites[i].icon || 'https://icons.duckduckgo.com/ip2/' + i}.ico"></img>${i}</a>`).attr('href', url)).appendTo(navBar)
+    $('<div></div>').append($(`<a target="_blank"><img class="icon" src="${sites[i].icon || 'https://icons.duckduckgo.com/ip2/' + i}.ico"></img>${i}</a>`).attr('href', url)).appendTo(navBar);
   }
 }
 
 async function showAllThumb () { // 显示所有预览页
-  let pages = $(SEL.EH.common.pages).toArray()
-  if (pages.length <= 1) return
-  $('<div class="gdtContainer"></div>').html('<div></div>'.repeat(pages.length)).insertBefore(SEL.EH.info.previewContainer)
-  $(SEL.EH.info.previewContainer).appendTo(`.gdtContainer>div:nth-child(${$(SEL.EH.common.pageCur).text()})`)
+  const pages = $(SEL.EH.common.pages).toArray();
+  if (pages.length <= 1) return;
+  $('<div class="gdtContainer"></div>').html('<div></div>'.repeat(pages.length)).insertBefore(SEL.EH.info.previewContainer);
+  $(SEL.EH.info.previewContainer).appendTo(`.gdtContainer>div:nth-child(${$(SEL.EH.common.pageCur).text()})`);
   for (let i = 0; i < pages.length; i++) {
-    if (pages[i].pathname === window.location.pathname && pages[i].search === window.location.search) continue
-    let res = await xhrSync(pages[i].href)
-    let doc = document.createElement('html')
-    doc.innerHTML = res.response
-    $(SEL.EH.info.previewContainer, doc).appendTo(`.gdtContainer>div:nth-child(${$(SEL.EH.common.pageCur, doc).text()})`)
+    if (pages[i].pathname === window.location.pathname && pages[i].search === window.location.search) continue;
+    const res = await xhrSync(pages[i].href);
+    const doc = document.createElement('html');
+    doc.innerHTML = res.response;
+    $(SEL.EH.info.previewContainer, doc).appendTo(`.gdtContainer>div:nth-child(${$(SEL.EH.common.pageCur, doc).text()})`);
   }
 }
 
 function showConfig () { // 显示设置
   $('<div><a href="javascript:;">[EH]Enhance Config</a></div>').on('click', function (e) {
     if ($('.ehConfig').length) {
-      $('.ehConfig').toggle()
-      return
+      $('.ehConfig').toggle();
+      return;
     }
-    let _html = [
+    const _html = [
       GM_info.script.name + '<span class="ehHighlight">v' + GM_info.script.version + '</span> <a href="' + GM_info.script.namespace + '" target="_blank">@' + (GM_info.script.author || 'dodying') + '</a>',
       '',
       '<input type="button" name="exportValues" value="Export Values" title="导出脚本储存的信息<br>(除EHT与EHD的数据)"> <input type="file" id="selectFileConfig" name="selectFile" accept=".json"><input type="button" name="importValues" value="Select File and Inmport Values" title="选择文件，并导入脚本储存的信息">',
@@ -1996,375 +1995,374 @@ function showConfig () { // 显示设置
       '调整图片尺寸: 大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1" step="0.1">; 其他默认视为小图(单页)',
       '调整图片尺寸: 大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>',
       '<label for="ehConfig_downloadSizeChanged" title="' + htmlEscape('需开启: <ul><li>启用内置 [E-Hentai-Downloader] (并设置关闭Request File System to handle large Zip file)</li><li>显示所有预览图</li><li>启用自动调整图片尺寸</li><li>大图(双页) 与 小图(单页)尺寸 不同</li></ul><hr>注意: 避免出错，应一次下载一个画廊') + '"><input type="checkbox" id="ehConfig_downloadSizeChanged">下载调整过大小的图片压缩档</label>'
-    ].map(i => i ? '<li>' + i + '</li>' : '<hr>').join('')
+    ].map(i => i ? '<li>' + i + '</li>' : '<hr>').join('');
     $('<div class="ehConfig"></div>').html('<ul>' + _html + '</ul><div class="ehConfigBtn"><input type="button" name="reset" value="Reset" title="重置"><input type="button" name="save" value="Save" title="保存"><input type="button" name="cancel" value="Cancel" title="取消"></div>').appendTo('body').on('click', function (e) {
       if ($(e.target).is('.ehConfigBtn>input[type="button"][name="reset"]')) {
         if (window.confirm('Continue to RESET')) {
-          GM_setValue('config', {})
-          $('.ehConfig').remove()
+          GM_setValue('config', {});
+          $('.ehConfig').remove();
           Object.keys(G.config).forEach(i => {
-            delete G.config[i]
-          })
-          defaultConfig()
+            delete G.config[i];
+          });
+          defaultConfig();
         }
       } else if ($(e.target).is('.ehConfigBtn>input[type="button"][name="save"]')) {
-        let config = GM_getValue('config', {})
+        const config = GM_getValue('config', {});
         $('.ehConfig input:not([type="button"]):not([type="file"]),.ehConfig select').toArray().forEach(i => {
-          let name, value
+          let name, value;
           if (i.type === 'number') {
-            name = i.name
-            value = (i.value || i.placeholder) * 1
-            if (isNaN(value)) return
+            name = i.name;
+            value = (i.value || i.placeholder) * 1;
+            if (isNaN(value)) return;
           } else if (i.type === 'text' || i.type === 'hidden') {
-            name = i.name
-            value = i.value || i.placeholder
+            name = i.name;
+            value = i.value || i.placeholder;
           } else if (i.type === 'checkbox') {
-            name = i.id
-            value = i.checked
+            name = i.id;
+            value = i.checked;
           } else if (i.type === 'select-one') {
-            name = i.name
-            value = i.value
+            name = i.name;
+            value = i.value;
           } else if (i.type === 'radio') {
-            if (!i.checked) return
-            name = i.name
-            value = i.value
+            if (!i.checked) return;
+            name = i.name;
+            value = i.value;
           }
-          config[name.replace('ehConfig_', '')] = value
-        })
+          config[name.replace('ehConfig_', '')] = value;
+        });
 
-        let searchEvent = config['searchEvent'].split('|')
-        let searchEventChs = []
-        for (let i of searchEvent) {
-          let arr = i.split(',').map(i => isNaN(i * 1) ? i : i * 1)
-          let chs = []
-          chs.push('鼠标' + '左中右'.split('')[arr[0]] + '键')
-          chs.push(arr[1] === -1 ? '任意按键' : ['altKey', 'ctrlKey', 'shiftKey'][arr[1]])
+        const searchEvent = config.searchEvent.split('|');
+        const searchEventChs = [];
+        for (const i of searchEvent) {
+          const arr = i.split(',').map(i => isNaN(i * 1) ? i : i * 1);
+          const chs = [];
+          chs.push('鼠标' + '左中右'.split('')[arr[0]] + '键');
+          chs.push(arr[1] === -1 ? '任意按键' : ['altKey', 'ctrlKey', 'shiftKey'][arr[1]]);
           if (arr[2] === -1) {
-            chs.push('自行选择')
+            chs.push('自行选择');
           } else if (arr[2] === 0) {
-            chs.push('主要名称')
+            chs.push('主要名称');
           } else if (arr[2] === 1) {
-            chs.push('作者或组织(顺位)')
+            chs.push('作者或组织(顺位)');
           }
-          if (arr[3] === 1) chs.push(' + chinese')
-          searchEventChs.push(chs[0] + ' + ' + chs[1] + ' -> ' + chs[2] + (chs[3] || ''))
+          if (arr[3] === 1) chs.push(' + chinese');
+          searchEventChs.push(chs[0] + ' + ' + chs[1] + ' -> ' + chs[2] + (chs[3] || ''));
         }
-        config.searchEventChs = searchEventChs.join('<br>')
+        config.searchEventChs = searchEventChs.join('<br>');
 
-        Object.assign(G.config, config)
-        GM_setValue('config', config)
-        $('.ehConfig').remove()
+        Object.assign(G.config, config);
+        GM_setValue('config', config);
+        $('.ehConfig').remove();
       } else if ($(e.target).is('.ehConfigBtn>input[type="button"][name="cancel"]')) {
-        $('.ehConfig').remove()
+        $('.ehConfig').remove();
       } else if ($(e.target).is('.ehConfig input[name="exportValues"]')) {
-        let obj = {}
+        const obj = {};
         GM_listValues().forEach(key => {
-          if (['EHD_code', 'EHT'].includes(key)) return
-          obj[key] = GM_getValue(key)
-        })
-        let text = JSON.stringify(obj, null, 2)
-        saveAs2(text, '[EH]Enhance.json')
+          if (['EHD_code', 'EHT'].includes(key)) return;
+          obj[key] = GM_getValue(key);
+        });
+        const text = JSON.stringify(obj, null, 2);
+        saveAs2(text, '[EH]Enhance.json');
       } else if ($(e.target).is('.ehConfig input[name="importValues"]')) {
-        $('#selectFileConfig').click()
+        $('#selectFileConfig').click();
       } else if ($(e.target).is('.ehConfig input[name="updateEHT"]')) {
-        $(e.target).prop('disabled', true).val('Updating...')
+        $(e.target).prop('disabled', true).val('Updating...');
         updateEHT().then(() => {
-          $(e.target).prop('disabled', false).val('Update Now')
-        })
+          $(e.target).prop('disabled', false).val('Update Now');
+        });
       } else if ($(e.target).is('.ehConfig input[name="exportEHT"]')) {
-        let text = GM_getValue('EHT', '')
-        saveAs2(text, 'EHT.json')
+        const text = GM_getValue('EHT', '');
+        saveAs2(text, 'EHT.json');
       } else if ($(e.target).is('.ehConfig input[name="emptyEHT"]')) {
-        GM_deleteValue('EHT')
-        GM_deleteValue('EHT_checkTime')
+        GM_deleteValue('EHT');
+        GM_deleteValue('EHT_checkTime');
       } else if ($(e.target).is('.ehConfig input[name="updateEHD"]')) {
-        $(e.target).prop('disabled', true).val('Updating...')
+        $(e.target).prop('disabled', true).val('Updating...');
         updateEHD().then(() => {
-          $(e.target).prop('disabled', false).val('Update Now')
-        })
+          $(e.target).prop('disabled', false).val('Update Now');
+        });
       } else if ($(e.target).is('.ehConfig input[name="exportEHD"]')) {
-        let text = GM_getValue('EHD_code', '')
-        saveAs2(text, 'E-Hentai-Downloader.user.js')
+        const text = GM_getValue('EHD_code', '');
+        saveAs2(text, 'E-Hentai-Downloader.user.js');
       } else if ($(e.target).is('.ehConfig input[name="emptyEHD"]')) {
-        GM_deleteValue('EHD_code')
-        GM_deleteValue('EHD_checkTime')
-        GM_deleteValue('EHD_version')
+        GM_deleteValue('EHD_code');
+        GM_deleteValue('EHD_checkTime');
+        GM_deleteValue('EHD_version');
       } else if ($(e.target).is('.ehConfig input[name="exportIntroPic"]')) {
-        let text = arrUnique(GM_getValue('introPic', [])).sort().map(i => G.config['exportIntroPicFormat'].replace(/{id}/g, i).replace(/{cr}/g, '\r').replace(/{lf}/g, '\n')).join('')
-        GM_setClipboard(text)
+        const text = arrUnique(GM_getValue('introPic', [])).sort().map(i => G.config.exportIntroPicFormat.replace(/{id}/g, i).replace(/{cr}/g, '\r').replace(/{lf}/g, '\n')).join('');
+        GM_setClipboard(text);
       } else if ($(e.target).is('.ehConfig input[name="getUconfig"]')) {
-        $(e.target).prop('disabled', true).val('Getting...')
+        $(e.target).prop('disabled', true).val('Getting...');
         getEConfig().then(uconfig => {
-          $('input[name="ehConfig_uconfig"]').val(uconfig)
-          $(e.target).prop('disabled', false).val('Get NOW')
-        })
+          $('input[name="ehConfig_uconfig"]').val(uconfig);
+          $(e.target).prop('disabled', false).val('Get NOW');
+        });
       } else if ($(e.target).is('.ehConfig input[name="exportUrl"]')) {
-        let text = arrUnique(GM_getValue('EHD_record', [])).sort().map(i => G.config['exportUrlFormat'].replace(/{url}/g, i).replace(/{cr}/g, '\r').replace(/{lf}/g, '\n')).join('')
-        GM_setClipboard(text)
+        const text = arrUnique(GM_getValue('EHD_record', [])).sort().map(i => G.config.exportUrlFormat.replace(/{url}/g, i).replace(/{cr}/g, '\r').replace(/{lf}/g, '\n')).join('');
+        GM_setClipboard(text);
       } else if ($(e.target).is('.ehConfig input[name="emptyUrl"]')) {
-        GM_setValue('EHD_record', [])
+        GM_setValue('EHD_record', []);
       }
-    })
+    });
 
     $('#selectFileConfig').on({
       change: e => {
         if (!e.target.files || !e.target.files.length || !window.confirm('Continue to IMPORT')) {
-          e.target.value = null
-          return
+          e.target.value = null;
+          return;
         }
-        let fr = new window.FileReader()
+        const fr = new window.FileReader();
         fr.onload = e => {
-          let json = e.target.result
+          let json = e.target.result;
           try {
-            json = JSON.parse(json)
+            json = JSON.parse(json);
           } catch (error) {
-            setNotification('Parse Json Data Error')
-            return
+            setNotification('Parse Json Data Error');
+            return;
           }
           Object.keys(json).forEach(i => {
-            GM_setValue(i, json[i])
-          })
-          window.location.assign(window.location.href)
-        }
-        fr.readAsText(e.target.files[0])
+            GM_setValue(i, json[i]);
+          });
+          window.location.assign(window.location.href);
+        };
+        fr.readAsText(e.target.files[0]);
       }
-    })
+    });
     $('[name="updateEHT"]').on({
       mouseenter: e => {
-        let time = GM_getValue('EHT_checkTime', '')
-        let d = new Date(time)
-        d = G.config['timeShow'] === 'iso' ? new Date(d.getTime() + d.getTimezoneOffset() * 60 * 1000) : d
-        let timeText = d.toLocaleString(navigator.language, {
+        const time = GM_getValue('EHT_checkTime', '');
+        let d = new Date(time);
+        d = G.config.timeShow === 'iso' ? new Date(d.getTime() + d.getTimezoneOffset() * 60 * 1000) : d;
+        const timeText = d.toLocaleString(navigator.language, {
           hour12: false
-        })
-        let length = G.EHT.map(i => i.count).reduce((a, c) => a + c)
-        $(e.target).attr('title', `当前总数: <span class="ehHighlight">${length}</span><hr><time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`)
+        });
+        const length = G.EHT.map(i => i.count).reduce((a, c) => a + c);
+        $(e.target).attr('title', `当前总数: <span class="ehHighlight">${length}</span><hr><time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`);
       }
-    })
+    });
     $('[name="updateEHD"]').on({
       mouseenter: e => {
-        let time = GM_getValue('EHD_checkTime', '')
-        let d = new Date(time)
-        d = G.config['timeShow'] === 'iso' ? new Date(d.getTime() + d.getTimezoneOffset() * 60 * 1000) : d
-        let timeText = d.toLocaleString(navigator.language, {
+        const time = GM_getValue('EHD_checkTime', '');
+        let d = new Date(time);
+        d = G.config.timeShow === 'iso' ? new Date(d.getTime() + d.getTimezoneOffset() * 60 * 1000) : d;
+        const timeText = d.toLocaleString(navigator.language, {
           hour12: false
-        })
-        let version = GM_getValue('EHD_version', '')
-        $(e.target).attr('title', `当前版本: <span class="ehHighlight">${version}</span><hr><time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`)
+        });
+        const version = GM_getValue('EHD_version', '');
+        $(e.target).attr('title', `当前版本: <span class="ehHighlight">${version}</span><hr><time title="${timeText}" datetime="${time}">${calcRelativeTime(time)}</time>`);
       }
-    })
+    });
 
-    let config = GM_getValue('config', {})
+    const config = GM_getValue('config', {});
     $('.ehConfig input:not([type="button"]):not([type="file"]),.ehConfig select').toArray().forEach(i => {
-      let name, value
-      name = i.name || i.id
-      name = name.replace('ehConfig_', '')
-      if (!(name in config)) return
-      value = config[name]
+      let name = i.name || i.id;
+      name = name.replace('ehConfig_', '');
+      if (!(name in config)) return;
+      const value = config[name];
       if (i.type === 'text' || i.type === 'hidden' || i.type === 'select-one' || i.type === 'number') {
-        i.value = value
+        i.value = value;
       } else if (i.type === 'checkbox') {
-        i.checked = value
+        i.checked = value;
       } else if (i.type === 'radio') {
-        i.checked = (i.value === value)
+        i.checked = (i.value === value);
       }
-    })
-  }).appendTo(SEL.EH.common.navBar)
+    });
+  }).appendTo(SEL.EH.common.navBar);
 }
 
 function showTooltip () { // 显示提示
-  $('<div class="ehTooltip"></div>').appendTo('body')
-  let preEle
-  let animateTimeout
+  $('<div class="ehTooltip"></div>').appendTo('body');
+  let preEle;
+  let animateTimeout;
 
-  let animate = () => {
-    let height = $('.ehTooltip')[0].scrollHeight
-    if (height === $('.ehTooltip').height()) return
-    if (animateTimeout) clearTimeout(animateTimeout)
+  const animate = () => {
+    const height = $('.ehTooltip')[0].scrollHeight;
+    if (height === $('.ehTooltip').height()) return;
+    if (animateTimeout) clearTimeout(animateTimeout);
     animateTimeout = setTimeout(() => {
-      let top = $('.ehTooltip').scrollTop()
-      $('.ehTooltip').scrollTop(top > height ? 0 : top + 30)
-      animate()
-    }, 1000)
-  }
+      const top = $('.ehTooltip').scrollTop();
+      $('.ehTooltip').scrollTop(top > height ? 0 : top + 30);
+      animate();
+    }, 1000);
+  };
 
   $('body').on('mousemove keydown', function (e) {
-    if ((e.target === preEle || $(e.target).parents().filter(preEle).length) && e.type !== 'keydown') return
-    let title = $(preEle).attr('raw-title')
-    $(preEle).removeAttr('raw-title').attr('title', title)
-    $('.ehTooltip').hide().scrollTop(0)
-    if (animateTimeout) clearTimeout(animateTimeout)
-  })
+    if ((e.target === preEle || $(e.target).parents().filter(preEle).length) && e.type !== 'keydown') return;
+    const title = $(preEle).attr('raw-title');
+    $(preEle).removeAttr('raw-title').attr('title', title);
+    $('.ehTooltip').hide().scrollTop(0);
+    if (animateTimeout) clearTimeout(animateTimeout);
+  });
 
   $('body').on('mouseenter', ':visible[title],:visible[raw-title],:visible[tooltip],[copy]', function (e) {
-    preEle = e.target
-    let title = $(preEle).attr('tooltip') ? $(preEle).attr('tooltip') + '<hr>' : ''
-    let title1
+    preEle = e.target;
+    const title = $(preEle).attr('tooltip') ? $(preEle).attr('tooltip') + '<hr>' : '';
+    let title1;
     if ($(preEle).is('[copy]:not([title])')) {
-      title1 = '点击复制: <span class="ehHighlight">' + $(preEle).attr('copy') + '</span>'
-      $(preEle).attr('raw-title', title1)
+      title1 = '点击复制: <span class="ehHighlight">' + $(preEle).attr('copy') + '</span>';
+      $(preEle).attr('raw-title', title1);
     } else {
-      title1 = $(preEle).attr('title') || $(preEle).attr('raw-title') || ''
+      title1 = $(preEle).attr('title') || $(preEle).attr('raw-title') || '';
       if (!title1) {
-        let preEleTrue = $(preEle).parents().filter('[title]').eq(-1)[0]
+        const preEleTrue = $(preEle).parents().filter('[title]').eq(-1)[0];
         if (preEleTrue) {
-          preEle = preEleTrue
-          title1 = $(preEle).attr('title') || $(preEle).attr('raw-title')
+          preEle = preEleTrue;
+          title1 = $(preEle).attr('title') || $(preEle).attr('raw-title');
         }
       }
-      $(preEle).removeAttr('title').attr('raw-title', title1)
+      $(preEle).removeAttr('title').attr('raw-title', title1);
     }
-    $('.ehTooltip').html(title + title1)
+    $('.ehTooltip').html(title + title1);
 
-    let top = $(preEle).offset().top - $(window).scrollTop()
-    let height = $(preEle).height() + parseInt($(preEle).css('padding-bottom')) + parseInt($(preEle).css('border-bottom-width')) + parseInt($(preEle).css('margin-bottom'))
-    let _height = $('.ehTooltip').height() + parseInt($('.ehTooltip').css('padding-bottom')) + parseInt($('.ehTooltip').css('border-bottom-width')) + parseInt($('.ehTooltip').css('margin-bottom'))
-    top = top + height + 5 + _height > window.innerHeight ? top - _height - 5 : top + height + 5
+    let top = $(preEle).offset().top - $(window).scrollTop();
+    const height = $(preEle).height() + parseInt($(preEle).css('padding-bottom')) + parseInt($(preEle).css('border-bottom-width')) + parseInt($(preEle).css('margin-bottom'));
+    const _height = $('.ehTooltip').height() + parseInt($('.ehTooltip').css('padding-bottom')) + parseInt($('.ehTooltip').css('border-bottom-width')) + parseInt($('.ehTooltip').css('margin-bottom'));
+    top = top + height + 5 + _height > window.innerHeight ? top - _height - 5 : top + height + 5;
 
-    let left = $(preEle).offset().left - $('body').scrollLeft()
-    let width = $(preEle).width() + parseInt($(preEle).css('padding-left')) + parseInt($(preEle).css('border-left-width')) + parseInt($(preEle).css('margin-left'))
-    let _width = $('.ehTooltip').width() + parseInt($('.ehTooltip').css('padding-left')) + parseInt($('.ehTooltip').css('border-left-width')) + parseInt($('.ehTooltip').css('margin-left'))
-    left = left + _width > window.innerWidth ? left + width - _width : left
-    if (top < 0) top = 0
-    if (left < 0) left = 0
+    let left = $(preEle).offset().left - $('body').scrollLeft();
+    const width = $(preEle).width() + parseInt($(preEle).css('padding-left')) + parseInt($(preEle).css('border-left-width')) + parseInt($(preEle).css('margin-left'));
+    const _width = $('.ehTooltip').width() + parseInt($('.ehTooltip').css('padding-left')) + parseInt($('.ehTooltip').css('border-left-width')) + parseInt($('.ehTooltip').css('margin-left'));
+    left = left + _width > window.innerWidth ? left + width - _width : left;
+    if (top < 0) top = 0;
+    if (left < 0) left = 0;
     $('.ehTooltip').show().css({
       top: top,
       left: left
-    })
+    });
 
-    animate()
-  })
+    animate();
+  });
 }
 
 function tagEvent () { // 标签事件
   $('<div class="ehTagEvent"></div>').insertAfter(SEL.EH.info.tagContainer)
-  ;[ 'Unlike', 'Alert', 'Like' ].forEach(i => {
+  ;['Unlike', 'Alert', 'Like'].forEach(i => {
     $('<a class="ehTagEventNotice" name="' + i + '" href="javascript:;" on="true"></a>').appendTo('.ehTagEvent').on('click', e => {
-      let tags = GM_getValue('tagAction', {})
-      let keyword = $('.ehTagEvent').attr('name')
+      const tags = GM_getValue('tagAction', {});
+      const keyword = $('.ehTagEvent').attr('name');
       if ($(e.target).attr('on') === 'true') { // 添加行为
-        tags[keyword] = i
-        $(SEL.EH.info.tagDivFromName(keyword.replace(/ /g, '_'))).attr('name', i)
+        tags[keyword] = i;
+        $(SEL.EH.info.tagDivFromName(keyword.replace(/ /g, '_'))).attr('name', i);
       } else { // 移除行为
-        delete tags[keyword]
-        $(SEL.EH.info.tagDivFromName(keyword.replace(/ /g, '_'))).removeAttr('name')
+        delete tags[keyword];
+        $(SEL.EH.info.tagDivFromName(keyword.replace(/ /g, '_'))).removeAttr('name');
       }
-      $(e.target).attr('on', $(e.target).attr('on') !== 'true')
-      $('.ehTagEventNotice').not(e.target).attr('on', 'true')
-      GM_setValue('tagAction', tags)
-    })
-  })
+      $(e.target).attr('on', $(e.target).attr('on') !== 'true');
+      $('.ehTagEventNotice').not(e.target).attr('on', 'true');
+      GM_setValue('tagAction', tags);
+    });
+  });
   $('<a href="https://github.com/Mapaler/EhTagTranslator/" target="_blank">Copy for ETT</a>').appendTo('.ehTagEvent').on('click', e => {
-    GM_setClipboard(`| ${$('.ehTagEvent').attr('name')} | | | |`)
-    return false
-  })
+    GM_setClipboard(`| ${$('.ehTagEvent').attr('name')} | | | |`);
+    return false;
+  });
   $(SEL.EH.info.tag).on({
     contextmenu: e => { // 搜索标签+中文
-      var keyword = e.target.innerText.replace(/\s+\|.*/, '')
-      keyword = '"' + keyword + '"'
-      if (SEL.EH.info.nameFromTag(e.target.id).length > 2) keyword = SEL.EH.info.nameFromTag(e.target.id)[2] + ':' + keyword + '$'
-      openUrl(G.config['searchArguments'].replace(/{q}/g, encodeURIComponent(keyword + ' language:"chinese"$')))
-      return false
+      var keyword = e.target.innerText.replace(/\s+\|.*/, '');
+      keyword = '"' + keyword + '"';
+      if (SEL.EH.info.nameFromTag(e.target.id).length > 2) keyword = SEL.EH.info.nameFromTag(e.target.id)[2] + ':' + keyword + '$';
+      openUrl(G.config.searchArguments.replace(/{q}/g, encodeURIComponent(keyword + ' language:"chinese"$')));
+      return false;
     },
     click: e => { // 标签
-      $('.ehTagEvent').css('display', e.target.style.color ? 'block' : 'none').attr('name', SEL.EH.info.nameFromTag(e.target.id)[1].replace(/_/g, ' '))
-      let name = $(e.target).parent().attr('name')
-      $('.ehTagEvent>a[name="' + name + '"]').attr('on', 'false')
-      $('.ehTagEvent>a:not([name="' + name + '"])').attr('on', 'true')
+      $('.ehTagEvent').css('display', e.target.style.color ? 'block' : 'none').attr('name', SEL.EH.info.nameFromTag(e.target.id)[1].replace(/_/g, ' '));
+      const name = $(e.target).parent().attr('name');
+      $('.ehTagEvent>a[name="' + name + '"]').attr('on', 'false');
+      $('.ehTagEvent>a:not([name="' + name + '"])').attr('on', 'true');
     }
-  })
+  });
   $(SEL.EH.info.tagDiv).toArray().forEach(i => {
-    let id = SEL.EH.info.nameFromTag(i.id)[1].replace(/_/g, ' ')
-    let tags = GM_getValue('tagAction', {})
-    if (id in tags) $(i).attr('name', tags[id])
-  })
+    const id = SEL.EH.info.nameFromTag(i.id)[1].replace(/_/g, ' ');
+    const tags = GM_getValue('tagAction', {});
+    if (id in tags) $(i).attr('name', tags[id]);
+  });
 }
 
 function tagPreview () { // 标签预览
-  $('<div class="ehTagPreview"></div>').appendTo('body')
+  $('<div class="ehTagPreview"></div>').appendTo('body');
   $('body').on({
     mousemove (e) {
       if (!$(e.target).is(SEL.EH.search.galleryA)) {
-        $('.ehTagPreview').hide()
-        return
+        $('.ehTagPreview').hide();
+        return;
       }
-      let target = e.target
-      let info = G.gmetadata.filter(i => i.gid === target.href.split('/')[4] * 1)[0]
-      if (!info) return
-      $('.ehTagPreview').html(`<div>${info.title_jpn}</div><div style="color:#f00;">[${Math.ceil(info.filesize / 1024 / 1024)}M] ${info.filecount}P ${info.rating}</div><div style="height:2px;background-color:#000000;"></div>`).show()
-      let tagsHTML = $('<div></div>').appendTo('.ehTagPreview')
+      const target = e.target;
+      const info = G.gmetadata.filter(i => i.gid === target.href.split('/')[4] * 1)[0];
+      if (!info) return;
+      $('.ehTagPreview').html(`<div>${info.title_jpn}</div><div style="color:#f00;">[${Math.ceil(info.filesize / 1024 / 1024)}M] ${info.filecount}P ${info.rating}</div><div style="height:2px;background-color:#000000;"></div>`).show();
+      const tagsHTML = $('<div></div>').appendTo('.ehTagPreview');
       info.tags.forEach(i => {
-        let tag = i.split(':')
-        let main = tag.length === 1 ? 'misc' : tag[0]
-        let sub = tag[tag.length - 1]
-        let chs = findData(main, sub, true)
-        if ($(`.ehTagPreviewLi[name="${main}"]`, tagsHTML).length === 0) $(`<li class="ehTagPreviewLi" name="${main}"></li>`).appendTo(tagsHTML)
-        $('<span></span>').text(chs.cname || sub).appendTo($(`.ehTagPreviewLi[name="${main}"]`, tagsHTML))
-      })
-      let _width = $('.ehTagPreview').outerWidth()
-      let _height = $('.ehTagPreview').outerHeight()
-      let left = _width + e.clientX + 10 < window.innerWidth ? e.clientX + 5 : e.clientX - _width - 5
-      let top = _height + e.clientY + 10 < window.innerHeight ? e.clientY + 5 : e.clientY - _height - 5
-      if (left < 0) left = 0
-      if (top < 0) top = 0
+        const tag = i.split(':');
+        const main = tag.length === 1 ? 'misc' : tag[0];
+        const sub = tag[tag.length - 1];
+        const chs = findData(main, sub, true);
+        if ($(`.ehTagPreviewLi[name="${main}"]`, tagsHTML).length === 0) $(`<li class="ehTagPreviewLi" name="${main}"></li>`).appendTo(tagsHTML);
+        $('<span></span>').text(chs.cname || sub).appendTo($(`.ehTagPreviewLi[name="${main}"]`, tagsHTML));
+      });
+      const _width = $('.ehTagPreview').outerWidth();
+      const _height = $('.ehTagPreview').outerHeight();
+      let left = _width + e.clientX + 10 < window.innerWidth ? e.clientX + 5 : e.clientX - _width - 5;
+      let top = _height + e.clientY + 10 < window.innerHeight ? e.clientY + 5 : e.clientY - _height - 5;
+      if (left < 0) left = 0;
+      if (top < 0) top = 0;
       $('.ehTagPreview').css({
         left: left,
         top: top
-      })
+      });
     }
-  })
+  });
 }
 
 function task () { // 下载任务
-  if (G.taskInterval) return
-  let max = GM_getValue('task', []).length
-  let main = async () => {
-    let task = GM_getValue('task', [])
+  if (G.taskInterval) return;
+  const max = GM_getValue('task', []).length;
+  const main = async () => {
+    const task = GM_getValue('task', []);
     if (task.length === 0 && !GM_getValue('tasking')) {
-      G.taskInterval = null
-      changeFav('/favicon.ico')
-      return
+      G.taskInterval = null;
+      changeFav('/favicon.ico');
+      return;
     }
 
-    let done = max - task.length
-    changeFav(getProcessImg((done - 1) / max * 100, 128))
+    const done = max - task.length;
+    changeFav(getProcessImg((done - 1) / max * 100, 128));
 
-    let downloading = GM_getValue('downloading', [])
+    const downloading = GM_getValue('downloading', []);
     if (downloading.length) {
-      await waitInMs(2 * 1000)
-      await main()
-      return
+      await waitInMs(2 * 1000);
+      await main();
+      return;
     }
 
-    let tasking = GM_getValue('tasking')
+    let tasking = GM_getValue('tasking');
     if (tasking) {
-      await waitInMs(2 * 1000)
-      await main()
-      return
+      await waitInMs(2 * 1000);
+      await main();
+      return;
     }
 
-    tasking = task.splice(0, 1)[0]
-    GM_setValue('tasking', tasking)
-    GM_setValue('task', task)
-    await waitInMs(2 * 1000)
-    openUrl(tasking + '#2')
-    await main()
-  }
-  G.taskInterval = setTimeout(main, 200)
+    tasking = task.splice(0, 1)[0];
+    GM_setValue('tasking', tasking);
+    GM_setValue('task', task);
+    await waitInMs(2 * 1000);
+    openUrl(tasking + '#2');
+    await main();
+  };
+  G.taskInterval = setTimeout(main, 200);
 }
 
 function taskRemove (id) {
-  let tasking = GM_getValue('tasking', '')
-  if (tasking.match(id)) GM_deleteValue('tasking')
+  const tasking = GM_getValue('tasking', '');
+  if (tasking.match(id)) GM_deleteValue('tasking');
 }
 
 function tagTranslate () { // 标签翻译
-  let data = $(SEL.EH.info.tag).toArray().map(i => {
-    let info = i.id.split(/ta_|:/)
-    if (info.length === 2) info.splice(1, 0, 'misc')
-    return findData(info[1], info[2], !G.config['tagTranslateImage'])
-  }).filter(i => Object.keys(i).length)
-  let css = [
+  const data = $(SEL.EH.info.tag).toArray().map(i => {
+    const info = i.id.split(/ta_|:/);
+    if (info.length === 2) info.splice(1, 0, 'misc');
+    return findData(info[1], info[2], !G.config.tagTranslateImage);
+  }).filter(i => Object.keys(i).length);
+  const css = [
     SEL.EH.info.tagContainer + '{overflow:visible;min-height:295px;height:auto}',
     SEL.EH.info.infoMid + '{min-height:330px;height:auto;position:static}',
     SEL.EH.info.tag + '{background:inherit}',
@@ -2382,135 +2380,135 @@ function tagTranslate () { // 标签翻译
     SEL.EH.info.tag + '::after{color:#' + (window.window.location.host === 'exhentai.org' ? 'fff' : '000') + '}',
     ...data.map(i => SEL.EH.info.tagFromName(i.name) + '{font-size:0;}'),
     SEL.EH.info.tag + '::before{text-decoration:line-through;}'
-  ]
-  let dealWithContent = (text) => {
-    let arr = text.split(/(!\[.*?\]\(.*?\))/)
-    console.log(arr)
-    let output = []
-    for (let i of arr) {
+  ];
+  const dealWithContent = (text) => {
+    const arr = text.split(/(!\[.*?\]\(.*?\))/);
+    console.log(arr);
+    const output = [];
+    for (const i of arr) {
       if (i.match(/!\[(.*?)\]\((.*?)\)/)) {
-        let match = i.match(/!\[(.*?)\]\((.*?)\)/)
-        output.push(`url(${match[2].replace(/^# "(.*)"$/, '$1')})`)
+        const match = i.match(/!\[(.*?)\]\((.*?)\)/);
+        output.push(`url(${match[2].replace(/^# "(.*)"$/, '$1')})`);
       } else {
-        output.push(`"${window.CSS.escape(i)}"`)
+        output.push(`"${window.CSS.escape(i)}"`);
       }
     }
-    return output.join('')
-  }
+    return output.join('');
+  };
   data.forEach(i => {
-    css.push(SEL.EH.info.tagFromName(i.name) + `::before{content:${dealWithContent(i.cname)}}`)
-    if (i.info) css.push(SEL.EH.info.tagFromName(i.name) + `::after{content:${dealWithContent(i.info)}}`)
-  })
+    css.push(SEL.EH.info.tagFromName(i.name) + `::before{content:${dealWithContent(i.cname)}}`);
+    if (i.info) css.push(SEL.EH.info.tagFromName(i.name) + `::after{content:${dealWithContent(i.info)}}`);
+  });
 
-  $('<style></style>').text(css.join('\n')).appendTo('head')
+  $('<style></style>').text(css.join('\n')).appendTo('head');
 }
 
 function toggleBlacklist (keyword) { // 加入黑名单或从黑名单中移除
-  let blacklist = GM_getValue('blacklist', [])
-  keyword = reEscape(keyword)
+  const blacklist = GM_getValue('blacklist', []);
+  keyword = reEscape(keyword);
   if (!blacklist.includes(keyword)) { // 加入黑名单
-    blacklist.push(keyword)
+    blacklist.push(keyword);
   } else if (blacklist.includes(keyword)) { // 从黑名单中移除
-    blacklist.splice(blacklist.indexOf(keyword), 1)
+    blacklist.splice(blacklist.indexOf(keyword), 1);
   }
-  GM_setValue('blacklist', blacklist)
+  GM_setValue('blacklist', blacklist);
 }
 
 function translateText (text) {
-  if (!text) return text
-  let arr = []
-  let re = /(\w+):("|)(.*?)(\$"|"\$|")/
-  let result
+  if (!text) return text;
+  const arr = [];
+  const re = /(\w+):("|)(.*?)(\$"|"\$|")/;
+  let result;
   for (let i = 0; ; i++) {
-    result = re.exec(text)
+    result = re.exec(text);
     if (result) {
-      text = text.replace(result[0], `{${i}}`)
-      let temp
+      text = text.replace(result[0], `{${i}}`);
+      let temp;
       if (findData(result[1]).cname) {
-        let chs = findData(result[1], result[3], true).cname
+        const chs = findData(result[1], result[3], true).cname;
 
-        temp = findData(result[1]).cname + ':"'
-        temp += chs || result[3]
-        temp += '"'
+        temp = findData(result[1]).cname + ':"';
+        temp += chs || result[3];
+        temp += '"';
       }
-      arr.push(temp || result[0])
-      result = re.exec(text)
+      arr.push(temp || result[0]);
+      result = re.exec(text);
     } else {
-      break
+      break;
     }
   }
   arr.forEach((i, j) => {
-    text = text.replace(`{${j}}`, i)
-  })
-  return text
+    text = text.replace(`{${j}}`, i);
+  });
+  return text;
 }
 
 async function updateEHD () { // 更新EHD
-  let res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/e-hentai-downloader.meta.js')
-  let version = res.response.match(/\/\/ @version\s+([\d.]+)/)[1]
+  const res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/e-hentai-downloader.meta.js');
+  const version = res.response.match(/\/\/ @version\s+([\d.]+)/)[1];
   if (version > GM_getValue('EHD_version', '0')) {
-    GM_setValue('EHD_version', version)
-    let res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/src/main.js')
-    setNotification('E-Hentai-Downloader has been updated to ' + version)
-    GM_setValue('EHD_code', res.response)
+    GM_setValue('EHD_version', version);
+    const res = await xhrSync('https://github.com/ccloli/E-Hentai-Downloader/raw/master/src/main.js');
+    setNotification('E-Hentai-Downloader has been updated to ' + version);
+    GM_setValue('EHD_code', res.response);
   }
-  GM_setValue('EHD_checkTime', new Date().getTime())
+  GM_setValue('EHD_checkTime', new Date().getTime());
 }
 
 async function updateEHT () {
-  let name = 'db.raw.json'
-  let url = 'https://api.github.com/repos/EhTagTranslation/Database/releases'
-  let res = await xhrSync(url, null, { responseType: 'json' })
-  let url1 = res.response.filter(i => i.assets.filter(i => i.name === name).length)[0].assets.filter(i => i.name === name)[0].browser_download_url
-  let res1 = await xhrSync(url1)
+  const name = 'db.raw.json';
+  const url = 'https://api.github.com/repos/EhTagTranslation/Database/releases';
+  const res = await xhrSync(url, null, { responseType: 'json' });
+  const url1 = res.response.filter(i => i.assets.filter(i => i.name === name).length)[0].assets.filter(i => i.name === name)[0].browser_download_url;
+  const res1 = await xhrSync(url1);
 
-  GM_setValue('EHT', res1.response)
-  setNotification('EhTagTranslator has been up-to-date')
-  GM_setValue('EHT_checkTime', new Date().getTime())
+  GM_setValue('EHT', res1.response);
+  setNotification('EhTagTranslator has been up-to-date');
+  GM_setValue('EHT_checkTime', new Date().getTime());
 }
 
 /* 通用函数 */
 
 function arrUnique (arr) { // 数组去重
-  return [...(new Set(arr))]
+  return [...(new Set(arr))];
 }
 
 function getProcessImg (process, radius = 16) { // 创建环形进度条
   while (process < 0 || process > 100) {
-    process = process < 0 ? process + 100 : process - 100
+    process = process < 0 ? process + 100 : process - 100;
   }
   // https://imys.net/20150722/canvas-annulus-process.html
-  var c = document.createElement('canvas')
-  c.width = 2 * radius
-  c.height = 2 * radius
-  var ctx = c.getContext('2d')
+  var c = document.createElement('canvas');
+  c.width = 2 * radius;
+  c.height = 2 * radius;
+  var ctx = c.getContext('2d');
   // 画灰色的圆
-  ctx.beginPath()
-  ctx.arc(radius, radius, 0.8 * radius, 0, Math.PI * 2)
-  ctx.closePath()
-  ctx.fillStyle = '#F6F6F6'
-  ctx.fill()
+  ctx.beginPath();
+  ctx.arc(radius, radius, 0.8 * radius, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.fillStyle = '#F6F6F6';
+  ctx.fill();
   // 画进度环
-  ctx.beginPath()
-  ctx.moveTo(radius, radius)
-  ctx.arc(radius, radius, 0.8 * radius, Math.PI * 1.5, Math.PI * (1.5 + 2 * process / 100))
-  ctx.closePath()
-  ctx.fillStyle = '#00CD00'
-  ctx.fill()
+  ctx.beginPath();
+  ctx.moveTo(radius, radius);
+  ctx.arc(radius, radius, 0.8 * radius, Math.PI * 1.5, Math.PI * (1.5 + 2 * process / 100));
+  ctx.closePath();
+  ctx.fillStyle = '#00CD00';
+  ctx.fill();
   // 画内填充圆
-  ctx.beginPath()
-  ctx.arc(radius, radius, 0, 0, Math.PI * 2)
-  ctx.closePath()
-  ctx.fillStyle = '#fff'
-  ctx.fill()
+  ctx.beginPath();
+  ctx.arc(radius, radius, 0, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.fillStyle = '#fff';
+  ctx.fill();
   // 填充文字
-  ctx.font = 'bold ' + 0.2 * radius + 'pt Microsoft YaHei'
-  ctx.fillStyle = '#333'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.moveTo(radius, radius)
-  ctx.fillText(process.toFixed(2).replace(/\.0+$/, '') + '%', radius, radius)
-  return c.toDataURL()
+  ctx.font = 'bold ' + 0.2 * radius + 'pt Microsoft YaHei';
+  ctx.fillStyle = '#333';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.moveTo(radius, radius);
+  ctx.fillText(process.toFixed(2).replace(/\.0+$/, '') + '%', radius, radius);
+  return c.toDataURL();
 }
 
 function htmlEscape (text) {
@@ -2522,8 +2520,8 @@ function htmlEscape (text) {
       '>': '&gt;',
       '"': '&quot;',
       "'": '&#39;'
-    }[match]
-  })
+    }[match];
+  });
 }
 
 function htmlUnescape (text) {
@@ -2535,68 +2533,69 @@ function htmlUnescape (text) {
       '&gt;': '>',
       '&quot;': '"',
       '&#39;': "'"
-    }[match]
-  })
+    }[match];
+  });
 }
 
 function reEscape (text) {
   // refer https://github.com/lodash/lodash/blob/master/escapeRegExp.js
-  return text.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
+  return text.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
 }
 
 function sortObj (obj, key = undefined) { // Object排序
-  let objNew = {}
+  const objNew = {};
   Object.entries(obj).map(i => {
     return {
       key: i[0],
       value: i[1]
-    }
+    };
   }).sort((o1, o2) => key ? o1.value[key] - o2.value[key] : o1.value - o2.value).forEach(i => {
-    objNew[i.key] = i.value
-  })
-  return objNew
+    objNew[i.key] = i.value;
+  });
+  return objNew;
 }
 
 function fullWidth2Half (str) { // 全角字符转半角
   // info: https://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms
   // refer: https://www.cnblogs.com/html55/p/10298569.html
-  let result = ''
+  let result = '';
   for (let i = 0; i < str.length; i++) {
     if (str.charCodeAt(i) === 12288) {
-      result += String.fromCharCode(str.charCodeAt(i) - 12256)
-      continue
+      result += String.fromCharCode(str.charCodeAt(i) - 12256);
+      continue;
     }
-    if (str.charCodeAt(i) > 65280 && str.charCodeAt(i) < 65375) result += String.fromCharCode(str.charCodeAt(i) - 65248)
-    else result += String.fromCharCode(str.charCodeAt(i))
+    if (str.charCodeAt(i) > 65280 && str.charCodeAt(i) < 65375) result += String.fromCharCode(str.charCodeAt(i) - 65248);
+    else result += String.fromCharCode(str.charCodeAt(i));
   }
-  return result
+  return result;
 }
 
 function waitInMs (time) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve()
-    }, time)
-  })
+      resolve();
+    }, time);
+  });
 }
 
 function waitForElement (ele, timeout) {
   return new Promise((resolve, reject) => {
-    let now = new Date().getTime()
-    let id
+    const now = new Date().getTime();
+    let id;
     id = setInterval(() => {
       if (new Date().getTime() - now >= timeout) {
-        clearInterval(id)
-        resolve(false)
+        if (id) clearInterval(id);
+        id = null;
+        resolve(false);
       } else if ($(ele).length) {
-        resolve(true)
+        resolve(true);
       }
-    }, 200)
-  })
+    }, 200);
+  });
 }
 
 function xhr (url, onload, parm = null, opt = {}) {
-  console.log({ url, parm })
+  console.log({ url, parm });
   GM_xmlhttpRequest({
     method: parm ? 'POST' : 'GET',
     url: url,
@@ -2607,19 +2606,19 @@ function xhr (url, onload, parm = null, opt = {}) {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
     },
     onload (res) {
-      onload(res)
+      onload(res);
     },
     ontimeout (res) {
-      if (typeof opt.ontimeout === 'function') opt.ontimeout(res)
+      if (typeof opt.ontimeout === 'function') opt.ontimeout(res);
     },
     onerror (res) {
-      if (typeof opt.onerror === 'function') opt.onerror(res)
+      if (typeof opt.onerror === 'function') opt.onerror(res);
     }
-  })
+  });
 }
 
 function xhrSync (url, parm = null, opt = {}) {
-  console.log({ url, parm })
+  console.log({ url, parm });
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
       method: parm ? 'POST' : 'GET',
@@ -2631,50 +2630,50 @@ function xhrSync (url, parm = null, opt = {}) {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
       onload (res) {
-        resolve(res)
+        resolve(res);
       },
       ontimeout (res) {
-        reject(res)
+        reject(res);
       },
       onerror (res) {
-        reject(res)
+        reject(res);
       }
-    })
-  })
+    });
+  });
 }
 
 function getStringSize (_string) {
   // from: https://stackoverflow.com/a/29955838
-  'use strict'
+  'use strict';
 
-  var codePoint
-  var accum = 0
+  var codePoint;
+  var accum = 0;
 
   for (var stringIndex = 0, endOfString = _string.length; stringIndex < endOfString; stringIndex++) {
-    codePoint = _string.charCodeAt(stringIndex)
+    codePoint = _string.charCodeAt(stringIndex);
 
     if (codePoint < 0x100) {
-      accum += 1
-      continue
+      accum += 1;
+      continue;
     }
 
     if (codePoint < 0x10000) {
-      accum += 2
-      continue
+      accum += 2;
+      continue;
     }
 
     if (codePoint < 0x1000000) {
-      accum += 3
+      accum += 3;
     } else {
-      accum += 4
+      accum += 4;
     }
   }
 
-  return accum
+  return accum;
 }
 
 init().then(() => {
   //
 }, (err) => {
-  console.error(err)
-})
+  console.error(err);
+});
