@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.896
-// @modified    2020-3-11 11:42:25
+// @version     1.16.921
+// @modified    2020-3-11 15:12:18
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -372,7 +372,7 @@ async function init () {
       },
       contextmenu: () => {
         let value = $(SEL.EH.search.keyword).val();
-        value = value.match('language:"chinese"\\$') ? value.replace('language:"chinese"$', '').trim() : value + ' language:"chinese"$';
+        value = value.match('language:chinese\\$') ? value.replace('language:chinese$', '').trim() : value + ' language:chinese$';
         $(SEL.EH.search.keyword).val(value);
         $(SEL.EH.search.apply).click();
       }
@@ -540,6 +540,7 @@ function addStyle () { // 添加样式
     '.ehExist[name="force"]{color:#0f0;}',
     '.ehExist[name="force1"]{color:#00f;}',
     '.ehExist[name="incomplete"]{color:#f00;background:#00f;}',
+    '.ehExist[name="notchinese"]{color:#000;background:#f8b400;}',
     '.ehTagPreview{position:fixed;padding:5px;display:none;z-index:999999;font-size:larger;width:250px;border-color:#000;border-style:solid;color:#fff;background-color:#34353b;}',
     '.ehTagPreviewLi{color:#ffffff;}',
     '.ehTagPreviewLi[name="language"]>span{background-color:#ff0000;}',
@@ -699,7 +700,7 @@ function autoComplete () { // 自动填充
       main.forEach(i => {
         for (const key in i.data) {
           if (key.match(value) || i.data[key].name.match(value)) {
-            $(`<li cname="${i.data[key].name}">${i.namespace}:"${key}"$</li>`).appendTo('.ehDatalist>ol');
+            $(`<li cname="${i.data[key].name}">${i.namespace}:"${key}$"</li>`).appendTo('.ehDatalist>ol');
           }
         }
       });
@@ -828,7 +829,7 @@ function btnSearch2 () { // 按钮 -> 搜索(搜索页)
         if (keydown) {
           let name;
           const gid = $(e.target).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find(SEL.EH.search.galleryA).attr('href').match(/\/g\/(\d+)/)[1] * 1;
-          const tags = G.gmetadata.filter(i => i.gid === gid)[0].tags.map(i => i.match(/^\w+:/) ? i.replace(/^(\w+:)/, '$1"') + '"$' : `misc:"${i}"$`);
+          const tags = G.gmetadata.filter(i => i.gid === gid)[0].tags.map(i => i.match(/^\w+:/) ? i.replace(/^(\w+:)/, '$1"') + '$"' : `misc:"${i}$"`);
           if (arr[2] === '-1') {
             const order = window.prompt(tags.map((i, j) => `${j}: ${translateText(i)}`).join('\n'));
             if (order) {
@@ -845,7 +846,7 @@ function btnSearch2 () { // 按钮 -> 搜索(搜索页)
           } else {
             return;
           }
-          if (arr[3] === '1') name += ' language:"chinese"$';
+          if (arr[3] === '1') name += ' language:chinese$';
           openUrl(G.config.searchArguments.replace(/{q}/g, encodeURIComponent(name)));
           break;
         }
@@ -1099,9 +1100,18 @@ function checkExist () { // 检查本地是否存在
           const noLang = noExt.replace(langRE, '').trim();
           const noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$');
           const p = $(i).parent().find('.ehExistContainer');
-          const _name = (noExtRE.exec(name) || noExtRE.exec(name2)) ? 'force'
-            : noExt.match(/\[Incomplete\]/i) ? 'incomplete'
-              : (noLangRE.exec(name3) || noLangRE.exec(name4)) ? 'force1' : '';
+          let _name;
+          if (noExtRE.exec(name) || noExtRE.exec(name2)) {
+            _name = 'force';
+          } else if (noExt.match(/\[Incomplete\]/i)) {
+            _name = 'incomplete';
+          } else if (!noExt.match(/(chinese|漢化|汉化|中文|中国翻訳|中国語|中国语)/i)) {
+            _name = 'notchinese';
+          } else if (noLangRE.exec(name3) || noLangRE.exec(name4)) {
+            _name = 'force1';
+          } else {
+            _name = '';
+          }
           const diffThis = diff(name, noExt);
           const similar = _name === 'force' ? 0 : diffThis.reduce((total, now) => total + (now[0] === 0 ? 0 : now[1].length), 0);
 
@@ -2260,8 +2270,8 @@ function tagEvent () { // 标签事件
     contextmenu: e => { // 搜索标签+中文
       var keyword = e.target.innerText.replace(/\s+\|.*/, '');
       keyword = '"' + keyword + '"';
-      if (SEL.EH.info.nameFromTag(e.target.id).length > 2) keyword = SEL.EH.info.nameFromTag(e.target.id)[2] + ':' + keyword + '$';
-      openUrl(G.config.searchArguments.replace(/{q}/g, encodeURIComponent(keyword + ' language:"chinese"$')));
+      if (SEL.EH.info.nameFromTag(e.target.id).length > 2) keyword = SEL.EH.info.nameFromTag(e.target.id)[2] + ':' + keyword.replace(/"$/, '$"');
+      openUrl(G.config.searchArguments.replace(/{q}/g, encodeURIComponent(keyword + ' language:chinese$')));
       return false;
     },
     click: e => { // 标签
@@ -2358,15 +2368,15 @@ function taskRemove (id) {
 
 function tagTranslate () { // 标签翻译
   const data = $(SEL.EH.info.tag).toArray().map(i => {
-    const info = i.id.split(/ta_|:/);
-    if (info.length === 2) info.splice(1, 0, 'misc');
-    return findData(info[1], info[2], !G.config.tagTranslateImage);
+    const info = i.id.replace(/^ta_/, '').split(/:/);
+    if (info.length === 1) info.splice(0, 0, 'misc');
+    return findData(info[0], info[1], !G.config.tagTranslateImage);
   }).filter(i => Object.keys(i).length);
   const css = [
     SEL.EH.info.tagContainer + '{overflow:visible;min-height:295px;height:auto}',
     SEL.EH.info.infoMid + '{min-height:330px;height:auto;position:static}',
     SEL.EH.info.tag + '{background:inherit}',
-    SEL.EH.info.tag + '::before{font-size:12px;overflow:hidden;line-height:20px;height:20px}',
+    SEL.EH.info.tag + '::before{font-size:12px;overflow:hidden;line-height:20px;height:20px;text-transform:capitalize;}',
     SEL.EH.info.tag + '::after{display:block;color:#ff8e8e;font-size:14px;background:inherit;border:1px solid #000;border-radius:5px;position:absolute;float:left;z-index:999;padding:8px;box-shadow:3px 3px 10px #000;min-width:150px;max-width:500px;white-space:pre-wrap;opacity:0;transition:opacity .2s;transform:translate(-50%,20px);top:0;left:50%;pointer-events:none;padding-top:8px;font-weight:400;line-height:20px}',
     SEL.EH.info.tag + ':hover::after{opacity:1;pointer-events:auto}',
     SEL.EH.info.tag + ':focus::after{opacity:1;pointer-events:auto}',
@@ -2378,12 +2388,10 @@ function tagTranslate () { // 标签翻译
     SEL.EH.info.tag + ':hover::before{z-index:9999999}',
     SEL.EH.info.tag + ':focus::before{z-index:9999997}',
     SEL.EH.info.tag + '::after{color:#' + (window.window.location.host === 'exhentai.org' ? 'fff' : '000') + '}',
-    ...data.map(i => SEL.EH.info.tagFromName(i.name) + '{font-size:0;}'),
-    SEL.EH.info.tag + '::before{text-decoration:line-through;}'
+    ...data.map(i => SEL.EH.info.tagFromName(i.name) + '{font-size:0;}')
   ];
   const dealWithContent = (text) => {
     const arr = text.split(/(!\[.*?\]\(.*?\))/);
-    console.log(arr);
     const output = [];
     for (const i of arr) {
       if (i.match(/!\[(.*?)\]\((.*?)\)/)) {
