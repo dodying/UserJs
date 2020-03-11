@@ -2,8 +2,8 @@
 // @name        []mark
 // @description mark
 // @include     *
-// @version     1.0.767
-// @modified    2020-2-21 16:55:00
+// @version     1.0.769
+// @modified    2020-3-11 19:32:34
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -16,31 +16,31 @@
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 (function () {
-  'use strict'
+  'use strict';
 
-  let selectCalc = (any, position) => {
-    any = [].concat(any)
-    let out = []
+  const selectCalc = (any, position) => {
+    any = [].concat(any);
+    const out = [];
     for (let i = 0; i < any.length; i++) {
-      let anyI = any[i]
+      const anyI = any[i];
       if (typeof anyI === 'string') {
-        out[i] = position['string'](anyI)
+        out[i] = position.string(anyI);
       } else if (typeof anyI === 'number') {
-        out[i] = position['number'](anyI)
+        out[i] = position.number(anyI);
       } else if (typeof anyI === 'function') {
-        out[i] = position['function'](anyI)
+        out[i] = position.function(anyI);
       } else if (typeof anyI === 'boolean') {
-        out[i] = position['boolean'](anyI)
+        out[i] = position.boolean(anyI);
       } else if (anyI instanceof RegExp) {
-        out[i] = position['RegExp'](anyI)
+        out[i] = position.RegExp(anyI);
       } else {
-        out[i] = position['default'](anyI)
+        out[i] = position.default(anyI);
       }
     }
-    return out
-  }
+    return out;
+  };
 
-  let libs = {
+  const libs = {
     novel: [
       {
         /**
@@ -88,11 +88,11 @@
         dealWithElems: (elemNow, elemBefore) => {
           [].concat(elemNow, elemBefore).forEach(i => {
             if (i.textContent.trim().match(/^《.*》$/) && !$(i).is('.mark-deal-ignore')) {
-              $(i).addClass('mark-deal-ignore')
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.trim().match(/^《(.*)》$/)[1]
+              $(i).addClass('mark-deal-ignore');
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.trim().match(/^《(.*)》$/)[1];
             }
-          })
-          return elemNow
+          });
+          return elemNow;
         },
         search: '优书网|https://www.yousuu.com/search/?SearchType=title&SearchValue=%s'
       },
@@ -116,13 +116,13 @@
         dealWithElems: (elemNow, elemBefore) => {
           [].concat(elemNow, elemBefore).forEach(i => {
             if (i.textContent.trim().match(/^(\[.*?\])(.*)/) && !$(i).is('.mark-deal-ignore')) {
-              let [, tag, name] = i.textContent.trim().match(/^(\[.*?\])(.*)$/)
-              $('<span></span>').text(tag).insertBefore(i)
-              $(i).addClass('mark-deal-ignore')
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = name
+              const [, tag, name] = i.textContent.trim().match(/^(\[.*?\])(.*)$/);
+              $('<span></span>').text(tag).insertBefore(i);
+              $(i).addClass('mark-deal-ignore');
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = name;
             }
-          })
-          return elemNow
+          });
+          return elemNow;
         },
         search: '起点数据|http://www.qidianshuju.com/find/%s.html'
       },
@@ -135,11 +135,11 @@
         dealWithElems: (elemNow, elemBefore) => {
           [].concat(elemNow, elemBefore).forEach(i => {
             if (i.textContent.trim().match(/最新章节(列表|)$/) && !$(i).is('.mark-deal-ignore')) {
-              $(i).addClass('mark-deal-ignore')
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.trim().replace(/最新章节(列表|)$/, '')
+              $(i).addClass('mark-deal-ignore');
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.trim().replace(/最新章节(列表|)$/, '');
             }
-          })
-          return elemNow
+          });
+          return elemNow;
         },
         search: 'UU看书|https://cse.google.com/cse?oe=utf8&ie=utf8&source=uds&q=%s&safe=off&cx=008945028460834109019:saffovty4iu'
       },
@@ -197,11 +197,11 @@
         dealWithElems: (elemNow, elemBefore) => {
           [].concat(elemNow, elemBefore).forEach(i => {
             if (i.textContent.match(/^\+/) && !$(i).is('.mark-deal-ignore')) {
-              $(i).addClass('mark-deal-ignore')
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/^\+/, '')
+              $(i).addClass('mark-deal-ignore');
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/^\+/, '');
             }
-          })
-          return elemNow
+          });
+          return elemNow;
         },
         search: '动漫之家|https://manhua.dmzj.com/tags/search.shtml?s=%s'
       },
@@ -222,36 +222,36 @@
         dealWithElems: (elemNow, elemBefore) => {
           [].concat(elemNow, elemBefore).forEach(i => {
             if (i.textContent.match(/(漫画|\[\d+\])$/) && !$(i).is('.mark-deal-ignore')) {
-              $(i).addClass('mark-deal-ignore')
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/(漫画|\[\d+\])$/, '')
+              $(i).addClass('mark-deal-ignore');
+              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/(漫画|\[\d+\])$/, '');
             }
-          })
-          return elemNow
+          });
+          return elemNow;
         },
         search: 'KuKu动漫|https://so.kukudm.com/search.asp?kw=%s&Submit=%C8%B7%B6%A8'
       }
     ]
-  }
+  };
 
-  let libName, lib
-  for (let i in libs) {
-    libName = i
-    lib = libs[i]
-    let found = lib.some(i => {
-      let filtered = selectCalc(i.filter, {
+  let libName, lib;
+  for (const i in libs) {
+    libName = i;
+    lib = libs[i];
+    const found = lib.some(i => {
+      const filtered = selectCalc(i.filter, {
         string: text => window.location.href.match(text),
         RegExp: regexp => window.location.href.match(regexp),
         function: func => func()
-      })
-      return filtered.some(i => i)
-    })
-    if (found) break
-    if (i === Object.keys(libs).slice(-1)[0]) return
+      });
+      return filtered.some(i => i);
+    });
+    if (found) break;
+    if (i === Object.keys(libs).slice(-1)[0]) return;
   }
-  console.log({ libName, lib })
+  console.log({ libName, lib });
 
-  let getValue = () => JSON.parse(GM_getValue(`dababase_${libName}`) || '{}')
-  let setValue = (value) => value || window.confirm(`value false\ncontinue?`) ? GM_setValue(`dababase_${libName}`, JSON.stringify(value)) : null
+  const getValue = () => JSON.parse(GM_getValue(`dababase_${libName}`) || '{}');
+  const setValue = (value) => value || window.confirm('value false\ncontinue?') ? GM_setValue(`dababase_${libName}`, JSON.stringify(value)) : null;
 
   $('<style></style>').html([
     '.mark-panel{z-index:99999;position:fixed;top:0;left:0;}',
@@ -279,7 +279,7 @@
     '.mark-show-search{margin:0 10px;color:#00f;}',
     //
     '.mark-edit-textarea{width:99%;height:calc(99% - 16px);}'
-  ].join('\n')).appendTo('head')
+  ].join('\n')).appendTo('head');
 
   /**
    * database:
@@ -292,250 +292,250 @@
    * -- type -> color
    */
 
-  let searchLib = []
-  let searchLibFirstRun = true
-  let ask = (q, a) => {
-    let database = getValue()
-    let answer = window.prompt(q, a || database.answer || '')
+  const searchLib = [];
+  let searchLibFirstRun = true;
+  const ask = (q, a) => {
+    const database = getValue();
+    const answer = window.prompt(q, a || database.answer || '');
     if (answer) {
-      database.answer = answer
-      setValue(database)
+      database.answer = answer;
+      setValue(database);
     }
-    return answer
-  }
-  let elems
-  let updateElems = () => {
-    let temp = []
-    for (let i of lib) {
-      let actived = selectCalc(i.filter, {
+    return answer;
+  };
+  let elems;
+  const updateElems = () => {
+    let temp = [];
+    for (const i of lib) {
+      const actived = selectCalc(i.filter, {
         string: text => window.location.href.match(text),
         RegExp: regexp => window.location.href.match(regexp),
         function: func => func()
-      })
-      if (!actived.some(i => i)) continue
-      if (searchLibFirstRun && i.search) searchLib.push(i.search)
+      });
+      if (!actived.some(i => i)) continue;
+      if (searchLibFirstRun && i.search) searchLib.push(i.search);
 
       let elem = selectCalc(i.elems, {
         string: text => $(text).toArray(),
         function: func => func()
-      }).reduce((pre, cur) => [].concat(cur, pre))
+      }).reduce((pre, cur) => [].concat(cur, pre));
 
-      elem = elem.filter(i => i.textContent.trim() && i.textContent.trim().length < 32)
+      elem = elem.filter(i => i.textContent.trim() && i.textContent.trim().length < 32);
 
-      if (typeof i.dealWithElems === 'function') elem = i.dealWithElems(elem, temp)
-      temp = temp.concat(elem)
+      if (typeof i.dealWithElems === 'function') elem = i.dealWithElems(elem, temp);
+      temp = temp.concat(elem);
     }
-    searchLibFirstRun = false
-    elems = temp
-  }
-  let updateHighlight = () => {
-    let database = getValue()
-    let books = database['book'] || {}
-    let matches = database['match'] || {}
+    searchLibFirstRun = false;
+    elems = temp;
+  };
+  const updateHighlight = () => {
+    const database = getValue();
+    const books = database.book || {};
+    const matches = database.match || {};
 
-    updateElems()
+    updateElems();
     elems.forEach(i => {
-      let name = i.textContent.trim()
+      const name = i.textContent.trim();
       if (name in books) {
-        $(i).attr('data-mark', books[name])
+        $(i).attr('data-mark', books[name]);
       } else if (Object.keys(matches).some(i => name.match(i))) {
-        let filtered = Object.keys(matches).filter(i => name.match(i))[0]
-        $(i).attr('data-mark', matches[filtered])
+        const filtered = Object.keys(matches).filter(i => name.match(i))[0];
+        $(i).attr('data-mark', matches[filtered]);
       } else {
-        $(i).attr('data-mark', 'null')
+        $(i).attr('data-mark', 'null');
       }
-    })
+    });
 
-    let colors = database['color'] || {}
-    let style = Object.keys(colors).map(i => `[data-mark="${i}"]{background-color:${colors[i]}!important;}`)
-    let styleEle = $('style.mark-style').length ? $('style.mark-style') : $('<style class="mark-style"></style>')
-    styleEle.html(style).appendTo('head')
-  }
-  let promptSetting = keyName => {
-    let database = getValue()
-    let obj = database[keyName] || {}
-    let answer = ask(`已存在:\n- - -\n${Object.keys(obj).map(i => `${i}:  ${obj[i]}`).join('\n')}\n- - -\n请使用:分割，值为null表示删除`)
-    if (!answer) return
-    let arr = answer.split(/:|：/)
+    const colors = database.color || {};
+    const style = Object.keys(colors).map(i => `[data-mark="${i}"]{background-color:${colors[i]}!important;}`);
+    const styleEle = $('style.mark-style').length ? $('style.mark-style') : $('<style class="mark-style"></style>');
+    styleEle.html(style).appendTo('head');
+  };
+  const promptSetting = keyName => {
+    const database = getValue();
+    const obj = database[keyName] || {};
+    const answer = ask(`已存在:\n- - -\n${Object.keys(obj).map(i => `${i}:  ${obj[i]}`).join('\n')}\n- - -\n请使用:分割，值为null表示删除`);
+    if (!answer) return;
+    const arr = answer.split(/:|：/);
     if (arr.length > 1) {
-      if (arr[0] === 'null') return
+      if (arr[0] === 'null') return;
       if (arr[1] === 'null') {
-        delete obj[arr[0]]
+        delete obj[arr[0]];
       } else {
-        obj[arr[0]] = arr.slice(1).join(':')
+        obj[arr[0]] = arr.slice(1).join(':');
       }
-      database[keyName] = obj
-      setValue(database)
-      updateHighlight()
+      database[keyName] = obj;
+      setValue(database);
+      updateHighlight();
     }
-  }
-  let markBatch = elems => {
-    let database = getValue()
-    let colors = database['color'] || {}
-    let type = ask(`要标记的状态,值为null表示删除:\n- - -\n${Object.keys(colors).map(i => `${i}:${colors[i]}`).join('\n')}\n- - -`)
-    if (!type) return
-    let obj = database['book'] || {}
+  };
+  const markBatch = elems => {
+    const database = getValue();
+    const colors = database.color || {};
+    const type = ask(`要标记的状态,值为null表示删除:\n- - -\n${Object.keys(colors).map(i => `${i}:${colors[i]}`).join('\n')}\n- - -`);
+    if (!type) return;
+    const obj = database.book || {};
 
-    updateElems()
+    updateElems();
     elems.forEach(i => {
-      let name = i.textContent.trim()
+      const name = i.textContent.trim();
 
       if (type === 'null') {
-        delete obj[name]
+        delete obj[name];
       } else {
-        obj[name] = type
+        obj[name] = type;
       }
-    })
+    });
 
-    database['book'] = obj
-    setValue(database)
-    updateHighlight()
-  }
-  updateHighlight()
+    database.book = obj;
+    setValue(database);
+    updateHighlight();
+  };
+  updateHighlight();
 
   var observer = new window.MutationObserver((mutationsList) => {
-    if (mutationsList.some(i => i.addedNodes && [].concat(...i.addedNodes).some(j => j.nodeType === 1))) updateHighlight()
-  })
+    if (mutationsList.some(i => i.addedNodes && [].concat(...i.addedNodes).some(j => j.nodeType === 1))) updateHighlight();
+  });
   observer.observe(document.body, {
     childList: true,
     subtree: true
-  })
+  });
 
-  $('<div class="mark-panel"></div>').appendTo('body')
+  $('<div class="mark-panel"></div>').appendTo('body');
   $('<button class="mark-close">x</button>').on({
     click: () => $('.mark-panel').hide()
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
   $('<button class="mark-switch"></button>').on({
     click: (e) => {
-      $(e.target).toggleClass('mark-switch-disabled')
+      $(e.target).toggleClass('mark-switch-disabled');
       if ($(e.target).is('.mark-switch-disabled')) {
-        $('style.mark-style').remove()
+        $('style.mark-style').remove();
       } else {
-        updateHighlight()
+        updateHighlight();
       }
     }
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
   $('<button class="mark-color mark-less-hide">color</button>').on({
     click: () => promptSetting('color')
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
   $('<button class="mark-match mark-less-hide">match</button>').on({
     click: () => promptSetting('match')
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
   $('<button class="mark-mark">mark</button>').on({
     click: (e) => {
-      let type
-      let func = (e) => {
-        e.preventDefault()
+      let type;
+      const func = (e) => {
+        e.preventDefault();
 
-        let database = getValue()
-        let obj = database['book'] || {}
-        let name = e.target.textContent.trim()
+        const database = getValue();
+        const obj = database.book || {};
+        const name = e.target.textContent.trim();
 
         if (type === 'null') {
-          delete obj[name]
+          delete obj[name];
         } else {
-          obj[name] = type
+          obj[name] = type;
         }
 
-        database['book'] = obj
-        setValue(database)
-        updateHighlight()
-      }
+        database.book = obj;
+        setValue(database);
+        updateHighlight();
+      };
 
-      $(e.target).toggleClass('mark-mark-on')
+      $(e.target).toggleClass('mark-mark-on');
       if ($(e.target).is('.mark-mark-on')) {
-        let database = getValue()
-        let colors = database['color'] || {}
-        type = ask(`要标记的状态,值为null表示删除:\n- - -\n${Object.keys(colors).map(i => `${i}:${colors[i]}`).join('\n')}\n- - -`)
+        const database = getValue();
+        const colors = database.color || {};
+        type = ask(`要标记的状态,值为null表示删除:\n- - -\n${Object.keys(colors).map(i => `${i}:${colors[i]}`).join('\n')}\n- - -`);
         if (!type) {
-          $(e.target).toggleClass('mark-mark-on')
-          return
+          $(e.target).toggleClass('mark-mark-on');
+          return;
         }
-        $('body').on('click', '[data-mark]', func)
+        $('body').on('click', '[data-mark]', func);
       } else {
-        $('body').off('click', '[data-mark]')
+        $('body').off('click', '[data-mark]');
       }
     }
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
   $('<button class="mark-mark-all mark-less-hide">mark-all</button>').on({
     click: () => markBatch($('[data-mark]').toArray())
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
   $('<button class="mark-mark-null mark-less-hide">mark-null</button>').on({
     click: () => markBatch($('[data-mark="null"]').toArray())
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
   $('<button class="mark-show mark-less-hide">show</button>').on({
     click: () => {
       if ($('.mark-show-container').length) {
-        $('.mark-show-container').remove()
-        return
+        $('.mark-show-container').remove();
+        return;
       }
 
-      let database = getValue()
-      let books = database.book || {}
-      let types = Object.values(books).sort().filter((item, index, array) => array.indexOf(item) === index)
+      const database = getValue();
+      const books = database.book || {};
+      const types = Object.values(books).sort().filter((item, index, array) => array.indexOf(item) === index);
 
-      let elem = $('<div class="mark-show-container"><ul class="mark-show-nav"></ul><div class="mark-show-content"></div></div>')
-      for (let type of types) {
-        $('<li class="mark-show-nav-select"></li>').attr('name', type).appendTo($(elem).find('.mark-show-nav'))
-        let html = '<ol>'
-        let names = Object.keys(books).filter(i => books[i] === type)
-        for (let name of names) {
-          html += '<li>'
-          html += `<span class="mark-show-pre">${name}</span>`
+      const elem = $('<div class="mark-show-container"><ul class="mark-show-nav"></ul><div class="mark-show-content"></div></div>');
+      for (const type of types) {
+        $('<li class="mark-show-nav-select"></li>').attr('name', type).appendTo($(elem).find('.mark-show-nav'));
+        let html = '<ol>';
+        const names = Object.keys(books).filter(i => books[i] === type);
+        for (const name of names) {
+          html += '<li>';
+          html += `<span class="mark-show-pre">${name}</span>`;
           html += searchLib.map(str => {
-            let [info, url] = str.split('|')
-            return `<a class="mark-show-search" href="${url.replace('%s', encodeURIComponent(name))}">${info}</a>`
-          }).join('')
-          html += '</li>'
+            const [info, url] = str.split('|');
+            return `<a class="mark-show-search" href="${url.replace('%s', encodeURIComponent(name))}">${info}</a>`;
+          }).join('');
+          html += '</li>';
         }
-        html += `</ol>`
-        $(html).attr('name', type).appendTo($(elem).find('.mark-show-content'))
+        html += '</ol>';
+        $(html).attr('name', type).appendTo($(elem).find('.mark-show-content'));
       }
-      elem.appendTo('body')
+      elem.appendTo('body');
       $('.mark-show-nav-select').on({
         click: e => {
-          $('.mark-show-nav-select').removeClass('mark-show-nav-selected')
-          $(e.target).addClass('mark-show-nav-selected')
-          $('.mark-show-content>ol').hide()
-          $('.mark-show-content>ol').filter((order, i) => $(i).attr('name') === $(e.target).attr('name')).show()
+          $('.mark-show-nav-select').removeClass('mark-show-nav-selected');
+          $(e.target).addClass('mark-show-nav-selected');
+          $('.mark-show-content>ol').hide();
+          $('.mark-show-content>ol').filter((order, i) => $(i).attr('name') === $(e.target).attr('name')).show();
         }
-      })
-      $('.mark-show-nav-select:eq(0)').addClass('mark-show-nav-selected')
-      $('.mark-show-content>ol').hide()
-      $('.mark-show-content>ol:eq(0)').show()
+      });
+      $('.mark-show-nav-select:eq(0)').addClass('mark-show-nav-selected');
+      $('.mark-show-content>ol').hide();
+      $('.mark-show-content>ol:eq(0)').show();
     }
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
   $('<button class="mark-edit mark-less-hide">edit</button>').on({
     click: () => {
       if ($('.mark-edit-container').length) {
-        $('.mark-edit-container').remove()
-        return
+        $('.mark-edit-container').remove();
+        return;
       }
 
-      let database = getValue()
+      const database = getValue();
 
-      $('<div class="mark-edit-container"><textarea class="mark-edit-textarea"></textarea></div>').appendTo('body')
+      $('<div class="mark-edit-container"><textarea class="mark-edit-textarea"></textarea></div>').appendTo('body');
       $('<button class="mark-edit-save">Save</button>').on({
         click: () => {
           try {
-            let obj = JSON.parse($('.mark-edit-textarea').val())
-            setValue(obj)
+            const obj = JSON.parse($('.mark-edit-textarea').val());
+            setValue(obj);
           } catch (error) {
-            console.log(error)
-            window.alert('Save Failed')
+            console.log(error);
+            window.alert('Save Failed');
           }
         }
-      }).appendTo('.mark-edit-container')
-      $('.mark-edit-textarea').text(JSON.stringify(database, null, 2))
+      }).appendTo('.mark-edit-container');
+      $('.mark-edit-textarea').text(JSON.stringify(database, null, 2));
     }
-  }).appendTo('.mark-panel')
+  }).appendTo('.mark-panel');
 
   // 最后
   $('<button class="mark-less"></button>').on({
     click: (e) => {
-      $(e.target).toggleClass('mark-less-on')
-      $('.mark-less-hide').toggle()
+      $(e.target).toggleClass('mark-less-on');
+      $('.mark-less-hide').toggle();
     }
-  }).appendTo('.mark-panel')
-  $('.mark-less').click()
-})()
+  }).appendTo('.mark-panel');
+  $('.mark-less').click();
+})();
