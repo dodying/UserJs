@@ -6,9 +6,11 @@
 
 ##### E-hentai
 
+[README](E-hentai/README.md)
+
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[[EH]Enhance](E-hentai/ehEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) | 1.16.795 | 2020-2-19 13:53:21 |  | 
+[[EH]Enhance](E-hentai/ehEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) | 1.16.921 | 2020-3-11 15:12:18 |  | 
 [[NH]nhentai Downloader](E-hentai/nhDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhDownloader.user.js) | 0.0.5 |  |  | 
 [[NH]Enhance](E-hentai/nhEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhEnhance.user.js) | 1.0.4 | 2020-2-7 11:11:14 |  | 
 
@@ -41,7 +43,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 [[]emptyName](global/emptyName.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/emptyName.user.js) | 1.1 |  |  | 
 [[]highlight](global/highlight.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/highlight.user.js) | 1.0.2 |  |  | 
 [[]insertJquery](global/insertJquery.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/insertJquery.user.js) | 1.0.30 |  |  | 
-[[]mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.0.767 | 2020-2-21 16:55:00 |  | mark
+[[]mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.0.797 | 2020-3-14 21:40:30 |  | mark
 [[]meta](global/meta.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/meta.user.js) | 1.11 |  |  | 
 [[]newTab](global/newTab.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/newTab.user.js) | 0.0.78 |  |  | 链接强制在新建标签中打开 Open a URL in a new tab
 [[]prettyJSON](global/prettyJSON.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/prettyJSON.user.js) | 1.0.38 | 2019-11-24 20:03:53 |  | prettyJSON
@@ -58,11 +60,15 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 ##### HentaiVerse/hvAutoAttack
 
+[README](HentaiVerse/hvAutoAttack/README.md)
+
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [[HV]AutoAttack](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | 2.90.0 |  |  | HV auto attack script, for the first user, should configure before use it.
 
 ##### HentaiVerse
+
+[README](HentaiVerse/README.md)
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
@@ -81,6 +87,8 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 ##### modify
 
+[README](modify/README.md)
+
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [hvTranslator](modify/hvTranslator.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/modify/hvTranslator.user.js) | 1.0 |  |  | 
@@ -97,10 +105,12 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 ##### novel/novelDownloader
 
+[README](novel/novelDownloader/README.md)
+
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [novelDownloader2](novel/novelDownloader/novelDownloader-new.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader-new.user.js) | 0.0.4 |  |  | novelDownloaderHelper，press key "shift+d" to show up.
-[[Novel]Downloader](novel/novelDownloader/novelDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader.user.js) | 1.45.30 | 2020-2-24 11:31:32 |  | novelDownloaderHelper, press key "shift+d" to show up.
+[[Novel]Downloader](novel/novelDownloader/novelDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader.user.js) | 1.45.33 | 2020-3-14 21:25:55 |  | novelDownloaderHelper, press key "shift+d" to show up.
 
 ##### other
 
