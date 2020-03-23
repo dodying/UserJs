@@ -1,15 +1,16 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.0.0
+// @version     3.0.1
 // @created     2020-03-16 16:59:04
-// @modified    2020-3-23 17:36:52
+// @modified    2020-3-23 17:42:33
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
-// @require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/download.js
+// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=783513
+// require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/download.js
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.0.0/jszip.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
