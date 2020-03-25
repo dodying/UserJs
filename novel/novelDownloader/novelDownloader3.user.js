@@ -1,17 +1,20 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.0.1
+// @version     3.1.0
 // @created     2020-03-16 16:59:04
-// @modified    2020-3-23 17:42:33
+// @modified    2020-3-25 18:07:17
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
+
 // @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=783513
 // require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/download.js
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
+// require     http://127.0.0.1:8081/download.js
+
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.0.0/jszip.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
@@ -28,7 +31,9 @@
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 /* global xhr, saveAs, tranStr, base64, JSZip */
-(function () {
+/* eslint-disable no-extra-semi  */
+;(function () {
+  /* eslint-enable no-extra-semi  */
   'use strict';
 
   let Storage = null;
@@ -1551,9 +1556,10 @@
       writer: '.zl',
       intro: '.js',
       chapter: '.mread:eq(0)>tbody>tr:gt(0) a',
-      content: '[class^="l"],.content',
+      chapterTitle: 'font>strong',
+      content: '[class^="l"],[class^="con"]',
       contentReplace: [
-        ['<img src="tu/(.*?).jpg">', '{$1}'],
+        ['<img src="(tu|in|image)/(.*?).jpg">', '{$2}'],
         ['{ai}', '爱'],
         ['{ba}', '巴'],
         ['{bang}', '棒'],
@@ -1700,7 +1706,8 @@
       chapterTitle: 'font>b',
       content: '.show_content>pre',
       chapterPrev: '.show_content>p>a',
-      chapterNext: 'body>table td>p:first+ul a:not(:contains("(无内容)"))'
+      chapterNext: 'body>table td>p:first+ul a:not(:contains("(无内容)"),.show_content>pre a',
+      elementRemove: 'font[color*="E6E6DD"],b:contains("评分完成")'
     },
     { // http://www.7zxs.cc/
       siteName: '7z小说网',
@@ -1838,6 +1845,54 @@
       chapterTitle: '.play-title>h1',
       content: '.txt_tcontent'
     },
+    { // https://xxread.net/
+      siteName: '肉肉阅读', // 与网易云阅读相同模板
+      url: '://xxread.net/book-\\d+.php',
+      chapterUrl: '://xxread.net/book_reader.php\\?b=\\d+&c=\\d+',
+      title: '.m-bookdetail h3',
+      intro: '.m-content .detail>.txt',
+      chapter: '.item>a',
+      deal: async (chapter) => {
+        const info = chapter.url.match(/\d+/g);
+        const content = await new Promise((resolve, reject) => {
+          xhr.add({
+            url: window.location.protocol + '//xxread.net/getArticleContent.php?sourceUuid=' + info[0] + '&articleUuid=' + info[1],
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              Referer: chapter.url,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            onload: function (res, request) {
+              try {
+                const json = JSON.parse(res.response);
+                let content = json.content;
+                content = base64.decode(content);
+                content = base64.utf8to16(content);
+                const title = $('h1', content).text();
+                resolve({ content, title });
+              } catch (error) {
+                resolve('');
+              }
+            }
+          }, null, 0, true);
+        });
+        return content;
+      },
+      elementRemove: 'h1',
+      getChapters: async (doc) => {
+        const info = window.location.href.match(/\d+/g);
+        const res = await xhr.sync(`https://xxread.net/getBook.php?b=${info[0]}`);
+        const json = JSON.parse(res.response);
+        const chapters = [];
+        for (let i = 1; i < json.portions.length; i++) {
+          chapters.push({
+            title: json.portions[i].title,
+            url: `https://xxread.net/book_reader.php?b=${info[0]}&c=${json.portions[i].id}`
+          });
+        }
+        return chapters;
+      }
+    },
     { // https://18h.mm-cg.com/novel/index.htm
       siteName: '18H',
       filter: () => $('meta[content*="18AV"],meta[content*="18av"]').length ? (window.location.href.match(/novel_\d+.html/) ? 2 : 1) : 0,
@@ -1962,6 +2017,7 @@
       '</div>',
 
       '<div name="config" useless>',
+      '  更多设置(请点击): <br>',
       '  下载线程: <input type="number" name="thread">',
       '  重试次数: <input type="number" name="retry">',
       '  <br>',
@@ -2042,6 +2098,15 @@
       container.find('[name="progress"]').show();
       container.find('[name="buttons"]').find('[name="download"]').attr('disabled', 'disabled');
       container.find('[name="buttons"]').find('[name="force-download"]').attr('disabled', null);
+      if (!Storage.audio) {
+        // 来自 E-Hentai-Downloader
+        Storage.audio = new window.Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU3LjcxLjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAEAAABVgANTU1NTU1Q0NDQ0NDUFBQUFBQXl5eXl5ea2tra2tra3l5eXl5eYaGhoaGhpSUlJSUlKGhoaGhoaGvr6+vr6+8vLy8vLzKysrKysrX19fX19fX5eXl5eXl8vLy8vLy////////AAAAAExhdmM1Ny44OQAAAAAAAAAAAAAAACQCgAAAAAAAAAVY82AhbwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+MYxAALACwAAP/AADwQKVE9YWDGPkQWpT66yk4+zIiYPoTUaT3tnU487uNhOvEmQDaCm1Yz1c6DPjbs6zdZVBk0pdGpMzxF/+MYxA8L0DU0AP+0ANkwmYaAMkOKDDjmYoMtwNMyDxMzDHE/MEsLow9AtDnBlQgDhTx+Eye0GgMHoCyDC8gUswJcMVMABBGj/+MYxBoK4DVpQP8iAtVmDk7LPgi8wvDzI4/MWAwK1T7rxOQwtsItMMQBazAowc4wZMC5MF4AeQAGDpruNuMEzyfjLBJhACU+/+MYxCkJ4DVcAP8MAO9J9THVg6oxRMGNMIqCCTAEwzwwBkINOPAs/iwjgBnMepYyId0PhWo+80PXMVsBFzD/AiwwfcKGMEJB/+MYxDwKKDVkAP8eAF8wMwIxMlpU/OaDPLpNKkEw4dRoBh6qP2FC8jCJQFcweQIPMHOBtTBoAVcwOoCNMYDI0u0Dd8ANTIsy/+MYxE4KUDVsAP8eAFBVpgVVPjdGeTEWQr0wdcDtMCeBgDBkgRgwFYB7Pv/zqx0yQQMCCgKNgonHKj6RRVkxM0GwML0AhDAN/+MYxF8KCDVwAP8MAIHZMDDA3DArAQo3K+TF5WOBDQw0lgcKQUJxhT5sxRcwQQI+EIPWMA7AVBoTABgTgzfBN+ajn3c0lZMe/+MYxHEJyDV0AP7MAA4eEwsqP/PDmzC/gNcwXUGaMBVBIwMEsmB6gaxhVuGkpoqMZMQjooTBwM0+S8FTMC0BcjBTgPwwOQDm/+MYxIQKKDV4AP8WADAzAKQwI4CGPhWOEwCFAiBAYQnQMT+uwXUeGzjBWQVkwTcENMBzA2zAGgFEJfSPkPSZzPXgqFy2h0xB/+MYxJYJCDV8AP7WAE0+7kK7MQrATDAvQRIwOADKMBuA9TAYQNM3AiOSPjGxowgHMKFGcBNMQU1FMy45OS41VVU/31eYM4sK/+MYxKwJaDV8AP7SAI4y1Yq0MmOIADGwBZwwlgIJMztCM0qU5TQPG/MSkn8yEROzCdAxECVMQU1FMy45OS41VTe7Ohk+Pqcx/+MYxMEJMDWAAP6MADVLDFUx+4J6Mq7NsjN2zXo8V5fjVJCXNOhwM0vTCDAxFpMYYQU+RlVMQU1FMy45OS41VVVVVVVVVVVV/+MYxNcJADWAAP7EAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxOsJwDWEAP7SAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxPMLoDV8AP+eAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+MYxPQL0DVcAP+0AFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
+        Storage.audio.loop = true;
+      }
+      $(window).off('blur').off('focus').on({
+        blur: () => Storage.audio.play(),
+        focus: () => Storage.audio.pause()
+      });
 
       Storage.book.chapters = Config.vip ? chapters : chapters.filter(i => !(vipChapters || []).includes(i.url));
 
@@ -2118,6 +2183,8 @@
         await downloadTo[format](chapters);
         if (!force) {
           container.find('[name="buttons"]').find('[name="download"]').attr('disabled', null);
+          $(window).off('blur').off('focus');
+          Storage.audio.pause();
         }
       };
       container.find('[name="buttons"]').find('[name="force-save"]').attr('disabled', null).on('click', async () => {
@@ -2125,7 +2192,10 @@
       });
       const onChapterFailed = async (res, request) => {
         const chapter = request.raw;
+        chapter.title = '';
         chapter.contentRaw = '';
+        chapter.content = '';
+        chapter.document = '';
       };
       let overrideMimeType = `text/html; charset=${document.characterSet}`;
       if (Storage.rule.charset) overrideMimeType = `text/html; charset=${Storage.rule.charset}`;
@@ -2173,7 +2243,8 @@
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
 
         const chapterTitle = await getFromRule(Storage.rule.chapterTitle, { attr: 'text', document: res.response }, [res, request], '');
-        chapter.title = chapter.title || chapterTitle.trim() || $('title', doc).eq(0).text();
+        chapter.title = chapterTitle.trim() || chapter.title || $('title', doc).eq(0).text();
+        request.title = chapter.title;
 
         let contentCheck = true;
         if (Storage.rule.contentCheck) contentCheck = await getFromRule(Storage.rule.contentCheck, (selector) => $(selector, res.response).length, [res, request]);
@@ -2252,6 +2323,13 @@
         onComplete: async (list) => {
           if (Storage.book.chapters.find(i => !('contentRaw' in i))) return;
           await onComplete();
+        },
+        checkLoad: async (res) => {
+          if ((res.status > 0 && res.status < 200) || res.status >= 300 || (res.response.match(/404/) && res.response.match(/Not Found|找不到文件或目录/i))) {
+            return false;
+          } else {
+            return true;
+          }
         }
       });
       if (Storage.rule.deal && typeof Storage.rule.deal === 'function') {
@@ -2314,8 +2392,8 @@
       '.novel-downloader-v3>div:nth-child(2n){background-color:#DADADA;}',
       '.novel-downloader-v3>div:nth-child(2n+1){background-color:#FAFAFA;}',
 
-      '.novel-downloader-v3>[name="config"][useless]{height:10px;overflow:hidden;}',
-      '.novel-downloader-v3>[name="config"][useless]:hover,.novel-downloader-v3>[name="config"][useless].hover{height:auto!important;}',
+      '.novel-downloader-v3>[name="config"][useless]{height:24px;overflow:hidden;}',
+      '.novel-downloader-v3>[name="config"][useless].hover{height:auto!important;}',
 
       '.novel-downloader-v3>[name="progress"]{display:none;}',
       '.novel-downloader-v3>[name="progress"]>progress::before{content:attr(value)" / "attr(max);}',
@@ -2356,7 +2434,9 @@
 
     // rule-intro,cover
 
-    Storage.book.intro = await getFromRule(Storage.rule.intro, { document: infoPage || document });
+    let intro = await getFromRule(Storage.rule.intro, { attr: 'html', document: infoPage || document });
+    intro = html2Text(intro, Storage.rule.contentReplace);
+    Storage.book.intro = intro;
     Storage.book.cover = await getFromRule(Storage.rule.cover, { attr: 'src', document: infoPage || document });
     for (const i of ['title', 'writer', 'intro', 'cover']) {
       container.find(`[name="info"]>[name="${i}"]`).val(Storage.book[i] || '');
@@ -2397,12 +2477,9 @@
       vipChapters = await getFromRule(Storage.rule.vipChapter, (selector) => $(Storage.rule.vipChapter).attr('novel-downloader-chapter', 'vip').toArray().map(i => i.href));
     } else if (Storage.mode === 2) {
       container.find('[name="info"]>[name="mode"]').text('章节模式');
-      if (typeof Storage.rule.getChapters === 'function') {
-        chapters = await Storage.rule.getChapters(document);
-      } else {
-        chapters = [window.location.href];
-      }
+      chapters = [window.location.href];
     }
+    if (typeof Storage.rule.getChapters === 'function') chapters = await Storage.rule.getChapters(document);
     chapters = chapters.map(i => typeof i === 'string' ? { url: i } : i);
 
     container.find('input,select,textarea').attr('disabled', null);
@@ -2502,8 +2579,15 @@
               retry: Config.retry,
               thread: Config.thread,
               timeout: Config.timeout * 10,
-              onComplete () {
+              onComplete: () => {
                 resolve();
+              },
+              checkLoad: async (res) => {
+                if ((res.status > 0 && res.status < 200) || res.status >= 300 || !res.responseHeaders.match(/content-type:\s*image\/(.*)/i)) {
+                  return false;
+                } else {
+                  return true;
+                }
               }
             });
             xhr.showDialog();
@@ -2512,7 +2596,7 @@
               onload: (res, reuqest) => {
                 const index = Storage.book.image.indexOf(reuqest.raw);
                 Storage.book.image[index].content = res.response;
-                Storage.book.image[index].type = res.responseHeaders.match(/content-type:\s*image\/(.*)/i) ? res.responseHeaders.match(/content-type:\s*image\/(.*)/i)[1] : 'png';
+                Storage.book.image[index].type = res.responseHeaders.match(/content-type:\s*image\/(.*)/i)[1];
               }
             });
             xhr.start();
@@ -2575,7 +2659,7 @@
       const title = Storage.book.title || Storage.book.chapters[0].title;
 
       const files = {};
-      files[String(0).padStart(length, '0') + ':说明文件.txt'] = [
+      files[String(0).padStart(length, '0') + '-说明文件.txt'] = [
         '本书名称: ' + title,
         Storage.book.writer ? `本书作者: ${Storage.book.writer}` : '',
         Storage.book.intro ? `本书简介: ${Storage.book.intro}` : '',
@@ -2585,7 +2669,7 @@
 
       for (let i = 0; i < chapters.length; i++) {
         const chapter = chapters[i];
-        files[String(i + 1).padStart(length, '0') + ':' + chapter.title + '.txt'] = (Config.reference ? `\u3000\u3000本章地址: ${chapter.url}\n` : '') + $('<div>').html(chapter.content).text();
+        files[String(i + 1).padStart(length, '0') + '-' + chapter.title + '.txt'] = (Config.reference ? `\u3000\u3000本章地址: ${chapter.url}\n` : '') + $('<div>').html(chapter.content).text();
       }
 
       const zip = new JSZip();
