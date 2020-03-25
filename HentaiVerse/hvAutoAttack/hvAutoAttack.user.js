@@ -360,7 +360,7 @@ function addStyle (lang) { // CSS
     '.quickSiteBar>span{display:block;max-height:24px;overflow:hidden;text-overflow:ellipsis;}',
     '.quickSiteBar>span>a{text-decoration:none;}',
     '.customize{border: 2px dashed red!important;min-height:21px;}',
-    '.customize>.customizeGroup{display:inline-block;background-color:#FFF;}',
+    '.customize>.customizeGroup{display:block;background-color:#FFF;}',
     '.customize>.customizeGroup:nth-child(2n){background-color:#C9DAF8;}',
     '.customizeBox{position:absolute;z-index:-1;border:1px solid #000;background-color:#EDEBDF;}',
     '.customizeBox>span{display:inline-block;font-size:16px;margin:0 1px;padding:0 5px;font-weight:bold;border:1px solid #5C0D11;border-radius:10px;}',
