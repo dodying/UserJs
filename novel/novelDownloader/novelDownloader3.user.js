@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.1.0
+// @version     3.1.35
 // @created     2020-03-16 16:59:04
-// @modified    2020-3-25 18:07:17
+// @modified    2020-3-29 22:01:31
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
-// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=783513
+// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=785676
 // require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/download.js
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
 // require     http://127.0.0.1:8081/download.js
@@ -32,7 +32,7 @@
 /* eslint-disable no-debugger  */
 /* global xhr, saveAs, tranStr, base64, JSZip */
 /* eslint-disable no-extra-semi  */
-;(function () {
+; (function () {
   /* eslint-enable no-extra-semi  */
   'use strict';
 
@@ -1559,7 +1559,7 @@
       chapterTitle: 'font>strong',
       content: '[class^="l"],[class^="con"]',
       contentReplace: [
-        ['<img src="(tu|in|image)/(.*?).jpg">', '{$2}'],
+        ['<img src=".*?/([a-z]+\\d?).jpg">', '{$1}'],
         ['{ai}', '爱'],
         ['{ba}', '巴'],
         ['{bang}', '棒'],
@@ -2107,6 +2107,7 @@
         blur: () => Storage.audio.play(),
         focus: () => Storage.audio.pause()
       });
+      Storage.title = document.title;
 
       Storage.book.chapters = Config.vip ? chapters : chapters.filter(i => !(vipChapters || []).includes(i.url));
 
@@ -2185,6 +2186,7 @@
           container.find('[name="buttons"]').find('[name="download"]').attr('disabled', null);
           $(window).off('blur').off('focus');
           Storage.audio.pause();
+          document.title = Storage.title;
         }
       };
       container.find('[name="buttons"]').find('[name="force-save"]').attr('disabled', null).on('click', async () => {
@@ -2277,7 +2279,10 @@
           chapter.contentRaw = '';
         }
 
-        container.find('[name="progress"]>progress').val(Storage.book.chapters.filter(i => i.contentRaw).length).attr('max', Storage.book.chapters.length);
+        const now = Storage.book.chapters.filter(i => i.contentRaw).length;
+        const max = Storage.book.chapters.length;
+        container.find('[name="progress"]>progress').val(now).attr('max', max);
+        document.title = `[${now}/${max}]${Storage.title}`;
       };
       const requestOption = { onload: onChapterLoad, onfailed: onChapterFailed, overrideMimeType };
 
@@ -2346,7 +2351,10 @@
                   for (const i in result) chapter[i] = result[i];
                 }
               }
-              container.find('[name="progress"]>progress').val(Storage.book.chapters.filter(i => i.contentRaw).length).attr('max', Storage.book.chapters.length);
+              const now = Storage.book.chapters.filter(i => i.contentRaw).length;
+              const max = Storage.book.chapters.length;
+              container.find('[name="progress"]>progress').val(now).attr('max', max);
+              document.title = `[${now}/${max}]${Storage.title}`;
             });
           } catch (error) {
 
@@ -2515,7 +2523,7 @@
       ].filter(i => i);
       all.push('');
       for (const chapter of chapters) {
-        all.push(`${chapter.title}\n${Config.reference ? `\u3000\u3000本章地址: ${chapter.url}\n` : ''}${$('<div>').html(chapter.content).text() || ''}\n`);
+        all.push(`${chapter.title}\n${$('<div>').html(chapter.content).text() || ''}\n`);
       }
       all = all.join('\n');
       const blob = new window.Blob([all], {
@@ -2527,7 +2535,7 @@
       const length = String(chapters.length).length;
       const title = Storage.book.title || Storage.book.chapters[0].title;
       const writer = Storage.book.writer || 'novelDownloader';
-      const uuid = 'nd' + new Date().getTime().toString();
+      const uuid = 'ndv3-' + window.location.href.match(/[a-z0-9-]+/ig).join('-') + $('.novel-downloader-v3').find('[name="limit"]>[name="range"]').val();
 
       let cover = Storage.book.coverBlob;
       if (!Storage.book.coverBlob && Storage.book.cover) {
@@ -2549,7 +2557,7 @@
         'META-INF/container.xml': '<?xml version="1.0" encoding="UTF-8"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml" /></rootfiles></container>',
         'OEBPS/stylesheet.css': Config.css,
         'OEBPS/cover.jpg': cover,
-        'OEBPS/content.opf': `<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="${uuid}" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>${title}</dc:title><dc:creator>${writer}</dc:creator><dc:identifier id="${uuid}">urn:uuid:${uuid}</dc:identifier><dc:language>zh-CN</dc:language><meta name="cover" content="cover-image" /></metadata><manifest><item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="cover.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>`,
+        'OEBPS/content.opf': `<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="${uuid}" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>${title}</dc:title><dc:creator>${writer}</dc:creator><dc:publisher>novelDownloader</dc:publisher><dc:source>${window.location.href}</dc:source><dc:identifier id="${uuid}">urn:uuid:${uuid}</dc:identifier><dc:language>zh-CN</dc:language><meta name="cover" content="cover-image" /></metadata><manifest><item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="cover.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>`,
         'OEBPS/toc.ncx': `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:${uuid}"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>${title}</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="cover.html"/></navPoint>`,
         'OEBPS/cover.html': `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>${title}</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>` + [
           `<h1>${title}</h1>`,
@@ -2635,7 +2643,7 @@
 
         files['OEBPS/content.opf'] += '<item id="chapter' + chapterOrder + '" href="' + chapterOrder + '.html" media-type="application/xhtml+xml"/>';
         itemref += '<itemref idref="chapter' + chapterOrder + '" linear="yes"/>';
-        files[`OEBPS/${chapterOrder}.html`] = '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + chapterName + '</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>' + chapterName + '</h3>' + (Config.reference ? `<h4>来源地址: <a href="${chapter.url}" target="_blank">${chapter.url}</a></h4>` : '') + '<div><p>' + chapterContent + '</p></div></body></html>';
+        files[`OEBPS/${chapterOrder}.html`] = '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + chapterName + '</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>' + chapterName + '</h3>' + '<div><p>' + chapterContent + '</p></div></body></html>';
       }
       files['OEBPS/content.opf'] += `<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">${itemref}</spine><guide><reference href="cover.html" type="cover" title="Cover"/></guide></package>`;
       files['OEBPS/toc.ncx'] += '</navMap></ncx>';
@@ -2669,7 +2677,7 @@
 
       for (let i = 0; i < chapters.length; i++) {
         const chapter = chapters[i];
-        files[String(i + 1).padStart(length, '0') + '-' + chapter.title + '.txt'] = (Config.reference ? `\u3000\u3000本章地址: ${chapter.url}\n` : '') + $('<div>').html(chapter.content).text();
+        files[String(i + 1).padStart(length, '0') + '-' + chapter.title + '.txt'] = $('<div>').html(chapter.content).text();
       }
 
       const zip = new JSZip();
