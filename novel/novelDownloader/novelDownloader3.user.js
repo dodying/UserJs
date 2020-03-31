@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.1.35
+// @version     3.1.53
 // @created     2020-03-16 16:59:04
-// @modified    2020-3-29 22:01:31
+// @modified    2020-3-31 19:53:15
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -31,7 +31,7 @@
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 /* global xhr, saveAs, tranStr, base64, JSZip */
-/* eslint-disable no-extra-semi  */
+/* eslint-disable no-extra-semi */
 ; (function () {
   /* eslint-enable no-extra-semi  */
   'use strict';
@@ -50,9 +50,9 @@
     xhr: xhr
   };
   const Config = GM_getValue('config', {
-    thread: '5',
-    retry: '3',
-    timeout: '60000',
+    thread: 5,
+    retry: 3,
+    timeout: 60000,
     reference: true,
     format: true,
     useCommon: true,
@@ -705,7 +705,7 @@
       chapterTitle: '.sr-play-box-scroll-t-path>span',
       content: async (doc, res, request) => {
         /* eslint-disable no-eval  */
-        return window.eval(res.response.match(/var chapterContent = (".*")/)[1]);
+        return window.eval(res.responseText.match(/var chapterContent = (".*")/)[1]);
         /* eslint-enable no-eval  */
       }
     },
@@ -831,7 +831,7 @@
       content: async (doc, res, request) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
-            url: res.response.match(/id="bookPartResourceUrl" value="(.*?)"/)[1],
+            url: res.responseText.match(/id="bookPartResourceUrl" value="(.*?)"/)[1],
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: request.url,
@@ -839,7 +839,7 @@
             },
             onload: function (res, request) {
               try {
-                const content = res.response.match(/\{content:'(.*)'\}/)[1];
+                const content = res.responseText.match(/\{content:'(.*)'\}/)[1];
                 resolve(content);
               } catch (error) {
                 resolve('');
@@ -1062,7 +1062,7 @@
             },
             onload: function (res, request) {
               try {
-                const content = res.response.match(/document.write\("(.*)"\);/)[1];
+                const content = res.responseText.match(/document.write\("(.*)"\);/)[1];
                 resolve(content);
               } catch (error) {
                 resolve('');
@@ -1864,7 +1864,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.response.match(/(\{.*\})/)[1]);
                 let content = json.content;
                 content = base64.decode(content);
                 content = base64.utf8to16(content);
@@ -2330,7 +2330,7 @@
           await onComplete();
         },
         checkLoad: async (res) => {
-          if ((res.status > 0 && res.status < 200) || res.status >= 300 || (res.response.match(/404/) && res.response.match(/Not Found|找不到文件或目录/i))) {
+          if ((res.status > 0 && res.status < 200) || res.status >= 300 || (res.responseText && res.responseText.match(/404/) && res.responseText.match(/Not Found|找不到文件或目录/i))) {
             return false;
           } else {
             return true;
@@ -2350,6 +2350,11 @@
                   chapter.contentRaw = result.content;
                   for (const i in result) chapter[i] = result[i];
                 }
+              } else {
+                chapter.title = '';
+                chapter.contentRaw = '';
+                chapter.content = '';
+                chapter.document = '';
               }
               const now = Storage.book.chapters.filter(i => i.contentRaw).length;
               const max = Storage.book.chapters.length;
