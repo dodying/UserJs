@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.1.53
+// @version     3.1.94
 // @created     2020-03-16 16:59:04
-// @modified    2020-3-31 19:53:15
+// @modified    2020-4-5 19:35:43
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -333,6 +333,7 @@
         const chapterId = chapter.url.split('/')[4];
         const res1 = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             method: 'POST',
             url: window.location.protocol + '//ciweimao.com/chapter/ajax_get_session_code',
             headers: {
@@ -351,6 +352,7 @@
 
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             method: 'POST',
             url: window.location.protocol + '//ciweimao.com/chapter/get_book_chapter_detail_info',
             headers: {
@@ -397,6 +399,7 @@
                 var content = n.toString(unsafeWindow.CryptoJS.enc.Utf8);
                 resolve(content);
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -422,6 +425,7 @@
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: window.location.origin + '/index.php/Bookreader/' + $('.title a:eq(0)').attr('href').match(/\/(\d+).html/)[1] + '/' + chapter.url.match(/-(\d+).html/)[1],
             method: 'POST',
             data: 'lang=zhs',
@@ -444,6 +448,7 @@
                 content = $('.bookreadercontent', content).html();
                 resolve(content);
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -465,6 +470,7 @@
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: window.location.origin + '/read/' + unsafeWindow.bid + '/' + chapter.url.match(/cid=(\d+)/)[1],
             method: 'POST',
             data: 'lang=zhs',
@@ -480,6 +486,7 @@
                 content = $('.bookreadercontent', content).html();
                 resolve(content);
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -515,6 +522,7 @@
         const result = await new Promise((resolve, reject) => {
           var urlArr = chapter.url.split('-');
           xhr.add({
+            chapter,
             url: 'https://app3g.tianya.cn/webservice/web/read_chapter.jsp',
             method: 'POST',
             data: 'bookid=' + urlArr[1] + '&chapterid=' + urlArr[2],
@@ -530,7 +538,8 @@
                 const content = json.data.chapterContent;
                 resolve({ title, content });
               } catch (error) {
-                resolve({});
+                console.error(error);
+                resolve('');
               }
             }
           }, null, 0, true);
@@ -609,6 +618,7 @@
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: `http://${window.location.host.replace('www.', 'a.')}/ajax/chapter/content/${chapter.url.replace(/.*\//, '')}`,
             onload: function (res, request) {
               try {
@@ -617,6 +627,7 @@
                 const content = json.chapter.htmlContent;
                 resolve({ title, content });
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -735,6 +746,7 @@
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: `https://app2.motie.com/pc/chapter/${chapter.url.split('/')[5]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -748,6 +760,7 @@
                 const content = json.data.content;
                 resolve({ title, content });
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -831,6 +844,7 @@
       content: async (doc, res, request) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter: request.raw,
             url: res.responseText.match(/id="bookPartResourceUrl" value="(.*?)"/)[1],
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -842,6 +856,7 @@
                 const content = res.responseText.match(/\{content:'(.*)'\}/)[1];
                 resolve(content);
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -864,6 +879,7 @@
         const urlArr = chapter.url.split('/');
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: window.location.protocol + '//yuedu.163.com/getArticleContent.do?sourceUuid=' + urlArr[4] + '&articleUuid=' + urlArr[5],
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -879,6 +895,7 @@
                 const title = $('h1', content).text();
                 resolve({ content, title });
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -915,6 +932,7 @@
         const urlArr = chapter.url.split('/');
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: `https://apiuser.yueduyun.com/app/chapter/chapter_content?book_id=${urlArr[4]}&chapter_id=${urlArr[5]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -930,6 +948,7 @@
                 Storage.book.writer = json.data.author_name;
                 resolve({ title, content });
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -995,6 +1014,7 @@
         const urlArr = chapter.url.split(/\/|-|\./);
         const res1 = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: window.location.protocol + '//www.hongshu.com/bookajax.do',
             method: 'POST',
             data: 'method=getchptkey&bid=' + urlArr[6] + '&cid=' + urlArr[8],
@@ -1008,6 +1028,7 @@
                 const json = JSON.parse(res.response);
                 resolve(json);
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -1015,6 +1036,7 @@
         });
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: window.location.protocol + '//www.hongshu.com/bookajax.do',
             method: 'POST',
             data: 'method=getchpcontent&bid=' + urlArr[6] + '&jid=' + urlArr[7] + '&cid=' + urlArr[8],
@@ -1054,6 +1076,7 @@
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: 'http://script.qwsy.com/html/js/' + chapter.url.replace('http://www.qwsy.com/read.aspx?cid=', '') + '.js',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -1065,6 +1088,7 @@
                 const content = res.responseText.match(/document.write\("(.*)"\);/)[1];
                 resolve(content);
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -1164,6 +1188,7 @@
         var info = chapter.url.match(/\d+/g);
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: 'https://www.chuangbie.com/book/load_chapter_content?book_id=' + info[0] + '&chapter_id=' + info[1],
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -1181,6 +1206,7 @@
                 if (!Storage.book.intro) Storage.book.intro = json.content.descriotion;
                 resolve({ title, content });
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -1217,6 +1243,7 @@
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: 'https://www.lajixs.com/api/book-read',
             method: 'POST',
             data: `chapterId=${chapter.url.match(/\d+/)[0]}&readType=1`,
@@ -1232,6 +1259,7 @@
                 const content = json.data.chapterInfo.chapterContent;
                 resolve({ title, content });
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -1265,6 +1293,7 @@
         const urlArr = chapter.url.split('/');
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: `https://www.po18.tw/books/${urlArr[4]}/articlescontent/${urlArr[6]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -1275,6 +1304,7 @@
               try {
                 resolve(res.response);
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -1308,6 +1338,23 @@
       chapter: '.chapter a',
       chapterTitle: '.article-title',
       content: '.article-text'
+    },
+    { // https://www.gongzicp.com/
+      siteName: '长佩文学网',
+      url: '://www.gongzicp.com/novel-\\d+.html',
+      chapterUrl: '://www.gongzicp.com/read-\\d+.html',
+      title: '.cp-novel-name',
+      intro: '.cp-novel-desc',
+      cover: '.cp-novel-cover>img',
+      chapter: '.cp-novel-menu-item>a',
+      vipChapter: '.cp-novel-menu-item>a:has(.icon-vip)',
+      chapterTitle: '.cp-read-name',
+      content: (doc, res, request) => {
+        /* eslint-disable no-eval  */
+        return window.eval(res.response.match(/content: (".*"),/)[1]);
+        /* eslint-enable no-eval  */
+      },
+      elementRemove: '.cp-hidden'
     },
     // 轻小说
     { // https://www.wenku8.net
@@ -1419,6 +1466,7 @@
         const urlArr = chapter.url.split(/[_/.]/);
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: `https://www.xiaoshuokan.com/chapreadajax.php?siteno=${urlArr[7]}&bookid=${urlArr[8]}&chapid=${urlArr[9]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -1446,6 +1494,7 @@
         const info = chapter.url.match(/\d+/g);
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: `https://www.ggdtxt.com/api/novel/chapter/transcode.html?novelid=${info[0]}&chapterid=${info[1]}&page=1`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -1459,6 +1508,7 @@
                 const content = json.data.chapter.content;
                 resolve({ title, content });
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
             }
@@ -1847,7 +1897,7 @@
     },
     { // https://xxread.net/
       siteName: '肉肉阅读', // 与网易云阅读相同模板
-      url: '://xxread.net/book-\\d+.php',
+      url: '://xxread.net/book(-\\d+)?.php',
       chapterUrl: '://xxread.net/book_reader.php\\?b=\\d+&c=\\d+',
       title: '.m-bookdetail h3',
       intro: '.m-content .detail>.txt',
@@ -1856,6 +1906,7 @@
         const info = chapter.url.match(/\d+/g);
         const content = await new Promise((resolve, reject) => {
           xhr.add({
+            chapter,
             url: window.location.protocol + '//xxread.net/getArticleContent.php?sourceUuid=' + info[0] + '&articleUuid=' + info[1],
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -1871,9 +1922,11 @@
                 const title = $('h1', content).text();
                 resolve({ content, title });
               } catch (error) {
+                console.error(error);
                 resolve('');
               }
-            }
+            },
+            checkLoad: () => true
           }, null, 0, true);
         });
         return content;
@@ -2193,7 +2246,8 @@
         await onComplete(true);
       });
       const onChapterFailed = async (res, request) => {
-        const chapter = request.raw;
+        let chapter = request.raw;
+        if ('chapter' in chapter) chapter = chapter.chapter;
         chapter.title = '';
         chapter.contentRaw = '';
         chapter.content = '';
@@ -2284,7 +2338,7 @@
         container.find('[name="progress"]>progress').val(now).attr('max', max);
         document.title = `[${now}/${max}]${Storage.title}`;
       };
-      const requestOption = { onload: onChapterLoad, onfailed: onChapterFailed, overrideMimeType };
+      const requestOption = { onload: onChapterLoad, overrideMimeType };
 
       const chapterDownloadList = [];
       for (const chapter of Storage.book.chapters) {
@@ -2303,17 +2357,20 @@
       if (Storage.rule.iframe) {
         for (const chapter of chapterDownloadList) {
           await new Promise((resolve, reject) => {
-            $('<iframe>').on('load', async e => {
+            $('<iframe>').on('load', async (e) => {
               let response;
               try {
                 if (typeof Storage.rule.iframe === 'function') await Storage.rule.iframe(e.target.contentWindow);
                 response = e.target.contentWindow.document;
               } catch (error) {
+                console.error(error);
                 response = '';
               }
               await onChapterLoad({ response }, { raw: chapter });
               $(e.target).remove();
               resolve();
+            }).on('error', async (e) => {
+              await onChapterLoad({ response: '' }, { raw: chapter });
             }).attr('src', chapter.url).css('visibility', 'hidden').appendTo('body');
           });
         }
@@ -2329,6 +2386,7 @@
           if (Storage.book.chapters.find(i => !('contentRaw' in i))) return;
           await onComplete();
         },
+        onfailed: onChapterFailed,
         checkLoad: async (res) => {
           if ((res.status > 0 && res.status < 200) || res.status >= 300 || (res.responseText && res.responseText.match(/404/) && res.responseText.match(/Not Found|找不到文件或目录/i))) {
             return false;
@@ -2360,9 +2418,15 @@
               const max = Storage.book.chapters.length;
               container.find('[name="progress"]>progress').val(now).attr('max', max);
               document.title = `[${now}/${max}]${Storage.title}`;
+            }, (error) => {
+              console.error(error);
+              chapter.title = '';
+              chapter.contentRaw = '';
+              chapter.content = '';
+              chapter.document = '';
             });
           } catch (error) {
-
+            console.error(error);
           }
         }
       } else {
@@ -2427,6 +2491,7 @@
       try {
         infoPage = new window.DOMParser().parseFromString(res.response, 'text/html');
       } catch (error) {
+        console.error(error);
         infoPage = null;
       }
     }
@@ -2553,7 +2618,9 @@
             type: res.responseHeaders.match(/content-type:\s*(image.*)/i) ? res.responseHeaders.match(/content-type:\s*(image.*)/i)[1] : 'image/png'
           });
           cover = Storage.book.coverBlob;
-        } catch (error) { }
+        } catch (error) {
+          console.error(error);
+        }
       }
       if (!cover) cover = await getCover(title);
 
@@ -2657,15 +2724,14 @@
       for (const file in files) {
         zip.file(file, files[file]);
       }
-      zip.generateAsync({
+      const file = await zip.generateAsync({
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
           level: 9
         }
-      }).then(function (content) {
-        download(content, title + '.epub');
       });
+      download(file, title + '.epub');
     },
     zip: async (chapters) => {
       const length = String(chapters.length).length;
@@ -2689,15 +2755,14 @@
       for (const file in files) {
         zip.file(file, files[file]);
       }
-      zip.generateAsync({
+      const file = await zip.generateAsync({
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
           level: 9
         }
-      }).then(function (content) {
-        download(content, title + '.zip');
       });
+      download(file, title + '.zip');
     }
   };
 
