@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.921
-// @modified    2020-3-11 15:12:18
+// @version     1.16.1035
+// @modified    2020-4-25 16:09:46
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -31,27 +31,23 @@
 // @grant       GM_xmlhttpRequest
 // @grant       GM_registerMenuCommand
 // @grant       GM_notification
-// @grant       GM_getResourceText
 // @connect     *
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.js
-// @resource diff https://raw.githubusercontent.com/jhchen/fast-diff/master/diff.js
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)
 // @compatible  chrome 55+(ES2017)
 // ==/UserScript==
 /* global JSZip */
 /* eslint-disable no-debugger */
-(function () {
-  /* eslint-disable no-new-func */
-  const obj = {};
-  const diffFunc = new Function('module', GM_getResourceText('diff'));
-  diffFunc(obj);
-  const diff = obj.exports;
-  Object.assign(window, { diff });
-})();
 
-const diff = window.diff;
+const $ = function (...args) {
+  const result = jQuery(...args);
+  if (result.length === 0 && args.length && typeof args[0] === 'string') {
+    console.debug('get empty', ...args);
+  }
+  return result;
+};
 
 const SEL = {
   EH: {
@@ -68,7 +64,7 @@ const SEL = {
       mainDiv: '.ido',
 
       keyword: '[name="f_search"]',
-      apply: '[name="f_apply"]',
+      apply: '[onclick="search_presubmit()"]',
       resultTotal: '.ip:eq(0)',
       resultTotalMatch: /Showing ([\d,]+) results?/,
 
@@ -134,7 +130,6 @@ const G = { // 全局变量
   debug: false,
   searchPage: !!$(SEL.EH.search.checker).length,
   infoPage: $(SEL.EH.info.checker).length,
-  isPreferDisplayMode: ['m', 'p'].includes($(SEL.EH.search.displayMode).val()),
   config: GM_getValue('config', {}),
   'ehD-setting': JSON.parse(GM_getValue('ehD-setting', '{}')),
   EHT: [],
@@ -156,8 +151,9 @@ const G = { // 全局变量
     '招募圖',
     '無邪気',
     /^Read(|_)(|\d+)\.(png|jpg)$/i,
-    /^CEwanted\.(png|jpg)$/i,
-    /^ZZ\.(png|jpg)$/
+    /^(CEwanted|zmt)\.(png|jpg)$/i,
+    /^ZZ\.(png|jpg)$/,
+    /(credits)\.(png|jpg)$/i
     // /\.gif$/i
   ],
   uselessStrRE: /\[.*?\]|\(.*?\)|\{.*?\}|【.*?】|［.*?］|（.*?）|～|~/g,
@@ -196,6 +192,7 @@ const G = { // 全局变量
   })(),
   emojiRegExp: /\u{2139}|[\u{2194}-\u{2199}]|[\u{21A9}-\u{21AA}]|[\u{231A}-\u{231B}]|\u{2328}|\u{23CF}|[\u{23E9}-\u{23F3}]|[\u{23F8}-\u{23FA}]|\u{24C2}|[\u{25AA}-\u{25AB}]|\u{25B6}|\u{25C0}|[\u{25FB}-\u{25FE}]|[\u{2600}-\u{2604}]|\u{260E}|\u{2611}|[\u{2614}-\u{2615}]|\u{2618}|\u{261D}|\u{2620}|[\u{2622}-\u{2623}]|\u{2626}|\u{262A}|[\u{262E}-\u{262F}]|[\u{2638}-\u{263A}]|[\u{2648}-\u{2653}]|\u{2660}|\u{2663}|\u{2666}|\u{2668}|\u{267B}|\u{267F}|[\u{2692}-\u{2697}]|\u{2699}|[\u{269B}-\u{269C}]|[\u{26A0}-\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26B0}-\u{26B1}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|\u{26C8}|\u{26CE}|\u{26CF}|\u{26D1}|[\u{26D3}-\u{26D4}]|[\u{26E9}-\u{26EA}]|[\u{26F0}-\u{26F5}]|[\u{26F7}-\u{26FA}]|\u{26FD}|\u{2702}|\u{2705}|[\u{2708}-\u{2709}]|[\u{270A}-\u{270B}]|[\u{270C}-\u{270D}]|\u{270F}|\u{2712}|\u{2714}|\u{2716}|\u{271D}|\u{2721}|\u{2728}|[\u{2733}-\u{2734}]|\u{2744}|\u{2747}|\u{274C}|\u{274E}|[\u{2753}-\u{2755}]|\u{2757}|\u{2763}|[\u{2795}-\u{2797}]|\u{27A1}|\u{27B0}|\u{27BF}|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|\u{2B50}|\u{2B55}|\u{3030}|\u{303D}|\u{3297}|\u{3299}|\u{1F004}|\u{1F0CF}|[\u{1F170}-\u{1F171}]|\u{1F17E}|\u{1F17F}|\u{1F18E}|[\u{1F191}-\u{1F19A}]|[\u{1F1E6}-\u{1F1FF}]|[\u{1F201}-\u{1F202}]|\u{1F21A}|\u{1F22F}|[\u{1F232}-\u{1F23A}]|[\u{1F250}-\u{1F251}]|[\u{1F300}-\u{1F320}]|\u{1F321}|[\u{1F324}-\u{1F32C}]|[\u{1F32D}-\u{1F32F}]|[\u{1F330}-\u{1F335}]|\u{1F336}|[\u{1F337}-\u{1F37C}]|\u{1F37D}|[\u{1F37E}-\u{1F37F}]|[\u{1F380}-\u{1F393}]|[\u{1F396}-\u{1F397}]|[\u{1F399}-\u{1F39B}]|[\u{1F39E}-\u{1F39F}]|[\u{1F3A0}-\u{1F3C4}]|\u{1F3C5}|[\u{1F3C6}-\u{1F3CA}]|[\u{1F3CB}-\u{1F3CE}]|[\u{1F3CF}-\u{1F3D3}]|[\u{1F3D4}-\u{1F3DF}]|[\u{1F3E0}-\u{1F3F0}]|[\u{1F3F3}-\u{1F3F5}]|\u{1F3F7}|[\u{1F3F8}-\u{1F3FF}]|[\u{1F400}-\u{1F43E}]|\u{1F43F}|\u{1F440}|\u{1F441}|[\u{1F442}-\u{1F4F7}]|\u{1F4F8}|[\u{1F4F9}-\u{1F4FC}]|\u{1F4FD}|\u{1F4FF}|[\u{1F500}-\u{1F53D}]|[\u{1F549}-\u{1F54A}]|[\u{1F54B}-\u{1F54E}]|[\u{1F550}-\u{1F567}]|[\u{1F56F}-\u{1F570}]|[\u{1F573}-\u{1F579}]|\u{1F57A}|\u{1F587}|[\u{1F58A}-\u{1F58D}]|\u{1F590}|[\u{1F595}-\u{1F596}]|\u{1F5A4}|\u{1F5A5}|\u{1F5A8}|[\u{1F5B1}-\u{1F5B2}]|\u{1F5BC}|[\u{1F5C2}-\u{1F5C4}]|[\u{1F5D1}-\u{1F5D3}]|[\u{1F5DC}-\u{1F5DE}]|\u{1F5E1}|\u{1F5E3}|\u{1F5E8}|\u{1F5EF}|\u{1F5F3}|\u{1F5FA}|[\u{1F5FB}-\u{1F5FF}]|\u{1F600}|[\u{1F601}-\u{1F610}]|\u{1F611}|[\u{1F612}-\u{1F614}]|\u{1F615}|\u{1F616}|\u{1F617}|\u{1F618}|\u{1F619}|\u{1F61A}|\u{1F61B}|[\u{1F61C}-\u{1F61E}]|\u{1F61F}|[\u{1F620}-\u{1F625}]|[\u{1F626}-\u{1F627}]|[\u{1F628}-\u{1F62B}]|\u{1F62C}|\u{1F62D}|[\u{1F62E}-\u{1F62F}]|[\u{1F630}-\u{1F633}]|\u{1F634}|[\u{1F635}-\u{1F640}]|[\u{1F641}-\u{1F642}]|[\u{1F643}-\u{1F644}]|[\u{1F645}-\u{1F64F}]|[\u{1F680}-\u{1F6C5}]|[\u{1F6CB}-\u{1F6CF}]|\u{1F6D0}|[\u{1F6D1}-\u{1F6D2}]|[\u{1F6E0}-\u{1F6E5}]|\u{1F6E9}|[\u{1F6EB}-\u{1F6EC}]|\u{1F6F0}|\u{1F6F3}|[\u{1F6F4}-\u{1F6F6}]|[\u{1F6F7}-\u{1F6F8}]|[\u{1F910}-\u{1F918}]|[\u{1F919}-\u{1F91E}]|\u{1F91F}|[\u{1F920}-\u{1F927}]|[\u{1F928}-\u{1F92F}]|\u{1F930}|[\u{1F931}-\u{1F932}]|[\u{1F933}-\u{1F93A}]|[\u{1F93C}-\u{1F93E}]|[\u{1F940}-\u{1F945}]|[\u{1F947}-\u{1F94B}]|\u{1F94C}|[\u{1F950}-\u{1F95E}]|[\u{1F95F}-\u{1F96B}]|[\u{1F980}-\u{1F984}]|[\u{1F985}-\u{1F991}]|[\u{1F992}-\u{1F997}]|\u{1F9C0}|[\u{1F9D0}-\u{1F9E6}]|❤/gu
 };
+G.isPreferDisplayMode = !G.infoPage && ['m', 'p'].includes($(SEL.EH.search.displayMode).val());
 G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config.autoStartDownload;
 G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.config.enableEHD && G.config.showAllThumb && G.config.enableChangeSize && G.config.sizeS !== G.config.sizeD && G.config.downloadSizeChanged;
 
@@ -372,7 +369,7 @@ async function init () {
       },
       contextmenu: () => {
         let value = $(SEL.EH.search.keyword).val();
-        value = value.match('language:chinese\\$') ? value.replace('language:chinese$', '').trim() : value + ' language:chinese$';
+        value = value.match(/language:"?\w+\$?"?/) ? value.replace(/language:"?\w+\$?"?/, '').trim() : value + ' language:chinese$';
         $(SEL.EH.search.keyword).val(value);
         $(SEL.EH.search.apply).click();
       }
@@ -392,7 +389,9 @@ async function init () {
     if (G.config.checkExistAtStart) $('input:button[name="checkExist"]').click();
     tagPreview(); // 标签预览
     hideGalleries(); // 隐藏某些画集
-    if ($(SEL.EH.search.resultTable).length && G.config.preloadPaneImage) $(SEL.EH.search.thumb).each((index, elem) => { unsafeWindow.load_pane_image(elem); });
+    waitForElement('[name="checkExist"]:not([disabled])').then(() => {
+      if ($(SEL.EH.search.resultTable).length && G.config.preloadPaneImage) $(SEL.EH.search.thumb).filter(':visible').each((index, elem) => { unsafeWindow.load_pane_image(elem); });
+    });
     autoComplete(); // 自动填充
     checkForNew(); // 检查有无新本子
   }
@@ -1065,6 +1064,7 @@ function checkExist () { // 检查本地是否存在
   $('<div class="ehExistContainer"></div>').prependTo('.ehContainer');
   $('<input type="button" value="Check Exist" name="checkExist" title="只检查可见的，且之前检查无结果">').on('click', async (e) => {
     const langRE = /\[(Chinese|English|Digital)\].*/gi;
+    const uncensoredRe = /\[(Decensored|無修正?|无修)\]/i;
 
     $(e.target).val('Checking').prop('disabled', true);
     const lst = $(SEL.EH.search.resultTr).filter(':visible').not(':has(.ehExist[name^="force"])').find(SEL.EH.search.galleryA).toArray();
@@ -1096,17 +1096,17 @@ function checkExist () { // 检查本地是否存在
           const fileSize = k.size;
           const fileName = k.name;
           const noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').trim();
-          const noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$');
+          const noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$', 'i');
           const noLang = noExt.replace(langRE, '').trim();
-          const noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$');
+          const noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$', 'i');
           const p = $(i).parent().find('.ehExistContainer');
           let _name;
           if (noExtRE.exec(name) || noExtRE.exec(name2)) {
             _name = 'force';
-          } else if (noExt.match(/\[Incomplete\]/i)) {
-            _name = 'incomplete';
           } else if (!noExt.match(/(chinese|漢化|汉化|中文|中国翻訳|中国語|中国语)/i)) {
             _name = 'notchinese';
+          } else if (noExt.match(/\[(Incomplete|Sample)\]/i) || (name.match(uncensoredRe) && !noExt.match(uncensoredRe))) {
+            _name = 'incomplete';
           } else if (noLangRE.exec(name3) || noLangRE.exec(name4)) {
             _name = 'force1';
           } else {
@@ -1556,7 +1556,8 @@ function hideGalleries () { // 隐藏某些画集
 
 function highlightBlacklist () { // 高亮黑名单相关的画廊(通用)
   const blacklist = GM_getValue('blacklist', []);
-  $(SEL.EH.search.galleryA).toArray().concat($(SEL.EH.info.title).toArray(), $(SEL.EH.info.titleJp).toArray()).forEach(i => {
+  const galleryList = G.infoPage ? [].concat($(SEL.EH.info.title).toArray(), $(SEL.EH.info.titleJp).toArray()) : $(SEL.EH.search.galleryA).toArray();
+  galleryList.forEach(i => {
     let title = htmlEscape($(i).text());
     for (const j of blacklist) {
       const re = new RegExp(j, 'gi');
@@ -1683,8 +1684,8 @@ function languageCode () { // 显示iso语言代码
     ukrainian: 'uk',
     vietnamese: 'vi'
   };
-  value = value.match(/language:("|)(.*?)(\$"|"\$|")/);
-  if (value && value[2] in iso) return;
+  value = value.match(/language:"?(\w+)\$?"?/);
+  if (value && value[1] in iso) return;
   $(SEL.EH.search.galleryA).toArray().forEach(i => {
     const info = G.gmetadata.filter(j => j.gid === i.href.split('/')[4] * 1)[0];
     if (!info) return;
@@ -1757,35 +1758,44 @@ async function saveAs (text, name) {
         G.imageData = text;
         autoDownload(true);
       } else {
-        new Promise(async resolve => {
-          const zipS = await JSZip.loadAsync(text);
-          const zip = await JSZip.loadAsync(G.imageData);
-          const files = Object.keys(zipS.files);
-          let infoStr = '';
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const ab = await zipS.files[file].async('arraybuffer');
-            zip.file(file, ab);
-            if (file.match(/\/info.txt$/)) infoStr = await zipS.files[file].async('text');
-          }
-          const data = await zip.generateAsync({
-            type: 'arraybuffer',
-            compression: G['ehD-setting']['compression-level'] ? 'DEFLATE' : 'STORE',
-            compressionOptions: {
-              level: G['ehD-setting']['compression-level'] > 0 ? (G['ehD-setting']['compression-level'] < 10 ? G['ehD-setting']['compression-level'] : 9) : 1
-            },
-            streamFiles: !!G['ehD-setting']['file-descriptor'],
-            comment: G['ehD-setting']['save-info'] === 'comment' ? infoStr.replace(/\n/gi, '\r\n') : undefined
-          });
-          resolve(data);
-        }).then(async data => {
-          saveAs2(data, name, text.type);
-          window.onbeforeunload = null;
-          await waitInMs(500);
-          taskRemove(SEL.EH.info.galleryId);
-          await waitInMs(200);
-          window.close();
+        const zipS = await JSZip.loadAsync(text);
+        const zip = await JSZip.loadAsync(G.imageData);
+        const files = Object.keys(zipS.files);
+
+        // 合并info
+        const infoFile = Object.keys(zip.files).find(i => i.match(/\/info.txt$/));
+        const info = await zip.files[infoFile].async('text');
+        const infoS = await zipS.files[infoFile].async('text');
+        const infoSArr = infoS.split('\n');
+        const start = infoSArr.findIndex(i => i.match(/^Page\s*\d+:\s*https:\/\/e[x-]hentai.org\/s\/\w+\/\d+-\d+/));
+        const end = infoSArr.findIndex(i => i.match(/^Downloaded at/));
+        const infoArr = info.split('\n');
+        const insertPosition = infoArr.findIndex(i => i.match(/^Downloaded at/));
+        infoArr.splice(insertPosition, 0, ...infoSArr.slice(start, end));
+        const infoStr = infoArr.join('\r\n');
+        zip.file(infoFile, infoStr);
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (file.match(/\/info.txt$/)) continue;
+          const ab = await zipS.files[file].async('arraybuffer');
+          zip.file(file, ab);
+        }
+        const data = await zip.generateAsync({
+          type: 'arraybuffer',
+          compression: G['ehD-setting']['compression-level'] ? 'DEFLATE' : 'STORE',
+          compressionOptions: {
+            level: G['ehD-setting']['compression-level'] > 0 ? (G['ehD-setting']['compression-level'] < 10 ? G['ehD-setting']['compression-level'] : 9) : 1
+          },
+          streamFiles: !!G['ehD-setting']['file-descriptor'],
+          comment: G['ehD-setting']['save-info'] === 'comment' ? infoStr : undefined
         });
+        saveAs2(data, name, text.type);
+        window.onbeforeunload = null;
+        await waitInMs(500);
+        taskRemove(SEL.EH.info.galleryId);
+        await waitInMs(200);
+        window.close();
       }
     } else {
       saveAs2(text, name, text.type);
@@ -1922,12 +1932,12 @@ function searchInOtherSite () { // 在其他站点搜索
     }
   };
   let keyword, keywordJ;
-  if ($(SEL.EH.search.keyword).length) {
-    keyword = $(SEL.EH.search.keyword).val();
-    keywordJ = $(SEL.EH.search.keyword).val();
-  } else {
+  if (G.infoPage) {
     keyword = $(SEL.EH.info.title).text();
     keywordJ = $(SEL.EH.info.titleJp).text();
+  } else {
+    keyword = $(SEL.EH.search.keyword).val();
+    keywordJ = $(SEL.EH.search.keyword).val();
   }
   for (const i in sites) {
     let url;
@@ -2325,7 +2335,6 @@ function tagPreview () { // 标签预览
 
 function task () { // 下载任务
   if (G.taskInterval) return;
-  const max = GM_getValue('task', []).length;
   const main = async () => {
     const task = GM_getValue('task', []);
     if (task.length === 0 && !GM_getValue('tasking')) {
@@ -2333,9 +2342,6 @@ function task () { // 下载任务
       changeFav('/favicon.ico');
       return;
     }
-
-    const done = max - task.length;
-    changeFav(getProcessImg((done - 1) / max * 100, 128));
 
     const downloading = GM_getValue('downloading', []);
     if (downloading.length) {
@@ -2356,6 +2362,9 @@ function task () { // 下载任务
     GM_setValue('task', task);
     await waitInMs(2 * 1000);
     openUrl(tasking + '#2');
+
+    getRemainImg(task.length + 1).then(data => changeFav(data));
+
     await main();
   };
   G.taskInterval = setTimeout(main, 200);
@@ -2481,42 +2490,32 @@ function arrUnique (arr) { // 数组去重
   return [...(new Set(arr))];
 }
 
-function getProcessImg (process, radius = 16) { // 创建环形进度条
-  while (process < 0 || process > 100) {
-    process = process < 0 ? process + 100 : process - 100;
+async function getRemainImg (number) {
+  if (!document.fonts.check('12px fff-forward')) {
+    const font = 'data:application/octet-stream;base64,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';
+
+    const f = new window.FontFace('fff-forward', `url(${font})`);
+    const fontLoad = await f.load();
+    document.fonts.add(fontLoad);
   }
-  // https://imys.net/20150722/canvas-annulus-process.html
-  var c = document.createElement('canvas');
-  c.width = 2 * radius;
-  c.height = 2 * radius;
-  var ctx = c.getContext('2d');
-  // 画灰色的圆
-  ctx.beginPath();
-  ctx.arc(radius, radius, 0.8 * radius, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.fillStyle = '#F6F6F6';
-  ctx.fill();
-  // 画进度环
-  ctx.beginPath();
-  ctx.moveTo(radius, radius);
-  ctx.arc(radius, radius, 0.8 * radius, Math.PI * 1.5, Math.PI * (1.5 + 2 * process / 100));
-  ctx.closePath();
-  ctx.fillStyle = '#00CD00';
-  ctx.fill();
-  // 画内填充圆
-  ctx.beginPath();
-  ctx.arc(radius, radius, 0, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.fillStyle = '#fff';
-  ctx.fill();
-  // 填充文字
-  ctx.font = 'bold ' + 0.2 * radius + 'pt Microsoft YaHei';
-  ctx.fillStyle = '#333';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.moveTo(radius, radius);
-  ctx.fillText(process.toFixed(2).replace(/\.0+$/, '') + '%', radius, radius);
-  return c.toDataURL();
+  var canvas = document.createElement('canvas');
+  var fontSize = 220;
+  var width = 320;
+  var height = 320;
+  var color = '#000';
+  canvas.width = width;
+  canvas.height = height;
+
+  var context = canvas.getContext('2d');
+  context.fillStyle = color;
+  context.strokeRect(0, 0, width, height);
+
+  context.font = `bold ${fontSize}px fff-forward`;
+  context.textBaseline = 'bottom';
+
+  context.textAlign = 'center';
+  context.fillText(String(number).substr(-2), width / 2, height);
+  return canvas.toDataURL();
 }
 
 function htmlEscape (text) {
@@ -2596,6 +2595,8 @@ function waitForElement (ele, timeout) {
         id = null;
         resolve(false);
       } else if ($(ele).length) {
+        if (id) clearInterval(id);
+        id = null;
         resolve(true);
       }
     }, 200);
@@ -2678,6 +2679,34 @@ function getStringSize (_string) {
   }
 
   return accum;
+}
+function diff (t1, t2) { // ignore case
+  t1 = t1.replace(/\s+/, ' ');
+  t2 = t2.replace(/\s+/, ' ');
+  const arr1 = t1.split(/([[\](){}\s])/); // 不变
+  const arr2 = t2.split(/([[\](){}\s])/); // 变
+  const arr1Up = t1.toUpperCase().split(/([[\](){}\s])/);
+  const arr2Up = t2.toUpperCase().split(/([[\](){}\s])/);
+  const result = [];
+  for (let i = 0; i < arr1Up.length; i++) {
+    if (arr1Up[i] === '') continue;
+    if (arr2Up.includes(arr1Up[i])) {
+      const index = arr2Up.indexOf(arr1Up[i]);
+      if (index > 0) { // added
+        arr2Up.splice(0, index);
+        const added = arr2.splice(0, index);
+        result.push([1, added.join('')]);
+      }
+      result.push([0, arr1[i]]);
+      arr2Up.splice(0, 1);
+      arr2.splice(0, 1);
+    } else { // removed
+      result.push([-1, arr1[i]]);
+    }
+  }
+  if (arr2.length) result.push([1, arr2.join('')]);
+
+  return result;
 }
 
 init().then(() => {
