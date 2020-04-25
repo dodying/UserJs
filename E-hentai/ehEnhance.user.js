@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.17.0
-// @modified    2020-4-25 19:25:14
+// @version     1.17.18
+// @modified    2020-4-25 20:28:00
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -56,7 +56,6 @@ const SEL = {
       navBar: '#nb',
       pageCur: '.ptds:eq(0)>a',
       pageMax: '.ptt td:gt(0):eq(-2)>a',
-      pages: '.ptt td:gt(0):lt(-1)>a',
       pagesContainerBottom: '.ptb'
     },
     search: { // 搜索页
@@ -1515,7 +1514,7 @@ async function getInfo () { // 获取信息
       gidlist: lst[i],
       namespace: 1
     };
-    const res = await xhrSync('/api.php', JSON.stringify(gdata), {
+    const res = await xhrSync('/api.php', JSON.stringify(gdata), { // TODO ? use promise.all, maybe banned
       responseType: 'json'
     });
     gmetadata = gmetadata.concat(res.response.gmetadata);
@@ -1971,16 +1970,18 @@ function searchInOtherSite () { // 在其他站点搜索
 }
 
 async function showAllThumb () { // 显示所有预览页
-  const pages = $(SEL.EH.common.pages).toArray();
-  if (pages.length <= 1) return;
-  $('<div class="gdtContainer"></div>').html('<div></div>'.repeat(pages.length)).insertBefore(SEL.EH.info.previewContainer);
+  const pageCur = $(SEL.EH.common.pageCur).text() * 1;
+  const pageMax = $(SEL.EH.common.pageMax).text() * 1;
+  let pageCurUrl = $(SEL.EH.common.pageCur).prop('href');
+  if (!pageCurUrl.match(/\?p=\d+/)) pageCurUrl = pageCurUrl.match(/\?/) ? pageCurUrl.replace(/\?/, '?p=0&') : pageCurUrl + '?p=0';
+  const urls = Array.from({ length: pageMax - pageCur }, (_, index) => pageCurUrl.replace(/\?p=\d+/, `?p=${pageCur + index}`));
+
+  $('<div class="gdtContainer"></div>').html('<div></div>'.repeat(pageMax - pageCur + 1)).insertBefore(SEL.EH.info.previewContainer);
   $(SEL.EH.info.previewContainer).appendTo(`.gdtContainer>div:nth-child(${$(SEL.EH.common.pageCur).text()})`);
-  for (let i = 0; i < pages.length; i++) {
-    if (pages[i].pathname === window.location.pathname && pages[i].search === window.location.search) continue;
-    const res = await xhrSync(pages[i].href);
-    const doc = document.createElement('html');
-    doc.innerHTML = res.response;
-    $(SEL.EH.info.previewContainer, doc).appendTo(`.gdtContainer>div:nth-child(${$(SEL.EH.common.pageCur, doc).text()})`);
+  const results = await Promise.all(urls.map(i => xhrSync(i, null, { responseType: 'document' })));
+  for (const res of results) {
+    const index = $(SEL.EH.common.pageCur, res.response).text();
+    $(SEL.EH.info.previewContainer, res.response).appendTo(`.gdtContainer>div:nth-child(${index})`);
   }
 }
 
