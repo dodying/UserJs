@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.16.1035
-// @modified    2020-4-25 16:09:46
+// @version     1.17.0
+// @modified    2020-4-25 19:25:14
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -54,8 +54,10 @@ const SEL = {
     // unsafeWindow
     common: {
       navBar: '#nb',
-      pageCur: '.ptds:eq(0)',
-      pages: '.ptt td:gt(0):lt(-1)>a'
+      pageCur: '.ptds:eq(0)>a',
+      pageMax: '.ptt td:gt(0):eq(-2)>a',
+      pages: '.ptt td:gt(0):lt(-1)>a',
+      pagesContainerBottom: '.ptb'
     },
     search: { // 搜索页
       checker: '.ido', // 检查是否为搜索页
@@ -72,6 +74,7 @@ const SEL = {
 
       favorited: '[id^="posted_"][style]',
 
+      resultTableContainer: '.ido>div:last-child',
       resultTable: 'table.itg',
       resultTbody: 'table.itg>tbody',
       resultTr: 'table.itg tr',
@@ -375,6 +378,7 @@ async function init () {
       }
     }).insertBefore(SEL.EH.search.apply);
     if ($(SEL.EH.search.keyword).val()) document.title = translateText($(SEL.EH.search.keyword).val());
+    if (G.config.preloadResult && $(SEL.EH.common.pageCur).length) await preloadResult(G.config.preloadResult);
     $('<div class="ehContainer"></div>').prependTo(SEL.EH.search.nameTd);
     btnSearch2(); // 按钮 -> 搜索(搜索页)
     quickDownload(); // 右键：下载
@@ -391,6 +395,7 @@ async function init () {
     hideGalleries(); // 隐藏某些画集
     waitForElement('[name="checkExist"]:not([disabled])').then(() => {
       if ($(SEL.EH.search.resultTable).length && G.config.preloadPaneImage) $(SEL.EH.search.thumb).filter(':visible').each((index, elem) => { unsafeWindow.load_pane_image(elem); });
+      changeFav(G.favicon.d);
     });
     autoComplete(); // 自动填充
     checkForNew(); // 检查有无新本子
@@ -695,7 +700,7 @@ function autoComplete () { // 自动填充
       $('.ehDatalist>ol').empty();
       if (!value || (value.length <= G.config.acLength && !value.match(/[\u4e00-\u9fa5]/))) return;
       lastValue = value;
-      value = new RegExp(value, 'i');
+      value = new RegExp(reEscape(value), 'i');
       main.forEach(i => {
         for (const key in i.data) {
           if (key.match(value) || i.data[key].name.match(value)) {
@@ -1390,6 +1395,7 @@ function defaultConfig () { // 默认设置
     searchArguments: '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_search={q}&f_sh=on',
     notification: '3',
     changeName: true,
+    autoRetry: true,
 
     // 搜索页
     preloadPaneImage: true,
@@ -1411,6 +1417,7 @@ function defaultConfig () { // 默认设置
     checkTimeDeviation: 12,
     autoUpdateCheck: 25,
     checkListPerPage: 25,
+    preloadResult: 1,
 
     // 信息页
     uconfig: '',
@@ -1750,7 +1757,20 @@ function quickDownload () { // 右键下载
   });
 }
 
-async function saveAs (text, name) {
+async function preloadResult (number) { // 自动预载
+  const pageCur = $(SEL.EH.common.pageCur).text() * 1;
+  const pageMax = $(SEL.EH.common.pageMax).text() * 1;
+  let pageCurUrl = $(SEL.EH.common.pageCur).prop('href');
+  if (!pageCurUrl.match(/\?page=\d+/)) pageCurUrl = pageCurUrl.match(/\?/) ? pageCurUrl.replace(/\?/, '?page=0&') : pageCurUrl + '?page=0';
+  const urls = Array.from({ length: Math.min(pageMax - pageCur, number) }, (_, index) => pageCurUrl.replace(/\?page=\d+/, `?page=${pageCur + index}`));
+  const results = await Promise.all(urls.map(i => xhrSync(i, null, { responseType: 'document' })));
+  for (const res of results) {
+    $('<hr size="10" style="background: #40454b;">').appendTo(SEL.EH.search.resultTableContainer);
+    $([SEL.EH.search.resultTable, SEL.EH.common.pagesContainerBottom].join(','), res.response).appendTo(SEL.EH.search.resultTableContainer);
+  }
+}
+
+async function saveAs (text, name) { // eslint-disable-line no-unused-vars
   downloadRemove(SEL.EH.info.galleryId);
   if (text instanceof window.Blob && text.type.match(/^application.*zip$/)) {
     if (G.downloadSizeChanged) {
@@ -1987,7 +2007,8 @@ function showConfig () { // 显示设置
       '收藏夹提示信息: <input name="ehConfig_bookmark" type="text" title="' + htmlEscape('以<span class="ehHighlight">,</span>分割') + '" placeholder="0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist">',
       '搜索参数: <input name="ehConfig_searchArguments" title="' + htmlEscape('以<span class="ehHighlight">{q}</span>代替搜索关键词') + '" type="text" placeholder="/?f_search={q}&f_sh=on" min="1">',
       '通知显示方式: <select name="ehConfig_notification"><option value="0">Web API: Notification</option><option value="1">GM_notification</option><option value="2">window.alert</option><option value="3">页面元素</option><option value="-1">不显示</option></select>',
-      '<div class="ehNew"></div><label for="ehConfig_changeName"><input type="checkbox" id="ehConfig_changeName">标题: 删除集会名、替换其中的罗马数字</label>',
+      '<label for="ehConfig_changeName"><input type="checkbox" id="ehConfig_changeName">标题: 删除集会名、替换其中的罗马数字</label>',
+      '<div class="ehNew"></div><label for="ehConfig_autoRetry"><input type="checkbox" id="ehConfig_autoRetry">网络：请求错误时，自动重试</label>',
       '',
       // 搜索页
       '<span class="ehHighlight">搜索页:</span>',
@@ -2002,7 +2023,8 @@ function showConfig () { // 显示设置
       '隐藏本子: 评分 < <input name="ehConfig_lowRating" type="number" placeholder="4.0" min="0" max="5" step="0.1">; 页数 < <input name="ehConfig_fewPages" type="number" placeholder="5" min="1">',
       '检测新本子: 当检查时间与最新本子上传时间 <= <input name="ehConfig_checkTimeDeviation" type="number" placeholder="3"> 小时时，以最新本子上传时间为检查时间',
       '检测新本子-自动更新时间: 结果数目变化 <= <input name="ehConfig_autoUpdateCheck" type="number" placeholder="10" min="0">',
-      '检测新本子-列表: 每页 <input name="ehConfig_checkListPerPage" type="number" placeholder="25" min="25" max="100"> 条CheckList',
+      '检测新本子-列表: 每页 <input name="ehConfig_checkListPerPage" type="number" placeholder="25" min="25"> 条CheckList',
+      '<div class="ehNew"></div>预载: 自动预载接下来 <input name="ehConfig_preloadResult" type="number" placeholder="1" min="0"> 页',
       '',
       // 信息页
       '<span class="ehHighlight">信息页:</span>',
@@ -2603,8 +2625,8 @@ function waitForElement (ele, timeout) {
   });
 }
 
-function xhr (url, onload, parm = null, opt = {}) {
-  console.log({ url, parm });
+function xhr (url, onload, parm = null, opt = {}) { // eslint-disable-line no-unused-vars
+  if (G.debug) console.log({ url, parm });
   GM_xmlhttpRequest({
     method: parm ? 'POST' : 'GET',
     url: url,
@@ -2627,14 +2649,14 @@ function xhr (url, onload, parm = null, opt = {}) {
 }
 
 function xhrSync (url, parm = null, opt = {}) {
-  console.log({ url, parm });
+  if (G.debug) console.log({ url, parm });
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
       method: parm ? 'POST' : 'GET',
       url: url,
       data: parm,
       timeout: opt.timeout || 60 * 1000,
-      responseType: ['arraybuffer', 'blob', 'json'].includes(opt.responseType) ? opt.responseType : null,
+      responseType: ['text', 'json', 'blob', 'arraybuffer', 'document'].includes(opt.responseType) ? opt.responseType : 'text',
       headers: opt.headers || {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
@@ -2642,10 +2664,20 @@ function xhrSync (url, parm = null, opt = {}) {
         resolve(res);
       },
       ontimeout (res) {
-        reject(res);
+        console.error(res);
+        if (G.config.autoRetry || window.confirm('请求超时，是否重试?')) {
+          xhrSync(url, parm, opt).then((res) => resolve(res), res => reject(res));
+        } else {
+          reject(res);
+        }
       },
       onerror (res) {
-        reject(res);
+        console.error(res);
+        if (G.config.autoRetry || window.confirm('请求错误，是否重试?')) {
+          xhrSync(url, parm, opt).then((res) => resolve(res), res => reject(res));
+        } else {
+          reject(res);
+        }
       }
     });
   });
@@ -2680,6 +2712,7 @@ function getStringSize (_string) {
 
   return accum;
 }
+
 function diff (t1, t2) { // ignore case
   t1 = t1.replace(/\s+/, ' ');
   t2 = t2.replace(/\s+/, ' ');
