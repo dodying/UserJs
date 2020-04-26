@@ -25,57 +25,57 @@
 // ==/UserScript==
 (function total () {
   if (document.title.match(/^Index of /) && document.querySelector('[href="../"]')) {
-    return
+    return;
   }
 
-  let blacklist = GM_getValue('blacklist', [])
-  let host = window.location.host
+  const blacklist = GM_getValue('blacklist', []);
+  const host = window.location.host;
 
   if (blacklist.includes(host)) {
     GM_registerMenuCommand('newTab: Effect ' + host, function () {
-      let blacklist = GM_getValue('blacklist', [])
+      const blacklist = GM_getValue('blacklist', []);
       if (blacklist.includes(host)) {
-        blacklist.splice(blacklist.indexOf(host), 1)
-        GM_setValue('blacklist', blacklist)
-        window.location.reload()
+        blacklist.splice(blacklist.indexOf(host), 1);
+        GM_setValue('blacklist', blacklist);
+        window.location.reload();
       }
-    }, 'N')
+    }, 'N');
   } else {
-    init()
-    let observer = new window.MutationObserver(mutationsList => {
-      let list = mutationsList.filter(i => i.addedNodes.length).map(i => [...i.addedNodes])
-      list = [].concat(...list)
-      if (list.length) init(list)
-    })
+    init();
+    const observer = new window.MutationObserver(mutationsList => {
+      let list = mutationsList.filter(i => i.addedNodes.length).map(i => [...i.addedNodes]);
+      list = [].concat(...list);
+      if (list.length) init(list);
+    });
     observer.observe(document.body, {
       childList: true,
       subtree: true
-    })
+    });
     GM_registerMenuCommand('newTab: DO NOT Effect ' + host, function () {
-      let blacklist = GM_getValue('blacklist', [])
+      const blacklist = GM_getValue('blacklist', []);
       if (!blacklist.includes(host)) {
-        blacklist.push(host)
-        GM_setValue('blacklist', blacklist)
-        window.location.reload()
+        blacklist.push(host);
+        GM_setValue('blacklist', blacklist);
+        window.location.reload();
       }
-    }, 'N')
+    }, 'N');
   }
 
   function init (parents) {
-    let elems = parents || [document]
-    elems = elems.filter(i => i.querySelectorAll).map(i => i.tagName === 'A' ? i : [...i.querySelectorAll('a:not([target="_blank"]):not([newtab="true"])')])
-    elems = [].concat(...elems)
+    let elems = parents || [document];
+    elems = elems.filter(i => i.querySelectorAll).map(i => i.tagName === 'A' ? i : [...i.querySelectorAll('a:not([target="_blank"]):not([newtab="true"])')]);
+    elems = [].concat(...elems);
 
     // let raw = []
     // let changed = []
-    let protocol, host, hash, next, text
+    let protocol, host, hash, next, text;
     elems.forEach(link => {
-      link.setAttribute('newtab', 'true')
-      protocol = !link.protocol.match(/^(http.?|ftp):$/)
-      host = link.href === window.location.origin || link.href === window.location.origin + '/'
-      hash = !!link.href.match('#') && link.pathname === window.location.pathname
-      next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/)
-      text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后|第)一?(章|页|话|集)|Previous|Next|首页|末页|尾页/i)
+      link.setAttribute('newtab', 'true');
+      protocol = !link.protocol.match(/^(http.?|ftp):$/);
+      host = link.href === window.location.origin || link.href === window.location.origin + '/';
+      hash = !!link.href.match('#') && link.pathname === window.location.pathname;
+      next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/);
+      text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后|第)一?(章|页|话|集)|Previous|Next|首页|末页|尾页/i);
       if (protocol || host || hash || next || text) {
         // raw.push({
         //   target: link,
@@ -92,9 +92,9 @@
         // })
       } else {
         // changed.push(link)
-        link.setAttribute('target', '_blank')
+        link.setAttribute('target', '_blank');
       }
-    })
+    });
     /* console.error('Set newtab: ', changed, '\ndon\'t change: ', raw); */
   }
-})()
+})();
