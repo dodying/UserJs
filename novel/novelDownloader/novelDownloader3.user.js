@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.1.94
+// @version     3.1.230
 // @created     2020-03-16 16:59:04
-// @modified    2020-4-5 19:35:43
+// @modified    2020-5-18 17:32:58
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -192,6 +192,19 @@
 
   /* eslint-disable comma-dangle  */
   Rule.special = [
+    // 漫画
+    { // TODO
+      siteName: '动漫之家',
+      url: '://manhua.dmzj.com/[a-z0-9]+/',
+      chapterUrl: '://manhua.dmzj.com/[a-z0-9]+/\\d+.shtml',
+      title: '.anim_title_text h1',
+      writer: '.anim-main_list a[href^="../tags/"]',
+      intro: '.line_height_content',
+      cover: '#cover_pic',
+      chapter: '.cartoon_online_border>ul>li>a',
+      chapterTitle: '.display_middle',
+      content: '#center_box'
+    },
     // 文学
     { // http://gj.zdic.net
       siteName: '汉典古籍',
@@ -1413,12 +1426,24 @@
       siteName: 'ESJ Zone',
       url: '://www.esjzone.cc/detail/\\d+.html',
       chapterUrl: '://www.esjzone.cc/forum/\\d+/\\d+.html',
-      title: '.col-xs-12>h3',
-      writer: '.nav-list span>a[href^="/tags/"]',
-      intro: '.book_description>div',
-      cover: '.product-image',
-      chapter: '.tab-content>#tab1>a',
-      chapterTitle: '.col-xs-12>h3',
+      title: 'h2',
+      writer: '.book-detail a[href^="/tags/"]',
+      intro: '.description',
+      cover: '.product-gallery img',
+      chapter: '#chapterList a',
+      chapterTitle: 'h2',
+      content: '.forum-content'
+    },
+    { // https://www.esjzone.cc/forum/ 论坛
+      siteName: 'ESJ Zone 论坛',
+      url: '://www.esjzone.cc/forum/\\d+',
+      chapterUrl: '://www.esjzone.cc/forum/\\d+/\\d+.html',
+      title: 'h2',
+      writer: '.book-detail a[href^="/tags/"]',
+      intro: '.description',
+      cover: '.product-gallery img',
+      chapter: '.forum-list a',
+      chapterTitle: 'h2',
       content: '.forum-content'
     },
     { // http://www.shencou.com/
@@ -1450,6 +1475,18 @@
       contentReplace: [
         [/pic.wenku8.com/g, 'picture.wenku8.com']
       ]
+    },
+    { // https://colorful-fantasybooks.com/
+      siteName: '繽紛幻想',
+      url: '://colorful-fantasybooks.com/module/novel/info.php\\?tid=\\d+&nid=\\d+',
+      chapterUrl: '://colorful-fantasybooks.com/module/novel/read.php\\?tid=\\d+&nid=\\d+&cid=\\d+',
+      title: '.works-intro-title>strong',
+      writer: '.works-author-name',
+      intro: 'works-intro-short',
+      cover: '.works-cover>img',
+      chapter: '.works-chapter-item>a',
+      chapterTitle: '#content>h2',
+      content: '.content'
     },
     // 盗贴
     { // https://www.xiaoshuokan.com
@@ -1751,12 +1788,11 @@
       filter: () => ['www.cool18.com'].includes(window.location.host) ? ($('#myform').length ? 2 : 1) : 0,
       chapterUrl: '://www.cool18.com/bbs4/index.php\\?app=forum&act=threadview&tid=\\d+',
       title: 'font>b',
-      writer: '',
       chapter: 'a:not(:contains("(无内容)"))',
       chapterTitle: 'font>b',
       content: '.show_content>pre',
       chapterPrev: '.show_content>p>a',
-      chapterNext: 'body>table td>p:first+ul a:not(:contains("(无内容)"),.show_content>pre a',
+      chapterNext: 'body>table td>p:first+ul a:not(:contains("(无内容)")),.show_content>pre a',
       elementRemove: 'font[color*="E6E6DD"],b:contains("评分完成")'
     },
     { // http://www.7zxs.cc/
@@ -1953,6 +1989,86 @@
       chapter: '.novel_leftright>span>a:visible',
       chapterTitle: 'h1',
       content: '#novel_content_txtsize'
+    },
+    { // https://hao.je51.com/ https://je51.com/
+      siteName: 'je51',
+      url: '://(hao.)?je51.com/st_l.en/st_did.l--.*?.html',
+      chapterUrl: '://(hao.)?je51.com/st_l.en/st_did.d--.*?--\\d+.html',
+      title: '.story-list-title',
+      writer: '#module8>.story-cat-list .author>a',
+      intro: '#module8>.story-cat-list .text',
+      chapter: '.story-list .container>.autocol>a',
+      chapterTitle: '#module8>.navlinks>.navtitle:last',
+      content: '#story-text'
+    },
+    { // https://aastory.space/
+      siteName: '疯情书库',
+      filter: () => document.title.match('疯情书库') && ['/archive.php', '/read.php'].includes(window.location.pathname) ? (['/archive.php'].includes(window.location.pathname) ? 1 : 2) : 0,
+      // url: '://aastory.space/archive.php\\?id=\\d+',
+      // chapterUrl: '://aastory.space/read.php\\?id=\\d+',
+      title: '.index_title',
+      writer: '.index_info>span',
+      chapter: '.section_list>li>a',
+      chapterTitle: '.chapter_title',
+      content: async (doc, res, request) => {
+        const content = await new Promise((resolve, reject) => {
+          xhr.add({
+            chapter: request.raw,
+            url: window.location.origin + '/_getcontent.php?id=' + request.url.match(/id=(\d+)/)[1] + '&v=' + res.responseText.match(/chapid\+"&v=(.*?)"/)[1],
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              Referer: request.url,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            onload: function (res, request) {
+              try {
+                const content = res.responseText;
+                resolve(content);
+              } catch (error) {
+                console.error(error);
+                resolve('');
+              }
+            }
+          }, null, 0, true);
+        });
+        return content;
+      }
+    },
+    { // https://aaread.club/ 仿起点样式
+      siteName: '疯情阅读',
+      url: '://aaread.club/book/\\d+',
+      chapterUrl: '://aaread.club/chapter/\\d+/\\d+',
+      title: 'h1>em',
+      writer: '.writer',
+      intro: '.intro',
+      cover: '.J-getJumpUrl>img',
+      chapter: '.volume>.cf>li>a',
+      chapterTitle: '.j_chapterName',
+      deal: async (chapter) => {
+        const urlArr = chapter.url.split('/');
+        const content = await new Promise((resolve, reject) => {
+          xhr.add({
+            chapter,
+            url: window.location.origin + '/_getcontent.php?id=' + urlArr[5],
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              Referer: chapter.url,
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            onload: function (res, request) {
+              try {
+                const content = res.responseText;
+                resolve(content);
+              } catch (error) {
+                resolve('');
+              }
+            }
+          }, null, 0, true);
+        });
+        return content;
+      },
+      chapterPrev: doc => [$('[id^="chapter-"]', doc).attr('data-purl')],
+      chapterNext: doc => [$('[id^="chapter-"]', doc).attr('data-nurl')]
     },
   ];
   Rule.template = [ // 模板网站
@@ -2310,7 +2426,7 @@
             const dom = new window.DOMParser().parseFromString(res.response, 'text/html');
             let elems = $(selector, dom);
             if (Storage.debug.content) debugger;
-            elems = elems.not(':emptyHuman'); // 移除空元素
+            if (Storage.rule === Rule) elems = elems.not(':emptyHuman'); // 移除空元素
             if (elems.length === 0) { // 没有找到内容
               console.error('novelDownloader: 找不到内容元素\n选择器: ' + selector);
               elems = $('body', dom);
@@ -2606,6 +2722,8 @@
       const title = Storage.book.title || Storage.book.chapters[0].title;
       const writer = Storage.book.writer || 'novelDownloader';
       const uuid = 'ndv3-' + window.location.href.match(/[a-z0-9-]+/ig).join('-') + $('.novel-downloader-v3').find('[name="limit"]>[name="range"]').val();
+      const href = $('<div>').text(window.location.href).html();
+      const date = new Date().toISOString();
 
       let cover = Storage.book.coverBlob;
       if (!Storage.book.coverBlob && Storage.book.cover) {
@@ -2629,14 +2747,24 @@
         'META-INF/container.xml': '<?xml version="1.0" encoding="UTF-8"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml" /></rootfiles></container>',
         'OEBPS/stylesheet.css': Config.css,
         'OEBPS/cover.jpg': cover,
-        'OEBPS/content.opf': `<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="${uuid}" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>${title}</dc:title><dc:creator>${writer}</dc:creator><dc:publisher>novelDownloader</dc:publisher><dc:source>${window.location.href}</dc:source><dc:identifier id="${uuid}">urn:uuid:${uuid}</dc:identifier><dc:language>zh-CN</dc:language><meta name="cover" content="cover-image" /></metadata><manifest><item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="cover.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>`,
+        'OEBPS/content.opf': [
+          `<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="${uuid}" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">`,
+          `<dc:title>${title}</dc:title>`,
+          `<dc:creator>${writer}</dc:creator>`,
+          '<dc:publisher>novelDownloader</dc:publisher>',
+          `<dc:date>${date}</dc:date>`,
+          `<dc:source>${href}</dc:source>`,
+          `<dc:identifier id="${uuid}">urn:uuid:${uuid}</dc:identifier>`,
+          '<dc:language>zh-CN</dc:language>',
+          '<meta name="cover" content="cover-image" /></metadata><manifest><item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="cover.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>'
+        ].join(''),
         'OEBPS/toc.ncx': `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:${uuid}"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>${title}</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="cover.html"/></navPoint>`,
         'OEBPS/cover.html': `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>${title}</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>` + [
           `<h1>${title}</h1>`,
           Storage.book.writer ? `<h2>${Storage.book.writer}</h2>` : '',
           Storage.book.intro ? `<h2>简介: ${Storage.book.intro}</h2>` : '',
           Config.reference ? '<h3>阅读前说明：本书籍由用户脚本novelDownloader制作</h3>' : '',
-          Config.reference ? `<h3>来源地址: <a href="${window.location.href}" target="_blank">${window.location.href}</a></h3>` : ''
+          Config.reference ? `<h3>来源地址: <a href="${href}" target="_blank">${href}</a></h3>` : ''
         ].filter(i => i).join('') + '</body></html>'
       };
 
