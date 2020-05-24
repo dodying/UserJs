@@ -2,8 +2,8 @@
 // @name        []prettyJSON
 // @description prettyJSON
 // @include     *
-// @version     1.1.4
-// @modified    2020-4-4 14:19:58
+// @version     1.1.7
+// @modified    2020/5/24 12:30:49
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -50,10 +50,10 @@
           elem.appendChild(a);
 
           elem.appendChild(document.createTextNode(matched[3]));
-        } else if (arrThis[j].match(/\s/)) {
-          const span = document.createElement('span');
-          span.classList.add('white');
-          elem.appendChild(span);
+        // } else if (arrThis[j].match(/\s/)) {
+        //   const span = document.createElement('span');
+        //   span.classList.add('white');
+        //   elem.appendChild(span);
         } else {
           elem.appendChild(document.createTextNode(arrThis[j]));
         }
@@ -61,9 +61,9 @@
       pretty.appendChild(elem);
     }
 
-    const raw = document.createElement('div');
-    raw.classList.add('raw');
-    raw.textContent = text;
+    // const raw = document.createElement('div');
+    // raw.classList.add('raw');
+    // raw.textContent = text;
 
     const style = document.createElement('style');
     style.textContent = [
@@ -88,17 +88,17 @@
 
     document.body.innerHTML = '';
     document.body.appendChild(pretty);
-    document.body.appendChild(raw);
+    // document.body.appendChild(raw);
 
-    document.body.addEventListener('dblclick', e => {
-      if (e.target === raw) {
-        raw.style.display = 'none';
-        pretty.style.display = 'block';
-      } else {
-        pretty.style.display = 'none';
-        raw.style.display = 'block';
-      }
-    });
+    // document.body.addEventListener('dblclick', e => {
+    //   if (e.target === raw) {
+    //     raw.style.display = 'none';
+    //     pretty.style.display = 'block';
+    //   } else {
+    //     pretty.style.display = 'none';
+    //     raw.style.display = 'block';
+    //   }
+    // });
   } catch (error) {
     // console.log(error);
   }
