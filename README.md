@@ -2,6 +2,42 @@
 
 #### 说明：有些脚本是很久很久以前写的，所以可能失效...
 
+#### 推荐脚本
+
+###### newtab
+
+[newtab](global/newTab.user.js) 链接强制在新建标签中打开，支持禁用某站点
+以下情况不会强制新标签打开
+1. 非http/ftp链接
+2. 根路径
+3. 页内跳转
+4. 翻页（将纯数字的链接也视为翻页）
+
+###### s
+
+[s](global/s.user.js) HTTP强制跳转HTTPS，支持禁用某站点
+
+###### insertJquery
+
+[insertJquery](global/insertJquery.user.js) 在当前页面插入jquery脚本
+
+###### mark
+
+[mark](global/mark.user.js) 标记，适用于有过滤需求的人，需要手动编辑脚本
+
+###### novelDownloader
+
+[novelDownloader](novel/novelDownloader/novelDownloader3.user.js) 下载小说
+
+###### ehEnhance
+
+[ehEnhance](E-hentai/ehEnhance.user.js) EH站点增强，**NSFW**
+
+###### HVAA
+
+[HVAA](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) 长期未更新，可能失效
+
+
 #### 目录说明
 
 ##### E-hentai
@@ -10,7 +46,7 @@
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[[EH]Enhance](E-hentai/ehEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) | 1.16.921 | 2020-3-11 15:12:18 |  | 
+[[EH]Enhance](E-hentai/ehEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) | 1.17.156 | 2020-5-19 14:56:13 |  | 
 [[NH]nhentai Downloader](E-hentai/nhDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhDownloader.user.js) | 0.0.5 |  |  | 
 [[NH]Enhance](E-hentai/nhEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhEnhance.user.js) | 1.0.4 | 2020-2-7 11:11:14 |  | 
 
@@ -43,19 +79,21 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 [[]emptyName](global/emptyName.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/emptyName.user.js) | 1.1 |  |  | 
 [[]highlight](global/highlight.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/highlight.user.js) | 1.0.2 |  |  | 
 [[]insertJquery](global/insertJquery.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/insertJquery.user.js) | 1.0.30 |  |  | 
-[[]mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.0.797 | 2020-3-14 21:40:30 |  | mark
+[[]mark](global/mark.private.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.private.user.js) | 1.1.4 | 2020/5/24 19:11:40 |  | mark
+[[]mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.1.0 | 2020/5/24 19:11:19 |  | mark
 [[]meta](global/meta.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/meta.user.js) | 1.11 |  |  | 
 [[]newTab](global/newTab.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/newTab.user.js) | 0.0.78 |  |  | 链接强制在新建标签中打开 Open a URL in a new tab
-[[]prettyJSON](global/prettyJSON.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/prettyJSON.user.js) | 1.0.38 | 2019-11-24 20:03:53 |  | prettyJSON
+[[]prettyJSON](global/prettyJSON.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/prettyJSON.user.js) | 1.1.7 | 2020/5/24 12:30:49 |  | prettyJSON
 [[]https](global/s.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/s.user.js) | 1.0.7 |  |  | 
-[[]style](global/style.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/style.user.js) | 1.0.35 |  |  | 
+[[]style](global/style.private.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/style.private.user.js) | 1.0.42 |  |  | 
+[[]style](global/style.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/style.user.js) | 1.1.0 |  |  | 
 
 ##### H
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [[H]CopyInfo](H/hCopyInfo.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hCopyInfo.user.js) | 1.01.5 |  |  | 
-[[H]ParkingLot](H/hParkingLot.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) | 1.11.252 |  |  | 
+[[H]ParkingLot](H/hParkingLot.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) | 1.11.266 |  |  | 
 [[H]ParkingLot2](H/hParkingLot2.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot2.doing.user.js) | 0.0.11 |  |  | [H]ParkingLot2
 
 ##### HentaiVerse/hvAutoAttack
@@ -109,8 +147,16 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[novelDownloader2](novel/novelDownloader/novelDownloader-new.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader-new.user.js) | 0.0.4 |  |  | novelDownloaderHelper，press key "shift+d" to show up.
-[[Novel]Downloader](novel/novelDownloader/novelDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader.user.js) | 1.45.33 | 2020-3-14 21:25:55 |  | novelDownloaderHelper, press key "shift+d" to show up.
+[novelDownloader3](novel/novelDownloader/novelDownloader3.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js) | 3.1.230 | 2020-5-18 17:32:58 | 2020-03-16 16:59:04 | 菜单```Download Novel```或**双击页面最左侧**来显示面板
+
+##### novel/novelDownloader/old-version
+
+[README](novel/novelDownloader/old-version/README.md)
+
+Name | Raw | Version | Last-Modified | Create-Time | Description
+--- | --- | --- | --- | --- | ---
+[novelDownloader2](novel/novelDownloader/old-version/novelDownloader-new.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/old-version/novelDownloader-new.user.js) | 0.0.4 |  |  | novelDownloaderHelper，press key "shift+d" to show up.
+[[Novel]Downloader](novel/novelDownloader/old-version/novelDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/old-version/novelDownloader.user.js) | 1.45.31 | 2020-3-14 20:31:21 |  | novelDownloaderHelper, press key "shift+d" to show up.
 
 ##### other
 
