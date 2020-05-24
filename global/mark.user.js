@@ -2,8 +2,8 @@
 // @name        []mark
 // @description mark
 // @include     *
-// @version     1.0.769
-// @modified    2020-3-11 19:32:34
+// @version     1.1.0
+// @modified    2020/5/24 19:11:19
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -42,15 +42,21 @@
 
   const libs = {
     novel: [
+      // 示例
       {
         /**
-         * filter <= Array
+         * filterUrl <= Array
          * string / RegExp 检测链接
          * Function 无参，返回true
          *
          * 特定网站生效
          */
-        filter: 'my.qidian.com/bookcase',
+        filterUrl: 'my.qidian.com/bookcase',
+
+        /**
+         * ?excludeUrl
+         * 类型同filterUrl，匹配时不生效
+         */
 
         /**
          * elems <= Array
@@ -62,173 +68,43 @@
         elems: ['.shelf-table-name [data-bid]'],
 
         /**
-         * dealWithElems
+         * ?dealWithElems
          * Function 参数(elemNow, elemBefore)，返回elemNew[]
+         * 尽量使用elementDo
          */
 
         /**
-          * search
+         * ?elementDo
+         * Array of function(elem)
+         */
+
+        /**
+          * ?textReplace
+          * Array of [match, replace]
+          * 替换元素下的首个textNode
+          * like elementDo: [ function (elem){elem.textContent=elem.textContent.replace(match, replace)} ]
+          */
+
+        /**
+          * ?search
           * string '名称|网址' 包含%s
           */
         search: '书架搜索|https://my.qidian.com/bookcase/search?kw=%s'
-      },
-      {
-        filter: () => window.location.href.match('qidian.com') && !window.location.href.match('read.qidian.com'),
-        elems: ['.book-mid-info>h4>a,.book-info>h4>a', '[data-bid]'],
-        search: '起点|https://www.qidian.com/search?kw=%s'
-      },
-      {
-        filter: 'book.qidian.com/info/',
-        elems: '.book-info h1>em'
-      },
 
-      {
-        filter: 'yousuu.com',
-        elems: '.book-name-and-score>a,.RecBooks a',
-        dealWithElems: (elemNow, elemBefore) => {
-          [].concat(elemNow, elemBefore).forEach(i => {
-            if (i.textContent.trim().match(/^《.*》$/) && !$(i).is('.mark-deal-ignore')) {
-              $(i).addClass('mark-deal-ignore');
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.trim().match(/^《(.*)》$/)[1];
-            }
-          });
-          return elemNow;
-        },
-        search: '优书网|https://www.yousuu.com/search/?SearchType=title&SearchValue=%s'
-      },
-      {
-        filter: 'yousuu.com/book/',
-        elems: '.book-name'
-      },
-      {
-        filter: ['yousuu.com/Booklist/', 'yousuu.com/search/'],
-        elems: '.bookname'
-      },
-
-      {
-        filter: ['booklink.me'],
-        elems: 'a[href^="/book-"][href$=".html"]'
-      },
-
-      {
-        filter: ['qidianshuju.com'],
-        elems: 'a[href*="qidianshuju.com/book"][href$=".html"]',
-        dealWithElems: (elemNow, elemBefore) => {
-          [].concat(elemNow, elemBefore).forEach(i => {
-            if (i.textContent.trim().match(/^(\[.*?\])(.*)/) && !$(i).is('.mark-deal-ignore')) {
-              const [, tag, name] = i.textContent.trim().match(/^(\[.*?\])(.*)$/);
-              $('<span></span>').text(tag).insertBefore(i);
-              $(i).addClass('mark-deal-ignore');
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = name;
-            }
-          });
-          return elemNow;
-        },
-        search: '起点数据|http://www.qidianshuju.com/find/%s.html'
-      },
-
-      {
-        filter: ['uukanshu.com'],
-        elems: [
-          () => $('a').toArray().filter(i => i.href.match(/\/b\/\d+\/$/))
-        ],
-        dealWithElems: (elemNow, elemBefore) => {
-          [].concat(elemNow, elemBefore).forEach(i => {
-            if (i.textContent.trim().match(/最新章节(列表|)$/) && !$(i).is('.mark-deal-ignore')) {
-              $(i).addClass('mark-deal-ignore');
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.trim().replace(/最新章节(列表|)$/, '');
-            }
-          });
-          return elemNow;
-        },
-        search: 'UU看书|https://cse.google.com/cse?oe=utf8&ie=utf8&source=uds&q=%s&safe=off&cx=008945028460834109019:saffovty4iu'
-      },
-      {
-        filter: ['bqg5200.com'],
-        elems: [
-          () => $('a').toArray().filter(i => i.href.match(/\/book\/\d+\/$/))
-        ]
-      },
-      {
-        filter: 'chuangshi.qq.com',
-        elems: ['.green[href^="http://chuangshi.qq.com/bk/"][href$=".html"]', 'a[bid]', '.title>a:eq(0)'],
-        search: '创世|http://chuangshi.qq.com/search/searchindex/type/all/wd/%s.html'
+        /**
+         * ?do 仅在匹配页面生效
+         * ?doEvery 即使不匹配，只要是这个lib都生效
+         * Function
+         */
       }
     ],
     manga: [
       {
-        filter: /i.dmzj.com\/(record|subscribe)/,
+        filterUrl: /i.dmzj.com\/(record|subscribe)/,
         elems: [
           '.dy_content_li h3>a',
           '.history_des>h3>a'
         ]
-      },
-      {
-        filter: /i.dmzj.com\/otherCenter\/hisSubscribe/,
-        elems: [
-          '#his_subscribe_id>dl>dd>a.title'
-        ]
-      },
-      {
-        filter: 'manhua.dmzj.com/rank',
-        elems: [
-          '.middlerighter1 .title>a',
-          '.support+[class^="guide"]+a'
-        ]
-      },
-      {
-        filter: () => window.location.pathname === '/' && window.location.host === 'manhua.dmzj.com',
-        elems: [
-          '.icn-02_index>a:nth-child(2)',
-          '.tt_comic',
-          '[class^="tcaricature_see"][class*="a2"] ul>li:nth-child(1)>a', '[class^="tcaricature_see"][class*="a3"] ul>li>a',
-          '[class^="today_recommended_bigpic2_a2"] ul>li:nth-child(1)>a', '[class^="today_recommended_bigpic2_b"] ul>li>a',
-          '.caricature_nav p>a'
-        ]
-      },
-      {
-        filter: 'manhua.dmzj.com',
-        elems: [
-          '.tcaricature_block>ul>li>a',
-          '.hotblood1 ul>li>a+a',
-          '.linehidden',
-          '.anim_title_text>a>h1'
-        ],
-        dealWithElems: (elemNow, elemBefore) => {
-          [].concat(elemNow, elemBefore).forEach(i => {
-            if (i.textContent.match(/^\+/) && !$(i).is('.mark-deal-ignore')) {
-              $(i).addClass('mark-deal-ignore');
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/^\+/, '');
-            }
-          });
-          return elemNow;
-        },
-        search: '动漫之家|https://manhua.dmzj.com/tags/search.shtml?s=%s'
-      },
-      {
-        filter: 'manhuadui.com',
-        elems: [
-          '.comic_deCon h1',
-          '[data-key] a'
-        ],
-        search: '漫画堆|https://www.manhuadui.com/search/?keywords=%s'
-      },
-      {
-        filter: 'kukudm.com',
-        elems: [
-          'body > table:nth-child(5) > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(1) > td',
-          '[href^="/comiclist/"][href$="/index.htm"]'
-        ],
-        dealWithElems: (elemNow, elemBefore) => {
-          [].concat(elemNow, elemBefore).forEach(i => {
-            if (i.textContent.match(/(漫画|\[\d+\])$/) && !$(i).is('.mark-deal-ignore')) {
-              $(i).addClass('mark-deal-ignore');
-              $(i).contents().toArray().filter(j => j.nodeType === 3)[0].textContent = i.textContent.replace(/(漫画|\[\d+\])$/, '');
-            }
-          });
-          return elemNow;
-        },
-        search: 'KuKu动漫|https://so.kukudm.com/search.asp?kw=%s&Submit=%C8%B7%B6%A8'
       }
     ]
   };
@@ -238,20 +114,25 @@
     libName = i;
     lib = libs[i];
     const found = lib.some(i => {
-      const filtered = selectCalc(i.filter, {
+      const filtered = selectCalc(i.filterUrl, {
         string: text => window.location.href.match(text),
         RegExp: regexp => window.location.href.match(regexp),
         function: func => func()
-      });
-      return filtered.some(i => i);
+      }).some(i => i);
+      const excluded = i.excludeUrl ? selectCalc(i.excludeUrl, {
+        string: text => window.location.href.match(text),
+        RegExp: regexp => window.location.href.match(regexp),
+        function: func => func()
+      }).some(i => i) : false;
+      return filtered && !excluded;
     });
     if (found) break;
     if (i === Object.keys(libs).slice(-1)[0]) return;
   }
   console.log({ libName, lib });
 
-  const getValue = () => JSON.parse(GM_getValue(`dababase_${libName}`) || '{}');
-  const setValue = (value) => value || window.confirm('value false\ncontinue?') ? GM_setValue(`dababase_${libName}`, JSON.stringify(value)) : null;
+  const getValue = () => JSON.parse(GM_getValue(`database_${libName}`) || '{}');
+  const setValue = (value) => value || window.confirm('value false\ncontinue?') ? GM_setValue(`database_${libName}`, JSON.stringify(value)) : null;
 
   $('<style></style>').html([
     '.mark-panel{z-index:99999;position:fixed;top:0;left:0;}',
@@ -261,8 +142,10 @@
     '.mark-switch.mark-switch-disabled::after{content:"off";}',
     '.mark-mark{background:#F00;}',
     '.mark-mark.mark-mark-on{background:#0F0;}',
-    '[data-mark]:hover{background-color:white!important;}',
+    '[data-mark]:hover{background-color:unset!important;}',
     '[data-mark]{border:1px black solid;margin: -1px;}',
+
+    '.mark-info::after{content:"-"attr(length)"-"attr(null)}',
 
     '.mark-less.mark-less-on::after{content:">>";}',
     '.mark-less::after{content:"<<";}',
@@ -293,7 +176,7 @@
    */
 
   const searchLib = [];
-  let searchLibFirstRun = true;
+  let firstRun = true;
   const ask = (q, a) => {
     const database = getValue();
     const answer = window.prompt(q, a || database.answer || '');
@@ -307,25 +190,57 @@
   const updateElems = () => {
     let temp = [];
     for (const i of lib) {
-      const actived = selectCalc(i.filter, {
+      if (firstRun) {
+        if (typeof i.doEvery === 'function') i.doEvery();
+      }
+      const filtered = selectCalc(i.filterUrl, {
         string: text => window.location.href.match(text),
         RegExp: regexp => window.location.href.match(regexp),
         function: func => func()
-      });
-      if (!actived.some(i => i)) continue;
-      if (searchLibFirstRun && i.search) searchLib.push(i.search);
+      }).some(i => i);
+      const excluded = i.excludeUrl ? selectCalc(i.excludeUrl, {
+        string: text => window.location.href.match(text),
+        RegExp: regexp => window.location.href.match(regexp),
+        function: func => func()
+      }).some(i => i) : false;
+      if (!filtered || excluded) continue;
+      if (firstRun) {
+        searchLib.push(i);
+        if (typeof i.do === 'function') i.do();
+      }
 
       let elem = selectCalc(i.elems, {
         string: text => $(text).toArray(),
         function: func => func()
       }).reduce((pre, cur) => [].concat(cur, pre));
 
-      elem = elem.filter(i => i.textContent.trim() && i.textContent.trim().length < 32);
+      elem = $(elem).filter(':visible').toArray().filter(i => i.textContent.trim());
 
       if (typeof i.dealWithElems === 'function') elem = i.dealWithElems(elem, temp);
+      if (i.elementDo instanceof Array && i.elementDo.every(i => typeof i === 'function')) {
+        const elems = $([].concat(elem, temp)).filter(':not([mark-do="true"])');
+        for (const elem of elems) {
+          for (const func of i.elementDo) {
+            func(elem);
+          }
+          $(elem).attr('mark-do', 'true');
+        }
+      }
+      if (i.textReplace instanceof Array) {
+        const elems = $([].concat(elem, temp)).filter(':not([mark-replace="true"])');
+        for (const elem of elems) {
+          const node = $(elem).find(':not(iframe)').addBack().contents().toArray().find(j => j.nodeType === 3);
+          let text = node.textContent.trim();
+          for (const reGroup of i.textReplace) {
+            text = text.replace(reGroup[0], reGroup[1] || '');
+          }
+          node.textContent = text.trim();
+          $(elem).attr('mark-replace', 'true');
+        }
+      }
       temp = temp.concat(elem);
     }
-    searchLibFirstRun = false;
+    firstRun = false;
     elems = temp;
   };
   const updateHighlight = () => {
@@ -350,6 +265,8 @@
     const style = Object.keys(colors).map(i => `[data-mark="${i}"]{background-color:${colors[i]}!important;}`);
     const styleEle = $('style.mark-style').length ? $('style.mark-style') : $('<style class="mark-style"></style>');
     styleEle.html(style).appendTo('head');
+
+    $('.mark-info').attr('length', $('[data-mark]').length).attr('null', $('[data-mark="null"]').length);
   };
   const promptSetting = keyName => {
     const database = getValue();
@@ -391,6 +308,18 @@
     setValue(database);
     updateHighlight();
   };
+  function markDirect (name, type) {
+    const database = getValue();
+    const obj = database.book || {};
+    if (type === 'null') {
+      delete obj[name];
+    } else {
+      obj[name] = type;
+    }
+    database.book = obj;
+    setValue(database);
+    updateHighlight();
+  }
   updateHighlight();
 
   var observer = new window.MutationObserver((mutationsList) => {
@@ -405,6 +334,7 @@
   $('<button class="mark-close">x</button>').on({
     click: () => $('.mark-panel').hide()
   }).appendTo('.mark-panel');
+  $('<button class="mark-info" disabled>').text(libName).appendTo('.mark-panel');
   $('<button class="mark-switch"></button>').on({
     click: (e) => {
       $(e.target).toggleClass('mark-switch-disabled');
@@ -413,6 +343,10 @@
       } else {
         updateHighlight();
       }
+    },
+    contextmenu: (e) => {
+      updateHighlight();
+      return false;
     }
   }).appendTo('.mark-panel');
   $('<button class="mark-color mark-less-hide">color</button>').on({
@@ -424,7 +358,7 @@
   $('<button class="mark-mark">mark</button>').on({
     click: (e) => {
       let type;
-      const func = (e) => {
+      const markEvent = (e) => {
         e.preventDefault();
 
         const database = getValue();
@@ -451,10 +385,38 @@
           $(e.target).toggleClass('mark-mark-on');
           return;
         }
-        $('body').on('click', '[data-mark]', func);
+        $('body').on('click', '[data-mark]', markEvent);
       } else {
         $('body').off('click', '[data-mark]');
       }
+    }
+  }).appendTo('.mark-panel');
+  $('<button class="mark-one">mark-one</button>').on({
+    click: (e) => {
+      let type;
+      const markOneEvent = (e) => {
+        e.preventDefault();
+
+        const database = getValue();
+        const obj = database.book || {};
+        const name = e.target.textContent.trim();
+
+        if (type === 'null') {
+          delete obj[name];
+        } else {
+          obj[name] = type;
+        }
+        type = null;
+
+        database.book = obj;
+        setValue(database);
+        updateHighlight();
+        $('body').off('click', '[data-mark]', markOneEvent);
+      };
+
+      const database = getValue();
+      type = database.answer;
+      $('body').on('click', '[data-mark]', markOneEvent);
     }
   }).appendTo('.mark-panel');
   $('<button class="mark-mark-all mark-less-hide">mark-all</button>').on({
@@ -482,8 +444,9 @@
         for (const name of names) {
           html += '<li>';
           html += `<span class="mark-show-pre">${name}</span>`;
-          html += searchLib.map(str => {
-            const [info, url] = str.split('|');
+          html += Array.from(new Set(searchLib.concat(lib))).map(lib => {
+            if (!lib.search) return;
+            const [info, url] = lib.search.split('|');
             return `<a class="mark-show-search" href="${url.replace('%s', encodeURIComponent(name))}">${info}</a>`;
           }).join('');
           html += '</li>';
@@ -538,4 +501,8 @@
     }
   }).appendTo('.mark-panel');
   $('.mark-less').click();
+
+  $(window).on('focus', (e) => {
+    updateHighlight();
+  });
 })();
