@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.17.18
-// @modified    2020-4-25 20:28:00
+// @version     1.17.156
+// @modified    2020-5-19 14:56:13
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -13,6 +13,7 @@
 // @include     https://exhentai.org/g/*
 // @include     https://exhentai.org/tag/*
 // @include     https://exhentai.org/uploader/*
+// @include     https://exhentai.org/uconfig.php
 //              表站
 // @include     https://e-hentai.org/
 // @include     https://e-hentai.org/favorites.php*
@@ -20,6 +21,7 @@
 // @include     https://e-hentai.org/g/*
 // @include     https://e-hentai.org/tag/*
 // @include     https://e-hentai.org/uploader/*
+// @include     https://e-hentai.org/uconfig.php
 // @grant       window.close
 // @grant       unsafeWindow
 // @grant       GM_openInTab
@@ -41,14 +43,6 @@
 /* global JSZip */
 /* eslint-disable no-debugger */
 
-const $ = function (...args) {
-  const result = jQuery(...args);
-  if (result.length === 0 && args.length && typeof args[0] === 'string') {
-    console.debug('get empty', ...args);
-  }
-  return result;
-};
-
 const SEL = {
   EH: {
     // unsafeWindow
@@ -65,15 +59,15 @@ const SEL = {
       mainDiv: '.ido',
 
       keyword: '[name="f_search"]',
-      apply: '[onclick="search_presubmit()"]',
+      apply: '[name="f_search"]~input[type="submit"]',
       resultTotal: '.ip:eq(0)',
       resultTotalMatch: /Showing ([\d,]+) results?/,
 
       thumb: '.glthumb',
 
-      favorited: '[id^="posted_"][style]',
+      // favorited: '[id^="posted_"][style]',
 
-      resultTableContainer: '.ido>div:last-child',
+      resultTableContainer: '.ido>*:has(.itg)',
       resultTable: 'table.itg',
       resultTbody: 'table.itg>tbody',
       resultTr: 'table.itg tr',
@@ -82,7 +76,6 @@ const SEL = {
 
       nameTd: '.gl3m',
       galleryA: '[href*="hentai.org/g/"]'
-
     },
     info: { // 信息页
       checker: '#gdt,.d', // 检查是否为信息页
@@ -93,11 +86,18 @@ const SEL = {
       title: '#gn',
       titleJp: '#gj',
 
-      favorite: '#gdf>#fav>.i',
+      // favorite: '#gdf>#fav>.i',
 
-      infoMid: '#gmid',
+      infoContainer: '#gmid',
+      infoCategory: '#gdc',
+      infoUploader: '#gdn',
+      infoDetailTr: '#gdd tr',
+      infoDetailKey: '.gdt1',
+      infoDetailValue: '.gdt2',
 
       tagContainer: '#taglist',
+      tagTr: '#taglist tr',
+      tagKey: '.tc',
       tagDiv: '[id^="td_"]',
       tagDivFromName: name => `[id="td_${name}"]`,
       tag: '[id^="ta_"]',
@@ -112,11 +112,15 @@ const SEL = {
       previewA: '.gdtm>div>a',
       previewImg: '.gdtm>div>a>img',
 
-      deleted: '.d'
+      uploaderComment: '#comment_0'
     },
     setting: { // 设置页
       // changeEConfig
+      checker: '[name="profile_set"]', // 检查是否为搜索页
       form: 'form:has(#apply)'
+    },
+    special: {
+      deleted: '.d' // https://e-hentai.org/g/1621568/6d89c79f2e/
     }
   },
   EHD: {
@@ -130,8 +134,9 @@ const SEL = {
 
 const G = { // 全局变量
   debug: false,
-  searchPage: !!$(SEL.EH.search.checker).length,
+  searchPage: $(SEL.EH.search.checker).length,
   infoPage: $(SEL.EH.info.checker).length,
+  settingPage: $(SEL.EH.setting.checker).length,
   config: GM_getValue('config', {}),
   'ehD-setting': JSON.parse(GM_getValue('ehD-setting', '{}')),
   EHT: [],
@@ -230,6 +235,9 @@ async function init () {
       return;
     }
   }
+
+  showConfig();
+
   if (G.infoPage) { // 信息页
     if (jumpHost()) return; // 里站跳转
     if (G.config.enableEHD) {
@@ -276,7 +284,7 @@ async function init () {
         '  document.querySelector(".ehD-pt").appendChild(node)',
         '}'
       ];
-      $('<input type="button" value="Fix EHD Counter" tooltip="重置EHTD计数">').on({
+      $('<input type="button" value="Fix EHD Counter" title="重置EHTD计数">').on({
         click: () => {
           window.fixEHDCounter();
         }
@@ -323,8 +331,7 @@ async function init () {
         '\n',
         '})()'
       ];
-      /* eslint-disable no-eval */
-      eval(toEavl.join('\n')); // 运行EHD
+      eval(toEavl.join('\n')); // eslint-disable-line no-eval
     } else {
       const loaded = await waitForElement(SEL.EHD.checker, 30 * 1000);
       if (!loaded) console.error('载入 E-Hentai-Downloader 超时');
@@ -343,7 +350,7 @@ async function init () {
     document.title = $(SEL.EH.info.title).text();
     tagTranslate(); // 标签翻译
     btnSearch(); // 按钮 -> 搜索(信息页)
-    btnFake(); // 按钮 -> 下载空文档(信息页)
+    if (G.config.btnFake) btnFake(); // 按钮 -> 下载空文档(信息页)
     btnInfoText(); // 按钮 -> 下载info.txt(信息页)
     btnTask(); // 按钮 -> 添加到下载任务(信息页)
     tagEvent(); // 标签事件
@@ -358,31 +365,26 @@ async function init () {
     if (G.config.enableChangeSize && G.config.sizeS !== G.config.sizeD) await checkImageSize();
     await waitInMs(500);
     if (G.autoDownload) await autoDownload(); // 自动开始下载
-  } else { // 搜索页
+  } else if (G.searchPage) { // 搜索页
     if ($(SEL.EH.search.resultTotal).length && !G.isPreferDisplayMode) {
       window.alert('Please change display mode to "Minimal" or "Minimal+"');
       return;
     }
     if (jumpHost()) return; // 里站跳转
-    $(SEL.EH.search.apply).hide();
-    $('<input type="button" value="Apply Filter" title="右键: 添加/删除 中文">').on({
-      click: () => {
-        $(SEL.EH.search.apply).click();
-      },
+    $(SEL.EH.search.apply).attr('title', '右键: 添加/删除 中文').on({
       contextmenu: () => {
         let value = $(SEL.EH.search.keyword).val();
         value = value.match(/language:"?\w+\$?"?/) ? value.replace(/language:"?\w+\$?"?/, '').trim() : value + ' language:chinese$';
         $(SEL.EH.search.keyword).val(value);
-        $(SEL.EH.search.apply).click();
       }
-    }).insertBefore(SEL.EH.search.apply);
+    });
     if ($(SEL.EH.search.keyword).val()) document.title = translateText($(SEL.EH.search.keyword).val());
     if (G.config.preloadResult && $(SEL.EH.common.pageCur).length) await preloadResult(G.config.preloadResult);
     $('<div class="ehContainer"></div>').prependTo(SEL.EH.search.nameTd);
     btnSearch2(); // 按钮 -> 搜索(搜索页)
     quickDownload(); // 右键：下载
     if ($(SEL.EH.search.resultTable).length) batchDownload(); // Displsy: List => 批量下载
-    btnFake2(); // 按钮 -> 下载空文档(搜索页)
+    if (G.config.btnFake) btnFake2(); // 按钮 -> 下载空文档(搜索页)
     btnTask2(); // 按钮 -> 添加到下载任务(搜索页)
     if (G.config.checkExist) checkExist(); // 检查本地是否存在
     const _gmetadata = await getInfo() || [];
@@ -398,10 +400,11 @@ async function init () {
     });
     autoComplete(); // 自动填充
     checkForNew(); // 检查有无新本子
+  } else if (G.settingPage) { // 设置页
+    return;
   }
   highlightBlacklist(); // 高亮黑名单相关的画廊(通用)
-  showConfig();
-  searchInOtherSite();
+  if (G.config.searchInOtherSites) searchInOtherSites(); // 在其他站点搜索
   if (G.config.saveLink) saveLink(); // 保存链接
   $('<input type="button" value="Clear Downloading" tooltip="重置下载列表">').on({
     click: () => {
@@ -609,6 +612,7 @@ function addStyle () { // 添加样式
     SEL.EH.search.mainDiv + ',' + SEL.EH.search.resultTable + '{max-width:9999px!important;min-width:0!important;justify-content:center;}',
     SEL.EH.search.resultTr + '.ehBatchHover{background-color:#669933!important;}',
     SEL.EH.search.resultTr + ':hover{background-color:#4a86e8!important;}',
+    SEL.EH.search.thumb + '{position:fixed;left:0px!important;top:50%!important;visibility:hidden;transform:translateY(-50%);}',
     '.ehTagNotice{margin:1px;}',
     '.ehTagNotice{float:left;}',
     '.ehTagNotice[name="Unlike"],' + SEL.EH.info.tagDiv + '[name="Unlike"]{color:#f00;background-color:#00f;}',
@@ -653,7 +657,7 @@ function autoComplete () { // 自动填充
     $('.ehDatalist').show();
   }).appendTo($('form').has(SEL.EH.search.keyword));
   let lastValue;
-  $(SEL.EH.search.keyword).attr('title', `当输入大于${G.config.acLength}个字符时，显示选单<br>使用主键盘区的数字/加减/方向键快速选择<br>点击/Enter/Insert键填充<br>使用输入法时，无法使用数字/加减选择`).on({
+  $(SEL.EH.search.keyword).attr('title', `当输入大于${G.config.acLength}个字符时，显示选单<br>使用主键盘区的数字/加减/方向键快速选择<br>点击/Enter/Insert键填充<br>使用输入法时，无法使用数字/加减选择`).attr('autocomplete', 'off').on({
     focusin: function () {
       $('.ehDatalist').show();
     },
@@ -769,32 +773,31 @@ function btnFake2 () { // 按钮 -> 下载空文档(搜索页)
 function btnInfoText () { // 按钮 -> 下载info.txt(信息页)
   $('<input type="button" value="info.txt" title="' + htmlEscape('下载一个 <span class="ehHighlight">info.txt</span>') + '">').on('mousedown', () => {
     let infoStr = '';
-    infoStr += $('#gn').text() + '\n';
-    infoStr += $('#gj').text() + '\n';
+    infoStr += $(SEL.EH.info.title).text() + '\n';
+    infoStr += $(SEL.EH.info.titleJp).text() + '\n';
     infoStr += window.location.href + '\n\n';
 
-    infoStr += 'Category: ' + $('#gdc .cs').eq(0).text().trim() + '\n';
-    infoStr += 'Uploader: ' + $('#gdn a').eq(0).text() + '\n';
+    infoStr += 'Category: ' + $(SEL.EH.info.infoCategory).eq(0).text().trim() + '\n';
+    infoStr += 'Uploader: ' + $(SEL.EH.info.infoUploader).eq(0).text() + '\n';
 
-    $('#gdd tr').toArray().forEach(i => {
-      var c1 = $('.gdt1', i).eq(0).text();
-      var c2 = $('.gdt2', i).eq(0).text();
+    $(SEL.EH.info.infoDetailTr).toArray().forEach(i => {
+      var c1 = $(SEL.EH.info.infoDetailKey, i).eq(0).text();
+      var c2 = $(SEL.EH.info.infoDetailValue, i).eq(0).text();
       infoStr += c1 + ' ' + c2 + '\n';
     });
 
     infoStr += 'Rating: ' + unsafeWindow.average_rating + '\n\n';
 
     infoStr += 'Tags:\n';
-    $('#taglist tr').toArray().forEach(i => {
-      const tds = $('td', i);
-      infoStr += '> ' + tds.eq(0).text() + ' ';
-      infoStr += $('a', tds.eq(1)).toArray().map(i => i.textContent).join(', ') + '\n';
+    $(SEL.EH.info.tagTr).toArray().forEach(i => {
+      infoStr += '> ' + $(SEL.EH.info.tagKey, i).text() + ' ';
+      infoStr += $(SEL.EH.info.tagDiv, i).toArray().map(i => i.textContent).join(', ') + '\n';
     });
     infoStr += '\n';
 
-    if ($('#comment_0')) infoStr += 'Uploader Comment:\n' + $('#comment_0').html().replace(/<br>|<br \/>/gi, '\n') + '\n\n';
+    if ($(SEL.EH.info.uploaderComment).length) infoStr += 'Uploader Comment:\n' + $(SEL.EH.info.uploaderComment).html().replace(/<br>|<br \/>/gi, '\n') + '\n\n';
 
-    $('.gdtm img').toArray().forEach(i => {
+    $(SEL.EH.info.previewImg).toArray().forEach(i => {
       infoStr += '\n\nPage ' + i.alt + ': ' + $(i).parent().attr('href') + '\n';
       const title = $(i).attr('title') || $(i).attr('raw-title');
       infoStr += 'Image ' + i.alt + ': ' + title.match(/^Page \d+: (.*)$/)[1];
@@ -1109,7 +1112,7 @@ function checkExist () { // 检查本地是否存在
             _name = 'force';
           } else if (!noExt.match(/(chinese|漢化|汉化|中文|中国翻訳|中国語|中国语)/i)) {
             _name = 'notchinese';
-          } else if (noExt.match(/\[(Incomplete|Sample)\]/i) || (name.match(uncensoredRe) && !noExt.match(uncensoredRe))) {
+          } else if (noExt.match(/\[(Incomplete|Sample|Ongoing)\]/i) || (name.match(uncensoredRe) && !noExt.match(uncensoredRe))) {
             _name = 'incomplete';
           } else if (noLangRE.exec(name3) || noLangRE.exec(name4)) {
             _name = 'force1';
@@ -1172,7 +1175,7 @@ function checkForNew () { // 检查有无新本子
       if (keyword in list && list[keyword].name) name = list[keyword].name;
       if (e.button === 0) {
         if (!name) name = translateText(keyword);
-        nameInput = window.prompt('请输入名称\n留空: ' + name);
+        nameInput = window.prompt('请输入名称\n留空: ' + name, name);
         if (nameInput === null) return;
       }
       let time = new Date().getTime();
@@ -1299,15 +1302,20 @@ function checkForNew () { // 检查有无新本子
   }).appendTo('.ehCheckContainer>td');
   const result = $(SEL.EH.search.resultTotal).text().match(SEL.EH.search.resultTotalMatch) ? $(SEL.EH.search.resultTotal).text().match(SEL.EH.search.resultTotalMatch)[1].replace(/,/g, '') * 1 : 0;
   if (result - info.result <= G.config.autoUpdateCheck && $(SEL.EH.common.pageCur).text() === '1') {
-    let time = new Date().getTime();
-    time = time - new Date(G.gmetadata[0].posted * 1000).getTime() <= G.config.checkTimeDeviation * 60 * 60 * 1000 ? new Date(G.gmetadata[0].posted * 1000).getTime() + 1 : time;
-    list[keyword] = {
-      time: time,
-      result: result
+    const updateCheck = () => {
+      const list = GM_getValue('checkList', {});
+      let time = new Date().getTime();
+      time = time - new Date(G.gmetadata[0].posted * 1000).getTime() <= G.config.checkTimeDeviation * 60 * 60 * 1000 ? new Date(G.gmetadata[0].posted * 1000).getTime() + 1 : time;
+      list[keyword] = {
+        time: time,
+        result: result
+      };
+      if (info.name) list[keyword].name = info.name;
+      GM_setValue('checkList', sortObj(list, 'time'));
+      setNotification((info.name || translateText(keyword)), 'CheckList updated');
     };
-    if (info.name) list[keyword].name = info.name;
-    GM_setValue('checkList', sortObj(list, 'time'));
-    setNotification((info.name || translateText(keyword)), 'CheckList updated');
+    updateCheck();
+    $(window).one('focus', updateCheck);
   }
 }
 
@@ -1379,17 +1387,17 @@ function copyInfo () { // 复制信息
 }
 
 function defaultConfig () { // 默认设置
+  /* eslint-disable object-property-newline */
   const config = {
     updateIntervalEHT: 0,
     updateIntervalEHD: 0,
     exportIntroPicFormat: "'{id}', ",
-    timeShow: 'local',
 
     // 通用设置
-    ex2eh: false,
-    eh2ex: true,
+    timeShow: 'local',
+    ex2eh: false, eh2ex: true,
     openUrl: '0',
-    saveLink: true,
+    saveLink: false, searchInOtherSites: false, bthFake: false,
     bookmark: '0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist',
     searchArguments: '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_search={q}&f_sh=on',
     notification: '3',
@@ -1397,22 +1405,15 @@ function defaultConfig () { // 默认设置
     autoRetry: true,
 
     // 搜索页
-    preloadPaneImage: true,
-    languageCode: true,
-    searchEvent: '0,-1,0,1|1,-1,-1,1|2,-1,1,1',
-    searchEventChs: '鼠标左键 + 任意按键 -> 主要名称 + chinese<br>鼠标中键 + 任意按键 -> 自行选择 + chinese<br>鼠标右键 + 任意按键 -> 作者或组织(顺位) + chinese',
+    preloadPaneImage: true, languageCode: true,
+    searchEvent: '0,-1,0,1|1,-1,-1,1|2,-1,1,1', searchEventChs: '鼠标左键 + 任意按键 -> 主要名称 + chinese<br>鼠标中键 + 任意按键 -> 自行选择 + chinese<br>鼠标右键 + 任意按键 -> 作者或组织(顺位) + chinese',
     checkExist: true,
-    checkExistAtStart: true,
-    checkExistName2: false,
-    checkExistSever: 'http://127.0.0.1:3000/',
-    hideExist: true,
+    checkExistAtStart: true, checkExistName2: false, hideExist: true, checkExistSever: 'http://127.0.0.1:3000/',
     acLength: 3,
     acItem: 'language,artist,female,male,parody,character,group,misc',
     batch: 3,
-    notHideUnlike: true,
-    alwaysShowLike: true,
-    lowRating: 0,
-    fewPages: 1,
+    notHideUnlike: true, alwaysShowLike: true,
+    lowRating: 0, fewPages: 1,
     checkTimeDeviation: 12,
     autoUpdateCheck: 25,
     checkListPerPage: 25,
@@ -1420,20 +1421,16 @@ function defaultConfig () { // 默认设置
 
     // 信息页
     uconfig: '',
-    autoStartDownload: true,
-    autoClose: true,
-    enableEHD: true,
-    recordEHDUrl: true,
-    fixEHDCounter: true,
+    autoStartDownload: true, autoClose: true,
+    enableEHD: true, recordEHDUrl: false, fixEHDCounter: true,
     exportUrlFormat: '{url} +Proxy{cr}{lf}',
-    tagTranslateImage: false,
-    showAllThumb: true,
+    tagTranslateImage: false, showAllThumb: true,
     enableChangeSize: true,
     rateD: 1,
-    sizeD: '3',
-    sizeS: '1',
+    sizeD: '3', sizeS: '1',
     downloadSizeChanged: true
   };
+  /* eslint-enable object-property-newline */
   for (const i in config) {
     if (!(i in G.config)) G.config[i] = config[i];
   }
@@ -1631,7 +1628,7 @@ function jumpHost () { // 里站跳转
           GM_setValue('jump', jump);
         }
       } else if (l.host === 'e-hentai.org') { // 表站
-        if (document.querySelector(SEL.EH.info.deleted)) { // 不存在则返回
+        if (document.querySelector(SEL.EH.special.deleted)) { // 不存在则返回
           jump.push(gid);
           GM_setValue('jump', jump);
           return true;
@@ -1918,7 +1915,7 @@ function setNotification2 (text, title, timeout) {
   }, timeout);
 }
 
-function searchInOtherSite () { // 在其他站点搜索
+function searchInOtherSites () { // 在其他站点搜索
   const navBar = $(SEL.EH.common.navBar).clone().empty().insertAfter(SEL.EH.common.navBar);
   const sites = {
     'nhentai.net': {
@@ -1994,7 +1991,7 @@ function showConfig () { // 显示设置
     const _html = [
       GM_info.script.name + '<span class="ehHighlight">v' + GM_info.script.version + '</span> <a href="' + GM_info.script.namespace + '" target="_blank">@' + (GM_info.script.author || 'dodying') + '</a>',
       '',
-      '<input type="button" name="exportValues" value="Export Values" title="导出脚本储存的信息<br>(除EHT与EHD的数据)"> <input type="file" id="selectFileConfig" name="selectFile" accept=".json"><input type="button" name="importValues" value="Select File and Inmport Values" title="选择文件，并导入脚本储存的信息">',
+      '<input type="button" name="exportValues" value="Export Values" title="导出脚本储存的信息<br>(除EHT与EHD的数据)"> <input type="file" id="selectFileConfig" name="selectFile" accept=".json"><input type="button" name="importValues" value="Select File and Inmport Values" title="选择文件，并导入脚本储存的信息"><input type="button" name="testSelectors" value="Test Selectors" title="测试选择器">',
       '更新 EHT: 更新频率: <input name="ehConfig_updateIntervalEHT" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHT" value="Update Now" tooltip="立即更新标签数据，来自[Mapaler/EhTagTranslator]"> <input type="button" name="exportEHT" value="Export Now" title="导出EHT数据"> <input type="button" name="emptyEHT" value="Empty Now" title="重置EHT数据">',
       '更新 EHD: 更新频率: <input name="ehConfig_updateIntervalEHD" type="number" placeholder="0" step="1" min="0" title="0表示不自动更新，以天为单位"> <input type="button" name="updateEHD" value="Update Now" tooltip="立即更新内置 [E-Hentai-Downloader]"> <input type="button" name="exportEHD" value="Export Now" title="导出EHD数据"> <input type="button" name="emptyEHD" value="Empty Now" title="重置EHD数据">',
       '宣传图相关: 导出格式: <input name="ehConfig_exportIntroPicFormat" title="' + htmlEscape('以<span class="ehHighlight">{id}</span>表示宣传图id<br>以<span class="ehHighlight">{cr}</span>表示\\r<br>以<span class="ehHighlight">{lf}</span>表示\\n') + '" type="text" placeholder="\'{id}\',{cr}{lf}"> <input type="button" name="exportIntroPic" value="Copy Text" title="复制文本">',
@@ -2004,7 +2001,7 @@ function showConfig () { // 显示设置
       '时间显示: <label for="ehConfig_timeShow_local"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_local" value="local" checked>本地时间</label> <label for="ehConfig_timeShow_iso"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_iso" value="iso">ISO时间</label>',
       '跳转相关: <label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">信息页: 里站自动跳转到表站</label>; <label for="ehConfig_eh2ex"><input type="checkbox" id="ehConfig_eh2ex">搜索页: 表站自动跳转到里站</label>',
       '链接打开方式: <select name="ehConfig_openUrl"><option value="0">新标签页后台打开</option><option value="1">新标签页前台打开</option><option value="2">新标签页后台打开搜索页，弹窗打开信息页</option><option value="3">新标签页前台打开搜索页，弹窗打开信息页</option></select>',
-      '<label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">显示按钮: 保存链接</label>',
+      '显示按钮: <label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">保存链接</label>; <label for="ehConfig_searchInOtherSites"><input type="checkbox" id="ehConfig_searchInOtherSites">在其他站点搜索</label>; <label for="ehConfig_btnFake"><input type="checkbox" id="ehConfig_btnFake">Fake</label>',
       '收藏夹提示信息: <input name="ehConfig_bookmark" type="text" title="' + htmlEscape('以<span class="ehHighlight">,</span>分割') + '" placeholder="0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist">',
       '搜索参数: <input name="ehConfig_searchArguments" title="' + htmlEscape('以<span class="ehHighlight">{q}</span>代替搜索关键词') + '" type="text" placeholder="/?f_search={q}&f_sh=on" min="1">',
       '通知显示方式: <select name="ehConfig_notification"><option value="0">Web API: Notification</option><option value="1">GM_notification</option><option value="2">window.alert</option><option value="3">页面元素</option><option value="-1">不显示</option></select>',
@@ -2108,6 +2105,28 @@ function showConfig () { // 显示设置
         saveAs2(text, '[EH]Enhance.json');
       } else if ($(e.target).is('.ehConfig input[name="importValues"]')) {
         $('#selectFileConfig').click();
+      } else if ($(e.target).is('.ehConfig input[name="testSelectors"]')) {
+        const arr = [];
+        const check = (name, selector) => {
+          if (typeof selector === 'string' && $(selector).length === 0) arr.push({ name, selector });
+        };
+        if (G.infoPage) {
+          for (const i of ['common', 'info']) {
+            for (const j in SEL.EH[i]) check(`${i}:${j}`, SEL.EH[i][j]);
+          }
+          for (const i in SEL.EHD) check(`EHD:${i}`, SEL.EHD[i]);
+        } else if (G.searchPage) {
+          for (const i of ['common', 'search']) {
+            for (const j in SEL.EH[i]) check(`${i}:${j}`, SEL.EH[i][j]);
+          }
+        } else if (G.settingPage) {
+          const i = 'setting';
+          for (const j in SEL.EH.setting) check(`${i}:${j}`, SEL.EH[i][j]);
+        }
+        if (arr.length) {
+          console.error('test selector:', arr);
+          window.alert(`${arr.length} selectors maybe changed!`);
+        }
       } else if ($(e.target).is('.ehConfig input[name="updateEHT"]')) {
         $(e.target).prop('disabled', true).val('Updating...');
         updateEHT().then(() => {
@@ -2369,14 +2388,14 @@ function task () { // 下载任务
     const downloading = GM_getValue('downloading', []);
     if (downloading.length) {
       await waitInMs(2 * 1000);
-      await main();
+      main();
       return;
     }
 
     let tasking = GM_getValue('tasking');
     if (tasking) {
       await waitInMs(2 * 1000);
-      await main();
+      main();
       return;
     }
 
@@ -2388,7 +2407,7 @@ function task () { // 下载任务
 
     getRemainImg(task.length + 1).then(data => changeFav(data));
 
-    await main();
+    main();
   };
   G.taskInterval = setTimeout(main, 200);
 }
@@ -2406,7 +2425,7 @@ function tagTranslate () { // 标签翻译
   }).filter(i => Object.keys(i).length);
   const css = [
     SEL.EH.info.tagContainer + '{overflow:visible;min-height:295px;height:auto}',
-    SEL.EH.info.infoMid + '{min-height:330px;height:auto;position:static}',
+    SEL.EH.info.infoContainer + '{min-height:330px;height:auto;position:static}',
     SEL.EH.info.tag + '{background:inherit}',
     SEL.EH.info.tag + '::before{font-size:12px;overflow:hidden;line-height:20px;height:20px;text-transform:capitalize;}',
     SEL.EH.info.tag + '::after{display:block;color:#ff8e8e;font-size:14px;background:inherit;border:1px solid #000;border-radius:5px;position:absolute;float:left;z-index:999;padding:8px;box-shadow:3px 3px 10px #000;min-width:150px;max-width:500px;white-space:pre-wrap;opacity:0;transition:opacity .2s;transform:translate(-50%,20px);top:0;left:50%;pointer-events:none;padding-top:8px;font-weight:400;line-height:20px}',
@@ -2457,7 +2476,7 @@ function toggleBlacklist (keyword) { // 加入黑名单或从黑名单中移除
 function translateText (text) {
   if (!text) return text;
   const arr = [];
-  const re = /(\w+):("|)(.*?)(\$"|"\$|")/;
+  const re = /(\w+):("|)(.*?)([$"]+)/;
   let result;
   for (let i = 0; ; i++) {
     result = re.exec(text);
@@ -2650,12 +2669,44 @@ function xhr (url, onload, parm = null, opt = {}) { // eslint-disable-line no-un
 }
 
 function xhrSync (url, parm = null, opt = {}) {
+  // custom option:
+  //  notry
   if (G.debug) console.log({ url, parm });
   return new Promise((resolve, reject) => {
+    const dealWithError = async (msg, res) => {
+      console.error(res);
+      msg = `请求${msg}\n链接:\t${new URL(url, window.location.href).href}\n是否重试?`;
+
+      if (opt.notry) { // 不重试
+      } else if (url.match(/https?:\/\/(127\.0\.0\.1|localhost)/)) { // 本地路径
+      } else if (navigator.onLine) { // 在线
+        try {
+          const online = await xhrSync(window.location.href, null, { method: 'HEAD', notry: true });
+          if (online.status === 200 && (G.config.autoRetry || window.confirm(msg))) {
+            await waitInMs(2000);
+            xhrSync(url, parm, opt).then((res) => resolve(res), res => reject(res));
+            return;
+          }
+        } catch (error) { // 离线
+          if (window.confirm(msg + '\n注意:您可能离线，请确认是否能打开该网站')) {
+            await waitInMs(2000);
+            xhrSync(url, parm, opt).then((res) => resolve(res), res => reject(res));
+            return;
+          }
+        }
+      } else { // 离线
+        if (window.confirm(msg + '\n注意:您可能离线，请确认是否能打开该网站')) {
+          await waitInMs(2000);
+          xhrSync(url, parm, opt).then((res) => resolve(res), res => reject(res));
+          return;
+        }
+      }
+      reject(res);
+    };
     GM_xmlhttpRequest({
-      method: parm ? 'POST' : 'GET',
-      url: url,
-      data: parm,
+      method: opt.method || parm ? 'POST' : 'GET',
+      url: url || opt.url,
+      data: parm || opt.data,
       timeout: opt.timeout || 60 * 1000,
       responseType: ['text', 'json', 'blob', 'arraybuffer', 'document'].includes(opt.responseType) ? opt.responseType : 'text',
       headers: opt.headers || {
@@ -2664,21 +2715,11 @@ function xhrSync (url, parm = null, opt = {}) {
       onload (res) {
         resolve(res);
       },
-      ontimeout (res) {
-        console.error(res);
-        if (G.config.autoRetry || window.confirm('请求超时，是否重试?')) {
-          xhrSync(url, parm, opt).then((res) => resolve(res), res => reject(res));
-        } else {
-          reject(res);
-        }
+      ontimeout: async (res) => {
+        dealWithError('超时', res);
       },
-      onerror (res) {
-        console.error(res);
-        if (G.config.autoRetry || window.confirm('请求错误，是否重试?')) {
-          xhrSync(url, parm, opt).then((res) => resolve(res), res => reject(res));
-        } else {
-          reject(res);
-        }
+      onerror: async (res) => {
+        dealWithError('错误', res);
       }
     });
   });
@@ -2746,5 +2787,5 @@ function diff (t1, t2) { // ignore case
 init().then(() => {
   //
 }, (err) => {
-  console.error(err);
+  console.error(err.stack);
 });
