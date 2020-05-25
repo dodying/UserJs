@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.1.230
+// @version     3.1.235
 // @created     2020-03-16 16:59:04
-// @modified    2020-5-18 17:32:58
+// @modified    2020/5/25 18:30:44
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -31,9 +31,7 @@
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 /* global xhr, saveAs, tranStr, base64, JSZip */
-/* eslint-disable no-extra-semi */
-; (function () {
-  /* eslint-enable no-extra-semi  */
+(function () {
   'use strict';
 
   let Storage = null;
@@ -2364,7 +2362,6 @@
       const onChapterFailed = async (res, request) => {
         let chapter = request.raw;
         if ('chapter' in chapter) chapter = chapter.chapter;
-        chapter.title = '';
         chapter.contentRaw = '';
         chapter.content = '';
         chapter.document = '';
@@ -2525,7 +2522,6 @@
                   for (const i in result) chapter[i] = result[i];
                 }
               } else {
-                chapter.title = '';
                 chapter.contentRaw = '';
                 chapter.content = '';
                 chapter.document = '';
@@ -2536,7 +2532,6 @@
               document.title = `[${now}/${max}]${Storage.title}`;
             }, (error) => {
               console.error(error);
-              chapter.title = '';
               chapter.contentRaw = '';
               chapter.content = '';
               chapter.document = '';
