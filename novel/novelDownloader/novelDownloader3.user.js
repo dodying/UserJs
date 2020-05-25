@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.1.235
+// @version     3.1.236
 // @created     2020-03-16 16:59:04
-// @modified    2020/5/25 18:30:44
+// @modified    2020/5/25 21:21:05
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -31,7 +31,7 @@
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 /* global xhr, saveAs, tranStr, base64, JSZip */
-(function () {
+;(function () { // eslint-disable-line no-extra-semi
   'use strict';
 
   let Storage = null;
