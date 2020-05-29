@@ -236,7 +236,7 @@ function delValue (item) { // 删除数据
 }
 
 function goto () { // 前进
-  window.location.href = window.location.search
+  window.location.href = window.location
   setTimeout(goto, 5000)
 }
 
