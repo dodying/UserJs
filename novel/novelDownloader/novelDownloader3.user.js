@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.1.236
+// @version     3.2.0
 // @created     2020-03-16 16:59:04
-// @modified    2020/5/25 21:21:05
+// @modified    2020/6/20 18:27:36
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
-// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=785676
+// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=818363
 // require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/download.js
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
 // require     http://127.0.0.1:8081/download.js
@@ -47,7 +47,7 @@
     },
     xhr: xhr
   };
-  const Config = GM_getValue('config', {
+  const Config = Object.assign({
     thread: 5,
     retry: 3,
     timeout: 60000,
@@ -56,11 +56,13 @@
     useCommon: true,
     modeManual: true,
     templateRule: true,
+    failedCount: 5,
+    failedWait: 60,
     image: true,
     addChapterNext: true,
     css: 'body {\n  line-height: 130%;\n  text-align: justify;\n  font-family: \\"Microsoft YaHei\\";\n  font-size: 22px;\n  margin: 0 auto;\n  background-color: #CCE8CF;\n  color: #000;\n}\n\nh1 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 28px;\n}\n\nh2 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 26px;\n}\n\nh3 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 24px;\n}\n\np {\n  text-indent: 2em;\n}',
     customize: '[]'
-  });
+  }, GM_getValue('config', {}));
   const Rule = {
     // 如无说明，所有可以为*选择器*都可以是async (doc)=>string
     //                              章节内async function(doc,res,request)
@@ -158,7 +160,7 @@
       '.booktext', '.yd_text2', '#contentTxt', '#oldtext',
       '#a_content', '#contents', '#content2', '#contentts',
       '#content1', '#content', '.content', '#arctext',
-      '[itemprop="acticleBody"]',
+      '[itemprop="acticleBody"]', '.readerCon',
       '[id*="article"]:minsize(100)', '[class*="article"]:minsize(100)',
       '[id*="content"]:minsize(100)', '[class*="content"]:minsize(100)'
     ].join(','),
@@ -169,7 +171,7 @@
 
     // ?elementRemove:选择器 或 async function(contentHTML)=>contentHTML
     //   如果需要下载图片，请不要移除图片元素
-    elementRemove: 'script,iframe,*:emptyHuman:not(br,p,img),:hiddenHuman',
+    elementRemove: 'script,iframe,*:emptyHuman:not(br,p,img),:hiddenHuman,a:not(:has(img))',
 
     // ?contentReplace:[[find,replace]]
     //   如果有图片，请不要移除图片元素
@@ -418,6 +420,7 @@
         });
         return content;
       },
+      elementRemove: 'span',
       chapterPrev: '#J_BtnPagePrev',
       chapterNext: '#J_BtnPageNext',
       thread: 1
@@ -1365,7 +1368,8 @@
         return window.eval(res.response.match(/content: (".*"),/)[1]);
         /* eslint-enable no-eval  */
       },
-      elementRemove: '.cp-hidden'
+      elementRemove: '.cp-hidden',
+      thread: 1
     },
     // 轻小说
     { // https://www.wenku8.net
@@ -1630,6 +1634,23 @@
       chapterTitle: 'h1',
       content: '#TextContent',
       elementRemove: 'div'
+    },
+    { // https://www.wanbentxt.com/
+      siteName: '完本神站',
+      url: '://www.wanbentxt.com/\\d+/$',
+      chapterUrl: '://www.wanbentxt.com/\\d+/\\d+(_\\d+)?.html',
+      title: '.detailTitle>h1',
+      writer: '.writer>a',
+      intro: '.detailTopMid>table>tbody>tr:nth-child(3)>td:nth-child(2)',
+      cover: '.detailTopLeft>img',
+      chapter: '.chapter>ul>li>a',
+      chapterTitle: '.readerTitle>h2',
+      content: '.readerCon',
+      contentReplace: [
+        [/^\s*(&nbsp;)+谨记我们的网址.*。/m],
+        [/^<br>(&nbsp;)+【提示】：.*?。/m],
+        [/--&gt;&gt;本章未完，点击下一页继续阅读/]
+      ]
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
@@ -2205,6 +2226,8 @@
       '  <br>',
       '  <input type="checkbox" name="templateRule">使用模板规则',
       '  <br>',
+      '  连续下载失败 <input type="number" name="failedCount" min="1"> 次时，<br>暂停 <input type="number" name="failedWait" min="1" title="0为手动继续"> 秒后继续下载',
+      '  <br>',
       '  Epub CSS: <textarea name="css" placeholder="" style="line-height:1;resize:both;"></textarea>',
       '  <br>',
       '  自定义规则: <textarea name="customize" placeholder="" style="line-height:1;resize:both;"></textarea>',
@@ -2319,7 +2342,8 @@
         let chapters = Storage.book.chapters;
         if (Config.sort) {
           const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-          chapters = chapters.sort((a, b) => collator.compare(a.url, b.url));
+          chapters = chapters.sort((a, b) => collator.compare(a.url, b.url)); // TODO
+          // ['1', '1_2'] => ['1_2', '1'] 而非 ['1', '1_2']
         }
 
         for (const chapter of chapters) {
@@ -2366,6 +2390,22 @@
         chapter.content = '';
         chapter.document = '';
       };
+      let failedCount = 0;
+      const onChapterFailedEvery = async (res, request, type) => {
+        if (type === 'abort' || failedCount < 0) return;
+        failedCount = failedCount + 1;
+        if (failedCount > Config.failedCount) {
+          failedCount = -1;
+          xhr.pause();
+          if (Config.failedWait > 0) {
+            await waitInMs(30 * 1000);
+            failedCount = 0;
+            xhr.resume();
+          } else {
+            failedCount = 0;
+          }
+        }
+      };
       let overrideMimeType = `text/html; charset=${document.characterSet}`;
       if (Storage.rule.charset) overrideMimeType = `text/html; charset=${Storage.rule.charset}`;
       const checkRelativeChapter = async (res, request, next) => {
@@ -2404,6 +2444,7 @@
         }
       };
       const onChapterLoad = async (res, request) => {
+        if (failedCount > 0) failedCount = 0;
         if (Storage.rule.deal) return;
 
         const doc = res.response;
@@ -2412,7 +2453,7 @@
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
 
         const chapterTitle = await getFromRule(Storage.rule.chapterTitle, { attr: 'text', document: res.response }, [res, request], '');
-        chapter.title = chapterTitle.trim() || chapter.title || $('title', doc).eq(0).text();
+        chapter.title = chapterTitle.split(Storage.book.title).join('').trim() || chapter.title || $('title', doc).eq(0).text();
         request.title = chapter.title;
 
         let contentCheck = true;
@@ -2493,13 +2534,14 @@
 
       xhr.init({
         retry: Config.retry,
-        thread: Storage.rule.thread || Config.thread,
+        thread: Storage.rule.thread && Storage.rule.thread < Config.thread ? Storage.rule.thread : Config.thread,
         timeout: Config.timeout,
         onComplete: async (list) => {
           if (Storage.book.chapters.find(i => !('contentRaw' in i))) return;
           await onComplete();
         },
         onfailed: onChapterFailed,
+        onfailedEvery: onChapterFailedEvery,
         checkLoad: async (res) => {
           if ((res.status > 0 && res.status < 200) || res.status >= 300 || (res.responseText && res.responseText.match(/404/) && res.responseText.match(/Not Found|找不到文件或目录/i))) {
             return false;
@@ -2871,7 +2913,7 @@
 
       for (let i = 0; i < chapters.length; i++) {
         const chapter = chapters[i];
-        files[String(i + 1).padStart(length, '0') + '-' + chapter.title + '.txt'] = $('<div>').html(chapter.content).text();
+        files[String(i + 1).padStart(length, '0') + '-' + chapter.title.replace(/[\\/:*?"<>|]/g, '-') + '.txt'] = $('<div>').html(chapter.content).text();
       }
 
       const zip = new JSZip();
