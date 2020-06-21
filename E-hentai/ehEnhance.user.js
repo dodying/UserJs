@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.17.156
-// @modified    2020-5-19 14:56:13
+// @version     1.18.0
+// @modified    2020/6/21 12:31:42
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -64,15 +64,16 @@ const SEL = {
       resultTotalMatch: /Showing ([\d,]+) results?/,
 
       thumb: '.glthumb',
-
+      thumbId: (id) => `it${id}`,
+      postedTime: '[id^="posted_"]',
       // favorited: '[id^="posted_"][style]',
 
       resultTableContainer: '.ido>*:has(.itg)',
       resultTable: 'table.itg',
       resultTbody: 'table.itg>tbody',
-      resultTr: 'table.itg tr',
-      resultTr0: 'table.itg tr:eq(0)',
-      resultTrGt0: 'table.itg tr:gt(0)',
+      resultTr: 'table.itg>tbody>tr',
+      resultTr0: 'table.itg>tbody>tr:nth-child(1)',
+      resultTrGt0: 'table.itg>tbody>tr:not(:nth-child(1))',
 
       nameTd: '.gl3m',
       galleryA: '[href*="hentai.org/g/"]'
@@ -134,6 +135,7 @@ const SEL = {
 
 const G = { // 全局变量
   debug: false,
+  isIframe: window.self !== window.top,
   searchPage: $(SEL.EH.search.checker).length,
   infoPage: $(SEL.EH.info.checker).length,
   settingPage: $(SEL.EH.setting.checker).length,
@@ -284,7 +286,7 @@ async function init () {
         '  document.querySelector(".ehD-pt").appendChild(node)',
         '}'
       ];
-      $('<input type="button" value="Fix EHD Counter" title="重置EHTD计数">').on({
+      $('<button title="重置EHTD计数">Fix EHD Counter</button>').on({
         click: () => {
           window.fixEHDCounter();
         }
@@ -354,11 +356,10 @@ async function init () {
     btnInfoText(); // 按钮 -> 下载info.txt(信息页)
     btnTask(); // 按钮 -> 添加到下载任务(信息页)
     tagEvent(); // 标签事件
-    copyInfo(); // 复制信息
     abortPending(); // 终止EHD所有下载
-    $('<input type="button" class="ehThumbBtn" value="Hide" style="width:36px;height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;">').on('click', function (e) { // 隐藏预览图
+    $('<button class="ehThumbBtn">Hide</button>').on('click', function (e) { // 隐藏预览图
       $(SEL.EH.info.previewContainer).toggle();
-      $(e.target).val($(e.target).val() === 'Show' ? 'Hide' : 'Show');
+      $(e.target).text($(e.target).text() === 'Show' ? 'Hide' : 'Show');
     }).prependTo(SEL.EH.info.btnContainer);
     if (G.config.showAllThumb) await showAllThumb();
     introPic(); // 宣传图
@@ -391,7 +392,7 @@ async function init () {
     G.gmetadata.push(..._gmetadata);
     if (G.config.changeName) changeName(SEL.EH.search.galleryA); // 修改本子标题（删除集会名、替换其中的罗马数字）
     if (G.config.languageCode) languageCode(); // 显示iso语言代码
-    if (G.config.checkExistAtStart) $('input:button[name="checkExist"]').click();
+    if (G.config.checkExistAtStart) $('[name="checkExist"]').click();
     tagPreview(); // 标签预览
     hideGalleries(); // 隐藏某些画集
     waitForElement('[name="checkExist"]:not([disabled])').then(() => {
@@ -400,13 +401,14 @@ async function init () {
     });
     autoComplete(); // 自动填充
     checkForNew(); // 检查有无新本子
+    btnSearch2Highlight();
   } else if (G.settingPage) { // 设置页
     return;
   }
   highlightBlacklist(); // 高亮黑名单相关的画廊(通用)
   if (G.config.searchInOtherSites) searchInOtherSites(); // 在其他站点搜索
   if (G.config.saveLink) saveLink(); // 保存链接
-  $('<input type="button" value="Clear Downloading" tooltip="重置下载列表">').on({
+  $('<button tooltip="重置下载列表">Clear Downloading</button>').on({
     click: () => {
       GM_setValue('downloading', []);
     },
@@ -414,7 +416,7 @@ async function init () {
       $(e.target).attr('title', '当前下载列表:<br> ' + GM_getValue('downloading', []).join('<br> '));
     }
   }).prependTo('.ehNavBar>div:nth-child(3)');
-  $('<input type="button" value="Start Task" tooltip="' + htmlEscape('左键: 开始下载任务<br>中键: 从当前任务开始<br>右键: 重置当前下载任务') + '">').on({
+  $('<button key-code="X" key-event="mousedown" tooltip="' + htmlEscape('左键: 开始下载任务<br>中键: 从当前任务开始<br>右键: 重置当前下载任务') + '">Start Task</button>').on({
     mousedown: e => {
       if (e.button === 0) {
         task();
@@ -449,7 +451,7 @@ async function init () {
       fr.readAsText(e.target.files[0]);
     }
   }).appendTo('.ehNavBar>div:nth-child(3)');
-  $('<input type="button" value="Export Task" tooltip="' + htmlEscape('左键: 导出下载列表（包括正在下载）<br>右键: 导入下载列表（自动清除重复项）') + '">').on({
+  $('<button tooltip="' + htmlEscape('左键: 导出下载列表（包括正在下载）<br>右键: 导入下载列表（自动清除重复项）') + '">Export Task</button>').on({
     mousedown: e => {
       if (e.button === 0) {
         const task = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i);
@@ -465,7 +467,7 @@ async function init () {
       $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
     }
   }).appendTo('.ehNavBar>div:nth-child(3)');
-  $('<input type="button" value="Toggle Blacklist" title="' + htmlEscape('左键: 加入或移除黑名单<br>右键: 显示黑名单列表') + '">').on({
+  $('<button title="' + htmlEscape('左键: 加入或移除黑名单<br>右键: 显示黑名单列表') + '">Toggle Blacklist</button>').on({
     mousedown: e => {
       if (e.button === 0) {
         const value = window.prompt('keyword:');
@@ -487,11 +489,17 @@ async function init () {
         }
       }
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)');
+  }).appendTo('.ehNavBar>div:nth-child(1)');
 
   showTooltip(); // 显示提示
   $('body').on('mousedown', 'a,button,input[type="button"],div:empty', e => {
-    $(e.target).css('border-color', 'red').css('border-style', 'solid').css('border-width', '1px');
+    setTimeout(() => {
+      $(e.target).addClass('clicked').attr('content-before', '[Click]');
+    }, 20);
+    $(e.target).addClass('clicked');
+    setTimeout(() => {
+      $(e.target).attr('content-before', null);
+    }, 800);
   });
   $('body').on('mousedown', '[copy]', e => {
     e.preventDefault();
@@ -500,10 +508,24 @@ async function init () {
     GM_setClipboard(copy);
   }).on('contextmenu', () => false);
   $('.ehNavBar').attr('oncontextmenu', 'return false');
+
+  $('body').on('keydown', function (e) {
+    if (['text', 'number', 'textarea', 'password'].includes(e.target.type)) return;
+    if (!e.originalEvent.code.match(/^(Key|Digit|Numpad)(.*)$/)) return;
+
+    const key = e.originalEvent.code.match(/^(Key|Digit|Numpad)(.*)$/)[2];
+    if ($(`[key-code="${key}"]`).length) {
+      const keyEvent = $(`[key-code=${key}]`).attr('key-event');
+      const event = jQuery.Event(keyEvent);
+      if (keyEvent === 'mousedown') event.button = e.shiftKey ? 2 : 0;
+      $(`[key-code=${key}]`).trigger(event).addClass('clicked');
+      e.preventDefault();
+    }
+  });
 }
 
 function abortPending () { // 终止EHD所有下载
-  $('<input type="button" value="Force Abort" title="终止EHD所有下载">').on({
+  $('<button title="终止EHD所有下载">Force Abort</button>').on({
     click: () => {
       $(SEL.EHD.abort).click();
     }
@@ -515,7 +537,17 @@ function addStyle () { // 添加样式
   $('<style></style>').text([
     // global
     'input[type="number"]{width:60px;border:1px solid #B5A4A4;margin:3px 1px 0;padding:1px 3px 3px;border-radius:3px;}',
-    'input:disabled{cursor:progress;color:#808080;}',
+    'input:disabled,button:disabled{cursor:progress;color:#808080;opacity:0.7;text-decoration:line-through;}',
+    '.clicked{border:#f00 solid 1px;}',
+    'button{min-height:26px;line-height:20px;padding:1px 5px 2px;margin:0 2px;border-radius:3px;font-size:9pt;}',
+    'button:enabled:hover{outline:0;}',
+    (
+      window.location.host === 'e-hentai.org'
+        ? 'button{border:2px solid #b5a4a4;color:#5c0d12;background-color:#edeada;}' +
+        'button:enabled:hover{background-color:#f3f0e0!important;border-color:#977273!important;}'
+        : 'button{border:2px solid #8d8d8d;color:#f1f1f1;background-color:#34353b;}' +
+        'button:enabled:hover{background-color:#43464e!important;border-color:#aeaeae!important;}'
+    ),
 
     // script
     '.ehNavBar{display:flex;width:99%;background-color:' + backgroundColor + ';position:fixed;z-index:1000;padding:0 10px;}',
@@ -587,6 +619,9 @@ function addStyle () { // 添加样式
     '.ehBlacklist{color:#000;background-color:#000;}',
     '.ehBlacklist:hover{color:inherit;background-color:inherit;}',
     '[copy]{cursor:pointer;}',
+    '[key-code]::before{content:"(&"attr(key-code)")";text-decoration:underline;}',
+    '[content-after]::after{content:attr(content-after);padding-left:5px;}',
+    '[content-before]::before{content:attr(content-before);padding-right:5px;}',
     '.icon{margin:-3px 0!important;height:16px!important;width:16px!important;}',
     '.ehHighlight{color:#0f0;background-color:#000;margin:3px;font-size:125%;font-weight:bold;}',
     'span.ehLang{float:left;border:black 1px solid;color:#0f0;margin:1px;background:#000;}',
@@ -599,6 +634,9 @@ function addStyle () { // 添加样式
     '.ehFavicion{background: url(favicon.ico) no-repeat center center;}',
     '.ehIgnore{filter:blur(1px) grayscale(1);}',
     '.ehIgnore:hover{filter:none;}',
+    '.ehIframe{width:99%;height:400px;padding-bottom:32px}',
+    '.ehIframeClose{position:fixed;top:0;right:0;z-index:99999;color:#f00;}',
+    '.ehThumbBtn{width:36px;height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;}',
 
     '.ehPreLike{white-space:pre-wrap;word-break:break-word;font-family:Consolas,Monaco,monospace;}',
     '.ehDiffNone{color:' + backgroundColor + ';background-color:' + backgroundColor + ';}',
@@ -615,6 +653,7 @@ function addStyle () { // 添加样式
     SEL.EH.search.thumb + '{position:fixed;left:0px!important;top:50%!important;visibility:hidden;transform:translateY(-50%);}',
     '.ehTagNotice{margin:1px;}',
     '.ehTagNotice{float:left;}',
+    '.ehTagNotice[name="Perma-ban"],' + SEL.EH.info.tagDiv + '[name="Perma-ban"]{color:#00f;background-color:#f00;}',
     '.ehTagNotice[name="Unlike"],' + SEL.EH.info.tagDiv + '[name="Unlike"]{color:#f00;background-color:#00f;}',
     '.ehTagNotice[name="Alert"],' + SEL.EH.info.tagDiv + '[name="Alert"]{color:#ff0;background-color:#080;}',
     '.ehTagNotice[name="Like"],' + SEL.EH.info.tagDiv + '[name="Like"]{color:#000;background-color:#0ff;}',
@@ -717,28 +756,71 @@ function autoComplete () { // 自动填充
 }
 
 function batchDownload () { // 批量下载
-  $('<th><input type="checkbox" title="全选"></th>').appendTo(SEL.EH.search.resultTr0);
-  $(SEL.EH.search.resultTr0).find('input').on('click', function (e) {
-    $(SEL.EH.search.resultTrGt0).find('input:visible').prop('checked', e.target.checked);
-    $(SEL.EH.search.resultTrGt0).filter(':visible:not(.ehCheckContainer)').toggleClass('ehBatchHover', e.target.checked);
+  $('<th><input type="checkbox" tooltip="' + htmlEscape('左键/Ctrl+A: 全选（当前表）<br>右键/Ctrl+D: 反选（当前表）<br>Shift+左键/Shift+A: 全选（所有表）<br>Shift+右键/Shift+D: 反选（所有表）') + '"></th>').appendTo(SEL.EH.search.resultTr0);
+  $(SEL.EH.search.resultTr0).find('th:last-child>input[type="checkbox"]').on('mousedown', function (e) {
+    const root = e.shiftKey ? document : $(e.target).parents().filter(SEL.EH.search.resultTable);
+    if (e.button === 0) {
+      const checked = e.target.checked;
+      $(root).find('tr').filter(SEL.EH.search.resultTrGt0).find('td:last-child>input[type="checkbox"]:visible').prop('checked', !checked);
+      $(root).find('tr').filter(SEL.EH.search.resultTrGt0).filter(':visible:not(.ehCheckContainer)').toggleClass('ehBatchHover', !checked);
+    } else if (e.button === 2) {
+      $(root).find('tr').filter(SEL.EH.search.resultTrGt0).find('td:last-child>input[type="checkbox"]:visible').toArray().forEach(i => {
+        const checked = i.checked;
+        i.checked = !checked;
+        $(i).parents().filter(SEL.EH.search.resultTrGt0).toggleClass('ehBatchHover', !checked);
+      });
+      e.target.checked = !e.target.checked;
+    }
+    e.preventDefault();
+  });
+  $('body').on('keydown', function (e) {
+    if (['text', 'number', 'textarea', 'password'].includes(e.target.type)) return;
+    if (!e.originalEvent.code.match(/^(Key|Digit|Numpad)(.*)$/)) return;
+
+    const key = e.originalEvent.code.match(/^(Key|Digit|Numpad)(.*)$/)[2];
+    if (e.ctrlKey && key === 'A') {
+      const checkboxs = $(SEL.EH.search.resultTr0).find('th:last-child>input[type="checkbox"]');
+
+      if (checkboxs.not(':checked').length) {
+        const event = jQuery.Event('mousedown');
+        event.button = 0;
+        checkboxs.not(':checked').eq(0).trigger(event).trigger('click');
+      }
+      e.preventDefault();
+    } else if (e.ctrlKey && key === 'D') {
+      const checkboxs = $(SEL.EH.search.resultTr0).find('th:last-child>input[type="checkbox"]');
+
+      if (checkboxs.filter(':checked').length) {
+        const event = jQuery.Event('mousedown');
+        event.button = 2;
+        checkboxs.filter(':checked').eq(0).trigger(event);
+      }
+      e.preventDefault();
+    } else if (e.shiftKey && key === 'A') {
+      const event = jQuery.Event('mousedown');
+      event.button = 0;
+      event.shiftKey = true;
+      $(SEL.EH.search.resultTr0).find('th:last-child>input[type="checkbox"]').eq(0).trigger(event).trigger('click');
+    } else if (e.shiftKey && key === 'D') {
+      const event = jQuery.Event('mousedown');
+      event.button = 2;
+      event.shiftKey = true;
+      $(SEL.EH.search.resultTr0).find('th:last-child>input[type="checkbox"]').eq(0).trigger(event);
+    }
   });
   $('<td><input type="checkbox"></td>').appendTo($(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer)'));
   $(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer)').on('click', e => {
     if ($(e.target).is('a,input') || $(e.target).parents().filter('a,input').length) return;
-    $(e.currentTarget).find('input[type="checkbox"]').click();
+    $(e.currentTarget).find('td:last-child>input[type="checkbox"]').click();
   });
-  $(SEL.EH.search.resultTrGt0).find('input').on('click', function (e) {
-    if (e.target.checked) {
-      $(e.target).parentsUntil('tbody').eq(-1).addClass('ehBatchHover');
-    } else {
-      $(e.target).parentsUntil('tbody').eq(-1).removeClass('ehBatchHover');
-    }
+  $(SEL.EH.search.resultTrGt0).find('td:last-child>input[type="checkbox"]').on('click', function (e) {
+    $(e.target).parentsUntil('tbody').eq(-1).toggleClass('ehBatchHover', e.target.checked);
   });
   window.sessionStorage.setItem('batch', 0);
-  $('<input type="button" value="Batch" title="' + htmlEscape('左键: Batch<br>右键: 重置Batch') + '">').on('mousedown', e => {
+  $('<button title="' + htmlEscape('左键: Batch<br>右键: 重置Batch') + '">Batch</button>').on('mousedown', e => {
     if (e.button === 2) {
       window.sessionStorage.setItem('batch', 0);
-    } else {
+    } else if (e.button === 0) {
       const batch = window.sessionStorage.getItem('batch') * 1;
       $(SEL.EH.search.resultTr).find('input:checked').click();
       const books = $(SEL.EH.search.resultTrGt0).filter(':visible:not(:has(.ehExist,.ehBlacklist),.ehCheckContainer)').toArray();
@@ -748,65 +830,123 @@ function batchDownload () { // 批量下载
       window.sessionStorage.setItem('batch', batch * G.config.batch <= books.length ? batch + 1 : 0);
     }
   }).appendTo('.ehNavBar>div:nth-child(3)');
-  $('<input type="button" value="Open" title="打开">').on('mousedown', e => {
+  $('<button title="打开">Open</button>').on('mousedown', e => {
     $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
       openUrl(i.href + '#' + e.button);
     });
   }).appendTo('.ehNavBar>div:nth-child(3)');
 }
 
+const generateInfo = () => {
+  let infoStr = '';
+  infoStr += $(SEL.EH.info.title).text() + '\n';
+  infoStr += $(SEL.EH.info.titleJp).text() + '\n';
+  infoStr += window.location.href + '\n\n';
+
+  infoStr += 'Category: ' + $(SEL.EH.info.infoCategory).eq(0).text().trim() + '\n';
+  infoStr += 'Uploader: ' + $(SEL.EH.info.infoUploader).eq(0).text() + '\n';
+
+  $(SEL.EH.info.infoDetailTr).toArray().forEach(i => {
+    var c1 = $(SEL.EH.info.infoDetailKey, i).eq(0).text();
+    var c2 = $(SEL.EH.info.infoDetailValue, i).eq(0).text();
+    infoStr += c1 + ' ' + c2 + '\n';
+  });
+
+  infoStr += 'Rating: ' + unsafeWindow.average_rating + '\n\n';
+
+  infoStr += 'Tags:\n';
+  $(SEL.EH.info.tagTr).toArray().forEach(i => {
+    infoStr += '> ' + $(SEL.EH.info.tagKey, i).text() + ' ';
+    infoStr += $(SEL.EH.info.tagDiv, i).toArray().map(i => i.textContent).join(', ') + '\n';
+  });
+  infoStr += '\n';
+
+  if ($(SEL.EH.info.uploaderComment).length) infoStr += 'Uploader Comment:\n' + $(SEL.EH.info.uploaderComment).html().replace(/<br>|<br \/>/gi, '\n') + '\n\n';
+
+  $(SEL.EH.info.previewImg).toArray().forEach(i => {
+    infoStr += '\n\nPage ' + i.alt + ': ' + $(i).parent().attr('href') + '\n';
+    const title = $(i).attr('title') || $(i).attr('raw-title');
+    infoStr += 'Image ' + i.alt + ': ' + title.match(/^Page \d+: (.*)$/)[1];
+  });
+
+  infoStr += '\n\nDownloaded at ' + new Date() + '\n\nGenerated by E-Hentai Downloader. https://github.com/ccloli/E-Hentai-Downloader';
+
+  infoStr = infoStr.replace(/\n/g, '\r\n');
+  return htmlUnescape(infoStr);
+};
+
 function btnFake () { // 按钮 -> 下载空文档(信息页)
-  $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', e => {
-    saveAs2('', $(SEL.EH.info.title).text().trim() + '.cbz');
-  }).appendTo('.ehNavBar>div:nth-child(3)');
+  $('<button title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">Fake</button>').on('mousedown', async e => {
+    const zip = new JSZip();
+    zip.file('info.txt', generateInfo());
+    const file = await zip.generateAsync({
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: {
+        level: 9
+      }
+    });
+    saveAs2(file, $(SEL.EH.info.title).text() + '.cbz');
+  }).appendTo('.ehNavBar>div:nth-child(1)');
 }
 
 function btnFake2 () { // 按钮 -> 下载空文档(搜索页)
-  $('<input type="button" value="Fake" title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">').on('mousedown', async e => {
-    for (const i of $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray()) {
-      saveAs2('', i.textContent.trim() + '.cbz');
-      await waitInMs(200);
+  $('<button title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">Fake</button>').on('mousedown', async e => {
+    for (const i of $('.ehBatchHover:visible').toArray()) {
+      const gid = $(i).find(SEL.EH.search.thumb).attr('id').match(/\d+/)[0] * 1;
+      const meta = G.gmetadata.find(i => i.gid === gid);
+      let language = meta.tags.find(i => i.match(/^language:(.*)/) && i !== 'language:translated');
+      language = language ? language.match(/^language:(.*)/)[1] : 'japanese';
+      language = language.substr(0, 1).toUpperCase() + language.substr(1);
+      let tags = {};
+      for (const tag of meta.tags) {
+        const [, main,, sub] = tag.match(/(language|artist|female|male|parody|character|group|misc)?(:)?(.*)/);
+        if (!(main in tags)) tags[main] = [];
+        tags[main].push(sub);
+      }
+      tags = Object.keys(tags).map(i => `> ${i}: ${tags[i].join(', ')}`);
+      const info = [
+        $(i).find(SEL.EH.search.galleryA).text(),
+        meta.title_jpn,
+        `${window.location.origin}/g/${meta.gid}/${meta.token}/`,
+        '',
+        `Category: ${meta.category}`,
+        `Uploader: ${meta.uploader}`,
+        `Posted: ${$(i).find(SEL.EH.search.postedTime).text()}`,
+        'Parent: None',
+        `Visible: ${meta.expunged ? 'No' : 'Yes'}`,
+        `Language: ${language} ${meta.tags.includes('language:translated') ? 'TR' : ''}`,
+        `File Size: ${Math.ceil(meta.filesize / 1024 / 1024)} MB`,
+        `Length: ${meta.filecount} pages`,
+        'Favorited: 0 times',
+        `Rating: ${meta.rating}`,
+        '',
+        'Tags:',
+        ...tags,
+        '',
+        `Downloaded at ${new Date().toString()}`,
+        '',
+        'Generated by E-Hentai Downloader. https://github.com/ccloli/E-Hentai-Downloader'
+      ].join('\r\n');
+      const zip = new JSZip();
+      zip.file('info.txt', info);
+      const file = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: {
+          level: 9
+        }
+      });
+      saveAs2(file, meta.title + '.cbz');
+      await waitInMs(100);
     }
-  }).appendTo('.ehNavBar>div:nth-child(3)');
+  }).appendTo('.ehNavBar>div:nth-child(1)');
 }
 
 function btnInfoText () { // 按钮 -> 下载info.txt(信息页)
-  $('<input type="button" value="info.txt" title="' + htmlEscape('下载一个 <span class="ehHighlight">info.txt</span>') + '">').on('mousedown', () => {
-    let infoStr = '';
-    infoStr += $(SEL.EH.info.title).text() + '\n';
-    infoStr += $(SEL.EH.info.titleJp).text() + '\n';
-    infoStr += window.location.href + '\n\n';
-
-    infoStr += 'Category: ' + $(SEL.EH.info.infoCategory).eq(0).text().trim() + '\n';
-    infoStr += 'Uploader: ' + $(SEL.EH.info.infoUploader).eq(0).text() + '\n';
-
-    $(SEL.EH.info.infoDetailTr).toArray().forEach(i => {
-      var c1 = $(SEL.EH.info.infoDetailKey, i).eq(0).text();
-      var c2 = $(SEL.EH.info.infoDetailValue, i).eq(0).text();
-      infoStr += c1 + ' ' + c2 + '\n';
-    });
-
-    infoStr += 'Rating: ' + unsafeWindow.average_rating + '\n\n';
-
-    infoStr += 'Tags:\n';
-    $(SEL.EH.info.tagTr).toArray().forEach(i => {
-      infoStr += '> ' + $(SEL.EH.info.tagKey, i).text() + ' ';
-      infoStr += $(SEL.EH.info.tagDiv, i).toArray().map(i => i.textContent).join(', ') + '\n';
-    });
-    infoStr += '\n';
-
-    if ($(SEL.EH.info.uploaderComment).length) infoStr += 'Uploader Comment:\n' + $(SEL.EH.info.uploaderComment).html().replace(/<br>|<br \/>/gi, '\n') + '\n\n';
-
-    $(SEL.EH.info.previewImg).toArray().forEach(i => {
-      infoStr += '\n\nPage ' + i.alt + ': ' + $(i).parent().attr('href') + '\n';
-      const title = $(i).attr('title') || $(i).attr('raw-title');
-      infoStr += 'Image ' + i.alt + ': ' + title.match(/^Page \d+: (.*)$/)[1];
-    });
-
-    infoStr += '\n\nDownloaded at ' + new Date() + '\n\nGenerated by E-Hentai Downloader. https://github.com/ccloli/E-Hentai-Downloader';
-
-    saveAs2(htmlUnescape(infoStr.replace(/\n/g, '\r\n')), 'info.txt');
-  }).appendTo('.ehNavBar>div:nth-child(3)');
+  $('<button title="' + htmlEscape('下载一个 <span class="ehHighlight">info.txt</span>') + '">info.txt</button>').on('mousedown', () => {
+    saveAs2(generateInfo(), 'info.txt');
+  }).appendTo('.ehNavBar>div:nth-child(1)');
 }
 
 function btnSearch () { // 按钮 -> 搜索(信息页)
@@ -818,7 +958,7 @@ function btnSearch () { // 按钮 -> 搜索(信息页)
     text[i] = text[i].trim();
     if (text[i]) $('<span></span>').html(`<input id="ehSearch_${i}" type="checkbox"><label for="ehSearch_${i}">${text[i]}</label>`).appendTo('.ehSearch');
   }
-  $('<input type="button" value="Search" title="搜索">').appendTo('.ehSearch').click(() => {
+  $('<button title="搜索">Search</button>').appendTo('.ehSearch').click(() => {
     const keyword = $('.ehSearch input:checked+label').toArray().map(i => '"' + i.textContent + '"').join(' ');
     if (keyword.length > 0) openUrl(G.config.searchArguments.replace(/{q}/g, encodeURIComponent(keyword)));
   });
@@ -861,8 +1001,53 @@ function btnSearch2 () { // 按钮 -> 搜索(搜索页)
   });
 }
 
+function btnSearch2Highlight () {
+  const check = () => {
+    const list = GM_getValue('checkList', {});
+    const listKeys = Object.keys(list);
+    const now = new Date().getTime();
+    const filtered = G.gmetadata.filter(info => info.tags && info.tags.some(tag => tag.match(/^(artist|group):/)));
+    for (const info of filtered) {
+      const artist = info.tags.filter(tag => tag.match(/^artist:/));
+      const group = info.tags.filter(tag => tag.match(/^group:/));
+      let regexp;
+      if (artist.length === 1) {
+        regexp = new RegExp(`artist:"?${artist[0].match(/^artist:(.*)$/)[1]}\\$?"?`, 'gi');
+      // } else if (group.length === 1) {
+      //   regexp = new RegExp(`group:"?${group[0].match(/^group:(.*)$/)[1]}\\$?"?`, 'gi');
+      } else if (artist.length === 0 && group.length === 0) {
+        continue;
+      } else {
+        const arr = artist.length ? artist : group;
+        const filtered = arr.filter(text => {
+          const main = text.match(/^artist:(.*)$/) ? 'artist' : 'group';
+          const regexp = new RegExp(`${main}:"?${text.match(/^\w+:(.*)$/)[1]}\\$?"?`, 'gi');
+          const find = listKeys.find(i => i.match(regexp));
+          if (find && now - list[find].time <= 30 * 24 * 60 * 60 * 1000) return true;
+        });
+        if (arr.length === filtered.length) {
+          $(SEL.EH.search.resultTrGt0).filter(`:has([href*="/${info.gid}/${info.token}/"])`).find('.btnSearch').css('background-color', 'green');
+        } else {
+          $(SEL.EH.search.resultTrGt0).filter(`:has([href*="/${info.gid}/${info.token}/"])`).find('.btnSearch').css('background-color', 'orange');
+          filtered.forEach(i => {
+            info.tags.splice(info.tags.indexOf(i), 1);
+          });
+        }
+        continue;
+      }
+      const find = listKeys.find(i => i.match(regexp));
+      if (find && now - list[find].time <= 30 * 24 * 60 * 60 * 1000) {
+        $(SEL.EH.search.resultTrGt0).filter(`:has([href*="/${info.gid}/${info.token}/"])`).find('.btnSearch').css('background-color', 'green');
+      }
+    }
+  };
+  $('<button>Check Search</button>').on('click', check).appendTo('.ehNavBar>div:nth-child(2)');
+
+  check();
+}
+
 function btnTask () { // 按钮 -> 添加到下载任务(信息页)
-  $('<input type="button" value="Add Task" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">').on({
+  $('<button key-code="Z" key-event="mousedown" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">Add Task</button>').on({
     mousedown: e => {
       if (e.button === 0) {
         const task = GM_getValue('task', []);
@@ -870,6 +1055,7 @@ function btnTask () { // 按钮 -> 添加到下载任务(信息页)
         if (!(task.includes(url))) {
           task.push(url);
           GM_setValue('task', task);
+          $(e.target).attr('content-after', '[+1]');
         }
       } else if (e.button === 1) {
         GM_setValue('task', []);
@@ -879,8 +1065,12 @@ function btnTask () { // 按钮 -> 添加到下载任务(信息页)
         if (task.includes(url)) {
           task.splice(task.indexOf(url), 1);
           GM_setValue('task', task);
+          $(e.target).attr('content-after', '[-1]');
         }
       }
+      setTimeout(() => {
+        $(e.target).attr('content-after', null);
+      }, 800);
     },
     mouseenter: e => {
       const task = GM_getValue('task', []);
@@ -890,23 +1080,36 @@ function btnTask () { // 按钮 -> 添加到下载任务(信息页)
 }
 
 function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
-  $('<input type="button" value="Add Task" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">').on({
+  $('<button key-code="Z" key-event="mousedown" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">Add Task</button>').on({
     mousedown: e => {
       if (e.button === 0) {
         const task = GM_getValue('task', []);
+        let count = 0;
         $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
-          if (!(task.includes(i.href))) task.push(i.href);
+          if (!(task.includes(i.href))) {
+            task.push(i.href);
+            count++;
+          }
         });
         GM_setValue('task', task);
+        $(e.target).attr('content-after', `[+${count}]`);
       } else if (e.button === 1) {
         GM_setValue('task', []);
       } else if (e.button === 2) {
         const task = GM_getValue('task', []);
+        let count = 0;
         $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
-          if (task.includes(i.href)) task.splice(task.indexOf(i.href), 1);
+          if (task.includes(i.href)) {
+            task.splice(task.indexOf(i.href), 1);
+            count++;
+          }
         });
         GM_setValue('task', task);
+        $(e.target).attr('content-after', `[-${count}]`);
       }
+      setTimeout(() => {
+        $(e.target).attr('content-after', null);
+      }, 800);
     },
     mouseenter: e => {
       const task = GM_getValue('task', []);
@@ -940,7 +1143,7 @@ function calcRelativeTime (time) { // 计算相对时间
   }
   t = Math.round(t);
   let text = `about ${t} ${suf}${t > 1 ? 's' : ''} ago`;
-  if (delta <= 1000 * 60 * 60 * 24 * 7 * 2) text = '<span class="ehHighlight">' + text + '</span>';
+  if (delta <= 1000 * 60 * 60 * 24 * 30) text = '<span class="ehHighlight">' + text + '</span>';
   return text;
 }
 
@@ -982,7 +1185,7 @@ function changeName (e) { // 修改本子标题（删除集会名、替换其中
   };
 
   $(e).toArray().forEach(i => {
-    const title = fullWidth2Half(i.textContent).replace(/^\(.*?\)( |)/, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/, ' ').replace(G.emojiRegExp, '').trim();
+    const title = fullWidth2Half(i.textContent).replace(/^\(.*?\)( |)/, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').replace(G.emojiRegExp, '').trim();
     i.textContent = title;
 
     // 去除标题中首尾的信息，如作者，组织，原作，语言，翻译组
@@ -997,7 +1200,7 @@ function changeName (e) { // 修改本子标题（删除集会名、替换其中
 
     let mainTitle = removeOtherInfo(title);
     mainTitle = removeOtherInfo(mainTitle, true);
-    mainTitle = mainTitle.replace(/[|~].*/, '').replace(/\s+/, ' ').trim();
+    mainTitle = mainTitle.replace(/[|~].*/, '').replace(/\s+/g, ' ').trim();
 
     const index = title.indexOf(mainTitle);
     const prefix = title.substr(0, index).trim();
@@ -1051,37 +1254,36 @@ function changeName (e) { // 修改本子标题（删除集会名、替换其中
 
 function checkExist () { // 检查本地是否存在
   if (G.config.hideExist) {
-    $('<input class="ehHideExist" type="button" status="Hide" value="Hide Exist: 0">').on({
+    $('<button class="ehHideExist" status="Hide">Hide Exist: 0</button>').on({
       click: e => {
         const status = $(e.target).attr('status');
         const ele = $(SEL.EH.search.resultTr).filter(':has(.ehExist[name="force"],.ehExist[name="force1"])');
         ele.toggle(status === 'Hide');
         const now = status === 'Hide' ? 'Show' : 'Hide';
-        $(e.target).attr('status', now);
-        $(e.target).val(`${now} Exist: ${ele.length}`);
+        $(e.target).attr('status', now).text(`${now} Exist: ${ele.length}`);
       },
       dblclick: e => {
         const status = $(e.target).attr('status');
         const ele = $(SEL.EH.search.resultTr).filter(':has(.ehExist[name="force"],.ehExist[name="force1"])');
         ele.toggle($(e.target).attr('status') !== 'Hide');
-        $(e.target).val(`${status} Exist: ${ele.length}`);
+        $(e.target).text(`${status} Exist: ${ele.length}`);
       }
     }).appendTo(SEL.EH.search.resultTotal);
   }
   $('<div class="ehExistContainer"></div>').prependTo('.ehContainer');
-  $('<input type="button" value="Check Exist" name="checkExist" title="只检查可见的，且之前检查无结果">').on('click', async (e) => {
+  $('<button name="checkExist" title="只检查可见的，且之前检查无结果">Check Exist</button>').on('click', async (e) => {
     const langRE = /\[(Chinese|English|Digital)\].*/gi;
-    const uncensoredRe = /\[(Decensored|無修正?|无修)\]/i;
+    const uncensoredRe = /\[(Decensored|無修正?|无修|Colorized)\]/i;
 
-    $(e.target).val('Checking').prop('disabled', true);
+    $(e.target).text('Checking').prop('disabled', true);
     const lst = $(SEL.EH.search.resultTr).filter(':visible').not(':has(.ehExist[name^="force"])').find(SEL.EH.search.galleryA).toArray();
     const name = {};
     lst.forEach((i, j) => {
       if (G.config.checkExistName2) {
         name[j] = i.textContent.replace(G.uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
       } else {
-        const arr = i.textContent.replace(/\|.*?([([{【［（]|$)/, '$1').replace(/[\\/:*?"<>|]/g, '-').replace(langRE, '').split(/[[\](){}【】［］（）～~]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i);
-        name[j] = arr.join();
+        const arr = i.textContent.replace(/\|.*?([([{【［（]|$)/, '$1').replace(/[\\/:*?"<>|]/g, '-').replace(langRE, '').split(/[[\](){}【】［］（）～~!-]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i);
+        name[j] = Array.from(new Set(arr)).join();
         if (name[j] === '') name[j] = i.textContent.replace(G.uselessStrRE, '').replace(/\|.*/g, '').replace(/[\\/:*?"<>|]/g, '-').replace(/\.$/, '').trim();
       }
     });
@@ -1091,7 +1293,7 @@ function checkExist () { // 检查本地是否存在
         timeout: 120 * 1000
       });
       lst.forEach((i, j) => {
-        let name = i.textContent;
+        let name = i.textContent.replace(/\s+/g, ' ');
         let name2 = name.match(/\|.*?([([{【［（]|$)/) ? name.replace(/\|.*?([([{【［（]|$)/, '$1') : name;
         name = name.replace(/[\\/:*?"<>|]/g, '-');
         name2 = name2.replace(/[\\/:*?"<>|]/g, '-');
@@ -1102,7 +1304,7 @@ function checkExist () { // 检查本地是否存在
         res.response[j].forEach(k => {
           const fileSize = k.size;
           const fileName = k.name;
-          const noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').trim();
+          const noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').replace(/\s+/g, ' ').trim();
           const noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$', 'i');
           const noLang = noExt.replace(langRE, '').trim();
           const noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$', 'i');
@@ -1110,7 +1312,7 @@ function checkExist () { // 检查本地是否存在
           let _name;
           if (noExtRE.exec(name) || noExtRE.exec(name2)) {
             _name = 'force';
-          } else if (!noExt.match(/(chinese|漢化|汉化|中文|中国翻訳|中国語|中国语)/i)) {
+          } else if (!noExt.match(/(chinese|漢化|汉化|中文|中国翻訳|中国語|中国语)/i) || noExt.match(/(机翻)/i)) {
             _name = 'notchinese';
           } else if (noExt.match(/\[(Incomplete|Sample|Ongoing)\]/i) || (name.match(uncensoredRe) && !noExt.match(uncensoredRe))) {
             _name = 'incomplete';
@@ -1154,7 +1356,7 @@ function checkExist () { // 检查本地是否存在
         console.error(err);
       }
     }
-    $(e.target).val('Check Exist').prop('disabled', false);
+    $(e.target).text('Check Exist').prop('disabled', false);
 
     if (G.config.hideExist) {
       $('.ehHideExist').dblclick();
@@ -1164,7 +1366,7 @@ function checkExist () { // 检查本地是否存在
 
 function checkForNew () { // 检查有无新本子
   let searchKey;
-  $('<div><a href="javascript:;">Add to CheckList</a></div>').on({
+  $('<div><a key-code="2" key-event="mousedown" href="javascript:;">Add to CheckList</a></div>').on({
     contextmenu: () => false,
     mousedown: e => {
       e.preventDefault();
@@ -1188,7 +1390,7 @@ function checkForNew () { // 检查有无新本子
       GM_setValue('checkList', sortObj(list, 'time'));
     }
   }).appendTo(SEL.EH.common.navBar);
-  $('<div><a href="javascript:;">Show CheckList</a></div>').on('click', e => {
+  $('<div><a key-code="3" key-event="click" href="javascript:;">Show CheckList</a></div>').on('click', e => {
     if ($('.ehCheckTableContainer').length) {
       $('.ehCheckTableContainer').toggle();
       return;
@@ -1249,12 +1451,12 @@ function checkForNew () { // 检查有无新本子
       $('.ehCheckTableContainer').remove();
       $(SEL.EH.common.navBar).find('a:contains("Show CheckList")').click();
     });
-    $('<input type="button" value="Select Invert" title="反选">').on('click', function () {
+    $('<button title="反选">Select Invert</button>').on('click', function () {
       $('.ehCheckTable td>input').toArray().forEach(i => {
         i.checked = !i.checked;
       });
     }).appendTo('.ehCheckTableBtn');
-    $('<input type="button" value="Delete" title="移除">').on('click', function () {
+    $('<button title="移除">Delete</button>').on('click', function () {
       const list = GM_getValue('checkList', {});
       $('.ehCheckTable td>input:checked').toArray().forEach(i => {
         const keyword = $(i).parentsUntil('tbody').eq(-1).find('td>a').html();
@@ -1263,7 +1465,7 @@ function checkForNew () { // 检查有无新本子
       GM_setValue('checkList', list);
       $('.ehCheckTableContainer').remove();
     }).appendTo('.ehCheckTableBtn');
-    $('<input type="button" value="Cancel" title="取消">').on('click', function () {
+    $('<button title="取消">Cancel</button>').on('click', function () {
       $('.ehCheckTableContainer').hide();
     }).appendTo('.ehCheckTableBtn');
   }).appendTo(SEL.EH.common.navBar);
@@ -1293,7 +1495,7 @@ function checkForNew () { // 检查有无新本子
     ele.insertBefore(tr[i]);
   }
 
-  $('<input type="button" value="Delete" title="移除该项">').click(() => {
+  $('<button title="移除该项">Delete</button>').click(() => {
     if (window.confirm('确认移除: \n' + keyword)) {
       const list = GM_getValue('checkList', {});
       delete list[keyword];
@@ -1360,32 +1562,6 @@ async function checkImageSize () { // 检查图片尺寸
   }
 }
 
-function copyInfo () { // 复制信息
-  if ($(SEL.EH.info.title).text().match(/\[(.*?)\]/) && $(SEL.EH.info.titleJp).text().match(/\[(.*?)\]/)) { // artist
-    var name = $(SEL.EH.info.title).text().match(/\[(.*?)\]/)[1];
-    var nameJpn = $(SEL.EH.info.titleJp).text().match(/\[(.*?)\]/)[1];
-    if (name.match(/\(.*?\)/)) name = name.match(/\((.*?)\)/)[1];
-    if (nameJpn.match(/\(.*?\)/)) nameJpn = nameJpn.match(/\((.*?)\)/)[1];
-    $(`<input type="button" value="[${name}]${nameJpn}" copy="[${name}]${nameJpn}">`).appendTo('.ehNavBar>div:nth-child(1)');
-  }
-  if ($(SEL.EH.info.tagParody).length > 0) { // parody
-    const info = $(SEL.EH.info.tagParody).attr('id').split(/ta_|:/);
-    let parody = findData(info[1], info[2], true);
-    if (Object.keys(parody).length) {
-      parody = parody.cname;
-    } else {
-      parody = $(SEL.EH.info.titleJp).text().match(/\(.*?\)/g) ? $(SEL.EH.info.titleJp).text().match(/\(.*?\)/g) : $(SEL.EH.info.title).text().match(/\(.*?\)/g);
-      if (parody) {
-        parody = parody[parody.length - 1].match(/\((.*?)\)/)[1];
-      } else {
-        return;
-      }
-    }
-    const parodyKeyword = $(SEL.EH.info.tagParody).text().replace(/ \| .*/, '');
-    $(`<input type="button" value="【${parody}】${parodyKeyword}" copy="【${parody}】${parodyKeyword}">`).appendTo('.ehNavBar>div:nth-child(1)');
-  }
-}
-
 function defaultConfig () { // 默认设置
   /* eslint-disable object-property-newline */
   const config = {
@@ -1396,7 +1572,8 @@ function defaultConfig () { // 默认设置
     // 通用设置
     timeShow: 'local',
     ex2eh: false, eh2ex: true,
-    openUrl: '0',
+    openUrlInfo: '0',
+    openUrlOther: '0',
     saveLink: false, searchInOtherSites: false, bthFake: false,
     bookmark: '0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist',
     searchArguments: '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_search={q}&f_sh=on',
@@ -1417,7 +1594,7 @@ function defaultConfig () { // 默认设置
     checkTimeDeviation: 12,
     autoUpdateCheck: 25,
     checkListPerPage: 25,
-    preloadResult: 1,
+    preloadResult: 0,
 
     // 信息页
     uconfig: '',
@@ -1542,19 +1719,20 @@ function hideGalleries () { // 隐藏某些画集
       $(`<span class="ehTagNotice" name="${tags[j]}" title="${tagInfo}">${tagChs}</span>`).appendTo(container);
     });
   });
-  if (!G.config.notHideUnlike) {
-    let ele = $(SEL.EH.search.resultTr).filter(':has(.ehTagNotice[name="Unlike"])');
-    if (G.config.alwaysShowLike) ele = ele.not(':has(.ehTagNotice[name="Unlike"]):has(.ehTagNotice[name="Like"])');
-    const length = ele.length;
-    ele.hide();
-    $(`<input type="button" status="Hide" value="Hide Tag: ${length}">`).on('click', function (e) {
-      const status = $(e.target).attr('status');
-      ele.toggle(status === 'Hide');
-      const now = status === 'Hide' ? 'Show' : 'Hide';
-      $(e.target).attr('status', now);
-      $(e.target).val(`${now} Tag: ${length}`);
-    }).appendTo(SEL.EH.search.resultTotal);
-  }
+
+  let elem = [];
+  if (!G.config.notHideUnlike) $(SEL.EH.search.resultTr).filter(':has(.ehTagNotice[name="Unlike"])').toArray();
+  if (G.config.alwaysShowLike) elem = $(elem).not(':has(.ehTagNotice[name="Like"])').toArray();
+  elem = elem.concat($(SEL.EH.search.resultTr).filter(':has(.ehTagNotice[name="Perma-ban"])').not(elem).toArray());
+  elem = $(elem);
+  elem.hide();
+  const length = elem.length;
+  $(`<button status="Hide">Hide Tag: ${length}</button>`).on('click', function (e) {
+    const status = $(e.target).attr('status');
+    elem.toggle(status === 'Hide');
+    const now = status === 'Hide' ? 'Show' : 'Hide';
+    $(e.target).attr('status', now).text(`${now} Tag: ${length}`);
+  }).appendTo(SEL.EH.search.resultTotal);
 }
 
 function highlightBlacklist () { // 高亮黑名单相关的画廊(通用)
@@ -1592,7 +1770,7 @@ function introPic () { // 宣传图
     const id = url.split('/')[4];
     const name = $(i).find('img:eq(0)').attr('title').match(/Page \d+:\s+(.*)/)[1];
     const isIntroPic = introPic.includes(id);
-    const btnBlock = $(`<a type="button" name="intro" href="javascript:;" on="true" file="${name}"></a>`).on('click', toggleIgnore).appendTo(i.parentNode);
+    const btnBlock = $(`<a name="intro" href="javascript:;" on="true" file="${name}"></a>`).on('click', toggleIgnore).appendTo(i.parentNode);
 
     if (isIntroPic || G.introPicName.some(j => name.match(j))) {
       $(btnBlock).attr('on', 'false');
@@ -1722,24 +1900,31 @@ function makeRange (arr) {
 }
 
 function openUrl (url) { // 打开链接
-  url = (url.match('//') ? '' : window.location.origin) + url;
-  if (G.config.openUrl === '0') {
+  url = new URL(url, window.location.href).href;
+  const mode = url.match(/e[x-]hentai.org\/g\//) ? 'Info' : 'Other';
+  const config = G.config[`openUrl${mode}`];
+  if (config === '0') {
     GM_openInTab(url, true);
-  } else if (G.config.openUrl === '1') {
+  } else if (config === '1') {
     GM_openInTab(url, false);
-  } else if (G.config.openUrl === '2' || G.config.openUrl === '3') {
-    if (url.match(/\/g\/\d+\/[\da-z]+\//)) {
-      const popup = window.open(url, '', 'resizable,scrollbars,status');
-      if (popup) {
-        popup.moveTo(0, 0);
-        popup.resizeTo(window.screen.width, window.screen.height);
-      } else {
-        setNotification('请允许该网页弹出窗口');
-        GM_openInTab(url, G.config.openUrl === '2');
-      }
+  } else if (config === '2') {
+    const popup = window.open(url, '', 'resizable,scrollbars,status');
+    if (popup) {
+      popup.moveTo(0, 0);
+      popup.resizeTo(window.screen.width, window.screen.height);
     } else {
-      GM_openInTab(url, G.config.openUrl === '2');
+      setNotification('请允许该网页弹出窗口');
+      GM_openInTab(url, false);
     }
+  } else if (config === '3') {
+    $('<iframe class="ehIframe">').appendTo('body').on('load', (e) => {
+      $(e.target).css({
+        height: Math.min(document.documentElement.clientHeight - 60, parseInt($(e.target).contents().find('body').css('height')))
+      });
+      $('<button class="ehIframeClose">Close</button>').appendTo($(e.target).contents().find('body')).on('click', () => {
+        $(e.target).remove();
+      });
+    }).attr('src', url);
   }
 }
 
@@ -1754,8 +1939,8 @@ function quickDownload () { // 右键下载
 }
 
 async function preloadResult (number) { // 自动预载
-  const pageCur = $(SEL.EH.common.pageCur).text() * 1;
-  const pageMax = $(SEL.EH.common.pageMax).text() * 1;
+  const pageCur = parseInt($(SEL.EH.common.pageCur).text());
+  const pageMax = parseInt($(SEL.EH.common.pageMax).text());
   let pageCurUrl = $(SEL.EH.common.pageCur).prop('href');
   if (!pageCurUrl.match(/\?page=\d+/)) pageCurUrl = pageCurUrl.match(/\?/) ? pageCurUrl.replace(/\?/, '?page=0&') : pageCurUrl + '?page=0';
   const urls = Array.from({ length: Math.min(pageMax - pageCur, number) }, (_, index) => pageCurUrl.replace(/\?page=\d+/, `?page=${pageCur + index}`));
@@ -1763,6 +1948,13 @@ async function preloadResult (number) { // 自动预载
   for (const res of results) {
     $('<hr size="10" style="background: #40454b;">').appendTo(SEL.EH.search.resultTableContainer);
     $([SEL.EH.search.resultTable, SEL.EH.common.pagesContainerBottom].join(','), res.response).appendTo(SEL.EH.search.resultTableContainer);
+  }
+
+  // 移除重复
+  let gids = $(SEL.EH.search.resultTr).find(SEL.EH.search.thumb).toArray().map(i => i.id.match(/\d+/)[0] * 1);
+  gids = Array.from(new Set(gids.filter((item, index, array) => array.indexOf(item) !== index)));
+  for (const gid of gids) {
+    $(SEL.EH.search.resultTr).filter((index, item) => $(item).find(SEL.EH.search.thumb).is(`[id="${SEL.EH.search.thumbId(gid)}"]`)).filter(':gt(0)').remove();
   }
 }
 
@@ -1782,10 +1974,10 @@ async function saveAs (text, name) { // eslint-disable-line no-unused-vars
         const infoFile = Object.keys(zip.files).find(i => i.match(/\/info.txt$/));
         const info = await zip.files[infoFile].async('text');
         const infoS = await zipS.files[infoFile].async('text');
-        const infoSArr = infoS.split('\n');
+        const infoSArr = infoS.split(/\r?\n/);
         const start = infoSArr.findIndex(i => i.match(/^Page\s*\d+:\s*https:\/\/e[x-]hentai.org\/s\/\w+\/\d+-\d+/));
         const end = infoSArr.findIndex(i => i.match(/^Downloaded at/));
-        const infoArr = info.split('\n');
+        const infoArr = info.split(/\r?\n/);
         const insertPosition = infoArr.findIndex(i => i.match(/^Downloaded at/));
         infoArr.splice(insertPosition, 0, ...infoSArr.slice(start, end));
         const infoStr = infoArr.join('\r\n');
@@ -1811,7 +2003,11 @@ async function saveAs (text, name) { // eslint-disable-line no-unused-vars
         await waitInMs(500);
         taskRemove(SEL.EH.info.galleryId);
         await waitInMs(200);
-        window.close();
+        if (G.isIframe) {
+          $('.ehIframeClose').click();
+        } else {
+          window.close();
+        }
       }
     } else {
       saveAs2(text, name, text.type);
@@ -1819,7 +2015,11 @@ async function saveAs (text, name) { // eslint-disable-line no-unused-vars
       await waitInMs(500);
       taskRemove(SEL.EH.info.galleryId);
       await waitInMs(200);
-      window.close();
+      if (G.isIframe) {
+        $('.ehIframeClose').click();
+      } else {
+        window.close();
+      }
     }
   } else {
     saveAs2(text, name);
@@ -1835,7 +2035,7 @@ function saveAs2 (content, name, type = 'application/octet-stream;charset=utf-8'
 }
 
 function saveLink () { // 保存链接
-  $('<input type="button" value="Shortcut" title="创建链接">').click(function () {
+  $('<button title="创建链接">Shortcut</button>').click(function () {
     var content = [
       '[InternetShortcut]\r\nURL={{url}}',
       '<?xml version=\'1.0\' encoding=\'UTF-8\'?><!DOCTYPE plist PUBLIC \'-//Apple//DTD PLIST 1.0//EN\' \'http://www.apple.com/DTDs/PropertyList-1.0.dtd\'><plist version=\'1.0\'><dict><key>URL</key><string>{{url}}</string></dict></plist>',
@@ -1855,7 +2055,7 @@ function saveLink () { // 保存链接
     }
     const text = content[platform].replace('{{url}}', window.location.href);
     saveAs2(text, document.title + fileType);
-  }).prependTo('.ehNavBar>div:nth-child(3)');
+  }).prependTo('.ehNavBar>div:nth-child(1)');
 }
 
 function setNotification (text, title = undefined, timeout = 3 * 1000) { // 发出桌面通知
@@ -1967,8 +2167,8 @@ function searchInOtherSites () { // 在其他站点搜索
 }
 
 async function showAllThumb () { // 显示所有预览页
-  const pageCur = $(SEL.EH.common.pageCur).text() * 1;
-  const pageMax = $(SEL.EH.common.pageMax).text() * 1;
+  const pageCur = parseInt($(SEL.EH.common.pageCur).text());
+  const pageMax = parseInt($(SEL.EH.common.pageMax).text());
   let pageCurUrl = $(SEL.EH.common.pageCur).prop('href');
   if (!pageCurUrl.match(/\?p=\d+/)) pageCurUrl = pageCurUrl.match(/\?/) ? pageCurUrl.replace(/\?/, '?p=0&') : pageCurUrl + '?p=0';
   const urls = Array.from({ length: pageMax - pageCur }, (_, index) => pageCurUrl.replace(/\?p=\d+/, `?p=${pageCur + index}`));
@@ -1983,7 +2183,7 @@ async function showAllThumb () { // 显示所有预览页
 }
 
 function showConfig () { // 显示设置
-  $('<div><a href="javascript:;">[EH]Enhance Config</a></div>').on('click', function (e) {
+  $('<div><a key-code="1" key-event="click" href="javascript:;">[EH]Enhance Config</a></div>').on('click', function (e) {
     if ($('.ehConfig').length) {
       $('.ehConfig').toggle();
       return;
@@ -2000,13 +2200,13 @@ function showConfig () { // 显示设置
       '<span class="ehHighlight">通用设置:</span>',
       '时间显示: <label for="ehConfig_timeShow_local"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_local" value="local" checked>本地时间</label> <label for="ehConfig_timeShow_iso"><input type="radio" name="ehConfig_timeShow" id="ehConfig_timeShow_iso" value="iso">ISO时间</label>',
       '跳转相关: <label for="ehConfig_ex2eh"><input type="checkbox" id="ehConfig_ex2eh">信息页: 里站自动跳转到表站</label>; <label for="ehConfig_eh2ex"><input type="checkbox" id="ehConfig_eh2ex">搜索页: 表站自动跳转到里站</label>',
-      '链接打开方式: <select name="ehConfig_openUrl"><option value="0">新标签页后台打开</option><option value="1">新标签页前台打开</option><option value="2">新标签页后台打开搜索页，弹窗打开信息页</option><option value="3">新标签页前台打开搜索页，弹窗打开信息页</option></select>',
+      '<div class="ehNew"></div>链接打开方式: 信息页：<select name="ehConfig_openUrlInfo"><option value="0">新标签页后台打开</option><option value="1">新标签页前台打开</option><option value="2">弹窗打开</option><option value="3">iframe中打开</option></select>; 其他页面: <select name="ehConfig_openUrlOther"><option value="0">新标签页后台打开</option><option value="1">新标签页前台打开</option><option value="2">弹窗打开</option><option value="3">iframe中打开</option></select>',
       '显示按钮: <label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">保存链接</label>; <label for="ehConfig_searchInOtherSites"><input type="checkbox" id="ehConfig_searchInOtherSites">在其他站点搜索</label>; <label for="ehConfig_btnFake"><input type="checkbox" id="ehConfig_btnFake">Fake</label>',
       '收藏夹提示信息: <input name="ehConfig_bookmark" type="text" title="' + htmlEscape('以<span class="ehHighlight">,</span>分割') + '" placeholder="0.Series,1.Cosplay,2.Image Set,3.Game CG,4.Doujinshi,5.Harem,6.Incest,7.Story arc,8.Anthology,9.Artist">',
       '搜索参数: <input name="ehConfig_searchArguments" title="' + htmlEscape('以<span class="ehHighlight">{q}</span>代替搜索关键词') + '" type="text" placeholder="/?f_search={q}&f_sh=on" min="1">',
       '通知显示方式: <select name="ehConfig_notification"><option value="0">Web API: Notification</option><option value="1">GM_notification</option><option value="2">window.alert</option><option value="3">页面元素</option><option value="-1">不显示</option></select>',
       '<label for="ehConfig_changeName"><input type="checkbox" id="ehConfig_changeName">标题: 删除集会名、替换其中的罗马数字</label>',
-      '<div class="ehNew"></div><label for="ehConfig_autoRetry"><input type="checkbox" id="ehConfig_autoRetry">网络：请求错误时，自动重试</label>',
+      '<label for="ehConfig_autoRetry"><input type="checkbox" id="ehConfig_autoRetry">网络：请求错误时，自动重试</label>',
       '',
       // 搜索页
       '<span class="ehHighlight">搜索页:</span>',
@@ -2022,7 +2222,7 @@ function showConfig () { // 显示设置
       '检测新本子: 当检查时间与最新本子上传时间 <= <input name="ehConfig_checkTimeDeviation" type="number" placeholder="3"> 小时时，以最新本子上传时间为检查时间',
       '检测新本子-自动更新时间: 结果数目变化 <= <input name="ehConfig_autoUpdateCheck" type="number" placeholder="10" min="0">',
       '检测新本子-列表: 每页 <input name="ehConfig_checkListPerPage" type="number" placeholder="25" min="25"> 条CheckList',
-      '<div class="ehNew"></div>预载: 自动预载接下来 <input name="ehConfig_preloadResult" type="number" placeholder="1" min="0"> 页',
+      '预载: 自动预载接下来 <input name="ehConfig_preloadResult" type="number" placeholder="1" min="0"> 页',
       '',
       // 信息页
       '<span class="ehHighlight">信息页:</span>',
@@ -2237,17 +2437,6 @@ function showTooltip () { // 显示提示
   let preEle;
   let animateTimeout;
 
-  const animate = () => {
-    const height = $('.ehTooltip')[0].scrollHeight;
-    if (height === $('.ehTooltip').height()) return;
-    if (animateTimeout) clearTimeout(animateTimeout);
-    animateTimeout = setTimeout(() => {
-      const top = $('.ehTooltip').scrollTop();
-      $('.ehTooltip').scrollTop(top > height ? 0 : top + 30);
-      animate();
-    }, 1000);
-  };
-
   $('body').on('mousemove keydown', function (e) {
     if ((e.target === preEle || $(e.target).parents().filter(preEle).length) && e.type !== 'keydown') return;
     const title = $(preEle).attr('raw-title');
@@ -2256,15 +2445,12 @@ function showTooltip () { // 显示提示
     if (animateTimeout) clearTimeout(animateTimeout);
   });
 
-  $('body').on('mouseenter', ':visible[title],:visible[raw-title],:visible[tooltip],[copy]', function (e) {
+  const target = ':visible[title],:visible[raw-title],:visible[tooltip],[copy],[key-code][key-event]';
+  $('body').on('mouseenter', target, function (e) {
     preEle = e.target;
-    const title = $(preEle).attr('tooltip') ? $(preEle).attr('tooltip') + '<hr>' : '';
-    let title1;
-    if ($(preEle).is('[copy]:not([title])')) {
-      title1 = '点击复制: <span class="ehHighlight">' + $(preEle).attr('copy') + '</span>';
-      $(preEle).attr('raw-title', title1);
-    } else {
-      title1 = $(preEle).attr('title') || $(preEle).attr('raw-title') || '';
+    const title = [$(preEle).attr('tooltip')];
+    if ($(preEle).is('[title],[raw-title]')) {
+      let title1 = $(preEle).attr('title') || $(preEle).attr('raw-title') || '';
       if (!title1) {
         const preEleTrue = $(preEle).parents().filter('[title]').eq(-1)[0];
         if (preEleTrue) {
@@ -2273,8 +2459,17 @@ function showTooltip () { // 显示提示
         }
       }
       $(preEle).removeAttr('title').attr('raw-title', title1);
+      title.push(title1);
     }
-    $('.ehTooltip').html(title + title1);
+    if ($(preEle).is('[copy]')) {
+      title.push('点击复制: <span class="ehHighlight">' + $(preEle).attr('copy') + '</span>');
+    }
+    if ($(preEle).is('[key-code][key-event]')) {
+      const code = $(preEle).attr('key-code');
+      const event = $(preEle).attr('key-event');
+      title.push(`${code}: ${event}<br>Shift+${code}: ${event}-2`);
+    }
+    $('.ehTooltip').html(title.filter(i => i).join('<hr>'));
 
     let top = $(preEle).offset().top - $(window).scrollTop();
     const height = $(preEle).height() + parseInt($(preEle).css('padding-bottom')) + parseInt($(preEle).css('border-bottom-width')) + parseInt($(preEle).css('margin-bottom'));
@@ -2291,14 +2486,16 @@ function showTooltip () { // 显示提示
       top: top,
       left: left
     });
+  });
 
-    animate();
+  $('body').on('wheel', target, function (e) {
+    $('.ehTooltip').get(0).scrollTop += 60 * Math.sign(e.originalEvent.deltaY);
   });
 }
 
 function tagEvent () { // 标签事件
   $('<div class="ehTagEvent"></div>').insertAfter(SEL.EH.info.tagContainer)
-  ;['Unlike', 'Alert', 'Like'].forEach(i => {
+  ;['Perma-ban', 'Unlike', 'Alert', 'Like'].forEach(i => {
     $('<a class="ehTagEventNotice" name="' + i + '" href="javascript:;" on="true"></a>').appendTo('.ehTagEvent').on('click', e => {
       const tags = GM_getValue('tagAction', {});
       const keyword = $('.ehTagEvent').attr('name');
@@ -2756,8 +2953,8 @@ function getStringSize (_string) {
 }
 
 function diff (t1, t2) { // ignore case
-  t1 = t1.replace(/\s+/, ' ');
-  t2 = t2.replace(/\s+/, ' ');
+  t1 = t1.replace(/\s+/g, ' ');
+  t2 = t2.replace(/\s+/g, ' ');
   const arr1 = t1.split(/([[\](){}\s])/); // 不变
   const arr2 = t2.split(/([[\](){}\s])/); // 变
   const arr1Up = t1.toUpperCase().split(/([[\](){}\s])/);
