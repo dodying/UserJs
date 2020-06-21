@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.2.18
+// @version     3.2.34
 // @created     2020-03-16 16:59:04
-// @modified    2020/6/21 13:49:43
+// @modified    2020/6/21 14:29:05
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1296,8 +1296,8 @@
       intro: '.book_intro',
       cover: '.cover-b',
       chapter: '.list-view .c2>a',
-      chapterTitle: '.read-txt>h2',
-      content: '.read-txt'
+      deal: (chapter) => Rule.special.find(i => i.siteName === 'PO18臉紅心跳').deal(chapter),
+      getChapters: (doc) => Rule.special.find(i => i.siteName === 'PO18臉紅心跳').getChapters(doc)
     },
     { // https://www.po18.tw/
       siteName: 'PO18臉紅心跳',
@@ -1312,7 +1312,7 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: `https://www.po18.tw/books/${urlArr[4]}/articlescontent/${urlArr[6]}`,
+            url: `${window.location.origin}/books/${urlArr[4]}/articlescontent/${urlArr[6]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
@@ -1329,6 +1329,20 @@
           }, null, 0, true);
         });
         return content;
+      },
+      getChapters: async (doc) => {
+        const urlArr = window.location.href.split('/');
+        const res = await xhr.sync(`${window.location.origin}/books/${urlArr[4]}/allarticles`, null, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            Referer: window.location.href,
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        return $('<div>').html(res.response).find('a').toArray().map(i => ({
+          title: $(i).text(),
+          url: $(i).prop('href')
+        }));
       }
     },
     { // https://www.qidian.com.tw/
