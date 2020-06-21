@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.2.0
+// @version     3.2.18
 // @created     2020-03-16 16:59:04
-// @modified    2020/6/20 18:27:36
+// @modified    2020/6/21 13:49:43
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -193,7 +193,7 @@
   /* eslint-disable comma-dangle  */
   Rule.special = [
     // 漫画
-    { // TODO
+    {
       siteName: '动漫之家',
       url: '://manhua.dmzj.com/[a-z0-9]+/',
       chapterUrl: '://manhua.dmzj.com/[a-z0-9]+/\\d+.shtml',
@@ -203,7 +203,11 @@
       cover: '#cover_pic',
       chapter: '.cartoon_online_border>ul>li>a',
       chapterTitle: '.display_middle',
-      content: '#center_box'
+      content: '#center_box',
+      iframe: true,
+      contentReplace: [
+        [/<img id="img_\d+" style=".*?" data-original="(.*?)" src=".*?">/g, '<img src="$1">']
+      ]
     },
     // 文学
     { // http://gj.zdic.net
@@ -327,7 +331,7 @@
     },
     { // https://ciweimao.com
       siteName: '刺猬猫',
-      url: /ciweimao.com\/book\/\d+$|ciweimao.com\/chapter-list\/\d+\/book_detail/,
+      url: /ciweimao.com\/book\/\d+|ciweimao.com\/chapter-list\/\d+\/book_detail/,
       chapterUrl: /ciweimao.com\/chapter\/\d+/,
       title: 'h3',
       writer: '.book-info [href*="reader/"]',
@@ -606,7 +610,7 @@
     },
     { // https://www.8kana.com/
       siteName: '不可能的世界',
-      url: /www.8kana.com\/book\/\d+(.html)?$/,
+      url: /www.8kana.com\/book\/\d+(.html)?/,
       chapterUrl: /www.8kana.com\/read\/\d+.html/,
       title: 'h2.left',
       writer: '.authorName',
@@ -1285,7 +1289,7 @@
     },
     { // https://www.popo.tw
       siteName: 'POPO原創市集',
-      url: '://www.popo.tw/books/\\d+/articles$',
+      url: '://www.popo.tw/books/\\d+/articles(\\?page=\\d+)?$',
       chapterUrl: '://www.popo.tw/books/\\d+/articles/\\d+',
       title: '.booksdetail .title',
       writer: '.b_author>a',
@@ -1297,7 +1301,7 @@
     },
     { // https://www.po18.tw/
       siteName: 'PO18臉紅心跳',
-      url: '://www.po18.tw/books/\\d+/articles$',
+      url: '://www.po18.tw/books/\\d+/articles(\\?page=\\d+)?$',
       chapterUrl: '://www.po18.tw/books/\\d+/articles/\\d+',
       title: '.book_name',
       writer: '.book_author',
@@ -2226,7 +2230,7 @@
       '  <br>',
       '  <input type="checkbox" name="templateRule">使用模板规则',
       '  <br>',
-      '  连续下载失败 <input type="number" name="failedCount" min="1"> 次时，<br>暂停 <input type="number" name="failedWait" min="1" title="0为手动继续"> 秒后继续下载',
+      '  连续下载失败 <input type="number" name="failedCount" min="1"> 次时，<br>暂停 <input type="number" name="failedWait" min="0" title="0为手动继续"> 秒后继续下载',
       '  <br>',
       '  Epub CSS: <textarea name="css" placeholder="" style="line-height:1;resize:both;"></textarea>',
       '  <br>',
@@ -2438,7 +2442,7 @@
             await onChapterLoad({ response: chapterNew.document }, { raw: chapterNew });
           } else {
             if (!Storage.rule.iframe) {
-              xhr.list([chapterNew], requestOption, false, true);
+              xhr.list([chapterNew], requestOption, 0, true);
             }
           }
         }
@@ -2461,7 +2465,7 @@
         if (contentCheck) {
           if (Storage.debug.content) debugger;
           let content = await getFromRule(Storage.rule.content, (selector) => {
-            const dom = new window.DOMParser().parseFromString(res.response, 'text/html');
+            const dom = typeof res.response === 'string' ? new window.DOMParser().parseFromString(res.response, 'text/html') : res.response;
             let elems = $(selector, dom);
             if (Storage.debug.content) debugger;
             if (Storage.rule === Rule) elems = elems.not(':emptyHuman'); // 移除空元素
