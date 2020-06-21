@@ -2,8 +2,8 @@
 // @name        []mark
 // @description mark
 // @include     *
-// @version     1.1.0
-// @modified    2020/5/24 19:11:19
+// @version     1.1.2
+// @modified    2020/6/20 16:56:37
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -66,12 +66,6 @@
          * 元素
          */
         elems: ['.shelf-table-name [data-bid]'],
-
-        /**
-         * ?dealWithElems
-         * Function 参数(elemNow, elemBefore)，返回elemNew[]
-         * 尽量使用elementDo
-         */
 
         /**
          * ?elementDo
@@ -216,7 +210,6 @@
 
       elem = $(elem).filter(':visible').toArray().filter(i => i.textContent.trim());
 
-      if (typeof i.dealWithElems === 'function') elem = i.dealWithElems(elem, temp);
       if (i.elementDo instanceof Array && i.elementDo.every(i => typeof i === 'function')) {
         const elems = $([].concat(elem, temp)).filter(':not([mark-do="true"])');
         for (const elem of elems) {
@@ -252,7 +245,7 @@
     elems.forEach(i => {
       const name = i.textContent.trim();
       if (name in books) {
-        $(i).attr('data-mark', books[name]);
+        $(i).attr('data-mark', String(books[name]));
       } else if (Object.keys(matches).some(i => name.match(i))) {
         const filtered = Object.keys(matches).filter(i => name.match(i))[0];
         $(i).attr('data-mark', matches[filtered]);
