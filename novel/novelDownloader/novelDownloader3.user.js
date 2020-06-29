@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.3.0
+// @version     3.3.20
 // @created     2020-03-16 16:59:04
-// @modified    2020/6/29 12:51:32
+// @modified    2020/6/30 07:17:40
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -2541,7 +2541,7 @@
                 $(Rule.elementRemove, elem).remove();
               }
               return elem.html();
-            }, content);
+            }, [], '');
           }
           if (Config.language) content = tranStr(content, Config.language === 'tc');
           if (Config.format) {
@@ -2601,7 +2601,7 @@
           ruleChapterRelative = Config.useCommon ? (rule.chapterPrev || Rule.chapterPrev) : rule.chapterPrev;
         }
 
-        let chapterRelative = await getFromRule(ruleChapterRelative, { attr: 'href', allElement: true, document: res.response }, [res, request]);
+        let chapterRelative = await getFromRule(ruleChapterRelative, { attr: 'href', allElement: true, document: res.response }, [res, request], []);
         chapterRelative = [].concat(chapterRelative)
           .filter(url => url && !url.match(/^(javascript:|#)/)).map(i => new URL(i, chapter.url).href)
           .filter(url => {
@@ -2651,7 +2651,7 @@
         request.title = chapter.title;
 
         let contentCheck = true;
-        if (rule.contentCheck) contentCheck = await getFromRule(rule.contentCheck, (selector) => $(selector, res.response).length, [res, request]);
+        if (rule.contentCheck) contentCheck = await getFromRule(rule.contentCheck, (selector) => $(selector, res.response).length, [res, request], true);
         if (contentCheck) {
           if (Storage.debug.content) debugger;
           let content = await getFromRule(rule.content, (selector) => {
@@ -2667,7 +2667,7 @@
               elems = elems.filter((i, e) => !elems.not(e).toArray().find(j => $(e).find(j).length));
             }
             return elems.toArray().map(i => $(i).html());
-          }, [res, request]);
+          }, [res, request], '');
           if (content instanceof Array) content = content.join('\n');
           chapter.content = content;
           chapter.contentRaw = content;
@@ -2861,7 +2861,7 @@
     // rule
     container.find('[name="info"]>[name="rule"]').html(`<a href="${window.location.origin}" target="_blank">${Storage.rule.siteName}</a>`);
 
-    let infoPage = await getFromRule(Storage.rule.infoPage, { attr: 'href' });
+    let infoPage = await getFromRule(Storage.rule.infoPage, { attr: 'href' }, [], null);
     if (infoPage) {
       infoPage = new URL(infoPage, window.location.href).href;
       const res = await xhr.sync(infoPage, null, { cache: true });
@@ -2875,7 +2875,7 @@
 
     // rule-title
 
-    let title = await getFromRule(Storage.rule.title, { document: infoPage || document }, null, '');
+    let title = await getFromRule(Storage.rule.title, { document: infoPage || document }, [], '');
     if (!title && Storage.rule.titleRegExp instanceof RegExp) title = document.title.match(Storage.rule.titleRegExp) ? document.title.match(Storage.rule.titleRegExp)[1] : document.title;
     if (Storage.rule.titleReplace) title = replaceWithDict(title, Storage.rule.titleReplace);
     title = title.replace(/\s+/g, ' ').replace(/^《(.*)》$/, '$1').trim();
@@ -2883,16 +2883,16 @@
 
     // rule-writer
 
-    let writer = await getFromRule(Storage.rule.writer, { document: infoPage || document }, null, '');
+    let writer = await getFromRule(Storage.rule.writer, { document: infoPage || document }, [], '');
     writer = writer.replace(/\s+/g, ' ').replace(/.*作\s*者(:|：)|\s+著$/g, '').trim();
     Storage.book.writer = writer;
 
     // rule-intro,cover
 
-    let intro = await getFromRule(Storage.rule.intro, { attr: 'html', document: infoPage || document });
+    let intro = await getFromRule(Storage.rule.intro, { attr: 'html', document: infoPage || document }, [], '');
     intro = html2Text(intro, Storage.rule.contentReplace);
     Storage.book.intro = intro;
-    Storage.book.cover = await getFromRule(Storage.rule.cover, { attr: 'src', document: infoPage || document });
+    Storage.book.cover = await getFromRule(Storage.rule.cover, { attr: 'src', document: infoPage || document }, [], '');
     for (const i of ['title', 'writer', 'intro', 'cover']) {
       container.find(`[name="info"]>[name="${i}"]`).val(Storage.book[i] || '');
     }
@@ -2917,7 +2917,7 @@
             url: i.href
           };
         });
-      });
+      }, [], []);
       if (!Storage.rule.chapter && Storage.rule.chapterUrl.length) {
         let elems = Array.from(document.links).filter(i => Storage.rule.chapterUrl.some(j => i.href.match(j)));
         elems = $(elems);
@@ -2929,7 +2929,7 @@
           };
         });
       }
-      vipChapters = await getFromRule(Storage.rule.vipChapter, (selector) => $(Storage.rule.vipChapter).attr('novel-downloader-chapter', 'vip').toArray().map(i => i.href));
+      vipChapters = await getFromRule(Storage.rule.vipChapter, (selector) => $(Storage.rule.vipChapter).attr('novel-downloader-chapter', 'vip').toArray().map(i => i.href), [], []);
     } else if (Storage.mode === 2) {
       container.find('[name="info"]>[name="mode"]').text('章节模式');
       chapters = [window.location.href];
@@ -3167,9 +3167,9 @@
     * @param {object | function} argsString 当为function时，参数为value
     * @param {array} argsFunction
   */
-  async function getFromRule (value, argsString = {}, argsFunction, defaultValue) {
+  async function getFromRule (value, argsString = {}, argsFunction = [], defaultValue) {
     argsFunction = [].concat(argsFunction);
-    let returnValue = defaultValue;
+    let returnValue;
 
     if (typeof argsString !== 'function') {
       argsString = Object.assign({
@@ -3206,6 +3206,7 @@
         console.error(error);
       }
     }
+    returnValue = returnValue !== null && returnValue !== undefined ? returnValue : defaultValue;
     return returnValue;
   }
 
