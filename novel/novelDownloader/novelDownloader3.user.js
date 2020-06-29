@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.2.34
+// @version     3.3.0
 // @created     2020-03-16 16:59:04
-// @modified    2020/6/21 14:29:05
+// @modified    2020/6/29 12:51:32
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
-// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=818363
+// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=821561
 // require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/download.js
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
 // require     http://127.0.0.1:8081/download.js
@@ -188,12 +188,15 @@
     //   通常来说不用设置
 
     // ?thread:下载线程数 通常来说不用设置
+
+    // ?vip:{} 对于vip页面
+    //  可用key: chapterTitle,iframe,deal,content,contentCheck,elementRemove,contentReplace,chapterPrev,chapterNext
   };
 
   /* eslint-disable comma-dangle  */
   Rule.special = [
     // 漫画
-    {
+    { // https://manhua.dmzj.com/
       siteName: '动漫之家',
       url: '://manhua.dmzj.com/[a-z0-9]+/',
       chapterUrl: '://manhua.dmzj.com/[a-z0-9]+/\\d+.shtml',
@@ -205,6 +208,47 @@
       chapterTitle: '.display_middle',
       content: '#center_box',
       iframe: true,
+      contentReplace: [
+        [/<img id="img_\d+" style=".*?" data-original="(.*?)" src=".*?">/g, '<img src="$1">']
+      ]
+    },
+    { // https://www.manhuabei.com/ https://www.manhuafen.com/
+      siteName: '漫画堆',
+      filter: () => {
+        return $('.dmzj-logo').length && $('.wrap_intro_l_comic').length && $('.wrap_intro_r').length && $('.list_con_li').length
+          ? 1
+          : $('.foot-detail:contains("漫画")').length && $('.dm_logo').length && $('.chapter-view').length ? 2 : 0;
+      },
+      title: '.comic_deCon>h1',
+      writer: '.comic_deCon_liO>li>a[href^="/author/"]',
+      intro: '.comic_deCon_d',
+      cover: '.comic_i_img>img',
+      chapter: '.list_con_li>li>a',
+      chapterTitle: '.head_title>h2',
+      iframe: (win) => $('<div class="nd3-images">').html(win.chapterImages.map((item, index, arr) => `<img data-src="${win.SinMH.getChapterImage(index + 1)}" /><p class="img_info">(${index + 1}/${arr.length})</p>`).join('')).appendTo(win.document.body),
+      content: '.nd3-images',
+      contentReplace: [
+        [/<img data-src/g, '<img src']
+      ]
+    },
+    { // https://www.manhuagui.com/
+      siteName: '漫画柜',
+      url: '://www.manhuagui.com/comic/\\d+/$',
+      chapterUrl: '://www.manhuagui.com/comic/\\d+/\\d+.html',
+      title: '.book-title>h1',
+      writer: '.detail-list [href^="/author/"]',
+      intro: '#intro-all',
+      cover: '.book-cover>.hcover>img',
+      chapter: '.chapter-list a',
+      chapterTitle: '.title h2',
+      content: (doc, res, request) => {
+        let info = res.response.match(/window\["\\x65\\x76\\x61\\x6c"\](.*?)<\/script>/)[1];
+        info = window.eval(info); // eslint-disable-line no-eval
+        info = info.match(/^SMH.imgData(.*?).preInit\(\);/)[1];
+        info = window.eval(info); // eslint-disable-line no-eval
+        const a = info.files.map((item, index, arr) => `<img src="https://us.hamreus.com${info.path}${item}?e=${info.sl.e}&m=${info.sl.m}" /><p class="img_info">(${index + 1}/${arr.length})</p>`);
+        return a.join('');
+      },
       contentReplace: [
         [/<img id="img_\d+" style=".*?" data-original="(.*?)" src=".*?">/g, '<img src="$1">']
       ]
@@ -329,16 +373,16 @@
       chapterPrev: doc => [$('[id^="chapter-"]', doc).attr('data-purl')],
       chapterNext: doc => [$('[id^="chapter-"]', doc).attr('data-nurl')]
     },
-    { // https://ciweimao.com
+    { // https://www.ciweimao.com
       siteName: '刺猬猫',
-      url: /ciweimao.com\/book\/\d+|ciweimao.com\/chapter-list\/\d+\/book_detail/,
-      chapterUrl: /ciweimao.com\/chapter\/\d+/,
+      url: /:\/\/(www.)?ciweimao.com\/book\/\d+|ciweimao.com\/chapter-list\/\d+\/book_detail/,
+      chapterUrl: /:\/\/(www.)?ciweimao.com\/chapter\/\d+/,
       title: 'h3',
       writer: '.book-info [href*="reader/"]',
       intro: '.book-intro-cnt>div:nth-child(1)',
       cover: '.cover>img',
       chapter: '.book-chapter-list a',
-      vipChapter: '.book-chapter-list a:has(.icon-lock)',
+      vipChapter: '.book-chapter-list a:has(.icon-lock),.book-chapter-list a:has(.icon-unlock)',
       chapterTitle: 'h3.chapter',
       deal: async (chapter) => {
         if (!unsafeWindow.CryptoJS) {
@@ -427,7 +471,41 @@
       elementRemove: 'span',
       chapterPrev: '#J_BtnPagePrev',
       chapterNext: '#J_BtnPageNext',
-      thread: 1
+      thread: 1,
+      vip: {
+        deal: null,
+        iframe: async (win) => {
+          win.getDataUrl = async img => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            ctx.drawImage(img, 0, 0);
+            const url = canvas.toDataURL('image/jpeg', 0.5);
+            img.src = url;
+          // return new Promise((resolve, reject) => {
+          //   canvas.toBlob(function (blob) {
+          //     const url = URL.createObjectURL(blob);
+          //     img.src = url;
+          //     resolve();
+          //   });
+          // });
+          };
+          await waitFor(() => $('#J_BookImage', win.document).css('background-image').match(/^url\("?(.*?)"?\)/));
+          let src = $('#J_BookImage', win.document).css('background-image').match(/^url\("?(.*?)"?\)/)[1];
+          await new Promise((resolve, reject) => {
+            $('#realBookImage', win.document).one('load', async () => {
+              src = await win.getDataUrl($('#realBookImage', win.document).get(0));
+              window.history.back();
+              resolve();
+            }).attr('src', src);
+          });
+        },
+        content: '#J_BookImage',
+        elementRemove: 'i'
+      }
     },
     { // http://chuangshi.qq.com http://yunqi.qq.com
       siteName: '创世中文网',
@@ -657,7 +735,7 @@
     { // https://b.faloo.com
       siteName: '飞卢',
       url: /b.faloo.com\/f\/\d+.html/,
-      chapterUrl: /b.faloo.com\/p\/\d+\/\d+.html/,
+      chapterUrl: /b.faloo.com\/(p|vip)\/\d+\/\d+.html/,
       title: '#novelName',
       writer: '#novelName+a',
       intro: '.T-L-T-C-Box1',
@@ -665,7 +743,33 @@
       chapter: '#mulu .DivTable .DivTd>a',
       vipChapter: '#mulu .DivVip~.DivTable .DivTd>a',
       chapterTitle: '.c_l_title',
-      content: '.noveContent'
+      content: '.noveContent',
+      elementRemove: 'p:has(a,b,font)',
+      vip: {
+        content: (doc, res, request) => {
+          const func = $('script:contains("image_do3")', res.response).text();
+          /* eslint-disable camelcase */
+          if (!unsafeWindow.image_do3) {
+            unsafeWindow.image_do3 = function (num, o, id, n, en, t, k, u, time, fontsize, fontcolor, chaptertype, font_family_type) {
+              var type = 1;
+              var domain = '//read.faloo.com/';
+              if (chaptertype === 0) { domain = '//read6.faloo.com/'; }
+              if (type === 2) { domain = '//read2.faloo.com/'; }
+              if (typeof (font_family_type) === 'undefined' || font_family_type == null) {
+                font_family_type = 0;
+              }
+              var url = domain + 'Page4VipImage.aspx?num=' + num + '&o=' + o + '&id=' + id + '&n=' + n + '&ct=' + chaptertype + '&en=' + en + '&t=' + t + '&font_size=' + fontsize + '&font_color=' + fontcolor + '&FontFamilyType=' + font_family_type + '&u=' + u + '&time=' + time + '&k=' + k;
+              url = encodeURI(url);
+              return url;
+            };
+          }
+          /* eslint-enable camelcase */
+          const image = window.eval('window.' + func); // eslint-disable-line no-eval
+          const elem = $('.noveContent', res.response);
+          elem.find('.con_img').replaceWith(`<img src="${image}">`);
+          return elem.html();
+        }
+      }
     },
     { // https://www.jjwxc.net
       siteName: '晋江文学城',
@@ -732,11 +836,7 @@
       chapter: '.chapter>span>a',
       vipChapter: '.chapter>span:has(i)>a',
       chapterTitle: '.sr-play-box-scroll-t-path>span',
-      content: async (doc, res, request) => {
-        /* eslint-disable no-eval  */
-        return window.eval(res.responseText.match(/var chapterContent = (".*")/)[1]);
-        /* eslint-enable no-eval  */
-      }
+      content: (doc, res, request) => window.eval(res.responseText.match(/var chapterContent = (".*")/)[1]) // eslint-disable-line no-eval
     },
     { // http://www.lcread.com
       siteName: '连城读书',
@@ -1268,7 +1368,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest',
+              'X-Requested-With': 'XMLHttpRequest'
             },
             onload: function (res, request) {
               try {
@@ -1381,11 +1481,7 @@
       chapter: '.cp-novel-menu-item>a',
       vipChapter: '.cp-novel-menu-item>a:has(.icon-vip)',
       chapterTitle: '.cp-read-name',
-      content: (doc, res, request) => {
-        /* eslint-disable no-eval  */
-        return window.eval(res.response.match(/content: (".*"),/)[1]);
-        /* eslint-enable no-eval  */
-      },
+      content: (doc, res, request) => window.eval(res.response.match(/content: (".*"),/)[1]), // eslint-disable-line no-eval
       elementRemove: '.cp-hidden',
       thread: 1
     },
@@ -1406,7 +1502,7 @@
     { // https://book.sfacg.com
       siteName: 'SF轻小说',
       url: '://book.sfacg.com/Novel/\\d+/MainIndex/',
-      chapterUrl: '://book.sfacg.com/Novel/\\d+/\\d+/\\d+/',
+      chapterUrl: '://book.sfacg.com/Novel/\\d+/\\d+/\\d+/|://book.sfacg.com/vip/c/\\d+/',
       infoPage: '.crumbs a:nth-child(6)',
       title: 'h1.title>.text',
       writer: '.author-name',
@@ -1478,7 +1574,7 @@
       chapter: '.zjlist4 a',
       chapterTitle: '#content>h1',
       content: '#content',
-      elementRemove: 'div',
+      elementRemove: 'div'
     },
     { // http://book.suixw.com
       siteName: '随想轻小说',
@@ -1507,6 +1603,40 @@
       chapter: '.works-chapter-item>a',
       chapterTitle: '#content>h2',
       content: '.content'
+    },
+    { // https://www.lightnovel.us/
+      siteName: '轻之国度',
+      url: '://www.lightnovel.us(/cn)?/search\\?kw=',
+      chapterUrl: '://www.lightnovel.us(/cn)?/detail/\\d+',
+      title: () => $('.search-input').val() || $('.article-title').text(),
+      titleReplace: [[/^\[.*?\]([^[\]])/, '$1'], [/([^[\]])\[.*?\]$/, '$1']],
+      cover: () => $('.long-item>a>div.cover').css('background-image').match(/url\("?(.*?)"?\)/)[1],
+      chapter: '.long-item>.info>a',
+      chapterTitle: '.article-title',
+      content: (doc, res, request) => {
+        const content = $('#article-main-contents', res.response).html().replace(/^(<br>)+/, '').split(/<div.*?>.*?<\/div>|(<br>\s*){3,}/).map(i => i && i.replace(/^(\s*|<br>)+/, '')).filter(i => i);
+        Storage.book.chapters.splice(Storage.book.chapters.indexOf(request.raw), 1, ...content.map((item, index) => ({
+          title: `${request.raw.title} - 第${String(index + 1)}部分`,
+          url: request.raw.url,
+          content: item,
+          contentRaw: item,
+          document: res.response
+        })));
+      },
+    },
+    { // https://www.lightnovel.us/
+      siteName: '轻之国度',
+      url: '://www.lightnovel.us(/cn)?/series',
+      chapterUrl: '://www.lightnovel.us(/cn)?/detail/\\d+',
+      title: () => unsafeWindow.__NUXT__.data[0].series.name,
+      writer: () => unsafeWindow.__NUXT__.data[0].series.author,
+      intro: () => unsafeWindow.__NUXT__.data[0].series.intro,
+      cover: () => unsafeWindow.__NUXT__.data[0].series.cover,
+      getChapters: () => {
+        return window.__NUXT__.data[0].series.articles.sort((a, b) => a.aid - b.aid).map(i => ({ title: i.title, url: `https://www.lightnovel.us/detail/${i.aid}` }));
+      },
+      chapterTitle: '.article-title',
+      content: (doc, res, request) => Rule.special.find(i => i.siteName === '轻之国度').content(doc, res, request),
     },
     // 盗贴
     { // https://www.xiaoshuokan.com
@@ -1666,9 +1796,26 @@
       content: '.readerCon',
       contentReplace: [
         [/^\s*(&nbsp;)+谨记我们的网址.*。/m],
+        [/^\s*(&nbsp;)+一秒记住.*/m],
         [/^<br>(&nbsp;)+【提示】：.*?。/m],
+        [/^<br>(&nbsp;)+看更多好文请搜.*/m],
+        [/^<br>(&nbsp;)+《[完本神站]》.*/m],
+        [/^<br>(&nbsp;)+喜欢神站记得收藏.*/m],
+        [/^<br>(&nbsp;)+支持.*把本站分享那些需要的小伙伴.*/m], // eslint-disable-line no-control-regex
         [/--&gt;&gt;本章未完，点击下一页继续阅读/]
       ]
+    },
+    { // https://www.qiushubang.com/
+      siteName: '求书帮',
+      url: '://www.qiushubang.com/\\d+/$',
+      chapterUrl: '://www.qiushubang.com/\\d+/\\d+(_\\d+)?.html',
+      title: '.bookPhr>h2',
+      writer: '.bookPhr>dl>dd:contains("作者")',
+      intro: '.introCon>p',
+      cover: '.bookImg>img',
+      chapter: '.chapterCon>ul>li>a',
+      chapterTitle: '.articleTitle>h2',
+      content: '.articleCon>p:nth-child(3)'
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
@@ -2090,7 +2237,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest',
+              'X-Requested-With': 'XMLHttpRequest'
             },
             onload: function (res, request) {
               try {
@@ -2106,7 +2253,7 @@
       },
       chapterPrev: doc => [$('[id^="chapter-"]', doc).attr('data-purl')],
       chapterNext: doc => [$('[id^="chapter-"]', doc).attr('data-nurl')]
-    },
+    }
   ];
   Rule.template = [ // 模板网站
     { // http://www.xbiquge.la/54/54439/
@@ -2144,16 +2291,14 @@
       chapterTitle: 'h1',
       content: '.read-content',
       elementRemove: 'dt,div'
-    },
+    }
   ];
   /* eslint-enable comma-dangle  */
 
   if (Config.customize) {
     try {
-      /* eslint-disable no-eval  */
-      const ruleUser = window.eval(Config.customize);
+      const ruleUser = window.eval(Config.customize); // eslint-disable-line no-eval
       Rule.special = Rule.special.concat(ruleUser);
-      /* eslint-enable no-eval */
     } catch (error) {
       console.error(error);
     }
@@ -2203,7 +2348,8 @@
   }
 
   async function showUI () {
-    let chapters, vipChapters, chaptersArr;
+    let chapters, chaptersArr;
+    let vipChapters = [];
     const chaptersDownloaded = [];
 
     // ui
@@ -2223,7 +2369,7 @@
       '</div>',
 
       '<div name="config" useless>',
-      '  更多设置(请点击): <br>',
+      '  更多设置(请双击): <br>',
       '  下载线程: <input type="number" name="thread">',
       '  重试次数: <input type="number" name="retry">',
       '  <br>',
@@ -2253,7 +2399,7 @@
 
       '<div name="config">',
       '  <input type="checkbox" name="image" title="仅下载EPUB时生效，仅支持img元素>">下载图片',
-      '  <input type="checkbox" name="vip">下载vip章节', // TODO 目前只是过滤掉vip章节
+      '  <input type="checkbox" name="vip" confirm="下载的vip章节需事先购买\n如开启自动购买等，该脚本造成的损失本人概不负责"><span>下载vip章节</span>',
       '  <br>',
       '  <input type="checkbox" name="addChapterPrev" title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加前章',
       '  <input type="checkbox" name="addChapterNext" title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加后章',
@@ -2286,7 +2432,11 @@
     container.find('input,select,textarea').attr('disabled', 'disabled');
     container.find('[name="config"]').find('input,select,textarea').on('change', function (e) {
       const name = e.target.name;
-      const value = e.target.type === 'checkbox' ? e.target.checked : e.target.type === 'number' ? (e.target.value || this.placeholder) * 1 : (e.target.value || e.target.placeholder);
+      let value = e.target.type === 'checkbox' ? e.target.checked : e.target.type === 'number' ? (e.target.value || this.placeholder) * 1 : (e.target.value || e.target.placeholder);
+      if (e.target.type === 'checkbox' && value && e.target.getAttribute('confirm')) {
+        value = window.confirm(e.target.getAttribute('confirm'));
+        e.target.checked = value;
+      }
       Config[name] = value;
       GM_setValue('config', Config);
       if (['retry', 'thread', 'timeout'].includes(name)) {
@@ -2317,7 +2467,8 @@
       });
       Storage.title = document.title;
 
-      Storage.book.chapters = Config.vip ? chapters : chapters.filter(i => !(vipChapters || []).includes(i.url));
+      Storage.book.chapters = Config.vip ? chapters : chapters.filter(i => !(vipChapters.includes(i.url)));
+      Storage.rule.vip = Object.assign({}, Storage.rule, Storage.rule.vip || {});
 
       // 限制下载范围
       if (container.find('[name="limit"]>[name="range"]').val()) {
@@ -2358,21 +2509,34 @@
         }
 
         let chapters = Storage.book.chapters;
-        if (Config.sort) {
-          const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-          chapters = chapters.sort((a, b) => collator.compare(a.url, b.url)); // TODO
-          // ['1', '1_2'] => ['1_2', '1'] 而非 ['1', '1_2']
+        if (Config.sort && chapters.length) {
+          const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'case' });
+          chapters.forEach(i => { i.sort = i.url; });
+          // const dir = new URL('./', chapters[0].sort).href;
+          // if (chapters.every(i => new URL('./', i.sort).href === dir)) {
+          //   chapters.forEach(i => { i.sort = i.sort.substr(dir.length); });
+          // }
+          let ext = chapters[0].sort.split('.');
+          if (ext.length > 1) {
+            ext = '.' + ext.slice(-1);
+            const extReversed = ext.split('').reverse().join('');
+            if (chapters.every(i => i.sort.split('').reverse().join('').indexOf(extReversed) === 0)) {
+              chapters.forEach(i => { i.sort = i.sort.substr(0, i.sort.length - ext.length); });
+            }
+          }
+          chapters = chapters.sort((a, b) => collator.compare(a.sort, b.sort));
         }
 
         for (const chapter of chapters) {
+          const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
           let content = chapter.contentRaw;
           if (!content) continue;
-          if (Storage.rule.elementRemove || Config.useCommon) {
+          if (rule.elementRemove || Config.useCommon) {
             if (Storage.debug.content) debugger;
             content = await getFromRule(content, (content) => {
               const elem = $('<div>').html(content);
-              if (Storage.rule.elementRemove) {
-                $(Storage.rule.elementRemove, elem).remove();
+              if (rule.elementRemove) {
+                $(rule.elementRemove, elem).remove();
               } else if (Config.useCommon) {
                 $(Rule.elementRemove, elem).remove();
               }
@@ -2381,7 +2545,7 @@
           }
           if (Config.language) content = tranStr(content, Config.language === 'tc');
           if (Config.format) {
-            content = html2Text(content, Storage.rule.contentReplace);
+            content = html2Text(content, rule.contentReplace);
             content = '\u3000\u3000' + content.replace(/^\s+/mg, '\u3000\u3000');
           }
           chapter.content = content;
@@ -2428,61 +2592,73 @@
       if (Storage.rule.charset) overrideMimeType = `text/html; charset=${Storage.rule.charset}`;
       const checkRelativeChapter = async (res, request, next) => {
         const chapter = request.raw;
-        let rule;
+        const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
+
+        let ruleChapterRelative;
         if (next) {
-          rule = Config.useCommon ? (Storage.rule.chapterNext || Rule.chapterNext) : Storage.rule.chapterNext;
+          ruleChapterRelative = Config.useCommon ? (rule.chapterNext || Rule.chapterNext) : rule.chapterNext;
         } else {
-          rule = Config.useCommon ? (Storage.rule.chapterPrev || Rule.chapterPrev) : Storage.rule.chapterPrev;
+          ruleChapterRelative = Config.useCommon ? (rule.chapterPrev || Rule.chapterPrev) : rule.chapterPrev;
         }
 
-        let chapterRelative = await getFromRule(rule, { attr: 'href', allElement: true, document: res.response }, [res, request]);
+        let chapterRelative = await getFromRule(ruleChapterRelative, { attr: 'href', allElement: true, document: res.response }, [res, request]);
         chapterRelative = [].concat(chapterRelative)
           .filter(url => url && !url.match(/^(javascript:|#)/)).map(i => new URL(i, chapter.url).href)
           .filter(url => {
-            if (Storage.rule !== Rule && Storage.rule.ignoreUrl.some(i => url.match(i))) return false;
-            if (Storage.rule !== Rule && Storage.rule.url.some(i => url.match(i))) return false;
-            if (Storage.rule !== Rule && Storage.rule.chapterUrl.length) return Storage.rule.chapterUrl.some(i => url.match(i));
+            if (rule !== Rule && rule.ignoreUrl.some(i => url.match(i))) return false;
+            if (rule !== Rule && rule.url.some(i => url.match(i))) return false;
+            if (rule !== Rule && rule.chapterUrl.length) return rule.chapterUrl.some(i => url.match(i));
             const pathurl = chapter.url.replace(/(.*\/).*/, '$1').replace(/.*?:\/\/(.*)/, '$1');
             const pathurlThis = url.replace(/(.*\/).*/, '$1');
             return pathurlThis !== url && pathurlThis.replace(/.*?:\/\/(.*)/, '$1') === pathurl;
           });
         for (const url of chapterRelative) {
-          if (chaptersArr.includes(url) || (vipChapters || []).includes(url)) continue;
+          if (chaptersArr.includes(url) || vipChapters.includes(url)) continue;
           const chapterNew = chaptersDownloaded.find(i => i.url === url) || { url };
           const index = Storage.book.chapters.indexOf(chapter);
           Storage.book.chapters.splice(next ? index + 1 : index, 0, chapterNew);
           chaptersArr.splice(next ? index + 1 : index, 0, url);
+
+          const rule = vipChapters.includes(url) ? Storage.rule.vip : Storage.rule;
+
           if (chapterNew.contentRaw && chapterNew.document) {
             await onChapterLoad({ response: chapterNew.document }, { raw: chapterNew });
           } else {
-            if (!Storage.rule.iframe) {
-              xhr.list([chapterNew], requestOption, 0, true);
+            delete chapterNew.contentRaw;
+            if (rule.iframe) {
+              chapterList.iframe.push(chapterNew);
+            } else if (rule.deal && typeof rule.deal === 'function') {
+              chapterList.deal.push(chapterNew);
+            } else {
+              chapterList.download.push(chapterNew);
             }
           }
         }
       };
       const onChapterLoad = async (res, request) => {
+        const chapter = request.raw;
+        const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
+
         if (failedCount > 0) failedCount = 0;
-        if (Storage.rule.deal) return;
+        if (rule.deal) return;
 
         const doc = res.response;
-        const chapter = request.raw;
 
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
 
-        const chapterTitle = await getFromRule(Storage.rule.chapterTitle, { attr: 'text', document: res.response }, [res, request], '');
+        const chapterTitle = await getFromRule(rule.chapterTitle, { attr: 'text', document: res.response }, [res, request], '');
         chapter.title = chapterTitle.split(Storage.book.title).join('').trim() || chapter.title || $('title', doc).eq(0).text();
         request.title = chapter.title;
 
         let contentCheck = true;
-        if (Storage.rule.contentCheck) contentCheck = await getFromRule(Storage.rule.contentCheck, (selector) => $(selector, res.response).length, [res, request]);
+        if (rule.contentCheck) contentCheck = await getFromRule(rule.contentCheck, (selector) => $(selector, res.response).length, [res, request]);
         if (contentCheck) {
           if (Storage.debug.content) debugger;
-          let content = await getFromRule(Storage.rule.content, (selector) => {
+          let content = await getFromRule(rule.content, (selector) => {
             const dom = typeof res.response === 'string' ? new window.DOMParser().parseFromString(res.response, 'text/html') : res.response;
             let elems = $(selector, dom);
             if (Storage.debug.content) debugger;
-            if (Storage.rule === Rule) elems = elems.not(':emptyHuman'); // 移除空元素
+            if (rule === Rule) elems = elems.not(':emptyHuman'); // 移除空元素
             if (elems.length === 0) { // 没有找到内容
               console.error('novelDownloader: 找不到内容元素\n选择器: ' + selector);
               elems = $('body', dom);
@@ -2512,13 +2688,24 @@
       };
       const requestOption = { onload: onChapterLoad, overrideMimeType };
 
-      const chapterDownloadList = [];
+      const chapterList = {
+        iframe: [],
+        deal: [],
+        download: []
+      };
       for (const chapter of Storage.book.chapters) {
+        const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
         if (chapter.contentRaw && chapter.document) {
           await onChapterLoad({ response: chapter.document }, { raw: chapter });
         } else {
           delete chapter.contentRaw;
-          chapterDownloadList.push(chapter);
+          if (rule.iframe) {
+            chapterList.iframe.push(chapter);
+          } else if (rule.deal && typeof rule.deal === 'function') {
+            chapterList.deal.push(chapter);
+          } else {
+            chapterList.download.push(chapter);
+          }
         }
       }
       if (Storage.book.chapters.every(i => i.contentRaw && i.document)) {
@@ -2526,86 +2713,104 @@
         return;
       }
 
-      if (Storage.rule.iframe) {
-        for (const chapter of chapterDownloadList) {
+      if (chapterList.download.length || chapterList.deal.length) {
+        xhr.init({
+          retry: Config.retry,
+          thread: Storage.rule.thread && Storage.rule.thread < Config.thread ? Storage.rule.thread : Config.thread,
+          timeout: Config.timeout,
+          onfailed: onChapterFailed,
+          onfailedEvery: onChapterFailedEvery,
+          checkLoad: async (res) => {
+            if ((res.status > 0 && res.status < 200) || res.status >= 300 || (res.responseText && res.responseText.match(/404/) && res.responseText.match(/Not Found|找不到文件或目录/i))) {
+              return false;
+            } else {
+              return true;
+            }
+          }
+        });
+      }
+
+      while (Storage.book.chapters.some(i => !('contentRaw' in i))) {
+        if (chapterList.download.length && chapterList.download.find(i => !('contentRaw' in i))) {
           await new Promise((resolve, reject) => {
-            $('<iframe>').on('load', async (e) => {
-              let response;
-              try {
-                if (typeof Storage.rule.iframe === 'function') await Storage.rule.iframe(e.target.contentWindow);
-                response = e.target.contentWindow.document;
-              } catch (error) {
-                console.error(error);
-                response = '';
-              }
-              await onChapterLoad({ response }, { raw: chapter });
-              $(e.target).remove();
+            xhr.storage.config.set('onComplete', async (list) => {
+              if (chapterList.download.find(i => !('contentRaw' in i))) return;
               resolve();
-            }).on('error', async (e) => {
-              await onChapterLoad({ response: '' }, { raw: chapter });
-            }).attr('src', chapter.url).css('visibility', 'hidden').appendTo('body');
+            });
+            xhr.list(chapterList.download, requestOption);
+            xhr.showDialog();
+            xhr.start();
           });
         }
-        onComplete();
-        return;
-      }
 
-      xhr.init({
-        retry: Config.retry,
-        thread: Storage.rule.thread && Storage.rule.thread < Config.thread ? Storage.rule.thread : Config.thread,
-        timeout: Config.timeout,
-        onComplete: async (list) => {
-          if (Storage.book.chapters.find(i => !('contentRaw' in i))) return;
-          await onComplete();
-        },
-        onfailed: onChapterFailed,
-        onfailedEvery: onChapterFailedEvery,
-        checkLoad: async (res) => {
-          if ((res.status > 0 && res.status < 200) || res.status >= 300 || (res.responseText && res.responseText.match(/404/) && res.responseText.match(/Not Found|找不到文件或目录/i))) {
-            return false;
-          } else {
-            return true;
-          }
-        }
-      });
-      if (Storage.rule.deal && typeof Storage.rule.deal === 'function') {
-        for (const chapter of chapterDownloadList) {
-          try {
-            Storage.rule.deal(chapter).then((result) => {
-              if (result) {
-                if (typeof result === 'string') {
-                  chapter.document = result;
-                  chapter.contentRaw = result;
-                } else {
-                  chapter.document = result.contentRaw || result.content;
-                  chapter.contentRaw = result.content;
-                  for (const i in result) chapter[i] = result[i];
-                }
-              } else {
-                chapter.contentRaw = '';
-                chapter.content = '';
-                chapter.document = '';
-              }
-              const now = Storage.book.chapters.filter(i => i.contentRaw).length;
-              const max = Storage.book.chapters.length;
-              container.find('[name="progress"]>progress').val(now).attr('max', max);
-              document.title = `[${now}/${max}]${Storage.title}`;
-            }, (error) => {
-              console.error(error);
-              chapter.contentRaw = '';
-              chapter.content = '';
-              chapter.document = '';
+        if (chapterList.deal.length && chapterList.deal.find(i => !('contentRaw' in i))) {
+          await new Promise((resolve, reject) => {
+            xhr.storage.config.set('onComplete', async (list) => {
+              if (chapterList.deal.find(i => !('contentRaw' in i))) return;
+              resolve();
             });
-          } catch (error) {
-            console.error(error);
+            for (const chapter of chapterList.deal) {
+              try {
+                const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
+                rule.deal(chapter).then((result) => {
+                  if (result) {
+                    if (typeof result === 'string') {
+                      chapter.document = result;
+                      chapter.contentRaw = result;
+                    } else {
+                      chapter.document = result.contentRaw || result.content;
+                      chapter.contentRaw = result.content;
+                      for (const i in result) chapter[i] = result[i];
+                    }
+                  } else {
+                    chapter.contentRaw = '';
+                    chapter.content = '';
+                    chapter.document = '';
+                  }
+                  const now = Storage.book.chapters.filter(i => i.contentRaw).length;
+                  const max = Storage.book.chapters.length;
+                  container.find('[name="progress"]>progress').val(now).attr('max', max);
+                  document.title = `[${now}/${max}]${Storage.title}`;
+                }, (error) => {
+                  console.error(error);
+                  chapter.contentRaw = '';
+                  chapter.content = '';
+                  chapter.document = '';
+                });
+              } catch (error) {
+                console.error(error);
+              }
+            }
+            xhr.showDialog();
+            xhr.start();
+          });
+        }
+
+        if (chapterList.iframe.length && chapterList.iframe.find(i => !('contentRaw' in i))) {
+          for (const chapter of chapterList.iframe) {
+            const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
+            await new Promise((resolve, reject) => {
+              $('<iframe>').on('load', async (e) => {
+                let response;
+                try {
+                  if (typeof rule.iframe === 'function') await rule.iframe(e.target.contentWindow);
+                  response = e.target.contentWindow.document;
+                } catch (error) {
+                  console.error(error);
+                  response = '';
+                }
+                await onChapterLoad({ response }, { raw: chapter });
+                $(e.target).remove();
+                resolve();
+              }).on('error', async (e) => {
+                await onChapterLoad({ response: '' }, { raw: chapter });
+              }).attr('src', chapter.url).css('visibility', 'hidden').appendTo('body');
+            });
           }
         }
-      } else {
-        xhr.list(chapterDownloadList, requestOption);
       }
 
-      xhr.showDialog();
-      xhr.start();
+      await onComplete();
     });
     container.find('[name="buttons"]').find('[type="button"]:not([name="download"])').on('click', async (e) => {
       const name = $(e.target).attr('name');
@@ -2618,7 +2823,7 @@
         container.toggleClass('opacity01');
       }
     });
-    container.find('[name="config"][useless]').on('click', (e) => {
+    container.find('[name="config"][useless]').on('dblclick', (e) => {
       $(e.target).toggleClass('hover');
     });
     container.find('[name="info"]>input[type="text"]').on('change', e => (Storage.book[$(e.target).attr('name')] = e.target.value));
@@ -2642,6 +2847,7 @@
 
       '.novel-downloader-v3>[name="config"][useless]{height:24px;overflow:hidden;}',
       '.novel-downloader-v3>[name="config"][useless].hover{height:auto!important;}',
+      '.novel-downloader-v3>[name="config"] [name="vip"]:checked+span{color:red;}',
 
       '.novel-downloader-v3>[name="progress"]{display:none;}',
       '.novel-downloader-v3>[name="progress"]>progress::before{content:attr(value)" / "attr(max);}',
@@ -2840,13 +3046,13 @@
           await new Promise((resolve, reject) => {
             xhr.init({
               retry: Config.retry,
-              thread: Config.thread,
+              thread: Storage.rule.thread && Storage.rule.thread < Config.thread ? Storage.rule.thread : Config.thread,
               timeout: Config.timeout * 10,
               onComplete: () => {
                 resolve();
               },
               checkLoad: async (res) => {
-                if ((res.status > 0 && res.status < 200) || res.status >= 300 || !res.responseHeaders.match(/content-type:\s*image\/(.*)/i)) {
+                if ((res.status > 0 && res.status < 200) || res.status >= 300) {
                   return false;
                 } else {
                   return true;
@@ -2859,7 +3065,7 @@
               onload: (res, reuqest) => {
                 const index = Storage.book.image.indexOf(reuqest.raw);
                 Storage.book.image[index].content = res.response;
-                Storage.book.image[index].type = res.responseHeaders.match(/content-type:\s*image\/(.*)/i)[1];
+                Storage.book.image[index].type = res.responseHeaders.match(/content-type:\s*image\/(.*)/i) ? res.responseHeaders.match(/content-type:\s*image\/(.*)/i)[1] : 'image/png';
               }
             });
             xhr.start();
@@ -2869,7 +3075,7 @@
         const length = String(Storage.book.image.length).length;
         for (let i = 0; i < Storage.book.image.length; i++) {
           const imgOrder = String(i + 1).padStart(length, '0');
-          const type = Storage.book.image[i].type || 'png';
+          const type = Storage.book.image[i].type ? Storage.book.image[i].type.split(';')[0] : 'png';
           const imgName = `img/img-${imgOrder}.${type}`;
           Storage.book.image[i].name = imgName;
           files['OEBPS/content.opf'] += `<item id="img-${imgOrder}" href="${imgName}" media-type="image/jpeg"/>`;
@@ -2892,7 +3098,14 @@
         const chapter = chapters[i];
         const chapterName = chapter.title;
         const chapterOrder = String(i + 1).padStart(length, '0');
-        const chapterContent = chapter.content.replace(/\n/g, '</p><p>').replace(/<p>\s+/g, '<p>');
+        const chapterContent = replaceWithDict(chapter.content, [
+          [/\n/g, '</p><p>'], [/<p>\s+/g, '<p>'],
+          [/&[a-z]+;/g, (match) => {
+            const text = $('<a>').html(match).text();
+            if (text.length > 1) return match;
+            return `&#${text.charCodeAt(0)};`;
+          }]
+        ]);
 
         files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/></navPoint>';
 
@@ -3013,11 +3226,13 @@
   function replaceWithDict (text = '', dict = []) {
     let replace = dict.find(i => text.match(i[0]));
     let replaceLast = null;
+    let textLast = null;
     while (replace) {
-      if (replace === replaceLast) {
+      if (replace === replaceLast && textLast === text) {
         console.error('novelDownloader: 替换文本陷入死循环\n替换规则: ' + replace);
         dict.splice(dict.indexOf(replace), 1);
       }
+      textLast = text;
       text = text.replace(replace[0], replace[1]);
       replaceLast = replace;
       replace = dict.find(i => text.match(i[0]));
@@ -3062,6 +3277,23 @@
       setTimeout(() => {
         resolve();
       }, time);
+    });
+  }
+  function waitFor (event, timeout) {
+    return new Promise((resolve, reject) => {
+      const now = new Date().getTime();
+      let id;
+      id = setInterval(() => {
+        if (new Date().getTime() - now >= timeout) {
+          if (id) clearInterval(id);
+          id = null;
+          resolve(false);
+        } else if (event()) {
+          if (id) clearInterval(id);
+          id = null;
+          resolve(true);
+        }
+      }, 200);
     });
   }
   function download (content, name, force) {
