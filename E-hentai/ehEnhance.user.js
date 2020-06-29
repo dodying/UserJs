@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.18.0
-// @modified    2020/6/21 12:31:42
+// @version     1.18.122
+// @modified    2020/6/29 10:48:25
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -206,9 +206,22 @@ G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config.autoStartDow
 G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.config.enableEHD && G.config.showAllThumb && G.config.enableChangeSize && G.config.sizeS !== G.config.sizeD && G.config.downloadSizeChanged;
 
 async function init () {
-  GM_registerMenuCommand(GM_info.script.name + ': Show Global', function () {
-    console.log({ SEL, G });
-  }, 'S');
+  if ($(SEL.EH.special.deleted).length && window.location.href === GM_getValue('tasking') + '#2') {
+    const taskFailed = GM_getValue('taskFailed', []);
+    taskFailed.push(GM_getValue('tasking'));
+    GM_setValue('taskFailed', taskFailed);
+    GM_deleteValue('tasking');
+    if (G.isIframe) {
+      $('.ehIframeClose').click();
+    } else {
+      window.close();
+    }
+    return;
+  }
+
+  // GM_registerMenuCommand(GM_info.script.name + ': Show Global', function () {
+  //   console.log({ SEL, G });
+  // }, 'S');
   defaultConfig(); // 默认设置
   addStyle(); // 添加样式
   $('<div class="ehNavBar" style="bottom:0;"><div></div><div></div><div></div></div>').appendTo('body');
@@ -225,12 +238,12 @@ async function init () {
       await updateEHT();
     } catch (err) { }
   }
-  if (GM_getValue('EHT') && JSON.parse(GM_getValue('EHT')).version === 5) {
-    G.EHT = JSON.parse(GM_getValue('EHT')).data;
+  if (GM_getValue('EHT', {}).version === 5) {
+    G.EHT = GM_getValue('EHT').data;
   } else {
     try {
       await updateEHT();
-      G.EHT = JSON.parse(GM_getValue('EHT')).data;
+      G.EHT = GM_getValue('EHT').data;
     } catch (error) {
       console.log(error);
       window.alert('update EHT failed, please reload this page');
@@ -416,22 +429,31 @@ async function init () {
       $(e.target).attr('title', '当前下载列表:<br> ' + GM_getValue('downloading', []).join('<br> '));
     }
   }).prependTo('.ehNavBar>div:nth-child(3)');
-  $('<button key-code="X" key-event="mousedown" tooltip="' + htmlEscape('左键: 开始下载任务<br>中键: 从当前任务开始<br>右键: 重置当前下载任务') + '">Start Task</button>').on({
+  $('<button name="taskControl" key-code="X" key-event="mousedown" tooltip="' + htmlEscape('左键: 开始/暂停下载任务<br>中键: 取消当前下载<br>右键: 从当前任务开始') + '">Start Task</button>').on({
     mousedown: e => {
       if (e.button === 0) {
-        task();
+        if (G.taskInterval) {
+          G.taskStop = true;
+          G.taskInterval = null;
+          $(e.target).text('Start Task');
+        } else {
+          task();
+          $(e.target).text('Stop Task');
+        }
       } else if (e.button === 1) {
-        const task = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i);
         GM_deleteValue('tasking');
-        GM_setValue('task', task);
-        task();
       } else if (e.button === 2) {
+        const taskAll = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter(i => i).filter((item, index, array) => array.indexOf(item) === index);
         GM_deleteValue('tasking');
+        GM_setValue('task', taskAll);
+        task();
+        $(e.target).text('Stop Task');
       }
     },
     mouseenter: e => {
       const task = GM_getValue('task', []);
-      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
+      const taskFailed = GM_getValue('taskFailed', []);
+      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> ') + '<hr>当前任务列表-失败: ' + taskFailed.length + '<br> ' + taskFailed.join('<br> '));
     }
   }).appendTo('.ehNavBar>div:nth-child(3)');
   $('<input type="file" id="selectFileTask" name="selectFile" accept=".txt">').on({
@@ -444,27 +466,29 @@ async function init () {
       fr.onload = e => {
         const text = e.target.result;
         const tasking = GM_getValue('tasking', []);
-        const task = [].concat(GM_getValue('task', []), text.split(/[\r\n]+/)).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i && i !== tasking && i.match(SEL.EH.info.urlMatch));
+        const task = [].concat(GM_getValue('task', []), text.split(/[\r\n]+/)).map(i => i.replace(/#\d+$/, '')).filter(i => i && i !== tasking && i.match(SEL.EH.info.urlMatch)).filter((item, index, array) => array.indexOf(item) === index);
         GM_setValue('task', task);
         e.target.value = null;
       };
       fr.readAsText(e.target.files[0]);
     }
   }).appendTo('.ehNavBar>div:nth-child(3)');
-  $('<button tooltip="' + htmlEscape('左键: 导出下载列表（包括正在下载）<br>右键: 导入下载列表（自动清除重复项）') + '">Export Task</button>').on({
+  $('<button tooltip="' + htmlEscape('左键: 导出下载列表（包括正在下载）<br>中键: 重置下载列表（包括正在下载）<br>右键: 导入下载列表（自动清除重复项）') + '">Export Task</button>').on({
     mousedown: e => {
       if (e.button === 0) {
-        const task = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter((item, index, array) => array.indexOf(item) === index).filter(i => i);
+        const task = [].concat(GM_getValue('tasking', []), GM_getValue('task', [])).map(i => i.replace(/#\d+$/, '')).filter(i => i).filter((item, index, array) => array.indexOf(item) === index);
         saveAs2(task.join('\n'), 'task-list.txt');
       } else if (e.button === 1) {
-
+        GM_setValue('task', []);
+        GM_deleteValue('tasking');
       } else if (e.button === 2) {
         $('#selectFileTask').click();
       }
     },
     mouseenter: e => {
       const task = GM_getValue('task', []);
-      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
+      const taskFailed = GM_getValue('taskFailed', []);
+      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> ') + '<hr>当前任务列表-失败: ' + taskFailed.length + '<br> ' + taskFailed.join('<br> '));
     }
   }).appendTo('.ehNavBar>div:nth-child(3)');
   $('<button title="' + htmlEscape('左键: 加入或移除黑名单<br>右键: 显示黑名单列表') + '">Toggle Blacklist</button>').on({
@@ -634,7 +658,7 @@ function addStyle () { // 添加样式
     '.ehFavicion{background: url(favicon.ico) no-repeat center center;}',
     '.ehIgnore{filter:blur(1px) grayscale(1);}',
     '.ehIgnore:hover{filter:none;}',
-    '.ehIframe{width:99%;height:400px;padding-bottom:32px}',
+    `.ehIframe{width:99%;height:${document.documentElement.clientHeight - 60}px;margin-bottom:32px;resize:vertical;}`,
     '.ehIframeClose{position:fixed;top:0;right:0;z-index:99999;color:#f00;}',
     '.ehThumbBtn{width:36px;height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;}',
 
@@ -900,7 +924,7 @@ function btnFake2 () { // 按钮 -> 下载空文档(搜索页)
       language = language.substr(0, 1).toUpperCase() + language.substr(1);
       let tags = {};
       for (const tag of meta.tags) {
-        const [, main,, sub] = tag.match(/(language|artist|female|male|parody|character|group|misc)?(:)?(.*)/);
+        const [, main, , sub] = tag.match(/(language|artist|female|male|parody|character|group|misc)?(:)?(.*)/);
         if (!(main in tags)) tags[main] = [];
         tags[main].push(sub);
       }
@@ -1012,16 +1036,16 @@ function btnSearch2Highlight () {
       const group = info.tags.filter(tag => tag.match(/^group:/));
       let regexp;
       if (artist.length === 1) {
-        regexp = new RegExp(`artist:"?${artist[0].match(/^artist:(.*)$/)[1]}\\$?"?`, 'gi');
-      // } else if (group.length === 1) {
-      //   regexp = new RegExp(`group:"?${group[0].match(/^group:(.*)$/)[1]}\\$?"?`, 'gi');
+        regexp = new RegExp(`artist:("?)${artist[0].match(/^artist:(.*)$/)[1]}\\$?\\1`, 'gi');
+        // } else if (group.length === 1) {
+        //   regexp = new RegExp(`group:("?)${group[0].match(/^group:(.*)$/)[1]}\\$?\\1`, 'gi');
       } else if (artist.length === 0 && group.length === 0) {
         continue;
       } else {
         const arr = artist.length ? artist : group;
         const filtered = arr.filter(text => {
           const main = text.match(/^artist:(.*)$/) ? 'artist' : 'group';
-          const regexp = new RegExp(`${main}:"?${text.match(/^\w+:(.*)$/)[1]}\\$?"?`, 'gi');
+          const regexp = new RegExp(`${main}:("?)${text.match(/^\w+:(.*)$/)[1]}\\$?\\1`, 'gi');
           const find = listKeys.find(i => i.match(regexp));
           if (find && now - list[find].time <= 30 * 24 * 60 * 60 * 1000) return true;
         });
@@ -1046,19 +1070,22 @@ function btnSearch2Highlight () {
   check();
 }
 
-function btnTask () { // 按钮 -> 添加到下载任务(信息页)
-  $('<button key-code="Z" key-event="mousedown" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">Add Task</button>').on({
+function btnTask () { // 按钮 -> 添加到下载列表(信息页)
+  $('<button key-code="Z" key-event="mousedown" tooltip="' + htmlEscape('左键: 添加到下载列表<br>中键: 重试失败列表<br>右键: 从下载列表删除') + '">Add Task</button>').on({
     mousedown: e => {
       if (e.button === 0) {
         const task = GM_getValue('task', []);
+        const tasking = GM_getValue('tasking');
         const url = window.location.href.replace(/#\d+$/, '');
-        if (!(task.includes(url))) {
+        if (!(task.includes(url)) && tasking === url) {
           task.push(url);
           GM_setValue('task', task);
           $(e.target).attr('content-after', '[+1]');
         }
       } else if (e.button === 1) {
-        GM_setValue('task', []);
+        const task = [].concat(GM_getValue('task', []), GM_getValue('taskFailed', [])).filter((item, index, array) => array.indexOf(item) === index);
+        GM_setValue('task', task);
+        GM_deleteValue('taskFailed');
       } else if (e.button === 2) {
         const task = GM_getValue('task', []);
         const url = window.location.href.replace(/#\d+$/, '');
@@ -1074,19 +1101,21 @@ function btnTask () { // 按钮 -> 添加到下载任务(信息页)
     },
     mouseenter: e => {
       const task = GM_getValue('task', []);
-      $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
+      const taskFailed = GM_getValue('taskFailed', []);
+      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> ') + '<hr>当前任务列表-失败: ' + taskFailed.length + '<br> ' + taskFailed.join('<br> '));
     }
   }).appendTo('.ehNavBar>div:nth-child(3)');
 }
 
-function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
-  $('<button key-code="Z" key-event="mousedown" tooltip="' + htmlEscape('左键: 添加到下载任务<br>中键: 重置下载任务<br>右键: 从任务列表中删除') + '">Add Task</button>').on({
+function btnTask2 () { // 按钮 -> 添加到下载列表(搜索页)
+  $('<button key-code="Z" key-event="mousedown" tooltip="' + htmlEscape('左键: 添加到下载列表<br>中键: 重试失败列表<br>右键: 从下载列表删除') + '">Add Task</button>').on({
     mousedown: e => {
       if (e.button === 0) {
         const task = GM_getValue('task', []);
+        const tasking = GM_getValue('tasking');
         let count = 0;
         $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
-          if (!(task.includes(i.href))) {
+          if (!(task.includes(i.href)) && i.href !== tasking) {
             task.push(i.href);
             count++;
           }
@@ -1094,7 +1123,9 @@ function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
         GM_setValue('task', task);
         $(e.target).attr('content-after', `[+${count}]`);
       } else if (e.button === 1) {
-        GM_setValue('task', []);
+        const task = [].concat(GM_getValue('task', []), GM_getValue('taskFailed', [])).filter((item, index, array) => array.indexOf(item) === index);
+        GM_setValue('task', task);
+        GM_deleteValue('taskFailed');
       } else if (e.button === 2) {
         const task = GM_getValue('task', []);
         let count = 0;
@@ -1113,7 +1144,8 @@ function btnTask2 () { // 按钮 -> 添加到下载任务(搜索页)
     },
     mouseenter: e => {
       const task = GM_getValue('task', []);
-      $(e.target).attr('title', '当前任务列表: ' + task.length + '<br> ' + task.join('<br> '));
+      const taskFailed = GM_getValue('taskFailed', []);
+      $(e.target).attr('title', '当前任务:<br> ' + GM_getValue('tasking', '') + '<hr>当前任务列表: ' + task.length + '<br> ' + task.join('<br> ') + '<hr>当前任务列表-失败: ' + taskFailed.length + '<br> ' + taskFailed.join('<br> '));
     }
   }).appendTo('.ehNavBar>div:nth-child(3)');
 }
@@ -1688,7 +1720,7 @@ async function getInfo () { // 获取信息
       gidlist: lst[i],
       namespace: 1
     };
-    const res = await xhrSync('/api.php', JSON.stringify(gdata), { // TODO ? use promise.all, maybe banned
+    const res = await xhrSync('/api.php', JSON.stringify(gdata), {
       responseType: 'json'
     });
     gmetadata = gmetadata.concat(res.response.gmetadata);
@@ -1917,14 +1949,45 @@ function openUrl (url) { // 打开链接
       GM_openInTab(url, false);
     }
   } else if (config === '3') {
-    $('<iframe class="ehIframe">').appendTo('body').on('load', (e) => {
-      $(e.target).css({
-        height: Math.min(document.documentElement.clientHeight - 60, parseInt($(e.target).contents().find('body').css('height')))
+    const close = (elem) => {
+      $(elem).contents().find('*').addBack().unbind().off();
+      $(elem).attr('src', 'about:blank');
+      $(elem).contents().get(0).write('');
+      $(elem).contents().get(0).clear();
+      $(elem).attr('src', null).attr('status', 'idle').hide();
+      $('.ehIframe[status="idle"]:gt(0)').remove();
+    };
+    const checkLoad = (elem) => {
+      try {
+        elem.contentWindow.document; // eslint-disable-line no-unused-expressions
+        return true;
+      } catch (error) {
+        const url = $(elem).attr('src');
+        $(elem).attr('src', 'about:blank');
+        setTimeout(() => {
+          $(elem).attr('src', url);
+        }, 200);
+        return false;
+      }
+    };
+    if ($('.ehIframe[status="idle"]').length === 0) {
+      $('<iframe class="ehIframe" status="idle">').appendTo($('body', window.top.document)).on({
+        load: (e) => {
+          if (!checkLoad(e.target)) return;
+          $(e.target).css({
+            height: Math.min(document.documentElement.clientHeight - 60, parseInt($(e.target).contents().find('body').css('height')))
+          });
+          $('<button class="ehIframeClose">Close</button>').appendTo($(e.target).contents().find('body')).on('click', () => {
+            close(e.target);
+          });
+        },
+        error: (e) => {
+          close(e.target);
+          openUrl(url);
+        }
       });
-      $('<button class="ehIframeClose">Close</button>').appendTo($(e.target).contents().find('body')).on('click', () => {
-        $(e.target).remove();
-      });
-    }).attr('src', url);
+    }
+    $('.ehIframe[status="idle"]', window.top.document).attr('status', 'busy').attr('src', url).show();
   }
 }
 
@@ -1968,6 +2031,7 @@ async function saveAs (text, name) { // eslint-disable-line no-unused-vars
       } else {
         const zipS = await JSZip.loadAsync(text);
         const zip = await JSZip.loadAsync(G.imageData);
+        G.imageData = null;
         const files = Object.keys(zipS.files);
 
         // 合并info
@@ -2331,9 +2395,10 @@ function showConfig () { // 显示设置
         $(e.target).prop('disabled', true).val('Updating...');
         updateEHT().then(() => {
           $(e.target).prop('disabled', false).val('Update Now');
+          G.EHT = GM_getValue('EHT').data;
         });
       } else if ($(e.target).is('.ehConfig input[name="exportEHT"]')) {
-        const text = GM_getValue('EHT', '');
+        const text = JSON.stringify(GM_getValue('EHT', {}));
         saveAs2(text, 'EHT.json');
       } else if ($(e.target).is('.ehConfig input[name="emptyEHT"]')) {
         GM_deleteValue('EHT');
@@ -2574,11 +2639,13 @@ function tagPreview () { // 标签预览
 
 function task () { // 下载任务
   if (G.taskInterval) return;
+  G.taskStop = false;
   const main = async () => {
     const task = GM_getValue('task', []);
-    if (task.length === 0 && !GM_getValue('tasking')) {
+    if ((task.length === 0 && !GM_getValue('tasking')) || G.taskStop) {
       G.taskInterval = null;
       changeFav('/favicon.ico');
+      $('[name="taskControl"]').text('Start Task');
       return;
     }
 
@@ -2718,7 +2785,7 @@ async function updateEHT () {
   const url1 = res.response.filter(i => i.assets.filter(i => i.name === name).length)[0].assets.filter(i => i.name === name)[0].browser_download_url;
   const res1 = await xhrSync(url1);
 
-  GM_setValue('EHT', res1.response);
+  GM_setValue('EHT', JSON.parse(res1.response));
   setNotification('EhTagTranslator has been up-to-date');
   GM_setValue('EHT_checkTime', new Date().getTime());
 }
