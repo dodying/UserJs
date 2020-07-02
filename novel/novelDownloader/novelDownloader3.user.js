@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.3.20
+// @version     3.3.185
 // @created     2020-03-16 16:59:04
-// @modified    2020/6/30 07:17:40
+// @modified    2020/7/2 20:50:25
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -33,6 +33,17 @@
 /* global xhr, saveAs, tranStr, base64, JSZip */
 ;(function () { // eslint-disable-line no-extra-semi
   'use strict';
+
+  /*
+    * interface Chapter {
+    *   title?:      string;
+    *   url?:        string;
+    *   volume?:     string;
+    *   document?:   string;
+    *   contentRaw?: string;
+    *   content?:    string;
+    * }
+  */
 
   let Storage = null;
   Storage = {
@@ -66,6 +77,7 @@
   const Rule = {
     // 如无说明，所有可以为*选择器*都可以是async (doc)=>string
     //                              章节内async function(doc,res,request)
+    // 快速查找脚本的相应位置：rule.key
 
     // ?siteName
     siteName: '通用规则',
@@ -79,6 +91,7 @@
 
     // ?infoPage: 选择器 或 async (doc)=>url
     //  如果存在infoPage，则基本信息（title,writer,intro,cover）从infoPage页面获取
+    //  当infoPage与当前页相同时，直接从当前页获取（极少数情况）
 
     // title 书籍名称:选择器
     title: ['.h1title > .shuming > a[title]', '.chapter_nav > div:first > a:last', '#header > .readNav > span > a:last', 'div[align="center"] > .border_b > a:last', '.ydselect > .weizhi > a:last', '.bdsub > .bdsite > a:last', '#sitebar > a:last', '.con_top > a:last', '.breadCrumb > a:last'].join(','),
@@ -136,7 +149,11 @@
 
       '[id*="list"] a', '[class*="list"] a'
     ].join(','),
-    // vipChapter:选择器 或 async (doc,res,request)=>url[]
+    // vipChapter:选择器 或 async (doc)=>url[]或{url,title}[]
+
+    // volume:
+    //  选择器/async (doc)=>elem[]；原理 $(chaptes).add(volumes);
+    //  async (doc,chapters)=>chapters；尽量不要生成新的对象，而是在原有对象上增加键"volume"（方便重新下载）
 
     // 以下在章节页面内使用
     // ?chapterTitle:选择器 省略留空时，为chapter的textContent
@@ -204,7 +221,8 @@
       writer: '.anim-main_list a[href^="../tags/"]',
       intro: '.line_height_content',
       cover: '#cover_pic',
-      chapter: '.cartoon_online_border>ul>li>a',
+      chapter: '[class^="cartoon_online_border"]>ul>li>a',
+      volume: '.h2_title2>h2',
       chapterTitle: '.display_middle',
       content: '#center_box',
       iframe: true,
@@ -224,6 +242,7 @@
       intro: '.comic_deCon_d',
       cover: '.comic_i_img>img',
       chapter: '.list_con_li>li>a',
+      volume: '.zj_list_head>h2>em',
       chapterTitle: '.head_title>h2',
       iframe: (win) => $('<div class="nd3-images">').html(win.chapterImages.map((item, index, arr) => `<img data-src="${win.SinMH.getChapterImage(index + 1)}" /><p class="img_info">(${index + 1}/${arr.length})</p>`).join('')).appendTo(win.document.body),
       content: '.nd3-images',
@@ -240,6 +259,7 @@
       intro: '#intro-all',
       cover: '.book-cover>.hcover>img',
       chapter: '.chapter-list a',
+      volume: 'h4>span',
       chapterTitle: '.title h2',
       content: (doc, res, request) => {
         let info = res.response.match(/window\["\\x65\\x76\\x61\\x6c"\](.*?)<\/script>/)[1];
@@ -274,7 +294,8 @@
       writer: 'h4:contains("作者")>a',
       intro: '.intro',
       cover: '#book_info>img',
-      chapter: '#dir>dd>a',
+      chapter: '#dir a',
+      volume: '#dir>dt:nochild',
       iframe: async (win) => {
         while (win.content.showNext() !== false) {
           await waitInMs(200);
@@ -302,13 +323,14 @@
       //   return content.map(i => i.outerHTML).join('<br>');
       // }
     },
-    { // https://www.kanunu8.com/book2/11140/
+    { // https://www.kanunu8.com/book2/11107/index.html
       siteName: '努努书坊',
       filter: () => window.location.href.match(/kanunu8.com\/book2/) ? ($('.book').length ? 1 : 2) : 0,
       title: '.book>h1',
       writer: '.book>h2>a',
       intro: '.description>p',
       chapter: '.book>dl>dd>a',
+      volume: '.book>dl>dt',
       content: '#Article>.text',
       elementRemove: 'table,a'
     },
@@ -341,6 +363,7 @@
       writer: 'h2>a[href^="/author/"]',
       intro: '.description>p',
       chapter: '.book>dl>dd>a',
+      volume: '.book>dl>dt',
       chapterTitle: 'h1',
       content: '[align="center"]+p'
     },
@@ -351,6 +374,7 @@
       title: '[style="FONT-FAMILY: 宋体; FONT-SIZE:12pt"]',
       writer: '[href="../index.html"]',
       chapter: '[style="FONT-FAMILY: 宋体; FONT-SIZE:12pt"]+center a',
+      volume: '[bgcolor="#D9DDE8"]',
       chapterTitle: '.tt2>center>b',
       content: '.tt2'
     },
@@ -365,6 +389,7 @@
       cover: '.J-getJumpUrl>img',
       chapter: '.volume>.cf>li>a',
       vipChapter: '.volume>.cf>li:has(.iconfont)>a',
+      volume: () => $('.volume>h3').toArray().map(i => i.childNodes[2]),
       chapterTitle: '.j_chapterName',
       content: '.j_readContent',
       contentReplace: [
@@ -375,14 +400,16 @@
     },
     { // https://www.ciweimao.com
       siteName: '刺猬猫',
-      url: /:\/\/(www.)?ciweimao.com\/book\/\d+|ciweimao.com\/chapter-list\/\d+\/book_detail/,
+      url: /:\/\/(www.)?ciweimao.com\/(book|chapter-list)\/\d+/,
       chapterUrl: /:\/\/(www.)?ciweimao.com\/chapter\/\d+/,
+      infoPage: () => `https://www.ciweimao.com/book/${window.location.href.match(/\d+/)[0]}`,
       title: 'h3',
       writer: '.book-info [href*="reader/"]',
       intro: '.book-intro-cnt>div:nth-child(1)',
       cover: '.cover>img',
       chapter: '.book-chapter-list a',
       vipChapter: '.book-chapter-list a:has(.icon-lock),.book-chapter-list a:has(.icon-unlock)',
+      volume: '.book-chapter-box>.sub-tit',
       chapterTitle: 'h3.chapter',
       deal: async (chapter) => {
         if (!unsafeWindow.CryptoJS) {
@@ -518,6 +545,7 @@
       cover: '.bookcover>img',
       chapter: 'div.list>ul>li>a',
       vipChapter: 'div.list:has(span.f900)>ul>li>a',
+      volume: '.juan_height',
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
@@ -600,6 +628,7 @@
       intro: '#about .g_txt_over',
       cover: '.det-info .g_thumb',
       chapter: '.content-list a',
+      volume: '.volume-item>h4',
       content: '.cha-words',
       elementRemove: 'pirate'
     },
@@ -654,6 +683,7 @@
       cover: '.RecBook img[onerror]',
       chapter: '.menu-area>p>a',
       vipChapter: '.menu-area>p>a:has(span.vip)',
+      volume: '.menu-area>h2',
       chapterTitle: 'h1',
       content: '.menu-area'
     },
@@ -668,6 +698,7 @@
       cover: '.book-img>img',
       chapter: '.chapter-list a',
       vipChapter: '.chapter-list .vip>a',
+      volume: () => $('.volume').toArray().map(i => i.childNodes[6]),
       chapterTitle: '.title_txtbox',
       content: '.content'
     },
@@ -682,6 +713,7 @@
       cover: '.cover img',
       chapter: 'dl.Volume>dd>a',
       vipChapter: 'dl.Volume>dd>a:has(.vip)',
+      volume: '.Volume>dt>.tit',
       chapterTitle: 'h1',
       content: '.p',
       elementRemove: '.copy,.qrcode'
@@ -696,6 +728,7 @@
       cover: '.bookContainImgBox img',
       chapter: '#informList li.nolooking>a',
       vipChapter: '#informList li.nolooking>a:has(.chapter_con_VIP)',
+      volume: '[flag="volumes"] span',
       chapterTitle: 'h2',
       content: '.myContent',
       elementRemove: '[id="-2"]'
@@ -711,6 +744,7 @@
       cover: '.book-cover',
       chapter: 'div.bd>ul>li>a',
       vipChapter: 'div.bd>ul>li>a.isvip',
+      volume: '.chapter-list>.hd>h2',
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
@@ -742,6 +776,7 @@
       cover: '.imgcss',
       chapter: '#mulu .DivTable .DivTd>a',
       vipChapter: '#mulu .DivVip~.DivTable .DivTd>a',
+      volume: '.C-Fo-Z-ML-TitleBox>h3',
       chapterTitle: '.c_l_title',
       content: '.noveContent',
       elementRemove: 'p:has(a,b,font)',
@@ -781,6 +816,7 @@
       cover: '[itemprop="image"]',
       chapter: '[itemprop="url"][href]',
       // vipChapter: '#oneboolt>tbody>tr>td>span>div>a[id^="vip_"]',
+      volume: '.volumnfont',
       chapterTitle: 'h2',
       content: '.noveltext',
       elementRemove: 'div'
@@ -795,6 +831,7 @@
       cover: '.bookprofile>dt>img',
       chapter: '.catalog-list>li>a',
       vipChapter: '.catalog-list>li.vip>a',
+      volume: () => $('.catalog-main>dt').toArray().map(i => i.childNodes[2]),
       chapterTitle: '.chapter-title',
       content: '.chapter-main'
     },
@@ -809,6 +846,7 @@
       cover: '.cover-box-left>img',
       chapter: '.chapter-list>ul>li>a',
       vipChapter: '.chapter-list>ul>li>a:has(span)',
+      volume: '.catalog-tit>h2',
       chapterTitle: 'h2>span',
       content: '#read-content',
       elementRemove: 'h2,div,style,p:has(cite)'
@@ -848,6 +886,7 @@
       cover: '.brc>img',
       chapter: '#abl4>table>tbody>tr>td>a',
       vipChapter: '#abl4>table>tbody>tr>td>a[href^="http://my.lc1001.com/vipchapters"]',
+      volume: '#cul>.dsh',
       chapterTitle: 'h2',
       content: '#ccon'
     },
@@ -861,6 +900,7 @@
       cover: '.pic>span>img',
       chapter: '.catebg a',
       vipChapter: '.catebg a:has([alt="vip"])',
+      volume: '.cate-tit>h2',
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
@@ -897,6 +937,7 @@
       cover: '.book-info .book-cover',
       chapter: '.chapter-item>a',
       vipChapter: '.chapter-item:has(.vip)>a',
+      volume: 'span.chapter-item',
       chapterTitle: '.chapter-name',
       content: '.chapter-item:has(.chaper-info)',
       elementRemove: 'div'
@@ -911,6 +952,7 @@
       intro: '.workSecHit+h2+p',
       cover: '.worksLList .fl >a>img',
       chapter: '.lb>table>tbody>tr>td>a',
+      volume: '.lb>h2',
       chapterTitle: '.pos>h1',
       content: '.xsDetail',
       elementRemove: 'p[style],p>*'
@@ -940,6 +982,7 @@
       intro: '#book_intro',
       cover: '.kjbookcover img',
       chapter: '.third>a',
+      volume: '.kjdt-catalog>span:nth-child(1)',
       chapterTitle: 'h1',
       content: '.content',
       elementRemove: 'span',
@@ -993,6 +1036,7 @@
       cover: '.cover>img',
       chapter: '.item>a,.title-1>a',
       vipChapter: '.vip>a',
+      volume: '.title-1',
       deal: async (chapter) => {
         const urlArr = chapter.url.split('/');
         const content = await new Promise((resolve, reject) => {
@@ -1033,6 +1077,7 @@
       cover: '.m-bookdetail .cover>img',
       chapter: '.item>a',
       vipChapter: '.vip>a',
+      volume: '.title-1',
       deal: async (chapter) => Rule.special.find(i => i.siteName === '网易云阅读').deal(chapter)
     },
     { // https://www.yueduyun.com/
@@ -1259,6 +1304,7 @@
       cover: '.c_img>img',
       chapter: '.mb_content a',
       vipChapter: '.mb_content a:has(span:contains("VIP"))',
+      volume: '.mb_content>li[style]',
       chapterTitle: '[itemprop="headline"]',
       content: '[itemprop="acticleBody"]'
     },
@@ -1273,6 +1319,7 @@
       cover: '.li_01 img',
       chapter: '.list01>li>p a',
       vipChapter: '.list01>li>p>span>a',
+      volume: '.dictry>h2',
       chapterTitle: '#contents>h1',
       content: '#mouseRight'
     },
@@ -1287,6 +1334,7 @@
       cover: '.bigpic>img',
       chapter: '.chapter-list>li>span>a',
       vipChapter: '.chapter-list>li>span:has(.vip-icon)>a',
+      volume: '.chapter-bd>h2',
       chapterTitle: 'h1',
       content: '.article-con',
       contentReplace: [
@@ -1302,6 +1350,7 @@
       writer: '.con_03>span',
       chapter: '.con_05 a',
       vipChapter: '.con_05 li:has(img)>a',
+      volume: '.con_05>.bt',
       deal: async (chapter) => {
         var info = chapter.url.match(/\d+/g);
         const content = await new Promise((resolve, reject) => {
@@ -1358,6 +1407,7 @@
       cover: '.cover',
       chapter: '.b_chapter_list a',
       vipChapter: '.b_chapter_list div:has(.zdy-icon__vip)>a',
+      volume: '.el-collapse-item__header',
       deal: async (chapter) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
@@ -1456,6 +1506,7 @@
       cover: '.imgbc-b>img',
       chapter: '.chapter>a',
       vipChapter: '.chapter.pay>a',
+      volume: '.chapter-list-all>ul>li.TITLE',
       chapterTitle: 'h1',
       content: '.box-text dd'
     },
@@ -1468,6 +1519,7 @@
       intro: '.about-text',
       cover: '.book-cover img',
       chapter: '.chapter a',
+      volume: '.volume-title>a',
       chapterTitle: '.article-title',
       content: '.article-text'
     },
@@ -1496,6 +1548,7 @@
       intro: 'span:contains("内容简介")+br+span',
       cover: 'img[src*="img.wenku8.com"]',
       chapter: '.css>tbody>tr>td>a',
+      volume: '.vcss',
       chapterTitle: '#title',
       content: '#content'
     },
@@ -1510,6 +1563,7 @@
       cover: '.summary-pic>img',
       chapter: '.catalog-list>ul>li>a',
       vipChapter: '.catalog-list>ul>li>a:has(.icn_vip)',
+      volume: '.catalog-title',
       chapterTitle: '.article-title',
       content: '#ChapterBody'
     },
@@ -1522,6 +1576,7 @@
       intro: '.intro',
       cover: '.show_info>img',
       chapter: '.chapter>a',
+      volume: '.volume_title>span',
       chapterTitle: '.c_title+.c_title>h3',
       content: '#chapter_content'
     },
@@ -1535,6 +1590,7 @@
       intro: '.book-dec>p',
       cover: '.book-img>img',
       chapter: '.chapter-list a',
+      volume: '.volume',
       chapterTitle: '.title_txtbox',
       content: '[itemprop="acticleBody"]'
     },
@@ -1572,9 +1628,10 @@
       intro: '[width="80%"]:last',
       cover: 'img[src*="www.shencou.com/files"]',
       chapter: '.zjlist4 a',
-      chapterTitle: '#content>h1',
-      content: '#content',
-      elementRemove: 'div'
+      volume: '.ttname>h2',
+      chapterTitle: '>h1',
+      content: 'body',
+      elementRemove: 'div,script,center'
     },
     { // http://book.suixw.com
       siteName: '随想轻小说',
@@ -1586,6 +1643,7 @@
       intro: '#content td:has(.hottext):last',
       cover: 'img[src*="book.suixw.com"]',
       chapter: '.ccss>a',
+      volume: '.vcss',
       chapterTitle: '#title',
       content: '#content',
       contentReplace: [
@@ -1601,6 +1659,7 @@
       intro: 'works-intro-short',
       cover: '.works-cover>img',
       chapter: '.works-chapter-item>a',
+      volume: '.vloume',
       chapterTitle: '#content>h2',
       content: '.content'
     },
@@ -1614,7 +1673,8 @@
       chapter: '.long-item>.info>a',
       chapterTitle: '.article-title',
       content: (doc, res, request) => {
-        const content = $('#article-main-contents', res.response).html().replace(/^(<br>)+/, '').split(/<div.*?>.*?<\/div>|(<br>\s*){3,}/).map(i => i && i.replace(/^(\s*|<br>)+/, '')).filter(i => i);
+        const contentRaw = $('#article-main-contents', res.response).html();
+        const content = contentRaw.replace(/^(<br>)+/, '').split(/<div.*?>.*?<\/div>|(<br>\s*){3,}/).map(i => i && i.replace(/^(\s*|<br>)+/, '')).filter(i => i);
         Storage.book.chapters.splice(Storage.book.chapters.indexOf(request.raw), 1, ...content.map((item, index) => ({
           title: `${request.raw.title} - 第${String(index + 1)}部分`,
           url: request.raw.url,
@@ -2193,6 +2253,7 @@
       title: '.index_title',
       writer: '.index_info>span',
       chapter: '.section_list>li>a',
+      volume: '.section_title',
       chapterTitle: '.chapter_title',
       content: async (doc, res, request) => {
         const content = await new Promise((resolve, reject) => {
@@ -2369,7 +2430,8 @@
       '</div>',
 
       '<div name="config" useless>',
-      '  更多设置(请双击): <br>',
+      '  <span style="color:red;">NEW!</span>',
+      '  更多设置: <button name="toggle">显示</button><br>',
       '  下载线程: <input type="number" name="thread">',
       '  重试次数: <input type="number" name="retry">',
       '  <br>',
@@ -2389,6 +2451,8 @@
       '  <input type="checkbox" name="modeManual">手动确认目录或章节',
       '  <br>',
       '  <input type="checkbox" name="templateRule">使用模板规则',
+      '  <br>',
+      '  <input type="checkbox" name="tocIndent">EPUB相关: 目录分卷缩进',
       '  <br>',
       '  连续下载失败 <input type="number" name="failedCount" min="1"> 次时，<br>暂停 <input type="number" name="failedWait" min="0" title="0为手动继续"> 秒后继续下载',
       '  <br>',
@@ -2527,7 +2591,33 @@
           chapters = chapters.sort((a, b) => collator.compare(a.sort, b.sort));
         }
 
-        for (const chapter of chapters) {
+        const volumes = [];
+        for (let i = 0; i < chapters.length; i++) {
+          const chapter = chapters[i];
+
+          if (i > 0 && chapters[i - 1].volume !== chapters[i].volume) {
+            const title = `【${chapters[i - 1].volume}】-分卷-结束`;
+            chapters.splice(i, 0, {
+              title,
+              contentRaw: title,
+              content: title,
+              volume: chapters[i - 1].volume
+            });
+            i++;
+          }
+
+          if (chapter.volume && chapter.volume !== volumes.slice(-1)[0]) {
+            volumes.push(chapter.volume);
+            const title = `【${chapter.volume}】-分卷-开始`;
+            chapters.splice(i, 0, {
+              title,
+              contentRaw: title,
+              content: title,
+              volume: chapter.volume
+            });
+            i++;
+          }
+
           const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
           let content = chapter.contentRaw;
           if (!content) continue;
@@ -2790,7 +2880,7 @@
           for (const chapter of chapterList.iframe) {
             const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
             await new Promise((resolve, reject) => {
-              $('<iframe>').on('load', async (e) => {
+              $('<iframe>').on('load', async (e) => { // TODO 优化
                 let response;
                 try {
                   if (typeof rule.iframe === 'function') await rule.iframe(e.target.contentWindow);
@@ -2802,8 +2892,6 @@
                 await onChapterLoad({ response }, { raw: chapter });
                 $(e.target).remove();
                 resolve();
-              }).on('error', async (e) => {
-                await onChapterLoad({ response: '' }, { raw: chapter });
               }).attr('src', chapter.url).css('visibility', 'hidden').appendTo('body');
             });
           }
@@ -2823,8 +2911,8 @@
         container.toggleClass('opacity01');
       }
     });
-    container.find('[name="config"][useless]').on('dblclick', (e) => {
-      $(e.target).toggleClass('hover');
+    container.find('[name="config"][useless]').find('button[name="toggle"]').on('click', (e) => {
+      container.find('[name="config"][useless]').toggleClass('hover');
     });
     container.find('[name="info"]>input[type="text"]').on('change', e => (Storage.book[$(e.target).attr('name')] = e.target.value));
 
@@ -2862,7 +2950,9 @@
     container.find('[name="info"]>[name="rule"]').html(`<a href="${window.location.origin}" target="_blank">${Storage.rule.siteName}</a>`);
 
     let infoPage = await getFromRule(Storage.rule.infoPage, { attr: 'href' }, [], null);
-    if (infoPage) {
+    if (infoPage === window.location.href) {
+      infoPage = null;
+    } else if (infoPage) {
       infoPage = new URL(infoPage, window.location.href).href;
       const res = await xhr.sync(infoPage, null, { cache: true });
       try {
@@ -2907,15 +2997,28 @@
       // rule-chapter
 
       let order = 1;
-      chapters = await getFromRule(Storage.rule.chapter, (selector) => {
+      chapters = await getFromRule(Storage.rule.chapter, async (selector) => {
         let elems = $(Storage.rule.chapter);
         if (Storage.rule !== Rule && Storage.rule.chapterUrl.length) elems = elems.filter((i, elem) => Storage.rule.chapterUrl.some(j => elem.href.match(j)));
+        let volumes;
+        if (typeof Storage.rule.volume === 'string') {
+          volumes = $(Storage.rule.volume);
+        } else if (typeof Storage.rule.volume === 'function' && Storage.rule.volume.length <= 1) {
+          volumes = await Storage.rule.volume(document);
+        }
+        volumes = $(volumes).toArray();
+        const all = $(elems).add(volumes);
         return elems.attr('novel-downloader-chapter', '').toArray().map(i => {
           $(i).attr('order', order++);
-          return {
+          const chapter = {
             title: i.textContent,
             url: i.href
           };
+          if (volumes && volumes.length) {
+            const volume = all.slice(0, all.index(i)).toArray().reverse().find(i => volumes.includes(i));
+            if (volume) chapter.volume = html2Text(volume.textContent);
+          }
+          return chapter;
         });
       }, [], []);
       if (!Storage.rule.chapter && Storage.rule.chapterUrl.length) {
@@ -2930,6 +3033,7 @@
         });
       }
       vipChapters = await getFromRule(Storage.rule.vipChapter, (selector) => $(Storage.rule.vipChapter).attr('novel-downloader-chapter', 'vip').toArray().map(i => i.href), [], []);
+      if (typeof Storage.rule.volume === 'function' && Storage.rule.volume.length > 1) chapters = await Storage.rule.volume(document, chapters);
     } else if (Storage.mode === 2) {
       container.find('[name="info"]>[name="mode"]').text('章节模式');
       chapters = [window.location.href];
@@ -3094,6 +3198,7 @@
       }
 
       let itemref = '<itemref idref="cover" linear="yes"/>';
+      let volumeCurrent;
       for (let i = 0; i < chapters.length; i++) {
         const chapter = chapters[i];
         const chapterName = chapter.title;
@@ -3107,7 +3212,18 @@
           }]
         ]);
 
-        files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/></navPoint>';
+        if (Config.tocIndent) {
+          if (chapter.volume && chapter.volume !== volumeCurrent) {
+            if (volumeCurrent) files['OEBPS/toc.ncx'] += '</navPoint>';
+            volumeCurrent = chapter.volume;
+            files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/>';
+          } else {
+            files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/></navPoint>';
+          }
+          if (chapter.volume && i === chapters.length - 1) files['OEBPS/toc.ncx'] += '</navPoint>';
+        } else {
+          files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/></navPoint>';
+        }
 
         files['OEBPS/content.opf'] += '<item id="chapter' + chapterOrder + '" href="' + chapterOrder + '.html" media-type="application/xhtml+xml"/>';
         itemref += '<itemref idref="chapter' + chapterOrder + '" linear="yes"/>';
