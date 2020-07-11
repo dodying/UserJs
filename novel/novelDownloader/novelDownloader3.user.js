@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.3.185
+// @version     3.3.236
 // @created     2020-03-16 16:59:04
-// @modified    2020/7/2 20:50:25
+// @modified    2020/7/11 12:31:17
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -29,8 +29,9 @@
 // @noframes
 // @include     *
 // ==/UserScript==
+/* global unsafeWindow GM_setValue GM_getValue GM_registerMenuCommand */
 /* eslint-disable no-debugger  */
-/* global xhr, saveAs, tranStr, base64, JSZip */
+/* global $ xhr saveAs tranStr base64 JSZip */
 ;(function () { // eslint-disable-line no-extra-semi
   'use strict';
 
@@ -1591,8 +1592,9 @@
       cover: '.book-img>img',
       chapter: '.chapter-list a',
       volume: '.volume',
-      chapterTitle: '.title_txtbox',
-      content: '[itemprop="acticleBody"]'
+      chapterTitle: '#mlfy_main_text>h1',
+      content: '.read-content',
+      elementRemove: 'div'
     },
     { // https://www.esjzone.cc/
       siteName: 'ESJ Zone',
@@ -1876,6 +1878,19 @@
       chapter: '.chapterCon>ul>li>a',
       chapterTitle: '.articleTitle>h2',
       content: '.articleCon>p:nth-child(3)'
+    },
+    { // https://www.lhjypx.net/ // TODO
+      siteName: '笔下看书阁',
+      url: '://www.lhjypx.net/(novel|other/chapters/id)/\\d+.html',
+      chapterUrl: '://www.lhjypx.net/book/\\d+/\\w+.html',
+      infoPage: '.breadcrumb>li:nth-child(3)>a',
+      title: '.info2>h1',
+      writer: '.info2>h3>a',
+      intro: '.info2>div>p',
+      cover: '.info1>img',
+      chapter: '.list-charts [href*="/book/"],.panel-chapterlist [href*="/book/"]',
+      chapterTitle: '#chaptername',
+      content: '#txt'
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
@@ -2692,7 +2707,7 @@
         }
 
         let chapterRelative = await getFromRule(ruleChapterRelative, { attr: 'href', allElement: true, document: res.response }, [res, request], []);
-        chapterRelative = [].concat(chapterRelative)
+        chapterRelative = [].concat(chapterRelative).map(i => new URL(i, res.finalUrl || window.location.href).href)
           .filter(url => url && !url.match(/^(javascript:|#)/)).map(i => new URL(i, chapter.url).href)
           .filter(url => {
             if (rule !== Rule && rule.ignoreUrl.some(i => url.match(i))) return false;
@@ -2705,6 +2720,7 @@
         for (const url of chapterRelative) {
           if (chaptersArr.includes(url) || vipChapters.includes(url)) continue;
           const chapterNew = chaptersDownloaded.find(i => i.url === url) || { url };
+          if (chapter.volume) chapterNew.volume = chapter.volume;
           const index = Storage.book.chapters.indexOf(chapter);
           Storage.book.chapters.splice(next ? index + 1 : index, 0, chapterNew);
           chaptersArr.splice(next ? index + 1 : index, 0, url);
@@ -2732,26 +2748,25 @@
         if (failedCount > 0) failedCount = 0;
         if (rule.deal) return;
 
-        const doc = res.response;
+        const doc = res.response && res.response instanceof window.Document ? res.response : new window.DOMParser().parseFromString(res.response, 'text/html');
 
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
 
-        const chapterTitle = await getFromRule(rule.chapterTitle, { attr: 'text', document: res.response }, [res, request], '');
+        const chapterTitle = await getFromRule(rule.chapterTitle, { attr: 'text', document: doc }, [res, request], '');
         chapter.title = chapterTitle.split(Storage.book.title).join('').trim() || chapter.title || $('title', doc).eq(0).text();
         request.title = chapter.title;
 
         let contentCheck = true;
-        if (rule.contentCheck) contentCheck = await getFromRule(rule.contentCheck, (selector) => $(selector, res.response).length, [res, request], true);
+        if (rule.contentCheck) contentCheck = await getFromRule(rule.contentCheck, (selector) => $(selector, doc).length, [res, request], true);
         if (contentCheck) {
           if (Storage.debug.content) debugger;
           let content = await getFromRule(rule.content, (selector) => {
-            const dom = typeof res.response === 'string' ? new window.DOMParser().parseFromString(res.response, 'text/html') : res.response;
-            let elems = $(selector, dom);
+            let elems = $(selector, doc);
             if (Storage.debug.content) debugger;
             if (rule === Rule) elems = elems.not(':emptyHuman'); // 移除空元素
             if (elems.length === 0) { // 没有找到内容
               console.error('novelDownloader: 找不到内容元素\n选择器: ' + selector);
-              elems = $('body', dom);
+              elems = $('body', doc);
             } else if (elems.length > 1) {
               // 当a是b的祖辈元素时，移除a
               elems = elems.filter((i, e) => !elems.not(e).toArray().find(j => $(e).find(j).length));
@@ -2824,10 +2839,9 @@
         if (chapterList.download.length && chapterList.download.find(i => !('contentRaw' in i))) {
           await new Promise((resolve, reject) => {
             xhr.storage.config.set('onComplete', async (list) => {
-              if (chapterList.download.find(i => !('contentRaw' in i))) return;
               resolve();
             });
-            xhr.list(chapterList.download, requestOption);
+            xhr.list(chapterList.download.filter(i => !('contentRaw' in i)), requestOption);
             xhr.showDialog();
             xhr.start();
           });
@@ -2839,7 +2853,7 @@
               if (chapterList.deal.find(i => !('contentRaw' in i))) return;
               resolve();
             });
-            for (const chapter of chapterList.deal) {
+            for (const chapter of chapterList.deal.filter(i => !('contentRaw' in i))) {
               try {
                 const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
                 rule.deal(chapter).then((result) => {
@@ -2877,7 +2891,7 @@
         }
 
         if (chapterList.iframe.length && chapterList.iframe.find(i => !('contentRaw' in i))) {
-          for (const chapter of chapterList.iframe) {
+          for (const chapter of chapterList.iframe.filter(i => !('contentRaw' in i))) {
             const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
             await new Promise((resolve, reject) => {
               $('<iframe>').on('load', async (e) => { // TODO 优化
@@ -3307,9 +3321,9 @@
       argsString = () => {
         const elem = $(value, args.document || document);
         if (args.allElement) {
-          return elem.toArray().map(i => args.attr === 'html' ? $(i).html() : args.attr === 'text' ? $(i).text() : $(i).prop(args.attr) || $(i).attr(args.attr));
+          return elem.toArray().map(i => args.attr === 'html' ? $(i).html() : args.attr === 'text' ? $(i).text() : $(i).attr(args.attr) || $(i).prop(args.attr));
         } else {
-          return args.attr === 'html' ? elem.eq(0).html() : args.attr === 'text' ? elem.eq(0).text() : elem.eq(0).prop(args.attr) || elem.eq(0).attr(args.attr);
+          return args.attr === 'html' ? elem.eq(0).html() : args.attr === 'text' ? elem.eq(0).text() : elem.eq(0).attr(args.attr) || elem.eq(0).prop(args.attr);
         }
       };
     }
