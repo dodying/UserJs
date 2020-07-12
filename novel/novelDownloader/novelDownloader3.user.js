@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.3.236
+// @version     3.3.238
 // @created     2020-03-16 16:59:04
-// @modified    2020/7/11 12:31:17
+// @modified    2020/7/12 11:05:24
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1593,8 +1593,7 @@
       chapter: '.chapter-list a',
       volume: '.volume',
       chapterTitle: '#mlfy_main_text>h1',
-      content: '.read-content',
-      elementRemove: 'div'
+      content: '.read-content'
     },
     { // https://www.esjzone.cc/
       siteName: 'ESJ Zone',
