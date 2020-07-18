@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.3.238
+// @version     3.3.295
 // @created     2020-03-16 16:59:04
-// @modified    2020/7/12 11:05:24
+// @modified    2020/7/18 15:23:46
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1538,6 +1538,54 @@
       elementRemove: '.cp-hidden',
       thread: 1
     },
+    { // https://sosad.fun/
+      siteName: 'SosadFun',
+      url: '://sosad.fun/threads/\\d+/(profile|chapter_index)',
+      chapterUrl: '://sosad.fun/posts/\\d+',
+      title: '.font-1',
+      writer: '.h5 a[href*="/users/"]',
+      intro: '.article-body .main-text',
+      chapter: '.panel-body .table th:nth-child(1)>a[href*="/posts/"]',
+      chapterTitle: 'strong.h3',
+      content: '.post-body>.main-text:nth-child(1)',
+      elementRemove: 'div:last-child',
+    },
+    { // https://www.myhtlmebook.com/
+      siteName: '海棠文化线上文学城',
+      url: 'myhtlmebook.com/\\?act=showinfo&bookwritercode=.*?&bookid=',
+      chapterUrl: 'myhtlmebook.com/\\?act=showpaper&paperid=',
+      title: '#mypages .uk-card h4',
+      writer: '#writerinfos>a',
+      chapter: '.uk-list>li>a[href^="/?act=showpaper&paperid="]',
+      vipChapter: '.uk-list>li:not(:contains("免費"))>a[href^="/?act=showpaper&paperid="]',
+      chapterTitle: '.uk-card-title',
+      content: async (doc, res, request) => {
+        const content = await new Promise((resolve, reject) => {
+          let [,paperid,vercodechk]=res.responseText.match(/data: { paperid: '(\d+)', vercodechk: '(.*?)'},/)
+          xhr.add({
+            chapter: request.raw,
+            url: '/showpapercolor.php',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              Referer: request.url,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            data: `paperid=${paperid}&vercodechk=${vercodechk}`,
+            onload: function (res, request) {
+              try {
+                const content = res.responseText;
+                resolve(content);
+              } catch (error) {
+                console.error(error);
+                resolve('');
+              }
+            }
+          }, null, 0, true);
+        });
+        return content;
+      }
+    },
     // 轻小说
     { // https://www.wenku8.net
       siteName: '轻小说文库',
@@ -1698,6 +1746,17 @@
       },
       chapterTitle: '.article-title',
       content: (doc, res, request) => Rule.special.find(i => i.siteName === '轻之国度').content(doc, res, request),
+    },
+    { // https://ncode.syosetu.com/
+      siteName: '小説家になろう',
+      url: '://ncode.syosetu.com/n\\d+[a-z]{2}(/#main)?',
+      chapterUrl: '://ncode.syosetu.com/n\\d+[a-z]{2}/\\d+/',
+      title: '.novel_title',
+      writer: '.novel_writername>a',
+      intro: '#novel_ex',
+      chapter: '.index_box>dl>dd>a',
+      chapterTitle: '.novel_subtitle',
+      content: '.novel_view'
     },
     // 盗贴
     { // https://www.xiaoshuokan.com
