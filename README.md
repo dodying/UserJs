@@ -188,5 +188,4 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 #### 捐赠
 
-![alipay](./alipay.jpg)
-![wechatpay](./wechatpay.jpg)
+![donation](./donation.jpg)
