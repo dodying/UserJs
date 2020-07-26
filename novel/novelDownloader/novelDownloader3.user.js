@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.0
+// @version     3.4.86
 // @created     2020-03-16 16:59:04
-// @modified    2020/7/26 16:04:51
+// @modified    2020/7/26 18:00:27
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1951,6 +1951,30 @@
       chapterTitle: '#chaptername',
       content: '#txt'
     },
+    { // http://m.yuzhaige.cc/
+      siteName: '御书阁',
+      url: '://m.yuzhaige.cc/\\d+/\\d+/$',
+      chapterUrl: '://m.yuzhaige.cc/\\d+/\\d+/\\d+(_\\d+)?.html',
+      infoPage: '.currency_head>h1>a',
+      title: '.cataloginfo>h3',
+      writer: '.infotype>p>a[href*="/author/"]',
+      intro: '.intro>p',
+      chapter: '.chapters a',
+      chapterTitle: '#chaptertitle',
+      content: (doc, res, request) => {
+        const doc1 = new window.DOMParser().parseFromString(res.response, 'text/html');
+        const order = window.atob(doc1.getElementsByTagName('meta')[7].getAttribute('content')).split(/[A-Z]+%/);
+        const codeurl = res.response.match(/var codeurl="(\d+)";/)[1] * 1;
+        const arrRaw = $('#content', doc1).children().toArray();
+        const arr = [];
+        for (let i = 0; i < order.length; i++) {
+          const truth = order[i] - ((i + 1) % codeurl);
+          arr[truth] = arrRaw[i];
+        }
+        return arr.map(i => i.textContent);
+      },
+      chapterNext: '.chapterPages>a.curr~a,.p3>a'
+    },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
       siteName: '流氓小说网',
@@ -2550,6 +2574,8 @@
       '  <br>',
       '  <input type="checkbox" name="addChapterPrev"><span title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加前章</span>',
       '  <input type="checkbox" name="addChapterNext"><span title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加后章</span>',
+      '  <br>',
+      '  <input type="checkbox" name="iframe" confirm="仅对通用规则生效\n建议先尝试普通下载\n建议首次下载，指定范围测试\n待下载范围正确下载无误，再下载所有章节\n下载请耐心等待"><span>使用iframe模式</span>',
       '</div>',
 
       '<div name="limit" title="优先度:批量下载>下载范围>全部章节">',
@@ -2616,6 +2642,20 @@
 
       Storage.book.chapters = Config.vip ? chapters : chapters.filter(i => !(vipChapters.includes(i.url)));
       Storage.rule.vip = Object.assign({}, Storage.rule, Storage.rule.vip || {});
+
+      if (Storage.rule === Rule) {
+        if (Config.iframe) {
+          Storage.rule.iframe = (win) => {
+            return new Promise((resolve, reject) => {
+              win.requestIdleCallback(() => {
+                resolve();
+              }, { timeout: 5 * 60 * 1000 });
+            });
+          };
+        } else {
+          delete Config.iframe;
+        }
+      }
 
       // 限制下载范围
       if (container.find('[name="limit"]>[name="range"]').val()) {
@@ -2804,11 +2844,13 @@
             const pathurlThis = url.replace(/(.*\/).*/, '$1');
             return pathurlThis !== url && pathurlThis.replace(/.*?:\/\/(.*)/, '$1') === pathurl;
           });
+        let anchor = chapter;
         for (const url of chapterRelative) {
           if (chaptersArr.includes(url) || vipChapters.includes(url)) continue;
           const chapterNew = chaptersDownloaded.find(i => i.url === url) || { url };
           if (chapter.volume) chapterNew.volume = chapter.volume;
-          const index = Storage.book.chapters.indexOf(chapter);
+          const index = Storage.book.chapters.indexOf(anchor);
+          anchor = chapterNew;
           Storage.book.chapters.splice(next ? index + 1 : index, 0, chapterNew);
           chaptersArr.splice(next ? index + 1 : index, 0, url);
 
@@ -2835,7 +2877,7 @@
         if (failedCount > 0) failedCount = 0;
         if (rule.deal) return;
 
-        const doc = res.response && res.response instanceof window.Document ? res.response : new window.DOMParser().parseFromString(res.response, 'text/html');
+        const doc = typeof res.response === 'string' ? new window.DOMParser().parseFromString(res.response, 'text/html') : res.response;
 
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
 
