@@ -29,3 +29,7 @@
 ### 更新历史
 
 * 请看[这里](https://github.com/dodying/UserJs/commits/master/novel/novelDownloader/novelDownloader3.user.js)
+
+### 捐赠
+
+![donation](https://raw.githubusercontent.com/dodying/UserJs/master/donation.jpg)

@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.3.295
+// @version     3.4.0
 // @created     2020-03-16 16:59:04
-// @modified    2020/7/18 15:23:46
+// @modified    2020/7/26 16:04:51
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -32,7 +32,7 @@
 /* global unsafeWindow GM_setValue GM_getValue GM_registerMenuCommand */
 /* eslint-disable no-debugger  */
 /* global $ xhr saveAs tranStr base64 JSZip */
-;(function () { // eslint-disable-line no-extra-semi
+; (function () { // eslint-disable-line no-extra-semi
   'use strict';
 
   /*
@@ -72,6 +72,7 @@
     failedWait: 60,
     image: true,
     addChapterNext: true,
+    removeEmptyLine: 'auto',
     css: 'body {\n  line-height: 130%;\n  text-align: justify;\n  font-family: \\"Microsoft YaHei\\";\n  font-size: 22px;\n  margin: 0 auto;\n  background-color: #CCE8CF;\n  color: #000;\n}\n\nh1 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 28px;\n}\n\nh2 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 26px;\n}\n\nh3 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 24px;\n}\n\np {\n  text-indent: 2em;\n}',
     customize: '[]'
   }, GM_getValue('config', {}));
@@ -146,7 +147,7 @@
       '.uk-table a', '.volume a', '.volumes a', '.wiki-content-table a',
       '.www a', '.xiaoshuo_list a', '.xsList a', '.zhangjieUl a',
       '.zjbox a', '.zjlist a', '.zjlist4 a', '.zl a',
-      '.zp_li a', 'dd a', '.chapter-list a',
+      '.zp_li a', 'dd a', '.chapter-list a', '.directoryArea a',
 
       '[id*="list"] a', '[class*="list"] a'
     ].join(','),
@@ -170,7 +171,7 @@
     // content:选择器
     content: [
       '#pagecontent', '#contentbox', '#bmsy_content', '#bookpartinfo',
-      '#htmlContent', '#text_area', '#chapter_content', '#chapterContent',
+      '#htmlContent', '#text_area', '#chapter_content', '#chapterContent', '#chaptercontent',
       '#partbody', '#BookContent', '#article_content', '#BookTextRead',
       '#booktext', '#BookText', '#readtext', '#readcon',
       '#text_c', '#txt_td', '#TXT', '#txt',
@@ -195,8 +196,8 @@
     //   如果有图片，请不要移除图片元素
 
     // ?chapterPrev,chapterNext:选择器 或 async function(doc)=>url
-    chapterPrev: 'a[rel="prev"],a:contains("上一页"),a:contains("上一章"),a:contains("上一节"),a:contains("上页"),#prevUrl',
-    chapterNext: 'a[rel="next"],a:contains("下一页"),a:contains("下一章"),a:contains("下一节"),a:contains("下页"),#nextUrl'
+    chapterPrev: 'a[rel="prev"],a:regexp("[上前]一?[章页话集节卷篇]+"),#prevUrl',
+    chapterNext: 'a[rel="next"],a:regexp("[下后]一?[章页话集节卷篇]+"),#nextUrl'
     // ?ignoreUrl:url[] 忽略的网站（用于过滤chapterPrev,chapterNext）
 
     // ?getChapters 在章节页面时使用，获取全部章节
@@ -513,13 +514,13 @@
             ctx.drawImage(img, 0, 0);
             const url = canvas.toDataURL('image/jpeg', 0.5);
             img.src = url;
-          // return new Promise((resolve, reject) => {
-          //   canvas.toBlob(function (blob) {
-          //     const url = URL.createObjectURL(blob);
-          //     img.src = url;
-          //     resolve();
-          //   });
-          // });
+            // return new Promise((resolve, reject) => {
+            //   canvas.toBlob(function (blob) {
+            //     const url = URL.createObjectURL(blob);
+            //     img.src = url;
+            //     resolve();
+            //   });
+            // });
           };
           await waitFor(() => $('#J_BookImage', win.document).css('background-image').match(/^url\("?(.*?)"?\)/));
           let src = $('#J_BookImage', win.document).css('background-image').match(/^url\("?(.*?)"?\)/)[1];
@@ -1561,7 +1562,7 @@
       chapterTitle: '.uk-card-title',
       content: async (doc, res, request) => {
         const content = await new Promise((resolve, reject) => {
-          let [,paperid,vercodechk]=res.responseText.match(/data: { paperid: '(\d+)', vercodechk: '(.*?)'},/)
+          const [, paperid, vercodechk] = res.responseText.match(/data: { paperid: '(\d+)', vercodechk: '(.*?)'},/);
           xhr.add({
             chapter: request.raw,
             url: '/showpapercolor.php',
@@ -1756,7 +1757,7 @@
       intro: '#novel_ex',
       chapter: '.index_box>dl>dd>a',
       chapterTitle: '.novel_subtitle',
-      content: '.novel_view'
+      content: '#novel_honbun'
     },
     // 盗贴
     { // https://www.xiaoshuokan.com
@@ -2489,9 +2490,9 @@
     // ui
     const html = [
       '<div name="info">',
-      '  当前规则: <span name="rule"></span>',
+      '  当前规则: <span name="rule"></span> <sup><a href="https://github.com/dodying/UserJs#捐赠" target="_blank">捐赠</a></sup>',
       '  <br>',
-      '  当前模式: <span name="mode"></span>',
+      '  当前模式: <span name="mode"></span> <sup><a href="https://github.com/dodying/UserJs/issues/new" target="_blank">反馈</a></sup>',
       '  <br>',
       '  书籍名称: <input type="text" name="title" value="加载中，请稍候">',
       '  <br>',
@@ -2502,9 +2503,11 @@
       '  书籍封面: <input type="text" name="cover">',
       '</div>',
 
-      '<div name="config" useless>',
+      '<div name="config">',
       '  <span style="color:red;">NEW!</span>',
-      '  更多设置: <button name="toggle">显示</button><br>',
+      '  更多设置: <button name="toggle">显示</button>',
+      '</div>',
+      '<div class="useless" name="config">',
       '  下载线程: <input type="number" name="thread">',
       '  重试次数: <input type="number" name="retry">',
       '  <br>',
@@ -2519,15 +2522,22 @@
       '  <input type="checkbox" name="reference">显示来源地址',
       '  <br>',
       '  <input type="checkbox" name="format">文本处理',
-      '  <input type="checkbox" name="useCommon" title="仅适用于没有设置相应key的规则\n支持的key: elementRemove,chapterPrev,chapterNext">使用通用规则',
+      '  <input type="checkbox" name="useCommon"><span title="仅适用于没有设置相应key的规则\n支持的key: elementRemove,chapterPrev,chapterNext">使用通用规则</span>',
       '  <br>',
       '  <input type="checkbox" name="modeManual">手动确认目录或章节',
       '  <br>',
       '  <input type="checkbox" name="templateRule">使用模板规则',
       '  <br>',
-      '  <input type="checkbox" name="tocIndent">EPUB相关: 目录分卷缩进',
+      '  <span title="{title}代表原标题\n{order}代表第几章\neg:#{order} {title}\n留空则不重命名">TEXT相关: 重命名章节标题</span> <input type="text" name="titleRename">',
       '  <br>',
-      '  连续下载失败 <input type="number" name="failedCount" min="1"> 次时，<br>暂停 <input type="number" name="failedWait" min="0" title="0为手动继续"> 秒后继续下载',
+      '  <input type="checkbox" name="tocIndent">EPUB相关: 目录分卷缩进',
+      '  <br><span title="关于智能的说明: 如果所有空行间只有一段文字，则移除空行，否则保留">移除空行</span>: <select name="removeEmptyLine">',
+      '    <option value="auto">智能</option>',
+      '    <option value="remove">移除所有空行</option>',
+      '    <option value="keep">保留所有空行</option>',
+      '  </select>',
+      '  <br>',
+      '  连续下载失败 <input type="number" name="failedCount" min="1"> 次时，暂停 <input type="number" name="failedWait" min="0" title="0为手动继续"> 秒后继续下载',
       '  <br>',
       '  Epub CSS: <textarea name="css" placeholder="" style="line-height:1;resize:both;"></textarea>',
       '  <br>',
@@ -2535,11 +2545,11 @@
       '</div>',
 
       '<div name="config">',
-      '  <input type="checkbox" name="image" title="仅下载EPUB时生效，仅支持img元素>">下载图片',
+      '  <input type="checkbox" name="image"><span title="仅下载EPUB时生效，仅支持img元素">下载图片</span>',
       '  <input type="checkbox" name="vip" confirm="下载的vip章节需事先购买\n如开启自动购买等，该脚本造成的损失本人概不负责"><span>下载vip章节</span>',
       '  <br>',
-      '  <input type="checkbox" name="addChapterPrev" title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加前章',
-      '  <input type="checkbox" name="addChapterNext" title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加后章',
+      '  <input type="checkbox" name="addChapterPrev"><span title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加前章</span>',
+      '  <input type="checkbox" name="addChapterNext"><span title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加后章</span>',
       '</div>',
 
       '<div name="limit" title="优先度:批量下载>下载范围>全部章节">',
@@ -2706,11 +2716,30 @@
               return elem.html();
             }, [], '');
           }
-          if (Config.language) content = tranStr(content, Config.language === 'tc');
+
           if (Config.format) {
             content = html2Text(content, rule.contentReplace);
-            content = '\u3000\u3000' + content.replace(/^\s+/mg, '\u3000\u3000');
+            if (['text', 'zip'].includes(format)) content = $('<div>').html(content).text();
+            content = content.replace(/^[\u{0009}\u{0020}\u{00A0}\u{1680}\u{2000}-\u{200A}\u{202F}\u{205F}\u{3000}]+/gmu, ''); // 移除开头空白字符
+            if (Config.removeEmptyLine === 'auto') {
+              const arr = content.split(/\n{2,}/);
+              let keep = false;
+              for (const i of arr) {
+                if (i.match(/\n/)) {
+                  keep = true;
+                  break;
+                }
+              }
+              content = keep ? content.replace(/\n{3,}/g, '\n\n') : content.replace(/\n+/g, '\n');
+            } else if (Config.removeEmptyLine === 'remove') {
+              content = content.replace(/\n+/g, '\n');
+            } else if (Config.removeEmptyLine === 'keep') {
+              content = content.replace(/\n{3,}/g, '\n\n');
+            }
+            // https://stackoverflow.com/a/25956935
+            content = content.replace(/^/gm, '\u3000\u3000'); // 每行增加空白字符作缩进
           }
+          if (Config.language) content = tranStr(content, Config.language === 'tc');
           chapter.content = content;
 
           if (!chapter.title) continue;
@@ -2983,8 +3012,8 @@
         container.toggleClass('opacity01');
       }
     });
-    container.find('[name="config"][useless]').find('button[name="toggle"]').on('click', (e) => {
-      container.find('[name="config"][useless]').toggleClass('hover');
+    container.find('[name="config"]').find('button[name="toggle"]').on('click', (e) => {
+      container.find('.useless[name="config"]').toggle();
     });
     container.find('[name="info"]>input[type="text"]').on('change', e => (Storage.book[$(e.target).attr('name')] = e.target.value));
 
@@ -2997,6 +3026,7 @@
       '.novel-downloader-v3 input[type=number]{width:36px;}',
       '.novel-downloader-v3 input[type=number]{width:36px;}',
       '.novel-downloader-v3 [disabled="disabled"]{color:#545454;cursor:default!important;background-color:#ebebe4;}',
+      '.novel-downloader-v3 span[title]::after{content:"(?)";text-decoration:underline;font-size:x-small;vertical-align:super;cursor:pointer;}',
 
       '.novel-downloader-v3{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99999;background:white;border:1px solid black;max-height:99vh;overflow:auto;text-align:center;}',
       '.novel-downloader-v3.opacity01{opacity:0.1;}',
@@ -3005,8 +3035,7 @@
       '.novel-downloader-v3>div:nth-child(2n){background-color:#DADADA;}',
       '.novel-downloader-v3>div:nth-child(2n+1){background-color:#FAFAFA;}',
 
-      '.novel-downloader-v3>[name="config"][useless]{height:24px;overflow:hidden;}',
-      '.novel-downloader-v3>[name="config"][useless].hover{height:auto!important;}',
+      '.novel-downloader-v3>.useless[name="config"]{display:none;}',
       '.novel-downloader-v3>[name="config"] [name="vip"]:checked+span{color:red;}',
 
       '.novel-downloader-v3>[name="progress"]{display:none;}',
@@ -3136,17 +3165,29 @@
       console.log(chapters);
     },
     text: async (chapters) => {
+      const length = String(chapters.length).length;
       const title = Storage.book.title || Storage.book.chapters[0].title;
+      const writer = Storage.book.writer || 'novelDownloader';
+
       var all = [
         '本书名称: ' + title,
-        Storage.book.writer ? `本书作者: ${Storage.book.writer}` : '',
+        Storage.book.writer ? `本书作者: ${writer}` : '',
         Storage.book.intro ? `本书简介: ${Storage.book.intro}` : '',
         Config.reference ? '阅读前说明：本书籍由用户脚本novelDownloader制作' : '',
         Config.reference ? `来源地址: ${window.location.href}` : ''
       ].filter(i => i);
       all.push('');
-      for (const chapter of chapters) {
-        all.push(`${chapter.title}\n${$('<div>').html(chapter.content).text() || ''}\n`);
+
+      for (let i = 0; i < chapters.length; i++) {
+        let { title, content } = chapters[i];
+        if (Config.titleRename) {
+          title = Config.titleRename.replace(/\{(.*?)\}/g, (all, group1) => {
+            if (group1 === 'title') return title;
+            if (group1 === 'order') return String(i + 1).padStart(length, '0');
+            return all;
+          });
+        }
+        all.push(`${title}\n${content || ''}\n`);
       }
       all = all.join('\n');
       const blob = new window.Blob([all], {
@@ -3192,7 +3233,7 @@
           `<dc:date>${date}</dc:date>`,
           `<dc:source>${href}</dc:source>`,
           `<dc:identifier id="${uuid}">urn:uuid:${uuid}</dc:identifier>`,
-          '<dc:language>zh-CN</dc:language>',
+          `<dc:language>${$('html').attr('xml:lang') || $('html').attr('lang') || 'zh-CN'}</dc:language>`,
           '<meta name="cover" content="cover-image" /></metadata><manifest><item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="cover.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>'
         ].join(''),
         'OEBPS/toc.ncx': `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:${uuid}"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>${title}</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="cover.html"/></navPoint>`,
@@ -3275,7 +3316,7 @@
         const chapter = chapters[i];
         const chapterName = chapter.title;
         const chapterOrder = String(i + 1).padStart(length, '0');
-        const chapterContent = replaceWithDict(chapter.content, [
+        const chapterContent = replaceWithDict(chapter.content.trim(), [
           [/\n/g, '</p><p>'], [/<p>\s+/g, '<p>'],
           [/&[a-z]+;/g, (match) => {
             const text = $('<a>').html(match).text();
@@ -3331,8 +3372,8 @@
       ].filter(i => i).join('\n');
 
       for (let i = 0; i < chapters.length; i++) {
-        const chapter = chapters[i];
-        files[String(i + 1).padStart(length, '0') + '-' + chapter.title.replace(/[\\/:*?"<>|]/g, '-') + '.txt'] = $('<div>').html(chapter.content).text();
+        const { title, content } = chapters[i];
+        files[String(i + 1).padStart(length, '0') + '-' + title.replace(/[\\/:*?"<>|]/g, '-') + '.txt'] = content;
       }
 
       const zip = new JSZip();
@@ -3403,7 +3444,9 @@
       [/<\/p>(\s*)<p(\s+.*?)?>/gi, '\n'],
       [/<\/p>|<p(\s+.*?)?>/gi, '\n'],
       [/<br\s*\/?>/gi, '\n'],
-      [/<(\w+)&nbsp;/g, '&lt;$1&nbsp;']
+      [/<(\w+)&nbsp;/g, '&lt;$1&nbsp;'],
+      [/(\S)<(div)/g, '$1\n<$2'],
+      [/<\/(div)>(\S)/g, '</$1>\n$2']
     ]).filter(i => typeof i === 'object' && i instanceof Array && i.length).map(i => {
       const arr = i;
       if (typeof arr[0] === 'string') arr[0] = new RegExp(arr[0], 'gi');
@@ -3519,5 +3562,8 @@
   };
   $.expr[':'].maxsize = function (elem, index, meta, stack) {
     return (elem.textContent || elem.innerText || $(elem).text() || '').trim().length <= meta[3];
+  };
+  $.expr[':'].regexp = function (elem, index, meta, stack) {
+    return !!(elem.textContent || elem.innerText || $(elem).text() || '').match(new RegExp(meta[3], 'i'));
   };
 })();
