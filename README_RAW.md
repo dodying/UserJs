@@ -44,5 +44,4 @@
 
 #### 捐赠
 
-![alipay](./alipay.jpg)
-![wechatpay](./wechatpay.jpg)
+![donation](./donation.jpg)
