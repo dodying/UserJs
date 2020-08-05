@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.86
+// @version     3.4.145
 // @created     2020-03-16 16:59:04
-// @modified    2020/7/26 18:00:27
+// @modified    2020/8/1 12:35:53
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1587,6 +1587,46 @@
         return content;
       }
     },
+    { // https://www.doufu.la/
+      siteName: '豆腐',
+      url: '://www.doufu.la/novel-',
+      chapterUrl: '://www.doufu.la/chapter/',
+      title: 'h1.book_tt>a',
+      writer: '.book_author',
+      intro: '.book_des',
+      cover: '.book_img',
+      chapter: '.catelogue a',
+      vipChapter: '.catelogue .list_item:has([class*="icon-lock"])>a',
+      chapterTitle: '.chapter_tt',
+      content: async (doc, res, request) => {
+        const chapter = request.raw;
+        const token = $(res.response).toArray().find(i => i.tagName === 'META' && i.name === 'csrf-token').content; // same as XSRF-TOKEN<cookie>
+        const content = await new Promise((resolve, reject) => {
+          xhr.add({
+            chapter,
+            url: `https://www.doufu.la/novel/getChapter/${chapter.url.split('/')[4]}`,
+            method: 'POST',
+            headers: {
+              Referer: chapter.url,
+              'x-csrf-token': token
+            },
+            onload: function (res, request) {
+              try {
+                const json = JSON.parse(res.response);
+                const content = json.content;
+                resolve(content);
+              } catch (error) {
+                console.error(error);
+                resolve('');
+              }
+            }
+          }, null, 0, true);
+        });
+        return content;
+      },
+      elementRemove: '.hidden',
+      thread: 1
+    },
     // 轻小说
     { // https://www.wenku8.net
       siteName: '轻小说文库',
@@ -2514,9 +2554,7 @@
     // ui
     const html = [
       '<div name="info">',
-      '  当前规则: <span name="rule"></span> <sup><a href="https://github.com/dodying/UserJs#捐赠" target="_blank">捐赠</a></sup>',
-      '  <br>',
-      '  当前模式: <span name="mode"></span> <sup><a href="https://github.com/dodying/UserJs/issues/new" target="_blank">反馈</a></sup>',
+      '  当前规则: <span name="rule"></span><span name="mode"></span><sup><a href="https://github.com/dodying/UserJs/issues/new" target="_blank">反馈</a></sup><sup><a href="https://github.com/dodying/UserJs#捐赠" target="_blank">捐赠</a></sup>',
       '  <br>',
       '  书籍名称: <input type="text" name="title" value="加载中，请稍候">',
       '  <br>',
@@ -2574,8 +2612,6 @@
       '  <br>',
       '  <input type="checkbox" name="addChapterPrev"><span title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加前章</span>',
       '  <input type="checkbox" name="addChapterNext"><span title="用于将一章分为多页的网站\n脚本会根据网址过滤已下载章节\n对于极个别网站，可能导致重复下载\n会导致【下载范围】、{批量下载】这些功能失效">自动添加后章</span>',
-      '  <br>',
-      '  <input type="checkbox" name="iframe" confirm="仅对通用规则生效\n建议先尝试普通下载\n建议首次下载，指定范围测试\n待下载范围正确下载无误，再下载所有章节\n下载请耐心等待"><span>使用iframe模式</span>',
       '</div>',
 
       '<div name="limit" title="优先度:批量下载>下载范围>全部章节">',
@@ -2642,20 +2678,6 @@
 
       Storage.book.chapters = Config.vip ? chapters : chapters.filter(i => !(vipChapters.includes(i.url)));
       Storage.rule.vip = Object.assign({}, Storage.rule, Storage.rule.vip || {});
-
-      if (Storage.rule === Rule) {
-        if (Config.iframe) {
-          Storage.rule.iframe = (win) => {
-            return new Promise((resolve, reject) => {
-              win.requestIdleCallback(() => {
-                resolve();
-              }, { timeout: 5 * 60 * 1000 });
-            });
-          };
-        } else {
-          delete Config.iframe;
-        }
-      }
 
       // 限制下载范围
       if (container.find('[name="limit"]>[name="range"]').val()) {
@@ -2881,8 +2903,10 @@
 
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
 
-        const chapterTitle = await getFromRule(rule.chapterTitle, { attr: 'text', document: doc }, [res, request], '');
-        chapter.title = chapterTitle.split(Storage.book.title).join('').trim() || chapter.title || $('title', doc).eq(0).text();
+        let chapterTitle = await getFromRule(rule.chapterTitle, { attr: 'text', document: doc }, [res, request], '');
+        chapterTitle = chapterTitle || chapter.title || $('title', doc).eq(0).text();
+        if (chapterTitle.indexOf(Storage.book.title) === 0) chapterTitle = chapterTitle.replace(Storage.book.title, '').trim();
+        chapter.title = chapterTitle;
         request.title = chapter.title;
 
         let contentCheck = true;
@@ -3124,6 +3148,15 @@
 
     let intro = await getFromRule(Storage.rule.intro, { attr: 'html', document: infoPage || document }, [], '');
     intro = html2Text(intro, Storage.rule.contentReplace);
+    intro = $('<div>').html(intro);
+    if (Storage.rule.elementRemove || Config.useCommon) {
+      if (Storage.rule.elementRemove) {
+        $(Storage.rule.elementRemove, intro).remove();
+      } else if (Config.useCommon) {
+        $(Rule.elementRemove, intro).remove();
+      }
+    }
+    intro = intro.text();
     Storage.book.intro = intro;
     Storage.book.cover = await getFromRule(Storage.rule.cover, { attr: 'src', document: infoPage || document }, [], '');
     for (const i of ['title', 'writer', 'intro', 'cover']) {

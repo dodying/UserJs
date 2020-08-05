@@ -32,4 +32,4 @@
 
 ### 捐赠
 
-![donation](https://raw.githubusercontent.com/dodying/UserJs/master/donation.jpg)
+![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs/donation.jpg)
