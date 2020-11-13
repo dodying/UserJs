@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.19.0
-// @modified    2020/7/11 12:53:37
+// @version     1.19.1
+// @modified    2020/8/6 3:39:15
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -254,7 +254,7 @@ async function init () {
 
   showConfig();
 
-  $('<button title="无人坚守模式" name="passive mode">Passive Mode</button>').on({
+  $('<button title="无人监守模式" name="passive mode">Passive Mode</button>').on({
     click: (e, remote) => {
       [window.alertRaw, window.alert] = [window.alert, window.alertRaw || function () {}];
       [window.confirmRaw, window.confirm] = [window.confirm, window.confirmRaw || function () { return true; }];
@@ -2457,7 +2457,7 @@ function showConfig () { // 显示设置
       '下载-EHD相关: <label for="ehConfig_enableEHD"><input type="checkbox" id="ehConfig_enableEHD">启用内置 [E-Hentai-Downloader]</label>; <label for="ehConfig_fixEHDCounter"><input type="checkbox" id="ehConfig_fixEHDCounter">尝试修复EHD下载时计数错误</label>',
       '<div class="ehNew"></div>下载-EHD相关-下载连续失败: 失败 <input name="ehConfig_ehdFailed1" type="number" placeholder="20" min="1" title="仅当成功下载时，才会重新计数，否则累加直至设定值"> 次时, 设置 <input name="ehConfig_ehdFailed1Config" title="JSON格式，仅影响本次下载" type="text" value="' + htmlEscape('{"thread-count":1,"timeout":300,"speed-detect":true,"speed-expired":180}') + '">',
       '<div class="ehNew"></div>下载-EHD相关-下载连续失败: 失败 <input name="ehConfig_ehdFailed2" type="number" placeholder="30" min="1" title="仅当成功下载时，才会重新计数，否则累加直至设定值"> 次时, 设置 <input name="ehConfig_ehdFailed2Config" title="JSON格式，仅影响本次下载" type="text" value="' + htmlEscape('{"thread-count":1,"timeout":0,"speed-detect":false,"speed-expired":0}') + '">',
-      '<div class="ehNew"></div>下载-EHD相关-下载连续失败: 失败 <input name="ehConfig_ehdFailed3" type="number" placeholder="50" min="1" title="此时重新计数"> 次时，暂停; 当无人坚守模式时，暂停 <input name="ehConfig_ehdFailed3Time" type="number" placeholder="600" min="0" title="当0时，不会继续下载""> 秒后，继续下载',
+      '<div class="ehNew"></div>下载-EHD相关-下载连续失败: 失败 <input name="ehConfig_ehdFailed3" type="number" placeholder="50" min="1" title="此时重新计数"> 次时，暂停; 当无人监守模式时，暂停 <input name="ehConfig_ehdFailed3Time" type="number" placeholder="600" min="0" title="当0时，不会继续下载""> 秒后，继续下载',
       '<label for="ehConfig_tagTranslateImage"><input type="checkbox" id="ehConfig_tagTranslateImage">标签翻译显示图片</label>; <label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">显示所有预览图</label>; <label for="ehConfig_enableChangeSize" title="' + htmlEscape('当大图(双页)尺寸与小图(单页)尺寸相同时，失效') + '"><input type="checkbox" id="ehConfig_enableChangeSize">启用自动调整图片尺寸</label>',
       '调整图片尺寸: 大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1" step="0.1">; 其他默认视为小图(单页); 大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>',
       '<label for="ehConfig_downloadSizeChanged" title="' + htmlEscape('需开启: <ul><li>启用内置 [E-Hentai-Downloader] (并设置关闭Request File System to handle large Zip file)</li><li>显示所有预览图</li><li>启用自动调整图片尺寸</li><li>大图(双页) 与 小图(单页)尺寸 不同</li></ul><hr>注意: 避免出错，应一次下载一个画廊') + '"><input type="checkbox" id="ehConfig_downloadSizeChanged">下载调整过大小的图片压缩档</label>'
