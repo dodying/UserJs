@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.255
+// @version     3.4.256
 // @created     2020-03-16 16:59:04
 // @modified    2020/11/23 13:45:44
 // @author      dodying
@@ -20,7 +20,8 @@
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
 // @require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
 // @require     https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js
-// @resource fontLib https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/SourceHanSansCN-Regular-Cutted.json?v=1
+// resource fontLib https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/SourceHanSansCN-Regular-Cutted.json?v=1
+// @resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Cutted.json?v=1
 // @grant       GM_xmlhttpRequest
 // @grant       unsafeWindow
 // @grant       GM_setValue
