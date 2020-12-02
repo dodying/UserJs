@@ -25,16 +25,18 @@ for (const i in font.glyphs.glyphs) {
 }
 fs.writeFileSync('cutted.json', JSON.stringify(libCutted, null, 2));
 
-let often = fs.readFileSync('./常用汉字.txt', 'utf-8').trim().split('');
-// https://zhs.glyphwiki.org/wiki/u2e92
-often = often.concat('⺒⻔⻜⻢戶⻅⻉⻋⻓⻙⻛⺠⻦⻰⻚⻬⻧⻨⻁⻘⻥⻮⻝⻤⻩'.split(''), libCutted.map(i => i.unicode));
-often = new Set(often);
+let often = fs.readFileSync('./常用汉字.json', 'utf-8');
+often = JSON.parse(often);
+// FIX
+often['\u0000'] = ['0000'];
+often['户'].push('6236'); // 戶
+// FIX
 const libOften = [];
-for (const i of often) {
-  const key = lib.find(j => j.unicode === i);
-  if (key) libOften.push(key);
-  if (!key) {
+for (const i in often) {
+  const key = lib.filter(j => often[i].map(k => String.fromCharCode(parseInt(k, 16))).includes(j.unicode));
+  if (key.length) libOften.push(...key);
+  if (!key.length) {
     console.log(i);
   }
 }
-fs.writeFileSync('often.json', JSON.stringify(libOften, null, 2));
+fs.writeFileSync('often.json', JSON.stringify([...new Set(libOften)], null, 2));
