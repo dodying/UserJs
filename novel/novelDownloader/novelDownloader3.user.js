@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.256
+// @version     3.4.286
 // @created     2020-03-16 16:59:04
-// @modified    2020/11/23 13:45:44
+// @modified    2020/12/2 13:54:54
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -20,8 +20,11 @@
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
 // @require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
 // @require     https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js
-// resource fontLib https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/SourceHanSansCN-Regular-Cutted.json?v=1
-// @resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Cutted.json?v=1
+
+// @resource fontLib https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// resource fontLib file:///E:/Desktop/_/GitHub/UserJs/novel/novelDownloader/起点自定义字体/often.json?v=2
+
 // @grant       GM_xmlhttpRequest
 // @grant       unsafeWindow
 // @grant       GM_setValue
@@ -38,7 +41,7 @@
 /* global $ xhr saveAs tranStr base64 JSZip opentype */
 ; (function () { // eslint-disable-line no-extra-semi
   'use strict';
-  const fontLib = JSON.parse(GM_getResourceText('fontLib'));
+  let fontLib;
 
   /*
     * interface Chapter {
@@ -411,16 +414,20 @@
                   content.title = json.data.chapterInfo.chapterName;
 
                   if (json.data.chapterInfo.fontsConf) {
+                    if (!fontLib) fontLib = JSON.parse(GM_getResourceText('fontLib')).reverse();
                     const font = json.data.chapterInfo.fontsConf.ttf.base64Content;
                     opentype.load(font, (err, font) => {
                       if (err) resolve();
                       const obj = {};
+                      const undefinedFont = [];
                       for (const i in font.glyphs.glyphs) {
                         const data = font.glyphs.glyphs[i].path.toPathData();
 
-                        const key = fontLib.filter(i => i.path === data);
-                        if (key) obj[font.glyphs.glyphs[i].unicode] = key[0].unicode;
+                        const key = fontLib.find(i => i.path === data);
+                        if (key) obj[font.glyphs.glyphs[i].unicode] = key.unicode;
+                        if (!key) undefinedFont.push(data);
                       }
+                      if (undefinedFont.length) console.error('未确定字符', undefinedFont);
                       content.content = json.data.chapterInfo.content.replace(/&#(\d+);/g, (matched, m1) => m1 in obj ? obj[m1] : matched);
                       resolve();
                     });
@@ -630,17 +637,21 @@
                 const html = arrStr.join('');
                 content = $('.bookreadercontent', html).html();
                 if ($('<div>').html(html).find('style:nth-child(2)').text().match(/url\((.*?\.ttf)\)/)) {
+                  if (!fontLib) fontLib = JSON.parse(GM_getResourceText('fontLib')).reverse();
                   const font = $('<div>').html(html).find('style:nth-child(2)').text().match(/url\((.*?\.ttf)\)/)[1];
 
                   opentype.load(font, (err, font) => {
                     if (err) resolve('');
                     const obj = {};
+                    const undefinedFont = [];
                     for (const i in font.glyphs.glyphs) {
                       const data = font.glyphs.glyphs[i].path.toPathData();
 
-                      const key = fontLib.filter(i => i.path === data);
-                      if (key) obj[font.glyphs.glyphs[i].unicode] = key[0].unicode;
+                      const key = fontLib.find(i => i.path === data);
+                      if (key) obj[font.glyphs.glyphs[i].unicode] = key.unicode;
+                      if (!key) undefinedFont.push(data);
                     }
+                    if (undefinedFont.length) console.error('未确定字符', undefinedFont);
 
                     for (const i in obj) {
                       if (isNaN(parseInt(i))) continue;
