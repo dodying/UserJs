@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.286
+// @version     3.4.324
 // @created     2020-03-16 16:59:04
-// @modified    2020/12/2 13:54:54
+// @modified    2020/12/4 15:21:26
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -21,8 +21,8 @@
 // @require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
 // @require     https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js
 
-// @resource fontLib https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
-// resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// resource fontLib https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// @resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
 // resource fontLib file:///E:/Desktop/_/GitHub/UserJs/novel/novelDownloader/起点自定义字体/often.json?v=2
 
 // @grant       GM_xmlhttpRequest
@@ -157,7 +157,8 @@
       '.zjbox a', '.zjlist a', '.zjlist4 a', '.zl a',
       '.zp_li a', 'dd a', '.chapter-list a', '.directoryArea a',
 
-      '[id*="list"] a', '[class*="list"] a'
+      '[id*="list"] a', '[class*="list"] a',
+      '[id*="chapter"] a', '[class*="chapter"] a'
     ].join(','),
     // vipChapter:选择器 或 async (doc)=>url[]或{url,title}[]
 
@@ -2104,6 +2105,20 @@
         return arr.map(i => i.textContent);
       },
       chapterNext: '.chapterPages>a.curr~a,.p3>a'
+    },
+    { // https://www.ruth-tshirt.com/
+      siteName: '老猫小说',
+      filter: () => $('[src="https://www.laomaoxs.com/static/image/qrcode.png"]').length && window.location.pathname.match(/\d+\.html$/) ? 1 : 0,
+      // chapterUrl: '://www.ruth-tshirt.com/ruth1/\\d+/\\w+.html',
+      title: ['.h1title > .shuming > a[title]', '.chapter_nav > div:first > a:last', '#header > .readNav > span > a:last', 'div[align="center"] > .border_b > a:last', '.ydselect > .weizhi > a:last', '.bdsub > .bdsite > a:last', '#sitebar > a:last', '.con_top > a:last', '.breadCrumb > a:last'].join(','),
+      chapter: ['[id*="list"] a', '[class*="list"] a', '[id*="chapter"] a', '[class*="chapter"] a'].join(','),
+      chapterTitle: '.chaptername',
+      content: (doc, res, request) => {
+        let content = $('.txt', res.response).html();
+        const str = '的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情己面最女但现前些所同日手又行意动';
+        content = content.replace(/[\ue800-\ue863]/g, matched => str[matched.charCodeAt(0) - 0xe800]);
+        return content;
+      }
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
