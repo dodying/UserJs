@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.324
+// @version     3.4.458
 // @created     2020-03-16 16:59:04
-// @modified    2020/12/4 15:21:26
+// @modified    2020/12/4 19:53:40
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -480,17 +480,20 @@
       chapterTitle: 'h3.chapter',
       deal: async (chapter) => {
         if (!unsafeWindow.CryptoJS) {
-          let script = window.location.protocol + '//ciweimao.com/resources/js/enjs.min.js';
-          script = await xhr.sync(script, null, { cache: true });
-          unsafeWindow.eval(script.response);
+          const result = await Promise.all([
+            '/resources/js/enjs.min.js',
+            '/resources/js/myEncrytExtend-min.js',
+            '/resources/js/jquery-plugins/jquery.base64.min.js'
+          ].map(i => 'https://www.ciweimao.com' + i).map(i => xhr.sync(i, null, { cache: true })));
+          for (const res of result) unsafeWindow.eval(res.response);
         }
 
-        const chapterId = chapter.url.split('/')[4];
+        const chapterId = chapter.url.split('/').slice(-1)[0];
         const res1 = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
             method: 'POST',
-            url: window.location.protocol + '//ciweimao.com/chapter/ajax_get_session_code',
+            url: window.location.origin + '/chapter/ajax_get_session_code',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
@@ -509,7 +512,7 @@
           xhr.add({
             chapter,
             method: 'POST',
-            url: window.location.protocol + '//ciweimao.com/chapter/get_book_chapter_detail_info',
+            url: window.location.origin + '/chapter/get_book_chapter_detail_info',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
@@ -519,39 +522,12 @@
             // responseType: 'json',
             onload: function (res, request) {
               try {
-                var json = JSON.parse(res.response);
-                var i;
-                /* 以下代码来自https://ciweimao.com/resources/js/myEncrytExtend-min.js */
-                var s = {
+                const json = JSON.parse(res.response);
+                const content = unsafeWindow.$.myDecrypt({
                   content: json.chapter_content,
                   keys: json.encryt_keys,
                   accessKey: accessKey
-                };
-                var n = s.content;
-                var r = s.keys;
-                var t = s.keys.length;
-                var q = s.accessKey;
-                var o = q.split('');
-                var m = o.length;
-                var k = [];
-                k.push(r[(o[m - 1].charCodeAt(0)) % t]);
-                k.push(r[(o[0].charCodeAt(0)) % t]);
-                for (i = 0; i < k.length; i++) {
-                  n = base64.decode(n);
-                  var p = k[i];
-                  var j = base64.encode(n.substr(0, 16));
-                  var f = base64.encode(n.substr(16));
-                  var h = unsafeWindow.CryptoJS.format.OpenSSL.parse(f);
-                  n = unsafeWindow.CryptoJS.AES.decrypt(h, unsafeWindow.CryptoJS.enc.Base64.parse(p), {
-                    iv: unsafeWindow.CryptoJS.enc.Base64.parse(j),
-                    format: unsafeWindow.CryptoJS.format.OpenSSL
-                  });
-                  if (i < k.length - 1) {
-                    n = n.toString(unsafeWindow.CryptoJS.enc.Base64);
-                    n = base64.decode(n);
-                  }
-                }
-                var content = n.toString(unsafeWindow.CryptoJS.enc.Utf8);
+                });
                 resolve(content);
               } catch (error) {
                 console.error(error);
@@ -601,6 +577,23 @@
         elementRemove: 'i'
       }
     },
+    { // https://www.shubl.com/
+      siteName: '书耽',
+      url: '://www.shubl.com/book/book_detail/\\d+',
+      chapterUrl: '://www.shubl.com/chapter/book_chapter_detail/\\d+',
+      title: '.book-title>span',
+      writer: '.right>.box>.user-info .username',
+      intro: '.book-brief',
+      cover: '.book-img',
+      chapter: '#chapter_list .chapter_item>a',
+      vipChapter: '#chapter_list .chapter_item:has(.lock)>a',
+      chapterTitle: '.article-title',
+      deal: async (chapter) => Rule.special.find(i => i.siteName === '刺猬猫').deal(chapter),
+      elementRemove: 'span',
+      chapterPrev: '#J_BtnPagePrev',
+      chapterNext: '#J_BtnPageNext',
+      thread: 1
+    },
     { // http://chuangshi.qq.com http://yunqi.qq.com
       siteName: '创世中文网',
       url: /(chuangshi|yunqi).qq.com\/bk\/.*?-l.html/,
@@ -635,11 +628,10 @@
                 for (var i = 1, len = arrText.length; i < len; i++) {
                   arrStr.push(String.fromCharCode(parseInt(arrText[i], base)));
                 }
-                const html = arrStr.join('');
-                content = $('.bookreadercontent', html).html();
-                if ($('<div>').html(html).find('style:nth-child(2)').text().match(/url\((.*?\.ttf)\)/)) {
+                let html = arrStr.join('');
+                if ($('<div>').html(html).text().match(/url\((https?:\/\/yuewen-skythunder-\d+.*?\.ttf)\)/)) {
                   if (!fontLib) fontLib = JSON.parse(GM_getResourceText('fontLib')).reverse();
-                  const font = $('<div>').html(html).find('style:nth-child(2)').text().match(/url\((.*?\.ttf)\)/)[1];
+                  const font = $('<div>').html(html).text().match(/url\((https?:\/\/yuewen-skythunder-\d+.*?\.ttf)\)/)[1];
 
                   opentype.load(font, (err, font) => {
                     if (err) resolve('');
@@ -653,17 +645,14 @@
                       if (!key) undefinedFont.push(data);
                     }
                     if (undefinedFont.length) console.error('未确定字符', undefinedFont);
-
-                    for (const i in obj) {
-                      if (isNaN(parseInt(i))) continue;
-                      content = content.replace(new RegExp(`\\u{${parseInt(i).toString(16)}}`, 'gu'), obj[i]);
-                    }
-                    // content = content.replace(/&#(\d+);/g, (matched, m1) => m1 in obj ? obj[m1] : matched);
+                    html = html.replace(/&#(\d+);/g, (matched, m1) => m1 in obj ? obj[m1] : matched);
+                    content = $('.bookreadercontent', html).html();
                     resolve(content);
                   });
-                  return;
+                } else {
+                  content = $('.bookreadercontent', html).html();
+                  resolve(content);
                 }
-                resolve(content);
               } catch (error) {
                 console.error(error);
                 resolve('');
@@ -1540,7 +1529,8 @@
       cover: '.cover-b',
       chapter: '.list-view .c2>a',
       deal: (chapter) => Rule.special.find(i => i.siteName === 'PO18臉紅心跳').deal(chapter),
-      getChapters: (doc) => Rule.special.find(i => i.siteName === 'PO18臉紅心跳').getChapters(doc)
+      getChapters: (doc) => Rule.special.find(i => i.siteName === 'PO18臉紅心跳').getChapters(doc),
+      elementRemove: 'span'
     },
     { // https://www.po18.tw/
       siteName: 'PO18臉紅心跳',
@@ -1586,7 +1576,8 @@
           title: $(i).text(),
           url: $(i).prop('href')
         }));
-      }
+      },
+      elementRemove: 'blockquote'
     },
     { // https://www.qidian.com.tw/
       siteName: '起点台湾',
@@ -1621,14 +1612,33 @@
       url: '://www.gongzicp.com/novel-\\d+.html',
       chapterUrl: '://www.gongzicp.com/read-\\d+.html',
       title: '.cp-novel-name',
-      intro: '.cp-novel-desc',
+      writer: '.cp-novel-index-author a[href*="/author/id/"]',
+      intro: '.cp-novel-index-novel-info',
       cover: '.cp-novel-cover>img',
-      chapter: '.cp-novel-menu-item>a',
-      vipChapter: '.cp-novel-menu-item>a:has(.icon-vip)',
       chapterTitle: '.cp-read-name',
       content: (doc, res, request) => window.eval(res.response.match(/content: (".*"),/)[1]), // eslint-disable-line no-eval
       elementRemove: '.cp-hidden',
-      thread: 1
+      thread: 1,
+      getChapters: async (doc) => {
+        const info = window.location.href.match(/\d+/g);
+        const res = await xhr.sync(`https://www.gongzicp.com/novel/getChapterList?nid=${info[0]}`);
+        const json = JSON.parse(res.response);
+        const chapters = [];
+        let volume = '';
+        for (let i = 1; i < json.data.list.length; i++) {
+          if (json.data.list[i].type === 'volume') {
+            volume = json.data.list[i].name;
+          } else if (json.data.list[i].type === 'item') {
+            chapters.push({
+              title: json.data.list[i].name,
+              url: `https://www.gongzicp.com/read-${json.data.list[i].id}.html`,
+              vip: json.data.list[i].pay,
+              volume
+            });
+          }
+        }
+        return chapters;
+      }
     },
     { // https://sosad.fun/
       siteName: 'SosadFun',
@@ -2119,6 +2129,19 @@
         content = content.replace(/[\ue800-\ue863]/g, matched => str[matched.charCodeAt(0) - 0xe800]);
         return content;
       }
+    },
+    { // https://www.19826.net/
+      siteName: '19826文学',
+      url: '://www.19826.net/\\d+/$',
+      chapterUrl: '://www.19826.net/\\d+/\\d+(_\\d+)?.html',
+      title: '.bookTitle',
+      writer: '.booktag>[href*="author="]',
+      intro: '#bookIntro',
+      cover: '.img-thumbnail',
+      chapter: '#list-chapterAll .panel-chapterlist>dd>a',
+      chapterTitle: '.readTitle',
+      content: '.panel-readcontent>.panel-body>div[id]',
+      chapterNext: async (doc, res, request) => res.response.match(/url = "(.*?)";/) ? res.response.match(/url = "(.*?)";/)[1] : []
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
@@ -2704,7 +2727,7 @@
       '    <option value="keep">保留所有空行</option>',
       '  </select>',
       '  <br>',
-      '  连续下载失败 <input type="number" name="failedCount" min="1"> 次时，暂停 <input type="number" name="failedWait" min="0" title="0为手动继续"> 秒后继续下载',
+      '  连续下载失败 <input type="number" name="failedCount" min="0" title="0为禁用"> 次时，暂停 <input type="number" name="failedWait" min="0" title="0为手动继续"> 秒后继续下载',
       '  <br>',
       '  Epub CSS: <textarea name="css" placeholder="" style="line-height:1;resize:both;"></textarea>',
       '  <br>',
@@ -2826,7 +2849,7 @@
         let chapters = Storage.book.chapters;
         if (Config.sort && chapters.length) {
           const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'case' });
-          chapters.forEach(i => { i.sort = i.url; });
+          for (const chapter of chapters) chapter.sort = chapter.url;
           // const dir = new URL('./', chapters[0].sort).href;
           // if (chapters.every(i => new URL('./', i.sort).href === dir)) {
           //   chapters.forEach(i => { i.sort = i.sort.substr(dir.length); });
@@ -2836,7 +2859,7 @@
             ext = '.' + ext.slice(-1);
             const extReversed = ext.split('').reverse().join('');
             if (chapters.every(i => i.sort.split('').reverse().join('').indexOf(extReversed) === 0)) {
-              chapters.forEach(i => { i.sort = i.sort.substr(0, i.sort.length - ext.length); });
+              for (const chapter of chapters) chapter.sort = chapter.sort.substr(0, chapter.sort.length - ext.length);
             }
           }
           chapters = chapters.sort((a, b) => collator.compare(a.sort, b.sort));
@@ -2933,7 +2956,7 @@
         chapter.document = '';
       };
       let failedCount = 0;
-      const onChapterFailedEvery = async (res, request, type) => {
+      const onChapterFailedEvery = Config.failedCount ? async (res, request, type) => {
         if (type === 'abort' || failedCount < 0) return;
         failedCount = failedCount + 1;
         if (failedCount > Config.failedCount) {
@@ -2947,7 +2970,7 @@
             failedCount = 0;
           }
         }
-      };
+      } : null;
       let overrideMimeType = `text/html; charset=${document.characterSet}`;
       if (Storage.rule.charset) overrideMimeType = `text/html; charset=${Storage.rule.charset}`;
       const checkRelativeChapter = async (res, request, next) => {
@@ -3019,7 +3042,7 @@
         if (rule.contentCheck) contentCheck = await getFromRule(rule.contentCheck, (selector) => $(selector, doc).length, [res, request], true);
         if (contentCheck) {
           if (Storage.debug.content) debugger;
-          let content = await getFromRule(rule.content, (selector) => {
+          let content = chapter.content || await getFromRule(rule.content, (selector) => {
             let elems = $(selector, doc);
             if (Storage.debug.content) debugger;
             if (rule === Rule) elems = elems.not(':emptyHuman'); // 移除空元素
@@ -3060,7 +3083,7 @@
       for (const chapter of Storage.book.chapters) {
         const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
         if (chapter.contentRaw && chapter.document) {
-          await onChapterLoad({ response: chapter.document }, { raw: chapter });
+          await onChapterLoad({ response: chapter.document, responseText: chapter.document }, { raw: chapter });
         } else {
           delete chapter.contentRaw;
           if (rule.iframe) {
@@ -3323,6 +3346,7 @@
     }
     if (typeof Storage.rule.getChapters === 'function') chapters = await Storage.rule.getChapters(document);
     chapters = chapters.map(i => typeof i === 'string' ? { url: i } : i);
+    vipChapters = vipChapters.concat(chapters.filter(i => i.vip).map(i => i.url));
 
     container.find('input,select,textarea').attr('disabled', null);
     container.find('input,select,textarea').filter('[raw-disabled="disabled"]').attr('raw-disabled', null).attr('disabled', 'disabled');
