@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.458
+// @version     3.4.502
 // @created     2020-03-16 16:59:04
-// @modified    2020/12/4 19:53:40
+// @modified    2020/12/6 13:14:11
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1650,7 +1650,7 @@
       chapter: '.panel-body .table th:nth-child(1)>a[href*="/posts/"]',
       chapterTitle: 'strong.h3',
       content: '.post-body>.main-text:nth-child(1)',
-      elementRemove: 'div:last-child',
+      elementRemove: 'div:last-child'
     },
     { // https://www.myhtlmebook.com/
       siteName: '海棠文化线上文学城',
@@ -1873,7 +1873,7 @@
           contentRaw: item,
           document: res.response
         })));
-      },
+      }
     },
     { // https://www.lightnovel.us/
       siteName: '轻之国度',
@@ -1887,7 +1887,7 @@
         return window.__NUXT__.data[0].series.articles.sort((a, b) => a.aid - b.aid).map(i => ({ title: i.title, url: `https://www.lightnovel.us/detail/${i.aid}` }));
       },
       chapterTitle: '.article-title',
-      content: (doc, res, request) => Rule.special.find(i => i.siteName === '轻之国度').content(doc, res, request),
+      content: (doc, res, request) => Rule.special.find(i => i.siteName === '轻之国度').content(doc, res, request)
     },
     { // https://ncode.syosetu.com/
       siteName: '小説家になろう',
@@ -1898,7 +1898,25 @@
       intro: '#novel_ex',
       chapter: '.index_box>dl>dd>a',
       chapterTitle: '.novel_subtitle',
-      content: '#novel_honbun'
+      content: (doc, res, request) => {
+        const content = $('#novel_honbun', res.response).html();
+        const authorSays = $('#novel_a', res.response).html();
+        return content + '-'.repeat(20) + authorSays;
+      }
+    },
+    { // https://www.wattpad.com/
+      siteName: 'Wattpad',
+      url: '://www.wattpad.com/story/\\d+-',
+      chapterUrl: '://www.wattpad.com/\\d+-',
+      title: '.cover+h1',
+      writer: '.send-author-event+strong>.send-author-event',
+      intro: '.description>pre',
+      cover: '.cover>img',
+      chapter: '.table-of-contents>li>a',
+      chapterTitle: '.part-header h2',
+      content: '.part-content .page>div>pre',
+      chapterPrev: (doc, res, request) => $('.table-of-contents>li.active', res.response).prevAll().find('a').toArray().map(i => i.href).reverse(),
+      chapterNext: (doc, res, request) => $('.table-of-contents>li.active', res.response).nextAll().find('a').toArray().map(i => i.href)
     },
     // 盗贴
     { // https://www.xiaoshuokan.com
@@ -3221,7 +3239,8 @@
       '.novel-downloader-v3 input[type="button"],.novel-downloader-v3 button{border:1px solid #000;cursor:pointer;padding:2px 3px;}',
       '.novel-downloader-v3 input[type=number]{width:36px;}',
       '.novel-downloader-v3 input[type=number]{width:36px;}',
-      '.novel-downloader-v3 [disabled="disabled"]{color:#545454;cursor:default!important;background-color:#ebebe4;}',
+      '.novel-downloader-v3 input:not([disabled="disabled"]),.novel-downloader-v3 button:not([disabled="disabled"]){color:#000;background-color:#fff;}',
+      '.novel-downloader-v3 input[disabled="disabled"],.novel-downloader-v3 button[disabled="disabled"]{color:#fff;cursor:default!important;background-color:#545454;text-decoration:line-through double;}',
       '.novel-downloader-v3 span[title]::after{content:"(?)";text-decoration:underline;font-size:x-small;vertical-align:super;cursor:pointer;}',
 
       '.novel-downloader-v3{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:99999;background:white;border:1px solid black;max-height:99vh;overflow:auto;text-align:center;}',
