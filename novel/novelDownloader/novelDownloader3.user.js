@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.502
+// @version     3.4.503
 // @created     2020-03-16 16:59:04
 // @modified    2020/12/6 13:14:11
 // @author      dodying
@@ -1652,10 +1652,10 @@
       content: '.post-body>.main-text:nth-child(1)',
       elementRemove: 'div:last-child'
     },
-    { // https://www.myhtlmebook.com/
+    { // https://www.myhtlmebook.com/ https://www.myhtebooks.com/
       siteName: '海棠文化线上文学城',
-      url: 'myhtlmebook.com/\\?act=showinfo&bookwritercode=.*?&bookid=',
-      chapterUrl: 'myhtlmebook.com/\\?act=showpaper&paperid=',
+      url: '(myhtlmebook|myhtebooks).com/\\?act=showinfo&bookwritercode=.*?&bookid=',
+      chapterUrl: '(myhtlmebook|myhtebooks).com/\\?act=showpaper&paperid=',
       title: '#mypages .uk-card h4',
       writer: '#writerinfos>a',
       chapter: '.uk-list>li>a[href^="/?act=showpaper&paperid="]',
