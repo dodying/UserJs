@@ -5,7 +5,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.2
+// @version      2.90.3
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -539,7 +539,7 @@ function optionBox () { // 配置界面
     '  <div>',
     '    <div><input id="debuffSkill_Sle" type="checkbox"><label for="debuffSkill_Sle">Sleep</label>{{debuffSkillSleCondition}}</div>',
     '    <div><input id="debuffSkill_Bl" type="checkbox"><label for="debuffSkill_Bl">Blind</label>{{debuffSkillBlCondition}}</div>',
-    '    <div><input id="debuffSkill_Slo" type="checkbox"><label for="debuffSkill_Slo">Slow</label>{{debuffSkillWeSlondition}}</div>',
+    '    <div><input id="debuffSkill_Slo" type="checkbox"><label for="debuffSkill_Slo">Slow</label>{{debuffSkillSloCondition}}</div>',
     '    <div><input id="debuffSkill_Im" type="checkbox"><label for="debuffSkill_Im">Imperil</label>{{debuffSkillImCondition}}</div>',
     '    <div><input id="debuffSkill_MN" type="checkbox"><label for="debuffSkill_MN">MagNet</label>{{debuffSkillMNCondition}}</div>',
     '    <div><input id="debuffSkill_Si" type="checkbox"><label for="debuffSkill_Si">Silence</label>{{debuffSkillSiCondition}}</div>',
