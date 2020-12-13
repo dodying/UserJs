@@ -47,7 +47,7 @@
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[[EH]Enhance](E-hentai/ehEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) | 1.19.184 | 2020/7/23 21:02:18 |  | 
+[[EH]Enhance](E-hentai/ehEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/ehEnhance.user.js) | 1.19.352 | 2020/10/2 13:12:22 |  | 
 [[NH]nhentai Downloader](E-hentai/nhDownloader.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhDownloader.user.js) | 0.0.5 |  |  | 
 [[NH]Enhance](E-hentai/nhEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/E-hentai/nhEnhance.user.js) | 1.0.4 | 2020-2-7 11:11:14 |  | 
 
@@ -75,26 +75,28 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
+[[]auto-wayback](global/auto-wayback.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/auto-wayback.user.js) | 1.0.65 | 2020/9/24 16:28:14 | 2020-09-24 15:51:26 | 自动保存当前网页到时间机器
 [[]cached](global/cached.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/cached.user.js) | 1.0.109 | 2019-11-25 09:31:55 | 2019-11-24 18:48:14 | cached
+[copyModify](global/copyModify.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/copyModify.user.js) | 1.0.5 | 2020/12/5 15:48:39 | 2020-12-05 15:44:53 | copyModify
 [[]copyTable](global/copyTable.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/copyTable.user.js) | 1.0.5 | 2020-2-7 11:11:26 |  | copyTable
 [[]emptyName](global/emptyName.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/emptyName.user.js) | 1.1 |  |  | 
 [[]highlight](global/highlight.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/highlight.user.js) | 1.0.2 |  |  | 
 [[]insertJquery](global/insertJquery.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/insertJquery.user.js) | 1.0.30 |  |  | 
-[[]mark](global/mark.private.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.private.user.js) | 1.1.343 | 2020/7/23 19:08:11 |  | mark
-[[]mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.1.3 | 2020/7/15 12:03:56 |  | mark
+[[]mark](global/mark.old.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.old.user.js) | 1.2.0 | 2020/9/5 20:19:21 |  | mark
+[[]mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.3.0 | 2020/12/13 13:19:17 |  | mark
 [[]meta](global/meta.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/meta.user.js) | 1.11 |  |  | 
-[[]newTab](global/newTab.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/newTab.user.js) | 0.0.86 |  |  | 链接强制在新建标签中打开 Open a URL in a new tab
+[[]newTab](global/newTab.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/newTab.user.js) | 0.0.109 |  |  | 链接强制在新建标签中打开 Open a URL in a new tab
 [[]prettyJSON](global/prettyJSON.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/prettyJSON.user.js) | 1.1.9 | 2020/6/8 14:01:31 |  | prettyJSON
 [[]https](global/s.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/s.user.js) | 1.0.7 |  |  | 
-[[]style](global/style.private.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/style.private.user.js) | 1.0.42 |  |  | 
 [[]style](global/style.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/style.user.js) | 1.1.0 |  |  | 
+[[]urlLet](global/urlLet.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/urlLet.user.js) | 1.0.132 | 2020/10/13 13:55:26 | 2020-10-13 10:44:15 | urlLet
 
 ##### H
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [[H]CopyInfo](H/hCopyInfo.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hCopyInfo.user.js) | 1.01.5 |  |  | 
-[[H]ParkingLot](H/hParkingLot.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) | 1.11.266 |  |  | 
+[[H]ParkingLot](H/hParkingLot.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) | 1.11.435 |  |  | 
 [[H]ParkingLot2](H/hParkingLot2.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot2.doing.user.js) | 0.0.11 |  |  | [H]ParkingLot2
 
 ##### HentaiVerse/hvAutoAttack
@@ -103,7 +105,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[[HV]AutoAttack](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | 2.90.2 |  |  | HV auto attack script, for the first user, should configure before use it.
+[[HV]AutoAttack](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | 2.90.3 |  |  | HV auto attack script, for the first user, should configure before use it.
 
 ##### HentaiVerse
 
@@ -138,10 +140,11 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[小说阅读脚本增强](novel/小说阅读脚本增强.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/%E5%B0%8F%E8%AF%B4%E9%98%85%E8%AF%BB%E8%84%9A%E6%9C%AC%E5%A2%9E%E5%BC%BA.user.js) | 1.0.76 | 2020/7/26 09:38:21 | 2020-07-20 08:45:13 | 小说阅读脚本增强
+[小说阅读脚本辅助朗读](novel/小说阅读脚本辅助朗读.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/%E5%B0%8F%E8%AF%B4%E9%98%85%E8%AF%BB%E8%84%9A%E6%9C%AC%E8%BE%85%E5%8A%A9%E6%9C%97%E8%AF%BB.user.js) | 1.0.284 | 2020/12/12 23:36:12 | 2020-12-11 13:05:42 | 小说阅读脚本辅助朗读
+[小说阅读脚本增强](novel/小说阅读脚本增强.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/%E5%B0%8F%E8%AF%B4%E9%98%85%E8%AF%BB%E8%84%9A%E6%9C%AC%E5%A2%9E%E5%BC%BA.user.js) | 1.0.320 | 2020/12/11 13:15:00 | 2020-07-20 08:45:13 | 移除鼠标双击事件，增加翻页按钮
 [hbookerEnhance](novel/hbookerEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/hbookerEnhance.user.js) | 1.039a |  |  | 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 [Qidian_Bookmark](novel/Qidian_Bookmark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) | 1.02 |  |  | 在“起点个人中心-我的书架”里增加阅读记录，通过点击章节页里的按钮添加到阅读记录里
-[QQ阅读-列表](novel/QQ阅读-列表.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/QQ%E9%98%85%E8%AF%BB-%E5%88%97%E8%A1%A8.user.js) | 1.0.493 | 2020/7/26 10:37:10 | 2020-07-15 12:22:22 | 自净网行动后，狗比起点/阅文不再在网页上显示所有书籍了
+[QQ阅读-列表](novel/QQ阅读-列表.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/QQ%E9%98%85%E8%AF%BB-%E5%88%97%E8%A1%A8.user.js) | 1.0.533 | 2020/9/28 18:04:07 | 2020-07-15 12:22:22 | 自净网行动后，狗比起点/阅文不再在网页上显示所有书籍了
 [SidebarInContent](novel/SidebarInContent.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/SidebarInContent.user.js) | 1 |  |  | 
 
 ##### novel/novelDownloader
@@ -150,7 +153,8 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[novelDownloader3](novel/novelDownloader/novelDownloader3.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js) | 3.4.0 | 2020/7/26 15:10:11 | 2020-03-16 16:59:04 | 菜单```Download Novel```或**双击页面最左侧**来显示面板
+[novelDownloader3](novel/novelDownloader/novelDownloader3.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js) | 3.4.503 | 2020/12/6 13:14:11 | 2020-03-16 16:59:04 | 菜单```Download Novel```或**双击页面最左侧**来显示面板
+[novelDownloader4.doing](novel/novelDownloader/novelDownloader4.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader4.doing.user.js) | 0.0.47 | 2020/11/23 13:36:35 | 2020-11-17 20:05:37 | novelDownloader4.doing
 
 ##### novel/novelDownloader/old-version
 
