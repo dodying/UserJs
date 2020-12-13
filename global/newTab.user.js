@@ -7,7 +7,7 @@
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @description 链接强制在新建标签中打开 Open a URL in a new tab
 // @raw-version 0.2.0.0
-// @version     0.0.81
+// @version     0.0.109
 
 // @include     http*://*/*
 
@@ -23,6 +23,7 @@
 // @grant       GM_setValue
 // @run-at      document-end
 // ==/UserScript==
+/* global GM_registerMenuCommand GM_getValue GM_setValue */
 (function total () {
   if (document.title.match(/^Index of /) && document.querySelector('[href="../"]')) {
     return;
@@ -63,23 +64,25 @@
 
   function init (parents) {
     let elems = parents || [document];
-    elems = elems.filter(i => i.querySelectorAll).map(i => i.tagName === 'A' ? i : [...i.querySelectorAll('a:not([target="_blank"]):not([newtab="true"])')]);
+    elems = elems.filter(i => i.querySelectorAll).map(i => ['A', 'AREA'].includes(i.tagName) ? i : [...i.querySelectorAll(':not([target="_blank"]):not([data-newtab="true"])')].filter(j => ['A', 'AREA'].includes(j.tagName))); // BASE FORM
     elems = [].concat(...elems);
 
     // let raw = []
     // let changed = []
-    let protocol, host, hash, next, text;
     elems.forEach(link => {
-      link.setAttribute('newtab', 'true');
-      protocol = !link.protocol.match(/^(http.?|ftp):$/);
-      host = link.href === window.location.origin || link.href === window.location.origin + '/';
-      hash = !!link.href.match('#') && link.pathname === window.location.pathname;
-      next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/);
-      text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后|第)一?(章|页|话|集|节|卷)|Previous|Next|首页|末页|尾页/i);
+      link.setAttribute('data-newtab', 'true');
+      const prop = link.tagName === 'FORM' ? 'action' : 'href';
+      if (!link[prop]) return;
+      const url = new URL(link[prop]);
+      const protocol = !url.protocol.match(/^(http.?|ftp):$/);
+      const host = url.href === window.location.origin || url.href === window.location.origin + '/';
+      const hash = !!url.href.match('#') && url.pathname === window.location.pathname;
+      const next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/);
+      const text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后)一?(章|页|话|集|节|卷|篇)|Previous|Next|首页|末页|尾页/i);
       if (protocol || host || hash || next || text) {
         // raw.push({
         //   target: link,
-        //   url: link.href,
+        //   url: link[prop],
         //   text: link.textContent,
         //   html: link.innerHTML,
         //   info: {
