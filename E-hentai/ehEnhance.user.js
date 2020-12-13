@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.19.1
-// @modified    2020/8/6 3:39:15
+// @version     1.19.352
+// @modified    2020/10/2 13:12:22
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -201,8 +201,15 @@ const G = { // 全局变量
     }
     return variabled;
   })(),
+  // https://stackoverflow.com/a/48387827
+  punctuationString: '!-/:-@[-`{-~¡-©«-¬®-±´¶-¸»¿×÷˂-˅˒-˟˥-˫˭˯-˿͵;΄-΅·϶҂՚-՟։-֊־׀׃׆׳-״؆-؏؛؞-؟٪-٭۔۩۽-۾܀-܍߶-߹।-॥॰৲-৳৺૱୰௳-௺౿ೱ-ೲ൹෴฿๏๚-๛༁-༗༚-༟༴༶༸༺-༽྅྾-࿅࿇-࿌࿎-࿔၊-၏႞-႟჻፠-፨᎐-᎙᙭-᙮᚛-᚜᛫-᛭᜵-᜶។-៖៘-៛᠀-᠊᥀᥄-᥅᧞-᧿᨞-᨟᭚-᭪᭴-᭼᰻-᰿᱾-᱿᾽᾿-῁῍-῏῝-῟῭-`´-῾\u2000-\u206e⁺-⁾₊-₎₠-₵℀-℁℃-℆℈-℉℔№-℘℞-℣℥℧℩℮℺-℻⅀-⅄⅊-⅍⅏←-⏧␀-␦⑀-⑊⒜-ⓩ─-⚝⚠-⚼⛀-⛃✁-✄✆-✉✌-✧✩-❋❍❏-❒❖❘-❞❡-❵➔➘-➯➱-➾⟀-⟊⟌⟐-⭌⭐-⭔⳥-⳪⳹-⳼⳾-⳿⸀-\u2e7e⺀-⺙⺛-⻳⼀-⿕⿰-⿻\u3000-〿゛-゜゠・㆐-㆑㆖-㆟㇀-㇣㈀-㈞㈪-㉃㉐㉠-㉿㊊-㊰㋀-㋾㌀-㏿䷀-䷿꒐-꓆꘍-꘏꙳꙾꜀-꜖꜠-꜡꞉-꞊꠨-꠫꡴-꡷꣎-꣏꤮-꤯꥟꩜-꩟﬩﴾-﴿﷼-﷽︐-︙︰-﹒﹔-﹦﹨-﹫！-／：-＠［-｀｛-･￠-￦￨-￮￼-�]|\ud800[\udd00-\udd02\udd37-\udd3f\udd79-\udd89\udd90-\udd9b\uddd0-\uddfc\udf9f\udfd0]|\ud802[\udd1f\udd3f\ude50-\ude58]|\ud809[\udc00-\udc7e]|\ud834[\udc00-\udcf5\udd00-\udd26\udd29-\udd64\udd6a-\udd6c\udd83-\udd84\udd8c-\udda9\uddae-\udddd\ude00-\ude41\ude45\udf00-\udf56]|\ud835[\udec1\udedb\udefb\udf15\udf35\udf4f\udf6f\udf89\udfa9\udfc3]|\ud83c[\udc00-\udc2b\udc30-\udc93',
   emojiRegExp: /\u{2139}|[\u{2194}-\u{2199}]|[\u{21A9}-\u{21AA}]|[\u{231A}-\u{231B}]|\u{2328}|\u{23CF}|[\u{23E9}-\u{23F3}]|[\u{23F8}-\u{23FA}]|\u{24C2}|[\u{25AA}-\u{25AB}]|\u{25B6}|\u{25C0}|[\u{25FB}-\u{25FE}]|[\u{2600}-\u{2604}]|\u{260E}|\u{2611}|[\u{2614}-\u{2615}]|\u{2618}|\u{261D}|\u{2620}|[\u{2622}-\u{2623}]|\u{2626}|\u{262A}|[\u{262E}-\u{262F}]|[\u{2638}-\u{263A}]|[\u{2648}-\u{2653}]|\u{2660}|\u{2663}|\u{2666}|\u{2668}|\u{267B}|\u{267F}|[\u{2692}-\u{2697}]|\u{2699}|[\u{269B}-\u{269C}]|[\u{26A0}-\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26B0}-\u{26B1}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|\u{26C8}|\u{26CE}|\u{26CF}|\u{26D1}|[\u{26D3}-\u{26D4}]|[\u{26E9}-\u{26EA}]|[\u{26F0}-\u{26F5}]|[\u{26F7}-\u{26FA}]|\u{26FD}|\u{2702}|\u{2705}|[\u{2708}-\u{2709}]|[\u{270A}-\u{270B}]|[\u{270C}-\u{270D}]|\u{270F}|\u{2712}|\u{2714}|\u{2716}|\u{271D}|\u{2721}|\u{2728}|[\u{2733}-\u{2734}]|\u{2744}|\u{2747}|\u{274C}|\u{274E}|[\u{2753}-\u{2755}]|\u{2757}|\u{2763}|[\u{2795}-\u{2797}]|\u{27A1}|\u{27B0}|\u{27BF}|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|\u{2B50}|\u{2B55}|\u{3030}|\u{303D}|\u{3297}|\u{3299}|\u{1F004}|\u{1F0CF}|[\u{1F170}-\u{1F171}]|\u{1F17E}|\u{1F17F}|\u{1F18E}|[\u{1F191}-\u{1F19A}]|[\u{1F1E6}-\u{1F1FF}]|[\u{1F201}-\u{1F202}]|\u{1F21A}|\u{1F22F}|[\u{1F232}-\u{1F23A}]|[\u{1F250}-\u{1F251}]|[\u{1F300}-\u{1F320}]|\u{1F321}|[\u{1F324}-\u{1F32C}]|[\u{1F32D}-\u{1F32F}]|[\u{1F330}-\u{1F335}]|\u{1F336}|[\u{1F337}-\u{1F37C}]|\u{1F37D}|[\u{1F37E}-\u{1F37F}]|[\u{1F380}-\u{1F393}]|[\u{1F396}-\u{1F397}]|[\u{1F399}-\u{1F39B}]|[\u{1F39E}-\u{1F39F}]|[\u{1F3A0}-\u{1F3C4}]|\u{1F3C5}|[\u{1F3C6}-\u{1F3CA}]|[\u{1F3CB}-\u{1F3CE}]|[\u{1F3CF}-\u{1F3D3}]|[\u{1F3D4}-\u{1F3DF}]|[\u{1F3E0}-\u{1F3F0}]|[\u{1F3F3}-\u{1F3F5}]|\u{1F3F7}|[\u{1F3F8}-\u{1F3FF}]|[\u{1F400}-\u{1F43E}]|\u{1F43F}|\u{1F440}|\u{1F441}|[\u{1F442}-\u{1F4F7}]|\u{1F4F8}|[\u{1F4F9}-\u{1F4FC}]|\u{1F4FD}|\u{1F4FF}|[\u{1F500}-\u{1F53D}]|[\u{1F549}-\u{1F54A}]|[\u{1F54B}-\u{1F54E}]|[\u{1F550}-\u{1F567}]|[\u{1F56F}-\u{1F570}]|[\u{1F573}-\u{1F579}]|\u{1F57A}|\u{1F587}|[\u{1F58A}-\u{1F58D}]|\u{1F590}|[\u{1F595}-\u{1F596}]|\u{1F5A4}|\u{1F5A5}|\u{1F5A8}|[\u{1F5B1}-\u{1F5B2}]|\u{1F5BC}|[\u{1F5C2}-\u{1F5C4}]|[\u{1F5D1}-\u{1F5D3}]|[\u{1F5DC}-\u{1F5DE}]|\u{1F5E1}|\u{1F5E3}|\u{1F5E8}|\u{1F5EF}|\u{1F5F3}|\u{1F5FA}|[\u{1F5FB}-\u{1F5FF}]|\u{1F600}|[\u{1F601}-\u{1F610}]|\u{1F611}|[\u{1F612}-\u{1F614}]|\u{1F615}|\u{1F616}|\u{1F617}|\u{1F618}|\u{1F619}|\u{1F61A}|\u{1F61B}|[\u{1F61C}-\u{1F61E}]|\u{1F61F}|[\u{1F620}-\u{1F625}]|[\u{1F626}-\u{1F627}]|[\u{1F628}-\u{1F62B}]|\u{1F62C}|\u{1F62D}|[\u{1F62E}-\u{1F62F}]|[\u{1F630}-\u{1F633}]|\u{1F634}|[\u{1F635}-\u{1F640}]|[\u{1F641}-\u{1F642}]|[\u{1F643}-\u{1F644}]|[\u{1F645}-\u{1F64F}]|[\u{1F680}-\u{1F6C5}]|[\u{1F6CB}-\u{1F6CF}]|\u{1F6D0}|[\u{1F6D1}-\u{1F6D2}]|[\u{1F6E0}-\u{1F6E5}]|\u{1F6E9}|[\u{1F6EB}-\u{1F6EC}]|\u{1F6F0}|\u{1F6F3}|[\u{1F6F4}-\u{1F6F6}]|[\u{1F6F7}-\u{1F6F8}]|[\u{1F910}-\u{1F918}]|[\u{1F919}-\u{1F91E}]|\u{1F91F}|[\u{1F920}-\u{1F927}]|[\u{1F928}-\u{1F92F}]|\u{1F930}|[\u{1F931}-\u{1F932}]|[\u{1F933}-\u{1F93A}]|[\u{1F93C}-\u{1F93E}]|[\u{1F940}-\u{1F945}]|[\u{1F947}-\u{1F94B}]|\u{1F94C}|[\u{1F950}-\u{1F95E}]|[\u{1F95F}-\u{1F96B}]|[\u{1F980}-\u{1F984}]|[\u{1F985}-\u{1F991}]|[\u{1F992}-\u{1F997}]|\u{1F9C0}|[\u{1F9D0}-\u{1F9E6}]|❤/gu
 };
+G.punctuationRegExp = new RegExp(`[${reEscape(G.punctuationString)}]`);
+G.punctuationWithWhiteRegExp = new RegExp(`[\\s${reEscape(G.punctuationString)}]`);
+G.punctuationWithWhiteGroupRegExp = new RegExp(`([\\s${reEscape(G.punctuationString)}])`);
+G.punctuationWithWhiteAllRegExp = new RegExp(`^[\\s${reEscape(G.punctuationString)}]+$`);
+
 G.isPreferDisplayMode = !G.infoPage && ['m', 'p'].includes($(SEL.EH.search.displayMode).val());
 G.autoDownload = window.location.hash.match(/^#[0-2]$/) && G.config.autoStartDownload;
 G.downloadSizeChanged = !G['ehD-setting']['store-in-fs'] && G.config.enableEHD && G.config.showAllThumb && G.config.enableChangeSize && G.config.sizeS !== G.config.sizeD && G.config.downloadSizeChanged;
@@ -256,7 +263,7 @@ async function init () {
 
   $('<button title="无人监守模式" name="passive mode">Passive Mode</button>').on({
     click: (e, remote) => {
-      [window.alertRaw, window.alert] = [window.alert, window.alertRaw || function () {}];
+      [window.alertRaw, window.alert] = [window.alert, window.alertRaw || function () { }];
       [window.confirmRaw, window.confirm] = [window.confirm, window.confirmRaw || function () { return true; }];
       [window.promptRaw, window.prompt] = [window.prompt, window.promptRaw || function (message, value) { return value; }];
       const status = $(e.target).attr('status');
@@ -308,7 +315,7 @@ async function init () {
         '  $(\'<tr>\').html(\'<td colspan="3">fixEHDCounter: \' + fixEHDCounterTime + \'</td>\').appendTo(\'.ehD-pt:last\');',
         '};'
       ];
-      $('<button title="重置EHTD计数">Fix EHD Counter</button>').on({
+      $('<button title="重置EHD计数">Fix EHD Counter</button>').on({
         click: () => {
           window.fixEHDCounter();
         }
@@ -335,13 +342,12 @@ async function init () {
         '    }',
         '  }',
         '  if (loop) setTimeout(checkAndFixEHDCounter, timeout)',
-        '}',
+        '};',
         'let checkAndFixEHDCounterStart = function () {',
         '  if (startLoop) return;',
         '  startLoop = true;',
         '  checkAndFixEHDCounter(true);',
-        '}'
-
+        '};'
       ];
       const monitorDialog = [
         'const pushDialogRaw = pushDialog;',
@@ -355,10 +361,29 @@ async function init () {
         '  pushDialogRaw(str);',
         '};'
       ];
+      $('<button tooltip="更改EHD设置" name="ehdSetting">EHD Setting: 0</button>').on({
+        click: () => {
+          window.changeEHDSetting();
+        }
+      }).prependTo('.ehNavBar>div:nth-child(2)');
       const monitorProgress = [
+        'const settingRaw = JSON.parse(GM_getValue(\'ehD-setting\'));',
+        'const settingLoop = [settingRaw, JSON.parse(G.config.ehdFailed1Config), JSON.parse(G.config.ehdFailed2Config)];',
+        'let settingIndex = 0;',
+        'window.changeEHDSetting = (obj, name) => {',
+        '  if (!obj) obj = settingIndex + 1;',
+        '  if (typeof obj === \'number\') {',
+        '    obj = obj % settingLoop.length;',
+        '    settingIndex = obj;',
+        '    name = obj;',
+        '    obj = settingLoop[obj];',
+        '  }',
+        '  Object.assign(setting, obj);',
+        '  const title = \'<pre>\' + JSON.stringify(obj, null, 2) + \'</pre>\';',
+        '  $(\'[name="ehdSetting"]\').text(\'EHD Setting: \' + name).attr(\'title\', title).attr(\'raw-title\', title);',
+        '};',
         'const updateProgressRaw = updateProgress;',
         'var ehFailedCount = 0;',
-        'const settingRaw = Object.assign({}, setting);',
         'var updateProgress = function (nodeList, data) {',
         '  if (data.class === \'ehD-pt-succeed\') {',
         '    ehFailedCount = 0;',
@@ -367,18 +392,19 @@ async function init () {
         '  }',
         '  if (ehFailedCount >= G.config.ehdFailed3) {',
         '    if (ehDownloadPauseBtn.textContent.match(/^Pause/i)) ehDownloadPauseBtn.click();',
-        '    Object.assign(setting, settingRaw);',
+        '    window.changeEHDSetting(0);',
         '    ehFailedCount = 0;',
-        '    window.alert(\'下载已暂停\');',
         '    if (GM_getValue(\'passiveMode\') && G.config.ehdFailed3Time) {',
         '      setTimeout(() => {',
         '        if (ehDownloadPauseBtn.textContent.match(/^Resume/i)) ehDownloadPauseBtn.click();',
         '      }, G.config.ehdFailed3Time * 1000);',
+        '    } else {',
+        '      window.alert(\'下载已暂停，设置已还原\');',
         '    }',
         '  } else if (ehFailedCount >= G.config.ehdFailed2) {',
-        '    Object.assign(setting, JSON.parse(G.config.ehdFailed2Config));',
+        '    window.changeEHDSetting(2);',
         '  } else if (ehFailedCount >= G.config.ehdFailed1) {',
-        '    Object.assign(setting, JSON.parse(G.config.ehdFailed1Config));',
+        '    window.changeEHDSetting(1);',
         '  }',
         '  updateProgressRaw(nodeList, data);',
         '};'
@@ -476,6 +502,13 @@ async function init () {
     waitForElement('[name="checkExist"]:not([disabled])').then(() => {
       if ($(SEL.EH.search.resultTable).length && G.config.preloadPaneImage) $(SEL.EH.search.thumb).filter(':visible').each((index, elem) => { unsafeWindow.load_pane_image(elem); });
       changeFav(G.favicon.d);
+      if (window.location.hash === '#autoPage') {
+        if ($(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer):visible').length === 0) {
+          window.location.href = $(SEL.EH.common.pagesContainerBottom).find('td:last-child>a').attr('href') + '#autoPage';
+        } else {
+          setNotification(`Result ${$(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer):visible').length}`, '');
+        }
+      }
     });
     if (G.config.acLength >= 0) autoComplete(); // 自动填充
     checkForNew(); // 检查有无新本子
@@ -559,7 +592,7 @@ async function init () {
   $('<button title="' + htmlEscape('左键: 加入或移除黑名单<br>右键: 显示黑名单列表') + '">Toggle Blacklist</button>').on({
     mousedown: e => {
       if (e.button === 0) {
-        const value = window.prompt('keyword:');
+        const value = window.prompt('如需输入正则表达式，请按"/pattern/flags"的格式输入\n其他格式视为纯文本');
         if (value && value.trim()) {
           toggleBlacklist(value.trim());
           highlightBlacklist();
@@ -720,8 +753,8 @@ function addStyle () { // 添加样式
     '.ehPagesHover{color:red;font-weight:bold;}',
     '.ehCheckContainer{text-align:center;}',
     '.ehCheckContainer>td{padding:3px 4px;border-right:1px solid #40454b;}',
-    '.ehBlacklist{color:#000;background-color:#000;}',
-    '.ehBlacklist:hover{color:inherit;background-color:inherit;}',
+    '.ehBlacklist{color:#f00!important;background-color:#00f;}',
+    '.ehBlacklist:hover{color:inherit!important;background-color:inherit;}',
     '[copy]{cursor:pointer;}',
     '[key-code]::before{content:"(&"attr(key-code)")";text-decoration:underline;}',
     '[content-after]::after{content:attr(content-after);padding-left:5px;}',
@@ -753,8 +786,9 @@ function addStyle () { // 添加样式
     // html
     SEL.EH.common.navBar + '{max-width:100%;max-height:100%;}',
     SEL.EH.search.mainDiv + ',' + SEL.EH.search.resultTable + '{max-width:9999px!important;min-width:0!important;justify-content:center;}',
-    SEL.EH.search.resultTr + '.ehBatchHover{background-color:#669933!important;}',
+    SEL.EH.search.resultTr + '.ehBatchActive{background-color:#669933!important;}',
     SEL.EH.search.resultTr + ':hover{background-color:#4a86e8!important;}',
+    SEL.EH.search.resultTr + '.ehHover{background-color:#4a86e8!important;}',
     SEL.EH.search.thumb + '{position:fixed;left:0px!important;top:50%!important;visibility:hidden;transform:translateY(-50%);}',
     '.ehTagNotice[name="Perma-ban"],' + SEL.EH.info.tagDiv + '[name="Perma-ban"]{color:#00f;background-color:#f00;}',
     '.ehTagNotice[name="Unlike"],' + SEL.EH.info.tagDiv + '[name="Unlike"]{color:#f00;background-color:#00f;}',
@@ -865,12 +899,12 @@ function batchDownload () { // 批量下载
     if (e.button === 0) {
       const checked = e.target.checked;
       $(root).find('tr').filter(SEL.EH.search.resultTrGt0).find('td:last-child>input[type="checkbox"]:visible').prop('checked', !checked);
-      $(root).find('tr').filter(SEL.EH.search.resultTrGt0).filter(':visible:not(.ehCheckContainer)').toggleClass('ehBatchHover', !checked);
+      $(root).find('tr').filter(SEL.EH.search.resultTrGt0).filter(':visible:not(.ehCheckContainer)').toggleClass('ehBatchActive', !checked);
     } else if (e.button === 2) {
       $(root).find('tr').filter(SEL.EH.search.resultTrGt0).find('td:last-child>input[type="checkbox"]:visible').toArray().forEach(i => {
         const checked = i.checked;
         i.checked = !checked;
-        $(i).parents().filter(SEL.EH.search.resultTrGt0).toggleClass('ehBatchHover', !checked);
+        $(i).parents().filter(SEL.EH.search.resultTrGt0).toggleClass('ehBatchActive', !checked);
       });
       e.target.checked = !e.target.checked;
     }
@@ -878,9 +912,9 @@ function batchDownload () { // 批量下载
   });
   $('body').on('keydown', function (e) {
     if (['text', 'number', 'textarea', 'password'].includes(e.target.type)) return;
-    if (!e.originalEvent.code.match(/^(Key|Digit|Numpad)(.*)$/)) return;
+    if (!e.originalEvent.code.match(/^(Key|Digit|Numpad|Arrow)(.*)$/)) return;
 
-    const key = e.originalEvent.code.match(/^(Key|Digit|Numpad)(.*)$/)[2];
+    const key = e.originalEvent.code.match(/^(Key|Digit|Numpad|Arrow)(.*)$/)[2];
     if (e.ctrlKey && key === 'A') {
       const checkboxs = $(SEL.EH.search.resultTr0).find('th:last-child>input[type="checkbox"]');
 
@@ -889,7 +923,6 @@ function batchDownload () { // 批量下载
         event.button = 0;
         checkboxs.not(':checked').eq(0).trigger(event).trigger('click');
       }
-      e.preventDefault();
     } else if (e.ctrlKey && key === 'D') {
       const checkboxs = $(SEL.EH.search.resultTr0).find('th:last-child>input[type="checkbox"]');
 
@@ -898,7 +931,6 @@ function batchDownload () { // 批量下载
         event.button = 2;
         checkboxs.filter(':checked').eq(0).trigger(event);
       }
-      e.preventDefault();
     } else if (e.shiftKey && key === 'A') {
       const event = jQuery.Event('mousedown');
       event.button = 0;
@@ -909,15 +941,49 @@ function batchDownload () { // 批量下载
       event.button = 2;
       event.shiftKey = true;
       $(SEL.EH.search.resultTr0).find('th:last-child>input[type="checkbox"]').eq(0).trigger(event);
+    } else if (['Up', 'Down'].includes(key)) {
+      const arr = $(SEL.EH.search.resultTrGt0).filter(`:has(${SEL.EH.search.nameTd})`).filter(':visible');
+      const elem = arr.filter('.ehHover');
+      let index = elem.length ? arr.index(elem) : window.hoverLast === undefined ? -1 : window.hoverLast;
+      index = ['Up'].includes(key) ? index - 1 : index + 1;
+      window.hoverLast = index;
+      while (index > arr.length) index -= arr.length;
+      while (index < -1) index = index + 1 + arr.length;
+      elem.removeClass('ehHover').find(SEL.EH.search.nameTd).trigger('mouseout');
+      if (index >= 0 && arr.eq(index).length) {
+        arr.eq(index).addClass('ehHover').find(SEL.EH.search.nameTd).trigger('mouseover');
+        arr.eq(index).get(0).scrollIntoView();
+
+        // tagPreview
+        const event = jQuery.Event('mousemove');
+        event.target = arr.eq(index).find(SEL.EH.search.galleryA).get(0);
+        event.clientX = $(event.target).offset().left - document.documentElement.scrollLeft + $(event.target).width() / 2;
+        event.clientY = $(event.target).offset().top - document.documentElement.scrollTop + $(event.target).height();
+        $('body').trigger(event);
+      } else {
+        $('.ehTagPreview').hide();
+      }
+    } else if ($('.ehHover').length && ['Right', 'Add'].includes(key)) {
+      $('.ehHover').find('td:last-child>input[type="checkbox"]:visible').prop('checked', false).trigger('click');
+    } else if ($('.ehHover').length && ['Left', 'Subtract'].includes(key)) {
+      $('.ehHover').find('td:last-child>input[type="checkbox"]:visible').prop('checked', true).trigger('click');
+    } else {
+      return;
     }
+    e.preventDefault();
   });
-  $('<td><input type="checkbox"></td>').appendTo($(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer)'));
+  $(window).on('blur mousedown', (e) => {
+    if ($('.ehHover').length === 0) return;
+    $('.ehHover').removeClass('ehHover').find(SEL.EH.search.nameTd).trigger('mouseout');
+    $('.ehTagPreview').hide();
+  });
+  $('<td title="' + htmlEscape('上下键:切换行<br>左右/+-键:切换勾选状态<br>注: 因鼠标问题，预览图可能并非显示正确<br>点击/失去焦点时，隐藏') + '"><input type="checkbox"></td>').appendTo($(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer)'));
   $(SEL.EH.search.resultTrGt0).filter(':not(.ehCheckContainer)').on('click', e => {
     if ($(e.target).is('a,input') || $(e.target).parents().filter('a,input').length) return;
     $(e.currentTarget).find('td:last-child>input[type="checkbox"]').click();
   });
   $(SEL.EH.search.resultTrGt0).find('td:last-child>input[type="checkbox"]').on('click', function (e) {
-    $(e.target).parentsUntil('tbody').eq(-1).toggleClass('ehBatchHover', e.target.checked);
+    $(e.target).parentsUntil('tbody').eq(-1).toggleClass('ehBatchActive', e.target.checked);
   });
 }
 
@@ -976,7 +1042,7 @@ function btnFake () { // 按钮 -> 下载空文档(信息页)
 
 function btnFake2 () { // 按钮 -> 下载空文档(搜索页)
   $('<button title="' + htmlEscape('下载一个 <span class="ehHighlight">名称.cbz</span> 的空文档') + '">Fake</button>').on('mousedown', async e => {
-    for (const i of $('.ehBatchHover:visible').toArray()) {
+    for (const i of $('.ehBatchActive:visible').toArray()) {
       const gid = $(i).find(SEL.EH.search.thumb).attr('id').match(/\d+/)[0] * 1;
       const meta = G.gmetadata.find(i => i.gid === gid);
       let language = meta.tags.find(i => i.match(/^language:(.*)/) && i !== 'language:translated');
@@ -1178,7 +1244,7 @@ function btnTask2 () { // 按钮 -> 添加到下载列表(搜索页)
         const task = GM_getValue('task', []);
         const tasking = GM_getValue('tasking');
         let count = 0;
-        $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
+        $('.ehBatchActive:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
           if (!(task.includes(i.href)) && i.href !== tasking) {
             task.push(i.href);
             count++;
@@ -1193,7 +1259,7 @@ function btnTask2 () { // 按钮 -> 添加到下载列表(搜索页)
       } else if (e.button === 2) {
         const task = GM_getValue('task', []);
         let count = 0;
-        $('.ehBatchHover:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
+        $('.ehBatchActive:visible').find(SEL.EH.search.galleryA).toArray().forEach(i => {
           if (task.includes(i.href)) {
             task.splice(task.indexOf(i.href), 1);
             count++;
@@ -1266,7 +1332,8 @@ function changeName (e) { // 修改本子标题（删除集会名、替换其中
   // test https://exhentai.org/?page=1&f_search=%22Fugudoku%22+%22Katou+Fuguo%22+%22Surudake%22&f_sh=on
 
   $(e).toArray().forEach(i => {
-    let title = fullWidth2Half(i.textContent).replace(/^\(.*?\)\s*/, '').replace(/\s+/g, ' ').replace(G.emojiRegExp, '').trim();
+    let title = fullWidth2Half(i.textContent).replace(/^\(.*?\)\s*/, '').replace(G.emojiRegExp, '').trim().replace(/\s+/g, ' ');
+    title = title.replace(/[\000-\037\177]+/g, ''); // https://en.wikipedia.org/wiki/ASCII#End_of_File/Stream
     // if (G.config.checkExist === 'everything')
     title = title.replace(/[\\/:*?"<>]/g, '-');
     i.textContent = title;
@@ -1379,7 +1446,7 @@ function checkExist () { // 检查本地是否存在
         text = text.replace(/\|.*?([([{【［（]|$)/g, '$1'); // 移除译名
         if (i.title_jpn_main_nohyphen) text = text.replace(/\s-\s.*?([([{【［（]|$)/g, ' $1'); // 移除译名
         if (G.config.checkExist === 'everything') text = text.replace(/\|/g, '-'); // 移除文件名中不允许的字符
-        const arr = text.split(/[[\](){}【】［］（）～~!-]+/).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i);
+        const arr = text.split(G.punctuationRegExp).map(i => i.trim().replace(/\.$/, '').trim()).filter(i => i);
         name[j] = Array.from(new Set(arr)).join();
         if (name[j] === '') name[j] = i.textContent.replace(/\s+/g, ' ');
       }
@@ -1416,7 +1483,7 @@ function checkExist () { // 检查本地是否存在
           const noExt = fileName.replace(/\.(zip|cbz|rar|cbr)$/, '').replace(/\s+/g, ' ').trim();
           const noExtRE = new RegExp('^' + reEscape(noExt).replace(/_/g, '.') + '$', 'i');
           let noExt2 = noExt.replace(/\|.*?([([{【［（]|$)/g, '$1');
-          if (i.title_jpn_main_nohyphen) noExt2 = noExt2.replace(/\s-\s.*?([([{【［（]|$)/g, ' $1');
+          if (i.title_jpn_main_nohyphen || (noExt.match(/(chinese|漢化|汉化|中文|中国翻訳|中国語|中国语)/i) && noExt.match(/\s-\s*[^[\](){}]*\p{Unified_Ideograph}/u))) noExt2 = noExt2.replace(/\s-\s.*?([([{【［（]|$)/g, ' $1');
           // const noExt2RE = new RegExp('^' + reEscape(noExt2).replace(/_/g, '.') + '$', 'i');
           const noLang = removeOtherInfo(noExt2, true, ['[]', '{}', '【】']);
           const noLangRE = new RegExp('^' + reEscape(noLang).replace(/_/g, '.') + '$', 'i');
@@ -1437,13 +1504,14 @@ function checkExist () { // 检查本地是否存在
           } else {
             _name = '';
           }
+          const diffThis = diff(name, noExt);
+          if (!diffThis.filter(i => i[0] && !i[1].match(G.punctuationWithWhiteAllRegExp)).length) _name = 'force';
 
           if (G.config.checkExistPages && ['force', 'force-nolang'].includes(_name) && filePages && i.pages && k.size > 1024 * filePages) {
-            if (i.pages - filePages > 4) _name = 'incomplete';
+            if (i.pages - filePages > Math.max(100, filePages) * (['force'].includes(_name) ? 0.05 : 0.1)) _name = 'incomplete';
           }
 
-          const diffThis = diff(name, noExt);
-          const similar = _name === 'force' ? 0 : diffThis.reduce((total, now) => total + (now[0] === 0 ? 0 : now[1].length), 0);
+          const similar = diffThis.reduce((total, now) => total + (now[0] === 0 ? 0 : now[1].length), 0);
 
           let diffFlag = 0;
           let diffHTML = [['Remote: '], ['Exists: ']];
@@ -1702,7 +1770,7 @@ function defaultConfig () { // 默认设置
     ex2ehInfo: false, eh2exSearch: true,
     openUrlInfo: '0', openUrlOther: '0',
     saveLink: false, searchInOtherSites: false, btnFake: false, changeName: true, autoRetry: true,
-    searchArguments: '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_search={q}&f_sh=on',
+    searchArguments: '/?f_doujinshi=1&f_manga=1&f_artistcg=1&f_gamecg=1&f_imageset=1&f_cosplay=1&f_search={q}&f_storr=on&f_sdt1=on&f_sh=on',
     notification: '3',
 
     // 搜索页
@@ -1834,7 +1902,7 @@ function hideGalleries () { // 隐藏某些画集
         tagChs = (main === 'male' ? '♂' : main === 'female' ? '♀' : main[0]) + ':' + data.cname;
         tagInfo += '<br>' + data.info;
       }
-      $(`<span class="ehTagNotice" name="${tags[j]}" title="${tagInfo}">${tagChs}</span>`).appendTo(container);
+      $(`<span class="ehTagNotice" name="${tags[j]}" title="${tagInfo}" tag="${main}:${sub}" tooltip="${htmlEscape('左键: 隐藏含当前标签的本子<br>中键: 显示所有本子<br>右键: 隐藏<b>不</b>含当前标签的本子')}">${tagChs}</span>`).appendTo(container);
     });
   });
 
@@ -1851,6 +1919,21 @@ function hideGalleries () { // 隐藏某些画集
     const now = status === 'Hide' ? 'Show' : 'Hide';
     $(e.target).attr('status', now).text(`${now} Tag: ${length}`);
   }).appendTo(SEL.EH.search.resultTotal);
+
+  $('body').on('mouseup', '.ehTagNotice[tag]', (e) => {
+    if (e.button === 1) {
+      $(SEL.EH.search.resultTr).show();
+    } else {
+      const tag = $(e.target).attr('tag');
+
+      const filter = e.button === 0 ? 'filter' : 'not';
+      $(SEL.EH.search.resultTr)[filter](`:has(.ehTagNotice[tag="${window.CSS.escape(tag)}"])`).hide();
+      if ($(SEL.EH.search.resultTr).filter(':visible').length === 0) {
+        window.alert('无结果');
+        $(SEL.EH.search.resultTr).show();
+      }
+    }
+  });
 }
 
 function highlightBlacklist () { // 高亮黑名单相关的画廊(通用)
@@ -1859,7 +1942,14 @@ function highlightBlacklist () { // 高亮黑名单相关的画廊(通用)
   galleryList.forEach(i => {
     let title = htmlEscape($(i).text());
     for (const j of blacklist) {
-      const re = new RegExp(j, 'gi');
+      let keyword = j;
+      let flag = 'gi';
+      if (keyword.match(/^\/(.*?)\/([igmsuy]*)$/)) {
+        [, keyword, flag] = keyword.match(/^\/(.*?)\/([igmsuy]*)$/);
+      } else {
+        keyword = reEscape(j);
+      }
+      const re = new RegExp(keyword, flag);
       if (title.match(re)) {
         title = title.replace(re, '<span class="ehBlacklist" copy="$&">$&</span>');
       }
@@ -2004,7 +2094,40 @@ function pageCount () { // 显示本子页数
     const info = G.gmetadata.filter(j => j.gid === i.href.split('/')[4] * 1)[0];
     if (!info) return;
     const container = $(i).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find('.ehContainer');
-    $(`<span class="ehPageCount">${info.filecount}P</span>`).appendTo(container);
+    $(`<span class="ehPageCount" tooltip="${htmlEscape('左键: 隐藏名称相似的本子<br>中键: 显示所有本子<br>右键: 隐藏名称<b>不</b>相似的本子<br>Ctrl+左/右键: 输入关键字过滤')}">${info.filecount}P</span>`).appendTo(container);
+  });
+
+  $('body').on('mouseup', '.ehPageCount', (e) => {
+    if (e.button === 1) {
+      $(SEL.EH.search.resultTr).show();
+    } else {
+      let keyword = $(e.target).parents(SEL.EH.search.resultTr).find(SEL.EH.search.galleryA).text();
+      keyword = removeOtherInfo(keyword);
+      keyword = removeOtherInfo(keyword, true);
+      keyword = keyword.trim();
+
+      let flag = 'gi';
+      if (e.ctrlKey) {
+        keyword = window.prompt('如需输入正则表达式，请按"/pattern/flags"的格式输入\n其他格式视为纯文本', keyword);
+        if (!keyword || !keyword.trim()) return;
+        keyword = keyword.trim();
+      }
+      if (keyword.match(/^\/(.*?)\/([igmsuy]*)$/)) {
+        [, keyword, flag] = keyword.match(/^\/(.*?)\/([igmsuy]*)$/);
+      } else {
+        keyword = reEscape(keyword);
+      }
+      const re = new RegExp(keyword, flag);
+
+      const filter = e.button === 0 ? 'filter' : 'not';
+      $(SEL.EH.search.resultTr)[filter]((index, elem) => {
+        return $(elem).find(SEL.EH.search.galleryA).text().match(re);
+      }).hide();
+      if ($(SEL.EH.search.resultTr).filter(':visible').length === 0) {
+        window.alert('无结果');
+        $(SEL.EH.search.resultTr).show();
+      }
+    }
   });
 }
 
@@ -2437,7 +2560,7 @@ function showConfig () { // 显示设置
       '跳转相关: <label for="ehConfig_ex2ehInfo"><input type="checkbox" id="ehConfig_ex2ehInfo">信息页: 里站自动跳转到表站</label>; <label for="ehConfig_eh2exSearch"><input type="checkbox" id="ehConfig_eh2exSearch">搜索页: 表站自动跳转到里站</label>',
       '链接打开方式: 信息页：<select name="ehConfig_openUrlInfo"><option value="0">新标签页后台打开</option><option value="1">新标签页前台打开</option><option value="2">弹窗打开</option><option value="3">iframe中打开</option></select>; 其他页面: <select name="ehConfig_openUrlOther"><option value="0">新标签页后台打开</option><option value="1">新标签页前台打开</option><option value="2">弹窗打开</option><option value="3">iframe中打开</option></select>; 测试 <input name="openUrlTest" type="text">',
       '启动功能: <label for="ehConfig_saveLink"><input type="checkbox" id="ehConfig_saveLink">保存链接</label>; <label for="ehConfig_searchInOtherSites"><input type="checkbox" id="ehConfig_searchInOtherSites">在其他站点搜索</label>; <label for="ehConfig_btnFake"><input type="checkbox" id="ehConfig_btnFake">Fake</label>; <label for="ehConfig_changeName"><input type="checkbox" id="ehConfig_changeName">标题: 删除集会名、替换其中的罗马数字</label>; <label for="ehConfig_autoRetry"><input type="checkbox" id="ehConfig_autoRetry">网络：请求错误时，自动重试</label>',
-      '搜索参数: <input name="ehConfig_searchArguments" title="' + htmlEscape('以<span class="ehHighlight">{q}</span>代替搜索关键词') + '" type="text" placeholder="/?f_search={q}&f_sh=on" min="1">',
+      '搜索参数: <input name="ehConfig_searchArguments" title="' + htmlEscape('以<span class="ehHighlight">{q}</span>代替搜索关键词') + '" type="text" placeholder="/?f_search={q}" min="1">',
       '通知显示方式: <select name="ehConfig_notification"><option value="0">Web API: Notification</option><option value="1">GM_notification</option><option value="2">window.alert</option><option value="3">页面元素</option><option value="-1">不显示</option></select>',
       '',
       // 搜索页
@@ -2887,7 +3010,6 @@ function tagTranslate () { // 标签翻译
 
 function toggleBlacklist (keyword) { // 加入黑名单或从黑名单中移除
   const blacklist = GM_getValue('blacklist', []);
-  keyword = reEscape(keyword);
   if (!blacklist.includes(keyword)) { // 加入黑名单
     blacklist.push(keyword);
   } else if (blacklist.includes(keyword)) { // 从黑名单中移除
@@ -3197,16 +3319,16 @@ function getStringSize (_string) {
 function diff (t1, t2) { // ignore case
   t1 = t1.replace(/\s+/g, ' ');
   t2 = t2.replace(/\s+/g, ' ');
-  const arr1 = t1.split(/([[\](){}\s])/).filter(i => i); // 不变
-  const arr2 = t2.split(/([[\](){}\s])/).filter(i => i); // 变
-  const arr1Up = t1.toUpperCase().split(/([[\](){}\s])/).filter(i => i);
-  const arr2Up = t2.toUpperCase().split(/([[\](){}\s])/).filter(i => i);
+  const arr1 = t1.split(G.punctuationWithWhiteGroupRegExp).filter(i => i); // 不变
+  const arr2 = t2.split(G.punctuationWithWhiteGroupRegExp).filter(i => i); // 变
+  const arr1Up = t1.toUpperCase().split(G.punctuationWithWhiteGroupRegExp).filter(i => i);
+  const arr2Up = t2.toUpperCase().split(G.punctuationWithWhiteGroupRegExp).filter(i => i);
   const result = [];
   // const ignoreCharacters = [].concat(' '.split(''));
   for (let i = 0; i < arr1Up.length; i++) {
     if (arr2Up.includes(arr1Up[i])) {
       const index = arr2Up.indexOf(arr1Up[i]);
-      if (index > 0 && [' '].includes(arr1Up[i])) {
+      if (index > 0 && arr1Up[i].match(G.punctuationWithWhiteRegExp)) {
         result.push([-1, arr1[i]]);
         continue;
       } else if (index > 0) { // added
@@ -3243,7 +3365,7 @@ function removeOtherInfo (text, reverse = false, infoGroup = G.infoGroup) {
 
 function windowClose () {
   if (G.isIframe) {
-    window.alert = window.confirm = window.prompt = function () {};
+    window.alert = window.confirm = window.prompt = function () { };
     $(window).trigger('beforeunload');
     $(window).trigger('unload');
     window.onbeforeunload = null;
@@ -3255,7 +3377,7 @@ function windowClose () {
   }
 }
 
-window.closeSafe = window.close;
+// window.closeSafe = windowClose;
 
 init().then(() => {
   //
