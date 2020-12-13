@@ -2,8 +2,8 @@
 // @name        []prettyJSON
 // @description prettyJSON
 // @include     *
-// @version     1.1.7
-// @modified    2020/5/24 12:30:49
+// @version     1.1.9
+// @modified    2020/6/8 14:01:31
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -24,6 +24,7 @@
     /* eslint-enable no-eval */
     if (typeof json !== 'object') return;
     console.log(json);
+    window.$json = json;
     if (JSON.stringify(json) === '{}') return;
 
     text = JSON.stringify(json, null, 2);
