@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.503
+// @version     3.4.616
 // @created     2020-03-16 16:59:04
-// @modified    2020/12/6 13:14:11
+// @modified    2020/12/27 19:51:37
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -15,10 +15,11 @@
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
 // require     http://127.0.0.1:8081/download.js
 
+// @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
+// require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.0.0/jszip.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
-// @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
-// @require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
+// @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js
 // @require     https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js
 
 // resource fontLib https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
@@ -36,9 +37,9 @@
 // @noframes
 // @include     *
 // ==/UserScript==
-/* global unsafeWindow GM_setValue GM_getValue GM_registerMenuCommand GM_getResourceText */
+/* global unsafeWindow GM_info GM_setValue GM_getValue GM_registerMenuCommand GM_getResourceText */
 /* eslint-disable no-debugger  */
-/* global $ xhr saveAs tranStr base64 JSZip opentype */
+/* global $ xhr tranStr JSZip saveAs CryptoJS opentype */
 ; (function () { // eslint-disable-line no-extra-semi
   'use strict';
   let fontLib;
@@ -317,7 +318,7 @@
       //   const content = [];
       //   const box = $('#content', doc).get(0);
       //   const star = 0; // ? 可能根本没用
-      //   var e = base64.decode($('meta[name="client"]', doc).attr('content')).split(/[A-Z]+%/);
+      //   var e = CryptoJS.enc.Base64.parse($('meta[name="client"]', doc).attr('content')).toString(CryptoJS.enc.Utf8).split(/[A-Z]+%/);
       //   var j = 0;
       //   function r (a) {
       //     return a;
@@ -1133,9 +1134,7 @@
             onload: function (res, request) {
               try {
                 const json = JSON.parse(res.response);
-                let content = json.content;
-                content = base64.decode(content);
-                content = base64.utf8to16(content);
+                const content = CryptoJS.enc.Base64.parse(json.content).toString(CryptoJS.enc.Utf8);
                 const title = $('h1', content).text();
                 resolve({ content, title });
               } catch (error) {
@@ -1528,9 +1527,10 @@
       intro: '.book_intro',
       cover: '.cover-b',
       chapter: '.list-view .c2>a',
-      deal: (chapter) => Rule.special.find(i => i.siteName === 'PO18臉紅心跳').deal(chapter),
+      chapterTitle: '.read-txt>h2',
+      content: '.read-txt',
       getChapters: (doc) => Rule.special.find(i => i.siteName === 'PO18臉紅心跳').getChapters(doc),
-      elementRemove: 'span'
+      elementRemove: 'blockquote'
     },
     { // https://www.po18.tw/
       siteName: 'PO18臉紅心跳',
@@ -1574,7 +1574,8 @@
         });
         return $('<div>').html(res.response).find('a').toArray().map(i => ({
           title: $(i).text(),
-          url: $(i).prop('href')
+          url: $(i).prop('href'),
+          vip: $(i).is(':has(img)')
         }));
       },
       elementRemove: 'blockquote'
@@ -1727,6 +1728,62 @@
       },
       elementRemove: '.hidden',
       thread: 1
+    },
+    { // https://www.youdubook.com/
+      siteName: '有毒小说',
+      url: '://www.youdubook.com/book_detail/\\d+',
+      chapterUrl: '://www.youdubook.com/readchapter/\\d+',
+      title: '.title>span',
+      writer: '#BooklibraryShow_Right .penName',
+      intro: '.synopsisCon',
+      cover: '.BookContent .pic>img',
+      chapter: '.BookDir .chapter_list>ul>li>a',
+      vipChapter: '.BookDir .chapter_list>ul>li.lock_fill>a',
+      chapterTitle: '.title',
+      content: async (doc, res, request) => {
+        const args = res.response.match(/^\s*MemberSingleChapter\((.*)\)/m)[1].split(',').map(i => i.match(/^"(.*?)"$/)[1]);
+        const content = await new Promise((resolve, reject) => {
+          xhr.add({
+            method: 'POST',
+            chapter: request.raw,
+            url: args[0], // window.location.origin + '/booklibrary/membersinglechapter/chapter_id/' + request.url.match(/\/readchapter\/(\d+)/)[1],
+            headers: {
+              Accept: 'application/json, text/javascript, */*; q=0.01',
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              Origin: window.location.origin,
+              Referer: request.url,
+              'sec-fetch-site': 'same-origin',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            data: `sign=${encodeURIComponent('a3NvcnQoJHBhcmEpOw==')}&caonima=${encodeURIComponent(args[4])}`,
+            onload: function (res, request) {
+              try {
+                const json = JSON.parse(res.response);
+
+                const listArr = json.data.show_content;
+                // 章节插图
+                const chapterpic = json.data.chapterpic;
+                let content = '';
+                for (let i = 0; i < listArr.length; i++) content += CryptoJS.enc.Base64.parse(listArr[i].content).toString(CryptoJS.enc.Utf8) + '\n';
+
+                // 章节插图是否存在
+                if (chapterpic.length > 0) {
+                  for (let i = 0; i < chapterpic.length; i++) content += `<img src="${chapterpic[i].url}" alt="${chapterpic[i].miaoshu}" />`;
+                }
+
+                // 作者说的话追加
+                if (json.data.miaoshu !== '') content += '---\n' + CryptoJS.enc.Base64.parse(json.data.miaoshu).toString(CryptoJS.enc.Utf8);
+
+                resolve(content);
+              } catch (error) {
+                console.error(error);
+                resolve('');
+              }
+            }
+          }, null, 0, true);
+        });
+        return content;
+      }
     },
     // 轻小说
     { // https://www.wenku8.net
@@ -2480,9 +2537,7 @@
             onload: function (res, request) {
               try {
                 const json = JSON.parse(res.response.match(/(\{.*\})/)[1]);
-                let content = json.content;
-                content = base64.decode(content);
-                content = base64.utf8to16(content);
+                const content = CryptoJS.enc.Base64.parse(json.content).toString(CryptoJS.enc.Utf8);
                 const title = $('h1', content).text();
                 resolve({ content, title });
               } catch (error) {
@@ -2690,6 +2745,10 @@
     } else {
       showUI();
     }
+
+    if (GM_info.scriptHandler === 'Violentmonkey' && !GM_getValue('Violentmonkey_alert_ignore')) { // TODO
+      GM_setValue('Violentmonkey_alert_ignore', window.confirm('novelDownloader3最新版暂时不兼容暴力猴\n请尝试使用TamperMonkey或GreaseMonkey\n是否忽略此条信息'));
+    }
   }
 
   async function showUI () {
@@ -2697,10 +2756,19 @@
     let vipChapters = [];
     const chaptersDownloaded = [];
 
+    const issueBody = [
+      `- 脚本: \`novelDownloader3 v${GM_info.script.version}\``,
+      '- 类型: `Bug/建议`',
+      `- 浏览器: \`${GM_info.platform ? GM_info.platform.browserName : '浏览器'} v${GM_info.platform ? GM_info.platform.browserVersion : '版本'}\``,
+      `- 扩展: \`${GM_info.scriptHandler} v${GM_info.version}\``,
+      '---',
+      '<!-- 你的问题 -->'
+    ];
+
     // ui
     const html = [
       '<div name="info">',
-      '  当前规则: <span name="rule"></span><span name="mode"></span><sup><a href="https://github.com/dodying/UserJs/issues/new" target="_blank">反馈</a></sup><sup><a href="https://github.com/dodying/UserJs#捐赠" target="_blank">捐赠</a></sup>',
+      `  当前规则: <span name="rule"></span><span name="mode"></span><sup><a href="https://github.com/dodying/UserJs/issues/new?body=${encodeURIComponent(issueBody.join('\u000a'))}" target="_blank">反馈</a></sup><sup><a href="https://github.com/dodying/UserJs#捐赠" target="_blank">捐赠</a></sup>`,
       '  <br>',
       '  书籍名称: <input type="text" name="title" value="加载中，请稍候">',
       '  <br>',
@@ -3126,7 +3194,7 @@
           onfailed: onChapterFailed,
           onfailedEvery: onChapterFailedEvery,
           checkLoad: async (res) => {
-            if ((res.status > 0 && res.status < 200) || res.status >= 300 || (res.responseText && res.responseText.match(/404/) && res.responseText.match(/Not Found|找不到文件或目录/i))) {
+            if ((res.status > 0 && res.status < 200) || res.status >= 300) { // TODO
               return false;
             } else {
               return true;
