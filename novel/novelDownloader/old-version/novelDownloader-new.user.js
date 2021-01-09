@@ -8,7 +8,7 @@
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
-// @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon         https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @run-at       document-end
 // @noframes
 //

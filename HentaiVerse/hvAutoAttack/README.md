@@ -25,7 +25,7 @@
 
 ### 截图
 
-![自定义设置](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
+![自定义设置](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
 ***
 
@@ -86,7 +86,7 @@
 
 #### 示例
 
-![示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
+![示例](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
 
 图中，我设置了三个大条件（2中有两个小条件）
 
@@ -102,7 +102,7 @@
 以下为电路图示意图
 
 
-![电路图示例](https://raw.githubusercontent.com/dodying/UserJs/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
+![电路图示例](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
 
 #### 技能/物品id表
 

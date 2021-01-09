@@ -34,4 +34,4 @@
 
 ### 捐赠
 
-![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs/donation.jpg)
+![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)

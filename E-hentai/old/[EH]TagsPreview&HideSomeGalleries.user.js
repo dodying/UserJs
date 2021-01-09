@@ -15,7 +15,7 @@
 // @exclude     http*://e-hentai.org/s/*
 // @version     1.2.3
 // 使用了来自Mapaler/EhTagTranslator生成的json数据
-// @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json
+// @resource EHT https://cdn.jsdelivr.net/gh/dodying/UserJs@master/E-hentai/EHT.json
 // @grant       GM_getResourceText
 // @run-at      document-idle
 // ==/UserScript==

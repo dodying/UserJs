@@ -8,7 +8,7 @@
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @run-at      document-end
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue
@@ -16,7 +16,7 @@
 // @grant       unsafeWindow
 // @noframes
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
-// @require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/download.js
+// @require     https://cdn.jsdelivr.net/gh/dodying/UserJs@master/lib/download.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // ==/UserScript==
 /* eslint-disable no-debugger  */

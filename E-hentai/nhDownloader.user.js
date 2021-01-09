@@ -6,7 +6,7 @@
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @run-at      document-end
 // @grant       unsafeWindow
 // @grant       GM_getValue
@@ -14,7 +14,7 @@
 // @grant       GM_xmlhttpRequest
 // @connect     i.nhentai.net
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
-// @require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/queue.js
+// @require     https://cdn.jsdelivr.net/gh/dodying/UserJs@master/lib/queue.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js
 // ==/UserScript==
 (function () {

@@ -16,7 +16,7 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 (function () {
