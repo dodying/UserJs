@@ -3,7 +3,7 @@
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
 // @version     1.02b

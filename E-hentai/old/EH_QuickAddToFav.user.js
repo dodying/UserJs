@@ -27,7 +27,7 @@ if (document.querySelector('div.i')) {
   var Fav = document.querySelectorAll('div.i');
   for (var i = 0; i < Fav.length; i++) {
     if (Fav[i].style.backgroundImage == 'url("https://exhentai.org/img/fav.png")' || Fav[i].style.backgroundImage == 'url("https://ehgt.org/g/fav.png")') {
-      Fav[i].style.backgroundImage = 'url("https://raw.githubusercontent.com/dodying/HentaiVersePlus/master/HV/Temp/fav.png")';
+      Fav[i].style.backgroundImage = 'url("https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/fav.png")';
     }
   }
 }
@@ -60,7 +60,7 @@ if (document.querySelector('#gdc')) { //如果是信息页
   var left = document.querySelector('#gdn').offsetLeft+350;
   var top = document.querySelector('#gdn').offsetTop+35;
   div.style = 'color:red;position:absolute;left:' + left + 'px;top:'+top+'px;z-index:999;';
-  div.innerHTML = '<div oncontextmenu="return false"><div class="EH_QuickAddToFav" title="' + addurl + '|||EH_QuickButton_InfoPage" style="cursor:pointer;background-image:url(https://raw.githubusercontent.com/dodying/HentaiVersePlus/master/HV/Temp/Plus.png);width:16px;height:16px;float:left;"></div><a target="_blank" href="https://' + host + '/?f_search=%22' + name_book + '%22&f_apply=Apply+Filter&advsearch=1&f_sname=on&f_stags=on&f_sh=on"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-16.png" /></a></div>';
+  div.innerHTML = '<div oncontextmenu="return false"><div class="EH_QuickAddToFav" title="' + addurl + '|||EH_QuickButton_InfoPage" style="cursor:pointer;background-image:url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Plus.png);width:16px;height:16px;float:left;"></div><a target="_blank" href="https://' + host + '/?f_search=%22' + name_book + '%22&f_apply=Apply+Filter&advsearch=1&f_sname=on&f_stags=on&f_sh=on"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-16.png" /></a></div>';
   document.body.appendChild(div);
 } /////////////////////////////////////////////////////
 
@@ -84,7 +84,7 @@ function EH_QuickButton_AddFav(a, name, style, box) {
     var div = document.createElement('div');
     var id = 'EH_' + name + i;
     div.id = id;
-    div.innerHTML = '<div oncontextmenu="return false" ' + style + '><div class="EH_QuickAddToFav" title="' + addurl + '|||' + id + '" style="cursor:pointer;background-image:url(https://raw.githubusercontent.com/dodying/HentaiVersePlus/master/HV/Temp/Plus.png);width:16px;height:16px;float:left;"></div><a target="_blank" href="https://' + host + '/?f_search=%22' + name_book + '%22&f_apply=Apply+Filter&advsearch=1&f_sname=on&f_stags=on&f_sh=on"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-16.png" /></a></div>';
+    div.innerHTML = '<div oncontextmenu="return false" ' + style + '><div class="EH_QuickAddToFav" title="' + addurl + '|||' + id + '" style="cursor:pointer;background-image:url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Plus.png);width:16px;height:16px;float:left;"></div><a target="_blank" href="https://' + host + '/?f_search=%22' + name_book + '%22&f_apply=Apply+Filter&advsearch=1&f_sname=on&f_stags=on&f_sh=on"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-16.png" /></a></div>';
     /*div.querySelector('a').onmousedown = function (event) {
       xhr_send(event.button, this.title.split('|||') [0], this.title.split('|||') [1]);
     }
@@ -149,10 +149,10 @@ function xhr_send(status, addurl, id) {
   xhr_send.send(parm);
   xhr_send.onload = function () {
     if (favcat != 'favdel') {
-      document.querySelector('#' + id + '>div>div').style.backgroundImage = 'url(https://raw.githubusercontent.com/dodying/HentaiVersePlus/master/HV/Temp/fav.png)';
+      document.querySelector('#' + id + '>div>div').style.backgroundImage = 'url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/fav.png)';
       document.querySelector('#' + id + '>div>div').style.backgroundPosition='0px -' + pic + 'px';
     } else {
-      document.querySelector('#' + id + '>div>div').style.backgroundImage = 'url(https://raw.githubusercontent.com/dodying/HentaiVersePlus/master/HV/Temp/Delete-16.png)';
+      document.querySelector('#' + id + '>div>div').style.backgroundImage = 'url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Delete-16.png)';
       document.querySelector('#' + id + '>div>div').style.backgroundPosition='0px 0px';
     }
 }

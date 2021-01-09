@@ -2,13 +2,13 @@
 // @name        小说阅读脚本辅助朗读
 // @description 小说阅读脚本辅助朗读
 // @include     *
-// @version     1.0.284
+// @version     1.0.287
 // @created     2020-12-11 13:05:42
-// @modified    2020/12/12 23:36:12
+// @modified    2021/1/9 20:57:53
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @run-at      document-end
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -181,9 +181,9 @@
           utterThis.rate = config.rate;
           utterThis.pitch = config.pitch;
           // Object.assign(utterThis, config);
-          utterThis.addEventListener('boundary', (e) => {
-            console.log(text.substr(e.charIndex, e.charLength));
-          });
+          // utterThis.addEventListener('boundary', (e) => { // 当前朗读字词
+          //   console.log(text.substr(e.charIndex, e.charLength));
+          // });
           utterThis.addEventListener('end', () => {
             resolve();
           });

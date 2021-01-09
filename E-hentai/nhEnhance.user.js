@@ -5,7 +5,7 @@
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @include     https://nhentai.net/*
 // @grant       GM_openInTab
 // @grant       GM_setClipboard
@@ -15,7 +15,7 @@
 // @grant       GM_xmlhttpRequest
 // @connect     *
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
-// @resource EHT https://raw.githubusercontent.com/dodying/UserJs/master/E-hentai/EHT.json?v=1522933172772
+// @resource EHT https://cdn.jsdelivr.net/gh/dodying/UserJs@master/E-hentai/EHT.json?v=1522933172772
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)
 // @compatible  chrome 55+(ES2017)

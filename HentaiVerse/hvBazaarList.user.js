@@ -4,7 +4,7 @@
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
-// @icon         https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon         https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @include      http*://hentaiverse.org/?s=Bazaar&ss=is*
 // @include      http://alt.hentaiverse.org/?s=Bazaar&ss=is*
 // @grant        GM_setValue
