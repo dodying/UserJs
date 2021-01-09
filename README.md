@@ -1,4 +1,4 @@
-### UserJs [GF地址](https://greasyfork.org/zh-CN/users/4000) [![Join the chat at https://gitter.im/dodying/UserJs](https://badges.gitter.im/dodying/UserJs.svg)](https://gitter.im/dodying/UserJs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+### UserJs [GF 地址](https://greasyfork.org/zh-CN/users/4000) [![Join the chat at https://gitter.im/dodying/UserJs](https://badges.gitter.im/dodying/UserJs.svg)](https://gitter.im/dodying/UserJs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### 说明：有些脚本是很久很久以前写的，所以可能失效...
 
@@ -8,18 +8,19 @@
 
 [newtab](global/newTab.user.js) 链接强制在新建标签中打开，支持禁用某站点
 以下情况不会强制新标签打开
-1. 非http/ftp链接
+
+1. 非 http/ftp 链接
 2. 根路径
 3. 页内跳转
 4. 翻页（将纯数字的链接也视为翻页）
 
 ###### s
 
-[s](global/s.user.js) HTTP强制跳转HTTPS，支持禁用某站点
+[s](global/s.user.js) HTTP 强制跳转 HTTPS，支持禁用某站点
 
 ###### insertJquery
 
-[insertJquery](global/insertJquery.user.js) 在当前页面插入jquery脚本
+[insertJquery](global/insertJquery.user.js) 在当前页面插入 jquery 脚本
 
 ###### mark
 
@@ -31,12 +32,11 @@
 
 ###### ehEnhance
 
-[ehEnhance](E-hentai/ehEnhance.user.js) EH站点增强，**NSFW**
+[ehEnhance](E-hentai/ehEnhance.user.js) EH 站点增强，**NSFW**
 
 ###### HVAA
 
 [HVAA](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) 长期未更新，可能失效
-
 
 #### 目录说明
 
@@ -86,6 +86,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 [[]mark](global/mark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/mark.user.js) | 1.3.0 | 2020/12/13 13:19:17 |  | mark
 [[]meta](global/meta.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/meta.user.js) | 1.11 |  |  | 
 [[]newTab](global/newTab.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/newTab.user.js) | 0.0.109 |  |  | 链接强制在新建标签中打开 Open a URL in a new tab
+[onerror](global/onerror.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/onerror.user.js) | 1.0.7 | 2021/1/9 20:57:58 | 2020-12-13 14:09:27 | onerror
 [[]prettyJSON](global/prettyJSON.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/prettyJSON.user.js) | 1.1.9 | 2020/6/8 14:01:31 |  | prettyJSON
 [[]https](global/s.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/s.user.js) | 1.0.7 |  |  | 
 [[]style](global/style.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/global/style.user.js) | 1.1.0 |  |  | 
@@ -97,7 +98,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
 [[H]CopyInfo](H/hCopyInfo.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hCopyInfo.user.js) | 1.01.5 |  |  | 
 [[H]ParkingLot](H/hParkingLot.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot.user.js) | 1.11.435 |  |  | 
-[[H]ParkingLot2](H/hParkingLot2.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot2.doing.user.js) | 0.0.11 |  |  | [H]ParkingLot2
+[[H]ParkingLot2](H/hParkingLot2.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/H/hParkingLot2.doing.user.js) | 0.0.12 |  |  | [H]ParkingLot2
 
 ##### HentaiVerse/hvAutoAttack
 
@@ -140,7 +141,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[小说阅读脚本辅助朗读](novel/小说阅读脚本辅助朗读.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/%E5%B0%8F%E8%AF%B4%E9%98%85%E8%AF%BB%E8%84%9A%E6%9C%AC%E8%BE%85%E5%8A%A9%E6%9C%97%E8%AF%BB.user.js) | 1.0.284 | 2020/12/12 23:36:12 | 2020-12-11 13:05:42 | 小说阅读脚本辅助朗读
+[小说阅读脚本辅助朗读](novel/小说阅读脚本辅助朗读.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/%E5%B0%8F%E8%AF%B4%E9%98%85%E8%AF%BB%E8%84%9A%E6%9C%AC%E8%BE%85%E5%8A%A9%E6%9C%97%E8%AF%BB.user.js) | 1.0.287 | 2021/1/9 20:57:53 | 2020-12-11 13:05:42 | 小说阅读脚本辅助朗读
 [小说阅读脚本增强](novel/小说阅读脚本增强.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/%E5%B0%8F%E8%AF%B4%E9%98%85%E8%AF%BB%E8%84%9A%E6%9C%AC%E5%A2%9E%E5%BC%BA.user.js) | 1.0.320 | 2020/12/11 13:15:00 | 2020-07-20 08:45:13 | 移除鼠标双击事件，增加翻页按钮
 [hbookerEnhance](novel/hbookerEnhance.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/hbookerEnhance.user.js) | 1.039a |  |  | 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 [Qidian_Bookmark](novel/Qidian_Bookmark.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/Qidian_Bookmark.user.js) | 1.02 |  |  | 在“起点个人中心-我的书架”里增加阅读记录，通过点击章节页里的按钮添加到阅读记录里
@@ -153,8 +154,8 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[novelDownloader3](novel/novelDownloader/novelDownloader3.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js) | 3.4.503 | 2020/12/6 13:14:11 | 2020-03-16 16:59:04 | 菜单```Download Novel```或**双击页面最左侧**来显示面板
-[novelDownloader4.doing](novel/novelDownloader/novelDownloader4.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader4.doing.user.js) | 0.0.47 | 2020/11/23 13:36:35 | 2020-11-17 20:05:37 | novelDownloader4.doing
+[novelDownloader3](novel/novelDownloader/novelDownloader3.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js) | 3.4.707 | 2021/1/9 20:57:52 | 2020-03-16 16:59:04 | 菜单```Download Novel```或**双击页面最左侧**来显示面板
+[novelDownloader4.doing](novel/novelDownloader/novelDownloader4.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader4.doing.user.js) | 0.0.48 | 2021/1/9 20:57:55 | 2020-11-17 20:05:37 | novelDownloader4.doing
 
 ##### novel/novelDownloader/old-version
 
@@ -192,4 +193,15 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 #### 捐赠
 
-![donation](./donation.jpg)
+![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)
+
+###
+
+```
+https://raw\.githubusercontent\.com/([^/]+)/([^/]+)/([^/]+)/(.*)$
+https://cdn.jsdelivr.net/gh/$1/$2@$3/$4
+
+https://github\.com/([^/]+)/([^/]+)/raw/([^/]+)/(.*)$
+https://cdn.jsdelivr.net/gh/$1/$2@$3/$4
+
+```

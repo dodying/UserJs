@@ -1,4 +1,4 @@
-### UserJs [GF地址](https://greasyfork.org/zh-CN/users/4000) [![Join the chat at https://gitter.im/dodying/UserJs](https://badges.gitter.im/dodying/UserJs.svg)](https://gitter.im/dodying/UserJs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+### UserJs [GF 地址](https://greasyfork.org/zh-CN/users/4000) [![Join the chat at https://gitter.im/dodying/UserJs](https://badges.gitter.im/dodying/UserJs.svg)](https://gitter.im/dodying/UserJs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### 说明：有些脚本是很久很久以前写的，所以可能失效...
 
@@ -8,18 +8,19 @@
 
 [newtab](global/newTab.user.js) 链接强制在新建标签中打开，支持禁用某站点
 以下情况不会强制新标签打开
-1. 非http/ftp链接
+
+1. 非 http/ftp 链接
 2. 根路径
 3. 页内跳转
 4. 翻页（将纯数字的链接也视为翻页）
 
 ###### s
 
-[s](global/s.user.js) HTTP强制跳转HTTPS，支持禁用某站点
+[s](global/s.user.js) HTTP 强制跳转 HTTPS，支持禁用某站点
 
 ###### insertJquery
 
-[insertJquery](global/insertJquery.user.js) 在当前页面插入jquery脚本
+[insertJquery](global/insertJquery.user.js) 在当前页面插入 jquery 脚本
 
 ###### mark
 
@@ -31,12 +32,11 @@
 
 ###### ehEnhance
 
-[ehEnhance](E-hentai/ehEnhance.user.js) EH站点增强，**NSFW**
+[ehEnhance](E-hentai/ehEnhance.user.js) EH 站点增强，**NSFW**
 
 ###### HVAA
 
 [HVAA](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) 长期未更新，可能失效
-
 
 #### 目录说明
 
@@ -44,4 +44,15 @@
 
 #### 捐赠
 
-![donation](./donation.jpg)
+![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)
+
+###
+
+```
+https://raw\.githubusercontent\.com/([^/]+)/([^/]+)/([^/]+)/(.*)$
+https://cdn.jsdelivr.net/gh/$1/$2@$3/$4
+
+https://github\.com/([^/]+)/([^/]+)/raw/([^/]+)/(.*)$
+https://cdn.jsdelivr.net/gh/$1/$2@$3/$4
+
+```
