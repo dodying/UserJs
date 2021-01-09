@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.616
+// @version     3.4.707
 // @created     2020-03-16 16:59:04
-// @modified    2020/12/27 19:51:37
+// @modified    2021/1/9 20:57:52
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://raw.githubusercontent.com/dodying/UserJs/master/Logo.png
+// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
+// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
 // @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=821561
-// require     https://raw.githubusercontent.com/dodying/UserJs/master/lib/download.js
+// require     https://cdn.jsdelivr.net/gh/dodying/UserJs@master/lib/download.js
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
 // require     http://127.0.0.1:8081/download.js
 
@@ -22,7 +23,7 @@
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js
 // @require     https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js
 
-// resource fontLib https://raw.githubusercontent.com/dodying/UserJs/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
 // @resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
 // resource fontLib file:///E:/Desktop/_/GitHub/UserJs/novel/novelDownloader/起点自定义字体/often.json?v=2
 
@@ -34,8 +35,8 @@
 // @grant       GM_getResourceText
 // @run-at      document-end
 // @connect     *
-// @noframes
 // @include     *
+// @noframes
 // ==/UserScript==
 /* global unsafeWindow GM_info GM_setValue GM_getValue GM_registerMenuCommand GM_getResourceText */
 /* eslint-disable no-debugger  */
@@ -274,7 +275,7 @@
       volume: 'h4>span',
       chapterTitle: '.title h2',
       content: (doc, res, request) => {
-        let info = res.response.match(/window\["\\x65\\x76\\x61\\x6c"\](.*?)<\/script>/)[1];
+        let info = res.responseText.match(/window\["\\x65\\x76\\x61\\x6c"\](.*?)<\/script>/)[1];
         info = window.eval(info); // eslint-disable-line no-eval
         info = info.match(/^SMH.imgData(.*?).preInit\(\);/)[1];
         info = window.eval(info); // eslint-disable-line no-eval
@@ -412,7 +413,7 @@
               method: 'GET',
               onload: function (res, request) {
                 try {
-                  const json = JSON.parse(res.response);
+                  const json = JSON.parse(res.responseText);
                   content.title = json.data.chapterInfo.chapterName;
 
                   if (json.data.chapterInfo.fontsConf) {
@@ -450,6 +451,7 @@
               chapter,
               url: chapter.url,
               method: 'GET',
+              responseType: 'document',
               onload: function (res, request) {
                 content.title = $('.j_chapterName', res.response).text();
                 content.content = $('.j_readContent', res.response).html();
@@ -486,7 +488,7 @@
             '/resources/js/myEncrytExtend-min.js',
             '/resources/js/jquery-plugins/jquery.base64.min.js'
           ].map(i => 'https://www.ciweimao.com' + i).map(i => xhr.sync(i, null, { cache: true })));
-          for (const res of result) unsafeWindow.eval(res.response);
+          for (const res of result) unsafeWindow.eval(res.responseText);
         }
 
         const chapterId = chapter.url.split('/').slice(-1)[0];
@@ -523,7 +525,7 @@
             // responseType: 'json',
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const content = unsafeWindow.$.myDecrypt({
                   content: json.chapter_content,
                   keys: json.encryt_keys,
@@ -621,7 +623,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 let content = json.Content;
                 var base = 30;
                 var arrStr = [];
@@ -688,7 +690,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 let content = json.Content;
                 content = $('.bookreadercontent', content).html();
                 resolve(content);
@@ -741,7 +743,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const title = json.data.curChapterName;
                 const content = json.data.chapterContent;
                 resolve({ title, content });
@@ -835,7 +837,7 @@
             url: `http://${window.location.host.replace('www.', 'a.')}/ajax/chapter/content/${chapter.url.replace(/.*\//, '')}`,
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const title = json.chapter.title;
                 const content = json.chapter.htmlContent;
                 resolve({ title, content });
@@ -865,7 +867,8 @@
       elementRemove: 'p:has(a,b,font)',
       vip: {
         content: (doc, res, request) => {
-          const func = $('script:contains("image_do3")', res.response).text();
+          const doc1 = new window.DOMParser().parseFromString(res.responseText, 'text/html');
+          const func = $('script:contains("image_do3")', doc1).text();
           /* eslint-disable camelcase */
           if (!unsafeWindow.image_do3) {
             unsafeWindow.image_do3 = function (num, o, id, n, en, t, k, u, time, fontsize, fontcolor, chaptertype, font_family_type) {
@@ -883,7 +886,7 @@
           }
           /* eslint-enable camelcase */
           const image = window.eval('window.' + func); // eslint-disable-line no-eval
-          const elem = $('.noveContent', res.response);
+          const elem = $('.noveContent', doc1);
           elem.find('.con_img').replaceWith(`<img src="${image}">`);
           return elem.html();
         }
@@ -996,7 +999,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const title = json.data.name;
                 const content = json.data.content;
                 resolve({ title, content });
@@ -1133,7 +1136,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const content = CryptoJS.enc.Base64.parse(json.content).toString(CryptoJS.enc.Utf8);
                 const title = $('h1', content).text();
                 resolve({ content, title });
@@ -1185,7 +1188,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const title = json.data.chapter_name;
                 const content = json.data.chapter_content;
                 Storage.book.title = json.data.book_name;
@@ -1269,7 +1272,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 resolve(json);
               } catch (error) {
                 console.error(error);
@@ -1291,7 +1294,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const title = json.chptitle;
                 let content = json.content;
                 content = unsafeWindow.utf8to16(unsafeWindow.hs_decrypt(unsafeWindow.base64decode(content), res1.key));
@@ -1445,7 +1448,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = unsafeWindow.strdecode(res.response);
+                const json = unsafeWindow.strdecode(res.responseText);
                 const content = json.content.chapter_content;
                 const title = json.content.chapter_name;
                 if (!Storage.book.title) Storage.book.title = json.content.book_name;
@@ -1503,7 +1506,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const title = json.data.chapterInfo.bookTitle;
                 const content = json.data.chapterInfo.chapterContent;
                 resolve({ title, content });
@@ -1553,7 +1556,7 @@
             },
             onload: function (res, request) {
               try {
-                resolve(res.response);
+                resolve(res.responseText);
               } catch (error) {
                 console.error(error);
                 resolve('');
@@ -1570,9 +1573,10 @@
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             Referer: window.location.href,
             'X-Requested-With': 'XMLHttpRequest'
-          }
+          },
+          responseType: 'document'
         });
-        return $('<div>').html(res.response).find('a').toArray().map(i => ({
+        return $('a', res.response).toArray().map(i => ({
           title: $(i).text(),
           url: $(i).prop('href'),
           vip: $(i).is(':has(img)')
@@ -1617,13 +1621,13 @@
       intro: '.cp-novel-index-novel-info',
       cover: '.cp-novel-cover>img',
       chapterTitle: '.cp-read-name',
-      content: (doc, res, request) => window.eval(res.response.match(/content: (".*"),/)[1]), // eslint-disable-line no-eval
+      content: (doc, res, request) => window.eval(res.responseText.match(/content: (".*"),/)[1]), // eslint-disable-line no-eval
       elementRemove: '.cp-hidden',
       thread: 1,
       getChapters: async (doc) => {
         const info = window.location.href.match(/\d+/g);
         const res = await xhr.sync(`https://www.gongzicp.com/novel/getChapterList?nid=${info[0]}`);
-        const json = JSON.parse(res.response);
+        const json = JSON.parse(res.responseText);
         const chapters = [];
         let volume = '';
         for (let i = 1; i < json.data.list.length; i++) {
@@ -1702,7 +1706,7 @@
       chapterTitle: '.chapter_tt',
       content: async (doc, res, request) => {
         const chapter = request.raw;
-        const token = $(res.response).toArray().find(i => i.tagName === 'META' && i.name === 'csrf-token').content; // same as XSRF-TOKEN<cookie>
+        const token = $(res.responseText).toArray().find(i => i.tagName === 'META' && i.name === 'csrf-token').content; // same as XSRF-TOKEN<cookie>
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
@@ -1714,7 +1718,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const content = json.content;
                 resolve(content);
               } catch (error) {
@@ -1741,7 +1745,7 @@
       vipChapter: '.BookDir .chapter_list>ul>li.lock_fill>a',
       chapterTitle: '.title',
       content: async (doc, res, request) => {
-        const args = res.response.match(/^\s*MemberSingleChapter\((.*)\)/m)[1].split(',').map(i => i.match(/^"(.*?)"$/)[1]);
+        const args = res.responseText.match(/^\s*MemberSingleChapter\((.*)\)/m)[1].split(',').map(i => i.match(/^"(.*?)"$/)[1]);
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             method: 'POST',
@@ -1758,7 +1762,7 @@
             data: `sign=${encodeURIComponent('a3NvcnQoJHBhcmEpOw==')}&caonima=${encodeURIComponent(args[4])}`,
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
 
                 const listArr = json.data.show_content;
                 // 章节插图
@@ -1921,14 +1925,14 @@
       chapter: '.long-item>.info>a',
       chapterTitle: '.article-title',
       content: (doc, res, request) => {
-        const contentRaw = $('#article-main-contents', res.response).html();
+        const contentRaw = $('#article-main-contents', res.responseText).html();
         const content = contentRaw.replace(/^(<br>)+/, '').split(/<div.*?>.*?<\/div>|(<br>\s*){3,}/).map(i => i && i.replace(/^(\s*|<br>)+/, '')).filter(i => i);
         Storage.book.chapters.splice(Storage.book.chapters.indexOf(request.raw), 1, ...content.map((item, index) => ({
           title: `${request.raw.title} - 第${String(index + 1)}部分`,
           url: request.raw.url,
           content: item,
           contentRaw: item,
-          document: res.response
+          document: res.responseText
         })));
       }
     },
@@ -1956,8 +1960,8 @@
       chapter: '.index_box>dl>dd>a',
       chapterTitle: '.novel_subtitle',
       content: (doc, res, request) => {
-        const content = $('#novel_honbun', res.response).html();
-        const authorSays = $('#novel_a', res.response).html();
+        const content = $('#novel_honbun', res.responseText).html();
+        const authorSays = $('#novel_a', res.responseText).html();
         return content + '-'.repeat(20) + authorSays;
       }
     },
@@ -1972,8 +1976,47 @@
       chapter: '.table-of-contents>li>a',
       chapterTitle: '.part-header h2',
       content: '.part-content .page>div>pre',
-      chapterPrev: (doc, res, request) => $('.table-of-contents>li.active', res.response).prevAll().find('a').toArray().map(i => i.href).reverse(),
-      chapterNext: (doc, res, request) => $('.table-of-contents>li.active', res.response).nextAll().find('a').toArray().map(i => i.href)
+      chapterPrev: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).prevAll().find('a').toArray().map(i => i.href).reverse(),
+      chapterNext: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).nextAll().find('a').toArray().map(i => i.href)
+    },
+    { // http://xs.kdays.net/index
+      siteName: '萌文库',
+      url: 'http://xs.kdays.net/book/\\d+/chapter',
+      chapterUrl: 'http://xs.kdays.net/book/\\d+/read/\\d+',
+      infoPage: '[href$="/detail"]',
+      title: '.info-side>h2',
+      writer: '.items>li>a[href^="/search/author"]',
+      intro: '.info-side>blockquote',
+      cover: '.book-detail>div>div>img',
+      chapter: '#vols>div>div>ul>li>a',
+      volume: '#vols>div>div>h2',
+      chapterTitle: '.chapterName',
+      content: 'article'
+    },
+    { // https://www.biquge1000.com/
+      siteName: '吾的轻小说',
+      url: '://www.biquge1000.com/book/\\d+.html',
+      chapterUrl: '://www.biquge1000.com/book/\\d+/\\d+.html',
+      title: '.bookTitle',
+      writer: '.booktag>a[href*="?author"]',
+      intro: '#bookIntro',
+      cover: '.img-thumbnail',
+      chapter: '#list-chapterAll>dl>dd>a',
+      volume: '#list-chapterAll>dl>dt',
+      chapterTitle: '.readTitle',
+      content: '#htmlContent'
+    },
+    { // https://novel.crazyideal.com/
+      siteName: '雷姆轻小说',
+      url: '://novel.crazyideal.com/book/\\d+/',
+      chapterUrl: 'https://novel.crazyideal.com/\\d+_\\d+/\\d+(_\\d+)?.html',
+      title: '.novel_info_title>h1',
+      writer: '.novel_info_title>i>a[href^="/author/"]',
+      intro: '.intro',
+      cover: '.novel_info_main>img',
+      chapter: '#ul_all_chapters>li>a',
+      chapterTitle: '.style_h1',
+      content: '#article'
     },
     // 盗贴
     { // https://www.xiaoshuokan.com
@@ -1998,7 +2041,7 @@
               'X-Requested-With': 'XMLHttpRequest'
             },
             onload: function (res, request) {
-              resolve(res.response);
+              resolve(res.responseText);
             }
           }, null, 0, true);
         });
@@ -2027,7 +2070,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response);
+                const json = JSON.parse(res.responseText);
                 const title = json.data.chapter.name;
                 const content = json.data.chapter.content;
                 resolve({ title, content });
@@ -2178,9 +2221,9 @@
       chapter: '.chapters a',
       chapterTitle: '#chaptertitle',
       content: (doc, res, request) => {
-        const doc1 = new window.DOMParser().parseFromString(res.response, 'text/html');
+        const doc1 = new window.DOMParser().parseFromString(res.responseText, 'text/html');
         const order = window.atob(doc1.getElementsByTagName('meta')[7].getAttribute('content')).split(/[A-Z]+%/);
-        const codeurl = res.response.match(/var codeurl="(\d+)";/)[1] * 1;
+        const codeurl = res.responseText.match(/var codeurl="(\d+)";/)[1] * 1;
         const arrRaw = $('#content', doc1).children().toArray();
         const arr = [];
         for (let i = 0; i < order.length; i++) {
@@ -2199,7 +2242,7 @@
       chapter: ['[id*="list"] a', '[class*="list"] a', '[id*="chapter"] a', '[class*="chapter"] a'].join(','),
       chapterTitle: '.chaptername',
       content: (doc, res, request) => {
-        let content = $('.txt', res.response).html();
+        let content = $('.txt', res.responseText).html();
         const str = '的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情己面最女但现前些所同日手又行意动';
         content = content.replace(/[\ue800-\ue863]/g, matched => str[matched.charCodeAt(0) - 0xe800]);
         return content;
@@ -2216,7 +2259,7 @@
       chapter: '#list-chapterAll .panel-chapterlist>dd>a',
       chapterTitle: '.readTitle',
       content: '.panel-readcontent>.panel-body>div[id]',
-      chapterNext: async (doc, res, request) => res.response.match(/url = "(.*?)";/) ? res.response.match(/url = "(.*?)";/)[1] : []
+      chapterNext: async (doc, res, request) => res.responseText.match(/url = "(.*?)";/) ? res.responseText.match(/url = "(.*?)";/)[1] : []
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
@@ -2536,7 +2579,7 @@
             },
             onload: function (res, request) {
               try {
-                const json = JSON.parse(res.response.match(/(\{.*\})/)[1]);
+                const json = JSON.parse(res.responseText.match(/(\{.*\})/)[1]);
                 const content = CryptoJS.enc.Base64.parse(json.content).toString(CryptoJS.enc.Utf8);
                 const title = $('h1', content).text();
                 resolve({ content, title });
@@ -2554,7 +2597,7 @@
       getChapters: async (doc) => {
         const info = window.location.href.match(/\d+/g);
         const res = await xhr.sync(`https://xxread.net/getBook.php?b=${info[0]}`);
-        const json = JSON.parse(res.response);
+        const json = JSON.parse(res.responseText);
         const chapters = [];
         for (let i = 1; i < json.portions.length; i++) {
           chapters.push({
@@ -3070,7 +3113,7 @@
           ruleChapterRelative = Config.useCommon ? (rule.chapterPrev || Rule.chapterPrev) : rule.chapterPrev;
         }
 
-        let chapterRelative = await getFromRule(ruleChapterRelative, { attr: 'href', allElement: true, document: res.response }, [res, request], []);
+        let chapterRelative = await getFromRule(ruleChapterRelative, { attr: 'href', allElement: true, document: new window.DOMParser().parseFromString(res.responseText, 'text/html') }, [res, request], []);
         chapterRelative = [].concat(chapterRelative).map(i => new URL(i, res.finalUrl || window.location.href).href)
           .filter(url => url && !url.match(/^(javascript:|#)/)).map(i => new URL(i, chapter.url).href)
           .filter(url => {
@@ -3094,7 +3137,7 @@
           const rule = vipChapters.includes(url) ? Storage.rule.vip : Storage.rule;
 
           if (chapterNew.contentRaw && chapterNew.document) {
-            await onChapterLoad({ response: chapterNew.document }, { raw: chapterNew });
+            await onChapterLoad({ response: chapterNew.document, responseText: chapterNew.document }, { raw: chapterNew });
           } else {
             delete chapterNew.contentRaw;
             if (rule.iframe) {
@@ -3114,7 +3157,7 @@
         if (failedCount > 0) failedCount = 0;
         if (rule.deal) return;
 
-        const doc = typeof res.response === 'string' ? new window.DOMParser().parseFromString(res.response, 'text/html') : res.response;
+        const doc = typeof res.response === 'object' ? res.response : new window.DOMParser().parseFromString(res.responseText, 'text/html');
 
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
 
@@ -3144,7 +3187,7 @@
           if (content instanceof Array) content = content.join('\n');
           chapter.content = content;
           chapter.contentRaw = content;
-          chapter.document = res.response;
+          chapter.document = res.responseText;
 
           if (Config.addChapterPrev || Config.addChapterNext) {
             if (Config.addChapterPrev) await checkRelativeChapter(res, request, false);
@@ -3264,15 +3307,17 @@
             const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
             await new Promise((resolve, reject) => {
               $('<iframe>').on('load', async (e) => { // TODO 优化
-                let response;
+                let response, responseText;
                 try {
                   if (typeof rule.iframe === 'function') await rule.iframe(e.target.contentWindow);
                   response = e.target.contentWindow.document;
+                  responseText = e.target.contentWindow.document.documentElement.outerHTML;
                 } catch (error) {
                   console.error(error);
                   response = '';
+                  responseText = '';
                 }
-                await onChapterLoad({ response }, { raw: chapter });
+                await onChapterLoad({ response, responseText }, { raw: chapter });
                 $(e.target).remove();
                 resolve();
               }).attr('src', chapter.url).css('visibility', 'hidden').appendTo('body');
@@ -3340,7 +3385,7 @@
       infoPage = new URL(infoPage, window.location.href).href;
       const res = await xhr.sync(infoPage, null, { cache: true });
       try {
-        infoPage = new window.DOMParser().parseFromString(res.response, 'text/html');
+        infoPage = new window.DOMParser().parseFromString(res.responseText, 'text/html');
       } catch (error) {
         console.error(error);
         infoPage = null;
