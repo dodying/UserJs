@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.707
+// @version     3.4.732
 // @created     2020-03-16 16:59:04
-// @modified    2021/1/9 20:57:52
+// @modified    2021/1/10 12:19:35
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
@@ -201,7 +200,7 @@
 
     // ?elementRemove:选择器 或 async function(contentHTML)=>contentHTML
     //   如果需要下载图片，请不要移除图片元素
-    elementRemove: 'script,iframe,*:emptyHuman:not(br,p,img),:hiddenHuman,a:not(:has(img))',
+    elementRemove: 'script,style,iframe,*:emptyHuman:not(br,p,img),:hiddenHuman,a:not(:has(img))',
 
     // ?contentReplace:[[find,replace]]
     //   如果有图片，请不要移除图片元素
@@ -392,7 +391,7 @@
       content: '.tt2'
     },
     // 正版
-    { // https://www.qidian.com https://www.hongxiu.com https://www.readnovel.com https://www.xs8.cn
+    { // https://www.qidian.com https://www.hongxiu.com https://www.readnovel.com https://www.xs8.cn // TODO 是否还有自定义字体
       siteName: '起点中文网',
       url: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/(info|book)\/\d+/,
       chapterUrl: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/chapter/,
@@ -892,20 +891,35 @@
         }
       }
     },
-    { // https://www.jjwxc.net
+    { // https://www.jjwxc.net // TODO vip自定义字体
       siteName: '晋江文学城',
-      url: /www.jjwxc.net\/onebook.php\?novelid=\d+$/,
-      chapterUrl: /www.jjwxc.net\/onebook.php\?novelid=\d+&chapterid=\d+/,
+      filter: () => {
+        if (window.location.href.match(/www.jjwxc.net\/onebook.php\?novelid=\d+$/)) {
+          $('[id^="vip_"]').toArray().forEach(i => {
+            i.href = i.rel;
+            i.target = '_blank';
+          });
+          return 1;
+        } else if (window.location.href.match(/www.jjwxc.net\/onebook.php\?novelid=\d+&chapterid=\d+/)) {
+          return 2;
+        } else {
+          return 0;
+        }
+      },
       title: '[itemprop="name"]',
       writer: '[itemprop="author"]',
       intro: '[itemprop="description"]',
       cover: '[itemprop="image"]',
       chapter: '[itemprop="url"][href]',
-      // vipChapter: '#oneboolt>tbody>tr>td>span>div>a[id^="vip_"]',
+      vipChapter: '#oneboolt>tbody>tr>td>span>div>a[id^="vip_"]',
       volume: '.volumnfont',
       chapterTitle: 'h2',
       content: '.noveltext',
       elementRemove: 'div'
+      // vip
+      // http://static.jjwxc.net/tmp/fonts/jjwxcfont_00147.ttf
+      // http://static.jjwxc.net/tmp/fonts/jjwxcfont_000bl.ttf
+      // http://static.jjwxc.net/tmp/fonts/jjwxcfont_00bmn.ttf
     },
     { // https://www.xxsy.net
       siteName: '潇湘书院',
@@ -3029,9 +3043,9 @@
             content = await getFromRule(content, (content) => {
               const elem = $('<div>').html(content);
               if (rule.elementRemove) {
-                $(rule.elementRemove, elem).remove();
+                $(rule.elementRemove + ',script,style,iframe', elem).remove();
               } else if (Config.useCommon) {
-                $(Rule.elementRemove, elem).remove();
+                $(Rule.elementRemove + ',script,style,iframe', elem).remove();
               }
               return elem.html();
             }, [], '');
@@ -3413,9 +3427,9 @@
     intro = $('<div>').html(intro);
     if (Storage.rule.elementRemove || Config.useCommon) {
       if (Storage.rule.elementRemove) {
-        $(Storage.rule.elementRemove, intro).remove();
+        $(Storage.rule.elementRemove + ',script,style,iframe', intro).remove();
       } else if (Config.useCommon) {
-        $(Rule.elementRemove, intro).remove();
+        $(Rule.elementRemove + ',script,style,iframe', intro).remove();
       }
     }
     intro = intro.text();
