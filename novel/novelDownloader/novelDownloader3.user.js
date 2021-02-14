@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.732
+// @version     3.4.749
 // @created     2020-03-16 16:59:04
-// @modified    2021/1/10 12:19:35
+// @modified    2021/2/14 14:59:01
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1661,8 +1661,8 @@
     },
     { // https://sosad.fun/
       siteName: 'SosadFun',
-      url: '://sosad.fun/threads/\\d+/(profile|chapter_index)',
-      chapterUrl: '://sosad.fun/posts/\\d+',
+      url: '://(sosad.fun|xn--pxtr7m.com)/threads/\\d+/(profile|chapter_index)',
+      chapterUrl: '://(sosad.fun|xn--pxtr7m.com)/posts/\\d+',
       title: '.font-1',
       writer: '.h5 a[href*="/users/"]',
       intro: '.article-body .main-text',
@@ -1673,8 +1673,8 @@
     },
     { // https://www.myhtlmebook.com/ https://www.myhtebooks.com/
       siteName: '海棠文化线上文学城',
-      url: '(myhtlmebook|myhtebooks).com/\\?act=showinfo&bookwritercode=.*?&bookid=',
-      chapterUrl: '(myhtlmebook|myhtebooks).com/\\?act=showpaper&paperid=',
+      url: '(myhtlmebook|myhtebooks|urhtbooks).com/\\?act=showinfo&bookwritercode=.*?&bookid=',
+      chapterUrl: '(myhtlmebook|myhtebooks|urhtbooks).com/\\?act=showpaper&paperid=',
       title: '#mypages .uk-card h4',
       writer: '#writerinfos>a',
       chapter: '.uk-list>li>a[href^="/?act=showpaper&paperid="]',
@@ -1831,7 +1831,10 @@
       vipChapter: '.catalog-list>ul>li>a:has(.icn_vip)',
       volume: '.catalog-title',
       chapterTitle: '.article-title',
-      content: '#ChapterBody'
+      content: '#ChapterBody',
+      vip: {
+        deal: async (chapter) => `<img src="http://book.sfacg.com/ajax/ashx/common.ashx?op=getChapPic&tp=true&quick=true&cid=${chapter.url.split('/')[5]}&nid=${window.location.href.split('/')[4]}&font=16&lang=&w=728">`
+      }
     },
     { // https://www.qinxiaoshuo.com/
       siteName: '亲小说网',
