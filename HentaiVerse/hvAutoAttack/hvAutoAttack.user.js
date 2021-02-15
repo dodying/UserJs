@@ -5,7 +5,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.3
+// @version      2.90.16
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -1749,7 +1749,7 @@ function reloader () {
     var delay = window.sessionStorage.delay * 1
     var delay2 = window.sessionStorage.delay2 * 1
     window.info = a
-    b.open('POST', '/json')
+    b.open('POST', MAIN_URL + 'json')
     b.setRequestHeader('Content-Type', 'application/json')
     b.withCredentials = true
     b.onreadystatechange = d
@@ -1782,7 +1782,7 @@ function reloader () {
       if (b.status === 200) {
         var a = JSON.parse(b.responseText)
         if (a.login !== undefined) {
-          unsafeWindow.top.window.location.href = unsafeWindow.login_url
+          top.window.location.href = login_url
         } else {
           if (a.error || a.reload) window.location.href = window.location.search
           return a
