@@ -34,4 +34,6 @@
 
 ### 捐赠
 
-![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)
+* [PayPal.Me](http://paypal.me/dodying)
+
+* ![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)

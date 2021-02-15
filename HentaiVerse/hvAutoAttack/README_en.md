@@ -1,24 +1,28 @@
 ### Notice Before Install
 
-#### UNMAINTAINED.
+* UNMAINTAINED.
 
-#### Latest Version: 2.90.0   Update Time: 2018-06-15
+* Latest Version: 2.90.0   Update Time: 2018-06-15
 
-#### Any pull requests are appreciated.
+* Any pull requests are appreciated.
 
-### Index
+<!-- TOC -->
 
-* 1.[Screenshots](#screenshots)
-* 2.[About Font](#about-font)
-* __2.1[Font Preference (for reference only)](#font-preference-for-reference-)
-* 3.IMPORTANT: [Customize Condition](#customize-condition)
-* __3.1[Comparison Value](#comparison-value)
-* __3.2[Example](#example)
-* __3.3[Skill/Item ID Table](#skillitem-id-table)
-* __3.4[Buff Image Table](#buff-image-table)
-* 4.[Attack Rule Example](#attack-rule-example)
-* 5.[Question and Answer](#question-and-answer)
+- [Notice Before Install](#notice-before-install)
+- [Screenshots](#screenshots)
+- [About Font](#about-font)
+  - [Font Preference (for reference only)](#font-preference-for-reference-only)
+- [Customize Condition](#customize-condition)
+  - [Comparison Value](#comparison-value)
+  - [Example](#example)
+  - [Skill/Item ID Table](#skillitem-id-table)
+  - [Buff Image Table](#buff-image-table)
+- [Attack Rule Example](#attack-rule-example)
+- [Question and Answer](#question-and-answer)
+- [Donation](#donation)
+- [Changelog](#changelog)
 
+<!-- /TOC -->
 ***
 
 ### Screenshots
@@ -175,3 +179,21 @@ In this example, the script will attack enemy 1 next.
 * Q: [Alarm not autoplaying on Chrome](https://github.com/dodying/UserJs/issues/31)
 
   A: Open `chrome://flags/#autoplay-policy` and select `No user gesture is required`
+
+***
+
+### Donation
+
+* [PayPal.Me](http://paypal.me/dodying)
+
+* ![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)
+
+***
+
+### Changelog
+
+* Latest
+1. Follow [History for hvAutoAttack - github](https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js)
+
+* Old
+1. see [README_Chinese#更新历史](https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#更新历史)

@@ -106,7 +106,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[[HV]AutoAttack](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | 2.90.3 |  |  | HV auto attack script, for the first user, should configure before use it.
+[[HV]AutoAttack](HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js) | 2.90.16 |  |  | HV auto attack script, for the first user, should configure before use it.
 
 ##### HentaiVerse
 
@@ -154,7 +154,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 Name | Raw | Version | Last-Modified | Create-Time | Description
 --- | --- | --- | --- | --- | ---
-[novelDownloader3](novel/novelDownloader/novelDownloader3.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js) | 3.4.707 | 2021/1/9 20:57:52 | 2020-03-16 16:59:04 | 菜单```Download Novel```或**双击页面最左侧**来显示面板
+[novelDownloader3](novel/novelDownloader/novelDownloader3.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js) | 3.4.749 | 2021/2/14 14:59:01 | 2020-03-16 16:59:04 | 菜单```Download Novel```或**双击页面最左侧**来显示面板
 [novelDownloader4.doing](novel/novelDownloader/novelDownloader4.doing.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader4.doing.user.js) | 0.0.48 | 2021/1/9 20:57:55 | 2020-11-17 20:05:37 | novelDownloader4.doing
 
 ##### novel/novelDownloader/old-version
@@ -191,9 +191,11 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 [wikiJump2Chinese](other/old/wikiJump2Chinese.user.js) | [Raw](https://github.com/dodying/UserJs/raw/master/other/old/wikiJump2Chinese.user.js) | 1 |  |  | 
 
 
-#### 捐赠
+### 捐赠
 
-![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)
+* [PayPal.Me](http://paypal.me/dodying)
+
+* ![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)
 
 ###
 
