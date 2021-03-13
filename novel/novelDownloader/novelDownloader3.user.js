@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.749
+// @version     3.4.817
 // @created     2020-03-16 16:59:04
-// @modified    2021/2/14 14:59:01
+// @modified    2021-03-13 21:23:45
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -211,7 +211,7 @@
     // ?ignoreUrl:url[] 忽略的网站（用于过滤chapterPrev,chapterNext）
 
     // ?getChapters 在章节页面时使用，获取全部章节
-    //   async function(doc)=>url[]或{url,title}[]
+    //   async function(doc)=>url[]或{url,title,vip,volume}[]
 
     // ?charset:utf-8||gb2312||other
     //   通常来说不用设置
@@ -1803,6 +1803,31 @@
         return content;
       }
     },
+    { // https://www.xrzww.com/
+      siteName: '息壤中文网',
+      url: '://www.xrzww.com/bookdetail/\\d+',
+      title: '.novel_name>span',
+      writer: '.novel_author>span:nth-child(1)',
+      intro: '.novel_info',
+      cover: '.bookcover',
+      getChapters: async (doc) => {
+        const urlArr = window.location.href.split('/');
+
+        const res = await xhr.sync(`https://pre-api.xrzww.com/api/directoryList?nid=${urlArr[4]}&orderBy=0`);
+        const json = JSON.parse(res.response);
+        const chapters = json.data.data;
+        const volumes = json.data.volume;
+        return chapters.sort((a, b) => {
+          return Math.sign(volumes.find(i => i.volume_id === a.chapter_vid).volume_order - volumes.find(i => i.volume_id === b.chapter_vid).volume_order);
+        }).map(i => ({
+          url: `https://pre-api.xrzww.com/api/readNew?nid=${urlArr[4]}&vid=${i.chapter_vid}&chapter_id=${i.chapter_id}&chapter_order=${i.chapter_order}&showpic=false`,
+          title: i.chapter_name,
+          vip: i.chapter_isvip,
+          volume: volumes.find(j => j.volume_id === i.chapter_vid).volume_name
+        }));
+      },
+      content: (doc, res, request) => JSON.parse(res.response).data.content
+    },
     // 轻小说
     { // https://www.wenku8.net
       siteName: '轻小说文库',
@@ -2277,6 +2302,20 @@
       chapterTitle: '.readTitle',
       content: '.panel-readcontent>.panel-body>div[id]',
       chapterNext: async (doc, res, request) => res.responseText.match(/url = "(.*?)";/) ? res.responseText.match(/url = "(.*?)";/)[1] : []
+    },
+    { // https://www.lewenn.com/
+      siteName: '乐文小说网',
+      url: '://www.lewenn.com/lw\\d+/$',
+      chapterUrl: '://www.lewenn.com/lw\\d+/\\d+.html',
+      title: '#info>h1',
+      writer: '#info>h1+p',
+      intro: '#intro',
+      cover: '#fmimg>img',
+      chapter: '.list dd>a',
+      chapterTitle: '.head_title>h2',
+      iframe: true,
+      content: '#content',
+      elementRemove: 'script,div'
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
@@ -2804,10 +2843,6 @@
       }
     } else {
       showUI();
-    }
-
-    if (GM_info.scriptHandler === 'Violentmonkey' && !GM_getValue('Violentmonkey_alert_ignore')) { // TODO
-      GM_setValue('Violentmonkey_alert_ignore', window.confirm('novelDownloader3最新版暂时不兼容暴力猴\n请尝试使用TamperMonkey或GreaseMonkey\n是否忽略此条信息'));
     }
   }
 
