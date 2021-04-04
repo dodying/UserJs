@@ -1,19 +1,18 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.4.817
+// @version     3.5.39
 // @created     2020-03-16 16:59:04
-// @modified    2021-03-13 21:23:45
+// @modified    2021-04-04 14:37:05
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
-// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=821561
+// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=918140
 // require     https://cdn.jsdelivr.net/gh/dodying/UserJs@master/lib/download.js
-// require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
-// require     http://127.0.0.1:8081/download.js
+// require     http://127.0.0.1:8082/download.js
 
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
 // require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
@@ -87,7 +86,7 @@
   }, GM_getValue('config', {}));
   const Rule = {
     // 如无说明，所有可以为*选择器*都可以是async (doc)=>string
-    //                              章节内async function(doc,res,request)
+    //                              章节内async (doc,res,request)
     // 快速查找脚本的相应位置：rule.key
 
     // ?siteName
@@ -171,8 +170,11 @@
     // ?chapterTitle:选择器 省略留空时，为chapter的textContent
     chapterTitle: '.bookname>h1,h2',
 
-    // iframe: boolean 或 async (win)=>[]
-    //   使用iframe时，只能一个一个获取（慎用）
+    // iframe: boolean 或 async (win)=>null
+    //   使用时，只能一个一个获取（慎用）
+
+    // popup: boolean 或 async ()=>null
+    //   仅当X-Frame-Options:DENY时使用，使用时，只能一个一个获取（慎用）
 
     // deal: async(chapter)=>content||object
     //   不请求章节相对网页，而直接获得内容（请求其他网址）
@@ -196,22 +198,22 @@
 
     // ?contentCheck: 检查页面是否正确，true时保留，否则content=null
     //   选择器 存在元素则为true
-    //   或 async function(doc,res,request)=>boolean
+    //   或 async (doc,res,request)=>boolean
 
-    // ?elementRemove:选择器 或 async function(contentHTML)=>contentHTML
+    // ?elementRemove:选择器 或 async (contentHTML)=>contentHTML
     //   如果需要下载图片，请不要移除图片元素
     elementRemove: 'script,style,iframe,*:emptyHuman:not(br,p,img),:hiddenHuman,a:not(:has(img))',
 
     // ?contentReplace:[[find,replace]]
     //   如果有图片，请不要移除图片元素
 
-    // ?chapterPrev,chapterNext:选择器 或 async function(doc)=>url
+    // ?chapterPrev,chapterNext:选择器 或 async (doc)=>url
     chapterPrev: 'a[rel="prev"],a:regexp("[上前]一?[章页话集节卷篇]+"),#prevUrl',
     chapterNext: 'a[rel="next"],a:regexp("[下后]一?[章页话集节卷篇]+"),#nextUrl'
     // ?ignoreUrl:url[] 忽略的网站（用于过滤chapterPrev,chapterNext）
 
     // ?getChapters 在章节页面时使用，获取全部章节
-    //   async function(doc)=>url[]或{url,title,vip,volume}[]
+    //   async (doc)=>url[]或{url,title,vip,volume}[]
 
     // ?charset:utf-8||gb2312||other
     //   通常来说不用设置
@@ -1092,16 +1094,16 @@
     },
     { // http://www.tadu.com
       siteName: '塔读文学',
-      url: '://www.tadu.com/book/catalogue/\\d+',
-      chapterUrl: '://www.tadu.com/book/\\d+/\\d+/',
-      infoPage: () => `http://www.tadu.com/book/${window.location.href.match(/\d+/)[0]}`,
+      url: '://www.tadu.com(:\\d+)?/book/catalogue/\\d+',
+      chapterUrl: '://www.tadu.com(:\\d+)?/book/\\d+/\\d+/',
+      infoPage: () => `${window.location.origin}/book/${window.location.pathname.match(/\d+/)[0]}`,
       title: '.bkNm',
       writer: '.bookNm>a:nth-child(2)',
       intro: '.datum+p',
       cover: (doc) => $('.bookImg>img', doc).attr('data-src').replace(/_a\.jpg$/, '.jpg'),
       chapter: '.chapter>a',
       vipChapter: '.chapter>a:has(.vip)',
-      chapterTitle: 'h2',
+      chapterTitle: '.chapter h4',
       content: async (doc, res, request) => {
         const content = await new Promise((resolve, reject) => {
           xhr.add({
@@ -1628,29 +1630,30 @@
     },
     { // https://www.gongzicp.com/
       siteName: '长佩文学网',
-      url: '://www.gongzicp.com/novel-\\d+.html',
-      chapterUrl: '://www.gongzicp.com/read-\\d+.html',
-      title: '.cp-novel-name',
-      writer: '.cp-novel-index-author a[href*="/author/id/"]',
-      intro: '.cp-novel-index-novel-info',
-      cover: '.cp-novel-cover>img',
-      chapterTitle: '.cp-read-name',
-      content: (doc, res, request) => window.eval(res.responseText.match(/content: (".*"),/)[1]), // eslint-disable-line no-eval
+      url: '://www.gongzicp.com/v4/novel-\\d+.html',
+      chapterUrl: '://www.gongzicp.com/v4/read-\\d+.html',
+      title: '.info-right .name',
+      writer: '.user-name>a[href^="/v4/zone/author-"]',
+      intro: '.info-text>.content',
+      cover: '.cover>img',
+      chapterTitle: '.title>.name',
+      popup: true,
+      content: '.cp-reader .content',
       elementRemove: '.cp-hidden',
       thread: 1,
       getChapters: async (doc) => {
-        const info = window.location.href.match(/\d+/g);
-        const res = await xhr.sync(`https://www.gongzicp.com/novel/getChapterList?nid=${info[0]}`);
+        const info = window.location.href.match(/\/(novel|read)-(\d+)/);
+        const res = await xhr.sync(`https://www.gongzicp.com/novel/getChapterList?nid=${info[2]}`);
         const json = JSON.parse(res.responseText);
         const chapters = [];
         let volume = '';
-        for (let i = 1; i < json.data.list.length; i++) {
+        for (let i = 0; i < json.data.list.length; i++) {
           if (json.data.list[i].type === 'volume') {
             volume = json.data.list[i].name;
           } else if (json.data.list[i].type === 'item') {
             chapters.push({
               title: json.data.list[i].name,
-              url: `https://www.gongzicp.com/read-${json.data.list[i].id}.html`,
+              url: `https://www.gongzicp.com/v4/read-${json.data.list[i].id}.html`,
               vip: json.data.list[i].pay,
               volume
             });
@@ -1660,16 +1663,16 @@
       }
     },
     { // https://sosad.fun/
-      siteName: 'SosadFun',
-      url: '://(sosad.fun|xn--pxtr7m.com)/threads/\\d+/(profile|chapter_index)',
-      chapterUrl: '://(sosad.fun|xn--pxtr7m.com)/posts/\\d+',
+      siteName: 'SosadFun|废文',
+      url: '://(sosad.fun|xn--pxtr7m.com|xn--pxtr7m5ny.com)/threads/\\d+/(profile|chapter_index)',
+      chapterUrl: '://(sosad.fun|xn--pxtr7m.com|xn--pxtr7m5ny.com)/posts/\\d+',
       title: '.font-1',
       writer: '.h5 a[href*="/users/"]',
       intro: '.article-body .main-text',
       chapter: '.panel-body .table th:nth-child(1)>a[href*="/posts/"]',
       chapterTitle: 'strong.h3',
       content: '.post-body>.main-text:nth-child(1)',
-      elementRemove: 'div:last-child'
+      elementRemove: 'div:last-child,.hidden'
     },
     { // https://www.myhtlmebook.com/ https://www.myhtebooks.com/
       siteName: '海棠文化线上文学城',
@@ -2317,6 +2320,16 @@
       content: '#content',
       elementRemove: 'script,div'
     },
+    { // http://www.daomubiji.org/
+      siteName: '盗墓笔记',
+      url: '://www.daomubiji.org/([a-z\\d]+)?$',
+      chapterUrl: '://www.daomubiji.org/\\d+.html',
+      title: '.mulu>h1',
+      chapter: '.panel>ul>li>span>a',
+      volume: '.panel>h2',
+      chapterTitle: '.bg>h1',
+      content: '.bg>.content'
+    },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
       siteName: '流氓小说网',
@@ -2803,6 +2816,14 @@
     }
   }
 
+  if (window.opener && window.opener !== window && !window.menubar.visible && window.localStorage.getItem('gm-nd-url') === window.location.href) {
+    init();
+    (async function () {
+      if (typeof Storage.rule.popup === 'function') await Storage.rule.popup();
+      window.localStorage.setItem('gm-nd-html', window.document.documentElement.outerHTML);
+    })();
+  }
+
   function init () {
     if (!Storage.rule) {
       if (Config.templateRule) Rule.special = Rule.special.concat(Rule.template);
@@ -2834,6 +2855,9 @@
         }
       }
     }
+  }
+
+  async function showUI () {
     if ($('.novel-downloader-v3').length) {
       $('.novel-downloader-v3').toggle();
       if ($('.novel-downloader-style-chapter[media]').length) { // https://stackoverflow.com/a/54441305
@@ -2841,12 +2865,9 @@
       } else {
         $('.novel-downloader-style-chapter').attr('media', 'max-width: 1px');
       }
-    } else {
-      showUI();
+      return;
     }
-  }
 
-  async function showUI () {
     let chapters, chaptersArr;
     let vipChapters = [];
     const chaptersDownloaded = [];
@@ -3194,6 +3215,8 @@
             delete chapterNew.contentRaw;
             if (rule.iframe) {
               chapterList.iframe.push(chapterNew);
+            } else if (rule.popup) {
+              chapterList.popup.push(chapterNew);
             } else if (rule.deal && typeof rule.deal === 'function') {
               chapterList.deal.push(chapterNew);
             } else {
@@ -3258,6 +3281,7 @@
 
       const chapterList = {
         iframe: [],
+        popup: [],
         deal: [],
         download: []
       };
@@ -3269,6 +3293,8 @@
           delete chapter.contentRaw;
           if (rule.iframe) {
             chapterList.iframe.push(chapter);
+          } else if (rule.popup) {
+            chapterList.popup.push(chapter);
           } else if (rule.deal && typeof rule.deal === 'function') {
             chapterList.deal.push(chapter);
           } else {
@@ -3374,6 +3400,21 @@
                 resolve();
               }).attr('src', chapter.url).css('visibility', 'hidden').appendTo('body');
             });
+          }
+        }
+
+        if (chapterList.popup.length && chapterList.popup.find(i => !('contentRaw' in i))) {
+          for (const chapter of chapterList.popup.filter(i => !('contentRaw' in i))) {
+            var popupWindow = window.open(chapter.url, '', 'resizable,scrollbars,width=300,height=350');
+            window.localStorage.setItem('gm-nd-url', chapter.url);
+            await waitFor(() => window.localStorage.getItem('gm-nd-html') || !popupWindow || popupWindow.closed);
+            const html = window.localStorage.getItem('gm-nd-html');
+            const doc = html;
+            // const doc = new window.DOMParser().parseFromString(html, 'text/html');
+            await onChapterLoad({ response: doc, responseText: html }, { raw: chapter });
+            popupWindow.close();
+            window.localStorage.removeItem('gm-nd-url');
+            window.localStorage.removeItem('gm-nd-html');
           }
         }
       }
@@ -3486,7 +3527,6 @@
 
       // rule-chapter
 
-      let order = 1;
       chapters = await getFromRule(Storage.rule.chapter, async (selector) => {
         let elems = $(Storage.rule.chapter);
         if (Storage.rule !== Rule && Storage.rule.chapterUrl.length) elems = elems.filter((i, elem) => Storage.rule.chapterUrl.some(j => elem.href.match(j)));
@@ -3498,6 +3538,7 @@
         }
         volumes = $(volumes).toArray();
         const all = $(elems).add(volumes);
+        let order = 1;
         return elems.attr('novel-downloader-chapter', '').toArray().map(i => {
           $(i).attr('order', order++);
           const chapter = {
@@ -3511,17 +3552,6 @@
           return chapter;
         });
       }, [], []);
-      if (!Storage.rule.chapter && Storage.rule.chapterUrl.length) {
-        let elems = Array.from(document.links).filter(i => Storage.rule.chapterUrl.some(j => i.href.match(j)));
-        elems = $(elems);
-        chapters = elems.attr('novel-downloader-chapter', '').toArray().map(i => {
-          $(i).attr('order', order++);
-          return {
-            title: i.textContent,
-            url: i.href
-          };
-        });
-      }
       vipChapters = await getFromRule(Storage.rule.vipChapter, (selector) => $(Storage.rule.vipChapter).attr('novel-downloader-chapter', 'vip').toArray().map(i => i.href), [], []);
       if (typeof Storage.rule.volume === 'function' && Storage.rule.volume.length > 1) chapters = await Storage.rule.volume(document, chapters);
     } else if (Storage.mode === 2) {
@@ -3531,6 +3561,22 @@
     if (typeof Storage.rule.getChapters === 'function') chapters = await Storage.rule.getChapters(document);
     chapters = chapters.map(i => typeof i === 'string' ? { url: i } : i);
     vipChapters = vipChapters.concat(chapters.filter(i => i.vip).map(i => i.url));
+    if (!Storage.rule.chapter && Storage.rule.chapterUrl.length) {
+      let order = 1;
+      const elems = Array.from(document.links).filter(i =>
+        (chapters.length || vipChapters.length)
+          ? (chapters.map(i => i.url).includes(i.href) || vipChapters.includes(i.href))
+          : Storage.rule.chapterUrl.some(j => i.href.match(j))
+      );
+      const temp = $(elems).toArray().map(i => {
+        $(i).attr('novel-downloader-chapter', vipChapters.includes(i.href) ? 'vip' : '').attr('order', order++);
+        return {
+          title: i.textContent,
+          url: i.href
+        };
+      });
+      if (!chapters.length) chapters = temp;
+    }
 
     container.find('input,select,textarea').attr('disabled', null);
     container.find('input,select,textarea').filter('[raw-disabled="disabled"]').attr('raw-disabled', null).attr('disabled', 'disabled');
@@ -3541,10 +3587,12 @@
   $('<div class="novel-downloader-trigger" style="position:fixed;top:0px;left:0px;width:1px;height:100%;z-index:999999;background:transparent;"></div>').on({
     dblclick: function () {
       init();
+      showUI();
     }
   }).appendTo('body');
   GM_registerMenuCommand('Download Novel', function () {
     init();
+    showUI();
   }, 'N');
   GM_registerMenuCommand('Show Storage', function () {
     console.log({ Storage, xhr: xhr.storage.getSelf() });

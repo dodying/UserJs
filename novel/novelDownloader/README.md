@@ -1,7 +1,5 @@
 ### 说明
 
-使用 暴力猴/ViolentMonkey 加载脚本暂时有问题，请改用 TamperMonkey 或 GreaseMonkey
-
 ### 推荐同类脚本
 
 #### [懒人小说下载器 - DownloadAllContent](https://greasyfork.org/zh-CN/scripts/25068)
