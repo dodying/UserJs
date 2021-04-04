@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.39
+// @version     3.5.87
 // @created     2020-03-16 16:59:04
-// @modified    2021-04-04 14:37:05
+// @modified    2021-04-04 15:07:08
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1830,6 +1830,38 @@
         }));
       },
       content: (doc, res, request) => JSON.parse(res.response).data.content
+    },
+    { // https://www.ireader.com/
+      siteName: '掌阅书城',
+      url: '://www.ireader.com/index.php\\?ca=bookdetail.index&bid=\\d+$',
+      chapterUrl: ':https://www.ireader.com/index.php\\?ca=Chapter.Index&pca=bookdetail.index&bid=\\d+&cid=\\d+',
+      title: '.bookname>h2>a',
+      writer: '.bookInfor .author',
+      intro: '.bookinf03>p',
+      cover: '.bookInfor>div>a>img',
+      chapterTitle: '.content h2',
+      content: '.content>.article',
+      getChapters: async (doc) => {
+        const bid = window.location.search.match(/&bid=(\d+)(&|$)/)[1];
+        const chapters = [];
+        let page = 0;
+        let total = 0;
+        while ((page = page + 1)) {
+          const res = await xhr.sync(`${window.location.origin}/index.php?ca=Chapter.List&ajax=1&bid=${bid}&page=${page}&pageSize=100`);
+          const json = JSON.parse(res.responseText);
+          for (const i of json.list) {
+            chapters.push({
+              title: i.chapterName,
+              url: `https://www.ireader.com/index.php?ca=Chapter.Index&pca=Chapter.Index&bid=${bid}&cid=${i.id}`,
+              vip: i.priceTag === '收费'
+            });
+          }
+          if (json.list[chapters.length - 1].priceTag === '收费') break;
+          total += json.list.length;
+          if (total >= json.page.total) break;
+        }
+        return chapters;
+      }
     },
     // 轻小说
     { // https://www.wenku8.net
