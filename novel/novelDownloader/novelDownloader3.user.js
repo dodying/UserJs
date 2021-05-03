@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.87
+// @version     3.5.148
 // @created     2020-03-16 16:59:04
-// @modified    2021-04-04 15:07:08
+// @modified    2021-05-03 16:19:13
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
-// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=918140
+// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=927326
 // require     https://cdn.jsdelivr.net/gh/dodying/UserJs@master/lib/download.js
 // require     http://127.0.0.1:8082/download.js
 
@@ -854,8 +854,8 @@
     },
     { // https://b.faloo.com
       siteName: '飞卢',
-      url: /b.faloo.com\/f\/\d+.html/,
-      chapterUrl: /b.faloo.com\/(p|vip)\/\d+\/\d+.html/,
+      url: /b.faloo.com\/\d+.html/,
+      chapterUrl: /b.faloo.com\/\d+_\d+.html/,
       title: '#novelName',
       writer: '#novelName+a',
       intro: '.T-L-T-C-Box1',
@@ -1925,8 +1925,8 @@
     },
     { // https://www.esjzone.cc/
       siteName: 'ESJ Zone',
-      url: '://www.esjzone.cc/detail/\\d+.html',
-      chapterUrl: '://www.esjzone.cc/forum/\\d+/\\d+.html',
+      url: '://(www.)?esjzone.cc/detail/\\d+.html',
+      chapterUrl: '://(www.)?esjzone.cc/forum/\\d+/\\d+.html',
       title: 'h2',
       writer: '.book-detail a[href^="/tags/"]',
       intro: '.description',
@@ -2361,6 +2361,47 @@
       volume: '.panel>h2',
       chapterTitle: '.bg>h1',
       content: '.bg>.content'
+    },
+    { // https://www.va-etong.com/
+      siteName: '全本小说网',
+      url: '://www.va-etong.com/xs/\\d+/$',
+      chapterUrl: '://www.va-etong.com/xs/\\d+/\\d+.html',
+      title: '.book-text>h1',
+      writer: '.book-text>h1+span',
+      intro: '.book-text>.intro',
+      cover: '.book-img>a>img',
+      chapter: '.cf+h3+.cf>li>a',
+      chapterTitle: '.chaptername',
+      content: async (doc, res, request) => {
+        const ssid = res.response.match(/var ssid=(.*?);/)[1];
+        const bookid = res.response.match(/bookid=(.*?);/)[1];
+        const mybookid = res.response.match(/mybookid=(.*?);/)[1];
+        const xid = Math.floor(mybookid / 1000);
+        const chapterid = res.response.match(/chapterid=(.*?);/)[1];
+        const hou = '.html';
+
+        const content = await new Promise((resolve, reject) => {
+          xhr.add({
+            chapter: request.raw,
+            url: window.location.origin + '/files/article/html' + ssid + '/' + xid + '/' + bookid + '/' + chapterid + hou,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              Referer: request.url,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            onload: function (res, request) {
+              try {
+                const content = window.eval(res.responseText); // eslint-disable-line no-eval
+                resolve(content);
+              } catch (error) {
+                console.error(error);
+                resolve('');
+              }
+            }
+          }, null, 0, true);
+        });
+        return content;
+      }
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
