@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.148
+// @version     3.5.153
 // @created     2020-03-16 16:59:04
-// @modified    2021-05-03 16:19:13
+// @modified    2021-05-16 13:52:16
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -2046,12 +2046,12 @@
       siteName: 'Wattpad',
       url: '://www.wattpad.com/story/\\d+-',
       chapterUrl: '://www.wattpad.com/\\d+-',
-      title: '.cover+h1',
-      writer: '.send-author-event+strong>.send-author-event',
+      title: '.story-info__title',
+      writer: '.author-info__username>a',
       intro: '.description>pre',
-      cover: '.cover>img',
-      chapter: '.table-of-contents>li>a',
-      chapterTitle: '.part-header h2',
+      cover: '.story-cover>img',
+      chapter: '.story-parts__part',
+      chapterTitle: '.panel-reading>h1.h2',
       content: '.part-content .page>div>pre',
       chapterPrev: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).prevAll().find('a').toArray().map(i => i.href).reverse(),
       chapterNext: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).nextAll().find('a').toArray().map(i => i.href)
