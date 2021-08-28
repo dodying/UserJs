@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.153
+// @version     3.5.212
 // @created     2020-03-16 16:59:04
-// @modified    2021-05-16 13:52:16
+// @modified    2021-08-28 22:53:15
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -1674,16 +1674,62 @@
       content: '.post-body>.main-text:nth-child(1)',
       elementRemove: 'div:last-child,.hidden'
     },
-    { // https://www.myhtlmebook.com/ https://www.myhtebooks.com/
+    { // https://www.myhtlmebook.com/ https://www.myhtebooks.com/ https://www.haitbook.com/
       siteName: '海棠文化线上文学城',
-      url: '(myhtlmebook|myhtebooks|urhtbooks).com/\\?act=showinfo&bookwritercode=.*?&bookid=',
-      chapterUrl: '(myhtlmebook|myhtebooks|urhtbooks).com/\\?act=showpaper&paperid=',
+      url: '(myhtlmebook|myhtebooks|urhtbooks|haitbook).com/\\?act=showinfo&bookwritercode=.*?&bookid=',
+      chapterUrl: '(myhtlmebook|myhtebooks|urhtbooks|haitbook).com/\\?act=showpaper&paperid=',
       title: '#mypages .uk-card h4',
       writer: '#writerinfos>a',
       chapter: '.uk-list>li>a[href^="/?act=showpaper&paperid="]',
       vipChapter: '.uk-list>li:not(:contains("免費"))>a[href^="/?act=showpaper&paperid="]',
       chapterTitle: '.uk-card-title',
       content: async (doc, res, request) => {
+        const writersay = $('#colorpanelwritersay', res.responseText).html();
+        let egg;
+        if ($('[id^="eggsarea"]+[uk-icon="commenting"]', res.responseText).length) {
+          const paperid = $('[id^="eggsarea"]', res.responseText).attr('id').match(/^eggsarea(.*)$/)[1];
+          const bookwritercode = $('[uk-icon="list"]', res.responseText).attr('href').match(/bookwritercode=(.*?)($|&)/)[1];
+          const bookid = $('[uk-icon="list"]', res.responseText).attr('href').match(/bookid=(.*?)($|&)/)[1];
+          const msgs = ['q', '敲', '\ud83e\udd5a'];
+          await new Promise((resolve, reject) => {
+            xhr.add({
+              method: 'POST',
+              url: window.location.origin + '/papergbookresave.php',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                Referer: request.raw.url,
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              data: `paperid=${paperid}&bookwritercode=${bookwritercode}&bookid=${bookid}&repapergbookid=0&papergbookpage=1&repostmsgtxt=${msgs[Math.floor(Math.random() * msgs.length)]}&postmode=1&giftid=0`,
+              onload: function (res) {
+                resolve(res);
+              }
+            }, null, 0, true);
+          });
+
+          const res2 = await new Promise((resolve, reject) => {
+            xhr.add({
+              method: 'POST',
+              url: window.location.origin + '/showpapereggs.php',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                Referer: request.raw.url,
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              data: `paperid=${paperid}&bookwritercode=${bookwritercode}`,
+              onload: function (res) {
+                resolve(res);
+              }
+            }, null, 0, true);
+          });
+          egg = res2.responseText;
+          if (egg.includes('#gopapergbook')) {
+            egg = '彩蛋加载失败';
+          }
+        } else {
+          egg = $('[id^="eggsarea"]', res.responseText).html();
+        }
+
         const content = await new Promise((resolve, reject) => {
           const [, paperid, vercodechk] = res.responseText.match(/data: { paperid: '(\d+)', vercodechk: '(.*?)'},/);
           xhr.add({
@@ -1707,7 +1753,7 @@
             }
           }, null, 0, true);
         });
-        return content;
+        return (writersay ? writersay + '<br>---<br>以下正文<br>' : '') + content + (egg ? '<br>---<br>彩蛋內容：<br>' + egg : '');
       }
     },
     { // https://www.doufu.la/
@@ -3514,7 +3560,7 @@
     const style = [
       '.novel-downloader-v3>div *,.novel-downloader-v3>div *:before,.novel-downloader-v3>div *:after{margin:1px;}',
       '.novel-downloader-v3 input{border:1px solid #000;opacity: 1;}',
-      '.novel-downloader-v3 input[type="checkbox"]{position:relative;top:0;opacity:1;}',
+      '.novel-downloader-v3 input[type="checkbox"]{position:relative;top:0;opacity:1;appearance:checkbox;}',
       '.novel-downloader-v3 input[type="button"],.novel-downloader-v3 button{border:1px solid #000;cursor:pointer;padding:2px 3px;}',
       '.novel-downloader-v3 input[type=number]{width:36px;}',
       '.novel-downloader-v3 input[type=number]{width:36px;}',
