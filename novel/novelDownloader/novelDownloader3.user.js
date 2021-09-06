@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.212
+// @version     3.5.247
 // @created     2020-03-16 16:59:04
-// @modified    2021-08-28 22:53:15
+// @modified    2021-09-05 22:47:56
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -76,6 +76,7 @@
     useCommon: true,
     modeManual: true,
     templateRule: true,
+    volume: true,
     failedCount: 5,
     failedWait: 60,
     image: true,
@@ -1682,6 +1683,7 @@
       writer: '#writerinfos>a',
       chapter: '.uk-list>li>a[href^="/?act=showpaper&paperid="]',
       vipChapter: '.uk-list>li:not(:contains("免費"))>a[href^="/?act=showpaper&paperid="]',
+      volume: '.uk-list>li:not(:has(a[href^="/?act=showpaper&paperid="])):has(b>font)',
       chapterTitle: '.uk-card-title',
       content: async (doc, res, request) => {
         const writersay = $('#colorpanelwritersay', res.responseText).html();
@@ -1753,8 +1755,35 @@
             }
           }, null, 0, true);
         });
-        return (writersay ? writersay + '<br>---<br>以下正文<br>' : '') + content + (egg ? '<br>---<br>彩蛋內容：<br>' + egg : '');
-      }
+        return content + (writersay ? writersay + '<br>---<br>以下正文' : '') + (egg ? '<br>---<br>彩蛋內容：<br>' + egg : '');
+      },
+      getChapters: async (doc) => {
+        const id = window.location.href.match(/bookid=(.*?)($|&)/)[1];
+        const chapters = [];
+        let pages = 1;
+        while (true) {
+          const res = await xhr.sync(window.location.origin + '/showbooklist.php', `ebookid=${id}&pages=${pages}&showbooklisttype=1`, {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              Referer: window.location.href,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            responseType: 'document'
+          });
+          chapters.push(...$('.uk-list>li>a[href^="/?act=showpaper&paperid="]', res.response).toArray().map(i => ({
+            title: $(i).text(),
+            url: $(i).prop('href'),
+            vip: $(i).is('.uk-list>li:not(:contains("免費"))>a[href^="/?act=showpaper&paperid="]'),
+            volume: $(i).parent().prevAll('.uk-list>li:not(:has(a[href^="/?act=showpaper&paperid="])):has(b>font)').eq(0).text()
+          })));
+          if ($('.uk-list>li:has([onclick^="showbooklistpage"])', res.response).length && $('.uk-list>li:has([onclick^="showbooklistpage"])', res.response).eq(0).find('font:has(b)').next('a').length) {
+            pages++;
+          } else {
+            break;
+          }
+        }
+        return chapters;
+      },
     },
     { // https://www.doufu.la/
       siteName: '豆腐',
@@ -3038,6 +3067,7 @@
       '  <input type="checkbox" name="modeManual">手动确认目录或章节',
       '  <br>',
       '  <input type="checkbox" name="templateRule">使用模板规则',
+      '  <input type="checkbox" name="volume">章节分卷',
       '  <br>',
       '  <span title="{title}代表原标题\n{order}代表第几章\neg:#{order} {title}\n留空则不重命名">TEXT相关: 重命名章节标题</span> <input type="text" name="titleRename">',
       '  <br>',
@@ -3190,27 +3220,29 @@
         for (let i = 0; i < chapters.length; i++) {
           const chapter = chapters[i];
 
-          if (i > 0 && chapters[i - 1].volume !== chapters[i].volume) {
-            const title = `【${chapters[i - 1].volume}】-分卷-结束`;
-            chapters.splice(i, 0, {
-              title,
-              contentRaw: title,
-              content: title,
-              volume: chapters[i - 1].volume
-            });
-            i++;
-          }
+          if (Config.volume) {
+            if (i > 0 && chapters[i - 1].volume !== chapter.volume) {
+              const title = `【${chapters[i - 1].volume}】-分卷-结束`;
+              chapters.splice(i, 0, {
+                title,
+                contentRaw: title,
+                content: title,
+                volume: chapters[i - 1].volume
+              });
+              i++;
+            }
 
-          if (chapter.volume && chapter.volume !== volumes.slice(-1)[0]) {
-            volumes.push(chapter.volume);
-            const title = `【${chapter.volume}】-分卷-开始`;
-            chapters.splice(i, 0, {
-              title,
-              contentRaw: title,
-              content: title,
-              volume: chapter.volume
-            });
-            i++;
+            if (chapter.volume && chapter.volume !== volumes.slice(-1)[0]) {
+              volumes.push(chapter.volume);
+              const title = `【${chapter.volume}】-分卷-开始`;
+              chapters.splice(i, 0, {
+                title,
+                contentRaw: title,
+                content: title,
+                volume: chapter.volume
+              });
+              i++;
+            }
           }
 
           const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
@@ -3232,7 +3264,7 @@
           if (Config.format) {
             content = html2Text(content, rule.contentReplace);
             if (['text', 'zip'].includes(format)) content = $('<div>').html(content).text();
-            content = content.replace(/^[\u{0009}\u{0020}\u{00A0}\u{1680}\u{2000}-\u{200A}\u{202F}\u{205F}\u{3000}]+/gmu, ''); // 移除开头空白字符
+            content = content.replace(/^\s+/mg, '').trim(); // 移除开头空白字符
             if (Config.removeEmptyLine === 'auto') {
               const arr = content.split(/\n{2,}/);
               let keep = false;
@@ -3883,14 +3915,14 @@
         ]);
 
         if (Config.tocIndent) {
-          if (chapter.volume && chapter.volume !== volumeCurrent) {
+          if (Config.volume && chapter.volume && chapter.volume !== volumeCurrent) {
             if (volumeCurrent) files['OEBPS/toc.ncx'] += '</navPoint>';
             volumeCurrent = chapter.volume;
             files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/>';
           } else {
             files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/></navPoint>';
           }
-          if (chapter.volume && i === chapters.length - 1) files['OEBPS/toc.ncx'] += '</navPoint>';
+          if (Config.volume && chapter.volume && i === chapters.length - 1) files['OEBPS/toc.ncx'] += '</navPoint>';
         } else {
           files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/></navPoint>';
         }
