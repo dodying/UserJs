@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.247
+// @version     3.5.284
 // @created     2020-03-16 16:59:04
-// @modified    2021-09-05 22:47:56
+// @modified    2021-10-10 10:54:23
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -2477,6 +2477,35 @@
         });
         return content;
       }
+    },
+    { // https://www.shuquge.com/
+      siteName: '书趣阁',
+      url: '://www.shuquge.com/txt/\\d+/index.html',
+      chapterUrl: '://www.shuquge.com/txt/\\d+/\\d+.html',
+      title: '.info>h2',
+      writer: '.info>.small>span:nth-child(1)',
+      intro: '.intro',
+      cover: '.cover>img',
+      chapter: '.listmain>dl>dt~dt~dd>a',
+      volume: '.listmain>dl>dt~dt',
+      chapterTitle: '.content>h1',
+      content: '#content',
+      thread: 1,
+      contentReplace: [['https://www.shuquge.com/.*'], ['请记住本书首发域名：www.shuquge.com。书趣阁_笔趣阁手机版阅读网址：m.shuquge.com']]
+    },
+    { // https://www.kuwx.net/
+      siteName: '系统小说网',
+      url: '://www.kuwx.net/ku/\\d+/\\d+/',
+      chapterUrl: '://www.kuwx.net/ku/\\d+/\\d+/\\d+.html',
+      title: '.book_inf h1',
+      writer: '.book_inf .zz',
+      intro: '.book_inf .jianjie+div',
+      cover: '.book_cov>img',
+      chapter: '#chapter>a',
+      chapterTitle: '.article>h2',
+      content: (doc, res, request) => {
+        return $('#txt>dd', res.responseText).toArray().map(i => [$(i).data('id'), $(i).html()]).filter(i => i[0] !== 999).sort((a, b) => a[0] - b[0]).map(i => i[1]).join('');
+      },
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
