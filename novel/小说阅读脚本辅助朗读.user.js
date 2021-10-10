@@ -2,9 +2,9 @@
 // @name        小说阅读脚本辅助朗读
 // @description 小说阅读脚本辅助朗读
 // @include     *
-// @version     1.0.287
+// @version     1.0.317
 // @created     2020-12-11 13:05:42
-// @modified    2021/1/9 20:57:53
+// @modified    2021-10-03 09:30:52
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -139,37 +139,59 @@
 
   function speakMyNovelReader () {
     console.log('lucky');
-    let stack = 0;
+    // let stack = 0;
 
     let cancel, cancelCompleted, interval;
-    $(window).on({
-      click: (e) => {
-        if (!$(e.target).is('#mynovelreader-content>article>*:not(.chapter-footer-nav)')) return;
-        if (interval) {
+    let currentElem;
+    const readThis = function (elem) {
+      if (!$(elem).is('#mynovelreader-content>article>:not(.chapter-footer-nav)')) return;
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+      cancel = true;
+      window.speechSynthesis.cancel();
+      interval = setInterval(() => {
+        if (cancelCompleted && !window.speechSynthesis.paused && !window.speechSynthesis.pending && !window.speechSynthesis.speaking) {
           clearInterval(interval);
           interval = null;
+          cancelCompleted = false;
+          cancel = false;
+          speakTheseElems($(elem).nextAll().addBack());
         }
-        cancel = true;
-        window.speechSynthesis.cancel();
-        interval = setInterval(() => {
-          if (cancelCompleted && !window.speechSynthesis.paused && !window.speechSynthesis.pending && !window.speechSynthesis.speaking) {
-            clearInterval(interval);
-            interval = null;
-            cancelCompleted = false;
-            cancel = false;
-            speakTheseElems($(e.target).nextAll().addBack());
-          }
-        }, 20);
+      }, 20);
+    };
+    $(window).on({
+      click: (e) => {
+        readThis(e.target);
+      },
+      keydown: (e) => {
+        if (!e.key.match(/^([zZxX0.]|Insert|Delete)$/i)) return;
+        const $all = $('#mynovelreader-content>article>:not(.chapter-footer-nav)');
+        let index = $all.index(currentElem);
+        if (['z', '0'].includes(e.key)) {
+          index = index - 1;
+        } else if (['x', '.'].includes(e.key)) {
+          index = index + 1;
+        } else if (['Z', 'Insert'].includes(e.key)) {
+          index = index - 5;
+        } else if (['X', 'Delete'].includes(e.key)) {
+          index = index + 5;
+        }
+        if (index < 0) index = 0;
+        if (index >= $all.length) index = $all.length - 1;
+        readThis($('#mynovelreader-content>article>:not(.chapter-footer-nav)').get(index));
       }
     });
     speakTheseElems($($('#chapter-list>.active>div').attr('href')).children().toArray());
 
     async function speakTheseElems (elemsToSpeak) {
-      const stackNow = stack++;
+      // const stackNow = stack++;
       for (const elem of elemsToSpeak) {
         if ($(elem).is('.chapter-footer-nav')) break;
-        console.log(stackNow);
+        // console.log(stackNow);
 
+        currentElem = elem;
         elem.style.background = 'white';
         elem.scrollIntoViewIfNeeded ? elem.scrollIntoViewIfNeeded() : elem.scrollIntoView();
         await new Promise((resolve, reject) => {
