@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.284
+// @version     3.5.419
 // @created     2020-03-16 16:59:04
-// @modified    2021-10-10 10:54:23
+// @modified    2021-10-10 15:15:24
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
-// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=927326
+// @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=977735
 // require     https://cdn.jsdelivr.net/gh/dodying/UserJs@master/lib/download.js
 // require     http://127.0.0.1:8082/download.js
 
@@ -411,7 +411,7 @@
           await new Promise((resolve, reject) => {
             xhr.add({
               chapter,
-              url: `https://vipreader.qidian.com/ajax/chapter/chapterInfo?_csrfToken=${document.cookie.match('_csrfToken=(.*?);')[1]}&bookId=${chapter.url.split('/')[4]}&chapterId=${chapter.url.split('/')[5]}&authorId=${$('.writer,.info>a[href*="authorIndex"]').attr('href').match(/id=(\d+)/)[1]}`,
+              url: `https://vipreader.qidian.com/ajax/chapter/chapterInfo?_csrfToken=${document.cookie.match('_csrfToken=(.*?);')[1]}&bookId=${chapter.url.split('/')[4]}&chapterId=${chapter.url.split('/')[5]}&authorId=${$('.writer,.info>a[href*="/author/"]').attr('href').match(/\/author\/(\d+)\//)[1]}`,
               method: 'GET',
               onload: function (res, request) {
                 try {
@@ -1500,7 +1500,7 @@
     },
     { // https://www.lajixs.com/
       siteName: '辣鸡小说',
-      url: 'https://www.lajixs.com/book/\\d+',
+      url: '://www.lajixs.com/book/\\d+',
       chapterUrl: '://www.lajixs.com/chapter/\\d+',
       title: '.b-title>strong',
       writer: '.b-info>p>span>a',
@@ -1631,31 +1631,31 @@
     },
     { // https://www.gongzicp.com/
       siteName: '长佩文学网',
-      url: '://www.gongzicp.com/v4/novel-\\d+.html',
-      chapterUrl: '://www.gongzicp.com/v4/read-\\d+.html',
+      url: '://www.gongzicp.com/novel-\\d+.html',
+      chapterUrl: '://www.gongzicp.com/read-\\d+.html',
       title: '.info-right .name',
-      writer: '.user-name>a[href^="/v4/zone/author-"]',
+      writer: '.author-name',
       intro: '.info-text>.content',
       cover: '.cover>img',
       chapterTitle: '.title>.name',
-      popup: true,
+      popup: async () => waitFor(() => $('.cp-reader .content>p:not(.watermark)').length, 5 * 1000),
       content: '.cp-reader .content',
-      elementRemove: '.cp-hidden',
+      elementRemove: '.cp-hidden,.watermark',
       thread: 1,
       getChapters: async (doc) => {
         const info = window.location.href.match(/\/(novel|read)-(\d+)/);
-        const res = await xhr.sync(`https://www.gongzicp.com/novel/getChapterList?nid=${info[2]}`);
+        const res = await xhr.sync(`https://webapi.gongzicp.com/novel/novelGetInfo?id=${info[2]}`);
         const json = JSON.parse(res.responseText);
         const chapters = [];
         let volume = '';
-        for (let i = 0; i < json.data.list.length; i++) {
-          if (json.data.list[i].type === 'volume') {
-            volume = json.data.list[i].name;
-          } else if (json.data.list[i].type === 'item') {
+        for (let i = 0; i < json.data.chapterList.length; i++) {
+          if (json.data.chapterList[i].type === 'volume') {
+            volume = json.data.chapterList[i].name;
+          } else if (json.data.chapterList[i].type === 'item') {
             chapters.push({
-              title: json.data.list[i].name,
-              url: `https://www.gongzicp.com/v4/read-${json.data.list[i].id}.html`,
-              vip: json.data.list[i].pay,
+              title: json.data.chapterList[i].name,
+              url: `https://www.gongzicp.com/read-${json.data.chapterList[i].id}.html`,
+              vip: json.data.chapterList[i].pay,
               volume
             });
           }
@@ -1677,8 +1677,17 @@
     },
     { // https://www.myhtlmebook.com/ https://www.myhtebooks.com/ https://www.haitbook.com/
       siteName: '海棠文化线上文学城',
-      url: '(myhtlmebook|myhtebooks|urhtbooks|haitbook).com/\\?act=showinfo&bookwritercode=.*?&bookid=',
-      chapterUrl: '(myhtlmebook|myhtebooks|urhtbooks|haitbook).com/\\?act=showpaper&paperid=',
+      filter: () => {
+        if ($('.title>a>img[alt="海棠文化线上文学城"]').length) {
+          if (window.location.search.match('\\?act=showinfo&bookwritercode=.*?&bookid=')) {
+            return 1;
+          } else if (window.location.search.match('\\?act=showpaper&paperid=')) {
+            return 2;
+          }
+        }
+      },
+      // url: '(myhtlmebook|myhtebooks?|urhtbooks|haitbook).com/\\?act=showinfo&bookwritercode=.*?&bookid=',
+      // chapterUrl: '(myhtlmebook|myhtebooks?|urhtbooks|haitbook).com/\\?act=showpaper&paperid=',
       title: '#mypages .uk-card h4',
       writer: '#writerinfos>a',
       chapter: '.uk-list>li>a[href^="/?act=showpaper&paperid="]',
@@ -1825,82 +1834,26 @@
       elementRemove: '.hidden',
       thread: 1
     },
-    { // https://www.youdubook.com/
-      siteName: '有毒小说',
-      url: '://www.youdubook.com/book_detail/\\d+',
-      chapterUrl: '://www.youdubook.com/readchapter/\\d+',
-      title: '.title>span',
-      writer: '#BooklibraryShow_Right .penName',
-      intro: '.synopsisCon',
-      cover: '.BookContent .pic>img',
-      chapter: '.BookDir .chapter_list>ul>li>a',
-      vipChapter: '.BookDir .chapter_list>ul>li.lock_fill>a',
-      chapterTitle: '.title',
-      content: async (doc, res, request) => {
-        const args = res.responseText.match(/^\s*MemberSingleChapter\((.*)\)/m)[1].split(',').map(i => i.match(/^"(.*?)"$/)[1]);
-        const content = await new Promise((resolve, reject) => {
-          xhr.add({
-            method: 'POST',
-            chapter: request.raw,
-            url: args[0], // window.location.origin + '/booklibrary/membersinglechapter/chapter_id/' + request.url.match(/\/readchapter\/(\d+)/)[1],
-            headers: {
-              Accept: 'application/json, text/javascript, */*; q=0.01',
-              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-              Origin: window.location.origin,
-              Referer: request.url,
-              'sec-fetch-site': 'same-origin',
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            data: `sign=${encodeURIComponent('a3NvcnQoJHBhcmEpOw==')}&caonima=${encodeURIComponent(args[4])}`,
-            onload: function (res, request) {
-              try {
-                const json = JSON.parse(res.responseText);
-
-                const listArr = json.data.show_content;
-                // 章节插图
-                const chapterpic = json.data.chapterpic;
-                let content = '';
-                for (let i = 0; i < listArr.length; i++) content += CryptoJS.enc.Base64.parse(listArr[i].content).toString(CryptoJS.enc.Utf8) + '\n';
-
-                // 章节插图是否存在
-                if (chapterpic.length > 0) {
-                  for (let i = 0; i < chapterpic.length; i++) content += `<img src="${chapterpic[i].url}" alt="${chapterpic[i].miaoshu}" />`;
-                }
-
-                // 作者说的话追加
-                if (json.data.miaoshu !== '') content += '---\n' + CryptoJS.enc.Base64.parse(json.data.miaoshu).toString(CryptoJS.enc.Utf8);
-
-                resolve(content);
-              } catch (error) {
-                console.error(error);
-                resolve('');
-              }
-            }
-          }, null, 0, true);
-        });
-        return content;
-      }
-    },
-    { // https://www.xrzww.com/
-      siteName: '息壤中文网',
-      url: '://www.xrzww.com/bookdetail/\\d+',
+    { // https://www.youdubook.com/ https://www.xrzww.com/
+      siteName: '有毒小说网/息壤中文网',
+      url: '://www.(youdubook|xrzww).com/bookdetail/\\d+',
       title: '.novel_name>span',
       writer: '.novel_author>span:nth-child(1)',
-      intro: '.novel_info',
+      intro: '.novel_text',
       cover: '.bookcover',
       getChapters: async (doc) => {
         const urlArr = window.location.href.split('/');
 
-        const res = await xhr.sync(`https://pre-api.xrzww.com/api/directoryList?nid=${urlArr[4]}&orderBy=0`);
-        const json = JSON.parse(res.response);
+        const res = await xhr.sync(`${window.location.origin.replace('www', 'pre-api')}/api/directoryList?nid=${urlArr[4]}&orderBy=0`);
+        const json = JSON.parse(res.responseText);
         const chapters = json.data.data;
         const volumes = json.data.volume;
         return chapters.sort((a, b) => {
           return Math.sign(volumes.find(i => i.volume_id === a.chapter_vid).volume_order - volumes.find(i => i.volume_id === b.chapter_vid).volume_order);
         }).map(i => ({
-          url: `https://pre-api.xrzww.com/api/readNew?nid=${urlArr[4]}&vid=${i.chapter_vid}&chapter_id=${i.chapter_id}&chapter_order=${i.chapter_order}&showpic=false`,
+          url: `${window.location.origin.replace('www', 'pre-api')}/api/readNew?nid=${urlArr[4]}&vid=${i.chapter_vid}&chapter_id=${i.chapter_id}&chapter_order=${i.chapter_order}&showpic=false`,
           title: i.chapter_name,
-          vip: i.chapter_isvip,
+          vip: i.chapter_ispay,
           volume: volumes.find(j => j.volume_id === i.chapter_vid).volume_name
         }));
       },
@@ -1937,6 +1890,101 @@
         }
         return chapters;
       }
+    },
+    { // https://read.douban.com/
+      siteName: '豆瓣阅读',
+      url: '://read.douban.com/column/\\d+/',
+      chapterUrl: '://read.douban.com/reader/column/\\d+/chapter/\\d+/',
+      title: '.title[itemprop="name"]',
+      writer: '.name[itemprop="name"]',
+      intro: '.intro',
+      cover: () => $('[property="og:image"]').attr('content'),
+      getChapters: async (doc) => {
+        const id = window.location.href.split('/')[4];
+        const chapters = [];
+        while (true) {
+          const res = await xhr.sync(`https://read.douban.com/j/column_v2/${id}/chapters?start=0&limit=100&latestFirst=0`);
+          const json = JSON.parse(res.responseText);
+          for (const item of json.list) {
+            chapters.push({
+              title: item.title,
+              url: `${window.location.origin}${item.links.reader}`,
+              vip: !item.isPurchased && item.price
+            });
+          }
+          if (chapters.length >= json.total) break;
+        }
+        return chapters;
+      },
+      fns: {
+        cookieGet: function (e) {
+          var t = document.cookie.match(new RegExp('(?:\\s|^)' + e + '\\=([^;]*)'));
+          return t ? decodeURIComponent(t[1]) : null;
+        },
+        decrypt: async function test (t) {
+          const cookieGet = Rule.special.find(i => i.siteName === '豆瓣阅读').fns.cookieGet;
+          const e = Uint8Array.from(window.atob(t), t => t.charCodeAt(0));
+          const i = e.buffer;
+          const d = e.length - 16 - 13;
+          const p = new Uint8Array(i, d, 16);
+          const f = new Uint8Array(i, 0, d);
+          const g = {
+            name: 'AES-CBC',
+            iv: p
+          };
+          return (function () {
+            const t = unsafeWindow.Ark.user;
+            const e = t.isAnonymous ? cookieGet('bid') : t.id;
+            const i = (new TextEncoder()).encode(e);
+            return window.crypto.subtle.digest('SHA-256', i).then(t => window.crypto.subtle.importKey('raw', t, 'AES-CBC', !0, ['decrypt']));
+          }()).then(t => window.crypto.subtle.decrypt(g, t, f)).then(t => JSON.parse((new TextDecoder()).decode(t)));
+        }
+
+      },
+      deal: async (chapter) => {
+        const aid = chapter.url.match('read.douban.com/reader/column') ? chapter.url.split('/')[7] : chapter.url.split('/')[5];
+        let content = await new Promise((resolve, reject) => {
+          xhr.add({
+            chapter,
+            url: `${window.location.origin}/j/article_v2/get_reader_data`,
+            method: 'POST',
+            data: `aid=${aid}&reader_data_version=${window.localStorage.getItem('readerDataVersion')}`,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              Referer: chapter.url,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            onload: function (res, request) {
+              try {
+                const json = JSON.parse(res.responseText);
+                resolve(json.data);
+              } catch (error) {
+                console.error(error);
+                resolve('');
+              }
+            }
+          }, null, 0, true);
+        });
+        if (content) {
+          const json = await Rule.special.find(i => i.siteName === '豆瓣阅读').fns.decrypt(content);
+          content = {
+            content: chapter.url.match('read.douban.com/reader/column') ? json.posts[0].contents.filter(i => i.data && i.data.text).map(i => i.data.text).flat().map(i => i.content).join('\n') : json.posts[0].contents.filter(i => i.data && i.data.text).map(i => (i.type === 'headline' ? '\n' : '') + i.data.text).join('\n'),
+            title: json.posts[0].title
+          };
+        }
+        return content;
+      },
+    },
+    { // https://read.douban.com/ebook
+      siteName: '豆瓣阅读Ebook',
+      url: '://read.douban.com/ebook/\\d+/',
+      chapterUrl: '://read.douban.com/reader/ebook/\\d+/',
+      title: '.article-title[itemprop="name"]',
+      writer: '.author-item',
+      intro: '[itemprop="description"]>.info',
+      cover: '.cover>[itemprop="image"]',
+      chapter: '.btn-read',
+      deal: async (chapter) => Rule.special.find(i => i.siteName === '豆瓣阅读').deal(chapter)
     },
     // 轻小说
     { // https://www.wenku8.net
@@ -2024,8 +2072,8 @@
     },
     { // http://www.shencou.com/
       siteName: '神凑小说网',
-      url: 'http://www.shencou.com/read/\\d+/\\d+/index.html',
-      chapterUrl: 'http://www.shencou.com/read/\\d+/\\d+/\\d+.html',
+      url: '://www.shencou.com/read/\\d+/\\d+/index.html',
+      chapterUrl: '://www.shencou.com/read/\\d+/\\d+/\\d+.html',
       infoPage: '[href*="books/read_"]',
       title: 'span>a',
       writer: '#content td:contains("小说作者"):nochild',
@@ -2133,8 +2181,8 @@
     },
     { // http://xs.kdays.net/index
       siteName: '萌文库',
-      url: 'http://xs.kdays.net/book/\\d+/chapter',
-      chapterUrl: 'http://xs.kdays.net/book/\\d+/read/\\d+',
+      url: '://xs.kdays.net/book/\\d+/chapter',
+      chapterUrl: '://xs.kdays.net/book/\\d+/read/\\d+',
       infoPage: '[href$="/detail"]',
       title: '.info-side>h2',
       writer: '.items>li>a[href^="/search/author"]',
@@ -2161,7 +2209,7 @@
     { // https://novel.crazyideal.com/
       siteName: '雷姆轻小说',
       url: '://novel.crazyideal.com/book/\\d+/',
-      chapterUrl: 'https://novel.crazyideal.com/\\d+_\\d+/\\d+(_\\d+)?.html',
+      chapterUrl: '://novel.crazyideal.com/\\d+_\\d+/\\d+(_\\d+)?.html',
       title: '.novel_info_title>h1',
       writer: '.novel_info_title>i>a[href^="/author/"]',
       intro: '.intro',
@@ -3250,20 +3298,20 @@
           const chapter = chapters[i];
 
           if (Config.volume) {
-            if (i > 0 && chapters[i - 1].volume !== chapter.volume) {
-              const title = `【${chapters[i - 1].volume}】-分卷-结束`;
-              chapters.splice(i, 0, {
-                title,
-                contentRaw: title,
-                content: title,
-                volume: chapters[i - 1].volume
-              });
-              i++;
-            }
+            // if (i > 0 && chapters[i - 1].volume !== chapter.volume) {
+            //   const title = `【${chapters[i - 1].volume}】-分卷-结束`;
+            //   chapters.splice(i, 0, {
+            //     title,
+            //     contentRaw: title,
+            //     content: title,
+            //     volume: chapters[i - 1].volume
+            //   });
+            //   i++;
+            // }
 
             if (chapter.volume && chapter.volume !== volumes.slice(-1)[0]) {
               volumes.push(chapter.volume);
-              const title = `【${chapter.volume}】-分卷-开始`;
+              const title = `【${chapter.volume}】`;
               chapters.splice(i, 0, {
                 title,
                 contentRaw: title,
