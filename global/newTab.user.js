@@ -7,7 +7,7 @@
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @description 链接强制在新建标签中打开 Open a URL in a new tab
 // @raw-version 0.2.0.0
-// @version     0.0.109
+// @version     0.0.113
 
 // @include     http*://*/*
 
@@ -78,7 +78,7 @@
       const host = url.href === window.location.origin || url.href === window.location.origin + '/';
       const hash = !!url.href.match('#') && url.pathname === window.location.pathname;
       const next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/);
-      const text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后)一?(章|页|话|集|节|卷|篇)|Previous|Next|首页|末页|尾页/i);
+      const text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后|首|末|尾)一?(章|页|话|集|节|卷|篇|章|頁|話|集|節|卷|篇)|Prev(ious)?|Next/i);
       if (protocol || host || hash || next || text) {
         // raw.push({
         //   target: link,
