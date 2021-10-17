@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        [H]ParkingLot
-// @version     1.11.435
+// @version     1.11.438
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -833,9 +833,10 @@
     'https://itorrents.org/torrent/{hash}.torrent?title={name}',
     'https://torrage.info/torrent.php?h={hash}',
     // (hash, name) => `https://www.seedpeer.eu/torrent/${hash.toLowerCase()},
-    (hash, name) => `http://www.torrent.org.cn/home/convert/magnet2torrent.html?hash==${hash.toLowerCase()}`,
+    // (hash, name) => `http://www.torrent.org.cn/home/convert/magnet2torrent.html?hash==${hash.toLowerCase()}`,
     (hash, name) => `http://v2.uploadbt.com/?r=down&hash=${hash.toLowerCase()}&name=${name}`,
-    (hash, name) => `https://btdb.eu/dl/${hash.toLowerCase().substr(0, 2)}/${hash.toLowerCase()}.torrent`
+    (hash, name) => `https://btdb.eu/dl/${hash.toLowerCase().substr(0, 2)}/${hash.toLowerCase()}.torrent`,
+    (hash, name) => `https://watercache.nanobytes.org/get/${hash.toLowerCase()}/${name}`
   ];
   var markLib = [
     { // 0
