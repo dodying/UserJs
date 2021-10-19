@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        [HV]IW
 // @include     http://alt.hentaiverse.org/*

@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        SidebarInContent
 // @name:zh-CN  【小说】目录页侧边分卷导航栏

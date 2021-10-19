@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        [H]CopyInfo
 // @version     1.01.5

@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        [dmzj]record
 // @description 自动更新浏览记录，获取书签

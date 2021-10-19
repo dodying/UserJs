@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        [H]ParkingLot
 // @version     1.11.438

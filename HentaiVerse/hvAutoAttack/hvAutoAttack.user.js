@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name         [HV]AutoAttack
 // @name:zh-TW   [HV]AutoAttack

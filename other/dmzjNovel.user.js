@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        [dmzj]Novel
 // @description 在动漫之家上看小说

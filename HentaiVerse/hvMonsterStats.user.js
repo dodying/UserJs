@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        [HV]MonsterStats
 // @namespace   https://github.com/dodying/UserJs

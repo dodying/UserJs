@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        []emptyName
 // @namespace   https://github.com/dodying/UserJs

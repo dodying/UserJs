@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        nsane.forums Sharecode
 // @description nsane.forums Sharecode

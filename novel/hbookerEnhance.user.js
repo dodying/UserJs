@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        hbookerEnhance
 // @namespace   https://github.com/dodying/Dodying-UserJs

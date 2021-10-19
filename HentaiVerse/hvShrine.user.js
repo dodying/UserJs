@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name         [HV]Shrine
 // @version      1.02

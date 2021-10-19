@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板

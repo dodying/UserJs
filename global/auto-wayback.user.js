@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        []auto-wayback
 // @description 自动保存当前网页到时间机器

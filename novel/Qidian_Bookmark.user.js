@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        Qidian_Bookmark
 // @name:zh-CN  【小说】起点书签

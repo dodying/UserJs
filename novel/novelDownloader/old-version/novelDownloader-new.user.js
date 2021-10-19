@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name         novelDownloader2
 // @name:zh-CN   [小说]下载脚本2

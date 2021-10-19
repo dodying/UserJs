@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name         [HV]BazaarList
 // @version      1.03

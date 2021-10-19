@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        QQ阅读-列表
 // @description 自净网行动后，狗比起点/阅文不再在网页上显示所有书籍了

@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        onerror
 // @description onerror

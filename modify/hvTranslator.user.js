@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name          hvTranslator
 // @name:zh-CN    【HV】翻译

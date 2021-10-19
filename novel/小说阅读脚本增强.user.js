@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        小说阅读脚本增强
 // @description 移除鼠标双击事件，增加翻页按钮

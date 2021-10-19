@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        []style
 // @version     1.1.0

@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name         nHentai Downloader modify by Dodying
 // @name:zh-CN  【nH】下载器-修改自Doying

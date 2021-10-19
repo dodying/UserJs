@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        []meta
 // @description

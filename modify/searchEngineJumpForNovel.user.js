@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name               searchEngineJumpForNovel
 // @name:zh-CN         搜索引擎跳转-小说版+高亮

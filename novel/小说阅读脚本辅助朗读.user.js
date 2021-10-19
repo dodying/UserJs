@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        小说阅读脚本辅助朗读
 // @description 小说阅读脚本辅助朗读

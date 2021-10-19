@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // ==UserScript==
 // @name        dmzj2bgm
 // @description 请通过脚本命令来进行授权与数据同步
