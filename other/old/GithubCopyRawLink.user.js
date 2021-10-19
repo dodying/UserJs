@@ -12,16 +12,16 @@
 // @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
-setTimeout(function () {
+setTimeout(() => {
   if (document.querySelector('.files>tbody>.js-navigation-item')) {
-    var line = document.querySelectorAll('.files>tbody>.js-navigation-item');
-    for (var i = 1; i < line.length; i++) {
-      var td = document.createElement('td');
-      var btn = document.createElement('button');
+    const line = document.querySelectorAll('.files>tbody>.js-navigation-item');
+    for (let i = 1; i < line.length; i++) {
+      const td = document.createElement('td');
+      const btn = document.createElement('button');
       btn.innerHTML = '复制Raw';
       btn.onclick = function () {
         GM_setClipboard(decodeURI(this.parentNode.parentNode.querySelector('.content>span>.js-navigation-open').href.replace('/blob/', '/raw/')));
-      }
+      };
       td.appendChild(btn);
       line[i].insertBefore(td, line[i].querySelector('.icon'));
     }

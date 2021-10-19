@@ -12,6 +12,6 @@
 // @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
-document.getElementById('submit-file').onclick = function() {
+document.getElementById('submit-file').onclick = function () {
   if (document.getElementById('commit-summary-input').value === '' && !confirm('commit为空，确定提交？')) return false;
 };

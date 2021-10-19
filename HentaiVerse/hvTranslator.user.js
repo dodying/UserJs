@@ -12,11 +12,11 @@
 // @include     http*://hentaiverse.org/*
 // ==/UserScript==
 (function () {
-  var page = window.location.search
-  var pageItem = /s=Bazaar&ss=is|s=Character&ss=it|s=Bazaar&ss=ss/
+  const page = window.location.search;
+  const pageItem = /s=Bazaar&ss=is|s=Character&ss=it|s=Bazaar&ss=ss/;
 
   if (pageItem.test(page)) {
-    var item = {
+    const item = {
       // 战场道具
       'Mystic Gem': '神秘宝石',
       'Health Gem': '生命宝石',
@@ -96,7 +96,7 @@
       30024: '奖杯 - (神级) 黑色Ｔ恤',
       'Black T-Shirt': '奖杯 - (神级) 黑色Ｔ恤',
       30030: '奖杯 - (神级) 树苗',
-      'Sapling': '奖杯 - (神级) 树苗',
+      Sapling: '奖杯 - (神级) 树苗',
       30031: '奖杯 - (神级) 独角兽的角',
       'Unicorn Horn': '奖杯 - (神级) 独角兽的角',
       30032: '奖杯 - (神级) 面条般的附肢',
@@ -330,25 +330,25 @@
       // 70026:                         '珍藏品 - 天使兔的公仔',
       // 'Angel Bunny Figurine':        '珍藏品 - 天使兔的公仔',
       70102: '珍藏品 - 甘米的公仔',
-      'Gummy Figurine': '珍藏品 - 甘米的公仔'
-    }
-    var text = [
+      'Gummy Figurine': '珍藏品 - 甘米的公仔',
+    };
+    const text = [
       '.itemlist :before{font-size:9pt!important;}',
-      'div[id^="ikey_"]:before{font-size:12pt!important;}'
-    ]
-    var hide = []
-    for (let i in item) {
-      hide.push('div[onmouseover*="' + i + '"]')
-      text.push('div[onmouseover*="' + i + '"]::before{content:"' + item[i] + '";}')
+      'div[id^="ikey_"]:before{font-size:12pt!important;}',
+    ];
+    const hide = [];
+    for (const i in item) {
+      hide.push(`div[onmouseover*="${i}"]`);
+      text.push(`div[onmouseover*="${i}"]::before{content:"${item[i]}";}`);
     }
-    text.push(hide.join(',') + '{font-size:0px;}')
-    text.push(hide.join(' *,') + ' *{font-size:0px;}')
-    addStyle(text.join(''))
+    text.push(`${hide.join(',')}{font-size:0px;}`);
+    text.push(`${hide.join(' *,')} *{font-size:0px;}`);
+    addStyle(text.join(''));
   }
-})()
+}());
 
-function addStyle (text) {
-  var style = document.createElement('style')
-  style.textContent = text
-  document.head.appendChild(style)
+function addStyle(text) {
+  const style = document.createElement('style');
+  style.textContent = text;
+  document.head.appendChild(style);
 }

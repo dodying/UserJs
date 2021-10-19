@@ -13,8 +13,6 @@
 // @noframes
 // ==/UserScript==
 (function () {
-  'use strict';
-
   try {
     let text = document.body.textContent;
     let jsonp = null;
@@ -83,7 +81,7 @@
       '  body{background-color:#1e1e1e;color:#d4d4d4;}',
       '  body>div.pretty>p::before{color:#858585;}',
       '  body>div.pretty>p .white::before{color:#e3e4e229;}',
-      '}'
+      '}',
     ].join('');
     document.head.appendChild(style);
 
@@ -103,4 +101,4 @@
   } catch (error) {
     // console.log(error);
   }
-})();
+}());

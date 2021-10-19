@@ -12,21 +12,21 @@
 // @grant       none
 // @run-at      document-idle
 // ==/UserScript==
-var button = document.createElement('button');
+const button = document.createElement('button');
 button.innerHTML = '排序';
 button.className = 'stdbtn';
-button.style.zIndex= '999';
-button.style.position= 'absolute';
-button.style.top= '200px';
-button.style.left= window.innerWidth-200+'px';
+button.style.zIndex = '999';
+button.style.position = 'absolute';
+button.style.top = '200px';
+button.style.left = `${window.innerWidth - 200}px`;
 button.onclick = function () {
-  var BookDiv = document.querySelectorAll('.it5>a');
-  var BookTr = document.querySelectorAll('.gtr0,.gtr1');
-  var BookName = [
+  const BookDiv = document.querySelectorAll('.it5>a');
+  const BookTr = document.querySelectorAll('.gtr0,.gtr1');
+  const BookName = [
   ];
-  var BookIndex = {
+  const BookIndex = {
   };
-  var BookHTML = [
+  const BookHTML = [
   ];
   console.log(1);
   for (var i = 0; i < BookDiv.length; i++) {
@@ -45,5 +45,5 @@ button.onclick = function () {
     document.querySelector('.itg>tbody').innerHTML = document.querySelector('.itg>tbody>tr').outerHTML + BookHTML.join('');
   }
   this.style.display = 'none';
-}
+};
 document.body.appendChild(button);

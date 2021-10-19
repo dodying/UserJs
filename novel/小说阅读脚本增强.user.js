@@ -21,12 +21,11 @@
 /* global $ */
 /* eslint-disable no-debugger  */
 (function () {
-  'use strict';
   let scrollElement = window.innerHeight === document.documentElement.clientHeight ? document.documentElement : document.body;
-  let compareElement = scrollElement === document.documentElement ? $('*').toArray().map(i => [i, i.clientHeight]).sort((a, b) => b[1] - a[1])[0][0] : document.documentElement;
+  let compareElement = scrollElement === document.documentElement ? $('*').toArray().map((i) => [i, i.clientHeight]).sort((a, b) => b[1] - a[1])[0][0] : document.documentElement;
   // let compareElement = scrollElement === document.documentElement ? document.body : document.documentElement;
 
-  async function init () {
+  async function init() {
     window.cancelAnimationFrame = () => { };
     $('html').on('dblclick', (e) => {
       e.stopPropagation();
@@ -41,7 +40,7 @@
       let observer;
       const checkScrollBar = () => {
         scrollElement = window.innerHeight === document.documentElement.clientHeight ? document.documentElement : document.body;
-        compareElement = scrollElement === document.documentElement ? $('*').toArray().map(i => [i, i.clientHeight]).sort((a, b) => b[1] - a[1])[0][0] : document.documentElement;
+        compareElement = scrollElement === document.documentElement ? $('*').toArray().map((i) => [i, i.clientHeight]).sort((a, b) => b[1] - a[1])[0][0] : document.documentElement;
         if (compareElement.clientHeight > scrollElement.clientHeight) {
           if (observer) {
             observer.disconnect();
@@ -55,7 +54,7 @@
       observer = new window.MutationObserver(checkScrollBar);
       observer.observe(scrollElement, {
         childList: true,
-        subtree: true
+        subtree: true,
       });
       $(window).on(eventType, checkScrollBar);
     }
@@ -63,13 +62,13 @@
 
   init();
 
-  function addScrollButton () {
+  function addScrollButton() {
     $('<scroll-button>').css({ all: 'initial' }).insertAfter('body');
   }
 
   // Create a class for the element
   class scrollButton extends window.HTMLElement {
-    constructor () {
+    constructor() {
       // Always call super first in constructor
       super();
 
@@ -81,7 +80,7 @@
         '.button{width:60px;height:60px;cursor:pointer;font-weight:700;border:2px solid #9b9b9b;background-color:#fff;font-size:xx-large;}',
         '[name="up"]:before{content:"▲";}',
         '[name="down"]:before{content:"▼";}',
-        '.line{position:fixed;background:#000;width:5px;display:none;}'
+        '.line{position:fixed;background:#000;width:5px;display:none;}',
       ].join('\n');
 
       const container = document.createElement('div');
@@ -91,19 +90,19 @@
         if (e.ctrlKey) container.setAttribute('draggable', true);
         offset = {
           x: e.offsetX,
-          y: e.offsetY
+          y: e.offsetY,
         };
       });
       container.addEventListener('dragend', (e) => {
         const containerPosition = GM_getValue('position', {});
         const position = {
           left: e.clientX - offset.x,
-          top: e.clientY - offset.y
+          top: e.clientY - offset.y,
         };
         $(container).css({
           ...position,
           right: 'unset',
-          transform: 'unset'
+          transform: 'unset',
         });
         containerPosition[window.location.host] = position;
         GM_setValue('position', containerPosition);
@@ -113,7 +112,7 @@
         $(container).css({
           ...containerPosition[window.location.host],
           right: 'unset',
-          transform: 'unset'
+          transform: 'unset',
         });
       }
 
@@ -123,7 +122,7 @@
       upBtn.setAttribute('class', 'button');
       upBtn.setAttribute('name', 'up');
       upBtn.addEventListener('click', () => {
-        $(scrollElement).finish().animate({ scrollTop: scrollElement.scrollTop - step }, 500, 'swing', function () { });
+        $(scrollElement).finish().animate({ scrollTop: scrollElement.scrollTop - step }, 500, 'swing', () => { });
       });
 
       const lineTop = document.createElement('div');
@@ -157,7 +156,7 @@
       downBtn.setAttribute('class', 'button');
       downBtn.setAttribute('name', 'down');
       downBtn.addEventListener('click', () => {
-        $(scrollElement).finish().animate({ scrollTop: scrollElement.scrollTop + step }, 500, 'swing', function () { });
+        $(scrollElement).finish().animate({ scrollTop: scrollElement.scrollTop + step }, 500, 'swing', () => { });
       });
 
       shadow.appendChild(style);
@@ -168,7 +167,7 @@
       container.appendChild(stepInput);
       container.appendChild(downBtn);
 
-      GM_registerMenuCommand('重置位置', function () {
+      GM_registerMenuCommand('重置位置', () => {
         const containerPosition = GM_getValue('position', {});
         delete containerPosition[window.location.host];
         GM_setValue('position', containerPosition);
@@ -177,7 +176,7 @@
           top: '50%',
           left: 'unset',
           right: '10%',
-          transform: 'translateY(-50%)'
+          transform: 'translateY(-50%)',
         });
       });
     }
@@ -185,4 +184,4 @@
 
   // Define the new element
   window.customElements.define('scroll-button', scrollButton);
-})();
+}());

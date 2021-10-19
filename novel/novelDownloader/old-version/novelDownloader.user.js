@@ -247,45 +247,43 @@
 // @include     http://18h.tv/serch*
 // ==/UserScript==
 /* global tranStr base64 JSZip saveAs */
-var debug = {
+const debug = {
   xhr: false,
   data: false,
   replace: false,
-  replace2: false
+  replace2: false,
 };
-var indexRule = {};
-var chapterRule = {};
-var reRule = {};
-var showUI = function () {
+const indexRule = {};
+const chapterRule = {};
+const reRule = {};
+const showUI = function () {
   if ($('.ndMain').length === 0) {
     init();
     $('.ndMain').toggle();
   } else {
     $('.ndMain').toggle();
-    $('#ndFlag').text(function () {
-      return '.ndPre,.ndPreVip{display:' + $('.ndMain').css('display') + ';}';
-    });
+    $('#ndFlag').text(() => `.ndPre,.ndPreVip{display:${$('.ndMain').css('display')};}`);
   }
 };
 $('<div class="ndTrigger" style="position:fixed;top:0px;left:0px;width:1px;height:100%;z-index:999999;background:transparent;"></div>').on({
-  dblclick: function () {
+  dblclick() {
     showUI();
-  }
+  },
 }).appendTo('body');
-GM_registerMenuCommand('Download Novel', function () {
+GM_registerMenuCommand('Download Novel', () => {
   showUI();
 }, 'N');
-$(window).on('keydown', function (e) {
+$(window).on('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if (e.shiftKey && e.keyCode === 68) { // Shift+D
     showUI();
   }
 });
-GM_registerMenuCommand('Show Storage', function () {
+GM_registerMenuCommand('Show Storage', () => {
   console.log($(window).data());
 }, 'S');
 
-function init () {
+function init() {
   addRule();
   addUI();
   addStyle();
@@ -301,9 +299,10 @@ function init () {
     }
   });
   $('.ndCustomize textarea[name=replace]').on({
-    keyup: function () {
-      var total = this.value.split('\n');
-      var i, arr;
+    keyup() {
+      const total = this.value.split('\n');
+      let i; let
+        arr;
       for (i = 0; i < total.length; i++) {
         if (total[i] === '') continue;
         arr = total[i].split('|||');
@@ -313,36 +312,36 @@ function init () {
           if (arr[1]) newRe = new RegExp(arr[1]);
           console.log(newRe);
         } catch (err) {
-          window.alert('第' + (i + 1) + '行发生错误，具体信息请打开开发者助手查看');
+          window.alert(`第${i + 1}行发生错误，具体信息请打开开发者助手查看`);
           console.error(err);
           return;
         }
       }
       GM_setValue('repalce', total);
-    }
+    },
   }).val(GM_getValue('repalce', ['格式: 替换前|||替换后']).join('\n'));
   if (GM_getValue('split')) {
-    var split = GM_getValue('split');
-    if ($('.ndSplit>option[value="' + split + '"]').length > 0) {
+    const split = GM_getValue('split');
+    if ($(`.ndSplit>option[value="${split}"]`).length > 0) {
       $('.ndSplit').val(split);
     } else {
-      $('.ndSplit').prepend('<option value="' + split + '">' + split + '</option>').val(split);
+      $('.ndSplit').prepend(`<option value="${split}">${split}</option>`).val(split);
     }
   }
-  var i;
-  var savedValue = GM_listValues();
-  var nowCustomizeRule = '';
-  var allCustomizeRule = '';
+  let i;
+  const savedValue = GM_listValues();
+  let nowCustomizeRule = '';
+  let allCustomizeRule = '';
   for (i = 0; i < savedValue.length; i++) {
     if (/^indexRule_|^chapterRule_|^reRule_/i.test(savedValue[i])) {
-      allCustomizeRule += GM_getValue(savedValue[i]) + '\n';
+      allCustomizeRule = `${allCustomizeRule}${GM_getValue(savedValue[i])}\n`;
       if (savedValue[i].indexOf(window.location.host) > 0) {
-        nowCustomizeRule += GM_getValue(savedValue[i]) + '\n';
+        nowCustomizeRule = `${nowCustomizeRule}${GM_getValue(savedValue[i])}\n`;
         try {
           /* eslint-disable no-eval */
           eval(GM_getValue(savedValue[i]));
         } catch (err) {
-          window.alert('站点规则出错\n名称：' + savedValue[i] + '\n值：' + GM_getValue(savedValue[i]) + '\n具体信息请打开开发者助手查看');
+          window.alert(`站点规则出错\n名称：${savedValue[i]}\n值：${GM_getValue(savedValue[i])}\n具体信息请打开开发者助手查看`);
           console.error(err);
         }
       }
@@ -352,7 +351,7 @@ function init () {
   if (allCustomizeRule === '') GM_setValue('savedUrl', []);
   $('.ndCustomizeTextarea').val(nowCustomizeRule);
   if (indexRule[window.location.host] === undefined) { // 待续
-    var testChapter = ['.dir a', '#BookText a', '#Chapters a', '#TabCss a', '#Table1 a', '#at a', '#book a', '#booktext a', '#catalog_list a', '#chapterList a', '#chapterlist a', '#container1 a', '#content_1 a', '#contenttable a', '#dir a', '#htmlList a', '#list a', '#oneboolt a', '#read.chapter a', '#readerlist a', '#readerlists a', '#readlist a', '#tbchapterlist a', '#xslist a', '#zcontent a', '.Chapter a', '.L a', '.TabCss>dl>dd>a', '.Volume a', '._chapter a', '.aarti a', '.acss a', '.all-catalog a', '.art_fnlistbox a', '.art_listmain_main a', '.article_texttitleb a', '.as a', '.bd a', '.book a', '.book-chapter-list a', '.bookUpdate a', '.book_02 a', '.book_article_listtext a', '.book_con_list a', '.book_dirbox a', '.book_list a', '.booklist a', '#booklist a', '.box-item a', '.box1 a', '.box_box a', '.box_chap a', '.catalog a', '.catalog-list a', '.catebg a', '.category a', '.ccss a', '.centent a', '.chapname a', '.chapter a', '.chapter-list a', '.chapterBean a', '.chapterNum a', '.chapterTable a', '.chapter_box_ul a', '.chapter_list_chapter a', '.chapterlist a', '.chapterlistxx a', '.chapters a', '.chapters_list a', '.chaptertable a', '.chaptertd a', '.columns a', '.con_05 a', '.content a', '.contentlist a', '.conter a', '.css a', '.d_contarin a', '.dccss a', '.detail-chapters a', '.dir_main_section a', '.dirbox a', '.dirconone a', '.dirinfo_list a', '.dit-list a', '.download_rtx a', '.entry_video_list a', '.float-list a', '.index a', '.indexlist a', '.info_chapterlist a', '.insert_list a', '.item a', '.kui-item a', '.l_mulu_table a', '.lb a', '.liebiao a', '.liebiao_bottom a', '.list a', '.list-directory a', '.list-group a', '.list01a', '.list_Content a', '.list_box a', '.listmain a', '.lists a', '.lrlb a', '.m10 a', '.main a', '.mb_content a', '.menu-area a', '.ml-list1 a', '.ml_main a', '.mls a', '.mod_container a', '.mread a', '.mulu a', '.mulu_list a', '.nav a', '.nolooking a', '.novel_leftright a', '.novel_list a', '.ocon a', '.opf a', '.qq', '.read_list a', '.readout a', '.td_0 a', '.td_con a', '.third a', '.uclist a', '.uk-table a', '.volume a', '.volumes a', '.wiki-content-table a', '.www a', '.xiaoshuo_list a', '.xsList a', '.zhangjieUl a', '.zjbox a', '.zjlist a', '.zjlist4 a', '.zl a', '.zp_li a'];
+    let testChapter = ['.dir a', '#BookText a', '#Chapters a', '#TabCss a', '#Table1 a', '#at a', '#book a', '#booktext a', '#catalog_list a', '#chapterList a', '#chapterlist a', '#container1 a', '#content_1 a', '#contenttable a', '#dir a', '#htmlList a', '#list a', '#oneboolt a', '#read.chapter a', '#readerlist a', '#readerlists a', '#readlist a', '#tbchapterlist a', '#xslist a', '#zcontent a', '.Chapter a', '.L a', '.TabCss>dl>dd>a', '.Volume a', '._chapter a', '.aarti a', '.acss a', '.all-catalog a', '.art_fnlistbox a', '.art_listmain_main a', '.article_texttitleb a', '.as a', '.bd a', '.book a', '.book-chapter-list a', '.bookUpdate a', '.book_02 a', '.book_article_listtext a', '.book_con_list a', '.book_dirbox a', '.book_list a', '.booklist a', '#booklist a', '.box-item a', '.box1 a', '.box_box a', '.box_chap a', '.catalog a', '.catalog-list a', '.catebg a', '.category a', '.ccss a', '.centent a', '.chapname a', '.chapter a', '.chapter-list a', '.chapterBean a', '.chapterNum a', '.chapterTable a', '.chapter_box_ul a', '.chapter_list_chapter a', '.chapterlist a', '.chapterlistxx a', '.chapters a', '.chapters_list a', '.chaptertable a', '.chaptertd a', '.columns a', '.con_05 a', '.content a', '.contentlist a', '.conter a', '.css a', '.d_contarin a', '.dccss a', '.detail-chapters a', '.dir_main_section a', '.dirbox a', '.dirconone a', '.dirinfo_list a', '.dit-list a', '.download_rtx a', '.entry_video_list a', '.float-list a', '.index a', '.indexlist a', '.info_chapterlist a', '.insert_list a', '.item a', '.kui-item a', '.l_mulu_table a', '.lb a', '.liebiao a', '.liebiao_bottom a', '.list a', '.list-directory a', '.list-group a', '.list01a', '.list_Content a', '.list_box a', '.listmain a', '.lists a', '.lrlb a', '.m10 a', '.main a', '.mb_content a', '.menu-area a', '.ml-list1 a', '.ml_main a', '.mls a', '.mod_container a', '.mread a', '.mulu a', '.mulu_list a', '.nav a', '.nolooking a', '.novel_leftright a', '.novel_list a', '.ocon a', '.opf a', '.qq', '.read_list a', '.readout a', '.td_0 a', '.td_con a', '.third a', '.uclist a', '.uk-table a', '.volume a', '.volumes a', '.wiki-content-table a', '.www a', '.xiaoshuo_list a', '.xsList a', '.zhangjieUl a', '.zjbox a', '.zjlist a', '.zjlist4 a', '.zl a', '.zp_li a'];
     for (i = 0; i < testChapter.length; i++) {
       if ($(testChapter[i]).length > 0) break;
     }
@@ -367,93 +366,93 @@ function init () {
   }
   $(indexRule[window.location.host].chapter).not('#nd a').not(indexRule[window.location.host].vip).prepend('<span class="ndPre"></span>');
   if (indexRule[window.location.host].vip) $(indexRule[window.location.host].vip).not('#nd a').prepend('<span class="ndPreVip"></span>');
-  $('.ndInfo').html(function () {
-    var nameThis = (indexRule[window.location.host] && indexRule[window.location.host].cn) ? indexRule[window.location.host].cn : '未命名的站点';
-    return '当前网站: <a href="http://' + window.location.host + '/" target="_blank">' + nameThis + '</a>';
+  $('.ndInfo').html(() => {
+    const nameThis = (indexRule[window.location.host] && indexRule[window.location.host].cn) ? indexRule[window.location.host].cn : '未命名的站点';
+    return `当前网站: <a href="http://${window.location.host}/" target="_blank">${nameThis}</a>`;
   });
-  $('.ndTitle').val(function () {
-    var host = window.location.host;
-    var bookName = $(indexRule[host].name).eq(0).text().trim() || $(chapterRule[host].name).eq(0).text().trim() || document.title;
+  $('.ndTitle').val(() => {
+    const { host } = window.location;
+    let bookName = $(indexRule[host].name).eq(0).text().trim() || $(chapterRule[host].name).eq(0).text().trim() || document.title;
     bookName = bookName.replace(/在线|阅读|全文|最新|章节|目录|列表|无弹窗|更新|全集|下载/g, '').trim();
     return $('.ndLang:checked').val() * 1 >= 0 ? tranStr(bookName, $('.ndLang:checked').val() * 1) : bookName;
   });
   /// ///////////////////////////////////////////////以下为CSS设置与事件
-  var resetPositon = function () {
-    var margin = 5;
-    var _screen = {
+  const resetPositon = function () {
+    const margin = 5;
+    const _screen = {
       width: Math.min(document.documentElement.clientWidth, window.screen.availWidth) - margin * 2,
-      height: Math.min(document.documentElement.clientHeight, window.screen.availHeight) - margin * 2
+      height: Math.min(document.documentElement.clientHeight, window.screen.availHeight) - margin * 2,
     };
     $('.ndBoxCenter').css({
-      'max-width': _screen.width + 'px',
-      'max-height': _screen.height + 'px',
-      left: function () {
-        return ((_screen.width - $(this).width()) / 2 + margin) + 'px';
+      'max-width': `${_screen.width}px`,
+      'max-height': `${_screen.height}px`,
+      left() {
+        return `${(_screen.width - $(this).width()) / 2 + margin}px`;
       },
-      top: function () {
-        return ((_screen.height - $(this).height()) / 2 + margin) + 'px';
-      }
+      top() {
+        return `${(_screen.height - $(this).height()) / 2 + margin}px`;
+      },
     });
     $('.ndCustomize textarea').css({
-      height: function () {
-        return this.scrollHeight + 'px';
-      }
+      height() {
+        return `${this.scrollHeight}px`;
+      },
     });
   };
   resetPositon();
   $(window).on({
-    resize: function () {
+    resize() {
       resetPositon();
-    }
+    },
   });
   $('.ndMain,.ndBoxCenter').on({
-    mouseenter: function () {
+    mouseenter() {
       // $(this).css('opacity', 1);
       resetPositon();
     },
-    mouseleave: function () {
+    mouseleave() {
       // $(this).css('opacity', 0.2);
       resetPositon();
-    }
+    },
   });
   $('.ndMain>[name=general]').on({
-    mouseenter: function () {
+    mouseenter() {
       this.style.height = '';
     },
-    mouseleave: function () {
+    mouseleave() {
       this.style.height = '1px';
-    }
+    },
   });
   $('.ndCustomize textarea').on({
-    keyup: function (e) {
+    keyup(e) {
       if (e.shiftKey || e.shiftKey || e.altKey || !!e.key.match(/^(Enter|Escape|Delete|Backspace)$/)) resetPositon();
     },
-    click: function () {
+    click() {
       resetPositon();
-    }
+    },
   });
   $('[name=chapter]').on({
-    change: function () {
+    change() {
       $('.ndChapterArea>div').css('display', this.checked ? 'block' : 'none');
       resetPositon();
-    }
+    },
   });
   $('#nd input[type=text],.ndBatchStart,.ndBatchEnd').on({
-    dblclick: function () {
+    dblclick() {
       this.value = '';
       resetPositon();
     },
-    keyup: function () {
-      var trueWidth = parseInt($(this).css('font-size')) * (getBlength($(this).val()) + 4) / 2;
-      $(this).css('width', trueWidth + 'px');
+    keyup() {
+      const trueWidth = parseInt($(this).css('font-size')) * (getBlength($(this).val()) + 4) / 2;
+      $(this).css('width', `${trueWidth}px`);
       resetPositon();
-    }
+    },
   });
   $('.ndBatchUrl').on({
-    keyup: function () {
+    keyup() {
       $('.ndBatchArea>div').css('display', this.value ? 'block' : 'none');
       resetPositon();
-    }
+    },
   });
   $('.ndConfig').change(function () {
     GM_setValue(this.name, this.type === 'checkbox' ? this.checked : this.type === 'number' ? (this.value || this.placeholder) * 1 : (this.value || this.placeholder));
@@ -463,8 +462,8 @@ function init () {
   });
   $('.ndSplit').change(function () {
     if (this.value === '...') {
-      var input = window.prompt('请输入[类型-数字]\n类型：\n1、all表示总体分割\n2、every表示每几章分割\n\n例：\n1、[all-3]表示整个下载列表分成3个文件\n2、[every-100]表示每100章，生成一个文件\n输入值将会保存并默认');
-      $(this).prepend('<option value="' + input + '">' + input + '</option>');
+      const input = window.prompt('请输入[类型-数字]\n类型：\n1、all表示总体分割\n2、every表示每几章分割\n\n例：\n1、[all-3]表示整个下载列表分成3个文件\n2、[every-100]表示每100章，生成一个文件\n输入值将会保存并默认');
+      $(this).prepend(`<option value="${input}">${input}</option>`);
       $(this).val(input);
       GM_setValue('split', input);
     } else {
@@ -474,35 +473,35 @@ function init () {
     $('.ndSplitStart').text('开始下载');
   });
   $('.ndSplitStart').click(function () {
-    const host = window.location.host;
-    var split = ($(window).data('split')) ? $(window).data('split') + 1 : 1;
+    const { host } = window.location;
+    const split = ($(window).data('split')) ? $(window).data('split') + 1 : 1;
     $(window).data('split', split);
-    var arr = $('.ndSplit').val().split('-');
+    const arr = $('.ndSplit').val().split('-');
     if (arr[0] === 'all' || arr[0] === 'every') {
-      $(this).text('第' + split + '次下载');
-      var len = $(indexRule[host].chapter).length;
+      $(this).text(`第${split}次下载`);
+      let len = $(indexRule[host].chapter).length;
       if ($('#ndVip')[0].checked === false && indexRule[host].vip !== '') len = $(indexRule[host].chapter).not($(indexRule[host].vip)).length;
-      var step = (arr[0] === 'all') ? Math.floor(len / arr[1]) + 1 : arr[1];
-      var start = step * (split - 1) + 1;
-      var end = step * split;
+      const step = (arr[0] === 'all') ? Math.floor(len / arr[1]) + 1 : arr[1];
+      const start = step * (split - 1) + 1;
+      let end = step * split;
       if (end >= len) {
         end = len;
         $(this).text('完成');
         $(window).data('split', 0);
       }
-      $('.ndSplitInput').val(start + '-' + end);
+      $('.ndSplitInput').val(`${start}-${end}`);
     } else {
       window.alert('请按照示例重新输入。');
       $(window).data('split', 0);
     }
   });
   $('.ndDownload>button').on({
-    click: function () {
-      var host = window.location.host;
+    click() {
+      const { host } = window.location;
       if (this.name === 'test') {
-        var empty = $('.ndSplitInput').val() === '';
+        const empty = $('.ndSplitInput').val() === '';
         if ($(indexRule[host].chapter).not(indexRule[host].vip).length > 0) {
-          var max = $(indexRule[host].chapter).not(indexRule[host].vip).length;
+          const max = $(indexRule[host].chapter).not(indexRule[host].vip).length;
           if (empty) $('.ndSplitInput').val(Math.ceil(Math.random() * max));
           download('test');
           if (empty) $('.ndSplitInput').val('');
@@ -511,10 +510,10 @@ function init () {
         }
       } else if (this.name === 'this') {
         if ($(chapterRule[host].content).length > 0) {
-          var name = $('.ndTitle').val();
+          const name = $('.ndTitle').val();
           if ($(window).data('autoTry') && !$(window).data('autoTryResult')) {
-            var i;
-            var testContent = chapterRule[host].content.split(',');
+            let i;
+            let testContent = chapterRule[host].content.split(',');
             for (i = 0; i < testContent.length; i++) {
               if ($(testContent[i]).length > 0) break;
             }
@@ -523,15 +522,15 @@ function init () {
             chapterRule[host].content = testContent;
             $(window).data('autoTryResult', true);
           }
-          var content = $(chapterRule[host].content).html();
+          let content = $(chapterRule[host].content).html();
           if (reRule[host] instanceof Array) content = wordFormatSpecial(host, content);
           if ($('.ndConfig[name=format]')[0].checked === true) content = wordFormat(content);
           if ($('.ndConfig[name=section]').val() !== '0') content = wordSection(content);
-          content = '来源地址：' + window.location.href + '\r\n' + content;
+          content = `来源地址：${window.location.href}\r\n${content}`;
           if ($('.ndLang:checked').val() * 1 >= 0) content = tranStr(content, $('.ndLang:checked').val() * 1);
           $(window).data('dataDownload', [{
-            name: name,
-            content: content
+            name,
+            content,
           }]);
           download2Txt(name);
         } else {
@@ -540,123 +539,123 @@ function init () {
       } else {
         download(this.name);
       }
-    }
+    },
   });
   $('.ndToggle').on({
-    click: function () {
-      $('.nd' + this.name).toggle();
-    }
+    click() {
+      $(`.nd${this.name}`).toggle();
+    },
   });
   $('#nd button[name=hide]').on({
-    click: function () {
+    click() {
       $(this).parents().filter('#nd>div').hide();
-    }
+    },
   });
   $('.ndCopy').on({
-    click: function () {
-      var text;
-      var host = window.location.host;
+    click() {
+      let text;
+      const { host } = window.location;
       if (this.name === 'inclue') {
-        text = '\n' + '// @include     ' + window.location.href;
+        text = `${'\n' + '// @include     '}${window.location.href}`;
       } else if (this.name === 'common') {
-        var i = indexRule[host];
-        text = 'addIRule(\'' + host + '\',\'' + i.cn + '\',\'' + i.name + '\',\'' + i.chapter + '\'';
-        if (i.vip || i.sort || i.thread) text += ',\'' + i.vip + '\'';
-        if (i.sort) text += ',\'' + i.sort + '\'';
-        if (i.thread) text += ',\'' + i.thread + '\'';
-        text += ');\n';
-        var c = chapterRule[host];
-        text += 'addCRule(\'' + host + '\',\'' + c.name + '\',\'' + c.content + '\'';
-        if (c.MimeType) text += ',1';
-        text += ');';
+        const i = indexRule[host];
+        text = `addIRule('${host}','${i.cn}','${i.name}','${i.chapter}'`;
+        if (i.vip || i.sort || i.thread) text = `${text},'${i.vip}'`;
+        if (i.sort) text = `${text},'${i.sort}'`;
+        if (i.thread) text = `${text},'${i.thread}'`;
+        text = `${text});\n`;
+        const c = chapterRule[host];
+        text = `${text}addCRule('${host}','${c.name}','${c.content}'`;
+        if (c.MimeType) text = `${text},1`;
+        text = `${text});`;
       } else if (this.name === 'replace') {
-        text = 'addRRule(\'' + host + '\', \'\\\\s+||| \', \'\');';
+        text = `addRRule('${host}', '\\\\s+||| ', '');`;
       }
       GM_setClipboard(text);
-      var _ = this;
-      var name = this.textContent;
+      const _ = this;
+      const name = this.textContent;
       this.textContent = '已复制';
-      setTimeout(function () {
+      setTimeout(() => {
         _.textContent = name;
       }, 800);
-    }
+    },
   });
-  $('.ndCustomizeSave').click(function () {
+  $('.ndCustomizeSave').click(() => {
     if ($('.ndCustomizeTextarea').val() === '') return;
-    var arr = $('.ndCustomizeTextarea').val().split('\n');
-    var savedUrl = GM_getValue('savedUrl', []);
-    var host;
-    for (var i = 0; i < arr.length; i++) {
+    const arr = $('.ndCustomizeTextarea').val().split('\n');
+    const savedUrl = GM_getValue('savedUrl', []);
+    let host;
+    for (let i = 0; i < arr.length; i++) {
       host = arr[i].split('\'')[1];
       if ($.inArray(host, savedUrl) === -1) savedUrl.push(host);
       GM_setValue('savedUrl', savedUrl);
       if (/^\s+$/.test(arr[i]) || arr[i] === '') {
         continue;
       } else if (/^addIRule/.test(arr[i])) {
-        GM_setValue('indexRule_' + host, arr[i]);
+        GM_setValue(`indexRule_${host}`, arr[i]);
       } else if (/^addCRule/.test(arr[i])) {
-        GM_setValue('chapterRule_' + host, arr[i]);
+        GM_setValue(`chapterRule_${host}`, arr[i]);
       } else if (/^chapterRule/.test(arr[i])) {
-        GM_setValue('chapterRule_' + host, arr[i]);
+        GM_setValue(`chapterRule_${host}`, arr[i]);
       } else if (/^addRRule/.test(arr[i])) {
-        GM_setValue('reRule_' + host, arr[i]);
+        GM_setValue(`reRule_${host}`, arr[i]);
       } else {
-        var lineNow = i + 1;
-        if (window.confirm('第' + lineNow + '行增加未知规则。\n此前的规则已经保存，后续操作已停止\n是否打开规则说明网址')) window.open('https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明');
+        const lineNow = i + 1;
+        if (window.confirm(`第${lineNow}行增加未知规则。\n此前的规则已经保存，后续操作已停止\n是否打开规则说明网址`)) window.open('https://github.com/dodying/UserJs/tree/master/novel/novelDownloader#自定义站点规则说明');
         return;
       }
     }
   });
-  $('.ndCustomizeDelete').click(function () {
-    var host = window.prompt('请输入要删除的域名\n不分大小写...\n如：\nread.qidian.com', window.location.host);
+  $('.ndCustomizeDelete').click(() => {
+    const host = window.prompt('请输入要删除的域名\n不分大小写...\n如：\nread.qidian.com', window.location.host);
     if (host === '') return;
-    var savedUrl = GM_getValue('savedUrl', []);
+    const savedUrl = GM_getValue('savedUrl', []);
     if ($.inArray(host, savedUrl) <= 0) return;
     savedUrl.splice($.inArray(host, savedUrl), 1);
-    var RE = new RegExp('_' + host + '$', 'i');
-    var savedValue = GM_listValues();
-    for (var i = 0; i < savedValue.length; i++) {
+    const RE = new RegExp(`_${host}$`, 'i');
+    const savedValue = GM_listValues();
+    for (let i = 0; i < savedValue.length; i++) {
       if (RE.test(savedValue[i])) GM_deleteValue(savedValue[i]);
     }
   });
-  $('.ndCustomizeClear').click(function () {
+  $('.ndCustomizeClear').click(() => {
     if (window.confirm('谨慎操作\n你确定要清空自定义站点规则\n你确定要清空自定义站点规则\n你确定要清空自定义站点规则')) {
       GM_setValue('savedUrl', []);
-      var savedValue = GM_listValues();
-      var RE = new RegExp('^indexRule_|^chapterRule_|^reRule_', 'i');
-      for (var i = 0; i < savedValue.length; i++) {
+      const savedValue = GM_listValues();
+      const RE = new RegExp('^indexRule_|^chapterRule_|^reRule_', 'i');
+      for (let i = 0; i < savedValue.length; i++) {
         if (RE.test(savedValue[i])) GM_deleteValue(savedValue[i]);
       }
     }
   });
-  $('.ndCustomizeAll').click(function () {
+  $('.ndCustomizeAll').click(() => {
     if (window.confirm('请确定是否已保存规则')) $('.ndCustomizeTextarea').val(allCustomizeRule);
   });
   $('.ndProgress').on({
-    click: function () {
+    click() {
       $('.ndLog .ndOk').remove();
-    }
+    },
   });
 }
 
 /// ///////////////////////////////////////////////
 
-function addRule () {
+function addRule() {
   // 文学
   addIRule('gj.zdic.net', '汉典古籍', '#shuye>h1', '.mls>li>a');
   addCRule('gj.zdic.net', '#snr1>h1', '#snr2', 1);
   addIRule('www.99lib.net', '九九藏书网', '#book_info>h2', '#dir>dd>a');
   chapterRule['www.99lib.net'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       var check = function (i) {
         if (i.contentWindow.content.showNext() !== false) {
-          setTimeout(function () {
+          setTimeout(() => {
             check(i);
           }, 200);
         } else {
-          var name = $('h2', i.contentWindow.document).text();
-          var content = [];
-          var temp;
+          const name = $('h2', i.contentWindow.document).text();
+          const content = [];
+          let temp;
           $('#content>div:visible', i.contentWindow.document).each(function () {
             temp = $(this.outerHTML);
             temp.find('acronym,bdo,big,cite,code,dfn,kbd,q,s,samp,strike,tt,u,var').remove();
@@ -666,12 +665,12 @@ function addRule () {
           $(i).remove();
         }
       };
-      $('<iframe class="ndFinder" name="' + num + '" src="' + url + '"></iframe>').on({
-        load: function () {
+      $(`<iframe class="ndFinder" name="${num}" src="${url}"></iframe>`).on({
+        load() {
           check(this);
-        }
+        },
       }).appendTo('.ndFinderArea');
-    }
+    },
   };
   addIRule('www.kanunu8.com', '努努书坊', 'h1>strong>font', 'body>div:nth-child(1)>table:nth-child(10)>tbody>tr:nth-child(4)>td>table:nth-child(2)>tbody>tr>td>a');
   addCRule('www.kanunu8.com', 'strong>font', 'p', 1);
@@ -699,157 +698,161 @@ function addRule () {
   addCRule('www.xs8.cn', '.j_chapterName', '.read-content');
   addIRule('chuangshi.qq.com', '创世中文网', '.title>a>b', 'div.list>ul>li>a', 'div.list:has(span.f900)>ul>li>a');
   chapterRule['chuangshi.qq.com'] = {
-    Deal: function (num, url) {
-      var xhr = new window.XMLHttpRequest();
-      xhr.open('POST', window.location.origin + '/index.php/Bookreader/' + $('.title a:eq(0)').attr('href').match(/\/(\d+).html/)[1] + '/' + url.match(/-(\d+).html/)[1]);
+    Deal(num, url) {
+      const xhr = new window.XMLHttpRequest();
+      xhr.open('POST', `${window.location.origin}/index.php/Bookreader/${$('.title a:eq(0)').attr('href').match(/\/(\d+).html/)[1]}/${url.match(/-(\d+).html/)[1]}`);
       xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
       xhr.setRequestHeader('Accept', 'application/json, text/javascript, */*; q=0.01');
       xhr.responseType = 'json';
       xhr.onload = function () {
-        var content = xhr.response.Content;
+        let content = xhr.response.Content;
         if (window.location.host === 'chuangshi.qq.com') {
-          var base = 30;
-          var arrStr = [];
-          var arrText = content.split('\\');
-          for (var i = 1, len = arrText.length; i < len; i++) {
+          const base = 30;
+          const arrStr = [];
+          const arrText = content.split('\\');
+          for (let i = 1, len = arrText.length; i < len; i++) {
             arrStr.push(String.fromCharCode(parseInt(arrText[i], base)));
           }
           content = arrStr.join('');
         }
-        content = $('.bookreadercontent', content).html().replace('最新章节由云起书院首发，最新最火最快网络小说首发地！（本站提供：传统翻页、瀑布阅读两种模式，可在设置中选择）', '').replace('本作品腾讯文学发表，请登录', '').replace(window.location.host, '').replace('浏览更多精彩作品。腾讯公司版权所有，未经允许不得复制', '');
+        content = $('.bookreadercontent', content).html().replace('最新章节由云起书院首发，最新最火最快网络小说首发地！（本站提供：传统翻页、瀑布阅读两种模式，可在设置中选择）', '').replace('本作品腾讯文学发表，请登录', '')
+          .replace(window.location.host, '')
+          .replace('浏览更多精彩作品。腾讯公司版权所有，未经允许不得复制', '');
         thisDownloaded(num, '', content);
       };
       xhr.send('lang=zhs');
-    }
+    },
   };
   addIRule('yunqi.qq.com', '云起书院', '.title>a>b', 'div.list>ul>li>a', 'div.list:has(span.f900)>ul>li>a');
   chapterRule['yunqi.qq.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       chapterRule['chuangshi.qq.com'].Deal(num, url);
-    }
+    },
   };
   addIRule('dushu.qq.com', '腾讯读书(只支持当前目录页)', 'h3>a', '#chapterList>div>ol>li>a', '#chapterList>div>ol>li:not(:has(span.free))>a');
   chapterRule['dushu.qq.com'] = {
-    Deal: function (num, url) {
-      var xhr = new window.XMLHttpRequest();
-      xhr.open('POST', window.location.origin + '/read/' + unsafeWindow.bid + '/' + url.match(/cid=(\d+)/)[1]);
+    Deal(num, url) {
+      const xhr = new window.XMLHttpRequest();
+      xhr.open('POST', `${window.location.origin}/read/${unsafeWindow.bid}/${url.match(/cid=(\d+)/)[1]}`);
       xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
       xhr.setRequestHeader('Accept', 'application/json, text/javascript, */*; q=0.01');
       xhr.responseType = 'json';
       xhr.onload = function () {
-        var content = xhr.response.Content;
-        content = $('.bookreadercontent', content).html().replace('最新章节由云起书院首发，最新最火最快网络小说首发地！（本站提供：传统翻页、瀑布阅读两种模式，可在设置中选择）', '').replace('本作品腾讯文学发表，请登录', '').replace(window.location.host, '').replace('浏览更多精彩作品。腾讯公司版权所有，未经允许不得复制', '');
+        let content = xhr.response.Content;
+        content = $('.bookreadercontent', content).html().replace('最新章节由云起书院首发，最新最火最快网络小说首发地！（本站提供：传统翻页、瀑布阅读两种模式，可在设置中选择）', '').replace('本作品腾讯文学发表，请登录', '')
+          .replace(window.location.host, '')
+          .replace('浏览更多精彩作品。腾讯公司版权所有，未经允许不得复制', '');
         thisDownloaded(num, '', content);
       };
       xhr.send('lang=zhs');
-    }
+    },
   };
   addIRule('book.qq.com', 'QQ阅读(只支持当前目录页)', 'h3>a', '#chapterList>div>ol>li>a', '#chapterList>div>ol>li:not(:has(span.free))>a');
   chapterRule['book.qq.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       chapterRule['dushu.qq.com'].Deal(num, url);
-    }
+    },
   };
   addIRule('book.tianya.cn', '天涯文学(只支持当前目录页)', 'h1>a', 'ul.dit-list>li>a', 'ul.dit-list>li:not(:has(.free))>a');
   chapterRule['book.tianya.cn'] = {
-    Deal: function (num, url) {
-      var urlArr = url.split('-');
+    Deal(num, url) {
+      const urlArr = url.split('-');
       GM_xmlhttpRequest({
         method: 'POST',
         url: 'http://app.3g.tianya.cn/webservice/web/read_chapter.jsp',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           Referer: 'http://app.3g.tianya.cn/webservice/web/proxy.html',
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        data: 'bookid=' + urlArr[1] + '&chapterid=' + urlArr[2],
+        data: `bookid=${urlArr[1]}&chapterid=${urlArr[2]}`,
         responseType: 'json',
-        onload: function (response) {
-          var info = response.response;
-          var name = info.data.curChapterName;
-          var content = info.data.chapterContent.replace(/<br>/g, '\r\n');
+        onload(response) {
+          const info = response.response;
+          const name = info.data.curChapterName;
+          const content = info.data.chapterContent.replace(/<br>/g, '\r\n');
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.ciweimao.com', '刺猬猫', 'h3', '.book-chapter-list a', '.book-chapter-list a:has(.icon-vip-s)', false, 1);
   chapterRule['www.ciweimao.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       if (!$(window).data('firstRun')) {
         $(window).data('firstRun', true);
-        $('head').append('<script type="text/javascript" src="' + window.location.protocol + '//www.ciweimao.com/resources/js/enjs.min.js"></script>');
+        $('head').append(`<script type="text/javascript" src="${window.location.protocol}//www.ciweimao.com/resources/js/enjs.min.js"></script>`);
       }
-      var chapterId = url.replace(window.location.protocol + '//www.ciweimao.com/chapter/book_chapter_detail/', '');
+      const chapterId = url.replace(`${window.location.protocol}//www.ciweimao.com/chapter/book_chapter_detail/`, '');
       GM_xmlhttpRequest({
         method: 'POST',
-        url: window.location.protocol + '//www.ciweimao.com/chapter/ajax_get_session_code',
+        url: `${window.location.protocol}//www.ciweimao.com/chapter/ajax_get_session_code`,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          Referer: window.location.protocol + '//www.ciweimao.com/chapter/book_chapter_detail/' + chapterId,
-          'X-Requested-With': 'XMLHttpRequest'
+          Referer: `${window.location.protocol}//www.ciweimao.com/chapter/book_chapter_detail/${chapterId}`,
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        data: 'chapter_id=' + chapterId,
+        data: `chapter_id=${chapterId}`,
         responseType: 'json',
-        onload: function (response) {
-          var json = response.response;
-          var accessKey = json.chapter_access_key;
+        onload(response) {
+          const json = response.response;
+          const accessKey = json.chapter_access_key;
           chapterRule['www.ciweimao.com'].Deal2(num, url, accessKey);
-        }
+        },
       });
     },
-    Deal2: function (num, url, accessKey) {
-      var chapterId = url.match(/\d+/)[0];
+    Deal2(num, url, accessKey) {
+      const chapterId = url.match(/\d+/)[0];
       GM_xmlhttpRequest({
         method: 'POST',
-        url: window.location.protocol + '//www.ciweimao.com/chapter/get_book_chapter_detail_info',
+        url: `${window.location.protocol}//www.ciweimao.com/chapter/get_book_chapter_detail_info`,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          Referer: window.location.protocol + '//www.ciweimao.com/chapter/book_chapter_detail/' + chapterId,
-          'X-Requested-With': 'XMLHttpRequest'
+          Referer: `${window.location.protocol}//www.ciweimao.com/chapter/book_chapter_detail/${chapterId}`,
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        data: 'chapter_id=' + chapterId + '&chapter_access_key=' + accessKey,
+        data: `chapter_id=${chapterId}&chapter_access_key=${accessKey}`,
         responseType: 'json',
-        onload: function (response) {
-          var json = response.response;
-          var i;
+        onload(response) {
+          const json = response.response;
+          let i;
           /* 以下代码来自https://www.ciweimao.com/resources/js/myEncrytExtend-min.js */
-          var s = {
+          const s = {
             content: json.chapter_content,
             keys: json.encryt_keys,
-            accessKey: accessKey
+            accessKey,
           };
-          var n = s.content;
-          var r = s.keys;
-          var t = s.keys.length;
-          var q = s.accessKey;
-          var o = q.split('');
-          var m = o.length;
-          var k = [];
+          let n = s.content;
+          const r = s.keys;
+          const t = s.keys.length;
+          const q = s.accessKey;
+          const o = q.split('');
+          const m = o.length;
+          const k = [];
           k.push(r[(o[m - 1].charCodeAt(0)) % t]);
           k.push(r[(o[0].charCodeAt(0)) % t]);
           for (i = 0; i < k.length; i++) {
             n = base64.decode(n);
-            var p = k[i];
-            var j = base64.encode(n.substr(0, 16));
-            var f = base64.encode(n.substr(16));
-            var h = unsafeWindow.CryptoJS.format.OpenSSL.parse(f);
+            const p = k[i];
+            const j = base64.encode(n.substr(0, 16));
+            const f = base64.encode(n.substr(16));
+            const h = unsafeWindow.CryptoJS.format.OpenSSL.parse(f);
             n = unsafeWindow.CryptoJS.AES.decrypt(h, unsafeWindow.CryptoJS.enc.Base64.parse(p), {
               iv: unsafeWindow.CryptoJS.enc.Base64.parse(j),
-              format: unsafeWindow.CryptoJS.format.OpenSSL
+              format: unsafeWindow.CryptoJS.format.OpenSSL,
             });
             if (i < k.length - 1) {
               n = n.toString(unsafeWindow.CryptoJS.enc.Base64);
               n = base64.decode(n);
             }
           }
-          var content = n.toString(unsafeWindow.CryptoJS.enc.Utf8);
+          const content = n.toString(unsafeWindow.CryptoJS.enc.Utf8);
           thisDownloaded(num, '', content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.3gsc.com.cn', '3G书城', 'h1>a', '.menu-area>p>a', '.menu-area>p>a:has(span.vip)');
   addCRule('www.3gsc.com.cn', 'h1', '.menu-area');
@@ -866,20 +869,20 @@ function addRule () {
   addRRule('www.8kana.com', '本书连载自免费原创小说网站.*');
   addIRule('www.heiyan.com', '黑岩', 'h1.page-title', 'div.bd>ul>li>a', 'div.bd>ul>li>a.isvip');
   chapterRule['www.heiyan.com'] = {
-    Deal: function (num, url) {
-      var urlTrue = 'http://a.heiyan.com/ajax/chapter/content/' + url.replace(/.*\//, '');
+    Deal(num, url) {
+      const urlTrue = `http://a.heiyan.com/ajax/chapter/content/${url.replace(/.*\//, '')}`;
       GM_xmlhttpRequest({
         method: 'GET',
         url: urlTrue,
         responseType: 'json',
-        onload: function (response) {
-          var info = response.response;
-          var name = info.chapter.title;
-          var content = info.chapter.htmlContent;
+        onload(response) {
+          const info = response.response;
+          const name = info.chapter.title;
+          const content = info.chapter.htmlContent;
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('b.faloo.com', '飞卢', 'h1.a_24b', '.td_0>a', '.td_0>a[href^="http://b.faloo.com/vip/"]');
   addCRule('b.faloo.com', '#title>h1', '#content');
@@ -895,51 +898,54 @@ function addRule () {
   addRRule('book.zhulang.com', '\\s+||| ', '<div class="textinfo">.*</div>', '<p> <cite>.*</p>');
   addIRule('book.hjsm.tom.com', '幻剑书盟', '.title>h2', '.ocon>ul>li>a', '.ocon>ul>li:has(img)>a');
   chapterRule['book.hjsm.tom.com'] = {
-    Deal: function (num, url) {
-      var urlArr = url.split(/\/|\./);
-      const urlTrue = 'http://book.hjsm.tom.com/' + urlArr[6].substring(0, 2) + '/' + urlArr[6] + '/' + urlArr[7] + '.js';
+    Deal(num, url) {
+      const urlArr = url.split(/\/|\./);
+      const urlTrue = `http://book.hjsm.tom.com/${urlArr[6].substring(0, 2)}/${urlArr[6]}/${urlArr[7]}.js`;
       GM_xmlhttpRequest({
         method: 'GET',
         url: urlTrue,
-        onload: function (response) {
-          var content = response.response.replace('document.write("<p>', '').replace('");', '');
-          content = eval('\'' + content + '\'');
+        onload(response) {
+          let content = response.response.replace('document.write("<p>', '').replace('");', '');
+          content = eval(`'${content}'`);
           thisDownloaded(num, '', content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.kanshu.com', '看书网', '.mu_h1>h1', '.mulu_list>li>a', '.mulu_list>li:has(span)>a');
   addCRule('www.kanshu.com', 'h1', '.yd_text2', 1);
   addRRule('www.kanshu.com', '\\s+||| ', '<span id="avg_link">.*');
   addIRule('vip.book.sina.com.cn', '微博读书-书城', 'h1.book_name', '.chapter>span>a', '.chapter>span:has(i)>a');
   chapterRule['vip.book.sina.com.cn'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: url,
-        onload: function (response) {
-          var name = $('.sr-play-box-scroll-t-path>span', response.response).text();
-          var content = response.response.replace(/\s+/g, ' ').replace(/.*chapterContent ="(.*?)";.*/, '$1');
-          content = eval('\'' + content + '\'');
+        url,
+        onload(response) {
+          const name = $('.sr-play-box-scroll-t-path>span', response.response).text();
+          let content = response.response.replace(/\s+/g, ' ').replace(/.*chapterContent ="(.*?)";.*/, '$1');
+          content = eval(`'${content}'`);
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.lcread.com', '连城读书', '.bri>table>tbody>tr>td>h1', '#abl4>table>tbody>tr>td>a', '#abl4>table>tbody>tr>td>a[href^="http://vipbook.lc1234.com/"]');
   addCRule('www.lcread.com', 'h2', '#ccon', 1);
   addIRule('www.motie.com', '磨铁中文网', '.title>.name', '.catebg a', '.catebg a:has([alt="vip"])');
   chapterRule['www.motie.com'] = {
-    Deal: function (num, url) {
-      var info = url.match(/\d+/g);
+    Deal(num, url) {
+      const info = url.match(/\d+/g);
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'http://www.motie.com/ajax/chapter/' + info[0] + '/' + info[1],
-        onload: function (response) {
-          var name = $('.chaptername', response.response).text();
-          var show = $('style', response.response).text().trim().replace(/{\s+/g, '{').replace(/\s+}/g, '}').replace(/ {/g, '{').split(' ');
-          for (var i = 0; i < show.length; i++) {
+        url: `http://www.motie.com/ajax/chapter/${info[0]}/${info[1]}`,
+        onload(response) {
+          const name = $('.chaptername', response.response).text();
+          let show = $('style', response.response).text().trim().replace(/{\s+/g, '{')
+            .replace(/\s+}/g, '}')
+            .replace(/ {/g, '{')
+            .split(' ');
+          for (let i = 0; i < show.length; i++) {
             if (show[i].match(/none/gi)) {
               show.splice(i, 1);
               i--;
@@ -947,36 +953,41 @@ function addRule () {
               show[i] = show[i].replace(/{.*?}/, '');
             }
           }
-          show = '.note' + show.join(',.note');
-          var content = $(show, response.response).text();
+          show = `.note${show.join(',.note')}`;
+          const content = $(show, response.response).text();
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.shuhai.com', '书海小说网', 'h3', '.box_chap>ul>li>a', '.box_chap>ul>li:has(em)>a');
   addCRule('www.shuhai.com', 'h1', '#readcon');
   addIRule('www.xiang5.com', '香网', '.lb>h2', '.lb>table>tbody>tr>td>a');
   chapterRule['www.xiang5.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: url,
-        onload: function (response) {
+        url,
+        onload(response) {
           if ($('.vipdy', response.response).length > 0) {
             $(window).data('downloadList', []);
-            for (var i = num; i < $(window).data('dataDownload').length; i++) {
+            for (let i = num; i < $(window).data('dataDownload').length; i++) {
               thisDownloaded(num, 'Vip章节', '', 'delete');
             }
             return;
           }
-          var name = $('h1', response.response).text();
-          var content = $('.xsDetail', response.response).html().replace(/\s+/g, ' ');
-          content = content.replace(/<font>.*?<\/font>/g, '').replace(/<i>.*?<\/i>/g, '').replace(/<abbr>.*?<\/abbr>/g, '').replace(/<dfn>.*?<\/dfn>/g, '').replace(/<u>.*?<\/u>/g, '').replace(/<ins>.*?<\/ins>/g, '').replace(/<kbd>.*?<\/kbd>/g, '').replace(/<tt>.*?<\/tt>/g, '').replace(/微信搜“香网小说”.*/, '');
+          const name = $('h1', response.response).text();
+          let content = $('.xsDetail', response.response).html().replace(/\s+/g, ' ');
+          content = content.replace(/<font>.*?<\/font>/g, '').replace(/<i>.*?<\/i>/g, '').replace(/<abbr>.*?<\/abbr>/g, '').replace(/<dfn>.*?<\/dfn>/g, '')
+            .replace(/<u>.*?<\/u>/g, '')
+            .replace(/<ins>.*?<\/ins>/g, '')
+            .replace(/<kbd>.*?<\/kbd>/g, '')
+            .replace(/<tt>.*?<\/tt>/g, '')
+            .replace(/微信搜“香网小说”.*/, '');
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('read.fmx.cn', '凤鸣轩小说网', '.art_listmain_top>h1', '.art_fnlistbox>span>a,.art_fnlistbox_vip>ul>li>span>a', '.art_fnlistbox_vip>ul>li>span>a');
   addCRule('read.fmx.cn', 'h1', '#content', 1);
@@ -990,64 +1001,64 @@ function addRule () {
   addCRule('www.tadu.com', 'h2', '#partContent');
   addIRule('yuedu.163.com', '网易云阅读', 'h2.title,h3', '.item>a', '.vip>a');
   chapterRule['yuedu.163.com'] = {
-    Deal: function (num, url) {
-      var urlArr = url.split('/');
+    Deal(num, url) {
+      const urlArr = url.split('/');
       GM_xmlhttpRequest({
         method: 'GET',
-        url: window.location.protocol + '//yuedu.163.com/getArticleContent.do?sourceUuid=' + urlArr[4] + '&articleUuid=' + urlArr[5],
+        url: `${window.location.protocol}//yuedu.163.com/getArticleContent.do?sourceUuid=${urlArr[4]}&articleUuid=${urlArr[5]}`,
         responseType: 'json',
-        onload: function (response) {
-          var content = response.response.content;
+        onload(response) {
+          let { content } = response.response;
           content = base64.decode(content);
           content = base64.utf8to16(content);
-          var name = $('h1', content).text();
+          const name = $('h1', content).text();
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('guofeng.yuedu.163.com', '国风中文网', 'h2.title,h3', '.item>a', '.vip>a');
   chapterRule['guofeng.yuedu.163.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       chapterRule['yuedu.163.com'].Deal(num, url);
-    }
+    },
   };
   addIRule('caiwei.yuedu.163.com', '采薇书院', 'h2.title,h3', '.item>a', '.vip>a');
   chapterRule['caiwei.yuedu.163.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       chapterRule['yuedu.163.com'].Deal(num, url);
-    }
+    },
   };
   addIRule('ebook.longmabook.com', '龍馬文化線上文學城', '.css_td>b>a', '.uk-table>tbody>tr>td>a:nth-child(2)');
   chapterRule['ebook.longmabook.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: url,
-        onload: function (response) {
-          var urlNext = response.response.replace(/\s+/g, ' ').replace(/.*iframe\.src="(.*?)";.*/, '$1');
-          var name = $('.uk-alert>b:nth-child(3)>font', response.response).text();
+        url,
+        onload(response) {
+          const urlNext = response.response.replace(/\s+/g, ' ').replace(/.*iframe\.src="(.*?)";.*/, '$1');
+          const name = $('.uk-alert>b:nth-child(3)>font', response.response).text();
           chapterRule['ebook.longmabook.com'].Deal2(num, urlNext, url, name);
-        }
+        },
       });
     },
-    Deal2: function (num, url, urlReferer, nameRaw) {
+    Deal2(num, url, urlReferer, nameRaw) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: window.location.protocol + '//ebook.longmabook.com' + url,
+        url: `${window.location.protocol}//ebook.longmabook.com${url}`,
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
           Referer: urlReferer,
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        onload: function (response) {
-          var name = nameRaw;
-          var content = $('#ebookcontent', response.response).html();
+        onload(response) {
+          const name = nameRaw;
+          let content = $('#ebookcontent', response.response).html();
           content = content.replace(/<font class="OutStrRnds">.*?<\/font>/g, '');
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.yueloo.com', '阅路小说网', 'h3', '#container1>table>tbody>tr>td>a', '#container1>table>tbody>tr>td:has(span)>a');
   addCRule('www.yueloo.com', 'h2', '.reed', 1);
@@ -1064,75 +1075,75 @@ function addRule () {
   addCRule('www.hxtk.com', 'h2', '#read_txt');
   addIRule('www.hongshu.com', '红薯中文网', 'h1>a', '.columns>li>a', '.columns>li:has(span.vip)>a');
   chapterRule['www.hongshu.com'] = {
-    Deal: function (num, url) {
-      var urlArr = url.split(/\/|-|\./);
+    Deal(num, url) {
+      const urlArr = url.split(/\/|-|\./);
       GM_xmlhttpRequest({
         method: 'POST',
-        url: window.location.protocol + '//www.hongshu.com/bookajax.do',
+        url: `${window.location.protocol}//www.hongshu.com/bookajax.do`,
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         },
-        data: 'method=getchptkey&bid=' + urlArr[6] + '&cid=' + urlArr[8],
+        data: `method=getchptkey&bid=${urlArr[6]}&cid=${urlArr[8]}`,
         responseType: 'json',
-        onload: function (response) {
-          var key = response.response.key;
+        onload(response) {
+          const { key } = response.response;
           chapterRule['www.hongshu.com'].Deal2(num, url, key);
-        }
+        },
       });
     },
-    Deal2: function (num, url, key) {
-      var urlArr = url.split(/\/|-|\./);
+    Deal2(num, url, key) {
+      const urlArr = url.split(/\/|-|\./);
       GM_xmlhttpRequest({
         method: 'POST',
-        url: window.location.protocol + '//www.hongshu.com/bookajax.do',
+        url: `${window.location.protocol}//www.hongshu.com/bookajax.do`,
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         },
-        data: 'method=getchpcontent&bid=' + urlArr[6] + '&jid=' + urlArr[7] + '&cid=' + urlArr[8],
+        data: `method=getchpcontent&bid=${urlArr[6]}&jid=${urlArr[7]}&cid=${urlArr[8]}`,
         responseType: 'json',
-        onload: function (response) {
-          var json = response.response;
-          var name = json.chptitle;
-          var content = json.content;
+        onload(response) {
+          const json = response.response;
+          const name = json.chptitle;
+          let { content } = json;
           content = unsafeWindow.utf8to16(unsafeWindow.hs_decrypt(unsafeWindow.base64decode(content), key));
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.qwsy.com', '蔷薇书院', 'h1', '.td_con>a', '.td_con:has(span[style="color:#ff0000;"])>a');
   chapterRule['www.qwsy.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'http://script.qwsy.com/html/js/' + url.replace('http://www.qwsy.com/read.aspx?cid=', '') + '.js',
-        onload: function (response) {
-          var content = response.response.replace('document.write("<p>', '').replace('");', '').replace(/<font.*?font>/g, '');
+        url: `http://script.qwsy.com/html/js/${url.replace('http://www.qwsy.com/read.aspx?cid=', '')}.js`,
+        onload(response) {
+          const content = response.response.replace('document.write("<p>', '').replace('");', '').replace(/<font.*?font>/g, '');
           thisDownloaded(num, '', content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.rongshuxia.com', '榕树下', 'strong>a', '.lists>ul>li>a');
   chapterRule['www.rongshuxia.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: url,
-        onload: function (response) {
-          var name = $('strong', response.response).text();
-          var content = $('#new_cpt_content', response.response).html();
+        url,
+        onload(response) {
+          const name = $('strong', response.response).text();
+          const content = $('#new_cpt_content', response.response).html();
           if (content.length === 9) {
-            for (var i = num; i < $(window).data('dataDownload').length; i++) {
+            for (let i = num; i < $(window).data('dataDownload').length; i++) {
               thisDownloaded(num, 'Vip章节', '', 'delete');
             }
             $(window).data('downloadList', []);
             return;
           }
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('vip.shulink.com', '书连', '.atitle', '.index>dd>a', '.index>dd:has(em)>a');
   addCRule('vip.shulink.com', '.atitle', '#acontent', 1);
@@ -1155,18 +1166,18 @@ function addRule () {
   addRRule('www.yokong.com', '\\s+||| ', '请记住本站：悠空网.*');
   addIRule('www.chuangbie.com', '创别书城', '.con_02', '.con_05 a', '.con_05 li:has(img)>a');
   chapterRule['www.chuangbie.com'] = {
-    Deal: function (num, url) {
-      var info = url.match(/\d+/g);
+    Deal(num, url) {
+      const info = url.match(/\d+/g);
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'http://www.chuangbie.com/book/load_chapter_content?book_id=' + info[0] + '&chapter_id=' + info[1],
+        url: `http://www.chuangbie.com/book/load_chapter_content?book_id=${info[0]}&chapter_id=${info[1]}`,
         responseType: 'json',
-        onload: function (response) {
-          var data = response.response;
+        onload(response) {
+          const data = response.response;
           thisDownloaded(num, data.content.chapter_name, data.content.chapter_content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('mm.msxf.net', '陌上香坊', 'h1>a', '.chaptertable>tbody>tr>td>a', '.chaptertable>tbody>tr>td:has(font.ico_vip)>a');
   addCRule('mm.msxf.net');
@@ -1176,13 +1187,13 @@ function addRule () {
   addCRule('www.popo.tw', '.read-content>h1', '.read-content>dl');
   addIRule('yuedu.baidu.com', '百度阅读', '.book-title', '#catalog-list>.level1>a');
   chapterRule['yuedu.baidu.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       const pn = url.match(/\?pn=(\d+)/)[1];
       GM_xmlhttpRequest({
         method: 'GET',
-        url: unsafeWindow.__fisData.get('bdjsonUrl') + '&type=json&cn=' + pn,
+        url: `${unsafeWindow.__fisData.get('bdjsonUrl')}&type=json&cn=${pn}`,
         responseType: 'json',
-        onload: function (res) {
+        onload(res) {
           const arr = res.response.c;
           let name = arr[0].c;
           let content = '';
@@ -1191,17 +1202,17 @@ function addRule () {
             if (!arr[i].c) continue;
             if (arr[i].c instanceof Array) {
               for (let j = 0; j < arr[i].c.length; j++) {
-                if (arr[i].c[j].c) content += arr[i].c[j].c + '<br>';
+                if (arr[i].c[j].c) content = `${content}${arr[i].c[j].c}<br>`;
               }
             } else {
-              content += arr[i].c + '<br>';
-              if (arr[i].t !== 'p') content += '<br>';
+              content = `${content}${arr[i].c}<br>`;
+              if (arr[i].t !== 'p') content = `${content}<br>`;
             }
           }
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   // 轻小说
   addIRule('www.wenku8.com', '轻小说文库', '#title', '.css>tbody>tr>td>a');
@@ -1216,243 +1227,243 @@ function addRule () {
   addCRule('book.suixw.com', '#title', '#content', 1);
   addIRule('www.iqing.com', '轻文轻小说', 'h1', '.chapter a', '.lock>a');
   chapterRule['www.iqing.com'] = {
-    Deal: function (num, url) {
-      var urlArr = url.split('/');
+    Deal(num, url) {
+      const urlArr = url.split('/');
       GM_xmlhttpRequest({
         method: 'GET',
-        url: window.location.protocol + '//poi.iqing.com/content/' + urlArr[4] + '/chapter/',
+        url: `${window.location.protocol}//poi.iqing.com/content/${urlArr[4]}/chapter/`,
         headers: {
           Referer: url,
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
         },
         responseType: 'json',
-        onload: function (response) {
-          var json = response.response;
-          var name = json.chapter_title;
-          var content = '';
-          for (var i = 0; i < json.results.length; i++) {
+        onload(response) {
+          const json = response.response;
+          const name = json.chapter_title;
+          let content = '';
+          for (let i = 0; i < json.results.length; i++) {
             if (json.results[i].type === 0) {
-              content += json.results[i].value + '\r\n';
+              content = `${content}${json.results[i].value}\r\n`;
             } else if (json.results[i].type === 1 && $('.ndMain [name=image]')[0].checked) {
-              content += '<img src="' + json.results[i].value + '"></img>';
+              content = `${content}<img src="${json.results[i].value}"></img>`;
               threadImg(json.results[i].value);
               imageTask();
             }
           }
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   // 盗贴
   addIRule('www.chuanyue8.net', '穿越小说吧', '.bigname', '.zjlist4>ol>li>a');
   chapterRule['www.chuanyue8.net'] = {
-    Deal: function (num, url) {
-      var urlArr = url.split(/\/|\./);
+    Deal(num, url) {
+      const urlArr = url.split(/\/|\./);
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'http://www.chuanyue8.net/modules/article/17mb_Content.php?aid=' + urlArr[9] + '&cid=' + urlArr[10],
+        url: `http://www.chuanyue8.net/modules/article/17mb_Content.php?aid=${urlArr[9]}&cid=${urlArr[10]}`,
         headers: {
           Referer: url,
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        onload: function (response) {
-          var content = response.response;
+        onload(response) {
+          const content = response.response;
           thisDownloaded(num, '', content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.22ff.com', '爱书网', '.tname>a', '.main>.neirong>.clc>a');
   chapterRule['www.22ff.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: url,
+        url,
         overrideMimeType: 'text/html; charset=gb2312',
-        onload: function (response) {
-          var name = $('h1', response.response).text();
+        onload(response) {
+          const name = $('h1', response.response).text();
           if ($('script:contains(output)', response.response).length > 0) {
             chapterRule['www.22ff.com'].Deal2(num, url, name);
           } else {
-            var content = $('#chapter_content', response.response).html();
+            const content = $('#chapter_content', response.response).html();
             thisDownloaded(num, name, content);
           }
-        }
+        },
       });
     },
-    Deal2: function (num, url, name) {
-      var urlArr = url.split('/');
-      var aid = urlArr[4];
-      var files = urlArr[5];
+    Deal2(num, url, name) {
+      const urlArr = url.split('/');
+      const aid = urlArr[4];
+      const files = urlArr[5];
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'http://121.40.22.93/novel/' + (Math.floor(aid / 1000) + 1) + '/' + (aid - Math.floor(aid / 1000) * 1000) + '/' + files + '.txt',
+        url: `http://121.40.22.93/novel/${Math.floor(aid / 1000) + 1}/${aid - Math.floor(aid / 1000) * 1000}/${files}.txt`,
         overrideMimeType: 'text/html; charset=gb2312',
-        onload: function (response) {
-          var content = response.response.replace(/document\.writeln\('(.*)'\);/, '$1');
+        onload(response) {
+          const content = response.response.replace(/document\.writeln\('(.*)'\);/, '$1');
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.xntk.net', '567中文', 'h1', '.centent>ul>li>a');
   chapterRule['www.xntk.net'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: url,
+        url,
         overrideMimeType: 'text/html; charset=gb2312',
-        onload: function (response) {
-          var name = $('.max', response.response).text();
+        onload(response) {
+          const name = $('.max', response.response).text();
           if ($('#booktext>script', response.response).length > 0) {
             chapterRule['www.xntk.net'].Deal2(num, $('#booktext>script', response.response).attr('src'), name);
           } else {
-            var content = $('#booktext', response.response).html();
+            const content = $('#booktext', response.response).html();
             thisDownloaded(num, name, content);
           }
-        }
+        },
       });
     },
-    Deal2: function (num, url, name) {
+    Deal2(num, url, name) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: url,
+        url,
         overrideMimeType: 'text/html; charset=gb2312',
-        onload: function (response) {
-          var content = response.response.replace(/document\.write\('(.*)'\);/, '$1');
+        onload(response) {
+          const content = response.response.replace(/document\.write\('(.*)'\);/, '$1');
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.kong.so', '悟空追书', 'h1', '.card~.card>.body>.dirlist>li>a');
   chapterRule['www.kong.so'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
-        url: url,
-        onload: function (response) {
-          var name = $('h1>a', response.response).text();
-          var data = response.response.match(/json',{siteid:'(.*?)',url:'(.*?)'}/);
+        url,
+        onload(response) {
+          const name = $('h1>a', response.response).text();
+          const data = response.response.match(/json',{siteid:'(.*?)',url:'(.*?)'}/);
           chapterRule['www.kong.so'].Deal2(num, name, data, url);
-        }
+        },
       });
     },
-    Deal2: function (num, name, data, url) {
+    Deal2(num, name, data, url) {
       GM_xmlhttpRequest({
         method: 'POST',
         url: 'http://www.kong.so/novelsearch/chapter/transcode.json',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
           Referer: url,
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
         },
-        data: 'siteid=' + data[1] + '&url=' + data[2],
+        data: `siteid=${data[1]}&url=${data[2]}`,
         responseType: 'json',
-        onload: function (response) {
-          var content = response.response.data;
+        onload(response) {
+          const content = response.response.data;
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.hunhun520.com', '混混小说网', 'h1', '#list>dl>dd>a,#Chapters>ul>li>a');
   chapterRule['www.hunhun520.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       GM_xmlhttpRequest({
         method: 'GET',
         overrideMimeType: 'text/html; charset=gb2312',
-        url: url,
-        onload: function (response) {
-          var name = $('h1', response.response).text();
-          var content = $('#content', response.response).html();
+        url,
+        onload(response) {
+          const name = $('h1', response.response).text();
+          const content = $('#content', response.response).html();
           chapterRule['www.hunhun520.com'].Deal2(num, name, content, url);
-        }
+        },
       });
     },
-    Deal2: function (num, name, content, url) {
+    Deal2(num, name, content, url) {
       GM_xmlhttpRequest({
         method: 'GET',
         overrideMimeType: 'text/html; charset=gb2312',
         url: url.replace('.html', '_2.html'),
-        onload: function (response) {
-          content += $('#content', response.response).html();
+        onload(response) {
+          content = content + $('#content', response.response).html();
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.xiaoshuokan.com', '好看小说网', 'h1', '.booklist a');
   chapterRule['www.xiaoshuokan.com'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       if (!$(window).data('firstRun')) {
         GM_xmlhttpRequest({
           method: 'GET',
-          url: url,
-          onload: function (res) {
-            var name = $('center>h1', res.response).text();
-            var bid = window.location.host.match('xiaoshuokan.com') ? 'bid' : 'mid';
-            bid = res.response.replace(/\s+/g, ' ').match(new RegExp('"' + bid + '":"(.*?)"'));
+          url,
+          onload(res) {
+            const name = $('center>h1', res.response).text();
+            let bid = window.location.host.match('xiaoshuokan.com') ? 'bid' : 'mid';
+            bid = res.response.replace(/\s+/g, ' ').match(new RegExp(`"${bid}":"(.*?)"`));
             if (bid) {
               $(window).data('firstRun', bid[1]);
               chapterRule['www.xiaoshuokan.com'].Deal2(num, name, url);
             } else {
-              var content = res.response.replace(/\s+/g, ' ').match(/<!--GGADEND-->(.*?)<!--content-->/)[1];
+              const content = res.response.replace(/\s+/g, ' ').match(/<!--GGADEND-->(.*?)<!--content-->/)[1];
               thisDownloaded(num, name, content);
             }
-          }
+          },
         });
       } else {
         chapterRule['www.xiaoshuokan.com'].Deal2(num, '', url);
       }
     },
-    Deal2: function (num, name, url) {
-      var bid = $(window).data('firstRun');
-      var cid = url.split(/\/|\./)[7];
-      var pre = window.location.host.match('xiaoshuokan.com') ? 'soso2.xiaoshuokan.com/call/chapreadajax.ashx?bid=' : 'json1.xiaoshuokan.com:81/read.php?mid=';
+    Deal2(num, name, url) {
+      const bid = $(window).data('firstRun');
+      const cid = url.split(/\/|\./)[7];
+      const pre = window.location.host.match('xiaoshuokan.com') ? 'soso2.xiaoshuokan.com/call/chapreadajax.ashx?bid=' : 'json1.xiaoshuokan.com:81/read.php?mid=';
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'http://' + pre + bid + '&cid=' + cid + '&c=gbk',
-        onload: function (response) {
-          var content = response.response;
+        url: `http://${pre}${bid}&cid=${cid}&c=gbk`,
+        onload(response) {
+          const content = response.response;
           thisDownloaded(num, name, content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.3zcn.org', '三藏中文网', 'h1', '.booklist a');
   chapterRule['www.3zcn.org'] = {
-    Deal: function (num, url) {
+    Deal(num, url) {
       chapterRule['www.xiaoshuokan.com'].Deal(num, url);
-    }
+    },
   };
   addIRule('www.ggdown.com', '格格党', 'h1', '.chapterlist a');
   chapterRule['www.ggdown.com'] = {
-    Deal: function (num, url) {
-      var urlArr = url.split(/\/|\./);
+    Deal(num, url) {
+      const urlArr = url.split(/\/|\./);
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'http://www.ggdown.com/t/t.php?id=/' + urlArr[5] + '&did=' + urlArr[6] + '&qid=' + urlArr[7] + '&page=0',
-        onload: function (res) {
-          var content = res.response.replace(/<font.*?<\/font>/g, '');
+        url: `http://www.ggdown.com/t/t.php?id=/${urlArr[5]}&did=${urlArr[6]}&qid=${urlArr[7]}&page=0`,
+        onload(res) {
+          const content = res.response.replace(/<font.*?<\/font>/g, '');
           thisDownloaded(num, '', content);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.daizitouxiang.com', '笔趣阁', 'h1', '.book-chapter-list a:gt(8)');
   chapterRule['www.daizitouxiang.com'] = {
-    Deal: function (num, url) {
-      var urlId = url.match(/\d+/g);
+    Deal(num, url) {
+      const urlId = url.match(/\d+/g);
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'https://www.daizitouxiang.com/files/article/html/' + Math.floor(urlId[1] / 1000) + '/' + urlId[1] + '/' + urlId[2] + '.html',
-        onload: function (res) {
+        url: `https://www.daizitouxiang.com/files/article/html/${Math.floor(urlId[1] / 1000)}/${urlId[1]}/${urlId[2]}.html`,
+        onload(res) {
           thisDownloaded(num, '', res.response);
-        }
+        },
       });
-    }
+    },
   };
   addIRule('www.blwen.com', 'bl文库', 'h2', '.jogger2>li:gt(1):lt(-1)>a');
   addCRule('www.blwen.com', 'h2', '.artz', 1);
@@ -1671,9 +1682,9 @@ function addRule () {
   addCRule('www.diyibanzhu.xyz', 'h2', '.box_box', 1);
 }
 
-function addUI () {
-  $('<div id="nd"></div>').html(function () {
-    var main = [
+function addUI() {
+  $('<div id="nd"></div>').html(() => {
+    const main = [
       '<div class="ndMain ndBoxCenter">',
       '  <button name="hide">×</button>',
       '  <div>',
@@ -1736,9 +1747,9 @@ function addUI () {
       '    <button class="ndToggle" name="Customize">自定义站点规则</button>',
       '    <button class="ndToggle" name="Console">控制台</button>',
       '  </div>',
-      '</div>'
+      '</div>',
     ];
-    var customize = [
+    const customize = [
       '<div class="ndCustomize ndBoxCenter">',
       '  <button name="hide">×</button>',
       '  <div>',
@@ -1761,124 +1772,123 @@ function addUI () {
       '    <span>全局替换规则(一行一条)(修改时自动保存): </span>',
       '    <textarea name="replace"></textarea>',
       '  </div>',
-      '</div>'
+      '</div>',
     ];
-    var log = [
+    const log = [
       ' <div class="ndLog">',
       '  <button name="hide">×</button>',
       '  <progress class="ndProgress" value="0" max="1" title="点击清除已完成"></progress>',
       '  <div class="ndTask"></div>',
       '  <div class="ndTaskImage"></div>',
-      '</div>'
+      '</div>',
     ];
-    var test = [
+    const test = [
       '<div class="ndTestArea">',
       '  <button name="hide" style="position:fixed;top:0;right:0;border:1px solid #000;left:auto;">×</button>',
       '  <textarea></textarea>',
-      '</div>'
+      '</div>',
     ];
-    var consoleDiv = [
+    const consoleDiv = [
       '<div class="ndConsole ndBoxCenter">',
       '  <button name="hide">×</button>',
-      '</div>'
+      '</div>',
     ];
-    var other = [
-      '<div class="ndFinderArea"></div>'
+    const other = [
+      '<div class="ndFinderArea"></div>',
     ];
     return main.concat(customize, log, test, consoleDiv, other).join('');
   }).appendTo('body');
 }
 
-function addStyle () {
-  $('<style></style>').text(function () {
-    return [
-      '#nd>div{z-index:999999;position:fixed;background-color:white;border:1px solid black;display:none;    text-align:center;color:black;overflow-x:hidden;overflow-y:auto;}',
-      '#nd>div>div{padding:2px}',
-      '#nd>div>div *,#nd>div>div *:before,#nd>div>div *:after{margin:1px}',
-      '#nd>div>div:nth-child(2n+1){background-color:#DADADA;}',
-      '#nd>div>div:nth-child(2n){background-color:#FAFAFA;}',
-      '#nd span{float:none;background:none;}',
-      '#nd input:hover,#nd>div select:hover,#nd>div button:hover{box-shadow:2px 2px 2px #888888;}',
-      '#nd input[type=number],#nd>div input[type=text]{border:1px solid #000;opacity:1;}',
-      '#nd input[type=number],#nd input[name=chapterPre],#nd input[name=chapterNumber],#nd input[name=chapterSuf]{width:36px;}',
-      '#nd input[type=checkbox]{position:relative;top:0;opacity:1;}',
-      '#nd input[type=number]{-moz-appearance:textfield;}',
-      '#nd input[type=number]::-webkit-inner-spin-button,#nd input[type=number]::-webkit-outer-spin-button{-webkit-appearance: none;margin: 0;}',
-      '#nd button{border:1px solid #000;cursor:pointer;padding:2px 3px;}',
-      '#nd button[name=hide]{z-index:1000001;float:right;padding:3px 8px;position:relative;left:1px;top:-1px;border-left:none;border-bottom:none;}',
-      '#nd button[name=hide]:hover{background-color:#FF0000;color:#FFF;}',
-      '#nd textarea{resize:none;display:block;font-family:Consolas,Menlo;font-size:16px;}',
-      // ndLog
-      '.ndLog{right:0px;bottom:0px;width:300px;}',
-      '.ndLog progress:after{content:attr(value) " / "attr(max);}',
-      '.ndLog div:after{float:right}',
-      '.ndLog div.ndIng:after{content:"下载中";color:#0000FF;}',
-      '.ndLog div.ndOk:after{content:"完成";color:#00FF00;}',
-      '.ndLog div.ndError:after{content:"失败";color:#FF0000;}',
-      '.ndLog div.ndTimeout:after{content:"超时";color:#FF0000;}',
-      '.ndLog div.ndDelete:after{content:"待删除";color:#FF0000;}',
-      '.ndProgress{cursor:pointer;width:calc(100% - 50px);margin:4px;}',
-      '.ndTask,.ndTaskImage{overflow-y:auto;overflow-x:hidden;font-size:12px;}',
-      '.ndTask{max-height:300px;width:296px;white-space:nowrap;counter-reset:downloadOrder;text-align:justify;}',
-      '.ndTask>div>a{display:inline-block;overflow:hidden;text-overflow:ellipsis;width:206px;}',
-      '.ndTask>div:before{content:counter(downloadOrder) ":";counter-increment:downloadOrder;float:left;}',
-      '.ndTaskImage{display:none;max-height:100px;counter-reset:imageOrder;}',
-      '.ndTaskImage>div>progress{width:calc(100% - 80px);}',
-      '.ndTaskImage>div>a:before{content:"pic " counter(imageOrder);counter-increment:imageOrder;}',
-      // 章节标记
-      'body{counter-reset:chapterOrder;}',
-      '.ndPre,.ndPreVip{float:left;width:auto;}',
-      '.ndPre:before,.ndPreVip:before{content:counter(chapterOrder) "-";counter-increment:chapterOrder;}',
-      '.ndPre{color:#000;}',
-      '.ndPreVip{color:#FF0000;}',
-      // 测试区域
-      '.ndTestArea>*{position:fixed;top:0;right:0;z-index:1;}',
-      '.ndTestArea>textarea{width:calc(100% - 20px)!important;height:calc(100% - 20px)!important;background-color:#FFF;margin:10px;z-index:1000000;}',
-      // 自定义站点规则
-      '.ndCustomize{width:100%;}',
-      '.ndCustomize textarea{overflow:hidden;width:calc(100% - 20px)!important;height:60px;background-color:#FFF;margin:10px;z-index:1000000;}',
-      // 默认情况隐藏某些元素
-      '.ndChapterArea>div,.ndBatchArea>div{display:none;}',
-      '.ndTitle,.ndBatchUrl,.ndSplitInput{width:60%;}'
-    ].join('');
-  }).appendTo('head');
+function addStyle() {
+  $('<style></style>').text(() => [
+    '#nd>div{z-index:999999;position:fixed;background-color:white;border:1px solid black;display:none;    text-align:center;color:black;overflow-x:hidden;overflow-y:auto;}',
+    '#nd>div>div{padding:2px}',
+    '#nd>div>div *,#nd>div>div *:before,#nd>div>div *:after{margin:1px}',
+    '#nd>div>div:nth-child(2n+1){background-color:#DADADA;}',
+    '#nd>div>div:nth-child(2n){background-color:#FAFAFA;}',
+    '#nd span{float:none;background:none;}',
+    '#nd input:hover,#nd>div select:hover,#nd>div button:hover{box-shadow:2px 2px 2px #888888;}',
+    '#nd input[type=number],#nd>div input[type=text]{border:1px solid #000;opacity:1;}',
+    '#nd input[type=number],#nd input[name=chapterPre],#nd input[name=chapterNumber],#nd input[name=chapterSuf]{width:36px;}',
+    '#nd input[type=checkbox]{position:relative;top:0;opacity:1;}',
+    '#nd input[type=number]{-moz-appearance:textfield;}',
+    '#nd input[type=number]::-webkit-inner-spin-button,#nd input[type=number]::-webkit-outer-spin-button{-webkit-appearance: none;margin: 0;}',
+    '#nd button{border:1px solid #000;cursor:pointer;padding:2px 3px;}',
+    '#nd button[name=hide]{z-index:1000001;float:right;padding:3px 8px;position:relative;left:1px;top:-1px;border-left:none;border-bottom:none;}',
+    '#nd button[name=hide]:hover{background-color:#FF0000;color:#FFF;}',
+    '#nd textarea{resize:none;display:block;font-family:Consolas,Menlo;font-size:16px;}',
+    // ndLog
+    '.ndLog{right:0px;bottom:0px;width:300px;}',
+    '.ndLog progress:after{content:attr(value) " / "attr(max);}',
+    '.ndLog div:after{float:right}',
+    '.ndLog div.ndIng:after{content:"下载中";color:#0000FF;}',
+    '.ndLog div.ndOk:after{content:"完成";color:#00FF00;}',
+    '.ndLog div.ndError:after{content:"失败";color:#FF0000;}',
+    '.ndLog div.ndTimeout:after{content:"超时";color:#FF0000;}',
+    '.ndLog div.ndDelete:after{content:"待删除";color:#FF0000;}',
+    '.ndProgress{cursor:pointer;width:calc(100% - 50px);margin:4px;}',
+    '.ndTask,.ndTaskImage{overflow-y:auto;overflow-x:hidden;font-size:12px;}',
+    '.ndTask{max-height:300px;width:296px;white-space:nowrap;counter-reset:downloadOrder;text-align:justify;}',
+    '.ndTask>div>a{display:inline-block;overflow:hidden;text-overflow:ellipsis;width:206px;}',
+    '.ndTask>div:before{content:counter(downloadOrder) ":";counter-increment:downloadOrder;float:left;}',
+    '.ndTaskImage{display:none;max-height:100px;counter-reset:imageOrder;}',
+    '.ndTaskImage>div>progress{width:calc(100% - 80px);}',
+    '.ndTaskImage>div>a:before{content:"pic " counter(imageOrder);counter-increment:imageOrder;}',
+    // 章节标记
+    'body{counter-reset:chapterOrder;}',
+    '.ndPre,.ndPreVip{float:left;width:auto;}',
+    '.ndPre:before,.ndPreVip:before{content:counter(chapterOrder) "-";counter-increment:chapterOrder;}',
+    '.ndPre{color:#000;}',
+    '.ndPreVip{color:#FF0000;}',
+    // 测试区域
+    '.ndTestArea>*{position:fixed;top:0;right:0;z-index:1;}',
+    '.ndTestArea>textarea{width:calc(100% - 20px)!important;height:calc(100% - 20px)!important;background-color:#FFF;margin:10px;z-index:1000000;}',
+    // 自定义站点规则
+    '.ndCustomize{width:100%;}',
+    '.ndCustomize textarea{overflow:hidden;width:calc(100% - 20px)!important;height:60px;background-color:#FFF;margin:10px;z-index:1000000;}',
+    // 默认情况隐藏某些元素
+    '.ndChapterArea>div,.ndBatchArea>div{display:none;}',
+    '.ndTitle,.ndBatchUrl,.ndSplitInput{width:60%;}',
+  ].join('')).appendTo('head');
 }
 
-function addIRule (host, cn = '', name, chapter, vip = '', sort = false, thread = false) { // 增加站点目录规则
+function addIRule(host, cn = '', name, chapter, vip = '', sort = false, thread = false) { // 增加站点目录规则
   indexRule[host] = {
-    cn: cn,
-    name: name,
-    chapter: chapter,
-    vip: vip,
-    sort: sort,
-    thread: thread
+    cn,
+    name,
+    chapter,
+    vip,
+    sort,
+    thread,
   };
 }
 
-function addCRule (host, name, content, MimeType = undefined) { // 增加站点章节规则
+function addCRule(host, name, content, MimeType = undefined) { // 增加站点章节规则
   MimeType = (MimeType === 1) ? 'text/html; charset=gb2312' : '';
   chapterRule[host] = {
-    name: name,
-    content: content,
-    MimeType: MimeType
+    name,
+    content,
+    MimeType,
   };
 }
 
-function addRRule (host, ...args) { // 增加站点替换规则
+function addRRule(host, ...args) { // 增加站点替换规则
   reRule[host] = args;
 }
 
-function wordFormatSpecial (host, word) { // 文本处理-特殊版
-  var regexp, str, reStr;
-  for (var i = 0; i < reRule[host].length; i++) {
+function wordFormatSpecial(host, word) { // 文本处理-特殊版
+  let regexp; let str; let
+    reStr;
+  for (let i = 0; i < reRule[host].length; i++) {
     str = reRule[host][i].split('|||');
     reStr = (str.length === 1) ? '' : str[1];
     regexp = new RegExp(str[0], 'gi');
     if (debug.replace2) {
       console.log({
-        regexp: regexp,
-        reStr: reStr,
-        word: word
+        regexp,
+        reStr,
+        word,
       });
     }
     word = word.replace(regexp, reStr);
@@ -1886,12 +1896,10 @@ function wordFormatSpecial (host, word) { // 文本处理-特殊版
   return word;
 }
 
-function downloadTo () { // 下载到...
-  var bookName = $(window).data('bookName');
-  var fileType = $(window).data('fileType');
-  var dataDownload = $(window).data('dataDownload').filter(function (i) {
-    return i.ok !== 'delete';
-  });
+function downloadTo() { // 下载到...
+  const bookName = $(window).data('bookName');
+  const fileType = $(window).data('fileType');
+  const dataDownload = $(window).data('dataDownload').filter((i) => i.ok !== 'delete');
   $(window).data('dataDownload', dataDownload);
   if (fileType === 'zip') {
     download2Zip(bookName);
@@ -1900,35 +1908,35 @@ function downloadTo () { // 下载到...
   } else if (fileType === 'epub') {
     download2Epub(bookName);
   } else if (fileType === 'test') {
-    var all = bookName + '\n\n';
-    for (var i = 0; i < $(window).data('dataDownload').length; i++) {
-      all += $(window).data('dataDownload')[i].name + '\r\n' + $(window).data('dataDownload')[i].content + '\r\n\r\n';
+    let all = `${bookName}\n\n`;
+    for (let i = 0; i < $(window).data('dataDownload').length; i++) {
+      all = `${all}${$(window).data('dataDownload')[i].name}\r\n${$(window).data('dataDownload')[i].content}\r\n\r\n`;
     }
     $('.ndTestArea').show();
     $('.ndTestArea>textarea').text(all).focus().prop('scrollTop', 0);
   }
 }
 
-function download (fileType) { // 下载
-  var host = window.location.host;
-  var chapter = $(indexRule[host].chapter).toArray();
-  var bookName = $('.ndTitle').val();
+function download(fileType) { // 下载
+  const { host } = window.location;
+  let chapter = $(indexRule[host].chapter).toArray();
+  const bookName = $('.ndTitle').val();
   $(window).data('bookName', bookName);
   $(window).data('fileType', fileType);
   if (fileType === 'epub') getCover(bookName);
-  var i;
+  let i;
   if ($('#ndVip')[0].checked === false && indexRule[host].vip !== '') chapter = $(chapter).not($(indexRule[host].vip)).toArray();
   if ($('.ndMain [name=empty]')[0].checked) {
     chapter = [];
   } else if ($('.ndSplitInput').val() !== '') {
     $(chapter).prop('nD-add', false);
-    var arr = $('.ndSplitInput').val().split(',');
+    const arr = $('.ndSplitInput').val().split(',');
     arr.sort();
     for (i = 0; i < arr.length; i++) {
       if (/^\d+-\d+$/.test(arr[i])) {
-        var start = arr[i].replace(/^(\d+)-\d+$/, '$1') - 1;
-        var end = arr[i].replace(/^\d+-(\d+)$/, '$1') - 1;
-        for (var j = start; j <= end; j++) {
+        const start = arr[i].replace(/^(\d+)-\d+$/, '$1') - 1;
+        const end = arr[i].replace(/^\d+-(\d+)$/, '$1') - 1;
+        for (let j = start; j <= end; j++) {
           if (j >= chapter.length) break;
           if (!chapter[j]['nD-add']) chapter[j]['nD-add'] = true;
         }
@@ -1936,16 +1944,16 @@ function download (fileType) { // 下载
         if (!chapter[arr[i] - 1]['nD-add']) chapter[arr[i] - 1]['nD-add'] = true;
       }
     }
-    chapter = $(chapter).toArray().filter(i => i['nD-add']);
+    chapter = $(chapter).toArray().filter((i) => i['nD-add']);
   }
   if (indexRule[host].sort || $('.ndConfig[name=sort]')[0].checked) chapter.sort(objArrSort('href'));
   chapter = $.makeArray(chapter);
-  if ($('.ndMain [name=index]')[0].checked) chapter.unshift($('<a href="' + window.location.href + '">' + bookName + '</a>')[0]);
+  if ($('.ndMain [name=index]')[0].checked) chapter.unshift($(`<a href="${window.location.href}">${bookName}</a>`)[0]);
   if ($('.ndBatchUrl').val() !== '') {
-    var url = $('.ndBatchUrl').val();
+    let url = $('.ndBatchUrl').val();
     if (url.match(/\*/)) {
       url = url.split('*');
-      var length = $('.ndBatchEnd').val().length;
+      const { length } = $('.ndBatchEnd').val();
       for (i = $('.ndBatchStart').val() * 1; i <= $('.ndBatchEnd').val() * 1; i++) {
         chapter.push(url[0] + ($('.ndConfig[name=zero]')[0].checked ? preZeroFill(i, length) : i) + url[1]);
       }
@@ -1955,15 +1963,13 @@ function download (fileType) { // 下载
   }
   if (chapter.length === 0) return;
   if ($(window).data('chapter') !== undefined && chapter.toString() === $(window).data('chapter').toString()) {
-    var error = $(window).data('dataDownload').some(function (i) {
-      return i.ok !== true;
-    });
+    const error = $(window).data('dataDownload').some((i) => i.ok !== true);
     if (!error) {
       downloadTo();
     } else {
       $('.ndTask,.ndTaskImage').empty();
-      var downloadList = [];
-      $(window).data('dataDownload').forEach(function (e, i, arr) {
+      const downloadList = [];
+      $(window).data('dataDownload').forEach((e, i, arr) => {
         downloadList.push(e.url);
         if (e.ok !== true) {
           arr[i] = {
@@ -1971,14 +1977,14 @@ function download (fileType) { // 下载
             name: e.name,
             error: 0,
             timeout: 0,
-            ok: false
+            ok: false,
           };
         }
       });
       $(window).data({
-        downloadList: downloadList,
+        downloadList,
         number: 0,
-        numberOk: 0
+        numberOk: 0,
       });
       $('.ndProgress').val(0).attr('max', downloadList.length);
       downloadTask();
@@ -1988,22 +1994,22 @@ function download (fileType) { // 下载
   $('.ndLog').show();
   $('.ndTask,.ndTaskImage').empty();
   $(window).data({
-    chapter: chapter,
+    chapter,
     dataDownload: [],
     downloadList: [],
     downloadNow: {
-      length: 0
+      length: 0,
     },
     number: 0,
-    numberOk: 0
+    numberOk: 0,
   });
   if ($('.ndMain [name=image]')[0].checked && $(window).data('fileType') === 'epub') {
     $(window).data('img', {
       ing: 0,
-      ok: false
+      ok: false,
     });
   }
-  var href;
+  let href;
   for (i = 0; i < chapter.length; i++) {
     href = chapter[i].tagName === 'OPTION' ? window.location.origin + chapter[i].value : chapter[i].href || chapter[i];
     $(window).data('dataDownload')[i] = {
@@ -2011,7 +2017,7 @@ function download (fileType) { // 下载
       name: chapter[i].innerText,
       error: 0,
       timeout: 0,
-      ok: false
+      ok: false,
     };
     $(window).data('downloadList')[i] = href;
   }
@@ -2019,11 +2025,11 @@ function download (fileType) { // 下载
   downloadTask();
 }
 
-function downloadTask () { // 下载列队
-  var host = window.location.host;
-  var fun = chapterRule[host].Deal instanceof Function ? chapterRule[host].Deal : xhr;
-  var thread = indexRule[host].thread || $('.ndConfig[name=thread]').val() * 1 || 10;
-  for (var i in $(window).data('downloadNow')) {
+function downloadTask() { // 下载列队
+  const { host } = window.location;
+  const fun = chapterRule[host].Deal instanceof Function ? chapterRule[host].Deal : xhr;
+  const thread = indexRule[host].thread || $('.ndConfig[name=thread]').val() * 1 || 10;
+  for (const i in $(window).data('downloadNow')) {
     if (!/^\d+$/.test(i)) continue;
     if ($(window).data('downloadNow')[i].ok) {
       delete $(window).data('downloadNow')[i];
@@ -2031,7 +2037,7 @@ function downloadTask () { // 下载列队
       continue;
     }
     if (!$(window).data('downloadNow')[i].downloading) {
-      var href = $(window).data('downloadNow')[i].href;
+      const { href } = $(window).data('downloadNow')[i];
       $(window).data('downloadNow')[i].downloading = true;
       addDownloadLogStart(i * 1 + 1, href);
       if ($(window).data('dataDownload')[i].ok === true) {
@@ -2047,7 +2053,7 @@ function downloadTask () { // 下载列队
     $(window).data('downloadNow')[$(window).data('number')] = {
       href: $(window).data('downloadList')[0],
       ok: false,
-      downloading: false
+      downloading: false,
     };
     $(window).data('downloadList').splice(0, 1);
     $(window).data('downloadNow').length++;
@@ -2060,56 +2066,57 @@ function downloadTask () { // 下载列队
   }
 }
 
-function xhr (num, url) { // xhr
-  var host = getHost(url);
+function xhr(num, url) { // xhr
+  let host = getHost(url);
   host = host in chapterRule ? host : window.location.host;
   GM_xmlhttpRequest({
     method: 'GET',
-    url: url,
+    url,
     overrideMimeType: chapterRule[host].MimeType,
     timeout: parseFloat($('.ndConfig[name=time]').val()) * 1000,
-    onload: function (res) {
+    onload(res) {
       if (res.status !== 200 || url !== res.finalUrl || (res.response.match(/404/) && res.response.match(/Not Found|找不到文件或目录/i))) {
         console.log({
           info: url !== res.finalUrl ? '网站跳转' : '网站错误',
           rawUrl: url,
           finalUrl: res.finalUrl,
           status: res.status,
-          title: res.response.match(/<title>(.*?)<\/title>/)[1]
+          title: res.response.match(/<title>(.*?)<\/title>/)[1],
         });
         thisDownloaded(num, '错误章节', '', 'delete');
         return;
       }
       if (debug.xhr) console.log(res);
-      var data = $($.parseHTML(res.response));
+      const data = $($.parseHTML(res.response));
       if (debug.data) console.log(data);
-      var name, content;
+      let name; let
+        content;
       if ($(window).data('autoTry') && !$(window).data('autoTryResult')) {
-        var i;
-        var testContent = chapterRule[host].content.split(',');
+        let i;
+        let testContent = chapterRule[host].content.split(',');
         for (i = 0; i < testContent.length; i++) {
           if ($(testContent[i], data).length > 0) break;
         }
         testContent = i === testContent.length ? chapterRule[host].content : testContent[i];
         console.log('通用规则-content: ', testContent);
-        var _content = GM_getValue('_content', {});
+        const _content = GM_getValue('_content', {});
         _content[testContent] = testContent in _content ? _content[testContent]++ : 1;
         GM_setValue('_content', _content);
         chapterRule[host].content = testContent;
         $(window).data('autoTryResult', true);
       }
-      name = $(window).data('dataDownload')[num].name ||
-        $(chapterRule[host].name, data).eq(0).text() ||
-        res.response.match(/<title>(.*?)<\/title>/)[1];
+      name = $(window).data('dataDownload')[num].name
+        || $(chapterRule[host].name, data).eq(0).text()
+        || res.response.match(/<title>(.*?)<\/title>/)[1];
       name = name.trim();
       content = $(chapterRule[host].content, data);
       if (content.length === 0) {
-        content = $('<div class="ndFinder" name="' + num + '"></div>').append(data).appendTo('.ndFinderArea');
+        content = $(`<div class="ndFinder" name="${num}"></div>`).append(data).appendTo('.ndFinderArea');
         content = content.find(chapterRule[host].content);
-        $('.ndFinder[name=' + num + ']').remove();
+        $(`.ndFinder[name=${num}]`).remove();
       }
       if (content.length > 0) {
-        var raw = content;
+        const raw = content;
         content = content.html();
         if ($(window).data('img') && raw.find('img').length > 0) {
           raw.find('img').each(function () {
@@ -2122,34 +2129,34 @@ function xhr (num, url) { // xhr
       }
       thisDownloaded(num, name, content);
     },
-    ontimeout: function () {
+    ontimeout() {
       $(window).data('dataDownload')[num].timeout++;
       if ($('.ndConfig[name=timeout]').val() * 1 > $(window).data('dataDownload')[num].timeout) {
         xhr(num, url);
       } else {
-        var nameTrue = $(window).data('dataDownload')[num].name || num;
+        const nameTrue = $(window).data('dataDownload')[num].name || num;
         thisDownloaded(num, nameTrue, '下载超时，原因：可能是网络问题。by novelDownloader', 'timeout');
       }
     },
-    onerror: function () {
+    onerror() {
       $(window).data('dataDownload')[num].error++;
       if ($('.ndConfig[name=error]').val() * 1 > $(window).data('dataDownload')[num].error) {
         xhr(num, url);
       } else {
-        var nameTrue = $(window).data('dataDownload')[num].name || num;
+        const nameTrue = $(window).data('dataDownload')[num].name || num;
         thisDownloaded(num, nameTrue, '下载失败，原因：可能是服务器问题。by novelDownloader', 'error');
       }
-    }
+    },
   });
 }
 
-function thisDownloaded (num, name = undefined, content, stauts = true) { // 下载完成，包括文本处理-通用版、简繁体转换
-  var host = window.location.host;
+function thisDownloaded(num, name = undefined, content, stauts = true) { // 下载完成，包括文本处理-通用版、简繁体转换
+  const { host } = window.location;
   if (!name) name = $(window).data('dataDownload')[num].name;
   if (reRule[host] instanceof Array) content = wordFormatSpecial(host, content);
   if ($('.ndConfig[name=format]')[0].checked === true) content = wordFormat(content);
   if ($('.ndConfig[name=section]').val() !== '0') content = wordSection(content);
-  if (!$('.ndConfig[name=nourl]')[0].checked) content = '来源地址：' + $(window).data('dataDownload')[num].url + '\r\n' + content;
+  if (!$('.ndConfig[name=nourl]')[0].checked) content = `来源地址：${$(window).data('dataDownload')[num].url}\r\n${content}`;
   if ($('.ndLang:checked').val() * 1 >= 0) {
     name = tranStr(name, $('.ndLang:checked').val() * 1);
     content = tranStr(content, $('.ndLang:checked').val() * 1);
@@ -2163,16 +2170,16 @@ function thisDownloaded (num, name = undefined, content, stauts = true) { // 下
   downloadTask();
 }
 
-function threadImg (url) { // 添加到下载图片队列
-  var img = $(window).data('img');
+function threadImg(url) { // 添加到下载图片队列
+  const img = $(window).data('img');
   img[url] = null;
   $(window).data('img', img);
 }
 
-function imageTask () {
-  var img = $(window).data('img');
-  var ok = true;
-  for (var i in img) {
+function imageTask() {
+  const img = $(window).data('img');
+  let ok = true;
+  for (const i in img) {
     if (img.ing >= 10) {
       ok = false;
       return;
@@ -2190,55 +2197,55 @@ function imageTask () {
   }
 }
 
-function downloadImage (url) {
-  if ($('.ndTaskImage>[name="' + url + '"]').length === 0) $('.ndTaskImage').show().append('<div class="ndIng" name="' + url + '"><a href="' + url + '" target="_blank"></a><progress max="1" value="0"></progress></div>');
+function downloadImage(url) {
+  if ($(`.ndTaskImage>[name="${url}"]`).length === 0) $('.ndTaskImage').show().append(`<div class="ndIng" name="${url}"><a href="${url}" target="_blank"></a><progress max="1" value="0"></progress></div>`);
   GM_xmlhttpRequest({
     method: 'GET',
-    url: url,
+    url,
     responseType: 'arraybuffer',
     timeout: 30000,
-    onprogress: function (res) {
-      if (res.lengthComputable) $('.ndTaskImage>[name="' + url + '"]>progress').val(res.loaded).attr('max', res.total)[0].scrollIntoView();
+    onprogress(res) {
+      if (res.lengthComputable) $(`.ndTaskImage>[name="${url}"]>progress`).val(res.loaded).attr('max', res.total)[0].scrollIntoView();
     },
-    onload: function (res) {
-      $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndOk')[0].scrollIntoView();
-      var img = $(window).data('img');
+    onload(res) {
+      $(`.ndTaskImage>[name="${url}"]`).attr('class', 'ndOk')[0].scrollIntoView();
+      const img = $(window).data('img');
       img[url] = new window.Blob([res.response], {
-        type: url.match(/\.png$/) ? 'image/png' : 'image/jpeg'
+        type: url.match(/\.png$/) ? 'image/png' : 'image/jpeg',
       });
       img.ing--;
       $(window).data('img', img);
       imageTask();
     },
-    ontimeout: function () {
-      if (window.confirm('一张图片下载超时，请检查\n网络是否正常，或是否网站地址错误\n建议打开图片地址，使其载入\n图片地址: ' + url + '\n是否尝试再次下载')) {
+    ontimeout() {
+      if (window.confirm(`一张图片下载超时，请检查\n网络是否正常，或是否网站地址错误\n建议打开图片地址，使其载入\n图片地址: ${url}\n是否尝试再次下载`)) {
         downloadImage(url);
       } else {
-        $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndError')[0].scrollIntoView();
-        var img = $(window).data('img');
+        $(`.ndTaskImage>[name="${url}"]`).attr('class', 'ndError')[0].scrollIntoView();
+        const img = $(window).data('img');
         img[url].data = 'timeout';
         img.ing--;
         $(window).data('img', img);
         imageTask();
       }
     },
-    onerror: function () {
-      if (window.confirm('一张图片下载错误，请检查\n网络是否正常，或是否网站地址错误\n建议打开图片地址，使其载入\n图片地址: ' + url + '\n是否尝试再次下载')) {
+    onerror() {
+      if (window.confirm(`一张图片下载错误，请检查\n网络是否正常，或是否网站地址错误\n建议打开图片地址，使其载入\n图片地址: ${url}\n是否尝试再次下载`)) {
         downloadImage(url);
       } else {
-        $('.ndTaskImage>[name="' + url + '"]').attr('class', 'ndTimeout')[0].scrollIntoView();
-        var img = $(window).data('img');
+        $(`.ndTaskImage>[name="${url}"]`).attr('class', 'ndTimeout')[0].scrollIntoView();
+        const img = $(window).data('img');
         img[url].data = 'error';
         img.ing--;
         $(window).data('img', img);
         imageTask();
       }
-    }
+    },
   });
 }
 
-function wordFormat (word) { // 文本处理-通用版
-  var html = $('<div>' + word + '</div>');
+function wordFormat(word) { // 文本处理-通用版
+  const html = $(`<div>${word}</div>`);
   $(':not(p,br,div,span,img,a),[style*="display:none"],a:not(:has(img)),#nd', html).remove();
   $('a[rel="next"],a:contains("下一页"),a:contains("下一章"),a:contains("下一节"),a:contains("下页"),a[rel="prev"],a:contains("上一页"),a:contains("上一章"),a:contains("上一节"),a:contains("上页"),a[href="index.html"],a:contains("返回书目"),a:contains("章节目录"),a:contains("章节列表"),a:contains("回目录"),a:contains("回书目"),a:contains("目 录"),a:contains("目录")', html).remove();
   if ($(window).data('img')) {
@@ -2249,7 +2256,7 @@ function wordFormat (word) { // 文本处理-通用版
     word = html.html();
   }
   // var symbol = '\\$\\(\\)\\*\\+\\.\\[\\]\\?\\^\\{\\}\\|’\'\"\\\\。？！‘’“”「」『』…，、—（）·《》〈〉．_；：<>❨❩❴❵⟨⟩【】〔〕〘〙‒–―~──﹏＿～‐/□×&@•~¦';
-  var replaceLib = [
+  let replaceLib = [
     /* 替换前的文本|||替换后的文本 */
     /* 换行符请先用【换行】二字代替，最后同一替代 */
     /* 请在最前方插入 */
@@ -2283,42 +2290,44 @@ function wordFormat (word) { // 文本处理-通用版
     '[\r\n]+\\s+[\r\n]+|||\r\n',
     '[\r\n]+\\s+|||\r\n　　',
     '[\r\n]+\\s+([。？！”」』])|||$1',
-    '(^\\s+|\\s+$)'
+    '(^\\s+|\\s+$)',
   ];
   if (GM_getValue('repalce')) replaceLib = GM_getValue('repalce').concat(replaceLib);
-  var regexp, str, reStr;
-  for (var i = 0; i < replaceLib.length; i++) {
+  let regexp; let str; let
+    reStr;
+  for (let i = 0; i < replaceLib.length; i++) {
     str = replaceLib[i].split('|||');
     reStr = (str.length === 1) ? '' : str[1];
     regexp = new RegExp(str[0], 'gi');
     if (debug.replace) {
       console.log({
-        regexp: regexp,
-        reStr: reStr,
-        word: word
+        regexp,
+        reStr,
+        word,
       });
     }
     word = word.replace(regexp, reStr);
   }
-  if (word !== '') word = '　　' + word;
+  if (word !== '') word = `　　${word}`;
   return word;
 }
 
-function wordSection (word) { // 文本强制分段-测试功能
-  var symbol = {
+function wordSection(word) { // 文本强制分段-测试功能
+  const symbol = {
     lineEnd: '。？！”」』', // 句子结尾
     lineStart: '“「『', // 句子开头
-    unbreak: '…，、—（）()·《 》〈 〉．_；：' // 不包括作为句子开头的标点 //作用是找到【需要断句的标点】后，不断判断之后的字符是否为标点，是则继续找，不是则断句
+    unbreak: '…，、—（）()·《 》〈 〉．_；：', // 不包括作为句子开头的标点 //作用是找到【需要断句的标点】后，不断判断之后的字符是否为标点，是则继续找，不是则断句
   };
-  var reLineEnd = new RegExp('[' + symbol.lineEnd + ']');
-  var reLineStart = new RegExp('[' + symbol.lineStart + ']');
-  var reUnbreak = new RegExp('[' + symbol.unbreak + ']');
+  const reLineEnd = new RegExp(`[${symbol.lineEnd}]`);
+  const reLineStart = new RegExp(`[${symbol.lineStart}]`);
+  const reUnbreak = new RegExp(`[${symbol.unbreak}]`);
   if ($('.ndConfig[name=section]').val() === '2') word = word.replace(/([\r\n]+\s+)/g, '').replace(/[\r\n]+/g, '');
-  var arr = word.split(/[\r\n]+/);
-  var lastWord, i, j;
+  const arr = word.split(/[\r\n]+/);
+  let lastWord; let i; let
+    j;
   for (i = 0; i < arr.length;) {
     // if (arr[i].length <= 30) continue;
-    var arrNew = arr[i].split('');
+    const arrNew = arr[i].split('');
     for (j = 1; j < arrNew.length; j++) {
       lastWord = arrNew[j - 1].substr(-1, 1); // 查找上一个元素的最后一个字符
       if (reUnbreak.test(arrNew[j]) || reLineEnd.test(arrNew[j]) || (!reLineEnd.test(lastWord) && !reLineStart.test(arrNew[j]))) {
@@ -2336,115 +2345,113 @@ function wordSection (word) { // 文本强制分段-测试功能
   return arr.join('\r\n').replace(/\r\n\s+/g, '\r\n').replace(/[\r\n]+/g, '\r\n　　');
 }
 
-function addDownloadLogStart (num, url) { // 下载进度-开始
-  $('.ndTask').append('<div class="ndIng" name="' + num + '"><a href="' + url + '" target="_blank">' + num + '</a></div>');
+function addDownloadLogStart(num, url) { // 下载进度-开始
+  $('.ndTask').append(`<div class="ndIng" name="${num}"><a href="${url}" target="_blank">${num}</a></div>`);
 }
 
-function addDownloadLogEnd (num, name, status) { // 下载进度-结束
-  var target = $('.ndIng[name=' + num + ']');
+function addDownloadLogEnd(num, name, status) { // 下载进度-结束
+  const target = $(`.ndIng[name=${num}]`);
   if (target.length === 0) return;
-  target.attr('class', 'nd' + status).find('a').text(name)[0].scrollIntoView();
+  target.attr('class', `nd${status}`).find('a').text(name)[0].scrollIntoView();
 }
 
-function download2Zip (name) { // 下载到1个zip
+function download2Zip(name) { // 下载到1个zip
   $(window).data('blob', new JSZip());
-  var leng = String($(window).data('dataDownload').length).length;
-  for (var i = 0; i < $(window).data('dataDownload').length; i++) {
-    var num = i + 1;
-    $(window).data('blob').file(String(preZeroFill(num, leng)) + '-' + $(window).data('dataDownload')[i].name + '.txt', $(window).data('dataDownload')[i].name + '\r\n' + $(window).data('dataDownload')[i].content);
+  const leng = String($(window).data('dataDownload').length).length;
+  for (let i = 0; i < $(window).data('dataDownload').length; i++) {
+    const num = i + 1;
+    $(window).data('blob').file(`${String(preZeroFill(num, leng))}-${$(window).data('dataDownload')[i].name}.txt`, `${$(window).data('dataDownload')[i].name}\r\n${$(window).data('dataDownload')[i].content}`);
   }
-  $(window).data('blob').file('###说明文件.txt', '本压缩包由用户脚本novelDownloader制作\r\n来源地址：' + window.location.href);
+  $(window).data('blob').file('###说明文件.txt', `本压缩包由用户脚本novelDownloader制作\r\n来源地址：${window.location.href}`);
   $(window).data('blob').generateAsync({
     type: 'blob',
     compression: 'DEFLATE',
     compressionOptions: {
-      level: 9
-    }
-  }).then(function (content) {
-    $('#ndBtn').click(function () {
-      saveAs(content, name + '.zip');
+      level: 9,
+    },
+  }).then((content) => {
+    $('#ndBtn').click(() => {
+      saveAs(content, `${name}.zip`);
     });
-    saveAs(content, name + '.zip');
+    saveAs(content, `${name}.zip`);
   });
 }
 
-function download2Epub (name) { // 下载到1个epub
-  var img = $(window).data('img');
-  var chapter = $(window).data('dataDownload');
-  var i;
+function download2Epub(name) { // 下载到1个epub
+  const img = $(window).data('img');
+  let chapter = $(window).data('dataDownload');
+  let i;
   if ($('#ndChapter')[0].checked) {
-    var all = '';
+    let all = '';
     for (i = 0; i < chapter.length; i++) {
-      all += chapter[i].name + '\r\n' + chapter[i].content + '\r\n\r\n';
+      all = `${all}${chapter[i].name}\r\n${chapter[i].content}\r\n\r\n`;
     }
-    var number = {
+    let number = {
       '-1': '0-9０-９零一二三四五六七八九十百千万零壹贰参肆伍陆柒捌玖拾佰仟萬',
       1: '0-9',
       '１': '０-９',
       '1１': '0-9０-９',
       一: '零一二三四五六七八九十百千万',
       壹: '零壹贰参肆伍陆柒捌玖拾佰仟萬',
-      一壹: '零一二三四五六七八九十百千万零壹贰参肆伍陆柒捌玖拾佰仟萬'
+      一壹: '零一二三四五六七八九十百千万零壹贰参肆伍陆柒捌玖拾佰仟萬',
     };
-    number = '[' + number[$('[name=chapterNumber]').val() || '-1'] + ']+';
-    var prefix = $('#ndChapterRE')[0].checked ? $('[name=chapterPre]').val() : $('[name=chapterPre]').val().replace(/[\^$*+?.|(){}[\]]/g, '\\$&');
-    var suffix = $('#ndChapterRE')[0].checked ? $('[name=chapterSuf]').val() : $('[name=chapterSuf]').val().replace(/[\^$*+?.|(){}[\]]/g, '\\$&');
-    var regexp = new RegExp('(([\\r\\n]|^)(.*?' + prefix + number + suffix + '.*?)([\\r\\n]|$))', 'gi');
-    var result = all.split(regexp);
+    number = `[${number[$('[name=chapterNumber]').val() || '-1']}]+`;
+    const prefix = $('#ndChapterRE')[0].checked ? $('[name=chapterPre]').val() : $('[name=chapterPre]').val().replace(/[\^$*+?.|(){}[\]]/g, '\\$&');
+    const suffix = $('#ndChapterRE')[0].checked ? $('[name=chapterSuf]').val() : $('[name=chapterSuf]').val().replace(/[\^$*+?.|(){}[\]]/g, '\\$&');
+    const regexp = new RegExp(`(([\\r\\n]|^)(.*?${prefix}${number}${suffix}.*?)([\\r\\n]|$))`, 'gi');
+    const result = all.split(regexp);
     chapter = [];
     if (result[0].trim() !== '') {
-      var content = result[0];
+      const content = result[0];
       chapter.push({
         name: content.substr(0, content.indexOf('\n')),
-        content: content
+        content,
       });
     }
     for (i = 1; i < result.length; i = i + 5) {
       chapter.push({
         name: result[i + 2].trim(),
         length: result[i + 4].length,
-        content: result[i + 4]
+        content: result[i + 4],
       });
     }
     console.log(chapter);
     if ($('#ndChapterResult')[0].checked) {
-      $('<div></div>').html('<table><tbody><tr><th></th><th>标题</th><th>长度</th><th>预览</th></tr>' + chapter.map(function (_, i) {
-        return '<tr><td>' + i + '</td><td>' + _.name + '</td><td>' + _.length + '</td><td>' + _.content.substr(0, 26).trim() + '</td></tr>';
-      }).join('') + '</tbody></table>').appendTo('.ndConsole');
+      $('<div></div>').html(`<table><tbody><tr><th></th><th>标题</th><th>长度</th><th>预览</th></tr>${chapter.map((_, i) => `<tr><td>${i}</td><td>${_.name}</td><td>${_.length}</td><td>${_.content.substr(0, 26).trim()}</td></tr>`).join('')}</tbody></table>`).appendTo('.ndConsole');
       $('.ndConsole').show();
     }
   }
-  var leng = String(chapter.length).length;
-  var uuid = 'nd' + new Date().getTime().toString();
+  const leng = String(chapter.length).length;
+  const uuid = `nd${new Date().getTime().toString()}`;
   $(window).data('blob', new JSZip());
   $(window).data('blob').file('mimetype', 'application/epub+zip');
-  var META_INF = $(window).data('blob').folder('META-INF');
+  const META_INF = $(window).data('blob').folder('META-INF');
   META_INF.file('container.xml', '<?xml version="1.0" encoding="UTF-8"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml" /></rootfiles></container>');
-  var OEBPS = $(window).data('blob').folder('OEBPS');
-  OEBPS.file('stylesheet.css', GM_getValue('style') || '' +
-    'body{line-height:130%;text-align:justify;font-family:"Microsoft YaHei";font-size:22px;margin:0 auto;}' +
-    'h1{text-align:center;font-weight:bold;font-size:28px;}' +
-    'h2{text-align:center;font-weight:bold;font-size:26px;}' +
-    'h3{text-align:center;font-weight:bold;font-size:24px;}' +
-    'p{text-indent:2em;}');
-  var lang = ($('[name="lang"]:checked').val() * 1 === 1) ? 'zh-TW' : 'zh-CN';
+  const OEBPS = $(window).data('blob').folder('OEBPS');
+  OEBPS.file('stylesheet.css', GM_getValue('style') || ''
+    + 'body{line-height:130%;text-align:justify;font-family:"Microsoft YaHei";font-size:22px;margin:0 auto;}'
+    + 'h1{text-align:center;font-weight:bold;font-size:28px;}'
+    + 'h2{text-align:center;font-weight:bold;font-size:26px;}'
+    + 'h3{text-align:center;font-weight:bold;font-size:24px;}'
+    + 'p{text-indent:2em;}');
+  const lang = ($('[name="lang"]:checked').val() * 1 === 1) ? 'zh-TW' : 'zh-CN';
   /* eslint-disable camelcase */
-  var content_opf = '<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="' + uuid + '" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>' + name + '</dc:title><dc:creator>novelDownloader</dc:creator><dc:identifier id="' + uuid + '">urn:uuid:' + uuid + '</dc:identifier><dc:language>' + lang + '</dc:language><meta name="cover" content="cover-image" /></metadata><manifest>';
-  var toc_ncx = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:' + uuid + '"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>' + name + '</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="' + preZeroFill(0, leng) + '.html"/></navPoint>';
-  var item = '<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="' + preZeroFill(0, leng) + '.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>';
-  var itemref = '<itemref idref="cover" linear="yes"/>';
-  var _name, _content;
+  let content_opf = `<?xml version="1.0" encoding="UTF-8"?><package version="2.0" unique-identifier="${uuid}" xmlns="http://www.idpf.org/2007/opf"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf"><dc:title>${name}</dc:title><dc:creator>novelDownloader</dc:creator><dc:identifier id="${uuid}">urn:uuid:${uuid}</dc:identifier><dc:language>${lang}</dc:language><meta name="cover" content="cover-image" /></metadata><manifest>`;
+  let toc_ncx = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:${uuid}"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>${name}</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="${preZeroFill(0, leng)}.html"/></navPoint>`;
+  let item = `<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="${preZeroFill(0, leng)}.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>`;
+  let itemref = '<itemref idref="cover" linear="yes"/>';
+  let _name; let
+    _content;
   if (img) {
-    var imgArr = Object.keys(img).filter(function (i) {
-      return i !== 'ing' && i !== 'ok';
-    });
+    var imgArr = Object.keys(img).filter((i) => i !== 'ing' && i !== 'ok');
     var leng2 = String(imgArr.length).length;
-    var imgOrder, imgName;
+    let imgOrder; let
+      imgName;
     for (i = 0; i < imgArr.length; i++) {
       if (typeof img[imgArr[i]] === 'string') continue;
       imgOrder = preZeroFill(i, leng2);
-      imgName = imgOrder + '.' + img[imgArr[i]].type.match(/image\/(.*)/)[1];
-      item += '<item id="img' + imgOrder + '" href="' + imgName + '" media-type="image/jpeg"/>';
+      imgName = `${imgOrder}.${img[imgArr[i]].type.match(/image\/(.*)/)[1]}`;
+      item = `${item}<item id="img${imgOrder}" href="${imgName}" media-type="image/jpeg"/>`;
       OEBPS.file(imgName, img[imgArr[i]]);
     }
   }
@@ -2452,55 +2459,55 @@ function download2Epub (name) { // 下载到1个epub
     _name = String(preZeroFill(i + 1, leng));
     _content = chapter[i].content.replace(/[\r\n]+/g, '</p><p>').replace(/<p>\s+/g, '<p>');
     if ($('<div></div>').html(_content).find('img').length > 0 && img) {
-      var _html = $('<div></div>').html(_content);
+      const _html = $('<div></div>').html(_content);
       _html.find('img').each(function () {
-        if (imgArr.indexOf(this.src) >= 0) this.src = preZeroFill(imgArr.indexOf(this.src), leng2) + '.' + img[this.src].type.match(/image\/(.*)/)[1];
+        if (imgArr.indexOf(this.src) >= 0) this.src = `${preZeroFill(imgArr.indexOf(this.src), leng2)}.${img[this.src].type.match(/image\/(.*)/)[1]}`;
       });
       _content = _html.html();
     }
-    toc_ncx += '<navPoint id="chapter' + _name + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapter[i].name + '</text></navLabel><content src="' + _name + '.html"/></navPoint>';
-    item += '<item id="chapter' + _name + '" href="' + _name + '.html" media-type="application/xhtml+xml"/>';
-    itemref += '<itemref idref="chapter' + _name + '" linear="yes"/>';
-    OEBPS.file(_name + '.html', '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + chapter[i].name + '</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>' + chapter[i].name + '</h3><div><p>' + _content + '</p></div></body></html>');
+    toc_ncx = `${toc_ncx}<navPoint id="chapter${_name}" playOrder="${i + 2}"><navLabel><text>${chapter[i].name}</text></navLabel><content src="${_name}.html"/></navPoint>`;
+    item = `${item}<item id="chapter${_name}" href="${_name}.html" media-type="application/xhtml+xml"/>`;
+    itemref = `${itemref}<itemref idref="chapter${_name}" linear="yes"/>`;
+    OEBPS.file(`${_name}.html`, `<html xmlns="http://www.w3.org/1999/xhtml"><head><title>${chapter[i].name}</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>${chapter[i].name}</h3><div><p>${_content}</p></div></body></html>`);
   }
-  content_opf = content_opf + item + '<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">' + itemref + '</spine><guide><reference href="' + preZeroFill(0, leng) + '.html" type="cover" title="Cover"/></guide></package>';
-  toc_ncx += '</navMap></ncx>';
+  content_opf = `${content_opf + item}<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">${itemref}</spine><guide><reference href="${preZeroFill(0, leng)}.html" type="cover" title="Cover"/></guide></package>`;
+  toc_ncx = `${toc_ncx}</navMap></ncx>`;
   OEBPS.file('content.opf', content_opf);
   OEBPS.file('toc.ncx', toc_ncx);
-  OEBPS.file(preZeroFill(0, leng) + '.html', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + name + '</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h1>' + name + '</h1><h2>本电子书由用户脚本novelDownloader制作</h2><h3>来源地址：' + window.location.href + '</h3></body></html>');
+  OEBPS.file(`${preZeroFill(0, leng)}.html`, `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>${name}</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h1>${name}</h1><h2>本电子书由用户脚本novelDownloader制作</h2><h3>来源地址：${window.location.href}</h3></body></html>`);
   OEBPS.file('cover.jpg', $(window).data('cover'));
   $(window).data('blob').generateAsync({
     type: 'blob',
     compression: 'DEFLATE',
     compressionOptions: {
-      level: 9
-    }
-  }).then(function (content) {
-    $('#ndBtn').click(function () {
-      saveAs(content, name + '.epub');
+      level: 9,
+    },
+  }).then((content) => {
+    $('#ndBtn').click(() => {
+      saveAs(content, `${name}.epub`);
     });
-    saveAs(content, name + '.epub');
+    saveAs(content, `${name}.epub`);
   });
 }
 
-function download2Txt (name) { // 下载到1个txt
-  var all = '';
-  for (var i = 0; i < $(window).data('dataDownload').length; i++) {
-    all += $(window).data('dataDownload')[i].name + '\r\n' + $(window).data('dataDownload')[i].content + '\r\n\r\n';
+function download2Txt(name) { // 下载到1个txt
+  let all = '';
+  for (let i = 0; i < $(window).data('dataDownload').length; i++) {
+    all = `${all}${$(window).data('dataDownload')[i].name}\r\n${$(window).data('dataDownload')[i].content}\r\n\r\n`;
   }
-  all = '阅读前说明：本书籍由用户脚本novelDownloader制作\r\n来源地址：' + window.location.href + '\r\n\r\n' + all;
+  all = `阅读前说明：本书籍由用户脚本novelDownloader制作\r\n来源地址：${window.location.href}\r\n\r\n${all}`;
   $(window).data('blob', new window.Blob([all], {
-    type: 'text/plain;charset=utf-8'
+    type: 'text/plain;charset=utf-8',
   }));
-  $('#ndBtn').click(function () {
-    saveAs($(window).data('blob'), name + '.txt');
+  $('#ndBtn').click(() => {
+    saveAs($(window).data('blob'), `${name}.txt`);
   });
-  saveAs($(window).data('blob'), name + '.txt');
+  saveAs($(window).data('blob'), `${name}.txt`);
 }
 
-function downloadedCheck (arr) { // 检查下载是否完成
-  var undownload = 0;
-  for (var i = 0; i < arr.length; i++) {
+function downloadedCheck(arr) { // 检查下载是否完成
+  let undownload = 0;
+  for (let i = 0; i < arr.length; i++) {
     if (arr[i].ok === true) {
       addDownloadLogEnd(i + 1, arr[i].name, 'Ok');
     } else if (arr[i].ok === 'error') {
@@ -2516,47 +2523,47 @@ function downloadedCheck (arr) { // 检查下载是否完成
   return (undownload === 0);
 }
 
-function getHost (url) { // 获取网址域名
+function getHost(url) { // 获取网址域名
   return (/^http(s|):\/\//.test(url)) ? url.split('/')[2] : url.split('/')[0];
 }
 
-function objArrSort (key) {
+function objArrSort(key) {
   return function (obj1, obj2) {
-    var value1 = obj1[key].match(/\d+/g);
-    var value2 = obj2[key].match(/\d+/g);
+    let value1 = obj1[key].match(/\d+/g);
+    let value2 = obj2[key].match(/\d+/g);
     if (value1 === null || value2 === null) return 0;
     value1 = value1[value1.length - 1] * 1;
     value2 = value2[value2.length - 1] * 1;
     if (value2 < value1) {
       return 1;
-    } else if (value2 > value1) {
+    } if (value2 > value1) {
       return -1;
-    } else {
-      return 0;
     }
+    return 0;
   };
 }
 
-function getCover (txt) {
-  var fontSize = 20;
-  var width = 180;
-  var height = 240;
-  var color = '#000';
-  var lineHeight = 10;
+function getCover(txt) {
+  const fontSize = 20;
+  const width = 180;
+  const height = 240;
+  const color = '#000';
+  const lineHeight = 10;
   /// ////////
-  var maxlen = width / fontSize - 2;
-  var txtArray = txt.split(new RegExp('(.{' + maxlen + '})'));
-  var i = 1;
-  var canvas = document.createElement('canvas');
+  const maxlen = width / fontSize - 2;
+  const txtArray = txt.split(new RegExp(`(.{${maxlen}})`));
+  let i = 1;
+  const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
-  var context = canvas.getContext('2d');
+  const context = canvas.getContext('2d');
   context.fillStyle = color;
   context.strokeRect(0, 0, width, height);
-  context.font = fontSize + 'px sans-serif';
+  context.font = `${fontSize}px sans-serif`;
   context.textBaseline = 'top';
-  var fLeft, fTop;
-  for (var j = 0; j < txtArray.length; j++) {
+  let fLeft; let
+    fTop;
+  for (let j = 0; j < txtArray.length; j++) {
     if (txtArray[j] === '') continue;
     fLeft = fontSize * ((maxlen - txtArray[j].length) / 2 + 1);
     fTop = fontSize / 4 + fontSize * i + lineHeight * i;
@@ -2564,23 +2571,22 @@ function getCover (txt) {
     context.fillText('\n', fLeft, fTop, canvas.width);
     i++;
   }
-  canvas.toBlob(function (blob) {
+  canvas.toBlob((blob) => {
     $(window).data('cover', blob);
   });
 }
 
-function getBlength (str) { // 获取字节数
+function getBlength(str) { // 获取字节数
   for (var i = str.length, n = 0; i--;) {
-    n += str.charCodeAt(i) > 255 ? 2 : 1;
+    n = n + (str.charCodeAt(i) > 255 ? 2 : 1);
   }
   return n;
 }
 
-function preZeroFill (num, size) { // 用0补足指定位数，来自https://segmentfault.com/q/1010000002607221，作者：captainblue与solar
+function preZeroFill(num, size) { // 用0补足指定位数，来自https://segmentfault.com/q/1010000002607221，作者：captainblue与solar
   if (num >= Math.pow(10, size)) { // 如果num本身位数不小于size位
     return num.toString();
-  } else {
-    var _str = Array(size + 1).join('0') + num;
-    return _str.slice(_str.length - size);
   }
+  const _str = Array(size + 1).join('0') + num;
+  return _str.slice(_str.length - size);
 }

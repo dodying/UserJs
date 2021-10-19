@@ -11,7 +11,7 @@
 // @include     *
 // ==/UserScript==
 (function () {
-  const id = 'style_' + Math.random();
+  const id = `style_${Math.random()}`;
   const init = function () {
     if (!document.getElementById(id)) {
       const rule = [
@@ -19,11 +19,11 @@
           url: '.*',
           style: [
             'a:visited{color:rgb(35,173,173)!important;}',
-            '::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track-piece{background-color:transparent}body::-webkit-scrollbar-track-piece{background-color:white}::-webkit-scrollbar-thumb{background-color:#7d7d7d;border-radius:3px;min-height:10vh;}::-webkit-scrollbar-thumb:hover{background-color:#999}::-webkit-scrollbar-thumb:active{background-color:#666}'
-          ]
-        }
+            '::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track-piece{background-color:transparent}body::-webkit-scrollbar-track-piece{background-color:white}::-webkit-scrollbar-thumb{background-color:#7d7d7d;border-radius:3px;min-height:10vh;}::-webkit-scrollbar-thumb:hover{background-color:#999}::-webkit-scrollbar-thumb:active{background-color:#666}',
+          ],
+        },
       ];
-      const style = rule.filter(i => window.location.href.match(i.url)).map(i => [].concat(i.style).join('\n'));
+      const style = rule.filter((i) => window.location.href.match(i.url)).map((i) => [].concat(i.style).join('\n'));
       const ele = document.createElement('style');
       ele.id = id;
       ele.textContent = style.join('\n');
@@ -32,9 +32,9 @@
   };
 
   init();
-  var observer = new window.MutationObserver(init);
+  const observer = new window.MutationObserver(init);
   observer.observe(document.head, {
     childList: true,
-    subtree: true
+    subtree: true,
   });
-})();
+}());

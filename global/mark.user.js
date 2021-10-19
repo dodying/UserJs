@@ -24,8 +24,7 @@
 /* global $ */
 /* eslint-disable no-debugger  */
 (async function () {
-  'use strict';
-  var prompt = async (message, defaultValue, autocompleteList = [], timeout) => {
+  const prompt = async (message, defaultValue, autocompleteList = [], timeout) => {
     const root = $('<mark-confirm>').insertAfter('body');
     return new Promise((resolve, reject) => {
       $.confirm({
@@ -38,25 +37,25 @@
           ` <div>${message}</div>`,
           ' <input type="text" list="promptList" style="height:40px;width:400px;font-size:20px;" ondblclick="this.value=&quot;&quot;"/>',
           ' <datalist id="promptList">',
-          ...autocompleteList.map(i => `<option value="${i}"></option>`),
+          ...autocompleteList.map((i) => `<option value="${i}"></option>`),
           ' </datalist>',
-          '</div>'
+          '</div>',
         ].join(''),
         autoClose: timeout ? `cancel|${timeout}` : null,
         backgroundDismiss: 'cancel',
         buttons: {
           formSubmit: {
             text: '确定',
-            btnClass: 'btn-blue'
+            btnClass: 'btn-blue',
           },
           cancel: {
             text: '取消',
             btnClass: 'btn-default',
-            keys: ['esc']
-          }
+            keys: ['esc'],
+          },
         },
-        onContentReady: function () {
-          var jc = this;
+        onContentReady() {
+          const jc = this;
           this.$content.find('input').on('keyup', (e) => {
             e.preventDefault();
             if (e.key === 'Enter') {
@@ -64,14 +63,14 @@
             }
           }).val(defaultValue);
         },
-        onClose: function () {
+        onClose() {
           resolve(null);
         },
-        onAction: function (btn) {
+        onAction(btn) {
           resolve(btn === 'cancel' ? null : this.$content.find('input').val());
           root.remove();
         },
-        container: root.get(0).shadowRoot
+        container: root.get(0).shadowRoot,
       });
     });
   };
@@ -82,7 +81,7 @@
       resolve();
       return;
     }
-    $(window).on('visibilitychange focus mousemove mousedown keydown touchstart mousewheel'.split(' ').map(i => i + '.mark-start').join(' '), () => {
+    $(window).on('visibilitychange focus mousemove mousedown keydown touchstart mousewheel'.split(' ').map((i) => `${i}.mark-start`).join(' '), () => {
       if (!document.hidden) {
         $(window).off('.mark-start');
         resolve();
@@ -91,7 +90,9 @@
   });
 
   $.extend({
-    markFunction: { markDirect, xhrSync, waitFor, waitIn }
+    markFunction: {
+      markDirect, xhrSync, waitFor, waitIn,
+    },
   });
   const server = $.markConfig && $.markConfig.libs ? $.markConfig.server : 'http://localhost:5556';
   const maxRetry = $.markConfig && $.markConfig.libs ? $.markConfig.maxRetry : 3;
@@ -134,7 +135,7 @@
          * like elementDo: [function (elem) { elem.textContent = elem.textContent.replace(match, replace); }]
          * 循环替换
          */
-        textReplaceEvery: [[/^\s*作\s*者\s*[:：]/], [/\|/g, '']]
+        textReplaceEvery: [[/^\s*作\s*者\s*[:：]/], [/\|/g, '']],
 
         /**
          * ?remakeHTML, remakeHTMLEvery
@@ -162,14 +163,14 @@
          */
 
         // 顺序： doEveryArgs/doEvery => do => elementDo => textReplace/textReplaceEvery => remakeHTML/remakeHTMLEvery
-      }
+      },
     ],
     manga: [
       {
         filterUrl: /i.dmzj.com\/(record|subscribe)/,
-        elems: ['.dy_content_li h3>a', '.history_des>h3>a']
-      }
-    ]
+        elems: ['.dy_content_li h3>a', '.history_des>h3>a'],
+      },
+    ],
   };
 
   const selectCalc = (any, position) => {
@@ -194,21 +195,22 @@
     return out;
   };
 
-  let libName, lib, database;
+  let libName; let lib; let
+    database;
   for (const i in libs) {
     libName = i;
     lib = libs[i];
-    const found = lib.some(i => {
+    const found = lib.some((i) => {
       const filtered = selectCalc(i.filterUrl, {
-        string: text => window.location.href.match(text),
-        RegExp: regexp => window.location.href.match(regexp),
-        function: func => func()
-      }).some(i => i);
+        string: (text) => window.location.href.match(text),
+        RegExp: (regexp) => window.location.href.match(regexp),
+        function: (func) => func(),
+      }).some((i) => i);
       const excluded = i.excludeUrl ? selectCalc(i.excludeUrl, {
-        string: text => window.location.href.match(text),
-        RegExp: regexp => window.location.href.match(regexp),
-        function: func => func()
-      }).some(i => i) : false;
+        string: (text) => window.location.href.match(text),
+        RegExp: (regexp) => window.location.href.match(regexp),
+        function: (func) => func(),
+      }).some((i) => i) : false;
       return filtered && !excluded;
     });
     if (found) break;
@@ -217,7 +219,7 @@
   console.log({ libName, lib });
 
   const getValue = () => JSON.parse(GM_getValue(`database_${libName}`) || '{}');
-  const setValue = (value) => value || window.confirm('数据库错误，请仔细检查\n是否强制保存') ? GM_setValue(`database_${libName}`, JSON.stringify(value)) || true : false;
+  const setValue = (value) => (value || window.confirm('数据库错误，请仔细检查\n是否强制保存') ? GM_setValue(`database_${libName}`, JSON.stringify(value)) || true : false);
   database = getValue();
   GM_addValueChangeListener(`database_${libName}`, (name, valueOld, value, remote) => {
     if (!remote) return;
@@ -234,7 +236,7 @@
 
     // 先从本地获取
     const books = database.book || {};
-    list = list.filter(i => {
+    list = list.filter((i) => {
       if (i in books) {
         result[i] = books[i];
         return false;
@@ -255,7 +257,7 @@
         try {
           res = await xhrSync(`${server}/query`, search.toString(), {
             responseType: 'json',
-            timeout: 120 * 1000
+            timeout: 120 * 1000,
           });
         } catch (error) {
           console.error(error);
@@ -301,7 +303,7 @@
     try {
       res = await xhrSync(`${server}/update`, search.toString(), {
         responseType: 'json',
-        timeout: 120 * 1000
+        timeout: 120 * 1000,
       });
     } catch (error) {
       console.error(error);
@@ -335,7 +337,7 @@
     '.mark-show-pre::after{content:"》"}',
     //
     '.mark-edit-textarea{width:99%;height:calc(99% - 16px);}',
-    '.mark-container[name="search"] [data-mark]{margin:0 2px;line-height:2;}'
+    '.mark-container[name="search"] [data-mark]{margin:0 2px;line-height:2;}',
   ].join('\n')).appendTo('head');
 
   /**
@@ -350,7 +352,7 @@
    */
 
   let panelRoot;
-  const searchLib = lib.filter(i => i.search);
+  const searchLib = lib.filter((i) => i.search);
   let firstRun = true;
   const ask = async (question, answer, list) => {
     answer = await prompt(question, answer || database.answer || '', list);
@@ -368,15 +370,15 @@
     let temp = [];
     for (const i of lib) {
       const filtered = selectCalc(i.filterUrl, {
-        string: text => window.location.href.match(text),
-        RegExp: regexp => window.location.href.match(regexp),
-        function: func => func()
-      }).some(i => i);
+        string: (text) => window.location.href.match(text),
+        RegExp: (regexp) => window.location.href.match(regexp),
+        function: (func) => func(),
+      }).some((i) => i);
       const excluded = i.excludeUrl ? selectCalc(i.excludeUrl, {
-        string: text => window.location.href.match(text),
-        RegExp: regexp => window.location.href.match(regexp),
-        function: func => func()
-      }).some(i => i) : false;
+        string: (text) => window.location.href.match(text),
+        RegExp: (regexp) => window.location.href.match(regexp),
+        function: (func) => func(),
+      }).some((i) => i) : false;
       if (!filtered || excluded) continue;
       if (firstRun) {
         const args = typeof i.doEveryArgs === 'function' ? await i.doEveryArgs() : i.doEveryArgs;
@@ -387,13 +389,13 @@
       }
 
       let elem = selectCalc(i.elems, {
-        string: text => $(text).toArray(),
-        function: func => func()
-      }).filter(i => i).map(i => i instanceof $().constructor ? i.toArray() : i).reduce((pre, cur) => [].concat(cur, pre));
+        string: (text) => $(text).toArray(),
+        function: (func) => func(),
+      }).filter((i) => i).map((i) => (i instanceof $().constructor ? i.toArray() : i)).reduce((pre, cur) => [].concat(cur, pre));
 
       elem = $(elem).add('[data-mark]').not('[data-mark-disabled]').toArray(); // .filter(i => i.textContent && i.textContent.trim());
 
-      if (i.elementDo instanceof Array && i.elementDo.every(i => typeof i === 'function')) {
+      if (i.elementDo instanceof Array && i.elementDo.every((i) => typeof i === 'function')) {
         const elems = $([].concat(elem, temp)).filter(':not([data-mark-do="true"])');
         for (const elem of elems) {
           for (const func of i.elementDo) {
@@ -402,37 +404,39 @@
           $(elem).attr('data-mark-do', 'true');
         }
       }
-      if (i.textReplace instanceof Array || lib.find(i => i.textReplaceEvery instanceof Array)) {
+      if (i.textReplace instanceof Array || lib.find((i) => i.textReplaceEvery instanceof Array)) {
         const elems = $([].concat(elem, temp)).filter(':not([data-mark-text="true"])').toArray();
         for (const elem of elems) {
-          const node = $(elem).find(':not(iframe)').addBack().contents().toArray().find(j => j.nodeType === 3);
+          const node = $(elem).find(':not(iframe)').addBack().contents()
+            .toArray()
+            .find((j) => j.nodeType === 3);
           let text = node.textContent.trim();
 
-          const dict = [].concat(i.textReplace || [], ...lib.filter(i => i.textReplaceEvery instanceof Array).map(i => i.textReplaceEvery));
-          let replace = dict.find(i => text.match(i[0]));
+          const dict = [].concat(i.textReplace || [], ...lib.filter((i) => i.textReplaceEvery instanceof Array).map((i) => i.textReplaceEvery));
+          let replace = dict.find((i) => text.match(i[0]));
           let replaceLast = null;
           let textLast = null;
           while (replace) {
             if (replace === replaceLast && textLast === text) {
-              console.error('mark: 替换文本陷入死循环\n替换规则: ' + replace);
+              console.error(`mark: 替换文本陷入死循环\n替换规则: ${replace}`);
               dict.splice(dict.indexOf(replace), 1);
             }
             textLast = text;
             text = text.replace(replace[0], replace[1] || '').trim();
             replaceLast = replace;
-            replace = dict.find(i => text.match(i[0]));
+            replace = dict.find((i) => text.match(i[0]));
           }
 
           node.textContent = text.trim();
           $(elem).attr('data-mark-text', 'true');
         }
       }
-      if (i.remakeHTML instanceof Array || lib.find(i => i.remakeHTMLEvery instanceof Array)) {
+      if (i.remakeHTML instanceof Array || lib.find((i) => i.remakeHTMLEvery instanceof Array)) {
         const elems = $([].concat(elem, temp)).filter(':not([data-mark-html="true"])').toArray();
         for (const elem of elems) {
           let html = $(elem).html();
-          const dict = [].concat(i.remakeHTML || [], ...lib.filter(i => i.remakeHTMLEvery instanceof Array).map(i => i.remakeHTMLEvery));
-          const replace = dict.find(i => html.match(i[0]));
+          const dict = [].concat(i.remakeHTML || [], ...lib.filter((i) => i.remakeHTMLEvery instanceof Array).map((i) => i.remakeHTMLEvery));
+          const replace = dict.find((i) => html.match(i[0]));
           if (replace) {
             elems.splice(elems.indexOf(elem), 1);
 
@@ -440,8 +444,8 @@
             html = html.replace(/\$tag/g, elem.tagName.toLowerCase());
             const temp = $('<div>').html(html);
             if (temp.find('[\\$attr]').length) {
-              temp.find('[\\$attr]').toArray().forEach(e => {
-                $(e).attr('$attr', null).attr(Object.fromEntries([...elem.attributes].filter(i => !i.nodeName.match(/^data-mark(-|$)/i)).map(i => [i.nodeName, i.nodeValue])));
+              temp.find('[\\$attr]').toArray().forEach((e) => {
+                $(e).attr('$attr', null).attr(Object.fromEntries([...elem.attributes].filter((i) => !i.nodeName.match(/^data-mark(-|$)/i)).map((i) => [i.nodeName, i.nodeValue])));
               });
             }
             html = temp.html();
@@ -461,7 +465,7 @@
       $(document).on('mousedown.mark-search', (e) => {
         mouseDown = true;
       });
-      $(document).on('mouseup.mark-search', function (e) {
+      $(document).on('mouseup.mark-search', (e) => {
         // console.log(e.target);
         mouseDown = false;
         if ($(e.target).is('mark-search-bar')) {
@@ -481,31 +485,31 @@
         if (left < 0) left = 0;
         if (top < 0) top = 0;
         $('mark-search-bar').attr('css', JSON.stringify({
-          left: left,
-          top: top
+          left,
+          top,
         })).show().attr('more', e.shiftKey * 1);
       });
     }
     firstRun = false;
     elems = temp;
-    $(elems).toArray().forEach(i => (i.textContent = i.textContent.trim()));
+    $(elems).toArray().forEach((i) => (i.textContent = i.textContent.trim()));
     $(elems).not('[data-mark]').attr('data-mark', 'null');
     updatingElems = false;
   };
   const updateHighlight = async () => {
     const matches = database.match || {};
 
-    const list = elems.map(i => i.textContent.trim());
+    const list = elems.map((i) => i.textContent.trim());
     const books = await queryMark(list);
 
-    elems.forEach(i => {
+    elems.forEach((i) => {
       const name = i.textContent.trim();
 
       if (name in books) {
         if (books[name] && books[name] !== 'null') {
           $(i).attr('data-mark', String(books[name]));
-        } else if (Object.keys(matches).some(i => name.match(i))) {
-          const filtered = Object.keys(matches).filter(i => name.match(i))[0];
+        } else if (Object.keys(matches).some((i) => name.match(i))) {
+          const filtered = Object.keys(matches).filter((i) => name.match(i))[0];
           $(i).attr('data-mark', matches[filtered]);
         } else {
           $(i).attr('data-mark', String(books[name]));
@@ -516,15 +520,15 @@
     });
 
     const colors = database.color || {};
-    const style = Object.keys(colors).map(i => `[data-mark="${i}"]{background-color:${colors[i]}!important;}`);
+    const style = Object.keys(colors).map((i) => `[data-mark="${i}"]{background-color:${colors[i]}!important;}`);
     const styleEle = $('style.mark-style').length ? $('style.mark-style') : $('<style class="mark-style"></style>');
     styleEle.html(style).appendTo('head');
 
     $('[name="info"]', panelRoot).attr('length', $('[data-mark]').length).attr('null', $('[data-mark="null"]').length);
   };
-  const promptSetting = async keyName => {
+  const promptSetting = async (keyName) => {
     const obj = database[keyName] || {};
-    const answer = await ask(`<h3>已存在:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(obj).map(i => `<li><span style="font-weight:bold;">${i}</span>: ${obj[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(obj).map(i => `${i}:  ${obj[i]}`));
+    const answer = await ask(`<h3>已存在:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(obj).map((i) => `<li><span style="font-weight:bold;">${i}</span>: ${obj[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(obj).map((i) => `${i}:  ${obj[i]}`));
     if (!answer) return;
     const arr = answer.split(/:|：/);
     if (arr.length > 1) {
@@ -539,31 +543,31 @@
       updateHighlight();
     }
   };
-  const markBatch = async elems => {
+  const markBatch = async (elems) => {
     const colors = database.color || {};
-    const type = await ask(`<h3>要标记的状态,值为null表示删除:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map(i => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(colors));
+    const type = await ask(`<h3>要标记的状态,值为null表示删除:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map((i) => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(colors));
     if (!type) return;
 
-    const list = elems.map(i => i.textContent.trim());
-    updateMark(Object.fromEntries(list.map(i => ([i, type]))));
+    const list = elems.map((i) => i.textContent.trim());
+    updateMark(Object.fromEntries(list.map((i) => ([i, type]))));
   };
-  function markDirect (name, type) {
+  function markDirect(name, type) {
     if (name && (name = name.trim())) updateMark(Object.fromEntries([[name, type]]));
   }
 
-  var observer = new window.MutationObserver(async (mutationsList) => {
-    if (mutationsList.some(i => i.addedNodes && [].concat(...i.addedNodes).some(j => j.nodeType === 1))) {
+  const observer = new window.MutationObserver(async (mutationsList) => {
+    if (mutationsList.some((i) => i.addedNodes && [].concat(...i.addedNodes).some((j) => j.nodeType === 1))) {
       await updateElems();
       updateHighlight();
     }
   });
   observer.observe(document.body, {
     childList: true,
-    subtree: true
+    subtree: true,
   });
 
   class markPanel extends window.HTMLElement {
-    constructor () {
+    constructor() {
       super();
 
       const shadow = this.attachShadow({ mode: 'open' });
@@ -582,11 +586,11 @@
 
         '.mark-less.mark-less-on::after{content:">>";}',
         '.mark-less::after{content:"<<";}',
-        'button:disabled{background-color:#000;color:#fff;}'
+        'button:disabled{background-color:#000;color:#fff;}',
       ].join('')).appendTo(shadow);
       const container = $('<div>').appendTo(shadow);
       $('<button class="mark-close">x</button>').on({
-        click: () => $(this).hide()
+        click: () => $(this).hide(),
       }).appendTo(container);
       $('<button name="info" disabled length="x" null="x">').text(libName).appendTo(container);
       $('<button class="mark-switch"></button>').on({
@@ -601,13 +605,13 @@
         contextmenu: (e) => {
           updateHighlight();
           return false;
-        }
+        },
       }).appendTo(container);
       $('<button name="color" class="mark-color mark-less-hide"></button>').on({
-        click: () => promptSetting('color')
+        click: () => promptSetting('color'),
       }).appendTo(container);
       $('<button name="match" class="mark-less-hide"></button>').on({
-        click: () => promptSetting('match')
+        click: () => promptSetting('match'),
       }).appendTo(container);
       $('<button name="mark"></button>').on({
         click: async (e) => {
@@ -616,7 +620,7 @@
           $(e.target).toggleClass('mark-mark-on');
           if ($(e.target).is('.mark-mark-on')) {
             const colors = database.color || {};
-            const type = await ask(`<h3>要标记的状态,值为null表示删除:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map(i => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(colors));
+            const type = await ask(`<h3>要标记的状态,值为null表示删除:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map((i) => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(colors));
             if (!type) {
               $(e.target).toggleClass('mark-mark-on');
               return;
@@ -632,7 +636,7 @@
           } else {
             $('body').off('click.mark');
           }
-        }
+        },
       }).appendTo(container);
       $('<button name="mark-one" title="标记1次"></button>').on({
         click: (e) => {
@@ -646,13 +650,13 @@
             updateMark(Object.fromEntries([[name, type]]));
             $('body').off('click.markone');
           });
-        }
+        },
       }).appendTo(container);
       $('<button name="mark-all" title="标记本页所有可标记的" class="mark-less-hide"></button>').on({
-        click: () => markBatch($('[data-mark]').toArray())
+        click: () => markBatch($('[data-mark]').toArray()),
       }).appendTo(container);
       $('<button name="mark-null" title="标记本页所有未标记的"></button>').on({
-        click: () => markBatch($('[data-mark="null"]').toArray())
+        click: () => markBatch($('[data-mark="null"]').toArray()),
       }).appendTo(container);
       $('<button name="hide-marked" class="mark-less-hide"></button>').on({
         click: () => {
@@ -661,10 +665,12 @@
           } else {
             const marked = $('[data-mark]:not([data-mark=""]):not([data-mark="null"])').toArray();
             for (const elem of marked) {
-              $(elem).parents().filter((index, e) => $(e).find('[data-mark]').length === 1).eq(-1).attr('data-mark-hide', 'true').hide();
+              $(elem).parents().filter((index, e) => $(e).find('[data-mark]').length === 1).eq(-1)
+                .attr('data-mark-hide', 'true')
+                .hide();
             }
           }
-        }
+        },
       }).appendTo(container);
       $('<button name="show" class="mark-less-hide"></button>').on({
         click: async () => {
@@ -673,7 +679,7 @@
             return;
           }
 
-          const list = elems.map(i => i.textContent.trim());
+          const list = elems.map((i) => i.textContent.trim());
           const books = await queryMark(list);
           const types = Object.values(books).sort().filter((item, index, array) => array.indexOf(item) === index);
 
@@ -681,26 +687,26 @@
           for (const type of types) {
             $('<li class="mark-show-nav-select"></li>').attr('name', type).appendTo($(elem).find('.mark-show-nav'));
             let html = '<ol>';
-            const names = Object.keys(books).filter(i => books[i] === type);
+            const names = Object.keys(books).filter((i) => books[i] === type);
             for (const name of names) {
-              html += `<li><span class="mark-show-pre" data-mark data-mark-do="true" data-mark-html="true" data-mark-text="true">${name}</span></li>`;
+              html = `${html}<li><span class="mark-show-pre" data-mark data-mark-do="true" data-mark-html="true" data-mark-text="true">${name}</span></li>`;
             }
-            html += '</ol>';
+            html = `${html}</ol>`;
             $(html).attr('name', type).appendTo($(elem).find('.mark-show-content'));
           }
           elem.appendTo('body');
           $('.mark-show-nav-select').on({
-            click: e => {
+            click: (e) => {
               $('.mark-show-nav-select').removeClass('mark-show-nav-selected');
               $(e.target).addClass('mark-show-nav-selected');
               $('.mark-show-content>ol').hide();
               $('.mark-show-content>ol').filter((order, i) => $(i).attr('name') === $(e.target).attr('name')).show();
-            }
+            },
           });
           $('.mark-show-nav-select:eq(0)').addClass('mark-show-nav-selected');
           $('.mark-show-content>ol').hide();
           $('.mark-show-content>ol:eq(0)').show();
-        }
+        },
       }).appendTo(container);
       $('<button name="edit" class="mark-less-hide"></button>').on({
         click: () => {
@@ -719,10 +725,10 @@
                 console.log(error);
                 window.alert('Save Failed');
               }
-            }
+            },
           }).appendTo('.mark-container[name="edit"]');
           $('.mark-edit-textarea').text(JSON.stringify(database, null, 2));
-        }
+        },
       }).appendTo(container);
       $('<button name="search" class="mark-less-hide"></button>').on({
         click: async () => {
@@ -733,41 +739,41 @@
           $('<div class="mark-container" name="search"></div>').html('<div style="text-align:center;margin:5px;"><input name="search" type="text" style="font-size:large;"></div><hr><div name="result"></div>').appendTo('body');
           let typing = false;
           $('.mark-container[name="search"] input[name="search"]').on({
-            compositionstart: e => {
+            compositionstart: (e) => {
               typing = true;
             },
-            compositionend: e => {
+            compositionend: (e) => {
               typing = false;
               $(e.target).trigger('input');
             },
-            input: async e => {
+            input: async (e) => {
               if (typing || !e.target.value) return;
-              let filter = Object.keys(database.book).filter(i => i.match(e.target.value));
+              let filter = Object.keys(database.book).filter((i) => i.match(e.target.value));
               const res = await xhrSync(`${server}/search`, `category=${libName}&name=${encodeURIComponent(e.target.value)}`, {
                 responseType: 'json',
-                timeout: 120 * 1000
+                timeout: 120 * 1000,
               });
               if (res && res.status === 200 && res.response) filter = filter.concat(res.response);
-              $('.mark-container[name="search"] [name="result"]').html([...new Set(filter)].map(i => `<span data-mark data-mark-do="true" data-mark-html="true" data-mark-text="true">${i}</span>`).join(''));
-            }
+              $('.mark-container[name="search"] [name="result"]').html([...new Set(filter)].map((i) => `<span data-mark data-mark-do="true" data-mark-html="true" data-mark-text="true">${i}</span>`).join(''));
+            },
           });
-        }
+        },
       }).appendTo(container);
       $('<button name="sync" class="mark-less-hide"></button>').on({
         click: async (e) => {
           $(e.target).prop('disabled', 'disabled');
           await updateMarkRemote(true);
           $(e.target).prop('disabled', null);
-        }
+        },
       }).appendTo(container);
       let lastElem = null;
       const scrollElement = window.innerHeight === document.documentElement.clientHeight ? document.documentElement : document.body;
-      const compareElement = scrollElement === document.documentElement ? $('*').toArray().map(i => [i, i.clientHeight]).sort((a, b) => b[1] - a[1])[0][0] : document.documentElement;
+      const compareElement = scrollElement === document.documentElement ? $('*').toArray().map((i) => [i, i.clientHeight]).sort((a, b) => b[1] - a[1])[0][0] : document.documentElement;
       $('<button name="jump-next" class="mark-less-hide"></button>').on({
         click: async (e) => {
           const all = $('[data-mark]').toArray().filter((elem, index, arr) => index <= arr.length - 2 && $(arr[index]).offset().top !== $(arr[index + 1]).offset().top);
           if (!all.length) return;
-          let elem = all.find(i => $(i).offset().top >= scrollElement.scrollTop);
+          let elem = all.find((i) => $(i).offset().top >= scrollElement.scrollTop);
           if (!elem) {
             elem = all[0];
           } else if (elem === lastElem) {
@@ -775,7 +781,7 @@
           }
           scrollElement.scrollTop = Math.abs(scrollElement.scrollTop + window.innerHeight - compareElement.clientHeight) <= 1 ? 0 : $(elem).offset().top - $(container).height();
           lastElem = elem;
-        }
+        },
       }).appendTo(container);
       $('<button name="show-mark" class="mark-less-hide"></button>').on({
         click: async (e) => {
@@ -784,7 +790,7 @@
           } else {
             $('[data-mark]').attr('data-mark-after', '1');
           }
-        }
+        },
       }).appendTo(container);
 
       // 最后
@@ -792,15 +798,15 @@
         click: (e) => {
           $(e.target).toggleClass('mark-less-on');
           $('.mark-less-hide', panelRoot).toggle();
-        }
+        },
       }).appendTo(container);
       $('.mark-less', panelRoot).click();
     }
   }
   class markSearchBar extends window.HTMLElement {
-    static get observedAttributes () { return ['css', 'more']; }
+    static get observedAttributes() { return ['css', 'more']; }
 
-    constructor () {
+    constructor() {
       super();
 
       const shadow = this.attachShadow({ mode: 'open' });
@@ -808,12 +814,13 @@
         '.container{background:#fcfcfc;text-align:center;position:fixed;z-index:2147483647;user-select:none;}',
         '[data-url]{display:inline-block;cursor:pointer;margin:3px;}',
         '[data-url]>img{width:24px;height:24px;}',
-        '[data-url]>span{display:block;}'
+        '[data-url]>span{display:block;}',
         // 'div>a:hover>span{display:block;}'
       ].join('')).appendTo(shadow);
       const searchDict = {};
       let buttons = searchLib.map((lib, index) => {
-        let info, url, favicon;
+        let info; let url; let
+          favicon;
         if (typeof lib.search === 'string') {
           [info, url, favicon] = lib.search.split('|');
         } else if (typeof lib.search === 'function') {
@@ -824,7 +831,7 @@
         if (GM_getValue(`favicon_${favicon}`)) {
           favicon = GM_getValue(`favicon_${favicon}`);
         } else {
-          xhrSync(favicon, null, { responseType: 'arraybuffer' }).then(res => {
+          xhrSync(favicon, null, { responseType: 'arraybuffer' }).then((res) => {
             const arrayBuffer = res.response;
             const base64 = window.btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
             const type = res.responseHeaders.match(/^Content-Type: (.*)$/im) ? res.responseHeaders.match(/^Content-Type: (.*)$/im)[1] : 'image/png';
@@ -841,7 +848,7 @@
         '<a data-url="https://www.baidu.com/s?wd=%s"><img src="https://www.baidu.com/favicon.ico" /><span>百度搜索</span></a>',
         '<a data-url="https://www.so.com/s?q=%s"><img src="https://www.so.com/favicon.ico" /><span>360搜索</span></a>',
         '<a data-url name="close"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIuMDAxIDUxMi4wMDEiPjxwYXRoIGQ9Ik0yODQuMjg2IDI1Ni4wMDJMNTA2LjE0MyAzNC4xNDRjNy44MTEtNy44MTEgNy44MTEtMjAuNDc1IDAtMjguMjg1LTcuODExLTcuODEtMjAuNDc1LTcuODExLTI4LjI4NSAwTDI1NiAyMjcuNzE3IDM0LjE0MyA1Ljg1OWMtNy44MTEtNy44MTEtMjAuNDc1LTcuODExLTI4LjI4NSAwLTcuODEgNy44MTEtNy44MTEgMjAuNDc1IDAgMjguMjg1bDIyMS44NTcgMjIxLjg1N0w1Ljg1OCA0NzcuODU5Yy03LjgxMSA3LjgxMS03LjgxMSAyMC40NzUgMCAyOC4yODVhMTkuOTM4IDE5LjkzOCAwIDAgMCAxNC4xNDMgNS44NTcgMTkuOTQgMTkuOTQgMCAwIDAgMTQuMTQzLTUuODU3TDI1NiAyODQuMjg3bDIyMS44NTcgMjIxLjg1N2MzLjkwNSAzLjkwNSA5LjAyNCA1Ljg1NyAxNC4xNDMgNS44NTdzMTAuMjM3LTEuOTUyIDE0LjE0My01Ljg1N2M3LjgxMS03LjgxMSA3LjgxMS0yMC40NzUgMC0yOC4yODVMMjg0LjI4NiAyNTYuMDAyeiIvPjwvc3ZnPg=="><span>禁止弹出</span></a>',
-        '</div>'
+        '</div>',
       ]);
       $('<div class="container">').html(buttons.join('')).appendTo(shadow).on('click', (e) => {
         const elem = $(e.target).is('[data-url]') ? $(e.target) : $(e.target).parents('[data-url]').eq(-1);
@@ -849,7 +856,7 @@
           $(document).off('.mark-search');
           $('mark-search-bar').remove();
           return;
-        } else if (elem.is('[name="more"]')) {
+        } if (elem.is('[name="more"]')) {
           $('.container>.more', this.shadowRoot).show();
           return;
         }
@@ -864,7 +871,7 @@
       });
     }
 
-    attributeChangedCallback (name, oldValue, newValue) {
+    attributeChangedCallback(name, oldValue, newValue) {
       if (name === 'css') {
         $('.container', this.shadowRoot).css(JSON.parse($(this).attr('css')));
       } else if (name === 'more') {
@@ -877,7 +884,7 @@
     }
   }
   class markConfirm extends window.HTMLElement {
-    constructor () {
+    constructor() {
       super();
 
       const shadow = this.attachShadow({ mode: 'open' });
@@ -899,7 +906,7 @@
   });
 
   // 通用函数
-  function xhrSync (url, parm = null, opt = {}) {
+  function xhrSync(url, parm = null, opt = {}) {
     return new Promise((resolve, reject) => {
       const dealWithError = async (msg, res) => {
         // console.error(res);
@@ -914,9 +921,9 @@
         timeout: opt.timeout || 60 * 1000,
         responseType: ['text', 'json', 'blob', 'arraybuffer', 'document'].includes(opt.responseType) ? opt.responseType : 'text',
         headers: opt.headers || {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         },
-        onload (res) {
+        onload(res) {
           resolve(res);
         },
         ontimeout: async (res) => {
@@ -924,11 +931,11 @@
         },
         onerror: async (res) => {
           dealWithError('错误', res);
-        }
+        },
       });
     });
   }
-  function waitFor (check, timeout) {
+  function waitFor(check, timeout) {
     return new Promise((resolve, reject) => {
       const start = new Date().getTime();
       let id;
@@ -951,11 +958,11 @@
       }, 200);
     });
   }
-  function waitIn (time) {
+  function waitIn(time) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve();
       }, time);
     });
   }
-})();
+}());

@@ -23,17 +23,16 @@
 /* global GM_setValue GM_getValue unsafeWindow */
 /* global $ xhr */
 (async function () {
-  'use strict';
   unsafeWindow.getPage = getPage;
 
   const lib = {
-    'c2|作品类别：': $('.tabList>dl:nth-child(1)>dd>a').toArray().map(i => `${i.href.match(/[?&]catv32=([-\d]+)/)[1]}|${i.textContent}`),
+    'c2|作品类别：': $('.tabList>dl:nth-child(1)>dd>a').toArray().map((i) => `${i.href.match(/[?&]catv32=([-\d]+)/)[1]}|${i.textContent}`),
     'c3|次要类别：': ['|不限'],
     'tag|作品标签：': ['|不限'],
     'free|作品价格：': ['-1|不限', '1|免费', '2|VIP'],
     'end|作品进度：': ['-1|不限', '0|完结', '1|连载'],
     'order|排序方式：': ['0|畅销', '1|收藏', '2|更新'],
-    'textSize|作品字数：': ['0|不限', '1|20万字以下', '2|20-30万字', '3|30-50万字', '4|50-100万字', '5|100-200万字', '6|200万字以上']
+    'textSize|作品字数：': ['0|不限', '1|20万字以下', '2|20-30万字', '3|30-50万字', '4|50-100万字', '5|100-200万字', '6|200万字以上'],
   };
 
   let filter = [
@@ -43,11 +42,11 @@
     { name: 'free', value: '-1' },
     { name: 'end', value: '1' },
     { name: 'order', value: '0' },
-    { name: 'textSize', value: '0' }
+    { name: 'textSize', value: '0' },
   ];
   let lastBook;
 
-  getCatetag(filter.find(i => i.name === 'c2').value);
+  getCatetag(filter.find((i) => i.name === 'c2').value);
 
   $('#bookList').on('click', '[name="page"]', async (e) => {
     lastBook = $('.showInfo').last().attr('bid') * 1;
@@ -77,7 +76,7 @@
   });
   $('#bookList').on('click', '[name="hideBookAll"]', (e) => {
     const hideId = GM_getValue('hideId', []);
-    const bids = $('.showInfo:visible').toArray().map(i => $(i).attr('bid') * 1);
+    const bids = $('.showInfo:visible').toArray().map((i) => $(i).attr('bid') * 1);
     hideId.push(...bids);
     GM_setValue('hideId', hideId);
 
@@ -96,7 +95,7 @@
     GM_setValue('hideKeyword', hideKeyword);
   });
 
-  async function getPage (page = 1, pageSize = 30) {
+  async function getPage(page = 1, pageSize = 30) {
     const search = new URLSearchParams('');
     for (const obj of filter) {
       const { name, value } = obj;
@@ -105,7 +104,7 @@
     search.set('pageNo', page);
     search.set('pageSize', pageSize);
 
-    const res = await xhr.sync('https://wxmini.reader.qq.com/fox/search/subcategory?' + search.toString());
+    const res = await xhr.sync(`https://wxmini.reader.qq.com/fox/search/subcategory?${search.toString()}`);
     if (res.status === 200 && res.response) {
       let json;
       try {
@@ -118,7 +117,7 @@
       const hideId = GM_getValue('hideId', []);
       const hideKeyword = GM_getValue('hideKeyword', []);
       const html = [
-        ...json.data.dataList.filter(i => {
+        ...json.data.dataList.filter((i) => {
           let continued = true;
           if (i.updatetime.match(/^\d+-\d+ \d+:\d+$/) || i.updatetime.match(/^\d+-\d+-\d+/)) {
             const time = i.updatetime.match(/^\d+-\d+ \d+:\d+$/) ? `${new Date().getFullYear()}-${i.updatetime}` : i.updatetime;
@@ -126,9 +125,9 @@
           }
 
           return i.totalWords / 10000 > 3 && i.lastChapterNo < 2000 && ['', '起点中文网'].includes(i.brand) && continued;
-        }).map(i => { // 过滤
+        }).map((i) => { // 过滤
           console.log(`%c ${i.brand}`, 'background: #222; color: #bada55', i.title, i);
-          const hide = hideId.includes(i.bid) || hideKeyword.some(j => i.title.match(j));
+          const hide = hideId.includes(i.bid) || hideKeyword.some((j) => i.title.match(j));
           return [
             `<dl class="hideInfo" bid="${i.bid}" style="text-align:center;background:#808080;padding:0;${hide ? '' : 'display:none;'}"><a name="showBook" href="javascript:void 0;" value="${i.bid}" style="background:#fff;font-size:medium;font-weight:bold;">${i.title}</a></dl>`,
             `<dl class="showInfo" bid="${i.bid}" style="${hide ? 'display:none;' : ''}">`,
@@ -150,7 +149,7 @@
             `  <li class="btn"><a target="_blank" href="/hvread.html?bid=${i.bid}">立即阅读</a><a href="http://ebook.qq.com/intro.html?bid=${i.bid}?tab=2" target="_blank">作品目录</a><a actiontype="addToBookshelf" bid="${i.bid}" href="javascript:">收藏本书</a><a href="https://www.qidian.com/search?kw=${i.title}" target="_blank">起点搜索</a>${['', '起点中文网'].includes(i.brand) && String(i.bid).length === 8 ? `<a href="https://book.qidian.com/info/10${String(i.bid).substr(0, 1) * 1 - 1}${String(i.bid).substr(1)}" target="_blank">起点阅读</a>` : ''}<a name="hideBook" href="javascript:void 0;" value="${i.bid}">隐藏该书</a></li>`,
             '</ul>',
             '</dd>',
-            '</dl>'
+            '</dl>',
           ].join('');
         }),
         '<div class="page_ye">',
@@ -162,7 +161,7 @@
         `<span>总共: ${json.data.totalPage}页</span>`,
         '<a name="hideBookAll" href="javascript:void 0;">隐藏所有</a>',
         '<a name="toggleKeyword" href="javascript:void 0;">切换关键词</a>',
-        '</div>'
+        '</div>',
       ].join('\n');
       $('#bookList').html(html);
       if (lastBook && $(`.showInfo[bid="${lastBook}"]`).length) {
@@ -173,9 +172,9 @@
       return true;
     }
   }
-  function updateFilterList () {
+  function updateFilterList() {
     const html = [
-      '<form id="yueduList">'
+      '<form id="yueduList">',
     ];
     for (const i in lib) {
       const [key, name] = i.split('|');
@@ -184,12 +183,12 @@
         `<dt>${name}</dt>`,
         '<dd>',
         `<input type="hidden" name="${key}">`,
-        ...lib[i].map(j => {
+        ...lib[i].map((j) => {
           const [value, name] = j.split('|');
           return `<a href="javascript:void 0;" class="yueduListOption" key="${key}" value="${value}">${name}</a>`;
         }),
         '</dd>',
-        '</dl>'
+        '</dl>',
       ].join(''));
     }
     html.push('</form>');
@@ -217,7 +216,7 @@
     lastBook = null;
     getPage();
   }
-  async function getCatetag (c2) {
+  async function getCatetag(c2) {
     try {
       const res = await xhr.sync(`https://wxmini.reader.qq.com/fox/query/catetag/list?cid=${c2}&platform=android`);
       if (res.status !== 200 || !res.response) throw new Error();
@@ -225,11 +224,11 @@
       const json = JSON.parse(res.response);
       if (json.code !== 0 || json.msg !== 'ok') throw new Error();
 
-      lib['c3|次要类别：'] = ['|不限'].concat(json.data.cateList.map(i => `${i.id}|${i.name}`));
-      lib['tag|作品标签：'] = ['|不限'].concat(json.data.tagList.map(i => `${i.id}|${i.name}`));
+      lib['c3|次要类别：'] = ['|不限'].concat(json.data.cateList.map((i) => `${i.id}|${i.name}`));
+      lib['tag|作品标签：'] = ['|不限'].concat(json.data.tagList.map((i) => `${i.id}|${i.name}`));
       updateFilterList();
     } catch (error) {
       if (window.confirm('是否重试')) return getCatetag(c2);
     }
   }
-})();
+}());

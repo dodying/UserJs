@@ -15,16 +15,16 @@
 // @grant       GM_deleteValue
 // @run-at      document-end
 // ==/UserScript==
-let gid = location.href.split('/')[4];
-if (location.host === 'exhentai.org') { //里站
-  if (GM_getValue(gid, true)) { //尝试跳转
-    if (!['ta_female:lolicon', 'ta_male:shotacon'].some(i => document.getElementById(i))) location = '//e-hentai.org' + location.pathname;
+const gid = location.href.split('/')[4];
+if (location.host === 'exhentai.org') { // 里站
+  if (GM_getValue(gid, true)) { // 尝试跳转
+    if (!['ta_female:lolicon', 'ta_male:shotacon'].some((i) => document.getElementById(i))) location = `//e-hentai.org${location.pathname}`;
   } else {
     GM_deleteValue(gid);
   }
-} else if (location.host === 'e-hentai.org') { //表站
-  if (document.querySelector('.d')) { //不存在则返回
-    location = '//exhentai.org' + location.pathname;
+} else if (location.host === 'e-hentai.org') { // 表站
+  if (document.querySelector('.d')) { // 不存在则返回
+    location = `//exhentai.org${location.pathname}`;
     GM_setValue(gid, false);
   }
 }

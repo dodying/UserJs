@@ -10,20 +10,20 @@
 // ==/UserScript==
 (function () {
   if (document.getElementById('riddlecounter')) {
-    var url = document.querySelector('#riddlebot>img').src
+    const url = document.querySelector('#riddlebot>img').src;
     GM_xmlhttpRequest({
       method: 'GET',
-      url: url,
+      url,
       responseType: 'arraybuffer',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       },
-      onload: function (e) {
+      onload(e) {
         /* global saveAs */
         saveAs(new window.Blob([e.response], {
-          type: 'image/jpeg'
-        }), new Date().getTime() + '.jpg')
-      }
-    })
+          type: 'image/jpeg',
+        }), `${new Date().getTime()}.jpg`);
+      },
+    });
   }
-})()
+}());

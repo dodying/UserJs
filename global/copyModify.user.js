@@ -15,9 +15,7 @@
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 (function () {
-  'use strict';
-
-  document.addEventListener('copy', function (e) {
+  document.addEventListener('copy', (e) => {
     const text = window.getSelection().toString().trim();
     if (text) {
       // GM_setClipboard(text);
@@ -26,4 +24,4 @@
     }
     e.preventDefault();
   }, false);
-})();
+}());

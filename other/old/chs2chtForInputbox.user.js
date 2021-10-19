@@ -23,14 +23,14 @@ document.onkeydown = function (e) {
   }
 }
 */
-GM_registerMenuCommand('转为繁体', function () {
-  tran(true)
-}, 'T')
-GM_registerMenuCommand('转为简体', function () {
-  tran(false)
-}, 'S')
-function tran (toBig5) {
+GM_registerMenuCommand('转为繁体', () => {
+  tran(true);
+}, 'T');
+GM_registerMenuCommand('转为简体', () => {
+  tran(false);
+}, 'S');
+function tran(toBig5) {
   jQuery('input:text,textarea,[contenteditable="true"]').val(function () {
-    return tranStr(this.value, toBig5)
-  })
+    return tranStr(this.value, toBig5);
+  });
 }

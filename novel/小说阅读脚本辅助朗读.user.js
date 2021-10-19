@@ -19,13 +19,12 @@
 /* global $ */
 /* eslint-disable no-debugger  */
 (function () {
-  'use strict';
   const config = GM_getValue('config', {
     lucky: false,
-    voice: window.speechSynthesis.getVoices().find(i => i.default) ? window.speechSynthesis.getVoices().find(i => i.default).name : null,
+    voice: window.speechSynthesis.getVoices().find((i) => i.default) ? window.speechSynthesis.getVoices().find((i) => i.default).name : null,
     volume: 1,
     rate: 1,
-    pitch: 1
+    pitch: 1,
   });
 
   const addSpeakButton = () => {
@@ -39,22 +38,22 @@
           window.speechSynthesis.pause();
           $(e.target).html('\u23f5');
         }
-      }
+      },
     });
     $('<div style="position:fixed;top:10px;right:36px;z-index:1597;font-size:16px;cursor:pointer;">').html('\ud83c\udfa4').insertBefore('#preferencesBtn').on({
-      click: () => config.lucky ? speakMyNovelReader() : toogleSpeakPanel(),
+      click: () => (config.lucky ? speakMyNovelReader() : toogleSpeakPanel()),
       contextmenu: (e) => {
         e.stopPropagation();
         e.stopImmediatePropagation();
         e.preventDefault();
         toogleSpeakPanel();
-      }
+      },
     });
   };
   if ($('body[name="MyNovelReader"]').length) {
     addSpeakButton();
   } else {
-    const observer = new window.MutationObserver(mutationsList => {
+    const observer = new window.MutationObserver((mutationsList) => {
       if ($('body[name="MyNovelReader"]').length) {
         observer.disconnect();
         addSpeakButton();
@@ -63,7 +62,7 @@
     observer.observe(document.body, { attributes: true });
   }
 
-  function toogleSpeakPanel () {
+  function toogleSpeakPanel() {
     const container = $('<div id="speakPanel">').html([
       '<style>',
       '#speakPanel{position:fixed;top:0;left:0;z-index:1597;width:100vw;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;}',
@@ -88,16 +87,16 @@
       '  <div><button name="startSpeak">开始朗读</button></div>', // TODO
       ' </div>',
 
-      '</div>'
+      '</div>',
     ].join('')).insertAfter('body').on({
-      click: e => {
+      click: (e) => {
         if ($(e.target).is(container)) {
           container.remove();
         }
-      }
+      },
     });
     container.find('.config').find('input,select,textarea').on({ // 应用并保存设置 // TODO 朗读时更改设置
-      change: e => {
+      change: (e) => {
         const elem = e.target;
         const key = elem.name;
         if (elem.type === 'checkbox') {
@@ -109,7 +108,7 @@
           elem.setAttribute('value', config[key]);
         }
         GM_setValue('config', config);
-      }
+      },
     });
 
     loadVoices();
@@ -122,26 +121,28 @@
       if (elem.type === 'checkbox') {
         elem.checked = config[key];
       } else if (elem.type === 'select-one') {
-        elem.value = [...elem.options].map(i => i.value).includes(config[key]) ? config[key] : elem.options[0].value;
+        elem.value = [...elem.options].map((i) => i.value).includes(config[key]) ? config[key] : elem.options[0].value;
       } else if (elem.type === 'range') {
         elem.value = config[key];
         elem.setAttribute('value', config[key]);
       }
     }
 
-    function loadVoices () {
+    function loadVoices() {
       $('.config #speakVoice', container).empty();
-      window.speechSynthesis.getVoices().forEach(voice => {
-        $('<option>').text(voice.name).val(voice.name).attr('selected', voice.default).appendTo('.config #speakVoice', container);
+      window.speechSynthesis.getVoices().forEach((voice) => {
+        $('<option>').text(voice.name).val(voice.name).attr('selected', voice.default)
+          .appendTo('.config #speakVoice', container);
       });
     }
   }
 
-  function speakMyNovelReader () {
+  function speakMyNovelReader() {
     console.log('lucky');
     // let stack = 0;
 
-    let cancel, cancelCompleted, interval;
+    let cancel; let cancelCompleted; let
+      interval;
     let currentElem;
     const readThis = function (elem) {
       if (!$(elem).is('#mynovelreader-content>article>:not(.chapter-footer-nav)')) return;
@@ -181,11 +182,11 @@
         if (index < 0) index = 0;
         if (index >= $all.length) index = $all.length - 1;
         readThis($('#mynovelreader-content>article>:not(.chapter-footer-nav)').get(index));
-      }
+      },
     });
     speakTheseElems($($('#chapter-list>.active>div').attr('href')).children().toArray());
 
-    async function speakTheseElems (elemsToSpeak) {
+    async function speakTheseElems(elemsToSpeak) {
       // const stackNow = stack++;
       for (const elem of elemsToSpeak) {
         if ($(elem).is('.chapter-footer-nav')) break;
@@ -197,8 +198,8 @@
         await new Promise((resolve, reject) => {
           const text = elem.textContent.trim();
 
-          var utterThis = new window.SpeechSynthesisUtterance(text);
-          utterThis.voice = window.speechSynthesis.getVoices().find(i => i.name === config.voice);
+          const utterThis = new window.SpeechSynthesisUtterance(text);
+          utterThis.voice = window.speechSynthesis.getVoices().find((i) => i.name === config.voice);
           utterThis.volume = config.volume;
           utterThis.rate = config.rate;
           utterThis.pitch = config.pitch;
@@ -221,7 +222,8 @@
       }
 
       if (!cancel && $(elemsToSpeak).filter('.chapter-footer-nav').last().find('.next-page:not([style="color:#666666"])').length) {
-        const $article = $(elemsToSpeak).filter('.chapter-footer-nav').last().find('.next-page:not([style="color:#666666"])').parents('#mynovelreader-content>article');
+        const $article = $(elemsToSpeak).filter('.chapter-footer-nav').last().find('.next-page:not([style="color:#666666"])')
+          .parents('#mynovelreader-content>article');
 
         let interval;
         interval = setInterval(() => {
@@ -235,4 +237,4 @@
       cancelCompleted = true;
     }
   }
-})();
+}());

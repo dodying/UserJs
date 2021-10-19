@@ -115,7 +115,7 @@
       check: '[property="og:site_name"][content="Sukebei"]',
       search: 'https://sukebei.nyaa.si/?q={searchTerms}',
       text: 'td[colspan="2"]>a',
-      code: '.search-bar'
+      code: '.search-bar',
     },
     { // Torrentz2
       name: 'Torrentz2',
@@ -124,7 +124,7 @@
       check: '[title="Torrents Search"]',
       search: 'https://torrentz2.eu/search?f={searchTerms}',
       text: '.results>dl>dt>a,.files .t>ul>li',
-      code: '#thesearchbox'
+      code: '#thesearchbox',
     },
     { // BTSOW
       name: 'BTSOW',
@@ -133,7 +133,7 @@
       check: '[name="author"][content="BTSOW"]',
       search: 'http://btsow.com/search/{searchTerms}/',
       text: 'h3,.file',
-      code: '.form-control:visible'
+      code: '.form-control:visible',
     },
 
     // 网盘
@@ -146,7 +146,7 @@
       text: '.file-name>em>a',
       code: () => window.prompt('请输入番号', $('.file-path>a:eq(-1)').text()),
       codeManual: true,
-      manual: true
+      manual: true,
     },
 
     // 正规站点
@@ -159,7 +159,7 @@
       text: '.txt,table.mg-b20 td:not(:has(a))',
       img: '.img img,.tdmm,.crs_full>img',
       time: '.nw:contains(発売日)+td',
-      code () {
+      code() {
         let code = $('.nw:contains(品番)+td').text();
         code = code.match(/[^h_0-9].*/)[0];
         code = code.replace(/^tk|tk$/g, '').replace(/00([0-9]{3})/, '$1').replace(/([a-z]+)([0-9]+)/, '$1-$2');
@@ -167,33 +167,32 @@
         return window.prompt('请输入番号', code);
       },
       codeManual: true,
-      extra () {
+      extra() {
         if (!$('#sample-image-block>a>img').length) return;
-        const previewSrc = $$.siteLib.filter(i => i.name === 'DMM')[0].previewSrc;
+        const { previewSrc } = $$.siteLib.filter((i) => i.name === 'DMM')[0];
         $(document).on({
-          click () {
+          click() {
             $('#sample-image-block>a>img').each((i, _) => {
               _.src = previewSrc(_.src);
             });
             $(document).off('click');
-          }
+          },
         });
       },
-      previewSrc (src) {
+      previewSrc(src) {
         if (src.match(/(p[a-z]\.)jpg/)) {
           return src.replace(RegExp.$1, 'pl.');
-        } else if (src.match(/consumer_game/)) {
+        } if (src.match(/consumer_game/)) {
           return src.replace('js-', '-');
-        } else if (src.match(/js-([0-9]+)\.jpg$/)) {
+        } if (src.match(/js-([0-9]+)\.jpg$/)) {
           return src.replace('js-', 'jp-');
-        } else if (src.match(/ts-([0-9]+)\.jpg$/)) {
+        } if (src.match(/ts-([0-9]+)\.jpg$/)) {
           return src.replace('ts-', 'tl-');
-        } else if (src.match(/(-[0-9]+\.)jpg$/)) {
-          return src.replace(RegExp.$1, 'jp' + RegExp.$1);
-        } else {
-          return src.replace('-', 'jp-');
+        } if (src.match(/(-[0-9]+\.)jpg$/)) {
+          return src.replace(RegExp.$1, `jp${RegExp.$1}`);
         }
-      }
+        return src.replace('-', 'jp-');
+      },
     },
     { // mgstage
       name: 'mgstage',
@@ -204,17 +203,17 @@
       text: '.detail_data tr:contains("品番")>td,.detail_txt>li:contains("品番")',
       img: '.detail_data img,.sample_image img,.push_title_list img',
       time: '.detail_data tr:contains("配信開始日")>td',
-      code () {
+      code() {
         const arr = window.location.href.split('/');
         return arr[arr.length - 2];
       },
-      extra () {
+      extra() {
         if (!$('.sample_image').length) return;
         $('<style></style>').text('#sample-photo li{float:none!important;}').appendTo('head');
         $('.sample_image').each((i, _) => {
           $(_).html(`<img src="${$(_).attr('href')}">`).removeAttr('href').off('click');
         });
-      }
+      },
     },
     { // Tokyo-Hot
       name: 'Tokyo-Hot',
@@ -224,7 +223,7 @@
       text: '.actor,.info:eq(1)>dd:eq(0)',
       img: '.rm>img,.popular img,.free img,.ranking img',
       time: '.info:eq(1)>dd:eq(0)',
-      code: '.info:eq(1)>dd:eq(2)'
+      code: '.info:eq(1)>dd:eq(2)',
     },
     { // caribbeancom.com
       name: '加勒比',
@@ -242,11 +241,11 @@
         '.spec-title:contains("出演")+span>a',
         '.spec-title:contains("タグ")+span>a',
         function () {
-          var time = $('.spec-title:contains("再生時間")+span').text().trim();
-          time = new Date('1970-01-01 ' + time + ' GMT+000').getTime();
+          let time = $('.spec-title:contains("再生時間")+span').text().trim();
+          time = new Date(`1970-01-01 ${time} GMT+000`).getTime();
           return Math.round(time / 1000 / 60);
-        }
-      ]
+        },
+      ],
     },
     { // caribbeancompr.com ?
       name: '加勒比-会员',
@@ -261,11 +260,11 @@
         '.movie-info>dl:contains("出演") a,.movie-info>dl:contains("演员") a',
         '.movie-info-cat>dd>a',
         function () {
-          var time = $('.movie-info>dl:contains("再生時間")>dd,.movie-info>dl:contains("片长")>dd').text();
-          time = new Date('1970-01-01 ' + time + ' GMT+000').getTime();
+          let time = $('.movie-info>dl:contains("再生時間")>dd,.movie-info>dl:contains("片长")>dd').text();
+          time = new Date(`1970-01-01 ${time} GMT+000`).getTime();
           return Math.round(time / 1000 / 60);
-        }
-      ]
+        },
+      ],
     },
     { // 1pondo.tv
       filter: 'www.1pondo.tv',
@@ -275,7 +274,7 @@
       img: '.figure>img,.ng-scope>a>img,img.ng-scope',
       time: 'dd.ng-binding:eq(1)',
       code: () => window.location.pathname.match(/[\d_]+/)[0],
-      manual: true
+      manual: true,
     },
     { // heyzo.com
       filter: 'www.heyzo.com',
@@ -284,7 +283,7 @@
       search: 'http://www.heyzo.com/search/{searchTerms}/1.html?sort=pop',
       // img: '.soundplay>img,.sample-images img,.relateive-movie img,.ranking-img>img,.withInfo>img,.new-movies>img,.actor>img',
       time: '.dataInfo:eq(0)',
-      code: () => 'HEYZO-' + window.location.pathname.match(/\d+/)[0]
+      code: () => `HEYZO-${window.location.pathname.match(/\d+/)[0]}`,
     },
     { // 10musume.com
       filter: 'cn.10musume.com',
@@ -293,7 +292,7 @@
       search: 'http://cn.10musume.com/cn/moviepages/{searchTerms}/index.html',
       img: 'img',
       time: '#movie-table1:eq(5)',
-      code: () => window.location.pathname.match(/[\d_]+/)[0]
+      code: () => window.location.pathname.match(/[\d_]+/)[0],
     },
     { // adult.contents.fc2.com
       filter: 'adult.contents.fc2.com',
@@ -301,7 +300,7 @@
       name: 'adult.contents.fc2.com',
       search: 'https://adult.contents.fc2.com/search/?q={searchTerms}',
       code: () => window.location.href.split('/')[4],
-      after: '[data-menu-name="main-header"]'
+      after: '[data-menu-name="main-header"]',
     },
 
     // 第三方
@@ -314,7 +313,7 @@
       time: '.info>p:eq(1)',
       code: '.info>p>span:eq(1)',
       after: '.row.movie',
-      extra () {
+      extra() {
         // if ($('#sample-waterfall').length) $('#sample-waterfall').html($('.sample-box').toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`))
       },
       info: [
@@ -322,8 +321,8 @@
         '.star-show~p:eq(0)>.genre>a',
         '.header:contains(類別)~p:eq(0)>.genre>a',
         '',
-        '.info>p:eq(2)'
-      ]
+        '.info>p:eq(2)',
+      ],
     },
     { // JAVLibrary
       filter: 'javlibrary.com',
@@ -335,12 +334,15 @@
       time: '.text:eq(2)',
       code: '#video_id .text',
       after: '#video_favorite_edit',
-      extra () {
-        const previewSrc = $$.siteLib.filter(i => i.name === 'DMM')[0].previewSrc;
+      extra() {
+        const { previewSrc } = $$.siteLib.filter((i) => i.name === 'DMM')[0];
         if (!$('#video_jacket_img').length) return;
         if ($('.previewthumbs').length) {
           $('.previewthumbs>img').each((i, _) => {
-            if ($(_).attr('src').match('//pics.dmm.co.jp')) $(_).attr('src', previewSrc($(_).attr('src'))).removeAttr('width').removeAttr('height').attr('style', 'margin:2px 0;');
+            if ($(_).attr('src').match('//pics.dmm.co.jp')) {
+              $(_).attr('src', previewSrc($(_).attr('src'))).removeAttr('width').removeAttr('height')
+                .attr('style', 'margin:2px 0;');
+            }
           });
         }
         const code = $('#video_jacket_img').attr('src').match(/http:\/\/pics.dmm.co.jp\/mono\/movie\/adult\/(.*?)\/(.*?)pl\.jpg/);
@@ -348,7 +350,7 @@
         const url = `http://www.dmm.co.jp/mono/dvd/-/detail/=/cid=${code[1]}/`;
         $('#video_jacket_img').wrap(() => `<a target="_blank" href="${url}"></a>`);
         if (!$('.previewthumbs').length) {
-          $('#video_jacket').one('click', e => {
+          $('#video_jacket').one('click', (e) => {
             e.preventDefault();
             /*
               GM_xmlhttpRequest({
@@ -366,15 +368,15 @@
               */
             GM_xmlhttpRequest({
               method: 'GET',
-              url: 'https://www.javbus.com/' + $('#video_id .text').text(),
+              url: `https://www.javbus.com/${$('#video_id .text').text()}`,
               timeout: 30 * 1000,
-              onload (res) {
+              onload(res) {
                 const data = res.response;
                 if ($('#sample-waterfall', data).length) {
-                  const img = $('.sample-box', data).toArray().map(i => `<img src="${i.href}" style="margin:2px 0;">`).join('');
+                  const img = $('.sample-box', data).toArray().map((i) => `<img src="${i.href}" style="margin:2px 0;">`).join('');
                   $(`<div class="previewthumbs">${img}</div>`).insertAfter('#rightcolumn>.socialmedia');
                 }
-              }
+              },
             });
           });
         }
@@ -384,8 +386,8 @@
         'span.star>a',
         '.genre>a',
         'span.score',
-        '#video_length .text'
-      ]
+        '#video_length .text',
+      ],
     },
     { // javdb.com
       filter: () => $('title').text().match('JavDB'),
@@ -395,7 +397,7 @@
       text: '.box .uid,.box .video-title,.title,.tile-item',
       img: '.box .item-image>img,.video-cover,.tile-item>img',
       code: '.item-title+.value:eq(0)',
-      after: '#search-bar-container'
+      after: '#search-bar-container',
     },
     { // javfree.me
       filter: 'javfree.me',
@@ -406,10 +408,11 @@
       img: '.entry-content img,.thumbnail-wrap>img',
       time: '.post-author',
       code: () => {
-        const matched = $('[id^="post"] .entry-title').eq(0).text().replace(/^\[HD\]/, '').match(/^\[(.*?)\]/);
+        const matched = $('[id^="post"] .entry-title').eq(0).text().replace(/^\[HD\]/, '')
+          .match(/^\[(.*?)\]/);
         return (matched ? matched[1] : window.location.href.split('/')[4]).replace('heyzo-', 'heyzo ').replace(/(carib|caribpr|1pondo|1000giri|10musume|pacopacomama|tokyo-hot)-/, '');
       },
-      after: '#start'
+      after: '#start',
     },
     { // javdownloader.info
       filter: 'javdownloader.info',
@@ -419,7 +422,7 @@
       text: '.title,.wp_rp_title,#nav-below a,.widget_recent_entries a',
       img: '.entry img',
       code: () => $('.title').text().replace('[HD]', '').match(/\[(.*?)\]/)[1],
-      after: '.post-info-bottom'
+      after: '.post-info-bottom',
     },
     { // javpop.com
       filter: 'javpop.com',
@@ -429,7 +432,7 @@
       text: '.thumb_post a:nth-child(2),h1',
       img: '.thumb_post img,.box-b img',
       code: () => $('h1').text().match(/\[(.*?)\]/)[1].replace('FC2_PPV-', ''),
-      after: '#header'
+      after: '#header',
     },
     { // AVMOO
       filter: () => document.title.match('AVMOO'),
@@ -440,7 +443,7 @@
       img: '.photo-frame>img,.bigImage>img',
       time: '.info>p:eq(1)',
       code: '.info>p>span:eq(1)',
-      after: '.row.movie'
+      after: '.row.movie',
     },
     { // AVSOX
       filter: () => document.title.match('AVSOX'),
@@ -451,7 +454,7 @@
       img: '.photo-frame>img,.bigImage>img',
       time: '.info>p:eq(1)',
       code: '.info>p>span:eq(1)',
-      after: '.row.movie'
+      after: '.row.movie',
     },
     { // AVMEMO
       filter: () => document.title.match('AVMEMO'),
@@ -462,14 +465,14 @@
       img: '.photo-frame>img,.bigImage>img',
       time: '.info>p:eq(1)',
       code: '.info>p>span:eq(1)',
-      after: '.row.movie'
+      after: '.row.movie',
     },
     { // inoreader
       filter: 'www.inoreader.com',
       on: false,
       name: 'Inoreader',
       search: 'https://www.inoreader.com/search/{searchTerms}',
-      text: '.article_title_link,.article_header_title'
+      text: '.article_title_link,.article_header_title',
     },
 
     // 在线观看
@@ -481,7 +484,7 @@
       search: 'https://avpapa.co/search?q={searchTerms}',
       text: '.tit,h4',
       img: '.thumbs>a>img,#click_to_show>img',
-      code: () => $('h4').text().match(/^\[(.*?)\]/)[1]
+      code: () => $('h4').text().match(/^\[(.*?)\]/)[1],
     },
     { // av99.us
       filter: 'av99.us',
@@ -492,7 +495,7 @@
       text: 'h1,.list>li>a,.dd>a,.fl>a>span',
       img: '.pic>a>img',
       time: '.viewimfor>li:eq(1)',
-      code: () => $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/)[1]
+      code: () => $('h1').text().replace(/^\[中文字幕\]\s+/, '').match(/(.*?) (.*?)/)[1],
     },
     { // BeJav.Com
       filter: () => $('meta[name=description]').attr('content').match('BEJAV'),
@@ -503,7 +506,7 @@
       text: '.name>a,.breadcrumb_last,.body>ul>li>a',
       img: '.img-responsive,.thumbnail>img,.body>ul>li>img',
       code: () => window.prompt('请输入番号', $('.breadcrumb_last').text()),
-      codeManual: true
+      codeManual: true,
     },
     { // HPJAV
       filter: () => document.title.match('HPJAV'),
@@ -513,13 +516,13 @@
       search: 'https://hpjav.tv/tw/?s={searchTerms}',
       text: '.entry-title a,h1,.current',
       code: () => window.prompt('请输入番号', $('.current').text().match(/(.*?) (.*?)/)[1]),
-      codeManual: true
-    }
+      codeManual: true,
+    },
   ];
-  $$._siteFavorite = $$.siteLib.filter(i => i.name === 'JAVLibrary')[0];
+  $$._siteFavorite = $$.siteLib.filter((i) => i.name === 'JAVLibrary')[0];
 
   // https://cdn.jsdelivr.net/gh/xiandanin/magnetW@master/rule.json
-  var magnetLib = {
+  const magnetLib = {
     'nyaa.si Sukebei': {
       searchPage: 'https://sukebei.nyaa.si/?q={q}',
       title: '.torrent-list tr>td:nth-child(2)>a',
@@ -527,13 +530,13 @@
       size: '.torrent-list tr>td:nth-child(4)',
       time: '.torrent-list tr>td:nth-child(5)',
       page: '.pagination',
-      sort: data => $('.table-responsive thead>tr>th>a', data).toArray().map(i => i.outerHTML.replace('</a>', $(i).attr('href').match(/s=(.*?)&/)[1] + '</a>')).join(' / '),
+      sort: (data) => $('.table-responsive thead>tr>th>a', data).toArray().map((i) => i.outerHTML.replace('</a>', `${$(i).attr('href').match(/s=(.*?)&/)[1]}</a>`)).join(' / '),
       more: {
-        Torrent: (data, lib) => $('.torrent-list tr>td:nth-child(3)>a:nth-child(1)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'), lib.searchPage).href}" target="blank">Torrent</a>`),
+        Torrent: (data, lib) => $('.torrent-list tr>td:nth-child(3)>a:nth-child(1)', data).toArray().map((i) => `<a href="${new URL($(i).attr('href'), lib.searchPage).href}" target="blank">Torrent</a>`),
         S: '.torrent-list tr>td:nth-child(6)',
         L: '.torrent-list tr>td:nth-child(7)',
-        D: '.torrent-list tr>td:nth-child(8)'
-      }
+        D: '.torrent-list tr>td:nth-child(8)',
+      },
     },
     BTDB: {
       searchPage: 'https://btdb.eu/search/{q}/',
@@ -547,8 +550,8 @@
         Torrent: '.media>.media-right>a:nth-child(2)',
         Files: '.media>.media-body .item-meta-info>small:nth-child(2)>strong',
         Seeders: '.media>.media-body .item-meta-info>small:nth-child(3)>strong',
-        Leechers: '.media>.media-body .item-meta-info>small:nth-child(4)>strong'
-      }
+        Leechers: '.media>.media-body .item-meta-info>small:nth-child(4)>strong',
+      },
     },
     '7torrents': {
       searchPage: 'https://www.7torrents.cc/search?query={q}',
@@ -562,21 +565,21 @@
         Torrent: '.media>.media-right>a:nth-child(2)',
         Files: '.media>.media-body small:nth-child(3)>strong',
         Seeders: '.media>.media-body small:nth-child(4)>strong',
-        Leechers: '.media>.media-body small:nth-child(5)>strong'
-      }
+        Leechers: '.media>.media-body small:nth-child(5)>strong',
+      },
     },
     LimeTorrents: {
       searchPage: 'https://www.limetorrents.info/search/all/{q}/',
       title: '.table2 tr:gt(0) .tt-name>a:nth-child(2)',
-      magnet: data => $('.table2 tr:gt(0) .tt-name>a:nth-child(1)', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.href.match(/torrent\/(.*?).torrent/)[1]),
+      magnet: (data) => $('.table2 tr:gt(0) .tt-name>a:nth-child(1)', data).toArray().map((i) => `magnet:?xt=urn:btih:${i.href.match(/torrent\/(.*?).torrent/)[1]}`),
       size: '.table2 tr:gt(0)>td:nth-child(3)',
       time: '.table2 tr:gt(0)>td:nth-child(2)',
       page: '.search_stat',
       more: {
         Torrent: '.table2 tr:gt(0) .tt-name>a:nth-child(1)',
         Seeders: '.table2 tr:gt(0)>td:nth-child(4)',
-        Leechers: '.table2 tr:gt(0)>td:nth-child(5)'
-      }
+        Leechers: '.table2 tr:gt(0)>td:nth-child(5)',
+      },
     },
     YourBittorrent: {
       searchPage: 'https://yourbittorrent.com/?q={q}',
@@ -585,10 +588,10 @@
       time: '.table-default>td:nth-child(4)',
       page: '.pagination',
       more: {
-        Torrent: (data, lib) => $('.table-default>td:nth-child(2)>a', data).toArray().map(i => `<a href="https://yourbittorrent.com/down/${i.href.split('/')[4]}.torrent" target="blank">Torrent</a>`),
+        Torrent: (data, lib) => $('.table-default>td:nth-child(2)>a', data).toArray().map((i) => `<a href="https://yourbittorrent.com/down/${i.href.split('/')[4]}.torrent" target="blank">Torrent</a>`),
         SD: '.table-default>td:nth-child(5)',
-        PR: '.table-default>td:nth-child(6)'
-      }
+        PR: '.table-default>td:nth-child(6)',
+      },
     },
     'SaveBt (Down)': {
       searchPage: 'http://savebts.org/q/{q}/0/0/1.html',
@@ -601,8 +604,8 @@
       more: {
         Files: '.item>.attr>span:nth-child(3)>b',
         Speed: '.item>.attr>span:nth-child(4)>b',
-        Hot: '.item>.attr>span:nth-child(5)>b'
-      }
+        Hot: '.item>.attr>span:nth-child(5)>b',
+      },
     },
     'The Pirate Bay': { // TODO FIX XHR
       searchPage: 'https://thepiratebay.org/search/{q}/0/1/0',
@@ -610,13 +613,14 @@
       magnet: 'nobr>a:nth-child(1)',
       size: '.vertTh+td+td+td+td',
       time: '.vertTh+td+td',
-      sort: data => $('.header a', data).toArray().filter(i => i.href.match('/search/')).map(i => i.outerHTML).join(' / '),
+      sort: (data) => $('.header a', data).toArray().filter((i) => i.href.match('/search/')).map((i) => i.outerHTML)
+        .join(' / '),
       page: '#content>[align="center"]',
       more: {
         Type: '.vertTh>a',
         SE: '.vertTh+td+td+td+td+td',
-        LE: '.vertTh+td+td+td+td+td+td'
-      }
+        LE: '.vertTh+td+td+td+td+td+td',
+      },
     },
     'Sukebei Pantsu': { // TODO CHECK
       searchPage: 'https://sukebei.pantsu.cat/search?q={q}',
@@ -625,49 +629,49 @@
       size: '.torrent-info>.tr-size',
       time: '.torrent-info>.tr-date',
       page: '#sort-list-order+.pagination',
-      sort: data => $('#sort-list-order td>*', data).toArray().map(i => i.outerHTML).join(' / '),
+      sort: (data) => $('#sort-list-order td>*', data).toArray().map((i) => i.outerHTML).join(' / '),
       more: {
-        File: (data, lib) => $('.tr-links>a:nth-child(2)', data).toArray().map(i => `<a href="${new URL($(i).attr('href'), lib.searchPage).href}" target="blank">File</a>`),
+        File: (data, lib) => $('.tr-links>a:nth-child(2)', data).toArray().map((i) => `<a href="${new URL($(i).attr('href'), lib.searchPage).href}" target="blank">File</a>`),
         S: '.torrent-info>.tr-se',
         L: '.torrent-info>.tr-le',
-        D: '.torrent-info>.tr-dl'
-      }
+        D: '.torrent-info>.tr-dl',
+      },
     },
     'Torrentz2 (Down)': {
       searchPage: 'https://torrentz2.eu/search?f={q}',
       title: '.results>dl>dt>a',
-      magnet: data => $('.results>dl>dt>a', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.getAttribute('href').match(/\/(.*)/)[1].toUpperCase()),
+      magnet: (data) => $('.results>dl>dt>a', data).toArray().map((i) => `magnet:?xt=urn:btih:${i.getAttribute('href').match(/\/(.*)/)[1].toUpperCase()}`),
       size: '.results>dl>dd>span:nth-child(3)',
       time: '.results>dl>dd>span:nth-child(2)',
       page: '.results>p>span',
       sort: '.results>div',
       more: {
         seeder: '.results>dl>dd>span:nth-child(4)',
-        rating: '.results>dl>dd>span:nth-child(5)'
-      }
+        rating: '.results>dl>dd>span:nth-child(5)',
+      },
     },
     BTSOW: {
       searchPage: 'https://btsow.com/search/{q}/',
       title: '.data-list>.row>a',
-      magnet: data => $('.data-list>.row>a', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.href.match(/hash\/(.*)/)[1].toUpperCase()),
+      magnet: (data) => $('.data-list>.row>a', data).toArray().map((i) => `magnet:?xt=urn:btih:${i.href.match(/hash\/(.*)/)[1].toUpperCase()}`),
       size: '.size',
       time: '.date',
-      page: '.pagination'
+      page: '.pagination',
     },
     'Tokyo Toshokan': {
       searchPage: 'https://www.tokyotosho.info/search.php?terms={q}',
       title: 'a[type="application/x-bittorrent"]',
       magnet: '.desc-top>a[href^="magnet"]',
-      size: data => $('.desc-bot', data).toArray().map(i => i.textContent.match(/Size: (.*?) /)[1]),
-      time: data => $('.desc-bot', data).toArray().map(i => i.textContent.match(/Date: (.*? UTC)/)[1]),
+      size: (data) => $('.desc-bot', data).toArray().map((i) => i.textContent.match(/Size: (.*?) /)[1]),
+      time: (data) => $('.desc-bot', data).toArray().map((i) => i.textContent.match(/Date: (.*? UTC)/)[1]),
       page: '.listing+p+p',
       more: {
-        Website: data => $('.category_0>.web', data).toArray().map(i => $(i).find('a:contains("Website")').length ? $(i).find('a:contains("Website")')[0].outerHTML : ''),
+        Website: (data) => $('.category_0>.web', data).toArray().map((i) => ($(i).find('a:contains("Website")').length ? $(i).find('a:contains("Website")')[0].outerHTML : '')),
         Details: '.web>a:contains("Details")',
         S: '.stats>span:nth-child(1)',
         L: '.stats>span:nth-child(2)',
-        C: '.stats>span:nth-child(3)'
-      }
+        C: '.stats>span:nth-child(3)',
+      },
     },
     'BTKu (Down)': {
       searchPage: 'https://btku.org/q/{q}/',
@@ -679,35 +683,35 @@
       sort: '#bar-sort',
       more: {
         Hot: '.resultsIntroduction>label:nth-child(6)',
-        Files: '.resultsIntroduction>label:nth-child(2)'
-      }
+        Files: '.resultsIntroduction>label:nth-child(2)',
+      },
     },
     BTDigg: { // TODO FIX
-      searchPage: code => `http://btdig.com/search/${window.btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1))).replace(/[=]+$/g, '')}/1/0/0.html`,
+      searchPage: (code) => `http://btdig.com/search/${window.btoa(encodeURIComponent(code).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(`0x${p1}`))).replace(/[=]+$/g, '')}/1/0/0.html`,
       title: '.list>dl>dt>a',
       magnet: '.list>dl>dd.attr>span>a',
       size: '.list>dl>dd.attr>span:nth-child(2)>b',
       time: '.list>dl>dd.attr>span:nth-child(1)>b',
       page: '.page-split',
-      sort: data => $('.category>a,.sorted-by>a', data).toArray().map(i => i.outerHTML).join(' / '),
+      sort: (data) => $('.category>a,.sorted-by>a', data).toArray().map((i) => i.outerHTML).join(' / '),
       more: {
         Files: '.list>dl>dd.attr>span:nth-child(3)>b',
         Speed: '.list>dl>dd.attr>span:nth-child(4)>b',
-        Hot: '.list>dl>dd.attr>span:nth-child(5)>b'
-      }
+        Hot: '.list>dl>dd.attr>span:nth-child(5)>b',
+      },
     },
     'Seedpeer (Down)': {
       searchPage: 'https://www.seedpeer.eu/search/{q}',
       title: '.table a[href]',
-      magnet: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => 'magnet:?xt=urn:btih:' + i.hash),
-      size: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => parseInt(i.size / 1024 / 1024) + 'Mb'),
-      time: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.createdAt),
-      page: data => new Array(JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.pages).fill(1).map((_, i) => `<a href="?page=${i + 1}">${i + 1}</a>`).join(''),
+      magnet: (data) => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map((i) => `magnet:?xt=urn:btih:${i.hash}`),
+      size: (data) => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map((i) => `${parseInt(i.size / 1024 / 1024)}Mb`),
+      time: (data) => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map((i) => i.createdAt),
+      page: (data) => new Array(JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.pages).fill(1).map((_, i) => `<a href="?page=${i + 1}">${i + 1}</a>`).join(''),
       more: {
-        Seeds: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.seeds),
-        Peers: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.peers),
-        Health: data => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map(i => i.ratio)
-      }
+        Seeds: (data) => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map((i) => i.seeds),
+        Peers: (data) => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map((i) => i.peers),
+        Health: (data) => JSON.parse($(data)[19].textContent.replace('window.initialData=', '')).data.list.map((i) => i.ratio),
+      },
     },
     BitCQ: {
       searchPage: 'https://bitcq.com/search?q={q}',
@@ -718,47 +722,47 @@
       page: '.pagination',
       more: {
         Type: '.table-hover tr>td:nth-child(3)>.label',
-        Peers: '.table-hover tr>td:nth-child(5)'
-      }
+        Peers: '.table-hover tr>td:nth-child(5)',
+      },
     },
     'Digbt (Down)': {
       searchPage: 'https://www.digbt.org/search/{q}',
       title: '.x-item>div:nth-child(1)>a.title',
       magnet: '.tail>a.title',
-      size: data => $('.tail', data).toArray().map(i => i.textContent.match(/Size:\s+([\d.]+\s+\w+)/)[1]),
-      time: data => $('.tail', data).toArray().map(i => i.textContent.match(/Updated:\s+(.*?)\s{2}/)[1]),
+      size: (data) => $('.tail', data).toArray().map((i) => i.textContent.match(/Size:\s+([\d.]+\s+\w+)/)[1]),
+      time: (data) => $('.tail', data).toArray().map((i) => i.textContent.match(/Updated:\s+(.*?)\s{2}/)[1]),
       sort: '.btn-group',
       page: '.pagination',
       more: {
-        Files: data => $('.tail', data).toArray().map(i => i.textContent.match(/Files:\s+(\d+)/)[1]),
-        Downloads: data => $('.tail', data).toArray().map(i => i.textContent.match(/Downloads:\s+(\d+)/)[1])
-      }
+        Files: (data) => $('.tail', data).toArray().map((i) => i.textContent.match(/Files:\s+(\d+)/)[1]),
+        Downloads: (data) => $('.tail', data).toArray().map((i) => i.textContent.match(/Downloads:\s+(\d+)/)[1]),
+      },
     },
     KickassTorrents: { // TODO FIX
       searchPage: 'https://kickasstorrents.to/usearch/{q}/',
       title: '.cellMainLink',
-      magnet: data => $('.iaconbox>div', data).toArray().map(i => JSON.parse($(i).attr('data-sc-params').replace(/'/g, '"')).magnet),
+      magnet: (data) => $('.iaconbox>div', data).toArray().map((i) => JSON.parse($(i).attr('data-sc-params').replace(/'/g, '"')).magnet),
       size: '[id^="torrent_"]>td:nth-child(2)',
       time: '[id^="torrent_"]>td:nth-child(4)',
       sort: '.tabNavigation:gt(0)',
-      page: data => $('.pages', data).html().replace(/[\r\n]+/g, '').replace(/<script.*/, ''),
+      page: (data) => $('.pages', data).html().replace(/[\r\n]+/g, '').replace(/<script.*/, ''),
       more: {
         Files: '[id^="torrent_"]>td:nth-child(3)',
         Speed: '[id^="torrent_"]>td:nth-child(5)',
-        Leech: '[id^="torrent_"]>td:nth-child(6)'
-      }
+        Leech: '[id^="torrent_"]>td:nth-child(6)',
+      },
     },
     iDope: {
       searchPage: 'https://idope.se/torrent-list/{q}/',
       title: '.resultdivtop>a',
-      magnet: data => $('[id^="hideinfohash"]', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.textContent.toUpperCase()),
+      magnet: (data) => $('[id^="hideinfohash"]', data).toArray().map((i) => `magnet:?xt=urn:btih:${i.textContent.toUpperCase()}`),
       size: '.resultdivbottonlength',
       time: '.resultdivbottontime',
       page: '#div3',
       more: {
         Seed: '.resultdivbottonseed',
-        Files: '.resultdivbottonfiles'
-      }
+        Files: '.resultdivbottonfiles',
+      },
     },
     Extratorrent: {
       searchPage: 'https://extratorrent.cd/search/?search={q}',
@@ -770,8 +774,8 @@
       page: 'td[style="padding: 5px;"]:has(.pager_link)',
       more: {
         S: '.tl tr>td:nth-child(6)',
-        L: '.tl tr>td:nth-child(7)'
-      }
+        L: '.tl tr>td:nth-child(7)',
+      },
     },
     'KAT - Kickass Torrents': { // TODO FIX
       searchPage: 'https://kickasstorrents.to/katsearch/page/1/{q}',
@@ -783,8 +787,8 @@
       page: 'td[style="padding: 5px;"]:has(.pager_link):gt(0)',
       more: {
         S: '.tl tr>td:nth-child(6)',
-        L: '.tl tr>td:nth-child(7)'
-      }
+        L: '.tl tr>td:nth-child(7)',
+      },
     },
     'BTAnt (Down)': {
       searchPage: 'http://www.btunt.com/search/{q}-hot-desc-1',
@@ -796,8 +800,8 @@
       page: '.bottom-pager',
       more: {
         Hot: '.search-item>.item-bar>span:nth-child(2)>b',
-        LastActived: '.search-item>.item-bar>span:nth-child(3)>b'
-      }
+        LastActived: '.search-item>.item-bar>span:nth-child(3)>b',
+      },
     },
     BTGG: {
       searchPage: 'https://www.btgg.cc/search?q={q}',
@@ -805,29 +809,29 @@
       magnet: '.item>.meta>a',
       size: '.item>.meta>span:nth-child(2)',
       time: '.item>.meta>span:nth-child(4)',
-      page: data => {
+      page: (data) => {
         const q = data.match(/<title>(.*?) - BTGG<\/title>/)[1];
         return $('.el-pager>.number', data).toArray().map((item, index) => `<a href="/search?q=${q}&p=${item.textContent}">${item.textContent}</a>`).join('');
       },
       more: {
         Requests: '.item>.meta>span:nth-child(3)',
-        Files: '.item>.meta>span:nth-child(5)'
-      }
+        Files: '.item>.meta>span:nth-child(5)',
+      },
     },
     BTHub: {
       searchPage: 'https://bthub.monster/cn/search/kw-{q}-1.html',
       title: '.search-item>.item-title a',
-      magnet: data => $('.search-item>.item-title a', data).toArray().map(i => 'magnet:?xt=urn:btih:' + i.href.match(/hash\/(.*?).html/)[1]),
+      magnet: (data) => $('.search-item>.item-title a', data).toArray().map((i) => `magnet:?xt=urn:btih:${i.href.match(/hash\/(.*?).html/)[1]}`),
       size: '.search-item>.item-bar>span:nth-child(1)>b',
       time: '.search-item>.item-bar>span:nth-child(2)>b',
       sort: '#sort-bar>a',
       page: '.bottom-pager',
       more: {
-        Hot: '.search-item>.item-bar>span:nth-child(3)>b'
-      }
-    }
+        Hot: '.search-item>.item-bar>span:nth-child(3)>b',
+      },
+    },
   };
-  var m2tLib = [
+  const m2tLib = [
     'http://btcache.me/torrent/{hash}',
     // 'http://storetorrents.me/hash/{hash}',
     'https://itorrents.org/torrent/{hash}.torrent?title={name}',
@@ -836,28 +840,28 @@
     // (hash, name) => `http://www.torrent.org.cn/home/convert/magnet2torrent.html?hash==${hash.toLowerCase()}`,
     (hash, name) => `http://v2.uploadbt.com/?r=down&hash=${hash.toLowerCase()}&name=${name}`,
     (hash, name) => `https://btdb.eu/dl/${hash.toLowerCase().substr(0, 2)}/${hash.toLowerCase()}.torrent`,
-    (hash, name) => `https://watercache.nanobytes.org/get/${hash.toLowerCase()}/${name}`
+    (hash, name) => `https://watercache.nanobytes.org/get/${hash.toLowerCase()}/${name}`,
   ];
-  var markLib = [
+  const markLib = [
     { // 0
       name: '等待中',
-      color: 'gray'
+      color: 'gray',
     }, { // 1
       name: '有种子无配额',
-      color: 'gray'
+      color: 'gray',
     }, { // 2
       name: '下载中',
-      color: 'blue'
+      color: 'blue',
     }, { // 3
       name: '已下-骑兵',
-      color: 'green'
+      color: 'green',
     }, { // 4
       name: '已下-步兵',
-      color: 'green'
+      color: 'green',
     }, { // 5
       name: '已删-不喜欢的',
-      color: 'black'
-    }
+      color: 'black',
+    },
   ];
 
   for (const _site of $$.siteLib) {
@@ -870,7 +874,7 @@
   if (!$$._site) return;
 
   if ($$._site.manual) {
-    $(window).on('keydown', function (e) {
+    $(window).on('keydown', (e) => {
       if (e.keyCode === 65 && e.shiftKey) { // Shift+A
         _init();
         $(window).off('keydown');
@@ -884,17 +888,17 @@
 
   // if (location.href === 'http://115.com/?tab=offline&mode=wangpan') downloadIn115();
 
-  function _init () {
+  function _init() {
     init();
     getCode(true);
     if ($$._site.extra && typeof $$._site.extra === 'function') $$._site.extra();
     markAdded();
   }
 
-  function init () {
+  function init() {
     $('<style></style>').appendTo('head').text(() => {
-      const mark = markLib.map((_, i) => '.hMark_' + i + '{background-color:' + _.color + ';color:#FFF;}');
-      const markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}');
+      const mark = markLib.map((_, i) => `.hMark_${i}{background-color:${_.color};color:#FFF;}`);
+      const markImg = markLib.map((_, i) => `.hMarkImg_${i}{background-image:url(${GM_getResourceURL(`mark${i}`)});background-size:24px;width:24px;height:24px;}`);
       const style = [
         '.hBanner{position:fixed;background-color:#F2F2F2;z-index:999999;}',
         '.hBanner{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;}',
@@ -927,48 +931,48 @@
         '.tablesorter-headerAsc{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);}',
         '.tablesorter-headerDesc{background-image:url(data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);}',
         '.sorter-false{background:none;cursor:default;}',
-        '.hHighlight{font-weight:bold;font-size:110%;color:#F00;}'
+        '.hHighlight{font-weight:bold;font-size:110%;color:#F00;}',
       ];
       return style.concat(mark, markImg).join('');
     });
     $('<div class="hBanner"></div>').on({
-      mousedown: function (e1) {
+      mousedown(e1) {
         if (e1.target !== $('.hasCode')[0]) return;
         $(this).off('mouseout');
         $('body').mouseup(function (e2) {
-          var width = 152;
-          var topBorder = $(window).height() - $('.hBanner').height();
-          var leftBorder = $(window).width() - $('.hBanner').width();
-          var top = (e2.clientY - e1.offsetY > 0) ? e2.clientY - e1.offsetY : 0;
+          const width = 152;
+          const topBorder = $(window).height() - $('.hBanner').height();
+          const leftBorder = $(window).width() - $('.hBanner').width();
+          let top = (e2.clientY - e1.offsetY > 0) ? e2.clientY - e1.offsetY : 0;
           top = (top > topBorder) ? topBorder : top;
-          var left = (e2.clientX - e1.offsetX > width) ? e2.clientX - e1.offsetX - width : 0;
+          let left = (e2.clientX - e1.offsetX > width) ? e2.clientX - e1.offsetX - width : 0;
           left = (left > leftBorder) ? leftBorder : left;
           $('.hBanner').css({
-            top: top + 'px',
-            left: left + 'px'
+            top: `${top}px`,
+            left: `${left}px`,
           });
           GM_setValue('top', top);
           GM_setValue('left', left);
           $(this).off('mouseup');
           $('.hBanner').on({
-            mouseout: function () {
+            mouseout() {
               $('.hasCode>a').hide();
-            }
+            },
           });
         });
       },
-      mouseover: function () {
+      mouseover() {
         $('.hasCode>a').show();
       },
-      mouseout: function () {
+      mouseout() {
         $('.hasCode>a').hide();
-      }
+      },
     }).css({
       top: GM_getValue('top', 0),
-      left: GM_getValue('left', 0)
+      left: GM_getValue('left', 0),
     }).appendTo('body');
     $('<div class="switcher"></div>').html('<span>on</span>').appendTo('.hBanner').on({
-      click: function () {
+      click() {
         if ($(this).text() === 'on') {
           $(this).find('span').text('off').css('color', 'red');
           undoMarkAdded();
@@ -977,65 +981,65 @@
           markAdded();
         }
       },
-      contextmenu: function (e) {
+      contextmenu(e) {
         e.preventDefault();
         $(this).find('span').text('on').css('color', 'green');
         undoMarkAdded();
         markAdded();
-      }
+      },
     });
-    $('<div class="links"></div>').html(function () {
-      var _html = '';
+    $('<div class="links"></div>').html(() => {
+      let _html = '';
       for (const site of $$.siteLib) {
         if (!site.on || site === $$._site) continue;
-        const hostname = new URL(site.search).hostname;
-        _html += `<img${site.online ? ' class="avOnline"' : ''} src="//${hostname}/favicon.ico" url="${site.search}" title="${site.name}" onerror="this.src='//www.google.com/s2/favicons?domain=${hostname}';this.onerror=null;">`;
+        const { hostname } = new URL(site.search);
+        _html = `${_html}<img${site.online ? ' class="avOnline"' : ''} src="//${hostname}/favicon.ico" url="${site.search}" title="${site.name}" onerror="this.src='//www.google.com/s2/favicons?domain=${hostname}';this.onerror=null;">`;
       }
       return _html;
     }).on({
-      click: function (e) {
-        var code = getCode();
+      click(e) {
+        const code = getCode();
         GM_openInTab($(e.target).attr('url').replace('{searchTerms}', code));
       },
-      contextmenu: function (e) {
+      contextmenu(e) {
         e.preventDefault();
-        var code = getCode().match(/[a-z0-9]+/gi).join(' ');
+        const code = getCode().match(/[a-z0-9]+/gi).join(' ');
         GM_openInTab($(e.target).attr('url').replace('{searchTerms}', code));
-      }
+      },
     }).appendTo('.hBanner');
     $('.links>.avOnline').on({
-      mouseover: function () {
+      mouseover() {
         $(this).attr({
           rawSrc: this.src,
-          src: GM_getResourceURL('play')
+          src: GM_getResourceURL('play'),
         });
       },
-      mouseout: function () {
+      mouseout() {
         $(this).attr('src', $(this).attr('rawSrc'));
-      }
+      },
     });
-    $('<div class="addCode"title="添加到数据库/移动"></div>').html('<img src="' + GM_getResourceURL('add') + '">').click(function () {
+    $('<div class="addCode"title="添加到数据库/移动"></div>').html(`<img src="${GM_getResourceURL('add')}">`).click(() => {
       addValue(GM_getValue('lastMark', 0));
     }).appendTo('.hBanner');
-    $('<div class="delCode"title="从数据库中删除"></div>').html('<img src="' + GM_getResourceURL('del') + '">').click(function () {
+    $('<div class="delCode"title="从数据库中删除"></div>').html(`<img src="${GM_getResourceURL('del')}">`).click(() => {
       delValue();
     }).appendTo('.hBanner');
-    $('<div class="importCode"title="导入到数据库"></div>').html('<img src="' + GM_getResourceURL('import') + '">').click(function () {
+    $('<div class="importCode"title="导入到数据库"></div>').html(`<img src="${GM_getResourceURL('import')}">`).click(() => {
       importValue();
     }).appendTo('.hBanner');
-    $('<div title="左键:数据库展示\n右键:下载数据库(网页格式)"></div>').html('<img src="' + GM_getResourceURL('table') + '">').on({
-      click: function () {
+    $('<div title="左键:数据库展示\n右键:下载数据库(网页格式)"></div>').html(`<img src="${GM_getResourceURL('table')}">`).on({
+      click() {
         showValue(0);
-        $(this).off('click').on('click', function () {
+        $(this).off('click').on('click', () => {
           $('.showTable').toggle();
         });
       },
-      contextmenu: function (e) {
+      contextmenu(e) {
         e.preventDefault();
         showValue(1);
-      }
+      },
     }).appendTo('.hBanner');
-    $('<div title="复制信息"></div>').html('<img src="' + GM_getResourceURL('copy') + '">').on({
+    $('<div title="复制信息"></div>').html(`<img src="${GM_getResourceURL('copy')}">`).on({
       click: async () => {
         if (!$$._site.info) return;
         const code = getCode();
@@ -1044,7 +1048,8 @@
           const value = $$._site.info[i];
           let result;
           if (typeof value === 'string') {
-            result = $(value).toArray().map(i => i.textContent.trim()).sort().join(', ');
+            result = $(value).toArray().map((i) => i.textContent.trim()).sort()
+              .join(', ');
           } else if (typeof value === 'function') {
             result = await value();
           } else {
@@ -1056,9 +1061,9 @@
           info.push(result.replace(code, '').trim());
         }
         GM_setClipboard(info.join('\t'));
-      }
+      },
     }).appendTo('.hBanner');
-    $('<div title="重启"></div>').html('<img src="' + GM_getResourceURL('restart') + '">').click(function () {
+    $('<div title="重启"></div>').html(`<img src="${GM_getResourceURL('restart')}">`).click(() => {
       $('.hBanner').remove();
       undoMarkAdded();
       $(window).removeData('code');
@@ -1066,62 +1071,70 @@
       markAdded();
     }).appendTo('.hBanner');
     $('<div class="hasCode">Marked: </div>').appendTo('.hBanner');
-    for (var i = 0; i < markLib.length; i++) {
-      $('<img src="' + GM_getResourceURL('mark' + i) + '"title="' + i + '|' + markLib[i].name + '">').val(i).click(function () {
+    for (let i = 0; i < markLib.length; i++) {
+      $(`<img src="${GM_getResourceURL(`mark${i}`)}"title="${i}|${markLib[i].name}">`).val(i).click(function () {
         addValue($(this).val());
       }).appendTo('.addCode');
     }
   }
 
-  function markAdded () {
+  function markAdded() {
     $('.hasCode a').remove();
-    var lib = GM_getValue('lib', null);
+    const lib = GM_getValue('lib', null);
     if (!lib) return;
     if ($$._site.img) {
       $($$._site.img).removeAttr('onerror').attr({
-        rawSrc: function () {
+        rawSrc() {
           return $(this).attr('src');
         },
-        src: function () {
-          var keyword;
-          var _src = $(this).attr('src');
-          for (var i in lib) {
-            keyword = new RegExp(i + '|' + i.replace('-', ''), 'gi');
+        src() {
+          let keyword;
+          let _src = $(this).attr('src');
+          for (const i in lib) {
+            keyword = new RegExp(`${i}|${i.replace('-', '')}`, 'gi');
             if (keyword.test(_src)) {
-              if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', $$._siteFavorite.search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
-              _src = GM_getResourceURL('mark' + lib[i].mark);
+              if ($(`.hasCode a[name="${i}"]`).length === 0) {
+                $('<a target="_blank"></a>').addClass(`hMark_${lib[i].mark}`).attr('name', i).attr('href', $$._siteFavorite.search.replace('{searchTerms}', i))
+                  .html(i)
+                  .appendTo('.hasCode');
+              }
+              _src = GM_getResourceURL(`mark${lib[i].mark}`);
               break;
             }
           }
           return _src;
-        }
+        },
       });
     }
     if ($$._site.text) {
       $($$._site.text).each(function () {
-        var keyword;
-        var _html = $(this).html();
+        let keyword;
+        let _html = $(this).html();
         $(this).empty();
-        for (var i in lib) {
+        for (const i in lib) {
           keyword = new RegExp(`${i}|${i.replace(/-/g, '')}|${i.replace(/-/g, ' ')}|${i.replace(/ /g, '-')}|${i.replace(/ /g, '')}`, 'gi');
           if (keyword.test(_html)) {
-            if ($('.hasCode a[name="' + i + '"]').length === 0) $('<a target="_blank"></a>').addClass('hMark_' + lib[i].mark).attr('name', i).attr('href', $$._siteFavorite.search.replace('{searchTerms}', i)).html(i).appendTo('.hasCode');
-            _html = _html.replace(keyword, '<span class="hMark_' + lib[i].mark + '" title="' + markLib[lib[i].mark].name + '">' + i + '</span>');
+            if ($(`.hasCode a[name="${i}"]`).length === 0) {
+              $('<a target="_blank"></a>').addClass(`hMark_${lib[i].mark}`).attr('name', i).attr('href', $$._siteFavorite.search.replace('{searchTerms}', i))
+                .html(i)
+                .appendTo('.hasCode');
+            }
+            _html = _html.replace(keyword, `<span class="hMark_${lib[i].mark}" title="${markLib[lib[i].mark].name}">${i}</span>`);
           }
         }
-        $('<span>' + _html + '</span>').appendTo(this);
+        $(`<span>${_html}</span>`).appendTo(this);
       });
     }
   }
 
-  function undoMarkAdded () {
-    var lib = GM_getValue('lib', null);
+  function undoMarkAdded() {
+    const lib = GM_getValue('lib', null);
     if (!lib) return;
     if ($$._site.img) {
       $($$._site.img).attr({
-        src: function () {
+        src() {
           return $(this).attr('rawSrc');
-        }
+        },
       }).removeAttr('rawSrc');
     }
     $($$._site.text).html(function () {
@@ -1129,18 +1142,18 @@
     });
   }
 
-  function addValue (mark, code = undefined) {
+  function addValue(mark, code = undefined) {
     mark = parseInt(mark);
     if (mark >= markLib.length) {
-      window.alert('请输入正确的标记，范围: 0-' + (markLib.length - 1));
+      window.alert(`请输入正确的标记，范围: 0-${markLib.length - 1}`);
       return;
     }
-    var lib = GM_getValue('lib', null) || {};
+    const lib = GM_getValue('lib', null) || {};
     code = code || getCode();
     if (!code) return;
     GM_setValue('lastMark', mark);
     lib[code] = {
-      mark: mark
+      mark,
     };
     if (mark === 0 || mark === 6) lib[code].time = $($$._site.time).text();
     GM_setValue('lib', lib);
@@ -1148,8 +1161,8 @@
     markAdded();
   }
 
-  function delValue (code = undefined) {
-    var lib = GM_getValue('lib', null);
+  function delValue(code = undefined) {
+    const lib = GM_getValue('lib', null);
     if (!lib) return;
     code = code || getCode();
     if (!code) return;
@@ -1159,8 +1172,8 @@
     markAdded();
   }
 
-  function importValue () {
-    const mark = window.prompt('请输入车位\n-1. 删除\n' + markLib.map((_, i) => `${i}. ${_.name}\n`).join('')) * 1;
+  function importValue() {
+    const mark = window.prompt(`请输入车位\n-1. 删除\n${markLib.map((_, i) => `${i}. ${_.name}\n`).join('')}`) * 1;
     if (isNaN(mark) || mark >= markLib.length || mark < -1) {
       window.alert(`请输入正确的标记，范围: -1 ==> ${markLib.length - 1}`);
       return;
@@ -1174,7 +1187,7 @@
         delete lib[codeArr[i]];
       } else {
         lib[codeArr[i]] = {
-          mark: mark
+          mark,
         };
       }
     }
@@ -1183,27 +1196,27 @@
     markAdded();
   }
 
-  function showValue (type) {
+  function showValue(type) {
     const lib = GM_getValue('lib', {});
     let _html = '<table class="tablesorter"><thead><tr><th>序号</th><th>数字</th><th>标记</th><th>代码</th><th>时间</th></tr></thead><tbody>';
     let num = 1;
     for (const i in lib) {
-      _html += `<tr><td>${num++}</td><td>${lib[i].mark}</td><td><img class="hMarkImg_${lib[i].mark}">${markLib[lib[i].mark].name}</td><td><a href="${$$._siteFavorite.search.replace('{searchTerms}', i)}"target="_blank">${i}</a></td><td>${lib[i].time || ''}</td></tr>`;
+      _html = `${_html}<tr><td>${num++}</td><td>${lib[i].mark}</td><td><img class="hMarkImg_${lib[i].mark}">${markLib[lib[i].mark].name}</td><td><a href="${$$._siteFavorite.search.replace('{searchTerms}', i)}"target="_blank">${i}</a></td><td>${lib[i].time || ''}</td></tr>`;
     }
-    _html += '</tbody></table>';
+    _html = `${_html}</tbody></table>`;
     if (type === 0) {
       $('<div class="showTable"></div>').html(_html).appendTo('body');
     } else if (type === 1) {
-      const markImg = markLib.map((_, i) => '.hMarkImg_' + i + '{background-image:url(' + GM_getResourceURL('mark' + i) + ');background-size:24px;width:24px;height:24px;}').join('');
-      _html = '<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>' + markImg + '</style></head><body><div class="showTable">' + _html + '</div><script>$(".showTable>table").tablesorter();</script></body></html>';
+      const markImg = markLib.map((_, i) => `.hMarkImg_${i}{background-image:url(${GM_getResourceURL(`mark${i}`)});background-size:24px;width:24px;height:24px;}`).join('');
+      _html = `<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script><style>.showTable{background-color:white;}.showTable>table{border-collapse:collapse;}.showTable tr{background-color:white;}.showTable th,.showTable td{border:1px solid black;}</style><style>${markImg}</style></head><body><div class="showTable">${_html}</div><script>$(".showTable>table").tablesorter();</script></body></html>`;
       const blob = new window.Blob([_html], {
-        type: 'text/html;charset=utf-8'
+        type: 'text/html;charset=utf-8',
       });
       $(`<a href="${URL.createObjectURL(blob)}" download="1.html"></a>`)[0].click();
     }
   }
 
-  function getCode (first = undefined) {
+  function getCode(first = undefined) {
     if ($(window).data('code')) return $(window).data('code');
     let code = '';
     const lib = $$._site;
@@ -1219,26 +1232,26 @@
     return code;
   }
 
-  function getMagnet (code, page = undefined, searchUrl = undefined) {
+  function getMagnet(code, page = undefined, searchUrl = undefined) {
     searchUrl = searchUrl in magnetLib ? searchUrl : Object.keys(magnetLib)[0];
-    var lib = magnetLib[searchUrl];
-    var searchPage = typeof lib.searchPage === 'string' ? lib.searchPage.replace('{q}', encodeURIComponent(code)) : lib.searchPage(code);
-    var url = page ? new URL(page, searchPage).href : searchPage;
+    const lib = magnetLib[searchUrl];
+    const searchPage = typeof lib.searchPage === 'string' ? lib.searchPage.replace('{q}', encodeURIComponent(code)) : lib.searchPage(code);
+    const url = page ? new URL(page, searchPage).href : searchPage;
     if ($('.hSearch').length === 0) {
-      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${new URL(searchPage).host}"><select class="hSearchSite">${Object.keys(magnetLib).map(i => `<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter($$._site.after || 'body>:eq(-1)');
+      $('<table class="hSearch"></table>').html(`<caption>站点: <img class="hSearchSiteImg" src="//www.google.com/s2/favicons?domain=${new URL(searchPage).host}"><select class="hSearchSite">${Object.keys(magnetLib).map((i) => `<option>${i}</option>`).join('')}</select></caption><thead><tr></tr></thead><tbody></tbody><tfoot></tfoot>`).insertAfter($$._site.after || 'body>:eq(-1)');
       $('.hSearchSite').val(searchUrl);
       // 重载
-      $('.hSearch').on('click', '.hSearchReload', e => {
+      $('.hSearch').on('click', '.hSearchReload', (e) => {
         e.preventDefault();
         $('.hSearch').trigger('destroy');
-        const target = e.target;
+        const { target } = e;
         getMagnet(getCode(), $(target).attr('href'), $('.hSearchSite').val());
       });
       // 排序翻页事件
-      $('.hSearch').on('click', '.hSearchSort a,.hSearchPage a', e => {
+      $('.hSearch').on('click', '.hSearchSort a,.hSearchPage a', (e) => {
         e.preventDefault();
         $('.hSearch').trigger('destroy');
-        let target = e.target;
+        let { target } = e;
         if (!$(target).is('a')) target = $(target).parents().filter('a')[0];
         getMagnet(getCode(), $(target).attr('href'), $('.hSearchSite').val());
       });
@@ -1250,50 +1263,49 @@
             $('.hSearch').data('abort')();
           } catch (error) {}
         }
-        $('.hSearchSiteImg').attr('src', '//www.google.com/s2/favicons?domain=' + magnetLib[$('.hSearchSite').val()].searchPage);
+        $('.hSearchSiteImg').attr('src', `//www.google.com/s2/favicons?domain=${magnetLib[$('.hSearchSite').val()].searchPage}`);
         $('.hSearch').trigger('destroy');
         getMagnet(getCode(), undefined, $('.hSearchSite').val());
       });
       // 按钮
-      $('.hSearch').on('click', '.hSearchCopy', e => {
+      $('.hSearch').on('click', '.hSearchCopy', (e) => {
         const target = $(e.target).parents('tr').find('td>a')[0];
         setNotice(target.innerText, target.href);
         GM_setClipboard(target.href);
       });
-      $('.hSearch').on('click', '.hMagnet_115', e => {
+      $('.hSearch').on('click', '.hMagnet_115', (e) => {
         const target = $(e.target).parents('tr').find('td>a')[0];
         GM_setValue('link', target.href);
         GM_setValue('name', target.innerText);
         addValue(2);
       });
     }
-    $('.hSearch>thead>tr:nth-child(1)').html(`<th>#</th><th><a class="hSearchReload" href="${url}" title="重载">名称</a></th><th><a href="${url}" target="_blank" title="新标签打开">大小</a></th><th>时间</th>${lib.more && Object.keys(lib.more).length ? '<th>' + Object.keys(lib.more).join('</th><th>') + '</th>' : ''}<th data-sorter="false">下载种子</th><th data-sorter="false">操作</th>`);
+    $('.hSearch>thead>tr:nth-child(1)').html(`<th>#</th><th><a class="hSearchReload" href="${url}" title="重载">名称</a></th><th><a href="${url}" target="_blank" title="新标签打开">大小</a></th><th>时间</th>${lib.more && Object.keys(lib.more).length ? `<th>${Object.keys(lib.more).join('</th><th>')}</th>` : ''}<th data-sorter="false">下载种子</th><th data-sorter="false">操作</th>`);
     $('.hSearchSort,.hSearch>tbody>tr,.hSearchPage').remove();
-    var codeArr = code.split('-');
-    var expArr = [];
-    for (var i = 0; i < codeArr.length; i++) {
+    const codeArr = code.split('-');
+    const expArr = [];
+    for (let i = 0; i < codeArr.length; i++) {
       expArr.push(new RegExp(reEscape(codeArr[i]), 'gi'));
     }
-    var abort = GM_xmlhttpRequest({
+    const { abort } = GM_xmlhttpRequest({
       method: 'GET',
-      url: url,
+      url,
       timeout: 30 * 1000,
-      onload (res) {
+      onload(res) {
         const data = res.response;
         const info = {};
         for (const i in lib) { // 获取信息
           if (['searchPage', 'more'].includes(i)) continue;
           if (typeof lib[i] === 'string') {
-            info[i] = $(lib[i], data).toArray().map(j => {
+            info[i] = $(lib[i], data).toArray().map((j) => {
               if (i === 'title') {
                 return j;
-              } else if (['sort', 'page'].includes(i)) {
+              } if (['sort', 'page'].includes(i)) {
                 return j.innerHTML.replace(/<(|\/)(td|th)>/g, '<$1span>');
-              } else if (i === 'magnet') {
+              } if (i === 'magnet') {
                 return j.href;
-              } else {
-                return j.textContent;
               }
+              return j.textContent;
             });
           } else {
             info[i] = lib[i](data);
@@ -1301,32 +1313,32 @@
         }
         let hash;
         if (info.magnet) {
-          hash = info.magnet.map(i => i.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toUpperCase());
+          hash = info.magnet.map((i) => i.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toUpperCase());
         } else {
           hash = info.magnet = new Array(info.title.length).fill('');
         }
         if (lib.more && Object.keys(lib.more).length) {
           info.more = {};
           for (const i in lib.more) {
-            info.more[i] = typeof lib.more[i] === 'string' ? $(lib.more[i], data).toArray().map(i => i.outerHTML.replace(/<(|\/)(td|th)( |>)/g, '<$1span$3')) : lib.more[i](data, lib);
+            info.more[i] = typeof lib.more[i] === 'string' ? $(lib.more[i], data).toArray().map((i) => i.outerHTML.replace(/<(|\/)(td|th)( |>)/g, '<$1span$3')) : lib.more[i](data, lib);
           }
         }
         console.log('load: ', url, '\ndata: ', [data], '\ninfo: ', info);
         for (let i = 0; i < info.title.length; i++) {
           let name = info.title[i].title || info.title[i].textContent;
-          const downloadHTML = m2tLib.map(j => {
+          const downloadHTML = m2tLib.map((j) => {
             const url = typeof j === 'function' ? j(hash[i], name) : j.replace('{hash}', hash[i]).replace('{name}', name);
             return `<a href="${url}" target="_blank"><img src="//www.google.com/s2/favicons?domain=${new URL(url).host}"></a>`;
           }).join('');
           for (let j = 0; j < codeArr.length; j++) {
-            name = name.replace(expArr[j], '<span class="hHighlight">' + codeArr[j] + '</span>');
+            name = name.replace(expArr[j], `<span class="hHighlight">${codeArr[j]}</span>`);
           }
           $('<tr></tr>').appendTo('.hSearch>tbody').html(`
             <td>${i + 1}</td>
             <td><a href="${info.magnet[i]}">${name}</a></td>
             <td><a href="${new URL(info.title[i].pathname, searchPage).href}" target="_blank">${info.size[i]}</a></td>
             <td>${info.time[i]}</td>
-            ${lib.more && Object.keys(lib.more).length ? '<td>' + Object.keys(lib.more).map(j => info.more[j][i]).join('</td><td>') + '</td>' : ''}
+            ${lib.more && Object.keys(lib.more).length ? `<td>${Object.keys(lib.more).map((j) => info.more[j][i]).join('</td><td>')}</td>` : ''}
             <td>${downloadHTML}</td>
             <td>
               <button class="hSearchCopy">复制</button>
@@ -1345,41 +1357,41 @@
           if (info.page) $('<tr class="hSearchPage"></tr>').appendTo('.hSearch>tfoot').html(`<td colspan="${colspan}">${info.page}</td>`); // 翻页
         }
       },
-      onerror () {
+      onerror() {
         $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load<a href="${url}" target="_blank">${url}</a> Error</td>`);
       },
-      ontimeout () {
+      ontimeout() {
         $('<tr></tr>').appendTo('.hSearch>tbody').html(`<td colspan="${$('.hSearch>thead>tr>th').length}">Load <a href="${url}" target="_blank">${url}</a> Timeout</td>`);
-      }
-    }).abort;
+      },
+    });
     $('.hSearch').data('abort', abort);
   }
 
-  function downloadIn115 () {
+  function downloadIn115() {
     if (document.readyState !== 'complete') {
       setTimeout(downloadIn115, 200);
     } else {
       $('<a href="javascript:;" class="opmenu-clean">清空所有任务</a>').prependTo(unsafeWindow.frames.wangpan.document.querySelector('.operate-menu')).on({
-        click: function () {
-          unsafeWindow.Core.OFFL5Plug.GetDataCtl().list(function (e) {
-            var tasks = e.tasks;
-            tasks.forEach(function (task) {
+        click() {
+          unsafeWindow.Core.OFFL5Plug.GetDataCtl().list((e) => {
+            const { tasks } = e;
+            tasks.forEach((task) => {
               unsafeWindow.Core.OFFL5Plug.Delete(task, null);
             });
           });
-        }
+        },
       });
-      setInterval(function () {
+      setInterval(() => {
         if (GM_getValue('link')) {
-          var link = GM_getValue('link');
+          const link = GM_getValue('link');
           GM_setValue('task', link.match(/^magnet:\?xt=urn:btih:(.*?)(&|$)/)[1].toLowerCase());
           unsafeWindow.Core.OFFL5Plug.OpenLink();
-          setTimeout(function () {
+          setTimeout(() => {
             if ($('#js_offline_new_add')) {
               $('#js_offline_new_add').val(link);
               GM_deleteValue('link');
               unsafeWindow.$('.con>.button').click();
-              var checkResult = setInterval(function () {
+              var checkResult = setInterval(() => {
                 if ($('iframe[src^="//captchaapi.115.com"]').length > 0) { // 验证
                   clearInterval(checkResult);
                   setNotice('请重新验证你的帐号', null, GM_getResourceURL('warn'));
@@ -1397,8 +1409,8 @@
         } else {
           unsafeWindow.Core.OFFL5Plug.Reload(); // 刷新任务
           if (GM_getValue('task') && $('iframe[src^="//captchaapi.115.com"]').length === 0) { // 检查下载情况
-            unsafeWindow.Core.OFFL5Plug.GetDataCtl().list(function (e) {
-              var tasks = e.tasks;
+            unsafeWindow.Core.OFFL5Plug.GetDataCtl().list((e) => {
+              const { tasks } = e;
               for (var i = 0; i < tasks.length; i++) {
                 if (tasks[i].info_hash === GM_getValue('task')) break;
               }
@@ -1406,9 +1418,9 @@
                 GM_deleteValue('task');
                 return;
               }
-              var p = Math.round(tasks[i].percentDone * 100) / 100;
-              var now = Math.floor(p / 4);
-              setNotice(tasks[i].name, '▉'.repeat(now) + '▁'.repeat(25 - now) + ' ' + p + '%', tasks[i].status === 2 ? GM_getResourceURL('success') : getProcess(p, 128));
+              const p = Math.round(tasks[i].percentDone * 100) / 100;
+              const now = Math.floor(p / 4);
+              setNotice(tasks[i].name, `${'▉'.repeat(now) + '▁'.repeat(25 - now)} ${p}%`, tasks[i].status === 2 ? GM_getResourceURL('success') : getProcess(p, 128));
               if (tasks[i].status === 2) GM_deleteValue('task'); // 1:下载中 2:下载完成
             });
           }
@@ -1417,20 +1429,20 @@
     }
   }
 
-  function setNotice (title, body = undefined, icon = undefined) {
+  function setNotice(title, body = undefined, icon = undefined) {
     if (window.Notification && window.Notification.permission !== 'denied') {
-      window.Notification.requestPermission(function (status) {
+      window.Notification.requestPermission((status) => {
         if (status === 'granted') {
-          var option = {
+          const option = {
             tag: 'hParkingLot',
-            icon: icon || GM_getResourceURL('success')
+            icon: icon || GM_getResourceURL('success'),
           };
           if (body) option.body = body;
-          var n = new window.Notification(cutByte(title, 28), option);
+          const n = new window.Notification(cutByte(title, 28), option);
           n.onclick = function () {
             n.close();
           };
-          setTimeout(function () {
+          setTimeout(() => {
             if (n) n.close();
           }, 3000);
         }
@@ -1438,12 +1450,12 @@
     }
   }
 
-  function getProcess (process, radius) { // https://imys.net/20150722/canvas-annulus-process.html
-    var c = document.createElement('canvas');
+  function getProcess(process, radius) { // https://imys.net/20150722/canvas-annulus-process.html
+    const c = document.createElement('canvas');
     radius = radius || 100;
     c.width = 2 * radius;
     c.height = 2 * radius;
-    var ctx = c.getContext('2d');
+    const ctx = c.getContext('2d');
     // 画灰色的圆
     ctx.beginPath();
     ctx.arc(radius, radius, 0.8 * radius, 0, Math.PI * 2);
@@ -1464,44 +1476,44 @@
     ctx.fillStyle = '#fff';
     ctx.fill();
     // 填充文字
-    ctx.font = 'bold ' + 0.2 * radius + 'pt Microsoft YaHei';
+    ctx.font = `bold ${0.2 * radius}pt Microsoft YaHei`;
     ctx.fillStyle = '#333';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.moveTo(radius, radius);
-    ctx.fillText(process + '%', radius, radius);
+    ctx.fillText(`${process}%`, radius, radius);
     return c.toDataURL();
   }
 
-  function cutByte (str, len, endstr = '...') { // http://www.cnblogs.com/whyoop/p/3680228.html
-    function n2 (a) { // 用于二分法查找
-      var n = a / 2 | 0;
+  function cutByte(str, len, endstr = '...') { // http://www.cnblogs.com/whyoop/p/3680228.html
+    function n2(a) { // 用于二分法查找
+      const n = a / 2 | 0;
       return (n > 0 ? n : 1);
     }
 
-    function getBlength (str) {
+    function getBlength(str) {
       for (var i = str.length, n = 0; i--;) {
-        n += str.charCodeAt(i) > 255 ? 2 : 1;
+        n = n + (str.charCodeAt(i) > 255 ? 2 : 1);
       }
       return n;
     }
     if (str.length <= len) return str;
-    if (!(str + '').length || !len || len <= 0) return '';
+    if (!(`${str}`).length || !len || len <= 0) return '';
     if (getBlength(str) <= len) {
       return str;
     } // 整个函数中最耗时的一个判断,欢迎优化
-    var lenS = len;
-    var _lenS = 0;
-    var _strl = 0;
+    const lenS = len;
+    let _lenS = 0;
+    let _strl = 0;
     while (_strl <= lenS) {
-      var _lenS1 = n2(lenS - _strl);
-      _strl += getBlength(str.substr(_lenS, _lenS1));
-      _lenS += _lenS1;
+      const _lenS1 = n2(lenS - _strl);
+      _strl = _strl + getBlength(str.substr(_lenS, _lenS1));
+      _lenS = _lenS + _lenS1;
     }
     return str.substr(0, _lenS - 1) + endstr;
   }
 
-  function reEscape (s) {
+  function reEscape(s) {
     return s.replace(/[$()*+.[\]?^{}|]+/g, '\\$&');
   }
-})(jQuery);
+}(jQuery));

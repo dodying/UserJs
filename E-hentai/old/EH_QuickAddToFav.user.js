@@ -24,93 +24,103 @@
 // @run-at      document-idle
 // ==/UserScript==
 if (document.querySelector('div.i')) {
-  var Fav = document.querySelectorAll('div.i');
+  const Fav = document.querySelectorAll('div.i');
   for (var i = 0; i < Fav.length; i++) {
     if (Fav[i].style.backgroundImage == 'url("https://exhentai.org/img/fav.png")' || Fav[i].style.backgroundImage == 'url("https://ehgt.org/g/fav.png")') {
       Fav[i].style.backgroundImage = 'url("https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/fav.png")';
     }
   }
 }
-if (document.querySelector('.it5')) { //如果存在搜索结果
-  var Chs = new RegExp('chinese|汉化|漢化|家族', 'gi');
-  var ChsFind = Chs.test(document.querySelector('input.stdinput,form>input[name="favcat"]+div>input').value);
+if (document.querySelector('.it5')) { // 如果存在搜索结果
+  const Chs = new RegExp('chinese|汉化|漢化|家族', 'gi');
+  const ChsFind = Chs.test(document.querySelector('input.stdinput,form>input[name="favcat"]+div>input').value);
   document.querySelector('body>div.ido').style.maxWidth = '99999px';
   document.querySelector('body>div.ido table.itg').style.maxWidth = '99999px';
-  var text = document.querySelectorAll('.it5');
-  //console.log(text);
+  const text = document.querySelectorAll('.it5');
+  // console.log(text);
   for (var i = 0; i < text.length; i++) {
-    text[i].style.maxWidth = '779px'; //限定大小
-    text[i].querySelector('a').innerHTML=getName2(text[i].querySelector('a').innerHTML); //去除漫展标签
-    if (!ChsFind) { //加粗突出汉化本
+    text[i].style.maxWidth = '779px'; // 限定大小
+    text[i].querySelector('a').innerHTML = getName2(text[i].querySelector('a').innerHTML); // 去除漫展标签
+    if (!ChsFind) { // 加粗突出汉化本
       if (Chs.test(text[i].querySelector('a').innerHTML)) text[i].style.fontWeight = 'bold';
     }
   }
   EH_QuickButton_AddFav('.it5', 'a', 'style="float:left;"', '.itd div[style="position:relative"]');
 }
-if (document.querySelector('.id1')) { //如果存在热门推荐
+if (document.querySelector('.id1')) { // 如果存在热门推荐
   EH_QuickButton_AddFav('.id1', 'b', 'style="float:left;"', '.id44');
 }
-if (document.querySelector('#gdc')) { //如果是信息页
-  document.getElementById('gn').innerHTML = getName2(document.getElementById('gn').innerHTML); //去除漫展标签
-  var addurl = get_addurl(window.location.href);
-  var host = window.location.host;
-  var name_book = encodeURIComponent(getName(document.querySelector('h1').innerHTML));
-  var div = document.createElement('div');
+if (document.querySelector('#gdc')) { // 如果是信息页
+  document.getElementById('gn').innerHTML = getName2(document.getElementById('gn').innerHTML); // 去除漫展标签
+  const addurl = get_addurl(window.location.href);
+  const { host } = window.location;
+  const name_book = encodeURIComponent(getName(document.querySelector('h1').innerHTML));
+  const div = document.createElement('div');
   div.id = 'EH_QuickButton_InfoPage';
-  var left = document.querySelector('#gdn').offsetLeft+350;
-  var top = document.querySelector('#gdn').offsetTop+35;
-  div.style = 'color:red;position:absolute;left:' + left + 'px;top:'+top+'px;z-index:999;';
-  div.innerHTML = '<div oncontextmenu="return false"><div class="EH_QuickAddToFav" title="' + addurl + '|||EH_QuickButton_InfoPage" style="cursor:pointer;background-image:url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Plus.png);width:16px;height:16px;float:left;"></div><a target="_blank" href="https://' + host + '/?f_search=%22' + name_book + '%22&f_apply=Apply+Filter&advsearch=1&f_sname=on&f_stags=on&f_sh=on"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-16.png" /></a></div>';
+  const left = document.querySelector('#gdn').offsetLeft + 350;
+  const top = document.querySelector('#gdn').offsetTop + 35;
+  div.style = `color:red;position:absolute;left:${left}px;top:${top}px;z-index:999;`;
+  div.innerHTML = `<div oncontextmenu="return false"><div class="EH_QuickAddToFav" title="${addurl}|||EH_QuickButton_InfoPage" style="cursor:pointer;background-image:url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Plus.png);width:16px;height:16px;float:left;"></div><a target="_blank" href="https://${host}/?f_search=%22${name_book}%22&f_apply=Apply+Filter&advsearch=1&f_sname=on&f_stags=on&f_sh=on"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-16.png" /></a></div>`;
   document.body.appendChild(div);
-} /////////////////////////////////////////////////////
+} /// //////////////////////////////////////////////////
 
 window.onmousedown = function (e) {
   if (e.target.className === 'EH_QuickAddToFav') {
-    xhr_send(e.button, e.target.title.split('|||') [0], e.target.title.split('|||') [1]);
+    xhr_send(e.button, e.target.title.split('|||')[0], e.target.title.split('|||')[1]);
   }
-}
+};
 window.ondblclick = function (e) {
   if (e.target.className === 'EH_QuickAddToFav') {
-    xhr_send(3, e.target.title.split('|||') [0], e.target.title.split('|||') [1]);
+    xhr_send(3, e.target.title.split('|||')[0], e.target.title.split('|||')[1]);
   }
-}
+};
 function EH_QuickButton_AddFav(a, name, style, box) {
-  var a_url = document.querySelectorAll(a);
-  var host = window.location.host;
-  for (var i = 0; i < a_url.length; i++) {
-    var name_book = encodeURIComponent(getName(a_url[i].querySelector('a').innerHTML));
-    var url = a_url[i].querySelector('a').getAttribute('href');
-    var addurl = get_addurl(url);
-    var div = document.createElement('div');
-    var id = 'EH_' + name + i;
+  const a_url = document.querySelectorAll(a);
+  const { host } = window.location;
+  for (let i = 0; i < a_url.length; i++) {
+    const name_book = encodeURIComponent(getName(a_url[i].querySelector('a').innerHTML));
+    const url = a_url[i].querySelector('a').getAttribute('href');
+    const addurl = get_addurl(url);
+    const div = document.createElement('div');
+    const id = `EH_${name}${i}`;
     div.id = id;
-    div.innerHTML = '<div oncontextmenu="return false" ' + style + '><div class="EH_QuickAddToFav" title="' + addurl + '|||' + id + '" style="cursor:pointer;background-image:url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Plus.png);width:16px;height:16px;float:left;"></div><a target="_blank" href="https://' + host + '/?f_search=%22' + name_book + '%22&f_apply=Apply+Filter&advsearch=1&f_sname=on&f_stags=on&f_sh=on"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-16.png" /></a></div>';
-    /*div.querySelector('a').onmousedown = function (event) {
+    div.innerHTML = `<div oncontextmenu="return false" ${style}><div class="EH_QuickAddToFav" title="${addurl}|||${id}" style="cursor:pointer;background-image:url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Plus.png);width:16px;height:16px;float:left;"></div><a target="_blank" href="https://${host}/?f_search=%22${name_book}%22&f_apply=Apply+Filter&advsearch=1&f_sname=on&f_stags=on&f_sh=on"><img src="https://cdn0.iconfinder.com/data/icons/basic-ui-elements-round/700/09_search-16.png" /></a></div>`;
+    /* div.querySelector('a').onmousedown = function (event) {
       xhr_send(event.button, this.title.split('|||') [0], this.title.split('|||') [1]);
     }
     div.querySelector('a').ondblclick = function () {
       xhr_send(3, this.title.split('|||') [0], this.title.split('|||') [1]);
-    }*/
-    var box1 = document.querySelectorAll(box);
+    } */
+    const box1 = document.querySelectorAll(box);
     box1[i].insertBefore(div, box1[i].childNodes[0]);
   }
 }
 function get_addurl(url) {
-  var all = url.replace('https://g.e-hentai.org/g/', '').replace('https://exhentai.org/g/', '');
-  var t = all.replace(/[0-9]{1,9}\//, '').replace('/', '');
-  var gid = all.replace('/' + t + '/', '');
+  const all = url.replace('https://g.e-hentai.org/g/', '').replace('https://exhentai.org/g/', '');
+  const t = all.replace(/[0-9]{1,9}\//, '').replace('/', '');
+  const gid = all.replace(`/${t}/`, '');
   if (url.indexOf('https://g.e-hentai.org/g/') >= 0) {
-    var addurl = 'https://g.e-hentai.org/gallerypopups.php?gid=' + gid + '&t=' + t + '&act=addfav';
+    var addurl = `https://g.e-hentai.org/gallerypopups.php?gid=${gid}&t=${t}&act=addfav`;
   } else if (url.indexOf('https://exhentai.org/g/') >= 0) {
-    var addurl = 'https://exhentai.org/gallerypopups.php?gid=' + gid + '&t=' + t + '&act=addfav';
+    var addurl = `https://exhentai.org/gallerypopups.php?gid=${gid}&t=${t}&act=addfav`;
   }
   return addurl;
 }
-function getName2(name){
-  return name.replace(/^\(.*?\)( |)/, '').replace(' Ni ',' 2 ').replace(' San ',' 3 ').replace(' Yon ',' 4 ').replace(' Go ',' 5 ').replace(' Roku ',' 6 ').replace(' Nana ',' 7 ').replace(' Hachi ',' 8 ').replace(' Ku ',' 9 ');
+function getName2(name) {
+  return name.replace(/^\(.*?\)( |)/, '').replace(' Ni ', ' 2 ').replace(' San ', ' 3 ').replace(' Yon ', ' 4 ')
+    .replace(' Go ', ' 5 ')
+    .replace(' Roku ', ' 6 ')
+    .replace(' Nana ', ' 7 ')
+    .replace(' Hachi ', ' 8 ')
+    .replace(' Ku ', ' 9 ');
 }
-function getName(name){
-  return name.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\{.*?\}/g, '').replace(/\【.*?\】/g, '').replace(/\|.*/, '').replace(/\s+/g, ' ').replace(/[,:]/g, ' ').replace(/(vol|ch)\.(\s+|)\d+(\-\d+|)/gi,'').replace(/^\s+|\s+$/g, '');
+function getName(name) {
+  return name.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\{.*?\}/g, '').replace(/\【.*?\】/g, '')
+    .replace(/\|.*/, '')
+    .replace(/\s+/g, ' ')
+    .replace(/[,:]/g, ' ')
+    .replace(/(vol|ch)\.(\s+|)\d+(\-\d+|)/gi, '')
+    .replace(/^\s+|\s+$/g, '');
 }
 function xhr_send(status, addurl, id) {
   switch (status) {
@@ -128,7 +138,7 @@ function xhr_send(status, addurl, id) {
       var pic = favcat * 19 + 2;
       localStorage.EH_QuickButtonToAddFav_LastFavcat = favcat;
       if (favcat == '10') var favcat = 'favdel';
-      var parm = 'favcat=' + favcat + '&favnote=&submit=Apply+Changes&update=1';
+      var parm = `favcat=${favcat}&favnote=&submit=Apply+Changes&update=1`;
       break;
     case 3:
       var favcat = 'favdel';
@@ -138,10 +148,10 @@ function xhr_send(status, addurl, id) {
       var favcat = localStorage.EH_QuickButtonToAddFav_LastFavcat;
       if (favcat == '10') var favcat = 'favdel';
       var pic = favcat * 19 + 2;
-      var parm = 'favcat=' + favcat + '&favnote=&submit=Apply+Changes&update=1';
+      var parm = `favcat=${favcat}&favnote=&submit=Apply+Changes&update=1`;
       break;
   }
-  var xhr_send = 'xhr_send' + Math.random();
+  let xhr_send = `xhr_send${Math.random()}`;
   xhr_send = new XMLHttpRequest();
   xhr_send.open('POST', addurl);
   xhr_send.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
@@ -149,11 +159,11 @@ function xhr_send(status, addurl, id) {
   xhr_send.send(parm);
   xhr_send.onload = function () {
     if (favcat != 'favdel') {
-      document.querySelector('#' + id + '>div>div').style.backgroundImage = 'url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/fav.png)';
-      document.querySelector('#' + id + '>div>div').style.backgroundPosition='0px -' + pic + 'px';
+      document.querySelector(`#${id}>div>div`).style.backgroundImage = 'url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/fav.png)';
+      document.querySelector(`#${id}>div>div`).style.backgroundPosition = `0px -${pic}px`;
     } else {
-      document.querySelector('#' + id + '>div>div').style.backgroundImage = 'url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Delete-16.png)';
-      document.querySelector('#' + id + '>div>div').style.backgroundPosition='0px 0px';
+      document.querySelector(`#${id}>div>div`).style.backgroundImage = 'url(https://cdn.jsdelivr.net/gh/dodying/HentaiVersePlus@master/HV/Temp/Delete-16.png)';
+      document.querySelector(`#${id}>div>div`).style.backgroundPosition = '0px 0px';
     }
+  };
 }
-};

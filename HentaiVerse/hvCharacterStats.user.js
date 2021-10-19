@@ -16,26 +16,27 @@
 // @run-at      document-end
 // ==/UserScript==
 (function () {
-  if (!document.querySelector('img[src="/y/character/inc.png"]')) return
-  var plus, grades, points, temp, min
+  if (!document.querySelector('img[src="/y/character/inc.png"]')) return;
+  let plus; let grades; let points; let temp; let
+    min;
   while (document.querySelector('img[src="/y/character/inc.png"]')) {
-    plus = document.querySelectorAll('#attr_table>tbody>tr>td:nth-child(7)>img')
-    grades = []
-    points = document.querySelectorAll('#attr_table>tbody>tr>td:nth-child(2)>div')
-    points.forEach(function (i) {
+    plus = document.querySelectorAll('#attr_table>tbody>tr>td:nth-child(7)>img');
+    grades = [];
+    points = document.querySelectorAll('#attr_table>tbody>tr>td:nth-child(2)>div');
+    points.forEach((i) => {
       if (i.querySelectorAll('div').length > 1) {
-        temp = ''
-        i.querySelectorAll('div').forEach(function (i) {
-          temp = String(-parseInt(i.style.backgroundPositionY) / 12) + temp
-        })
-        grades.push(temp * 1)
+        temp = '';
+        i.querySelectorAll('div').forEach((i) => {
+          temp = String(-parseInt(i.style.backgroundPositionY) / 12) + temp;
+        });
+        grades.push(temp * 1);
       } else {
-        grades.push(i.textContent * 1)
+        grades.push(i.textContent * 1);
       }
-    })
-    min = Math.min.apply(null, grades)
-    plus[grades.indexOf(min)].click()
-    plus = document.querySelectorAll('img[src="/y/character/inc.png"]')
+    });
+    min = Math.min.apply(null, grades);
+    plus[grades.indexOf(min)].click();
+    plus = document.querySelectorAll('img[src="/y/character/inc.png"]');
   }
-  document.querySelector('img[src="/y/character/apply.png"]').click()
-})()
+  document.querySelector('img[src="/y/character/apply.png"]').click();
+}());

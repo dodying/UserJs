@@ -3,119 +3,119 @@
  */
 
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(global = global || self, factory(global.opentype = {}));
-}(this, (function (exports) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports)
+    : typeof define === 'function' && define.amd ? define(['exports'], factory)
+      : (global = global || self, factory(global.opentype = {}));
+}(this, ((exports) => {
+  /*! https://mths.be/codepointat v0.2.0 by @mathias */
+  if (!String.prototype.codePointAt) {
+    (function () {
+      const defineProperty = (function () {
+        // IE 8 only supports `Object.defineProperty` on DOM elements
+        try {
+          const object = {};
+          const $defineProperty = Object.defineProperty;
+          var result = $defineProperty(object, object, object) && $defineProperty;
+        } catch (error) {}
+        return result;
+      }());
+      const codePointAt = function (position) {
+        if (this == null) {
+          throw TypeError();
+        }
+        const string = String(this);
+        const size = string.length;
+        // `ToInteger`
+        let index = position ? Number(position) : 0;
+        if (index != index) { // better `isNaN`
+          index = 0;
+        }
+        // Account for out-of-bounds indices:
+        if (index < 0 || index >= size) {
+          return undefined;
+        }
+        // Get the first code unit
+        const first = string.charCodeAt(index);
+        let second;
+        if ( // check if it’s the start of a surrogate pair
+          first >= 0xD800 && first <= 0xDBFF // high surrogate
+					&& size > index + 1 // there is a next code unit
+        ) {
+          second = string.charCodeAt(index + 1);
+          if (second >= 0xDC00 && second <= 0xDFFF) { // low surrogate
+            // https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+            return (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
+          }
+        }
+        return first;
+      };
+      if (defineProperty) {
+        defineProperty(String.prototype, 'codePointAt', {
+          value: codePointAt,
+          configurable: true,
+          writable: true,
+        });
+      } else {
+        String.prototype.codePointAt = codePointAt;
+      }
+    }());
+  }
 
-	/*! https://mths.be/codepointat v0.2.0 by @mathias */
-	if (!String.prototype.codePointAt) {
-		(function() {
-			var defineProperty = (function() {
-				// IE 8 only supports `Object.defineProperty` on DOM elements
-				try {
-					var object = {};
-					var $defineProperty = Object.defineProperty;
-					var result = $defineProperty(object, object, object) && $defineProperty;
-				} catch(error) {}
-				return result;
-			}());
-			var codePointAt = function(position) {
-				if (this == null) {
-					throw TypeError();
-				}
-				var string = String(this);
-				var size = string.length;
-				// `ToInteger`
-				var index = position ? Number(position) : 0;
-				if (index != index) { // better `isNaN`
-					index = 0;
-				}
-				// Account for out-of-bounds indices:
-				if (index < 0 || index >= size) {
-					return undefined;
-				}
-				// Get the first code unit
-				var first = string.charCodeAt(index);
-				var second;
-				if ( // check if it’s the start of a surrogate pair
-					first >= 0xD800 && first <= 0xDBFF && // high surrogate
-					size > index + 1 // there is a next code unit
-				) {
-					second = string.charCodeAt(index + 1);
-					if (second >= 0xDC00 && second <= 0xDFFF) { // low surrogate
-						// https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
-						return (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
-					}
-				}
-				return first;
-			};
-			if (defineProperty) {
-				defineProperty(String.prototype, 'codePointAt', {
-					'value': codePointAt,
-					'configurable': true,
-					'writable': true
-				});
-			} else {
-				String.prototype.codePointAt = codePointAt;
-			}
-		}());
-	}
+  const TINF_OK = 0;
+  const TINF_DATA_ERROR = -3;
 
-	var TINF_OK = 0;
-	var TINF_DATA_ERROR = -3;
+  function Tree() {
+	  this.table = new Uint16Array(16); /* table of code length counts */
+	  this.trans = new Uint16Array(288); /* code -> symbol translation table */
+  }
 
-	function Tree() {
-	  this.table = new Uint16Array(16);   /* table of code length counts */
-	  this.trans = new Uint16Array(288);  /* code -> symbol translation table */
-	}
-
-	function Data(source, dest) {
+  function Data(source, dest) {
 	  this.source = source;
 	  this.sourceIndex = 0;
 	  this.tag = 0;
 	  this.bitcount = 0;
-	  
+
 	  this.dest = dest;
 	  this.destLen = 0;
-	  
-	  this.ltree = new Tree();  /* dynamic length/symbol tree */
-	  this.dtree = new Tree();  /* dynamic distance tree */
-	}
 
-	/* --------------------------------------------------- *
+	  this.ltree = new Tree(); /* dynamic length/symbol tree */
+	  this.dtree = new Tree(); /* dynamic distance tree */
+  }
+
+  /* --------------------------------------------------- *
 	 * -- uninitialized global data (static structures) -- *
 	 * --------------------------------------------------- */
 
-	var sltree = new Tree();
-	var sdtree = new Tree();
+  const sltree = new Tree();
+  const sdtree = new Tree();
 
-	/* extra bits and base tables for length codes */
-	var length_bits = new Uint8Array(30);
-	var length_base = new Uint16Array(30);
+  /* extra bits and base tables for length codes */
+  const length_bits = new Uint8Array(30);
+  const length_base = new Uint16Array(30);
 
-	/* extra bits and base tables for distance codes */
-	var dist_bits = new Uint8Array(30);
-	var dist_base = new Uint16Array(30);
+  /* extra bits and base tables for distance codes */
+  const dist_bits = new Uint8Array(30);
+  const dist_base = new Uint16Array(30);
 
-	/* special ordering of code length codes */
-	var clcidx = new Uint8Array([
+  /* special ordering of code length codes */
+  const clcidx = new Uint8Array([
 	  16, 17, 18, 0, 8, 7, 9, 6,
 	  10, 5, 11, 4, 12, 3, 13, 2,
-	  14, 1, 15
-	]);
+	  14, 1, 15,
+  ]);
 
-	/* used by tinf_decode_trees, avoids allocations every call */
-	var code_tree = new Tree();
-	var lengths = new Uint8Array(288 + 32);
+  /* used by tinf_decode_trees, avoids allocations every call */
+  const code_tree = new Tree();
+  const lengths = new Uint8Array(288 + 32);
 
-	/* ----------------------- *
+  /* ----------------------- *
 	 * -- utility functions -- *
 	 * ----------------------- */
 
-	/* build extra bits and base tables */
-	function tinf_build_bits_base(bits, base, delta, first) {
-	  var i, sum;
+  /* build extra bits and base tables */
+  function tinf_build_bits_base(bits, base, delta, first) {
+	  let i; let
+      sum;
 
 	  /* build bits table */
 	  for (i = 0; i < delta; ++i) { bits[i] = 0; }
@@ -124,13 +124,13 @@
 	  /* build base table */
 	  for (sum = first, i = 0; i < 30; ++i) {
 	    base[i] = sum;
-	    sum += 1 << bits[i];
+	    sum = sum + (1 << bits[i]);
 	  }
-	}
+  }
 
-	/* build the fixed huffman trees */
-	function tinf_build_fixed_trees(lt, dt) {
-	  var i;
+  /* build the fixed huffman trees */
+  function tinf_build_fixed_trees(lt, dt) {
+	  let i;
 
 	  /* build fixed length tree */
 	  for (i = 0; i < 7; ++i) { lt.table[i] = 0; }
@@ -150,13 +150,14 @@
 	  dt.table[5] = 32;
 
 	  for (i = 0; i < 32; ++i) { dt.trans[i] = i; }
-	}
+  }
 
-	/* given an array of code lengths, build a tree */
-	var offs = new Uint16Array(16);
+  /* given an array of code lengths, build a tree */
+  const offs = new Uint16Array(16);
 
-	function tinf_build_tree(t, lengths, off, num) {
-	  var i, sum;
+  function tinf_build_tree(t, lengths, off, num) {
+	  let i; let
+      sum;
 
 	  /* clear code length count table */
 	  for (i = 0; i < 16; ++i) { t.table[i] = 0; }
@@ -169,21 +170,21 @@
 	  /* compute offset table for distribution sort */
 	  for (sum = 0, i = 0; i < 16; ++i) {
 	    offs[i] = sum;
-	    sum += t.table[i];
+	    sum = sum + t.table[i];
 	  }
 
 	  /* create code->symbol translation table (symbols sorted by code) */
 	  for (i = 0; i < num; ++i) {
 	    if (lengths[off + i]) { t.trans[offs[lengths[off + i]]++] = i; }
 	  }
-	}
+  }
 
-	/* ---------------------- *
+  /* ---------------------- *
 	 * -- decode functions -- *
 	 * ---------------------- */
 
-	/* get one bit from source stream */
-	function tinf_getbit(d) {
+  /* get one bit from source stream */
+  function tinf_getbit(d) {
 	  /* check if tag is empty */
 	  if (!d.bitcount--) {
 	    /* load next tag */
@@ -192,58 +193,60 @@
 	  }
 
 	  /* shift bit out of tag */
-	  var bit = d.tag & 1;
-	  d.tag >>>= 1;
+	  const bit = d.tag & 1;
+	  d.tag = d.tag >>> 1;
 
 	  return bit;
-	}
+  }
 
-	/* read a num bit value from a stream and add base */
-	function tinf_read_bits(d, num, base) {
-	  if (!num)
-	    { return base; }
+  /* read a num bit value from a stream and add base */
+  function tinf_read_bits(d, num, base) {
+	  if (!num) { return base; }
 
 	  while (d.bitcount < 24) {
-	    d.tag |= d.source[d.sourceIndex++] << d.bitcount;
-	    d.bitcount += 8;
+	    d.tag = d.tag | d.source[d.sourceIndex++] << d.bitcount;
+	    d.bitcount = d.bitcount + 8;
 	  }
 
-	  var val = d.tag & (0xffff >>> (16 - num));
-	  d.tag >>>= num;
-	  d.bitcount -= num;
+	  const val = d.tag & (0xffff >>> (16 - num));
+	  d.tag = d.tag >>> num;
+	  d.bitcount = d.bitcount - num;
 	  return val + base;
-	}
+  }
 
-	/* given a data stream and a tree, decode a symbol */
-	function tinf_decode_symbol(d, t) {
+  /* given a data stream and a tree, decode a symbol */
+  function tinf_decode_symbol(d, t) {
 	  while (d.bitcount < 24) {
-	    d.tag |= d.source[d.sourceIndex++] << d.bitcount;
-	    d.bitcount += 8;
+	    d.tag = d.tag | d.source[d.sourceIndex++] << d.bitcount;
+	    d.bitcount = d.bitcount + 8;
 	  }
-	  
-	  var sum = 0, cur = 0, len = 0;
-	  var tag = d.tag;
+
+	  let sum = 0; let cur = 0; let
+      len = 0;
+	  let { tag } = d;
 
 	  /* get more bits while code value is above sum */
 	  do {
 	    cur = 2 * cur + (tag & 1);
-	    tag >>>= 1;
+	    tag = tag >>> 1;
 	    ++len;
 
-	    sum += t.table[len];
-	    cur -= t.table[len];
+	    sum = sum + t.table[len];
+	    cur = cur - t.table[len];
 	  } while (cur >= 0);
-	  
+
 	  d.tag = tag;
-	  d.bitcount -= len;
+	  d.bitcount = d.bitcount - len;
 
 	  return t.trans[sum + cur];
-	}
+  }
 
-	/* given a data stream, decode dynamic trees from it */
-	function tinf_decode_trees(d, lt, dt) {
-	  var hlit, hdist, hclen;
-	  var i, num, length;
+  /* given a data stream, decode dynamic trees from it */
+  function tinf_decode_trees(d, lt, dt) {
+	  let hlit; let hdist; let
+      hclen;
+	  let i; let num; let
+      length;
 
 	  /* get 5 bits HLIT (257-286) */
 	  hlit = tinf_read_bits(d, 5, 257);
@@ -259,7 +262,7 @@
 	  /* read code lengths for code length alphabet */
 	  for (i = 0; i < hclen; ++i) {
 	    /* get 3 bits code length (0-7) */
-	    var clen = tinf_read_bits(d, 3, 0);
+	    const clen = tinf_read_bits(d, 3, 0);
 	    lengths[clcidx[i]] = clen;
 	  }
 
@@ -268,7 +271,7 @@
 
 	  /* decode code lengths for the dynamic trees */
 	  for (num = 0; num < hlit + hdist;) {
-	    var sym = tinf_decode_symbol(d, code_tree);
+	    const sym = tinf_decode_symbol(d, code_tree);
 
 	    switch (sym) {
 	      case 16:
@@ -300,16 +303,16 @@
 	  /* build dynamic trees */
 	  tinf_build_tree(lt, lengths, 0, hlit);
 	  tinf_build_tree(dt, lengths, hlit, hdist);
-	}
+  }
 
-	/* ----------------------------- *
+  /* ----------------------------- *
 	 * -- block inflate functions -- *
 	 * ----------------------------- */
 
-	/* given a stream and two trees, inflate a block of data */
-	function tinf_inflate_block_data(d, lt, dt) {
+  /* given a stream and two trees, inflate a block of data */
+  function tinf_inflate_block_data(d, lt, dt) {
 	  while (1) {
-	    var sym = tinf_decode_symbol(d, lt);
+	    let sym = tinf_decode_symbol(d, lt);
 
 	    /* check for end of block */
 	    if (sym === 256) {
@@ -319,10 +322,11 @@
 	    if (sym < 256) {
 	      d.dest[d.destLen++] = sym;
 	    } else {
-	      var length, dist, offs;
+	      var length; var dist; var
+          offs;
 	      var i;
 
-	      sym -= 257;
+	      sym = sym - 257;
 
 	      /* possibly get more bits from length code */
 	      length = tinf_read_bits(d, length_bits[sym], length_base[sym]);
@@ -338,17 +342,18 @@
 	      }
 	    }
 	  }
-	}
+  }
 
-	/* inflate an uncompressed block of data */
-	function tinf_inflate_uncompressed_block(d) {
-	  var length, invlength;
-	  var i;
-	  
+  /* inflate an uncompressed block of data */
+  function tinf_inflate_uncompressed_block(d) {
+	  let length; let
+      invlength;
+	  let i;
+
 	  /* unread from bitbuffer */
 	  while (d.bitcount > 8) {
 	    d.sourceIndex--;
-	    d.bitcount -= 8;
+	    d.bitcount = d.bitcount - 8;
 	  }
 
 	  /* get length */
@@ -360,25 +365,24 @@
 	  invlength = 256 * invlength + d.source[d.sourceIndex + 2];
 
 	  /* check length */
-	  if (length !== (~invlength & 0x0000ffff))
-	    { return TINF_DATA_ERROR; }
+	  if (length !== (~invlength & 0x0000ffff)) { return TINF_DATA_ERROR; }
 
-	  d.sourceIndex += 4;
+	  d.sourceIndex = d.sourceIndex + 4;
 
 	  /* copy block */
-	  for (i = length; i; --i)
-	    { d.dest[d.destLen++] = d.source[d.sourceIndex++]; }
+	  for (i = length; i; --i) { d.dest[d.destLen++] = d.source[d.sourceIndex++]; }
 
 	  /* make sure we start next block on a byte boundary */
 	  d.bitcount = 0;
 
 	  return TINF_OK;
-	}
+  }
 
-	/* inflate stream from source to dest */
-	function tinf_uncompress(source, dest) {
-	  var d = new Data(source, dest);
-	  var bfinal, btype, res;
+  /* inflate stream from source to dest */
+  function tinf_uncompress(source, dest) {
+	  const d = new Data(source, dest);
+	  let bfinal; let btype; let
+      res;
 
 	  do {
 	    /* read final block flag */
@@ -406,47 +410,42 @@
 	        res = TINF_DATA_ERROR;
 	    }
 
-	    if (res !== TINF_OK)
-	      { throw new Error('Data error'); }
-
+	    if (res !== TINF_OK) { throw new Error('Data error'); }
 	  } while (!bfinal);
 
 	  if (d.destLen < d.dest.length) {
-	    if (typeof d.dest.slice === 'function')
-	      { return d.dest.slice(0, d.destLen); }
-	    else
-	      { return d.dest.subarray(0, d.destLen); }
+	    if (typeof d.dest.slice === 'function') { return d.dest.slice(0, d.destLen); } return d.dest.subarray(0, d.destLen);
 	  }
-	  
-	  return d.dest;
-	}
 
-	/* -------------------- *
+	  return d.dest;
+  }
+
+  /* -------------------- *
 	 * -- initialization -- *
 	 * -------------------- */
 
-	/* build fixed huffman trees */
-	tinf_build_fixed_trees(sltree, sdtree);
+  /* build fixed huffman trees */
+  tinf_build_fixed_trees(sltree, sdtree);
 
-	/* build extra bits and base tables */
-	tinf_build_bits_base(length_bits, length_base, 4, 3);
-	tinf_build_bits_base(dist_bits, dist_base, 2, 1);
+  /* build extra bits and base tables */
+  tinf_build_bits_base(length_bits, length_base, 4, 3);
+  tinf_build_bits_base(dist_bits, dist_base, 2, 1);
 
-	/* fix a special case */
-	length_bits[28] = 0;
-	length_base[28] = 258;
+  /* fix a special case */
+  length_bits[28] = 0;
+  length_base[28] = 258;
 
-	var tinyInflate = tinf_uncompress;
+  const tinyInflate = tinf_uncompress;
 
-	// The Bounding Box object
+  // The Bounding Box object
 
-	function derive(v0, v1, v2, v3, t) {
-	    return Math.pow(1 - t, 3) * v0 +
-	        3 * Math.pow(1 - t, 2) * t * v1 +
-	        3 * (1 - t) * Math.pow(t, 2) * v2 +
-	        Math.pow(t, 3) * v3;
-	}
-	/**
+  function derive(v0, v1, v2, v3, t) {
+	    return Math.pow(1 - t, 3) * v0
+	        + 3 * Math.pow(1 - t, 2) * t * v1
+	        + 3 * (1 - t) * Math.pow(t, 2) * v2
+	        + Math.pow(t, 3) * v3;
+  }
+  /**
 	 * A bounding box is an enclosing box that describes the smallest measure within which all the points lie.
 	 * It is used to calculate the bounding box of a glyph or text path.
 	 *
@@ -456,27 +455,27 @@
 	 * @class
 	 * @constructor
 	 */
-	function BoundingBox() {
+  function BoundingBox() {
 	    this.x1 = Number.NaN;
 	    this.y1 = Number.NaN;
 	    this.x2 = Number.NaN;
 	    this.y2 = Number.NaN;
-	}
+  }
 
-	/**
+  /**
 	 * Returns true if the bounding box is empty, that is, no points have been added to the box yet.
 	 */
-	BoundingBox.prototype.isEmpty = function() {
+  BoundingBox.prototype.isEmpty = function () {
 	    return isNaN(this.x1) || isNaN(this.y1) || isNaN(this.x2) || isNaN(this.y2);
-	};
+  };
 
-	/**
+  /**
 	 * Add the point to the bounding box.
 	 * The x1/y1/x2/y2 coordinates of the bounding box will now encompass the given point.
 	 * @param {number} x - The X coordinate of the point.
 	 * @param {number} y - The Y coordinate of the point.
 	 */
-	BoundingBox.prototype.addPoint = function(x, y) {
+  BoundingBox.prototype.addPoint = function (x, y) {
 	    if (typeof x === 'number') {
 	        if (isNaN(this.x1) || isNaN(this.x2)) {
 	            this.x1 = x;
@@ -501,29 +500,29 @@
 	            this.y2 = y;
 	        }
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Add a X coordinate to the bounding box.
 	 * This extends the bounding box to include the X coordinate.
 	 * This function is used internally inside of addBezier.
 	 * @param {number} x - The X coordinate of the point.
 	 */
-	BoundingBox.prototype.addX = function(x) {
+  BoundingBox.prototype.addX = function (x) {
 	    this.addPoint(x, null);
-	};
+  };
 
-	/**
+  /**
 	 * Add a Y coordinate to the bounding box.
 	 * This extends the bounding box to include the Y coordinate.
 	 * This function is used internally inside of addBezier.
 	 * @param {number} y - The Y coordinate of the point.
 	 */
-	BoundingBox.prototype.addY = function(y) {
+  BoundingBox.prototype.addY = function (y) {
 	    this.addPoint(null, y);
-	};
+  };
 
-	/**
+  /**
 	 * Add a Bézier curve to the bounding box.
 	 * This extends the bounding box to include the entire Bézier.
 	 * @param {number} x0 - The starting X coordinate.
@@ -535,49 +534,49 @@
 	 * @param {number} x - The ending X coordinate.
 	 * @param {number} y - The ending Y coordinate.
 	 */
-	BoundingBox.prototype.addBezier = function(x0, y0, x1, y1, x2, y2, x, y) {
+  BoundingBox.prototype.addBezier = function (x0, y0, x1, y1, x2, y2, x, y) {
 	    // This code is based on http://nishiohirokazu.blogspot.com/2009/06/how-to-calculate-bezier-curves-bounding.html
 	    // and https://github.com/icons8/svg-path-bounding-box
 
-	    var p0 = [x0, y0];
-	    var p1 = [x1, y1];
-	    var p2 = [x2, y2];
-	    var p3 = [x, y];
+	    const p0 = [x0, y0];
+	    const p1 = [x1, y1];
+	    const p2 = [x2, y2];
+	    const p3 = [x, y];
 
 	    this.addPoint(x0, y0);
 	    this.addPoint(x, y);
 
-	    for (var i = 0; i <= 1; i++) {
-	        var b = 6 * p0[i] - 12 * p1[i] + 6 * p2[i];
-	        var a = -3 * p0[i] + 9 * p1[i] - 9 * p2[i] + 3 * p3[i];
-	        var c = 3 * p1[i] - 3 * p0[i];
+	    for (let i = 0; i <= 1; i++) {
+	        const b = 6 * p0[i] - 12 * p1[i] + 6 * p2[i];
+	        const a = -3 * p0[i] + 9 * p1[i] - 9 * p2[i] + 3 * p3[i];
+	        const c = 3 * p1[i] - 3 * p0[i];
 
 	        if (a === 0) {
 	            if (b === 0) { continue; }
-	            var t = -c / b;
-	            if (0 < t && t < 1) {
+	            const t = -c / b;
+	            if (t > 0 && t < 1) {
 	                if (i === 0) { this.addX(derive(p0[i], p1[i], p2[i], p3[i], t)); }
 	                if (i === 1) { this.addY(derive(p0[i], p1[i], p2[i], p3[i], t)); }
 	            }
 	            continue;
 	        }
 
-	        var b2ac = Math.pow(b, 2) - 4 * c * a;
+	        const b2ac = Math.pow(b, 2) - 4 * c * a;
 	        if (b2ac < 0) { continue; }
-	        var t1 = (-b + Math.sqrt(b2ac)) / (2 * a);
-	        if (0 < t1 && t1 < 1) {
+	        const t1 = (-b + Math.sqrt(b2ac)) / (2 * a);
+	        if (t1 > 0 && t1 < 1) {
 	            if (i === 0) { this.addX(derive(p0[i], p1[i], p2[i], p3[i], t1)); }
 	            if (i === 1) { this.addY(derive(p0[i], p1[i], p2[i], p3[i], t1)); }
 	        }
-	        var t2 = (-b - Math.sqrt(b2ac)) / (2 * a);
-	        if (0 < t2 && t2 < 1) {
+	        const t2 = (-b - Math.sqrt(b2ac)) / (2 * a);
+	        if (t2 > 0 && t2 < 1) {
 	            if (i === 0) { this.addX(derive(p0[i], p1[i], p2[i], p3[i], t2)); }
 	            if (i === 1) { this.addY(derive(p0[i], p1[i], p2[i], p3[i], t2)); }
 	        }
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Add a quadratic curve to the bounding box.
 	 * This extends the bounding box to include the entire quadratic curve.
 	 * @param {number} x0 - The starting X coordinate.
@@ -587,55 +586,55 @@
 	 * @param {number} x - The ending X coordinate.
 	 * @param {number} y - The ending Y coordinate.
 	 */
-	BoundingBox.prototype.addQuad = function(x0, y0, x1, y1, x, y) {
-	    var cp1x = x0 + 2 / 3 * (x1 - x0);
-	    var cp1y = y0 + 2 / 3 * (y1 - y0);
-	    var cp2x = cp1x + 1 / 3 * (x - x0);
-	    var cp2y = cp1y + 1 / 3 * (y - y0);
+  BoundingBox.prototype.addQuad = function (x0, y0, x1, y1, x, y) {
+	    const cp1x = x0 + 2 / 3 * (x1 - x0);
+	    const cp1y = y0 + 2 / 3 * (y1 - y0);
+	    const cp2x = cp1x + 1 / 3 * (x - x0);
+	    const cp2y = cp1y + 1 / 3 * (y - y0);
 	    this.addBezier(x0, y0, cp1x, cp1y, cp2x, cp2y, x, y);
-	};
+  };
 
-	// Geometric objects
+  // Geometric objects
 
-	/**
+  /**
 	 * A bézier path containing a set of path commands similar to a SVG path.
 	 * Paths can be drawn on a context using `draw`.
 	 * @exports opentype.Path
 	 * @class
 	 * @constructor
 	 */
-	function Path() {
+  function Path() {
 	    this.commands = [];
 	    this.fill = 'black';
 	    this.stroke = null;
 	    this.strokeWidth = 1;
-	}
+  }
 
-	/**
+  /**
 	 * @param  {number} x
 	 * @param  {number} y
 	 */
-	Path.prototype.moveTo = function(x, y) {
+  Path.prototype.moveTo = function (x, y) {
 	    this.commands.push({
 	        type: 'M',
-	        x: x,
-	        y: y
+	        x,
+	        y,
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * @param  {number} x
 	 * @param  {number} y
 	 */
-	Path.prototype.lineTo = function(x, y) {
+  Path.prototype.lineTo = function (x, y) {
 	    this.commands.push({
 	        type: 'L',
-	        x: x,
-	        y: y
+	        x,
+	        y,
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * Draws cubic curve
 	 * @function
 	 * curveTo
@@ -648,7 +647,7 @@
 	 * @param  {number} y - y of path point
 	 */
 
-	/**
+  /**
 	 * Draws cubic curve
 	 * @function
 	 * bezierCurveTo
@@ -661,19 +660,19 @@
 	 * @param  {number} y - y of path point
 	 * @see curveTo
 	 */
-	Path.prototype.curveTo = Path.prototype.bezierCurveTo = function(x1, y1, x2, y2, x, y) {
+  Path.prototype.curveTo = Path.prototype.bezierCurveTo = function (x1, y1, x2, y2, x, y) {
 	    this.commands.push({
 	        type: 'C',
-	        x1: x1,
-	        y1: y1,
-	        x2: x2,
-	        y2: y2,
-	        x: x,
-	        y: y
+	        x1,
+	        y1,
+	        x2,
+	        y2,
+	        x,
+	        y,
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * Draws quadratic curve
 	 * @function
 	 * quadraticCurveTo
@@ -684,7 +683,7 @@
 	 * @param  {number} y - y of path point
 	 */
 
-	/**
+  /**
 	 * Draws quadratic curve
 	 * @function
 	 * quadTo
@@ -694,42 +693,42 @@
 	 * @param  {number} x - x of path point
 	 * @param  {number} y - y of path point
 	 */
-	Path.prototype.quadTo = Path.prototype.quadraticCurveTo = function(x1, y1, x, y) {
+  Path.prototype.quadTo = Path.prototype.quadraticCurveTo = function (x1, y1, x, y) {
 	    this.commands.push({
 	        type: 'Q',
-	        x1: x1,
-	        y1: y1,
-	        x: x,
-	        y: y
+	        x1,
+	        y1,
+	        x,
+	        y,
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * Closes the path
 	 * @function closePath
 	 * @memberof opentype.Path.prototype
 	 */
 
-	/**
+  /**
 	 * Close the path
 	 * @function close
 	 * @memberof opentype.Path.prototype
 	 */
-	Path.prototype.close = Path.prototype.closePath = function() {
+  Path.prototype.close = Path.prototype.closePath = function () {
 	    this.commands.push({
-	        type: 'Z'
+	        type: 'Z',
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * Add the given path or list of commands to the commands of this path.
 	 * @param  {Array} pathOrCommands - another opentype.Path, an opentype.BoundingBox, or an array of commands.
 	 */
-	Path.prototype.extend = function(pathOrCommands) {
+  Path.prototype.extend = function (pathOrCommands) {
 	    if (pathOrCommands.commands) {
 	        pathOrCommands = pathOrCommands.commands;
 	    } else if (pathOrCommands instanceof BoundingBox) {
-	        var box = pathOrCommands;
+	        const box = pathOrCommands;
 	        this.moveTo(box.x1, box.y1);
 	        this.lineTo(box.x2, box.y1);
 	        this.lineTo(box.x2, box.y2);
@@ -739,21 +738,21 @@
 	    }
 
 	    Array.prototype.push.apply(this.commands, pathOrCommands);
-	};
+  };
 
-	/**
+  /**
 	 * Calculate the bounding box of the path.
 	 * @returns {opentype.BoundingBox}
 	 */
-	Path.prototype.getBoundingBox = function() {
-	    var box = new BoundingBox();
+  Path.prototype.getBoundingBox = function () {
+	    const box = new BoundingBox();
 
-	    var startX = 0;
-	    var startY = 0;
-	    var prevX = 0;
-	    var prevY = 0;
-	    for (var i = 0; i < this.commands.length; i++) {
-	        var cmd = this.commands[i];
+	    let startX = 0;
+	    let startY = 0;
+	    let prevX = 0;
+	    let prevY = 0;
+	    for (let i = 0; i < this.commands.length; i++) {
+	        const cmd = this.commands[i];
 	        switch (cmd.type) {
 	            case 'M':
 	                box.addPoint(cmd.x, cmd.y);
@@ -780,23 +779,23 @@
 	                prevY = startY;
 	                break;
 	            default:
-	                throw new Error('Unexpected path command ' + cmd.type);
+	                throw new Error(`Unexpected path command ${cmd.type}`);
 	        }
 	    }
 	    if (box.isEmpty()) {
 	        box.addPoint(0, 0);
 	    }
 	    return box;
-	};
+  };
 
-	/**
+  /**
 	 * Draw the path to a 2D context.
 	 * @param {CanvasRenderingContext2D} ctx - A 2D drawing context.
 	 */
-	Path.prototype.draw = function(ctx) {
+  Path.prototype.draw = function (ctx) {
 	    ctx.beginPath();
-	    for (var i = 0; i < this.commands.length; i += 1) {
-	        var cmd = this.commands[i];
+	    for (let i = 0; i < this.commands.length; i = i + 1) {
+	        const cmd = this.commands[i];
 	        if (cmd.type === 'M') {
 	            ctx.moveTo(cmd.x, cmd.y);
 	        } else if (cmd.type === 'L') {
@@ -820,556 +819,554 @@
 	        ctx.lineWidth = this.strokeWidth;
 	        ctx.stroke();
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Convert the Path to a string of path data instructions
 	 * See http://www.w3.org/TR/SVG/paths.html#PathData
 	 * @param  {number} [decimalPlaces=2] - The amount of decimal places for floating-point values
 	 * @return {string}
 	 */
-	Path.prototype.toPathData = function(decimalPlaces) {
+  Path.prototype.toPathData = function (decimalPlaces) {
 	    decimalPlaces = decimalPlaces !== undefined ? decimalPlaces : 2;
 
 	    function floatToString(v) {
 	        if (Math.round(v) === v) {
-	            return '' + Math.round(v);
-	        } else {
-	            return v.toFixed(decimalPlaces);
+	            return `${Math.round(v)}`;
 	        }
+	            return v.toFixed(decimalPlaces);
 	    }
 
 	    function packValues() {
-	        var arguments$1 = arguments;
+	        const arguments$1 = arguments;
 
-	        var s = '';
-	        for (var i = 0; i < arguments.length; i += 1) {
-	            var v = arguments$1[i];
+	        let s = '';
+	        for (let i = 0; i < arguments.length; i = i + 1) {
+	            const v = arguments$1[i];
 	            if (v >= 0 && i > 0) {
-	                s += ' ';
+	                s = `${s} `;
 	            }
 
-	            s += floatToString(v);
+	            s = s + floatToString(v);
 	        }
 
 	        return s;
 	    }
 
-	    var d = '';
-	    for (var i = 0; i < this.commands.length; i += 1) {
-	        var cmd = this.commands[i];
+	    let d = '';
+	    for (let i = 0; i < this.commands.length; i = i + 1) {
+	        const cmd = this.commands[i];
 	        if (cmd.type === 'M') {
-	            d += 'M' + packValues(cmd.x, cmd.y);
+	            d = `${d}M${packValues(cmd.x, cmd.y)}`;
 	        } else if (cmd.type === 'L') {
-	            d += 'L' + packValues(cmd.x, cmd.y);
+	            d = `${d}L${packValues(cmd.x, cmd.y)}`;
 	        } else if (cmd.type === 'C') {
-	            d += 'C' + packValues(cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y);
+	            d = `${d}C${packValues(cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y)}`;
 	        } else if (cmd.type === 'Q') {
-	            d += 'Q' + packValues(cmd.x1, cmd.y1, cmd.x, cmd.y);
+	            d = `${d}Q${packValues(cmd.x1, cmd.y1, cmd.x, cmd.y)}`;
 	        } else if (cmd.type === 'Z') {
-	            d += 'Z';
+	            d = `${d}Z`;
 	        }
 	    }
 
 	    return d;
-	};
+  };
 
-	/**
+  /**
 	 * Convert the path to an SVG <path> element, as a string.
 	 * @param  {number} [decimalPlaces=2] - The amount of decimal places for floating-point values
 	 * @return {string}
 	 */
-	Path.prototype.toSVG = function(decimalPlaces) {
-	    var svg = '<path d="';
-	    svg += this.toPathData(decimalPlaces);
-	    svg += '"';
+  Path.prototype.toSVG = function (decimalPlaces) {
+	    let svg = '<path d="';
+	    svg = svg + this.toPathData(decimalPlaces);
+	    svg = `${svg}"`;
 	    if (this.fill && this.fill !== 'black') {
 	        if (this.fill === null) {
-	            svg += ' fill="none"';
+	            svg = `${svg} fill="none"`;
 	        } else {
-	            svg += ' fill="' + this.fill + '"';
+	            svg = `${svg} fill="${this.fill}"`;
 	        }
 	    }
 
 	    if (this.stroke) {
-	        svg += ' stroke="' + this.stroke + '" stroke-width="' + this.strokeWidth + '"';
+	        svg = `${svg} stroke="${this.stroke}" stroke-width="${this.strokeWidth}"`;
 	    }
 
-	    svg += '/>';
+	    svg = `${svg}/>`;
 	    return svg;
-	};
+  };
 
-	/**
+  /**
 	 * Convert the path to a DOM element.
 	 * @param  {number} [decimalPlaces=2] - The amount of decimal places for floating-point values
 	 * @return {SVGPathElement}
 	 */
-	Path.prototype.toDOMElement = function(decimalPlaces) {
-	    var temporaryPath = this.toPathData(decimalPlaces);
-	    var newPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  Path.prototype.toDOMElement = function (decimalPlaces) {
+	    const temporaryPath = this.toPathData(decimalPlaces);
+	    const newPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
 	    newPath.setAttribute('d', temporaryPath);
 
 	    return newPath;
-	};
+  };
 
-	// Run-time checking of preconditions.
+  // Run-time checking of preconditions.
 
-	function fail(message) {
+  function fail(message) {
 	    throw new Error(message);
-	}
+  }
 
-	// Precondition function that checks if the given predicate is true.
-	// If not, it will throw an error.
-	function argument(predicate, message) {
+  // Precondition function that checks if the given predicate is true.
+  // If not, it will throw an error.
+  function argument(predicate, message) {
 	    if (!predicate) {
 	        fail(message);
 	    }
-	}
-	var check = { fail: fail, argument: argument, assert: argument };
+  }
+  const check = { fail, argument, assert: argument };
 
-	// Data types used in the OpenType font file.
+  // Data types used in the OpenType font file.
 
-	var LIMIT16 = 32768; // The limit at which a 16-bit number switches signs == 2^15
-	var LIMIT32 = 2147483648; // The limit at which a 32-bit number switches signs == 2 ^ 31
+  const LIMIT16 = 32768; // The limit at which a 16-bit number switches signs == 2^15
+  const LIMIT32 = 2147483648; // The limit at which a 32-bit number switches signs == 2 ^ 31
 
-	/**
+  /**
 	 * @exports opentype.decode
 	 * @class
 	 */
-	var decode = {};
-	/**
+  const decode = {};
+  /**
 	 * @exports opentype.encode
 	 * @class
 	 */
-	var encode = {};
-	/**
+  const encode = {};
+  /**
 	 * @exports opentype.sizeOf
 	 * @class
 	 */
-	var sizeOf = {};
+  const sizeOf = {};
 
-	// Return a function that always returns the same value.
-	function constant(v) {
-	    return function() {
+  // Return a function that always returns the same value.
+  function constant(v) {
+	    return function () {
 	        return v;
 	    };
-	}
+  }
 
-	// OpenType data types //////////////////////////////////////////////////////
+  // OpenType data types //////////////////////////////////////////////////////
 
-	/**
+  /**
 	 * Convert an 8-bit unsigned integer to a list of 1 byte.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.BYTE = function(v) {
+  encode.BYTE = function (v) {
 	    check.argument(v >= 0 && v <= 255, 'Byte value should be between 0 and 255.');
 	    return [v];
-	};
-	/**
+  };
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.BYTE = constant(1);
+  sizeOf.BYTE = constant(1);
 
-	/**
+  /**
 	 * Convert a 8-bit signed integer to a list of 1 byte.
 	 * @param {string}
 	 * @returns {Array}
 	 */
-	encode.CHAR = function(v) {
+  encode.CHAR = function (v) {
 	    return [v.charCodeAt(0)];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.CHAR = constant(1);
+  sizeOf.CHAR = constant(1);
 
-	/**
+  /**
 	 * Convert an ASCII string to a list of bytes.
 	 * @param {string}
 	 * @returns {Array}
 	 */
-	encode.CHARARRAY = function(v) {
-	    var b = [];
-	    for (var i = 0; i < v.length; i += 1) {
+  encode.CHARARRAY = function (v) {
+	    const b = [];
+	    for (let i = 0; i < v.length; i = i + 1) {
 	        b[i] = v.charCodeAt(i);
 	    }
 
 	    return b;
-	};
+  };
 
-	/**
+  /**
 	 * @param {Array}
 	 * @returns {number}
 	 */
-	sizeOf.CHARARRAY = function(v) {
+  sizeOf.CHARARRAY = function (v) {
 	    return v.length;
-	};
+  };
 
-	/**
+  /**
 	 * Convert a 16-bit unsigned integer to a list of 2 bytes.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.USHORT = function(v) {
+  encode.USHORT = function (v) {
 	    return [(v >> 8) & 0xFF, v & 0xFF];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.USHORT = constant(2);
+  sizeOf.USHORT = constant(2);
 
-	/**
+  /**
 	 * Convert a 16-bit signed integer to a list of 2 bytes.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.SHORT = function(v) {
+  encode.SHORT = function (v) {
 	    // Two's complement
 	    if (v >= LIMIT16) {
 	        v = -(2 * LIMIT16 - v);
 	    }
 
 	    return [(v >> 8) & 0xFF, v & 0xFF];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.SHORT = constant(2);
+  sizeOf.SHORT = constant(2);
 
-	/**
+  /**
 	 * Convert a 24-bit unsigned integer to a list of 3 bytes.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.UINT24 = function(v) {
+  encode.UINT24 = function (v) {
 	    return [(v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.UINT24 = constant(3);
+  sizeOf.UINT24 = constant(3);
 
-	/**
+  /**
 	 * Convert a 32-bit unsigned integer to a list of 4 bytes.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.ULONG = function(v) {
+  encode.ULONG = function (v) {
 	    return [(v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.ULONG = constant(4);
+  sizeOf.ULONG = constant(4);
 
-	/**
+  /**
 	 * Convert a 32-bit unsigned integer to a list of 4 bytes.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.LONG = function(v) {
+  encode.LONG = function (v) {
 	    // Two's complement
 	    if (v >= LIMIT32) {
 	        v = -(2 * LIMIT32 - v);
 	    }
 
 	    return [(v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.LONG = constant(4);
+  sizeOf.LONG = constant(4);
 
-	encode.FIXED = encode.ULONG;
-	sizeOf.FIXED = sizeOf.ULONG;
+  encode.FIXED = encode.ULONG;
+  sizeOf.FIXED = sizeOf.ULONG;
 
-	encode.FWORD = encode.SHORT;
-	sizeOf.FWORD = sizeOf.SHORT;
+  encode.FWORD = encode.SHORT;
+  sizeOf.FWORD = sizeOf.SHORT;
 
-	encode.UFWORD = encode.USHORT;
-	sizeOf.UFWORD = sizeOf.USHORT;
+  encode.UFWORD = encode.USHORT;
+  sizeOf.UFWORD = sizeOf.USHORT;
 
-	/**
+  /**
 	 * Convert a 32-bit Apple Mac timestamp integer to a list of 8 bytes, 64-bit timestamp.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.LONGDATETIME = function(v) {
+  encode.LONGDATETIME = function (v) {
 	    return [0, 0, 0, 0, (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.LONGDATETIME = constant(8);
+  sizeOf.LONGDATETIME = constant(8);
 
-	/**
+  /**
 	 * Convert a 4-char tag to a list of 4 bytes.
 	 * @param {string}
 	 * @returns {Array}
 	 */
-	encode.TAG = function(v) {
+  encode.TAG = function (v) {
 	    check.argument(v.length === 4, 'Tag should be exactly 4 ASCII characters.');
 	    return [v.charCodeAt(0),
 	            v.charCodeAt(1),
 	            v.charCodeAt(2),
 	            v.charCodeAt(3)];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.TAG = constant(4);
+  sizeOf.TAG = constant(4);
 
-	// CFF data types ///////////////////////////////////////////////////////////
+  // CFF data types ///////////////////////////////////////////////////////////
 
-	encode.Card8 = encode.BYTE;
-	sizeOf.Card8 = sizeOf.BYTE;
+  encode.Card8 = encode.BYTE;
+  sizeOf.Card8 = sizeOf.BYTE;
 
-	encode.Card16 = encode.USHORT;
-	sizeOf.Card16 = sizeOf.USHORT;
+  encode.Card16 = encode.USHORT;
+  sizeOf.Card16 = sizeOf.USHORT;
 
-	encode.OffSize = encode.BYTE;
-	sizeOf.OffSize = sizeOf.BYTE;
+  encode.OffSize = encode.BYTE;
+  sizeOf.OffSize = sizeOf.BYTE;
 
-	encode.SID = encode.USHORT;
-	sizeOf.SID = sizeOf.USHORT;
+  encode.SID = encode.USHORT;
+  sizeOf.SID = sizeOf.USHORT;
 
-	// Convert a numeric operand or charstring number to a variable-size list of bytes.
-	/**
+  // Convert a numeric operand or charstring number to a variable-size list of bytes.
+  /**
 	 * Convert a numeric operand or charstring number to a variable-size list of bytes.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.NUMBER = function(v) {
+  encode.NUMBER = function (v) {
 	    if (v >= -107 && v <= 107) {
 	        return [v + 139];
-	    } else if (v >= 108 && v <= 1131) {
+	    } if (v >= 108 && v <= 1131) {
 	        v = v - 108;
 	        return [(v >> 8) + 247, v & 0xFF];
-	    } else if (v >= -1131 && v <= -108) {
+	    } if (v >= -1131 && v <= -108) {
 	        v = -v - 108;
 	        return [(v >> 8) + 251, v & 0xFF];
-	    } else if (v >= -32768 && v <= 32767) {
+	    } if (v >= -32768 && v <= 32767) {
 	        return encode.NUMBER16(v);
-	    } else {
-	        return encode.NUMBER32(v);
 	    }
-	};
+	        return encode.NUMBER32(v);
+  };
 
-	/**
+  /**
 	 * @param {number}
 	 * @returns {number}
 	 */
-	sizeOf.NUMBER = function(v) {
+  sizeOf.NUMBER = function (v) {
 	    return encode.NUMBER(v).length;
-	};
+  };
 
-	/**
+  /**
 	 * Convert a signed number between -32768 and +32767 to a three-byte value.
 	 * This ensures we always use three bytes, but is not the most compact format.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.NUMBER16 = function(v) {
+  encode.NUMBER16 = function (v) {
 	    return [28, (v >> 8) & 0xFF, v & 0xFF];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.NUMBER16 = constant(3);
+  sizeOf.NUMBER16 = constant(3);
 
-	/**
+  /**
 	 * Convert a signed number between -(2^31) and +(2^31-1) to a five-byte value.
 	 * This is useful if you want to be sure you always use four bytes,
 	 * at the expense of wasting a few bytes for smaller numbers.
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.NUMBER32 = function(v) {
+  encode.NUMBER32 = function (v) {
 	    return [29, (v >> 24) & 0xFF, (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF];
-	};
+  };
 
-	/**
+  /**
 	 * @constant
 	 * @type {number}
 	 */
-	sizeOf.NUMBER32 = constant(5);
+  sizeOf.NUMBER32 = constant(5);
 
-	/**
+  /**
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.REAL = function(v) {
-	    var value = v.toString();
+  encode.REAL = function (v) {
+	    let value = v.toString();
 
 	    // Some numbers use an epsilon to encode the value. (e.g. JavaScript will store 0.0000001 as 1e-7)
 	    // This code converts it back to a number without the epsilon.
-	    var m = /\.(\d*?)(?:9{5,20}|0{5,20})\d{0,2}(?:e(.+)|$)/.exec(value);
+	    const m = /\.(\d*?)(?:9{5,20}|0{5,20})\d{0,2}(?:e(.+)|$)/.exec(value);
 	    if (m) {
-	        var epsilon = parseFloat('1e' + ((m[2] ? +m[2] : 0) + m[1].length));
+	        const epsilon = parseFloat(`1e${(m[2] ? +m[2] : 0) + m[1].length}`);
 	        value = (Math.round(v * epsilon) / epsilon).toString();
 	    }
 
-	    var nibbles = '';
-	    for (var i = 0, ii = value.length; i < ii; i += 1) {
-	        var c = value[i];
+	    let nibbles = '';
+	    for (let i = 0, ii = value.length; i < ii; i = i + 1) {
+	        const c = value[i];
 	        if (c === 'e') {
-	            nibbles += value[++i] === '-' ? 'c' : 'b';
+	            nibbles = nibbles + (value[++i] === '-' ? 'c' : 'b');
 	        } else if (c === '.') {
-	            nibbles += 'a';
+	            nibbles = `${nibbles}a`;
 	        } else if (c === '-') {
-	            nibbles += 'e';
+	            nibbles = `${nibbles}e`;
 	        } else {
-	            nibbles += c;
+	            nibbles = nibbles + c;
 	        }
 	    }
 
-	    nibbles += (nibbles.length & 1) ? 'f' : 'ff';
-	    var out = [30];
-	    for (var i$1 = 0, ii$1 = nibbles.length; i$1 < ii$1; i$1 += 2) {
+	    nibbles = nibbles + ((nibbles.length & 1) ? 'f' : 'ff');
+	    const out = [30];
+	    for (let i$1 = 0, ii$1 = nibbles.length; i$1 < ii$1; i$1 = i$1 + 2) {
 	        out.push(parseInt(nibbles.substr(i$1, 2), 16));
 	    }
 
 	    return out;
-	};
+  };
 
-	/**
+  /**
 	 * @param {number}
 	 * @returns {number}
 	 */
-	sizeOf.REAL = function(v) {
+  sizeOf.REAL = function (v) {
 	    return encode.REAL(v).length;
-	};
+  };
 
-	encode.NAME = encode.CHARARRAY;
-	sizeOf.NAME = sizeOf.CHARARRAY;
+  encode.NAME = encode.CHARARRAY;
+  sizeOf.NAME = sizeOf.CHARARRAY;
 
-	encode.STRING = encode.CHARARRAY;
-	sizeOf.STRING = sizeOf.CHARARRAY;
+  encode.STRING = encode.CHARARRAY;
+  sizeOf.STRING = sizeOf.CHARARRAY;
 
-	/**
+  /**
 	 * @param {DataView} data
 	 * @param {number} offset
 	 * @param {number} numBytes
 	 * @returns {string}
 	 */
-	decode.UTF8 = function(data, offset, numBytes) {
-	    var codePoints = [];
-	    var numChars = numBytes;
-	    for (var j = 0; j < numChars; j++, offset += 1) {
+  decode.UTF8 = function (data, offset, numBytes) {
+	    const codePoints = [];
+	    const numChars = numBytes;
+	    for (let j = 0; j < numChars; j++, offset = offset + 1) {
 	        codePoints[j] = data.getUint8(offset);
 	    }
 
 	    return String.fromCharCode.apply(null, codePoints);
-	};
+  };
 
-	/**
+  /**
 	 * @param {DataView} data
 	 * @param {number} offset
 	 * @param {number} numBytes
 	 * @returns {string}
 	 */
-	decode.UTF16 = function(data, offset, numBytes) {
-	    var codePoints = [];
-	    var numChars = numBytes / 2;
-	    for (var j = 0; j < numChars; j++, offset += 2) {
+  decode.UTF16 = function (data, offset, numBytes) {
+	    const codePoints = [];
+	    const numChars = numBytes / 2;
+	    for (let j = 0; j < numChars; j++, offset = offset + 2) {
 	        codePoints[j] = data.getUint16(offset);
 	    }
 
 	    return String.fromCharCode.apply(null, codePoints);
-	};
+  };
 
-	/**
+  /**
 	 * Convert a JavaScript string to UTF16-BE.
 	 * @param {string}
 	 * @returns {Array}
 	 */
-	encode.UTF16 = function(v) {
-	    var b = [];
-	    for (var i = 0; i < v.length; i += 1) {
-	        var codepoint = v.charCodeAt(i);
+  encode.UTF16 = function (v) {
+	    const b = [];
+	    for (let i = 0; i < v.length; i = i + 1) {
+	        const codepoint = v.charCodeAt(i);
 	        b[b.length] = (codepoint >> 8) & 0xFF;
 	        b[b.length] = codepoint & 0xFF;
 	    }
 
 	    return b;
-	};
+  };
 
-	/**
+  /**
 	 * @param {string}
 	 * @returns {number}
 	 */
-	sizeOf.UTF16 = function(v) {
+  sizeOf.UTF16 = function (v) {
 	    return v.length * 2;
-	};
+  };
 
-	// Data for converting old eight-bit Macintosh encodings to Unicode.
-	// This representation is optimized for decoding; encoding is slower
-	// and needs more memory. The assumption is that all opentype.js users
-	// want to open fonts, but saving a font will be comparatively rare
-	// so it can be more expensive. Keyed by IANA character set name.
-	//
-	// Python script for generating these strings:
-	//
-	//     s = u''.join([chr(c).decode('mac_greek') for c in range(128, 256)])
-	//     print(s.encode('utf-8'))
-	/**
+  // Data for converting old eight-bit Macintosh encodings to Unicode.
+  // This representation is optimized for decoding; encoding is slower
+  // and needs more memory. The assumption is that all opentype.js users
+  // want to open fonts, but saving a font will be comparatively rare
+  // so it can be more expensive. Keyed by IANA character set name.
+  //
+  // Python script for generating these strings:
+  //
+  //     s = u''.join([chr(c).decode('mac_greek') for c in range(128, 256)])
+  //     print(s.encode('utf-8'))
+  /**
 	 * @private
 	 */
-	var eightBitMacEncodings = {
-	    'x-mac-croatian':  // Python: 'mac_croatian'
-	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®Š™´¨≠ŽØ∞±≤≥∆µ∂∑∏š∫ªºΩžø' +
-	    '¿¡¬√ƒ≈Ć«Č… ÀÃÕŒœĐ—“”‘’÷◊©⁄€‹›Æ»–·‚„‰ÂćÁčÈÍÎÏÌÓÔđÒÚÛÙıˆ˜¯πË˚¸Êæˇ',
-	    'x-mac-cyrillic':  // Python: 'mac_cyrillic'
-	    'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ†°Ґ£§•¶І®©™Ђђ≠Ѓѓ∞±≤≥іµґЈЄєЇїЉљЊњ' +
-	    'јЅ¬√ƒ≈∆«»… ЋћЌќѕ–—“”‘’÷„ЎўЏџ№Ёёяабвгдежзийклмнопрстуфхцчшщъыьэю',
+  const eightBitMacEncodings = {
+	    'x-mac-croatian': // Python: 'mac_croatian'
+	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®Š™´¨≠ŽØ∞±≤≥∆µ∂∑∏š∫ªºΩžø'
+	    + '¿¡¬√ƒ≈Ć«Č… ÀÃÕŒœĐ—“”‘’÷◊©⁄€‹›Æ»–·‚„‰ÂćÁčÈÍÎÏÌÓÔđÒÚÛÙıˆ˜¯πË˚¸Êæˇ',
+	    'x-mac-cyrillic': // Python: 'mac_cyrillic'
+	    'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ†°Ґ£§•¶І®©™Ђђ≠Ѓѓ∞±≤≥іµґЈЄєЇїЉљЊњ'
+	    + 'јЅ¬√ƒ≈∆«»… ЋћЌќѕ–—“”‘’÷„ЎўЏџ№Ёёяабвгдежзийклмнопрстуфхцчшщъыьэю',
 	    'x-mac-gaelic': // http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/GAELIC.TXT
-	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØḂ±≤≥ḃĊċḊḋḞḟĠġṀæø' +
-	    'ṁṖṗɼƒſṠ«»… ÀÃÕŒœ–—“”‘’ṡẛÿŸṪ€‹›Ŷŷṫ·Ỳỳ⁊ÂÊÁËÈÍÎÏÌÓÔ♣ÒÚÛÙıÝýŴŵẄẅẀẁẂẃ',
-	    'x-mac-greek':  // Python: 'mac_greek'
-	    'Ä¹²É³ÖÜ΅àâä΄¨çéèêë£™îï•½‰ôö¦€ùûü†ΓΔΘΛΞΠß®©ΣΪ§≠°·Α±≤≥¥ΒΕΖΗΙΚΜΦΫΨΩ' +
-	    'άΝ¬ΟΡ≈Τ«»… ΥΧΆΈœ–―“”‘’÷ΉΊΌΎέήίόΏύαβψδεφγηιξκλμνοπώρστθωςχυζϊϋΐΰ\u00AD',
-	    'x-mac-icelandic':  // Python: 'mac_iceland'
-	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûüÝ°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø' +
-	    '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€ÐðÞþý·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
+	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØḂ±≤≥ḃĊċḊḋḞḟĠġṀæø'
+	    + 'ṁṖṗɼƒſṠ«»… ÀÃÕŒœ–—“”‘’ṡẛÿŸṪ€‹›Ŷŷṫ·Ỳỳ⁊ÂÊÁËÈÍÎÏÌÓÔ♣ÒÚÛÙıÝýŴŵẄẅẀẁẂẃ',
+	    'x-mac-greek': // Python: 'mac_greek'
+	    'Ä¹²É³ÖÜ΅àâä΄¨çéèêë£™îï•½‰ôö¦€ùûü†ΓΔΘΛΞΠß®©ΣΪ§≠°·Α±≤≥¥ΒΕΖΗΙΚΜΦΫΨΩ'
+	    + 'άΝ¬ΟΡ≈Τ«»… ΥΧΆΈœ–―“”‘’÷ΉΊΌΎέήίόΏύαβψδεφγηιξκλμνοπώρστθωςχυζϊϋΐΰ\u00AD',
+	    'x-mac-icelandic': // Python: 'mac_iceland'
+	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûüÝ°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø'
+	    + '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€ÐðÞþý·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
 	    'x-mac-inuit': // http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/INUIT.TXT
-	    'ᐃᐄᐅᐆᐊᐋᐱᐲᐳᐴᐸᐹᑉᑎᑏᑐᑑᑕᑖᑦᑭᑮᑯᑰᑲᑳᒃᒋᒌᒍᒎᒐᒑ°ᒡᒥᒦ•¶ᒧ®©™ᒨᒪᒫᒻᓂᓃᓄᓅᓇᓈᓐᓯᓰᓱᓲᓴᓵᔅᓕᓖᓗ' +
-	    'ᓘᓚᓛᓪᔨᔩᔪᔫᔭ… ᔮᔾᕕᕖᕗ–—“”‘’ᕘᕙᕚᕝᕆᕇᕈᕉᕋᕌᕐᕿᖀᖁᖂᖃᖄᖅᖏᖐᖑᖒᖓᖔᖕᙱᙲᙳᙴᙵᙶᖖᖠᖡᖢᖣᖤᖥᖦᕼŁł',
-	    'x-mac-ce':  // Python: 'mac_latin2'
-	    'ÄĀāÉĄÖÜáąČäčĆćéŹźĎíďĒēĖóėôöõúĚěü†°Ę£§•¶ß®©™ę¨≠ģĮįĪ≤≥īĶ∂∑łĻļĽľĹĺŅ' +
-	    'ņŃ¬√ńŇ∆«»… ňŐÕőŌ–—“”‘’÷◊ōŔŕŘ‹›řŖŗŠ‚„šŚśÁŤťÍŽžŪÓÔūŮÚůŰűŲųÝýķŻŁżĢˇ',
-	    macintosh:  // Python: 'mac_roman'
-	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø' +
-	    '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›ﬁﬂ‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
-	    'x-mac-romanian':  // Python: 'mac_romanian'
-	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ĂȘ∞±≤≥¥µ∂∑∏π∫ªºΩăș' +
-	    '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›Țț‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
-	    'x-mac-turkish':  // Python: 'mac_turkish'
-	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø' +
-	    '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸĞğİıŞş‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙˆ˜¯˘˙˚¸˝˛ˇ'
-	};
+	    'ᐃᐄᐅᐆᐊᐋᐱᐲᐳᐴᐸᐹᑉᑎᑏᑐᑑᑕᑖᑦᑭᑮᑯᑰᑲᑳᒃᒋᒌᒍᒎᒐᒑ°ᒡᒥᒦ•¶ᒧ®©™ᒨᒪᒫᒻᓂᓃᓄᓅᓇᓈᓐᓯᓰᓱᓲᓴᓵᔅᓕᓖᓗ'
+	    + 'ᓘᓚᓛᓪᔨᔩᔪᔫᔭ… ᔮᔾᕕᕖᕗ–—“”‘’ᕘᕙᕚᕝᕆᕇᕈᕉᕋᕌᕐᕿᖀᖁᖂᖃᖄᖅᖏᖐᖑᖒᖓᖔᖕᙱᙲᙳᙴᙵᙶᖖᖠᖡᖢᖣᖤᖥᖦᕼŁł',
+	    'x-mac-ce': // Python: 'mac_latin2'
+	    'ÄĀāÉĄÖÜáąČäčĆćéŹźĎíďĒēĖóėôöõúĚěü†°Ę£§•¶ß®©™ę¨≠ģĮįĪ≤≥īĶ∂∑łĻļĽľĹĺŅ'
+	    + 'ņŃ¬√ńŇ∆«»… ňŐÕőŌ–—“”‘’÷◊ōŔŕŘ‹›řŖŗŠ‚„šŚśÁŤťÍŽžŪÓÔūŮÚůŰűŲųÝýķŻŁżĢˇ',
+	    macintosh: // Python: 'mac_roman'
+	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø'
+	    + '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›ﬁﬂ‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
+	    'x-mac-romanian': // Python: 'mac_romanian'
+	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ĂȘ∞±≤≥¥µ∂∑∏π∫ªºΩăș'
+	    + '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›Țț‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
+	    'x-mac-turkish': // Python: 'mac_turkish'
+	    'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø'
+	    + '¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸĞğİıŞş‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙˆ˜¯˘˙˚¸˝˛ˇ',
+  };
 
-	/**
+  /**
 	 * Decodes an old-style Macintosh string. Returns either a Unicode JavaScript
 	 * string, or 'undefined' if the encoding is unsupported. For example, we do
 	 * not support Chinese, Japanese or Korean because these would need large
@@ -1380,46 +1377,46 @@
 	 * @param {string} encoding
 	 * @returns {string}
 	 */
-	decode.MACSTRING = function(dataView, offset, dataLength, encoding) {
-	    var table = eightBitMacEncodings[encoding];
+  decode.MACSTRING = function (dataView, offset, dataLength, encoding) {
+	    const table = eightBitMacEncodings[encoding];
 	    if (table === undefined) {
 	        return undefined;
 	    }
 
-	    var result = '';
-	    for (var i = 0; i < dataLength; i++) {
-	        var c = dataView.getUint8(offset + i);
+	    let result = '';
+	    for (let i = 0; i < dataLength; i++) {
+	        const c = dataView.getUint8(offset + i);
 	        // In all eight-bit Mac encodings, the characters 0x00..0x7F are
 	        // mapped to U+0000..U+007F; we only need to look up the others.
 	        if (c <= 0x7F) {
-	            result += String.fromCharCode(c);
+	            result = result + String.fromCharCode(c);
 	        } else {
-	            result += table[c & 0x7F];
+	            result = result + table[c & 0x7F];
 	        }
 	    }
 
 	    return result;
-	};
+  };
 
-	// Helper function for encode.MACSTRING. Returns a dictionary for mapping
-	// Unicode character codes to their 8-bit MacOS equivalent. This table
-	// is not exactly a super cheap data structure, but we do not care because
-	// encoding Macintosh strings is only rarely needed in typical applications.
-	var macEncodingTableCache = typeof WeakMap === 'function' && new WeakMap();
-	var macEncodingCacheKeys;
-	var getMacEncodingTable = function (encoding) {
+  // Helper function for encode.MACSTRING. Returns a dictionary for mapping
+  // Unicode character codes to their 8-bit MacOS equivalent. This table
+  // is not exactly a super cheap data structure, but we do not care because
+  // encoding Macintosh strings is only rarely needed in typical applications.
+  const macEncodingTableCache = typeof WeakMap === 'function' && new WeakMap();
+  let macEncodingCacheKeys;
+  const getMacEncodingTable = function (encoding) {
 	    // Since we use encoding as a cache key for WeakMap, it has to be
 	    // a String object and not a literal. And at least on NodeJS 2.10.1,
 	    // WeakMap requires that the same String instance is passed for cache hits.
 	    if (!macEncodingCacheKeys) {
 	        macEncodingCacheKeys = {};
-	        for (var e in eightBitMacEncodings) {
-	            /*jshint -W053 */  // Suppress "Do not use String as a constructor."
+	        for (const e in eightBitMacEncodings) {
+	            /* jshint -W053 */ // Suppress "Do not use String as a constructor."
 	            macEncodingCacheKeys[e] = new String(e);
 	        }
 	    }
 
-	    var cacheKey = macEncodingCacheKeys[encoding];
+	    const cacheKey = macEncodingCacheKeys[encoding];
 	    if (cacheKey === undefined) {
 	        return undefined;
 	    }
@@ -1429,19 +1426,19 @@
 	    // between the calls to cache.has() and cache.get(). In that case,
 	    // we would return 'undefined' even though we do support the encoding.
 	    if (macEncodingTableCache) {
-	        var cachedTable = macEncodingTableCache.get(cacheKey);
+	        const cachedTable = macEncodingTableCache.get(cacheKey);
 	        if (cachedTable !== undefined) {
 	            return cachedTable;
 	        }
 	    }
 
-	    var decodingTable = eightBitMacEncodings[encoding];
+	    const decodingTable = eightBitMacEncodings[encoding];
 	    if (decodingTable === undefined) {
 	        return undefined;
 	    }
 
-	    var encodingTable = {};
-	    for (var i = 0; i < decodingTable.length; i++) {
+	    const encodingTable = {};
+	    for (let i = 0; i < decodingTable.length; i++) {
 	        encodingTable[decodingTable.charCodeAt(i)] = i + 0x80;
 	    }
 
@@ -1450,9 +1447,9 @@
 	    }
 
 	    return encodingTable;
-	};
+  };
 
-	/**
+  /**
 	 * Encodes an old-style Macintosh string. Returns a byte array upon success.
 	 * If the requested encoding is unsupported, or if the input string contains
 	 * a character that cannot be expressed in the encoding, the function returns
@@ -1461,15 +1458,15 @@
 	 * @param {string} encoding
 	 * @returns {Array}
 	 */
-	encode.MACSTRING = function(str, encoding) {
-	    var table = getMacEncodingTable(encoding);
+  encode.MACSTRING = function (str, encoding) {
+	    const table = getMacEncodingTable(encoding);
 	    if (table === undefined) {
 	        return undefined;
 	    }
 
-	    var result = [];
-	    for (var i = 0; i < str.length; i++) {
-	        var c = str.charCodeAt(i);
+	    const result = [];
+	    for (let i = 0; i < str.length; i++) {
+	        let c = str.charCodeAt(i);
 
 	        // In all eight-bit Mac encodings, the characters 0x00..0x7F are
 	        // mapped to U+0000..U+007F; we only need to look up the others.
@@ -1486,46 +1483,45 @@
 	    }
 
 	    return result;
-	};
+  };
 
-	/**
+  /**
 	 * @param {string} str
 	 * @param {string} encoding
 	 * @returns {number}
 	 */
-	sizeOf.MACSTRING = function(str, encoding) {
-	    var b = encode.MACSTRING(str, encoding);
+  sizeOf.MACSTRING = function (str, encoding) {
+	    const b = encode.MACSTRING(str, encoding);
 	    if (b !== undefined) {
 	        return b.length;
-	    } else {
-	        return 0;
 	    }
-	};
+	        return 0;
+  };
 
-	// Helper for encode.VARDELTAS
-	function isByteEncodable(value) {
+  // Helper for encode.VARDELTAS
+  function isByteEncodable(value) {
 	    return value >= -128 && value <= 127;
-	}
+  }
 
-	// Helper for encode.VARDELTAS
-	function encodeVarDeltaRunAsZeroes(deltas, pos, result) {
-	    var runLength = 0;
-	    var numDeltas = deltas.length;
+  // Helper for encode.VARDELTAS
+  function encodeVarDeltaRunAsZeroes(deltas, pos, result) {
+	    let runLength = 0;
+	    const numDeltas = deltas.length;
 	    while (pos < numDeltas && runLength < 64 && deltas[pos] === 0) {
 	        ++pos;
 	        ++runLength;
 	    }
 	    result.push(0x80 | (runLength - 1));
 	    return pos;
-	}
+  }
 
-	// Helper for encode.VARDELTAS
-	function encodeVarDeltaRunAsBytes(deltas, offset, result) {
-	    var runLength = 0;
-	    var numDeltas = deltas.length;
-	    var pos = offset;
+  // Helper for encode.VARDELTAS
+  function encodeVarDeltaRunAsBytes(deltas, offset, result) {
+	    let runLength = 0;
+	    const numDeltas = deltas.length;
+	    let pos = offset;
 	    while (pos < numDeltas && runLength < 64) {
-	        var value = deltas[pos];
+	        const value = deltas[pos];
 	        if (!isByteEncodable(value)) {
 	            break;
 	        }
@@ -1545,19 +1541,19 @@
 	        ++runLength;
 	    }
 	    result.push(runLength - 1);
-	    for (var i = offset; i < pos; ++i) {
+	    for (let i = offset; i < pos; ++i) {
 	        result.push((deltas[i] + 256) & 0xff);
 	    }
 	    return pos;
-	}
+  }
 
-	// Helper for encode.VARDELTAS
-	function encodeVarDeltaRunAsWords(deltas, offset, result) {
-	    var runLength = 0;
-	    var numDeltas = deltas.length;
-	    var pos = offset;
+  // Helper for encode.VARDELTAS
+  function encodeVarDeltaRunAsWords(deltas, offset, result) {
+	    let runLength = 0;
+	    const numDeltas = deltas.length;
+	    let pos = offset;
 	    while (pos < numDeltas && runLength < 64) {
-	        var value = deltas[pos];
+	        const value = deltas[pos];
 
 	        // Within a word-encoded run of deltas, it is easiest to start
 	        // a new run (with a different encoding) whenever we encounter
@@ -1583,14 +1579,14 @@
 	        ++runLength;
 	    }
 	    result.push(0x40 | (runLength - 1));
-	    for (var i = offset; i < pos; ++i) {
-	        var val = deltas[i];
+	    for (let i = offset; i < pos; ++i) {
+	        const val = deltas[i];
 	        result.push(((val + 0x10000) >> 8) & 0xff, (val + 0x100) & 0xff);
 	    }
 	    return pos;
-	}
+  }
 
-	/**
+  /**
 	 * Encode a list of variation adjustment deltas.
 	 *
 	 * Variation adjustment deltas are used in ‘gvar’ and ‘cvar’ tables.
@@ -1602,11 +1598,11 @@
 	 * @param {Array}
 	 * @return {Array}
 	 */
-	encode.VARDELTAS = function(deltas) {
-	    var pos = 0;
-	    var result = [];
+  encode.VARDELTAS = function (deltas) {
+	    let pos = 0;
+	    const result = [];
 	    while (pos < deltas.length) {
-	        var value = deltas[pos];
+	        const value = deltas[pos];
 	        if (value === 0) {
 	            pos = encodeVarDeltaRunAsZeroes(deltas, pos, result);
 	        } else if (value >= -128 && value <= 127) {
@@ -1616,27 +1612,27 @@
 	        }
 	    }
 	    return result;
-	};
+  };
 
-	// Convert a list of values to a CFF INDEX structure.
-	// The values should be objects containing name / type / value.
-	/**
+  // Convert a list of values to a CFF INDEX structure.
+  // The values should be objects containing name / type / value.
+  /**
 	 * @param {Array} l
 	 * @returns {Array}
 	 */
-	encode.INDEX = function(l) {
-	    //var offset, offsets, offsetEncoder, encodedOffsets, encodedOffset, data,
+  encode.INDEX = function (l) {
+	    // var offset, offsets, offsetEncoder, encodedOffsets, encodedOffset, data,
 	    //    i, v;
 	    // Because we have to know which data type to use to encode the offsets,
 	    // we have to go through the values twice: once to encode the data and
 	    // calculate the offsets, then again to encode the offsets using the fitting data type.
-	    var offset = 1; // First offset is always 1.
-	    var offsets = [offset];
-	    var data = [];
-	    for (var i = 0; i < l.length; i += 1) {
-	        var v = encode.OBJECT(l[i]);
+	    let offset = 1; // First offset is always 1.
+	    const offsets = [offset];
+	    const data = [];
+	    for (let i = 0; i < l.length; i = i + 1) {
+	        const v = encode.OBJECT(l[i]);
 	        Array.prototype.push.apply(data, v);
-	        offset += v.length;
+	        offset = offset + v.length;
 	        offsets.push(offset);
 	    }
 
@@ -1644,11 +1640,11 @@
 	        return [0, 0];
 	    }
 
-	    var encodedOffsets = [];
-	    var offSize = (1 + Math.floor(Math.log(offset) / Math.log(2)) / 8) | 0;
-	    var offsetEncoder = [undefined, encode.BYTE, encode.USHORT, encode.UINT24, encode.ULONG][offSize];
-	    for (var i$1 = 0; i$1 < offsets.length; i$1 += 1) {
-	        var encodedOffset = offsetEncoder(offsets[i$1]);
+	    const encodedOffsets = [];
+	    const offSize = (1 + Math.floor(Math.log(offset) / Math.log(2)) / 8) | 0;
+	    const offsetEncoder = [undefined, encode.BYTE, encode.USHORT, encode.UINT24, encode.ULONG][offSize];
+	    for (let i$1 = 0; i$1 < offsets.length; i$1 = i$1 + 1) {
+	        const encodedOffset = offsetEncoder(offsets[i$1]);
 	        Array.prototype.push.apply(encodedOffsets, encodedOffset);
 	    }
 
@@ -1656,74 +1652,72 @@
 	                           encode.OffSize(offSize),
 	                           encodedOffsets,
 	                           data);
-	};
+  };
 
-	/**
+  /**
 	 * @param {Array}
 	 * @returns {number}
 	 */
-	sizeOf.INDEX = function(v) {
+  sizeOf.INDEX = function (v) {
 	    return encode.INDEX(v).length;
-	};
+  };
 
-	/**
+  /**
 	 * Convert an object to a CFF DICT structure.
 	 * The keys should be numeric.
 	 * The values should be objects containing name / type / value.
 	 * @param {Object} m
 	 * @returns {Array}
 	 */
-	encode.DICT = function(m) {
-	    var d = [];
-	    var keys = Object.keys(m);
-	    var length = keys.length;
+  encode.DICT = function (m) {
+	    let d = [];
+	    const keys = Object.keys(m);
+	    const { length } = keys;
 
-	    for (var i = 0; i < length; i += 1) {
+	    for (let i = 0; i < length; i = i + 1) {
 	        // Object.keys() return string keys, but our keys are always numeric.
-	        var k = parseInt(keys[i], 0);
-	        var v = m[k];
+	        const k = parseInt(keys[i], 0);
+	        const v = m[k];
 	        // Value comes before the key.
 	        d = d.concat(encode.OPERAND(v.value, v.type));
 	        d = d.concat(encode.OPERATOR(k));
 	    }
 
 	    return d;
-	};
+  };
 
-	/**
+  /**
 	 * @param {Object}
 	 * @returns {number}
 	 */
-	sizeOf.DICT = function(m) {
+  sizeOf.DICT = function (m) {
 	    return encode.DICT(m).length;
-	};
+  };
 
-	/**
+  /**
 	 * @param {number}
 	 * @returns {Array}
 	 */
-	encode.OPERATOR = function(v) {
+  encode.OPERATOR = function (v) {
 	    if (v < 1200) {
 	        return [v];
-	    } else {
-	        return [12, v - 1200];
 	    }
-	};
+	        return [12, v - 1200];
+  };
 
-	/**
+  /**
 	 * @param {Array} v
 	 * @param {string}
 	 * @returns {Array}
 	 */
-	encode.OPERAND = function(v, type) {
-	    var d = [];
+  encode.OPERAND = function (v, type) {
+	    let d = [];
 	    if (Array.isArray(type)) {
-	        for (var i = 0; i < type.length; i += 1) {
-	            check.argument(v.length === type.length, 'Not enough arguments given for type' + type);
+	        for (let i = 0; i < type.length; i = i + 1) {
+	            check.argument(v.length === type.length, `Not enough arguments given for type${type}`);
 	            d = d.concat(encode.OPERAND(v[i], type[i]));
 	        }
-	    } else {
-	        if (type === 'SID') {
+	    } else if (type === 'SID') {
 	            d = d.concat(encode.NUMBER(v));
 	        } else if (type === 'offset') {
 	            // We make it easy for ourselves and always encode offsets as
@@ -1734,39 +1728,38 @@
 	        } else if (type === 'real') {
 	            d = d.concat(encode.REAL(v));
 	        } else {
-	            throw new Error('Unknown operand type ' + type);
+	            throw new Error(`Unknown operand type ${type}`);
 	            // FIXME Add support for booleans
 	        }
-	    }
 
 	    return d;
-	};
+  };
 
-	encode.OP = encode.BYTE;
-	sizeOf.OP = sizeOf.BYTE;
+  encode.OP = encode.BYTE;
+  sizeOf.OP = sizeOf.BYTE;
 
-	// memoize charstring encoding using WeakMap if available
-	var wmm = typeof WeakMap === 'function' && new WeakMap();
+  // memoize charstring encoding using WeakMap if available
+  const wmm = typeof WeakMap === 'function' && new WeakMap();
 
-	/**
+  /**
 	 * Convert a list of CharString operations to bytes.
 	 * @param {Array}
 	 * @returns {Array}
 	 */
-	encode.CHARSTRING = function(ops) {
+  encode.CHARSTRING = function (ops) {
 	    // See encode.MACSTRING for why we don't do "if (wmm && wmm.has(ops))".
 	    if (wmm) {
-	        var cachedValue = wmm.get(ops);
+	        const cachedValue = wmm.get(ops);
 	        if (cachedValue !== undefined) {
 	            return cachedValue;
 	        }
 	    }
 
-	    var d = [];
-	    var length = ops.length;
+	    let d = [];
+	    const { length } = ops;
 
-	    for (var i = 0; i < length; i += 1) {
-	        var op = ops[i];
+	    for (let i = 0; i < length; i = i + 1) {
+	        const op = ops[i];
 	        d = d.concat(encode[op.type](op.value));
 	    }
 
@@ -1775,62 +1768,62 @@
 	    }
 
 	    return d;
-	};
+  };
 
-	/**
+  /**
 	 * @param {Array}
 	 * @returns {number}
 	 */
-	sizeOf.CHARSTRING = function(ops) {
+  sizeOf.CHARSTRING = function (ops) {
 	    return encode.CHARSTRING(ops).length;
-	};
+  };
 
-	// Utility functions ////////////////////////////////////////////////////////
+  // Utility functions ////////////////////////////////////////////////////////
 
-	/**
+  /**
 	 * Convert an object containing name / type / value to bytes.
 	 * @param {Object}
 	 * @returns {Array}
 	 */
-	encode.OBJECT = function(v) {
-	    var encodingFunction = encode[v.type];
-	    check.argument(encodingFunction !== undefined, 'No encoding function for type ' + v.type);
+  encode.OBJECT = function (v) {
+	    const encodingFunction = encode[v.type];
+	    check.argument(encodingFunction !== undefined, `No encoding function for type ${v.type}`);
 	    return encodingFunction(v.value);
-	};
+  };
 
-	/**
+  /**
 	 * @param {Object}
 	 * @returns {number}
 	 */
-	sizeOf.OBJECT = function(v) {
-	    var sizeOfFunction = sizeOf[v.type];
-	    check.argument(sizeOfFunction !== undefined, 'No sizeOf function for type ' + v.type);
+  sizeOf.OBJECT = function (v) {
+	    const sizeOfFunction = sizeOf[v.type];
+	    check.argument(sizeOfFunction !== undefined, `No sizeOf function for type ${v.type}`);
 	    return sizeOfFunction(v.value);
-	};
+  };
 
-	/**
+  /**
 	 * Convert a table object to bytes.
 	 * A table contains a list of fields containing the metadata (name, type and default value).
 	 * The table itself has the field values set as attributes.
 	 * @param {opentype.Table}
 	 * @returns {Array}
 	 */
-	encode.TABLE = function(table) {
-	    var d = [];
-	    var length = table.fields.length;
-	    var subtables = [];
-	    var subtableOffsets = [];
+  encode.TABLE = function (table) {
+	    let d = [];
+	    const { length } = table.fields;
+	    const subtables = [];
+	    const subtableOffsets = [];
 
-	    for (var i = 0; i < length; i += 1) {
-	        var field = table.fields[i];
-	        var encodingFunction = encode[field.type];
-	        check.argument(encodingFunction !== undefined, 'No encoding function for field type ' + field.type + ' (' + field.name + ')');
-	        var value = table[field.name];
+	    for (let i = 0; i < length; i = i + 1) {
+	        const field = table.fields[i];
+	        const encodingFunction = encode[field.type];
+	        check.argument(encodingFunction !== undefined, `No encoding function for field type ${field.type} (${field.name})`);
+	        let value = table[field.name];
 	        if (value === undefined) {
 	            value = field.value;
 	        }
 
-	        var bytes = encodingFunction(value);
+	        const bytes = encodingFunction(value);
 
 	        if (field.type === 'TABLE') {
 	            subtableOffsets.push(d.length);
@@ -1841,61 +1834,61 @@
 	        }
 	    }
 
-	    for (var i$1 = 0; i$1 < subtables.length; i$1 += 1) {
-	        var o = subtableOffsets[i$1];
-	        var offset = d.length;
-	        check.argument(offset < 65536, 'Table ' + table.tableName + ' too big.');
+	    for (let i$1 = 0; i$1 < subtables.length; i$1 = i$1 + 1) {
+	        const o = subtableOffsets[i$1];
+	        const offset = d.length;
+	        check.argument(offset < 65536, `Table ${table.tableName} too big.`);
 	        d[o] = offset >> 8;
 	        d[o + 1] = offset & 0xff;
 	        d = d.concat(subtables[i$1]);
 	    }
 
 	    return d;
-	};
+  };
 
-	/**
+  /**
 	 * @param {opentype.Table}
 	 * @returns {number}
 	 */
-	sizeOf.TABLE = function(table) {
-	    var numBytes = 0;
-	    var length = table.fields.length;
+  sizeOf.TABLE = function (table) {
+	    let numBytes = 0;
+	    const { length } = table.fields;
 
-	    for (var i = 0; i < length; i += 1) {
-	        var field = table.fields[i];
-	        var sizeOfFunction = sizeOf[field.type];
-	        check.argument(sizeOfFunction !== undefined, 'No sizeOf function for field type ' + field.type + ' (' + field.name + ')');
-	        var value = table[field.name];
+	    for (let i = 0; i < length; i = i + 1) {
+	        const field = table.fields[i];
+	        const sizeOfFunction = sizeOf[field.type];
+	        check.argument(sizeOfFunction !== undefined, `No sizeOf function for field type ${field.type} (${field.name})`);
+	        let value = table[field.name];
 	        if (value === undefined) {
 	            value = field.value;
 	        }
 
-	        numBytes += sizeOfFunction(value);
+	        numBytes = numBytes + sizeOfFunction(value);
 
 	        // Subtables take 2 more bytes for offsets.
 	        if (field.type === 'TABLE') {
-	            numBytes += 2;
+	            numBytes = numBytes + 2;
 	        }
 	    }
 
 	    return numBytes;
-	};
+  };
 
-	encode.RECORD = encode.TABLE;
-	sizeOf.RECORD = sizeOf.TABLE;
+  encode.RECORD = encode.TABLE;
+  sizeOf.RECORD = sizeOf.TABLE;
 
-	// Merge in a list of bytes.
-	encode.LITERAL = function(v) {
+  // Merge in a list of bytes.
+  encode.LITERAL = function (v) {
 	    return v;
-	};
+  };
 
-	sizeOf.LITERAL = function(v) {
+  sizeOf.LITERAL = function (v) {
 	    return v.length;
-	};
+  };
 
-	// Table metadata
+  // Table metadata
 
-	/**
+  /**
 	 * @exports opentype.Table
 	 * @class
 	 * @param {string} tableName
@@ -1903,158 +1896,171 @@
 	 * @param {Object} options
 	 * @constructor
 	 */
-	function Table(tableName, fields, options) {
-	    for (var i = 0; i < fields.length; i += 1) {
-	        var field = fields[i];
+  function Table(tableName, fields, options) {
+	    for (let i = 0; i < fields.length; i = i + 1) {
+	        const field = fields[i];
 	        this[field.name] = field.value;
 	    }
 
 	    this.tableName = tableName;
 	    this.fields = fields;
 	    if (options) {
-	        var optionKeys = Object.keys(options);
-	        for (var i$1 = 0; i$1 < optionKeys.length; i$1 += 1) {
-	            var k = optionKeys[i$1];
-	            var v = options[k];
+	        const optionKeys = Object.keys(options);
+	        for (let i$1 = 0; i$1 < optionKeys.length; i$1 = i$1 + 1) {
+	            const k = optionKeys[i$1];
+	            const v = options[k];
 	            if (this[k] !== undefined) {
 	                this[k] = v;
 	            }
 	        }
 	    }
-	}
+  }
 
-	/**
+  /**
 	 * Encodes the table and returns an array of bytes
 	 * @return {Array}
 	 */
-	Table.prototype.encode = function() {
+  Table.prototype.encode = function () {
 	    return encode.TABLE(this);
-	};
+  };
 
-	/**
+  /**
 	 * Get the size of the table.
 	 * @return {number}
 	 */
-	Table.prototype.sizeOf = function() {
+  Table.prototype.sizeOf = function () {
 	    return sizeOf.TABLE(this);
-	};
+  };
 
-	/**
+  /**
 	 * @private
 	 */
-	function ushortList(itemName, list, count) {
+  function ushortList(itemName, list, count) {
 	    if (count === undefined) {
 	        count = list.length;
 	    }
-	    var fields = new Array(list.length + 1);
-	    fields[0] = {name: itemName + 'Count', type: 'USHORT', value: count};
-	    for (var i = 0; i < list.length; i++) {
-	        fields[i + 1] = {name: itemName + i, type: 'USHORT', value: list[i]};
+	    const fields = new Array(list.length + 1);
+	    fields[0] = { name: `${itemName}Count`, type: 'USHORT', value: count };
+	    for (let i = 0; i < list.length; i++) {
+	        fields[i + 1] = { name: itemName + i, type: 'USHORT', value: list[i] };
 	    }
 	    return fields;
-	}
+  }
 
-	/**
+  /**
 	 * @private
 	 */
-	function tableList(itemName, records, itemCallback) {
-	    var count = records.length;
-	    var fields = new Array(count + 1);
-	    fields[0] = {name: itemName + 'Count', type: 'USHORT', value: count};
-	    for (var i = 0; i < count; i++) {
-	        fields[i + 1] = {name: itemName + i, type: 'TABLE', value: itemCallback(records[i], i)};
+  function tableList(itemName, records, itemCallback) {
+	    const count = records.length;
+	    const fields = new Array(count + 1);
+	    fields[0] = { name: `${itemName}Count`, type: 'USHORT', value: count };
+	    for (let i = 0; i < count; i++) {
+	        fields[i + 1] = { name: itemName + i, type: 'TABLE', value: itemCallback(records[i], i) };
 	    }
 	    return fields;
-	}
+  }
 
-	/**
+  /**
 	 * @private
 	 */
-	function recordList(itemName, records, itemCallback) {
-	    var count = records.length;
-	    var fields = [];
-	    fields[0] = {name: itemName + 'Count', type: 'USHORT', value: count};
-	    for (var i = 0; i < count; i++) {
+  function recordList(itemName, records, itemCallback) {
+	    const count = records.length;
+	    let fields = [];
+	    fields[0] = { name: `${itemName}Count`, type: 'USHORT', value: count };
+	    for (let i = 0; i < count; i++) {
 	        fields = fields.concat(itemCallback(records[i], i));
 	    }
 	    return fields;
-	}
+  }
 
-	// Common Layout Tables
+  // Common Layout Tables
 
-	/**
+  /**
 	 * @exports opentype.Coverage
 	 * @class
 	 * @param {opentype.Table}
 	 * @constructor
 	 * @extends opentype.Table
 	 */
-	function Coverage(coverageTable) {
+  function Coverage(coverageTable) {
 	    if (coverageTable.format === 1) {
 	        Table.call(this, 'coverageTable',
-	            [{name: 'coverageFormat', type: 'USHORT', value: 1}]
-	            .concat(ushortList('glyph', coverageTable.glyphs))
-	        );
+	            [{ name: 'coverageFormat', type: 'USHORT', value: 1 }]
+	            .concat(ushortList('glyph', coverageTable.glyphs)));
 	    } else {
 	        check.assert(false, 'Can\'t create coverage table format 2 yet.');
 	    }
-	}
-	Coverage.prototype = Object.create(Table.prototype);
-	Coverage.prototype.constructor = Coverage;
+  }
+  Coverage.prototype = Object.create(Table.prototype);
+  Coverage.prototype.constructor = Coverage;
 
-	function ScriptList(scriptListTable) {
+  function ScriptList(scriptListTable) {
 	    Table.call(this, 'scriptListTable',
-	        recordList('scriptRecord', scriptListTable, function(scriptRecord, i) {
-	            var script = scriptRecord.script;
-	            var defaultLangSys = script.defaultLangSys;
-	            check.assert(!!defaultLangSys, 'Unable to write GSUB: script ' + scriptRecord.tag + ' has no default language system.');
+	        recordList('scriptRecord', scriptListTable, (scriptRecord, i) => {
+	            const { script } = scriptRecord;
+	            const { defaultLangSys } = script;
+	            check.assert(!!defaultLangSys, `Unable to write GSUB: script ${scriptRecord.tag} has no default language system.`);
 	            return [
-	                {name: 'scriptTag' + i, type: 'TAG', value: scriptRecord.tag},
-	                {name: 'script' + i, type: 'TABLE', value: new Table('scriptTable', [
-	                    {name: 'defaultLangSys', type: 'TABLE', value: new Table('defaultLangSys', [
-	                        {name: 'lookupOrder', type: 'USHORT', value: 0},
-	                        {name: 'reqFeatureIndex', type: 'USHORT', value: defaultLangSys.reqFeatureIndex}]
-	                        .concat(ushortList('featureIndex', defaultLangSys.featureIndexes)))}
-	                    ].concat(recordList('langSys', script.langSysRecords, function(langSysRecord, i) {
-	                        var langSys = langSysRecord.langSys;
+	                { name: `scriptTag${i}`, type: 'TAG', value: scriptRecord.tag },
+	                {
+            name: `script${i}`,
+            type: 'TABLE',
+            value: new Table('scriptTable', [
+	                    {
+                name: 'defaultLangSys',
+                type: 'TABLE',
+                value: new Table('defaultLangSys', [
+	                        { name: 'lookupOrder', type: 'USHORT', value: 0 },
+	                        { name: 'reqFeatureIndex', type: 'USHORT', value: defaultLangSys.reqFeatureIndex }]
+	                        .concat(ushortList('featureIndex', defaultLangSys.featureIndexes))),
+              },
+	                    ].concat(recordList('langSys', script.langSysRecords, (langSysRecord, i) => {
+	                        const { langSys } = langSysRecord;
 	                        return [
-	                            {name: 'langSysTag' + i, type: 'TAG', value: langSysRecord.tag},
-	                            {name: 'langSys' + i, type: 'TABLE', value: new Table('langSys', [
-	                                {name: 'lookupOrder', type: 'USHORT', value: 0},
-	                                {name: 'reqFeatureIndex', type: 'USHORT', value: langSys.reqFeatureIndex}
-	                                ].concat(ushortList('featureIndex', langSys.featureIndexes)))}
+	                            { name: `langSysTag${i}`, type: 'TAG', value: langSysRecord.tag },
+	                            {
+                  name: `langSys${i}`,
+                  type: 'TABLE',
+                  value: new Table('langSys', [
+	                                { name: 'lookupOrder', type: 'USHORT', value: 0 },
+	                                { name: 'reqFeatureIndex', type: 'USHORT', value: langSys.reqFeatureIndex },
+	                                ].concat(ushortList('featureIndex', langSys.featureIndexes))),
+                },
 	                        ];
-	                    })))}
+	                    }))),
+          },
 	            ];
-	        })
-	    );
-	}
-	ScriptList.prototype = Object.create(Table.prototype);
-	ScriptList.prototype.constructor = ScriptList;
+	        }));
+  }
+  ScriptList.prototype = Object.create(Table.prototype);
+  ScriptList.prototype.constructor = ScriptList;
 
-	/**
+  /**
 	 * @exports opentype.FeatureList
 	 * @class
 	 * @param {opentype.Table}
 	 * @constructor
 	 * @extends opentype.Table
 	 */
-	function FeatureList(featureListTable) {
+  function FeatureList(featureListTable) {
 	    Table.call(this, 'featureListTable',
-	        recordList('featureRecord', featureListTable, function(featureRecord, i) {
-	            var feature = featureRecord.feature;
+	        recordList('featureRecord', featureListTable, (featureRecord, i) => {
+	            const { feature } = featureRecord;
 	            return [
-	                {name: 'featureTag' + i, type: 'TAG', value: featureRecord.tag},
-	                {name: 'feature' + i, type: 'TABLE', value: new Table('featureTable', [
-	                    {name: 'featureParams', type: 'USHORT', value: feature.featureParams} ].concat(ushortList('lookupListIndex', feature.lookupListIndexes)))}
+	                { name: `featureTag${i}`, type: 'TAG', value: featureRecord.tag },
+	                {
+            name: `feature${i}`,
+            type: 'TABLE',
+            value: new Table('featureTable', [
+	                    { name: 'featureParams', type: 'USHORT', value: feature.featureParams }].concat(ushortList('lookupListIndex', feature.lookupListIndexes))),
+          },
 	            ];
-	        })
-	    );
-	}
-	FeatureList.prototype = Object.create(Table.prototype);
-	FeatureList.prototype.constructor = FeatureList;
+	        }));
+  }
+  FeatureList.prototype = Object.create(Table.prototype);
+  FeatureList.prototype.constructor = FeatureList;
 
-	/**
+  /**
 	 * @exports opentype.LookupList
 	 * @class
 	 * @param {opentype.Table}
@@ -2062,384 +2068,382 @@
 	 * @constructor
 	 * @extends opentype.Table
 	 */
-	function LookupList(lookupListTable, subtableMakers) {
-	    Table.call(this, 'lookupListTable', tableList('lookup', lookupListTable, function(lookupTable) {
-	        var subtableCallback = subtableMakers[lookupTable.lookupType];
-	        check.assert(!!subtableCallback, 'Unable to write GSUB lookup type ' + lookupTable.lookupType + ' tables.');
+  function LookupList(lookupListTable, subtableMakers) {
+	    Table.call(this, 'lookupListTable', tableList('lookup', lookupListTable, (lookupTable) => {
+	        const subtableCallback = subtableMakers[lookupTable.lookupType];
+	        check.assert(!!subtableCallback, `Unable to write GSUB lookup type ${lookupTable.lookupType} tables.`);
 	        return new Table('lookupTable', [
-	            {name: 'lookupType', type: 'USHORT', value: lookupTable.lookupType},
-	            {name: 'lookupFlag', type: 'USHORT', value: lookupTable.lookupFlag}
+	            { name: 'lookupType', type: 'USHORT', value: lookupTable.lookupType },
+	            { name: 'lookupFlag', type: 'USHORT', value: lookupTable.lookupFlag },
 	        ].concat(tableList('subtable', lookupTable.subtables, subtableCallback)));
 	    }));
-	}
-	LookupList.prototype = Object.create(Table.prototype);
-	LookupList.prototype.constructor = LookupList;
+  }
+  LookupList.prototype = Object.create(Table.prototype);
+  LookupList.prototype.constructor = LookupList;
 
-	// Record = same as Table, but inlined (a Table has an offset and its data is further in the stream)
-	// Don't use offsets inside Records (probable bug), only in Tables.
-	var table = {
-	    Table: Table,
+  // Record = same as Table, but inlined (a Table has an offset and its data is further in the stream)
+  // Don't use offsets inside Records (probable bug), only in Tables.
+  const table = {
+	    Table,
 	    Record: Table,
-	    Coverage: Coverage,
-	    ScriptList: ScriptList,
-	    FeatureList: FeatureList,
-	    LookupList: LookupList,
-	    ushortList: ushortList,
-	    tableList: tableList,
-	    recordList: recordList,
-	};
+	    Coverage,
+	    ScriptList,
+	    FeatureList,
+	    LookupList,
+	    ushortList,
+	    tableList,
+	    recordList,
+  };
 
-	// Parsing utility functions
+  // Parsing utility functions
 
-	// Retrieve an unsigned byte from the DataView.
-	function getByte(dataView, offset) {
+  // Retrieve an unsigned byte from the DataView.
+  function getByte(dataView, offset) {
 	    return dataView.getUint8(offset);
-	}
+  }
 
-	// Retrieve an unsigned 16-bit short from the DataView.
-	// The value is stored in big endian.
-	function getUShort(dataView, offset) {
+  // Retrieve an unsigned 16-bit short from the DataView.
+  // The value is stored in big endian.
+  function getUShort(dataView, offset) {
 	    return dataView.getUint16(offset, false);
-	}
+  }
 
-	// Retrieve a signed 16-bit short from the DataView.
-	// The value is stored in big endian.
-	function getShort(dataView, offset) {
+  // Retrieve a signed 16-bit short from the DataView.
+  // The value is stored in big endian.
+  function getShort(dataView, offset) {
 	    return dataView.getInt16(offset, false);
-	}
+  }
 
-	// Retrieve an unsigned 32-bit long from the DataView.
-	// The value is stored in big endian.
-	function getULong(dataView, offset) {
+  // Retrieve an unsigned 32-bit long from the DataView.
+  // The value is stored in big endian.
+  function getULong(dataView, offset) {
 	    return dataView.getUint32(offset, false);
-	}
+  }
 
-	// Retrieve a 32-bit signed fixed-point number (16.16) from the DataView.
-	// The value is stored in big endian.
-	function getFixed(dataView, offset) {
-	    var decimal = dataView.getInt16(offset, false);
-	    var fraction = dataView.getUint16(offset + 2, false);
+  // Retrieve a 32-bit signed fixed-point number (16.16) from the DataView.
+  // The value is stored in big endian.
+  function getFixed(dataView, offset) {
+	    const decimal = dataView.getInt16(offset, false);
+	    const fraction = dataView.getUint16(offset + 2, false);
 	    return decimal + fraction / 65535;
-	}
+  }
 
-	// Retrieve a 4-character tag from the DataView.
-	// Tags are used to identify tables.
-	function getTag(dataView, offset) {
-	    var tag = '';
-	    for (var i = offset; i < offset + 4; i += 1) {
-	        tag += String.fromCharCode(dataView.getInt8(i));
+  // Retrieve a 4-character tag from the DataView.
+  // Tags are used to identify tables.
+  function getTag(dataView, offset) {
+	    let tag = '';
+	    for (let i = offset; i < offset + 4; i = i + 1) {
+	        tag = tag + String.fromCharCode(dataView.getInt8(i));
 	    }
 
 	    return tag;
-	}
+  }
 
-	// Retrieve an offset from the DataView.
-	// Offsets are 1 to 4 bytes in length, depending on the offSize argument.
-	function getOffset(dataView, offset, offSize) {
-	    var v = 0;
-	    for (var i = 0; i < offSize; i += 1) {
-	        v <<= 8;
-	        v += dataView.getUint8(offset + i);
+  // Retrieve an offset from the DataView.
+  // Offsets are 1 to 4 bytes in length, depending on the offSize argument.
+  function getOffset(dataView, offset, offSize) {
+	    let v = 0;
+	    for (let i = 0; i < offSize; i = i + 1) {
+	        v = v << 8;
+	        v = v + dataView.getUint8(offset + i);
 	    }
 
 	    return v;
-	}
+  }
 
-	// Retrieve a number of bytes from start offset to the end offset from the DataView.
-	function getBytes(dataView, startOffset, endOffset) {
-	    var bytes = [];
-	    for (var i = startOffset; i < endOffset; i += 1) {
+  // Retrieve a number of bytes from start offset to the end offset from the DataView.
+  function getBytes(dataView, startOffset, endOffset) {
+	    const bytes = [];
+	    for (let i = startOffset; i < endOffset; i = i + 1) {
 	        bytes.push(dataView.getUint8(i));
 	    }
 
 	    return bytes;
-	}
+  }
 
-	// Convert the list of bytes to a string.
-	function bytesToString(bytes) {
-	    var s = '';
-	    for (var i = 0; i < bytes.length; i += 1) {
-	        s += String.fromCharCode(bytes[i]);
+  // Convert the list of bytes to a string.
+  function bytesToString(bytes) {
+	    let s = '';
+	    for (let i = 0; i < bytes.length; i = i + 1) {
+	        s = s + String.fromCharCode(bytes[i]);
 	    }
 
 	    return s;
-	}
+  }
 
-	var typeOffsets = {
+  const typeOffsets = {
 	    byte: 1,
 	    uShort: 2,
 	    short: 2,
 	    uLong: 4,
 	    fixed: 4,
 	    longDateTime: 8,
-	    tag: 4
-	};
+	    tag: 4,
+  };
 
-	// A stateful parser that changes the offset whenever a value is retrieved.
-	// The data is a DataView.
-	function Parser(data, offset) {
+  // A stateful parser that changes the offset whenever a value is retrieved.
+  // The data is a DataView.
+  function Parser(data, offset) {
 	    this.data = data;
 	    this.offset = offset;
 	    this.relativeOffset = 0;
-	}
+  }
 
-	Parser.prototype.parseByte = function() {
-	    var v = this.data.getUint8(this.offset + this.relativeOffset);
-	    this.relativeOffset += 1;
+  Parser.prototype.parseByte = function () {
+	    const v = this.data.getUint8(this.offset + this.relativeOffset);
+	    this.relativeOffset = this.relativeOffset + 1;
 	    return v;
-	};
+  };
 
-	Parser.prototype.parseChar = function() {
-	    var v = this.data.getInt8(this.offset + this.relativeOffset);
-	    this.relativeOffset += 1;
+  Parser.prototype.parseChar = function () {
+	    const v = this.data.getInt8(this.offset + this.relativeOffset);
+	    this.relativeOffset = this.relativeOffset + 1;
 	    return v;
-	};
+  };
 
-	Parser.prototype.parseCard8 = Parser.prototype.parseByte;
+  Parser.prototype.parseCard8 = Parser.prototype.parseByte;
 
-	Parser.prototype.parseUShort = function() {
-	    var v = this.data.getUint16(this.offset + this.relativeOffset);
-	    this.relativeOffset += 2;
+  Parser.prototype.parseUShort = function () {
+	    const v = this.data.getUint16(this.offset + this.relativeOffset);
+	    this.relativeOffset = this.relativeOffset + 2;
 	    return v;
-	};
+  };
 
-	Parser.prototype.parseCard16 = Parser.prototype.parseUShort;
-	Parser.prototype.parseSID = Parser.prototype.parseUShort;
-	Parser.prototype.parseOffset16 = Parser.prototype.parseUShort;
+  Parser.prototype.parseCard16 = Parser.prototype.parseUShort;
+  Parser.prototype.parseSID = Parser.prototype.parseUShort;
+  Parser.prototype.parseOffset16 = Parser.prototype.parseUShort;
 
-	Parser.prototype.parseShort = function() {
-	    var v = this.data.getInt16(this.offset + this.relativeOffset);
-	    this.relativeOffset += 2;
+  Parser.prototype.parseShort = function () {
+	    const v = this.data.getInt16(this.offset + this.relativeOffset);
+	    this.relativeOffset = this.relativeOffset + 2;
 	    return v;
-	};
+  };
 
-	Parser.prototype.parseF2Dot14 = function() {
-	    var v = this.data.getInt16(this.offset + this.relativeOffset) / 16384;
-	    this.relativeOffset += 2;
+  Parser.prototype.parseF2Dot14 = function () {
+	    const v = this.data.getInt16(this.offset + this.relativeOffset) / 16384;
+	    this.relativeOffset = this.relativeOffset + 2;
 	    return v;
-	};
+  };
 
-	Parser.prototype.parseULong = function() {
-	    var v = getULong(this.data, this.offset + this.relativeOffset);
-	    this.relativeOffset += 4;
+  Parser.prototype.parseULong = function () {
+	    const v = getULong(this.data, this.offset + this.relativeOffset);
+	    this.relativeOffset = this.relativeOffset + 4;
 	    return v;
-	};
+  };
 
-	Parser.prototype.parseOffset32 = Parser.prototype.parseULong;
+  Parser.prototype.parseOffset32 = Parser.prototype.parseULong;
 
-	Parser.prototype.parseFixed = function() {
-	    var v = getFixed(this.data, this.offset + this.relativeOffset);
-	    this.relativeOffset += 4;
+  Parser.prototype.parseFixed = function () {
+	    const v = getFixed(this.data, this.offset + this.relativeOffset);
+	    this.relativeOffset = this.relativeOffset + 4;
 	    return v;
-	};
+  };
 
-	Parser.prototype.parseString = function(length) {
-	    var dataView = this.data;
-	    var offset = this.offset + this.relativeOffset;
-	    var string = '';
-	    this.relativeOffset += length;
-	    for (var i = 0; i < length; i++) {
-	        string += String.fromCharCode(dataView.getUint8(offset + i));
+  Parser.prototype.parseString = function (length) {
+	    const dataView = this.data;
+	    const offset = this.offset + this.relativeOffset;
+	    let string = '';
+	    this.relativeOffset = this.relativeOffset + length;
+	    for (let i = 0; i < length; i++) {
+	        string = string + String.fromCharCode(dataView.getUint8(offset + i));
 	    }
 
 	    return string;
-	};
+  };
 
-	Parser.prototype.parseTag = function() {
+  Parser.prototype.parseTag = function () {
 	    return this.parseString(4);
-	};
+  };
 
-	// LONGDATETIME is a 64-bit integer.
-	// JavaScript and unix timestamps traditionally use 32 bits, so we
-	// only take the last 32 bits.
-	// + Since until 2038 those bits will be filled by zeros we can ignore them.
-	Parser.prototype.parseLongDateTime = function() {
-	    var v = getULong(this.data, this.offset + this.relativeOffset + 4);
+  // LONGDATETIME is a 64-bit integer.
+  // JavaScript and unix timestamps traditionally use 32 bits, so we
+  // only take the last 32 bits.
+  // + Since until 2038 those bits will be filled by zeros we can ignore them.
+  Parser.prototype.parseLongDateTime = function () {
+	    let v = getULong(this.data, this.offset + this.relativeOffset + 4);
 	    // Subtract seconds between 01/01/1904 and 01/01/1970
 	    // to convert Apple Mac timestamp to Standard Unix timestamp
-	    v -= 2082844800;
-	    this.relativeOffset += 8;
+	    v = v - 2082844800;
+	    this.relativeOffset = this.relativeOffset + 8;
 	    return v;
-	};
+  };
 
-	Parser.prototype.parseVersion = function(minorBase) {
-	    var major = getUShort(this.data, this.offset + this.relativeOffset);
+  Parser.prototype.parseVersion = function (minorBase) {
+	    const major = getUShort(this.data, this.offset + this.relativeOffset);
 
 	    // How to interpret the minor version is very vague in the spec. 0x5000 is 5, 0x1000 is 1
 	    // Default returns the correct number if minor = 0xN000 where N is 0-9
 	    // Set minorBase to 1 for tables that use minor = N where N is 0-9
-	    var minor = getUShort(this.data, this.offset + this.relativeOffset + 2);
-	    this.relativeOffset += 4;
+	    const minor = getUShort(this.data, this.offset + this.relativeOffset + 2);
+	    this.relativeOffset = this.relativeOffset + 4;
 	    if (minorBase === undefined) { minorBase = 0x1000; }
 	    return major + minor / minorBase / 10;
-	};
+  };
 
-	Parser.prototype.skip = function(type, amount) {
+  Parser.prototype.skip = function (type, amount) {
 	    if (amount === undefined) {
 	        amount = 1;
 	    }
 
-	    this.relativeOffset += typeOffsets[type] * amount;
-	};
+	    this.relativeOffset = this.relativeOffset + typeOffsets[type] * amount;
+  };
 
-	///// Parsing lists and records ///////////////////////////////
+  /// // Parsing lists and records ///////////////////////////////
 
-	// Parse a list of 32 bit unsigned integers.
-	Parser.prototype.parseULongList = function(count) {
+  // Parse a list of 32 bit unsigned integers.
+  Parser.prototype.parseULongList = function (count) {
 	    if (count === undefined) { count = this.parseULong(); }
-	    var offsets = new Array(count);
-	    var dataView = this.data;
-	    var offset = this.offset + this.relativeOffset;
-	    for (var i = 0; i < count; i++) {
+	    const offsets = new Array(count);
+	    const dataView = this.data;
+	    let offset = this.offset + this.relativeOffset;
+	    for (let i = 0; i < count; i++) {
 	        offsets[i] = dataView.getUint32(offset);
-	        offset += 4;
+	        offset = offset + 4;
 	    }
 
-	    this.relativeOffset += count * 4;
+	    this.relativeOffset = this.relativeOffset + count * 4;
 	    return offsets;
-	};
+  };
 
-	// Parse a list of 16 bit unsigned integers. The length of the list can be read on the stream
-	// or provided as an argument.
-	Parser.prototype.parseOffset16List =
-	Parser.prototype.parseUShortList = function(count) {
+  // Parse a list of 16 bit unsigned integers. The length of the list can be read on the stream
+  // or provided as an argument.
+  Parser.prototype.parseOffset16List =	Parser.prototype.parseUShortList = function (count) {
 	    if (count === undefined) { count = this.parseUShort(); }
-	    var offsets = new Array(count);
-	    var dataView = this.data;
-	    var offset = this.offset + this.relativeOffset;
-	    for (var i = 0; i < count; i++) {
+	    const offsets = new Array(count);
+	    const dataView = this.data;
+	    let offset = this.offset + this.relativeOffset;
+	    for (let i = 0; i < count; i++) {
 	        offsets[i] = dataView.getUint16(offset);
-	        offset += 2;
+	        offset = offset + 2;
 	    }
 
-	    this.relativeOffset += count * 2;
+	    this.relativeOffset = this.relativeOffset + count * 2;
 	    return offsets;
-	};
+  };
 
-	// Parses a list of 16 bit signed integers.
-	Parser.prototype.parseShortList = function(count) {
-	    var list = new Array(count);
-	    var dataView = this.data;
-	    var offset = this.offset + this.relativeOffset;
-	    for (var i = 0; i < count; i++) {
+  // Parses a list of 16 bit signed integers.
+  Parser.prototype.parseShortList = function (count) {
+	    const list = new Array(count);
+	    const dataView = this.data;
+	    let offset = this.offset + this.relativeOffset;
+	    for (let i = 0; i < count; i++) {
 	        list[i] = dataView.getInt16(offset);
-	        offset += 2;
+	        offset = offset + 2;
 	    }
 
-	    this.relativeOffset += count * 2;
+	    this.relativeOffset = this.relativeOffset + count * 2;
 	    return list;
-	};
+  };
 
-	// Parses a list of bytes.
-	Parser.prototype.parseByteList = function(count) {
-	    var list = new Array(count);
-	    var dataView = this.data;
-	    var offset = this.offset + this.relativeOffset;
-	    for (var i = 0; i < count; i++) {
+  // Parses a list of bytes.
+  Parser.prototype.parseByteList = function (count) {
+	    const list = new Array(count);
+	    const dataView = this.data;
+	    let offset = this.offset + this.relativeOffset;
+	    for (let i = 0; i < count; i++) {
 	        list[i] = dataView.getUint8(offset++);
 	    }
 
-	    this.relativeOffset += count;
+	    this.relativeOffset = this.relativeOffset + count;
 	    return list;
-	};
+  };
 
-	/**
+  /**
 	 * Parse a list of items.
 	 * Record count is optional, if omitted it is read from the stream.
 	 * itemCallback is one of the Parser methods.
 	 */
-	Parser.prototype.parseList = function(count, itemCallback) {
+  Parser.prototype.parseList = function (count, itemCallback) {
 	    if (!itemCallback) {
 	        itemCallback = count;
 	        count = this.parseUShort();
 	    }
-	    var list = new Array(count);
-	    for (var i = 0; i < count; i++) {
+	    const list = new Array(count);
+	    for (let i = 0; i < count; i++) {
 	        list[i] = itemCallback.call(this);
 	    }
 	    return list;
-	};
+  };
 
-	Parser.prototype.parseList32 = function(count, itemCallback) {
+  Parser.prototype.parseList32 = function (count, itemCallback) {
 	    if (!itemCallback) {
 	        itemCallback = count;
 	        count = this.parseULong();
 	    }
-	    var list = new Array(count);
-	    for (var i = 0; i < count; i++) {
+	    const list = new Array(count);
+	    for (let i = 0; i < count; i++) {
 	        list[i] = itemCallback.call(this);
 	    }
 	    return list;
-	};
+  };
 
-	/**
+  /**
 	 * Parse a list of records.
 	 * Record count is optional, if omitted it is read from the stream.
 	 * Example of recordDescription: { sequenceIndex: Parser.uShort, lookupListIndex: Parser.uShort }
 	 */
-	Parser.prototype.parseRecordList = function(count, recordDescription) {
+  Parser.prototype.parseRecordList = function (count, recordDescription) {
 	    // If the count argument is absent, read it in the stream.
 	    if (!recordDescription) {
 	        recordDescription = count;
 	        count = this.parseUShort();
 	    }
-	    var records = new Array(count);
-	    var fields = Object.keys(recordDescription);
-	    for (var i = 0; i < count; i++) {
-	        var rec = {};
-	        for (var j = 0; j < fields.length; j++) {
-	            var fieldName = fields[j];
-	            var fieldType = recordDescription[fieldName];
+	    const records = new Array(count);
+	    const fields = Object.keys(recordDescription);
+	    for (let i = 0; i < count; i++) {
+	        const rec = {};
+	        for (let j = 0; j < fields.length; j++) {
+	            const fieldName = fields[j];
+	            const fieldType = recordDescription[fieldName];
 	            rec[fieldName] = fieldType.call(this);
 	        }
 	        records[i] = rec;
 	    }
 	    return records;
-	};
+  };
 
-	Parser.prototype.parseRecordList32 = function(count, recordDescription) {
+  Parser.prototype.parseRecordList32 = function (count, recordDescription) {
 	    // If the count argument is absent, read it in the stream.
 	    if (!recordDescription) {
 	        recordDescription = count;
 	        count = this.parseULong();
 	    }
-	    var records = new Array(count);
-	    var fields = Object.keys(recordDescription);
-	    for (var i = 0; i < count; i++) {
-	        var rec = {};
-	        for (var j = 0; j < fields.length; j++) {
-	            var fieldName = fields[j];
-	            var fieldType = recordDescription[fieldName];
+	    const records = new Array(count);
+	    const fields = Object.keys(recordDescription);
+	    for (let i = 0; i < count; i++) {
+	        const rec = {};
+	        for (let j = 0; j < fields.length; j++) {
+	            const fieldName = fields[j];
+	            const fieldType = recordDescription[fieldName];
 	            rec[fieldName] = fieldType.call(this);
 	        }
 	        records[i] = rec;
 	    }
 	    return records;
-	};
+  };
 
-	// Parse a data structure into an object
-	// Example of description: { sequenceIndex: Parser.uShort, lookupListIndex: Parser.uShort }
-	Parser.prototype.parseStruct = function(description) {
+  // Parse a data structure into an object
+  // Example of description: { sequenceIndex: Parser.uShort, lookupListIndex: Parser.uShort }
+  Parser.prototype.parseStruct = function (description) {
 	    if (typeof description === 'function') {
 	        return description.call(this);
-	    } else {
-	        var fields = Object.keys(description);
-	        var struct = {};
-	        for (var j = 0; j < fields.length; j++) {
-	            var fieldName = fields[j];
-	            var fieldType = description[fieldName];
+	    }
+	        const fields = Object.keys(description);
+	        const struct = {};
+	        for (let j = 0; j < fields.length; j++) {
+	            const fieldName = fields[j];
+	            const fieldType = description[fieldName];
 	            struct[fieldName] = fieldType.call(this);
 	        }
 	        return struct;
-	    }
-	};
+  };
 
-	/**
+  /**
 	 * Parse a GPOS valueRecord
 	 * https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#value-record
 	 * valueFormat is optional, if omitted it is read from the stream.
 	 */
-	Parser.prototype.parseValueRecord = function(valueFormat) {
+  Parser.prototype.parseValueRecord = function (valueFormat) {
 	    if (valueFormat === undefined) {
 	        valueFormat = this.parseUShort();
 	    }
@@ -2448,7 +2452,7 @@
 	        // in this case return undefined instead of an empty object, to save space
 	        return;
 	    }
-	    var valueRecord = {};
+	    const valueRecord = {};
 
 	    if (valueFormat & 0x0001) { valueRecord.xPlacement = this.parseShort(); }
 	    if (valueFormat & 0x0002) { valueRecord.yPlacement = this.parseShort(); }
@@ -2463,55 +2467,55 @@
 	    if (valueFormat & 0x0080) { valueRecord.yAdvDevice = undefined; this.parseShort(); }
 
 	    return valueRecord;
-	};
+  };
 
-	/**
+  /**
 	 * Parse a list of GPOS valueRecords
 	 * https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#value-record
 	 * valueFormat and valueCount are read from the stream.
 	 */
-	Parser.prototype.parseValueRecordList = function() {
-	    var valueFormat = this.parseUShort();
-	    var valueCount = this.parseUShort();
-	    var values = new Array(valueCount);
-	    for (var i = 0; i < valueCount; i++) {
+  Parser.prototype.parseValueRecordList = function () {
+	    const valueFormat = this.parseUShort();
+	    const valueCount = this.parseUShort();
+	    const values = new Array(valueCount);
+	    for (let i = 0; i < valueCount; i++) {
 	        values[i] = this.parseValueRecord(valueFormat);
 	    }
 	    return values;
-	};
+  };
 
-	Parser.prototype.parsePointer = function(description) {
-	    var structOffset = this.parseOffset16();
+  Parser.prototype.parsePointer = function (description) {
+	    const structOffset = this.parseOffset16();
 	    if (structOffset > 0) {
 	        // NULL offset => return undefined
 	        return new Parser(this.data, this.offset + structOffset).parseStruct(description);
 	    }
 	    return undefined;
-	};
+  };
 
-	Parser.prototype.parsePointer32 = function(description) {
-	    var structOffset = this.parseOffset32();
+  Parser.prototype.parsePointer32 = function (description) {
+	    const structOffset = this.parseOffset32();
 	    if (structOffset > 0) {
 	        // NULL offset => return undefined
 	        return new Parser(this.data, this.offset + structOffset).parseStruct(description);
 	    }
 	    return undefined;
-	};
+  };
 
-	/**
+  /**
 	 * Parse a list of offsets to lists of 16-bit integers,
 	 * or a list of offsets to lists of offsets to any kind of items.
 	 * If itemCallback is not provided, a list of list of UShort is assumed.
 	 * If provided, itemCallback is called on each item and must parse the item.
 	 * See examples in tables/gsub.js
 	 */
-	Parser.prototype.parseListOfLists = function(itemCallback) {
-	    var offsets = this.parseOffset16List();
-	    var count = offsets.length;
-	    var relativeOffset = this.relativeOffset;
-	    var list = new Array(count);
-	    for (var i = 0; i < count; i++) {
-	        var start = offsets[i];
+  Parser.prototype.parseListOfLists = function (itemCallback) {
+	    const offsets = this.parseOffset16List();
+	    const count = offsets.length;
+	    const { relativeOffset } = this;
+	    const list = new Array(count);
+	    for (let i = 0; i < count; i++) {
+	        const start = offsets[i];
 	        if (start === 0) {
 	            // NULL offset
 	            // Add i as owned property to list. Convenient with assert.
@@ -2520,9 +2524,9 @@
 	        }
 	        this.relativeOffset = start;
 	        if (itemCallback) {
-	            var subOffsets = this.parseOffset16List();
-	            var subList = new Array(subOffsets.length);
-	            for (var j = 0; j < subOffsets.length; j++) {
+	            const subOffsets = this.parseOffset16List();
+	            const subList = new Array(subOffsets.length);
+	            for (let j = 0; j < subOffsets.length; j++) {
 	                this.relativeOffset = start + subOffsets[j];
 	                subList[j] = itemCallback.call(this);
 	            }
@@ -2533,220 +2537,220 @@
 	    }
 	    this.relativeOffset = relativeOffset;
 	    return list;
-	};
+  };
 
-	///// Complex tables parsing //////////////////////////////////
+  /// // Complex tables parsing //////////////////////////////////
 
-	// Parse a coverage table in a GSUB, GPOS or GDEF table.
-	// https://www.microsoft.com/typography/OTSPEC/chapter2.htm
-	// parser.offset must point to the start of the table containing the coverage.
-	Parser.prototype.parseCoverage = function() {
-	    var startOffset = this.offset + this.relativeOffset;
-	    var format = this.parseUShort();
-	    var count = this.parseUShort();
+  // Parse a coverage table in a GSUB, GPOS or GDEF table.
+  // https://www.microsoft.com/typography/OTSPEC/chapter2.htm
+  // parser.offset must point to the start of the table containing the coverage.
+  Parser.prototype.parseCoverage = function () {
+	    const startOffset = this.offset + this.relativeOffset;
+	    const format = this.parseUShort();
+	    const count = this.parseUShort();
 	    if (format === 1) {
 	        return {
 	            format: 1,
-	            glyphs: this.parseUShortList(count)
+	            glyphs: this.parseUShortList(count),
 	        };
-	    } else if (format === 2) {
-	        var ranges = new Array(count);
-	        for (var i = 0; i < count; i++) {
+	    } if (format === 2) {
+	        const ranges = new Array(count);
+	        for (let i = 0; i < count; i++) {
 	            ranges[i] = {
 	                start: this.parseUShort(),
 	                end: this.parseUShort(),
-	                index: this.parseUShort()
+	                index: this.parseUShort(),
 	            };
 	        }
 	        return {
 	            format: 2,
-	            ranges: ranges
+	            ranges,
 	        };
 	    }
-	    throw new Error('0x' + startOffset.toString(16) + ': Coverage format must be 1 or 2.');
-	};
+	    throw new Error(`0x${startOffset.toString(16)}: Coverage format must be 1 or 2.`);
+  };
 
-	// Parse a Class Definition Table in a GSUB, GPOS or GDEF table.
-	// https://www.microsoft.com/typography/OTSPEC/chapter2.htm
-	Parser.prototype.parseClassDef = function() {
-	    var startOffset = this.offset + this.relativeOffset;
-	    var format = this.parseUShort();
+  // Parse a Class Definition Table in a GSUB, GPOS or GDEF table.
+  // https://www.microsoft.com/typography/OTSPEC/chapter2.htm
+  Parser.prototype.parseClassDef = function () {
+	    const startOffset = this.offset + this.relativeOffset;
+	    const format = this.parseUShort();
 	    if (format === 1) {
 	        return {
 	            format: 1,
 	            startGlyph: this.parseUShort(),
-	            classes: this.parseUShortList()
+	            classes: this.parseUShortList(),
 	        };
-	    } else if (format === 2) {
+	    } if (format === 2) {
 	        return {
 	            format: 2,
 	            ranges: this.parseRecordList({
 	                start: Parser.uShort,
 	                end: Parser.uShort,
-	                classId: Parser.uShort
-	            })
+	                classId: Parser.uShort,
+	            }),
 	        };
 	    }
-	    throw new Error('0x' + startOffset.toString(16) + ': ClassDef format must be 1 or 2.');
-	};
+	    throw new Error(`0x${startOffset.toString(16)}: ClassDef format must be 1 or 2.`);
+  };
 
-	///// Static methods ///////////////////////////////////
-	// These convenience methods can be used as callbacks and should be called with "this" context set to a Parser instance.
+  /// // Static methods ///////////////////////////////////
+  // These convenience methods can be used as callbacks and should be called with "this" context set to a Parser instance.
 
-	Parser.list = function(count, itemCallback) {
-	    return function() {
+  Parser.list = function (count, itemCallback) {
+	    return function () {
 	        return this.parseList(count, itemCallback);
 	    };
-	};
+  };
 
-	Parser.list32 = function(count, itemCallback) {
-	    return function() {
+  Parser.list32 = function (count, itemCallback) {
+	    return function () {
 	        return this.parseList32(count, itemCallback);
 	    };
-	};
+  };
 
-	Parser.recordList = function(count, recordDescription) {
-	    return function() {
+  Parser.recordList = function (count, recordDescription) {
+	    return function () {
 	        return this.parseRecordList(count, recordDescription);
 	    };
-	};
+  };
 
-	Parser.recordList32 = function(count, recordDescription) {
-	    return function() {
+  Parser.recordList32 = function (count, recordDescription) {
+	    return function () {
 	        return this.parseRecordList32(count, recordDescription);
 	    };
-	};
+  };
 
-	Parser.pointer = function(description) {
-	    return function() {
+  Parser.pointer = function (description) {
+	    return function () {
 	        return this.parsePointer(description);
 	    };
-	};
+  };
 
-	Parser.pointer32 = function(description) {
-	    return function() {
+  Parser.pointer32 = function (description) {
+	    return function () {
 	        return this.parsePointer32(description);
 	    };
-	};
+  };
 
-	Parser.tag = Parser.prototype.parseTag;
-	Parser.byte = Parser.prototype.parseByte;
-	Parser.uShort = Parser.offset16 = Parser.prototype.parseUShort;
-	Parser.uShortList = Parser.prototype.parseUShortList;
-	Parser.uLong = Parser.offset32 = Parser.prototype.parseULong;
-	Parser.uLongList = Parser.prototype.parseULongList;
-	Parser.struct = Parser.prototype.parseStruct;
-	Parser.coverage = Parser.prototype.parseCoverage;
-	Parser.classDef = Parser.prototype.parseClassDef;
+  Parser.tag = Parser.prototype.parseTag;
+  Parser.byte = Parser.prototype.parseByte;
+  Parser.uShort = Parser.offset16 = Parser.prototype.parseUShort;
+  Parser.uShortList = Parser.prototype.parseUShortList;
+  Parser.uLong = Parser.offset32 = Parser.prototype.parseULong;
+  Parser.uLongList = Parser.prototype.parseULongList;
+  Parser.struct = Parser.prototype.parseStruct;
+  Parser.coverage = Parser.prototype.parseCoverage;
+  Parser.classDef = Parser.prototype.parseClassDef;
 
-	///// Script, Feature, Lookup lists ///////////////////////////////////////////////
-	// https://www.microsoft.com/typography/OTSPEC/chapter2.htm
+  /// // Script, Feature, Lookup lists ///////////////////////////////////////////////
+  // https://www.microsoft.com/typography/OTSPEC/chapter2.htm
 
-	var langSysTable = {
+  const langSysTable = {
 	    reserved: Parser.uShort,
 	    reqFeatureIndex: Parser.uShort,
-	    featureIndexes: Parser.uShortList
-	};
+	    featureIndexes: Parser.uShortList,
+  };
 
-	Parser.prototype.parseScriptList = function() {
+  Parser.prototype.parseScriptList = function () {
 	    return this.parsePointer(Parser.recordList({
 	        tag: Parser.tag,
 	        script: Parser.pointer({
 	            defaultLangSys: Parser.pointer(langSysTable),
 	            langSysRecords: Parser.recordList({
 	                tag: Parser.tag,
-	                langSys: Parser.pointer(langSysTable)
-	            })
-	        })
+	                langSys: Parser.pointer(langSysTable),
+	            }),
+	        }),
 	    })) || [];
-	};
+  };
 
-	Parser.prototype.parseFeatureList = function() {
+  Parser.prototype.parseFeatureList = function () {
 	    return this.parsePointer(Parser.recordList({
 	        tag: Parser.tag,
 	        feature: Parser.pointer({
 	            featureParams: Parser.offset16,
-	            lookupListIndexes: Parser.uShortList
-	        })
+	            lookupListIndexes: Parser.uShortList,
+	        }),
 	    })) || [];
-	};
+  };
 
-	Parser.prototype.parseLookupList = function(lookupTableParsers) {
-	    return this.parsePointer(Parser.list(Parser.pointer(function() {
-	        var lookupType = this.parseUShort();
-	        check.argument(1 <= lookupType && lookupType <= 9, 'GPOS/GSUB lookup type ' + lookupType + ' unknown.');
-	        var lookupFlag = this.parseUShort();
-	        var useMarkFilteringSet = lookupFlag & 0x10;
+  Parser.prototype.parseLookupList = function (lookupTableParsers) {
+	    return this.parsePointer(Parser.list(Parser.pointer(function () {
+	        const lookupType = this.parseUShort();
+	        check.argument(lookupType >= 1 && lookupType <= 9, `GPOS/GSUB lookup type ${lookupType} unknown.`);
+	        const lookupFlag = this.parseUShort();
+	        const useMarkFilteringSet = lookupFlag & 0x10;
 	        return {
-	            lookupType: lookupType,
-	            lookupFlag: lookupFlag,
+	            lookupType,
+	            lookupFlag,
 	            subtables: this.parseList(Parser.pointer(lookupTableParsers[lookupType])),
-	            markFilteringSet: useMarkFilteringSet ? this.parseUShort() : undefined
+	            markFilteringSet: useMarkFilteringSet ? this.parseUShort() : undefined,
 	        };
 	    }))) || [];
-	};
+  };
 
-	Parser.prototype.parseFeatureVariationsList = function() {
-	    return this.parsePointer32(function() {
-	        var majorVersion = this.parseUShort();
-	        var minorVersion = this.parseUShort();
+  Parser.prototype.parseFeatureVariationsList = function () {
+	    return this.parsePointer32(function () {
+	        const majorVersion = this.parseUShort();
+	        const minorVersion = this.parseUShort();
 	        check.argument(majorVersion === 1 && minorVersion < 1, 'GPOS/GSUB feature variations table unknown.');
-	        var featureVariations = this.parseRecordList32({
+	        const featureVariations = this.parseRecordList32({
 	            conditionSetOffset: Parser.offset32,
-	            featureTableSubstitutionOffset: Parser.offset32
+	            featureTableSubstitutionOffset: Parser.offset32,
 	        });
 	        return featureVariations;
 	    }) || [];
-	};
+  };
 
-	var parse = {
-	    getByte: getByte,
+  const parse = {
+	    getByte,
 	    getCard8: getByte,
-	    getUShort: getUShort,
+	    getUShort,
 	    getCard16: getUShort,
-	    getShort: getShort,
-	    getULong: getULong,
-	    getFixed: getFixed,
-	    getTag: getTag,
-	    getOffset: getOffset,
-	    getBytes: getBytes,
-	    bytesToString: bytesToString,
-	    Parser: Parser,
-	};
+	    getShort,
+	    getULong,
+	    getFixed,
+	    getTag,
+	    getOffset,
+	    getBytes,
+	    bytesToString,
+	    Parser,
+  };
 
-	// The `cmap` table stores the mappings from characters to glyphs.
+  // The `cmap` table stores the mappings from characters to glyphs.
 
-	function parseCmapTableFormat12(cmap, p) {
-	    //Skip reserved.
+  function parseCmapTableFormat12(cmap, p) {
+	    // Skip reserved.
 	    p.parseUShort();
 
 	    // Length in bytes of the sub-tables.
 	    cmap.length = p.parseULong();
 	    cmap.language = p.parseULong();
 
-	    var groupCount;
+	    let groupCount;
 	    cmap.groupCount = groupCount = p.parseULong();
 	    cmap.glyphIndexMap = {};
 
-	    for (var i = 0; i < groupCount; i += 1) {
-	        var startCharCode = p.parseULong();
-	        var endCharCode = p.parseULong();
-	        var startGlyphId = p.parseULong();
+	    for (let i = 0; i < groupCount; i = i + 1) {
+	        const startCharCode = p.parseULong();
+	        const endCharCode = p.parseULong();
+	        let startGlyphId = p.parseULong();
 
-	        for (var c = startCharCode; c <= endCharCode; c += 1) {
+	        for (let c = startCharCode; c <= endCharCode; c = c + 1) {
 	            cmap.glyphIndexMap[c] = startGlyphId;
 	            startGlyphId++;
 	        }
 	    }
-	}
+  }
 
-	function parseCmapTableFormat4(cmap, p, data, start, offset) {
+  function parseCmapTableFormat4(cmap, p, data, start, offset) {
 	    // Length in bytes of the sub-tables.
 	    cmap.length = p.parseUShort();
 	    cmap.language = p.parseUShort();
 
 	    // segCount is stored x 2.
-	    var segCount;
+	    let segCount;
 	    cmap.segCount = segCount = p.parseUShort() >> 1;
 
 	    // Skip searchRange, entrySelector, rangeShift.
@@ -2754,28 +2758,28 @@
 
 	    // The "unrolled" mapping from character codes to glyph indices.
 	    cmap.glyphIndexMap = {};
-	    var endCountParser = new parse.Parser(data, start + offset + 14);
-	    var startCountParser = new parse.Parser(data, start + offset + 16 + segCount * 2);
-	    var idDeltaParser = new parse.Parser(data, start + offset + 16 + segCount * 4);
-	    var idRangeOffsetParser = new parse.Parser(data, start + offset + 16 + segCount * 6);
-	    var glyphIndexOffset = start + offset + 16 + segCount * 8;
-	    for (var i = 0; i < segCount - 1; i += 1) {
-	        var glyphIndex = (void 0);
-	        var endCount = endCountParser.parseUShort();
-	        var startCount = startCountParser.parseUShort();
-	        var idDelta = idDeltaParser.parseShort();
-	        var idRangeOffset = idRangeOffsetParser.parseUShort();
-	        for (var c = startCount; c <= endCount; c += 1) {
+	    const endCountParser = new parse.Parser(data, start + offset + 14);
+	    const startCountParser = new parse.Parser(data, start + offset + 16 + segCount * 2);
+	    const idDeltaParser = new parse.Parser(data, start + offset + 16 + segCount * 4);
+	    const idRangeOffsetParser = new parse.Parser(data, start + offset + 16 + segCount * 6);
+	    let glyphIndexOffset = start + offset + 16 + segCount * 8;
+	    for (let i = 0; i < segCount - 1; i = i + 1) {
+	        let glyphIndex = (void 0);
+	        const endCount = endCountParser.parseUShort();
+	        const startCount = startCountParser.parseUShort();
+	        const idDelta = idDeltaParser.parseShort();
+	        const idRangeOffset = idRangeOffsetParser.parseUShort();
+	        for (let c = startCount; c <= endCount; c = c + 1) {
 	            if (idRangeOffset !== 0) {
 	                // The idRangeOffset is relative to the current position in the idRangeOffset array.
 	                // Take the current offset in the idRangeOffset array.
 	                glyphIndexOffset = (idRangeOffsetParser.offset + idRangeOffsetParser.relativeOffset - 2);
 
 	                // Add the value of the idRangeOffset, which will move us into the glyphIndex array.
-	                glyphIndexOffset += idRangeOffset;
+	                glyphIndexOffset = glyphIndexOffset + idRangeOffset;
 
 	                // Then add the character index of the current segment, multiplied by 2 for USHORTs.
-	                glyphIndexOffset += (c - startCount) * 2;
+	                glyphIndexOffset = glyphIndexOffset + (c - startCount) * 2;
 	                glyphIndex = parse.getUShort(data, glyphIndexOffset);
 	                if (glyphIndex !== 0) {
 	                    glyphIndex = (glyphIndex + idDelta) & 0xFFFF;
@@ -2787,25 +2791,25 @@
 	            cmap.glyphIndexMap[c] = glyphIndex;
 	        }
 	    }
-	}
+  }
 
-	// Parse the `cmap` table. This table stores the mappings from characters to glyphs.
-	// There are many available formats, but we only support the Windows format 4 and 12.
-	// This function returns a `CmapEncoding` object or null if no supported format could be found.
-	function parseCmapTable(data, start) {
-	    var cmap = {};
+  // Parse the `cmap` table. This table stores the mappings from characters to glyphs.
+  // There are many available formats, but we only support the Windows format 4 and 12.
+  // This function returns a `CmapEncoding` object or null if no supported format could be found.
+  function parseCmapTable(data, start) {
+	    const cmap = {};
 	    cmap.version = parse.getUShort(data, start);
 	    check.argument(cmap.version === 0, 'cmap table version should be 0.');
 
 	    // The cmap table can contain many sub-tables, each with their own format.
 	    // We're only interested in a "platform 0" (Unicode format) and "platform 3" (Windows format) table.
 	    cmap.numTables = parse.getUShort(data, start + 2);
-	    var offset = -1;
-	    for (var i = cmap.numTables - 1; i >= 0; i -= 1) {
-	        var platformId = parse.getUShort(data, start + 4 + (i * 8));
-	        var encodingId = parse.getUShort(data, start + 4 + (i * 8) + 2);
-	        if ((platformId === 3 && (encodingId === 0 || encodingId === 1 || encodingId === 10)) ||
-	            (platformId === 0 && (encodingId === 0 || encodingId === 1 || encodingId === 2 || encodingId === 3 || encodingId === 4))) {
+	    let offset = -1;
+	    for (let i = cmap.numTables - 1; i >= 0; i = i - 1) {
+	        const platformId = parse.getUShort(data, start + 4 + (i * 8));
+	        const encodingId = parse.getUShort(data, start + 4 + (i * 8) + 2);
+	        if ((platformId === 3 && (encodingId === 0 || encodingId === 1 || encodingId === 10))
+	            || (platformId === 0 && (encodingId === 0 || encodingId === 1 || encodingId === 2 || encodingId === 3 || encodingId === 4))) {
 	            offset = parse.getULong(data, start + 4 + (i * 8) + 4);
 	            break;
 	        }
@@ -2816,7 +2820,7 @@
 	        throw new Error('No valid cmap sub-tables found.');
 	    }
 
-	    var p = new parse.Parser(data, start + offset);
+	    const p = new parse.Parser(data, start + offset);
 	    cmap.format = p.parseUShort();
 
 	    if (cmap.format === 12) {
@@ -2824,40 +2828,40 @@
 	    } else if (cmap.format === 4) {
 	        parseCmapTableFormat4(cmap, p, data, start, offset);
 	    } else {
-	        throw new Error('Only format 4 and 12 cmap tables are supported (found format ' + cmap.format + ').');
+	        throw new Error(`Only format 4 and 12 cmap tables are supported (found format ${cmap.format}).`);
 	    }
 
 	    return cmap;
-	}
+  }
 
-	function addSegment(t, code, glyphIndex) {
+  function addSegment(t, code, glyphIndex) {
 	    t.segments.push({
 	        end: code,
 	        start: code,
 	        delta: -(code - glyphIndex),
 	        offset: 0,
-	        glyphIndex: glyphIndex
+	        glyphIndex,
 	    });
-	}
+  }
 
-	function addTerminatorSegment(t) {
+  function addTerminatorSegment(t) {
 	    t.segments.push({
 	        end: 0xFFFF,
 	        start: 0xFFFF,
 	        delta: 1,
-	        offset: 0
+	        offset: 0,
 	    });
-	}
+  }
 
-	// Make cmap table, format 4 by default, 12 if needed only
-	function makeCmapTable(glyphs) {
+  // Make cmap table, format 4 by default, 12 if needed only
+  function makeCmapTable(glyphs) {
 	    // Plan 0 is the base Unicode Plan but emojis, for example are on another plan, and needs cmap 12 format (with 32bit)
-	    var isPlan0Only = true;
-	    var i;
+	    let isPlan0Only = true;
+	    let i;
 
 	    // Check if we need to add cmap format 12 or if format 4 only is fine
-	    for (i = glyphs.length - 1; i > 0; i -= 1) {
-	        var g = glyphs.get(i);
+	    for (i = glyphs.length - 1; i > 0; i = i - 1) {
+	        const g = glyphs.get(i);
 	        if (g.unicode > 65535) {
 	            console.log('Adding CMAP format 12 (needed!)');
 	            isPlan0Only = false;
@@ -2865,92 +2869,91 @@
 	        }
 	    }
 
-	    var cmapTable = [
-	        {name: 'version', type: 'USHORT', value: 0},
-	        {name: 'numTables', type: 'USHORT', value: isPlan0Only ? 1 : 2},
+	    let cmapTable = [
+	        { name: 'version', type: 'USHORT', value: 0 },
+	        { name: 'numTables', type: 'USHORT', value: isPlan0Only ? 1 : 2 },
 
 	        // CMAP 4 header
-	        {name: 'platformID', type: 'USHORT', value: 3},
-	        {name: 'encodingID', type: 'USHORT', value: 1},
-	        {name: 'offset', type: 'ULONG', value: isPlan0Only ? 12 : (12 + 8)}
+	        { name: 'platformID', type: 'USHORT', value: 3 },
+	        { name: 'encodingID', type: 'USHORT', value: 1 },
+	        { name: 'offset', type: 'ULONG', value: isPlan0Only ? 12 : (12 + 8) },
 	    ];
 
-	    if (!isPlan0Only)
-	        { cmapTable = cmapTable.concat([
+	    if (!isPlan0Only) {
+      cmapTable = cmapTable.concat([
 	            // CMAP 12 header
-	            {name: 'cmap12PlatformID', type: 'USHORT', value: 3}, // We encode only for PlatformID = 3 (Windows) because it is supported everywhere
-	            {name: 'cmap12EncodingID', type: 'USHORT', value: 10},
-	            {name: 'cmap12Offset', type: 'ULONG', value: 0}
-	        ]); }
+	            { name: 'cmap12PlatformID', type: 'USHORT', value: 3 }, // We encode only for PlatformID = 3 (Windows) because it is supported everywhere
+	            { name: 'cmap12EncodingID', type: 'USHORT', value: 10 },
+	            { name: 'cmap12Offset', type: 'ULONG', value: 0 },
+	        ]);
+    }
 
 	    cmapTable = cmapTable.concat([
 	        // CMAP 4 Subtable
-	        {name: 'format', type: 'USHORT', value: 4},
-	        {name: 'cmap4Length', type: 'USHORT', value: 0},
-	        {name: 'language', type: 'USHORT', value: 0},
-	        {name: 'segCountX2', type: 'USHORT', value: 0},
-	        {name: 'searchRange', type: 'USHORT', value: 0},
-	        {name: 'entrySelector', type: 'USHORT', value: 0},
-	        {name: 'rangeShift', type: 'USHORT', value: 0}
+	        { name: 'format', type: 'USHORT', value: 4 },
+	        { name: 'cmap4Length', type: 'USHORT', value: 0 },
+	        { name: 'language', type: 'USHORT', value: 0 },
+	        { name: 'segCountX2', type: 'USHORT', value: 0 },
+	        { name: 'searchRange', type: 'USHORT', value: 0 },
+	        { name: 'entrySelector', type: 'USHORT', value: 0 },
+	        { name: 'rangeShift', type: 'USHORT', value: 0 },
 	    ]);
 
-	    var t = new table.Table('cmap', cmapTable);
+	    const t = new table.Table('cmap', cmapTable);
 
 	    t.segments = [];
-	    for (i = 0; i < glyphs.length; i += 1) {
-	        var glyph = glyphs.get(i);
-	        for (var j = 0; j < glyph.unicodes.length; j += 1) {
+	    for (i = 0; i < glyphs.length; i = i + 1) {
+	        const glyph = glyphs.get(i);
+	        for (let j = 0; j < glyph.unicodes.length; j = j + 1) {
 	            addSegment(t, glyph.unicodes[j], i);
 	        }
 
-	        t.segments = t.segments.sort(function (a, b) {
-	            return a.start - b.start;
-	        });
+	        t.segments = t.segments.sort((a, b) => a.start - b.start);
 	    }
 
 	    addTerminatorSegment(t);
 
-	    var segCount = t.segments.length;
-	    var segCountToRemove = 0;
+	    const segCount = t.segments.length;
+	    let segCountToRemove = 0;
 
 	    // CMAP 4
 	    // Set up parallel segment arrays.
-	    var endCounts = [];
-	    var startCounts = [];
-	    var idDeltas = [];
-	    var idRangeOffsets = [];
-	    var glyphIds = [];
+	    let endCounts = [];
+	    let startCounts = [];
+	    let idDeltas = [];
+	    let idRangeOffsets = [];
+	    let glyphIds = [];
 
 	    // CMAP 12
-	    var cmap12Groups = [];
+	    let cmap12Groups = [];
 
 	    // Reminder this loop is not following the specification at 100%
 	    // The specification -> find suites of characters and make a group
 	    // Here we're doing one group for each letter
 	    // Doing as the spec can save 8 times (or more) space
-	    for (i = 0; i < segCount; i += 1) {
-	        var segment = t.segments[i];
+	    for (i = 0; i < segCount; i = i + 1) {
+	        const segment = t.segments[i];
 
 	        // CMAP 4
 	        if (segment.end <= 65535 && segment.start <= 65535) {
-	            endCounts = endCounts.concat({name: 'end_' + i, type: 'USHORT', value: segment.end});
-	            startCounts = startCounts.concat({name: 'start_' + i, type: 'USHORT', value: segment.start});
-	            idDeltas = idDeltas.concat({name: 'idDelta_' + i, type: 'SHORT', value: segment.delta});
-	            idRangeOffsets = idRangeOffsets.concat({name: 'idRangeOffset_' + i, type: 'USHORT', value: segment.offset});
+	            endCounts = endCounts.concat({ name: `end_${i}`, type: 'USHORT', value: segment.end });
+	            startCounts = startCounts.concat({ name: `start_${i}`, type: 'USHORT', value: segment.start });
+	            idDeltas = idDeltas.concat({ name: `idDelta_${i}`, type: 'SHORT', value: segment.delta });
+	            idRangeOffsets = idRangeOffsets.concat({ name: `idRangeOffset_${i}`, type: 'USHORT', value: segment.offset });
 	            if (segment.glyphId !== undefined) {
-	                glyphIds = glyphIds.concat({name: 'glyph_' + i, type: 'USHORT', value: segment.glyphId});
+	                glyphIds = glyphIds.concat({ name: `glyph_${i}`, type: 'USHORT', value: segment.glyphId });
 	            }
 	        } else {
 	            // Skip Unicode > 65535 (16bit unsigned max) for CMAP 4, will be added in CMAP 12
-	            segCountToRemove += 1;
+	            segCountToRemove = segCountToRemove + 1;
 	        }
 
 	        // CMAP 12
 	        // Skip Terminator Segment
 	        if (!isPlan0Only && segment.glyphIndex !== undefined) {
-	            cmap12Groups = cmap12Groups.concat({name: 'cmap12Start_' + i, type: 'ULONG', value: segment.start});
-	            cmap12Groups = cmap12Groups.concat({name: 'cmap12End_' + i, type: 'ULONG', value: segment.end});
-	            cmap12Groups = cmap12Groups.concat({name: 'cmap12Glyph_' + i, type: 'ULONG', value: segment.glyphIndex});
+	            cmap12Groups = cmap12Groups.concat({ name: `cmap12Start_${i}`, type: 'ULONG', value: segment.start });
+	            cmap12Groups = cmap12Groups.concat({ name: `cmap12End_${i}`, type: 'ULONG', value: segment.end });
+	            cmap12Groups = cmap12Groups.concat({ name: `cmap12Glyph_${i}`, type: 'ULONG', value: segment.glyphIndex });
 	        }
 	    }
 
@@ -2961,45 +2964,45 @@
 	    t.rangeShift = t.segCountX2 - t.searchRange;
 
 	    t.fields = t.fields.concat(endCounts);
-	    t.fields.push({name: 'reservedPad', type: 'USHORT', value: 0});
+	    t.fields.push({ name: 'reservedPad', type: 'USHORT', value: 0 });
 	    t.fields = t.fields.concat(startCounts);
 	    t.fields = t.fields.concat(idDeltas);
 	    t.fields = t.fields.concat(idRangeOffsets);
 	    t.fields = t.fields.concat(glyphIds);
 
-	    t.cmap4Length = 14 + // Subtable header
-	        endCounts.length * 2 +
-	        2 + // reservedPad
-	        startCounts.length * 2 +
-	        idDeltas.length * 2 +
-	        idRangeOffsets.length * 2 +
-	        glyphIds.length * 2;
+	    t.cmap4Length = 14 // Subtable header
+	        + endCounts.length * 2
+	        + 2 // reservedPad
+	        + startCounts.length * 2
+	        + idDeltas.length * 2
+	        + idRangeOffsets.length * 2
+	        + glyphIds.length * 2;
 
 	    if (!isPlan0Only) {
 	        // CMAP 12 Subtable
-	        var cmap12Length = 16 + // Subtable header
-	            cmap12Groups.length * 4;
+	        const cmap12Length = 16 // Subtable header
+	            + cmap12Groups.length * 4;
 
 	        t.cmap12Offset = 12 + (2 * 2) + 4 + t.cmap4Length;
 	        t.fields = t.fields.concat([
-	            {name: 'cmap12Format', type: 'USHORT', value: 12},
-	            {name: 'cmap12Reserved', type: 'USHORT', value: 0},
-	            {name: 'cmap12Length', type: 'ULONG', value: cmap12Length},
-	            {name: 'cmap12Language', type: 'ULONG', value: 0},
-	            {name: 'cmap12nGroups', type: 'ULONG', value: cmap12Groups.length / 3}
+	            { name: 'cmap12Format', type: 'USHORT', value: 12 },
+	            { name: 'cmap12Reserved', type: 'USHORT', value: 0 },
+	            { name: 'cmap12Length', type: 'ULONG', value: cmap12Length },
+	            { name: 'cmap12Language', type: 'ULONG', value: 0 },
+	            { name: 'cmap12nGroups', type: 'ULONG', value: cmap12Groups.length / 3 },
 	        ]);
 
 	        t.fields = t.fields.concat(cmap12Groups);
 	    }
 
 	    return t;
-	}
+  }
 
-	var cmap = { parse: parseCmapTable, make: makeCmapTable };
+  const cmap = { parse: parseCmapTable, make: makeCmapTable };
 
-	// Glyph encoding
+  // Glyph encoding
 
-	var cffStandardStrings = [
+  const cffStandardStrings = [
 	    '.notdef', 'space', 'exclam', 'quotedbl', 'numbersign', 'dollar', 'percent', 'ampersand', 'quoteright',
 	    'parenleft', 'parenright', 'asterisk', 'plus', 'comma', 'hyphen', 'period', 'slash', 'zero', 'one', 'two',
 	    'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'colon', 'semicolon', 'less', 'equal', 'greater',
@@ -3044,7 +3047,7 @@
 	    'Uacutesmall', 'Ucircumflexsmall', 'Udieresissmall', 'Yacutesmall', 'Thornsmall', 'Ydieresissmall', '001.000',
 	    '001.001', '001.002', '001.003', 'Black', 'Bold', 'Book', 'Light', 'Medium', 'Regular', 'Roman', 'Semibold'];
 
-	var cffStandardEncoding = [
+  const cffStandardEncoding = [
 	    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
 	    '', '', '', '', 'space', 'exclam', 'quotedbl', 'numbersign', 'dollar', 'percent', 'ampersand', 'quoteright',
 	    'parenleft', 'parenright', 'asterisk', 'plus', 'comma', 'hyphen', 'period', 'slash', 'zero', 'one', 'two',
@@ -3063,7 +3066,7 @@
 	    '', 'Lslash', 'Oslash', 'OE', 'ordmasculine', '', '', '', '', '', 'ae', '', '', '', 'dotlessi', '', '',
 	    'lslash', 'oslash', 'oe', 'germandbls'];
 
-	var cffExpertEncoding = [
+  const cffExpertEncoding = [
 	    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
 	    '', '', '', '', 'space', 'exclamsmall', 'Hungarumlautsmall', '', 'dollaroldstyle', 'dollarsuperior',
 	    'ampersandsmall', 'Acutesmall', 'parenleftsuperior', 'parenrightsuperior', 'twodotenleader', 'onedotenleader',
@@ -3091,7 +3094,7 @@
 	    'Ocircumflexsmall', 'Otildesmall', 'Odieresissmall', 'OEsmall', 'Oslashsmall', 'Ugravesmall', 'Uacutesmall',
 	    'Ucircumflexsmall', 'Udieresissmall', 'Yacutesmall', 'Thornsmall', 'Ydieresissmall'];
 
-	var standardNames = [
+  const standardNames = [
 	    '.notdef', '.null', 'nonmarkingreturn', 'space', 'exclam', 'quotedbl', 'numbersign', 'dollar', 'percent',
 	    'ampersand', 'quotesingle', 'parenleft', 'parenright', 'asterisk', 'plus', 'comma', 'hyphen', 'period', 'slash',
 	    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'colon', 'semicolon', 'less',
@@ -3118,7 +3121,7 @@
 	    'onehalf', 'onequarter', 'threequarters', 'franc', 'Gbreve', 'gbreve', 'Idotaccent', 'Scedilla', 'scedilla',
 	    'Cacute', 'cacute', 'Ccaron', 'ccaron', 'dcroat'];
 
-	/**
+  /**
 	 * This is the encoding used for fonts created from scratch.
 	 * It loops through all glyphs and finds the appropriate unicode value.
 	 * Since it's linear time, other encodings will be faster.
@@ -3127,17 +3130,17 @@
 	 * @constructor
 	 * @param {opentype.Font}
 	 */
-	function DefaultEncoding(font) {
+  function DefaultEncoding(font) {
 	    this.font = font;
-	}
+  }
 
-	DefaultEncoding.prototype.charToGlyphIndex = function(c) {
-	    var code = c.codePointAt(0);
-	    var glyphs = this.font.glyphs;
+  DefaultEncoding.prototype.charToGlyphIndex = function (c) {
+	    const code = c.codePointAt(0);
+	    const { glyphs } = this.font;
 	    if (glyphs) {
-	        for (var i = 0; i < glyphs.length; i += 1) {
-	            var glyph = glyphs.get(i);
-	            for (var j = 0; j < glyph.unicodes.length; j += 1) {
+	        for (let i = 0; i < glyphs.length; i = i + 1) {
+	            const glyph = glyphs.get(i);
+	            for (let j = 0; j < glyph.unicodes.length; j = j + 1) {
 	                if (glyph.unicodes[j] === code) {
 	                    return i;
 	                }
@@ -3145,62 +3148,62 @@
 	        }
 	    }
 	    return null;
-	};
+  };
 
-	/**
+  /**
 	 * @exports opentype.CmapEncoding
 	 * @class
 	 * @constructor
 	 * @param {Object} cmap - a object with the cmap encoded data
 	 */
-	function CmapEncoding(cmap) {
+  function CmapEncoding(cmap) {
 	    this.cmap = cmap;
-	}
+  }
 
-	/**
+  /**
 	 * @param  {string} c - the character
 	 * @return {number} The glyph index.
 	 */
-	CmapEncoding.prototype.charToGlyphIndex = function(c) {
+  CmapEncoding.prototype.charToGlyphIndex = function (c) {
 	    return this.cmap.glyphIndexMap[c.codePointAt(0)] || 0;
-	};
+  };
 
-	/**
+  /**
 	 * @exports opentype.CffEncoding
 	 * @class
 	 * @constructor
 	 * @param {string} encoding - The encoding
 	 * @param {Array} charset - The character set.
 	 */
-	function CffEncoding(encoding, charset) {
+  function CffEncoding(encoding, charset) {
 	    this.encoding = encoding;
 	    this.charset = charset;
-	}
+  }
 
-	/**
+  /**
 	 * @param  {string} s - The character
 	 * @return {number} The index.
 	 */
-	CffEncoding.prototype.charToGlyphIndex = function(s) {
-	    var code = s.codePointAt(0);
-	    var charName = this.encoding[code];
+  CffEncoding.prototype.charToGlyphIndex = function (s) {
+	    const code = s.codePointAt(0);
+	    const charName = this.encoding[code];
 	    return this.charset.indexOf(charName);
-	};
+  };
 
-	/**
+  /**
 	 * @exports opentype.GlyphNames
 	 * @class
 	 * @constructor
 	 * @param {Object} post
 	 */
-	function GlyphNames(post) {
+  function GlyphNames(post) {
 	    switch (post.version) {
 	        case 1:
 	            this.names = standardNames.slice();
 	            break;
 	        case 2:
 	            this.names = new Array(post.numberOfGlyphs);
-	            for (var i = 0; i < post.numberOfGlyphs; i++) {
+	            for (let i = 0; i < post.numberOfGlyphs; i++) {
 	                if (post.glyphNameIndex[i] < standardNames.length) {
 	                    this.names[i] = standardNames[post.glyphNameIndex[i]];
 	                } else {
@@ -3211,7 +3214,7 @@
 	            break;
 	        case 2.5:
 	            this.names = new Array(post.numberOfGlyphs);
-	            for (var i$1 = 0; i$1 < post.numberOfGlyphs; i$1++) {
+	            for (let i$1 = 0; i$1 < post.numberOfGlyphs; i$1++) {
 	                this.names[i$1] = standardNames[i$1 + post.glyphNameIndex[i$1]];
 	            }
 
@@ -3223,42 +3226,42 @@
 	            this.names = [];
 	            break;
 	    }
-	}
+  }
 
-	/**
+  /**
 	 * Gets the index of a glyph by name.
 	 * @param  {string} name - The glyph name
 	 * @return {number} The index
 	 */
-	GlyphNames.prototype.nameToGlyphIndex = function(name) {
+  GlyphNames.prototype.nameToGlyphIndex = function (name) {
 	    return this.names.indexOf(name);
-	};
+  };
 
-	/**
+  /**
 	 * @param  {number} gid
 	 * @return {string}
 	 */
-	GlyphNames.prototype.glyphIndexToName = function(gid) {
+  GlyphNames.prototype.glyphIndexToName = function (gid) {
 	    return this.names[gid];
-	};
+  };
 
-	function addGlyphNamesAll(font) {
-	    var glyph;
-	    var glyphIndexMap = font.tables.cmap.glyphIndexMap;
-	    var charCodes = Object.keys(glyphIndexMap);
+  function addGlyphNamesAll(font) {
+	    let glyph;
+	    const { glyphIndexMap } = font.tables.cmap;
+	    const charCodes = Object.keys(glyphIndexMap);
 
-	    for (var i = 0; i < charCodes.length; i += 1) {
-	        var c = charCodes[i];
-	        var glyphIndex = glyphIndexMap[c];
+	    for (let i = 0; i < charCodes.length; i = i + 1) {
+	        const c = charCodes[i];
+	        const glyphIndex = glyphIndexMap[c];
 	        glyph = font.glyphs.get(glyphIndex);
 	        glyph.addUnicode(parseInt(c));
 	    }
 
-	    for (var i$1 = 0; i$1 < font.glyphs.length; i$1 += 1) {
+	    for (let i$1 = 0; i$1 < font.glyphs.length; i$1 = i$1 + 1) {
 	        glyph = font.glyphs.get(i$1);
 	        if (font.cffEncoding) {
 	            if (font.isCIDFont) {
-	                glyph.name = 'gid' + i$1;
+	                glyph.name = `gid${i$1}`;
 	            } else {
 	                glyph.name = font.cffEncoding.charset[i$1];
 	            }
@@ -3266,61 +3269,61 @@
 	            glyph.name = font.glyphNames.glyphIndexToName(i$1);
 	        }
 	    }
-	}
+  }
 
-	function addGlyphNamesToUnicodeMap(font) {
+  function addGlyphNamesToUnicodeMap(font) {
 	    font._IndexToUnicodeMap = {};
 
-	    var glyphIndexMap = font.tables.cmap.glyphIndexMap;
-	    var charCodes = Object.keys(glyphIndexMap);
+	    const { glyphIndexMap } = font.tables.cmap;
+	    const charCodes = Object.keys(glyphIndexMap);
 
-	    for (var i = 0; i < charCodes.length; i += 1) {
-	        var c = charCodes[i];
-	        var glyphIndex = glyphIndexMap[c];
+	    for (let i = 0; i < charCodes.length; i = i + 1) {
+	        const c = charCodes[i];
+	        const glyphIndex = glyphIndexMap[c];
 	        if (font._IndexToUnicodeMap[glyphIndex] === undefined) {
 	            font._IndexToUnicodeMap[glyphIndex] = {
-	                unicodes: [parseInt(c)]
+	                unicodes: [parseInt(c)],
 	            };
 	        } else {
 	            font._IndexToUnicodeMap[glyphIndex].unicodes.push(parseInt(c));
 	        }
 	    }
-	}
+  }
 
-	/**
+  /**
 	 * @alias opentype.addGlyphNames
 	 * @param {opentype.Font}
 	 * @param {Object}
 	 */
-	function addGlyphNames(font, opt) {
+  function addGlyphNames(font, opt) {
 	    if (opt.lowMemory) {
 	        addGlyphNamesToUnicodeMap(font);
 	    } else {
 	        addGlyphNamesAll(font);
 	    }
-	}
+  }
 
-	// Drawing utility functions.
+  // Drawing utility functions.
 
-	// Draw a line on the given context from point `x1,y1` to point `x2,y2`.
-	function line(ctx, x1, y1, x2, y2) {
+  // Draw a line on the given context from point `x1,y1` to point `x2,y2`.
+  function line(ctx, x1, y1, x2, y2) {
 	    ctx.beginPath();
 	    ctx.moveTo(x1, y1);
 	    ctx.lineTo(x2, y2);
 	    ctx.stroke();
-	}
+  }
 
-	var draw = { line: line };
+  const draw = { line };
 
-	// The Glyph object
-	// import glyf from './tables/glyf' Can't be imported here, because it's a circular dependency
+  // The Glyph object
+  // import glyf from './tables/glyf' Can't be imported here, because it's a circular dependency
 
-	function getPathDefinition(glyph, path) {
-	    var _path = path || new Path();
+  function getPathDefinition(glyph, path) {
+	    let _path = path || new Path();
 	    return {
 	        configurable: true,
 
-	        get: function() {
+	        get() {
 	            if (typeof _path === 'function') {
 	                _path = _path();
 	            }
@@ -3328,12 +3331,12 @@
 	            return _path;
 	        },
 
-	        set: function(p) {
+	        set(p) {
 	            _path = p;
-	        }
+	        },
 	    };
-	}
-	/**
+  }
+  /**
 	 * @typedef GlyphOptions
 	 * @type Object
 	 * @property {string} [name] - The glyph name
@@ -3346,27 +3349,27 @@
 	 * @property {number} [advanceWidth]
 	 */
 
-	// A Glyph is an individual mark that often corresponds to a character.
-	// Some glyphs, such as ligatures, are a combination of many characters.
-	// Glyphs are the basic building blocks of a font.
-	//
-	// The `Glyph` class contains utility methods for drawing the path and its points.
-	/**
+  // A Glyph is an individual mark that often corresponds to a character.
+  // Some glyphs, such as ligatures, are a combination of many characters.
+  // Glyphs are the basic building blocks of a font.
+  //
+  // The `Glyph` class contains utility methods for drawing the path and its points.
+  /**
 	 * @exports opentype.Glyph
 	 * @class
 	 * @param {GlyphOptions}
 	 * @constructor
 	 */
-	function Glyph(options) {
+  function Glyph(options) {
 	    // By putting all the code on a prototype function (which is only declared once)
 	    // we reduce the memory requirements for larger fonts by some 2%
 	    this.bindConstructorValues(options);
-	}
+  }
 
-	/**
+  /**
 	 * @param  {GlyphOptions}
 	 */
-	Glyph.prototype.bindConstructorValues = function(options) {
+  Glyph.prototype.bindConstructorValues = function (options) {
 	    this.index = options.index || 0;
 
 	    // These three values cannot be deferred for memory optimization:
@@ -3400,28 +3403,28 @@
 	    // with a getter/setter to ensure we actually do path parsing only once the
 	    // path is actually needed by anything.
 	    Object.defineProperty(this, 'path', getPathDefinition(this, options.path));
-	};
+  };
 
-	/**
+  /**
 	 * @param {number}
 	 */
-	Glyph.prototype.addUnicode = function(unicode) {
+  Glyph.prototype.addUnicode = function (unicode) {
 	    if (this.unicodes.length === 0) {
 	        this.unicode = unicode;
 	    }
 
 	    this.unicodes.push(unicode);
-	};
+  };
 
-	/**
+  /**
 	 * Calculate the minimum bounding box for this glyph.
 	 * @return {opentype.BoundingBox}
 	 */
-	Glyph.prototype.getBoundingBox = function() {
+  Glyph.prototype.getBoundingBox = function () {
 	    return this.path.getBoundingBox();
-	};
+  };
 
-	/**
+  /**
 	 * Convert the glyph to a Path we can draw on a drawing context.
 	 * @param  {number} [x=0] - Horizontal position of the beginning of the text.
 	 * @param  {number} [y=0] - Vertical position of the *baseline* of the text.
@@ -3430,15 +3433,15 @@
 	 * @param  {opentype.Font} if hinting is to be used, the font
 	 * @return {opentype.Path}
 	 */
-	Glyph.prototype.getPath = function(x, y, fontSize, options, font) {
+  Glyph.prototype.getPath = function (x, y, fontSize, options, font) {
 	    x = x !== undefined ? x : 0;
 	    y = y !== undefined ? y : 0;
 	    fontSize = fontSize !== undefined ? fontSize : 72;
-	    var commands;
-	    var hPoints;
+	    let commands;
+	    let hPoints;
 	    if (!options) { options = { }; }
-	    var xScale = options.xScale;
-	    var yScale = options.yScale;
+	    let { xScale } = options;
+	    let { yScale } = options;
 
 	    if (options.hinting && font && font.hinting) {
 	        // in case of hinting, the hinting engine takes care
@@ -3457,14 +3460,14 @@
 	        xScale = yScale = 1;
 	    } else {
 	        commands = this.path.commands;
-	        var scale = 1 / (this.path.unitsPerEm || 1000) * fontSize;
+	        const scale = 1 / (this.path.unitsPerEm || 1000) * fontSize;
 	        if (xScale === undefined) { xScale = scale; }
 	        if (yScale === undefined) { yScale = scale; }
 	    }
 
-	    var p = new Path();
-	    for (var i = 0; i < commands.length; i += 1) {
-	        var cmd = commands[i];
+	    const p = new Path();
+	    for (let i = 0; i < commands.length; i = i + 1) {
+	        const cmd = commands[i];
 	        if (cmd.type === 'M') {
 	            p.moveTo(x + (cmd.x * xScale), y + (-cmd.y * yScale));
 	        } else if (cmd.type === 'L') {
@@ -3482,23 +3485,23 @@
 	    }
 
 	    return p;
-	};
+  };
 
-	/**
+  /**
 	 * Split the glyph into contours.
 	 * This function is here for backwards compatibility, and to
 	 * provide raw access to the TrueType glyph outlines.
 	 * @return {Array}
 	 */
-	Glyph.prototype.getContours = function() {
+  Glyph.prototype.getContours = function () {
 	    if (this.points === undefined) {
 	        return [];
 	    }
 
-	    var contours = [];
-	    var currentContour = [];
-	    for (var i = 0; i < this.points.length; i += 1) {
-	        var pt = this.points[i];
+	    const contours = [];
+	    let currentContour = [];
+	    for (let i = 0; i < this.points.length; i = i + 1) {
+	        const pt = this.points[i];
 	        currentContour.push(pt);
 	        if (pt.lastPointOfContour) {
 	            contours.push(currentContour);
@@ -3508,18 +3511,18 @@
 
 	    check.argument(currentContour.length === 0, 'There are still points left in the current contour.');
 	    return contours;
-	};
+  };
 
-	/**
+  /**
 	 * Calculate the xMin/yMin/xMax/yMax/lsb/rsb for a Glyph.
 	 * @return {Object}
 	 */
-	Glyph.prototype.getMetrics = function() {
-	    var commands = this.path.commands;
-	    var xCoords = [];
-	    var yCoords = [];
-	    for (var i = 0; i < commands.length; i += 1) {
-	        var cmd = commands[i];
+  Glyph.prototype.getMetrics = function () {
+	    const { commands } = this.path;
+	    const xCoords = [];
+	    const yCoords = [];
+	    for (let i = 0; i < commands.length; i = i + 1) {
+	        const cmd = commands[i];
 	        if (cmd.type !== 'Z') {
 	            xCoords.push(cmd.x);
 	            yCoords.push(cmd.y);
@@ -3536,12 +3539,12 @@
 	        }
 	    }
 
-	    var metrics = {
+	    const metrics = {
 	        xMin: Math.min.apply(null, xCoords),
 	        yMin: Math.min.apply(null, yCoords),
 	        xMax: Math.max.apply(null, xCoords),
 	        yMax: Math.max.apply(null, yCoords),
-	        leftSideBearing: this.leftSideBearing
+	        leftSideBearing: this.leftSideBearing,
 	    };
 
 	    if (!isFinite(metrics.xMin)) {
@@ -3562,9 +3565,9 @@
 
 	    metrics.rightSideBearing = this.advanceWidth - metrics.leftSideBearing - (metrics.xMax - metrics.xMin);
 	    return metrics;
-	};
+  };
 
-	/**
+  /**
 	 * Draw the glyph on the given context.
 	 * @param  {CanvasRenderingContext2D} ctx - A 2D drawing context, like Canvas.
 	 * @param  {number} [x=0] - Horizontal position of the beginning of the text.
@@ -3572,11 +3575,11 @@
 	 * @param  {number} [fontSize=72] - Font size in pixels. We scale the glyph units by `1 / unitsPerEm * fontSize`.
 	 * @param  {Object=} options - xScale, yScale to stretch the glyph.
 	 */
-	Glyph.prototype.draw = function(ctx, x, y, fontSize, options) {
+  Glyph.prototype.draw = function (ctx, x, y, fontSize, options) {
 	    this.getPath(x, y, fontSize, options).draw(ctx);
-	};
+  };
 
-	/**
+  /**
 	 * Draw the points of the glyph.
 	 * On-curve points will be drawn in blue, off-curve points will be drawn in red.
 	 * @param  {CanvasRenderingContext2D} ctx - A 2D drawing context, like Canvas.
@@ -3584,10 +3587,10 @@
 	 * @param  {number} [y=0] - Vertical position of the *baseline* of the text.
 	 * @param  {number} [fontSize=72] - Font size in pixels. We scale the glyph units by `1 / unitsPerEm * fontSize`.
 	 */
-	Glyph.prototype.drawPoints = function(ctx, x, y, fontSize) {
+  Glyph.prototype.drawPoints = function (ctx, x, y, fontSize) {
 	    function drawCircles(l, x, y, scale) {
 	        ctx.beginPath();
-	        for (var j = 0; j < l.length; j += 1) {
+	        for (let j = 0; j < l.length; j = j + 1) {
 	            ctx.moveTo(x + (l[j].x * scale), y + (l[j].y * scale));
 	            ctx.arc(x + (l[j].x * scale), y + (l[j].y * scale), 2, 0, Math.PI * 2, false);
 	        }
@@ -3599,23 +3602,23 @@
 	    x = x !== undefined ? x : 0;
 	    y = y !== undefined ? y : 0;
 	    fontSize = fontSize !== undefined ? fontSize : 24;
-	    var scale = 1 / this.path.unitsPerEm * fontSize;
+	    const scale = 1 / this.path.unitsPerEm * fontSize;
 
-	    var blueCircles = [];
-	    var redCircles = [];
-	    var path = this.path;
-	    for (var i = 0; i < path.commands.length; i += 1) {
-	        var cmd = path.commands[i];
+	    const blueCircles = [];
+	    const redCircles = [];
+	    const { path } = this;
+	    for (let i = 0; i < path.commands.length; i = i + 1) {
+	        const cmd = path.commands[i];
 	        if (cmd.x !== undefined) {
-	            blueCircles.push({x: cmd.x, y: -cmd.y});
+	            blueCircles.push({ x: cmd.x, y: -cmd.y });
 	        }
 
 	        if (cmd.x1 !== undefined) {
-	            redCircles.push({x: cmd.x1, y: -cmd.y1});
+	            redCircles.push({ x: cmd.x1, y: -cmd.y1 });
 	        }
 
 	        if (cmd.x2 !== undefined) {
-	            redCircles.push({x: cmd.x2, y: -cmd.y2});
+	            redCircles.push({ x: cmd.x2, y: -cmd.y2 });
 	        }
 	    }
 
@@ -3623,9 +3626,9 @@
 	    drawCircles(blueCircles, x, y, scale);
 	    ctx.fillStyle = 'red';
 	    drawCircles(redCircles, x, y, scale);
-	};
+  };
 
-	/**
+  /**
 	 * Draw lines indicating important font measurements.
 	 * Black lines indicate the origin of the coordinate system (point 0,0).
 	 * Blue lines indicate the glyph bounding box.
@@ -3635,8 +3638,8 @@
 	 * @param  {number} [y=0] - Vertical position of the *baseline* of the text.
 	 * @param  {number} [fontSize=72] - Font size in pixels. We scale the glyph units by `1 / unitsPerEm * fontSize`.
 	 */
-	Glyph.prototype.drawMetrics = function(ctx, x, y, fontSize) {
-	    var scale;
+  Glyph.prototype.drawMetrics = function (ctx, x, y, fontSize) {
+	    let scale;
 	    x = x !== undefined ? x : 0;
 	    y = y !== undefined ? y : 0;
 	    fontSize = fontSize !== undefined ? fontSize : 24;
@@ -3650,11 +3653,11 @@
 
 	    // This code is here due to memory optimization: by not using
 	    // defaults in the constructor, we save a notable amount of memory.
-	    var xMin = this.xMin || 0;
-	    var yMin = this.yMin || 0;
-	    var xMax = this.xMax || 0;
-	    var yMax = this.yMax || 0;
-	    var advanceWidth = this.advanceWidth || 0;
+	    const xMin = this.xMin || 0;
+	    const yMin = this.yMin || 0;
+	    const xMax = this.xMax || 0;
+	    const yMax = this.yMax || 0;
+	    const advanceWidth = this.advanceWidth || 0;
 
 	    // Draw the glyph box
 	    ctx.strokeStyle = 'blue';
@@ -3666,27 +3669,27 @@
 	    // Draw the advance width
 	    ctx.strokeStyle = 'green';
 	    draw.line(ctx, x + (advanceWidth * scale), -10000, x + (advanceWidth * scale), 10000);
-	};
+  };
 
-	// The GlyphSet object
+  // The GlyphSet object
 
-	// Define a property on the glyph that depends on the path being loaded.
-	function defineDependentProperty(glyph, externalName, internalName) {
+  // Define a property on the glyph that depends on the path being loaded.
+  function defineDependentProperty(glyph, externalName, internalName) {
 	    Object.defineProperty(glyph, externalName, {
-	        get: function() {
+	        get() {
 	            // Request the path property to make sure the path is loaded.
 	            glyph.path; // jshint ignore:line
 	            return glyph[internalName];
 	        },
-	        set: function(newValue) {
+	        set(newValue) {
 	            glyph[internalName] = newValue;
 	        },
 	        enumerable: true,
-	        configurable: true
+	        configurable: true,
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * A GlyphSet represents all glyphs available in the font, but modelled using
 	 * a deferred glyph loader, for retrieving glyphs only once they are absolutely
 	 * necessary, to keep the memory footprint down.
@@ -3695,25 +3698,25 @@
 	 * @param {opentype.Font}
 	 * @param {Array}
 	 */
-	function GlyphSet(font, glyphs) {
+  function GlyphSet(font, glyphs) {
 	    this.font = font;
 	    this.glyphs = {};
 	    if (Array.isArray(glyphs)) {
-	        for (var i = 0; i < glyphs.length; i++) {
-	            var glyph = glyphs[i];
+	        for (let i = 0; i < glyphs.length; i++) {
+	            const glyph = glyphs[i];
 	            glyph.path.unitsPerEm = font.unitsPerEm;
 	            this.glyphs[i] = glyph;
 	        }
 	    }
 
 	    this.length = (glyphs && glyphs.length) || 0;
-	}
+  }
 
-	/**
+  /**
 	 * @param  {number} index
 	 * @return {opentype.Glyph}
 	 */
-	GlyphSet.prototype.get = function(index) {
+  GlyphSet.prototype.get = function (index) {
 	    // this.glyphs[index] is 'undefined' when low memory mode is on. glyph is pushed on request only.
 	    if (this.glyphs[index] === undefined) {
 	        this.font._push(index);
@@ -3721,17 +3724,16 @@
 	            this.glyphs[index] = this.glyphs[index]();
 	        }
 
-	        var glyph = this.glyphs[index];
-	        var unicodeObj = this.font._IndexToUnicodeMap[index];
+	        const glyph = this.glyphs[index];
+	        const unicodeObj = this.font._IndexToUnicodeMap[index];
 
 	        if (unicodeObj) {
-	            for (var j = 0; j < unicodeObj.unicodes.length; j++)
-	                { glyph.addUnicode(unicodeObj.unicodes[j]); }
+	            for (let j = 0; j < unicodeObj.unicodes.length; j++) { glyph.addUnicode(unicodeObj.unicodes[j]); }
 	        }
 
 	        if (this.font.cffEncoding) {
 	            if (this.font.isCIDFont) {
-	                glyph.name = 'gid' + index;
+	                glyph.name = `gid${index}`;
 	            } else {
 	                glyph.name = this.font.cffEncoding.charset[index];
 	            }
@@ -3741,35 +3743,33 @@
 
 	        this.glyphs[index].advanceWidth = this.font._hmtxTableData[index].advanceWidth;
 	        this.glyphs[index].leftSideBearing = this.font._hmtxTableData[index].leftSideBearing;
-	    } else {
-	        if (typeof this.glyphs[index] === 'function') {
+	    } else if (typeof this.glyphs[index] === 'function') {
 	            this.glyphs[index] = this.glyphs[index]();
 	        }
-	    }
 
 	    return this.glyphs[index];
-	};
+  };
 
-	/**
+  /**
 	 * @param  {number} index
 	 * @param  {Object}
 	 */
-	GlyphSet.prototype.push = function(index, loader) {
+  GlyphSet.prototype.push = function (index, loader) {
 	    this.glyphs[index] = loader;
 	    this.length++;
-	};
+  };
 
-	/**
+  /**
 	 * @alias opentype.glyphLoader
 	 * @param  {opentype.Font} font
 	 * @param  {number} index
 	 * @return {opentype.Glyph}
 	 */
-	function glyphLoader(font, index) {
-	    return new Glyph({index: index, font: font});
-	}
+  function glyphLoader(font, index) {
+	    return new Glyph({ index, font });
+  }
 
-	/**
+  /**
 	 * Generate a stub glyph that can be filled with all metadata *except*
 	 * the "points" and "path" properties, which must be loaded only once
 	 * the glyph's path is actually requested for text shaping.
@@ -3782,13 +3782,13 @@
 	 * @param  {Function} buildPath
 	 * @return {opentype.Glyph}
 	 */
-	function ttfGlyphLoader(font, index, parseGlyph, data, position, buildPath) {
-	    return function() {
-	        var glyph = new Glyph({index: index, font: font});
+  function ttfGlyphLoader(font, index, parseGlyph, data, position, buildPath) {
+	    return function () {
+	        const glyph = new Glyph({ index, font });
 
-	        glyph.path = function() {
+	        glyph.path = function () {
 	            parseGlyph(glyph, data, position);
-	            var path = buildPath(font.glyphs, glyph);
+	            const path = buildPath(font.glyphs, glyph);
 	            path.unitsPerEm = font.unitsPerEm;
 	            return path;
 	        };
@@ -3800,8 +3800,8 @@
 
 	        return glyph;
 	    };
-	}
-	/**
+  }
+  /**
 	 * @alias opentype.cffGlyphLoader
 	 * @param  {opentype.Font} font
 	 * @param  {number} index
@@ -3809,49 +3809,50 @@
 	 * @param  {string} charstring
 	 * @return {opentype.Glyph}
 	 */
-	function cffGlyphLoader(font, index, parseCFFCharstring, charstring) {
-	    return function() {
-	        var glyph = new Glyph({index: index, font: font});
+  function cffGlyphLoader(font, index, parseCFFCharstring, charstring) {
+	    return function () {
+	        const glyph = new Glyph({ index, font });
 
-	        glyph.path = function() {
-	            var path = parseCFFCharstring(font, glyph, charstring);
+	        glyph.path = function () {
+	            const path = parseCFFCharstring(font, glyph, charstring);
 	            path.unitsPerEm = font.unitsPerEm;
 	            return path;
 	        };
 
 	        return glyph;
 	    };
-	}
+  }
 
-	var glyphset = { GlyphSet: GlyphSet, glyphLoader: glyphLoader, ttfGlyphLoader: ttfGlyphLoader, cffGlyphLoader: cffGlyphLoader };
+  const glyphset = {
+    GlyphSet, glyphLoader, ttfGlyphLoader, cffGlyphLoader,
+  };
 
-	// The `CFF` table contains the glyph outlines in PostScript format.
+  // The `CFF` table contains the glyph outlines in PostScript format.
 
-	// Custom equals function that can also check lists.
-	function equals(a, b) {
+  // Custom equals function that can also check lists.
+  function equals(a, b) {
 	    if (a === b) {
 	        return true;
-	    } else if (Array.isArray(a) && Array.isArray(b)) {
+	    } if (Array.isArray(a) && Array.isArray(b)) {
 	        if (a.length !== b.length) {
 	            return false;
 	        }
 
-	        for (var i = 0; i < a.length; i += 1) {
+	        for (let i = 0; i < a.length; i = i + 1) {
 	            if (!equals(a[i], b[i])) {
 	                return false;
 	            }
 	        }
 
 	        return true;
-	    } else {
-	        return false;
 	    }
-	}
+	        return false;
+  }
 
-	// Subroutines are encoded using the negative half of the number space.
-	// See type 2 chapter 4.7 "Subroutine operators".
-	function calcCFFSubroutineBias(subrs) {
-	    var bias;
+  // Subroutines are encoded using the negative half of the number space.
+  // See type 2 chapter 4.7 "Subroutine operators".
+  function calcCFFSubroutineBias(subrs) {
+	    let bias;
 	    if (subrs.length < 1240) {
 	        bias = 107;
 	    } else if (subrs.length < 33900) {
@@ -3861,23 +3862,23 @@
 	    }
 
 	    return bias;
-	}
+  }
 
-	// Parse a `CFF` INDEX array.
-	// An index array consists of a list of offsets, then a list of objects at those offsets.
-	function parseCFFIndex(data, start, conversionFn) {
-	    var offsets = [];
-	    var objects = [];
-	    var count = parse.getCard16(data, start);
-	    var objectOffset;
-	    var endOffset;
+  // Parse a `CFF` INDEX array.
+  // An index array consists of a list of offsets, then a list of objects at those offsets.
+  function parseCFFIndex(data, start, conversionFn) {
+	    const offsets = [];
+	    const objects = [];
+	    const count = parse.getCard16(data, start);
+	    let objectOffset;
+	    let endOffset;
 	    if (count !== 0) {
-	        var offsetSize = parse.getByte(data, start + 2);
+	        const offsetSize = parse.getByte(data, start + 2);
 	        objectOffset = start + ((count + 1) * offsetSize) + 2;
-	        var pos = start + 3;
-	        for (var i = 0; i < count + 1; i += 1) {
+	        let pos = start + 3;
+	        for (let i = 0; i < count + 1; i = i + 1) {
 	            offsets.push(parse.getOffset(data, pos, offsetSize));
-	            pos += offsetSize;
+	            pos = pos + offsetSize;
 	        }
 
 	        // The total size of the index array is 4 header bytes + the value of the last offset.
@@ -3886,8 +3887,8 @@
 	        endOffset = start + 2;
 	    }
 
-	    for (var i$1 = 0; i$1 < offsets.length - 1; i$1 += 1) {
-	        var value = parse.getBytes(data, objectOffset + offsets[i$1], objectOffset + offsets[i$1 + 1]);
+	    for (let i$1 = 0; i$1 < offsets.length - 1; i$1 = i$1 + 1) {
+	        let value = parse.getBytes(data, objectOffset + offsets[i$1], objectOffset + offsets[i$1 + 1]);
 	        if (conversionFn) {
 	            value = conversionFn(value);
 	        }
@@ -3895,21 +3896,21 @@
 	        objects.push(value);
 	    }
 
-	    return {objects: objects, startOffset: start, endOffset: endOffset};
-	}
+	    return { objects, startOffset: start, endOffset };
+  }
 
-	function parseCFFIndexLowMemory(data, start) {
-	    var offsets = [];
-	    var count = parse.getCard16(data, start);
-	    var objectOffset;
-	    var endOffset;
+  function parseCFFIndexLowMemory(data, start) {
+	    const offsets = [];
+	    const count = parse.getCard16(data, start);
+	    let objectOffset;
+	    let endOffset;
 	    if (count !== 0) {
-	        var offsetSize = parse.getByte(data, start + 2);
+	        const offsetSize = parse.getByte(data, start + 2);
 	        objectOffset = start + ((count + 1) * offsetSize) + 2;
-	        var pos = start + 3;
-	        for (var i = 0; i < count + 1; i += 1) {
+	        let pos = start + 3;
+	        for (let i = 0; i < count + 1; i = i + 1) {
 	            offsets.push(parse.getOffset(data, pos, offsetSize));
-	            pos += offsetSize;
+	            pos = pos + offsetSize;
 	        }
 
 	        // The total size of the index array is 4 header bytes + the value of the last offset.
@@ -3918,55 +3919,55 @@
 	        endOffset = start + 2;
 	    }
 
-	    return {offsets: offsets, startOffset: start, endOffset: endOffset};
-	}
-	function getCffIndexObject(i, offsets, data, start, conversionFn) {
-	    var count = parse.getCard16(data, start);
-	    var objectOffset = 0;
+	    return { offsets, startOffset: start, endOffset };
+  }
+  function getCffIndexObject(i, offsets, data, start, conversionFn) {
+	    const count = parse.getCard16(data, start);
+	    let objectOffset = 0;
 	    if (count !== 0) {
-	        var offsetSize = parse.getByte(data, start + 2);
+	        const offsetSize = parse.getByte(data, start + 2);
 	        objectOffset = start + ((count + 1) * offsetSize) + 2;
 	    }
 
-	    var value = parse.getBytes(data, objectOffset + offsets[i], objectOffset + offsets[i + 1]);
+	    let value = parse.getBytes(data, objectOffset + offsets[i], objectOffset + offsets[i + 1]);
 	    if (conversionFn) {
 	        value = conversionFn(value);
 	    }
 	    return value;
-	}
+  }
 
-	// Parse a `CFF` DICT real value.
-	function parseFloatOperand(parser) {
-	    var s = '';
-	    var eof = 15;
-	    var lookup = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'E', 'E-', null, '-'];
+  // Parse a `CFF` DICT real value.
+  function parseFloatOperand(parser) {
+	    let s = '';
+	    const eof = 15;
+	    const lookup = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'E', 'E-', null, '-'];
 	    while (true) {
-	        var b = parser.parseByte();
-	        var n1 = b >> 4;
-	        var n2 = b & 15;
+	        const b = parser.parseByte();
+	        const n1 = b >> 4;
+	        const n2 = b & 15;
 
 	        if (n1 === eof) {
 	            break;
 	        }
 
-	        s += lookup[n1];
+	        s = s + lookup[n1];
 
 	        if (n2 === eof) {
 	            break;
 	        }
 
-	        s += lookup[n2];
+	        s = s + lookup[n2];
 	    }
 
 	    return parseFloat(s);
-	}
+  }
 
-	// Parse a `CFF` DICT operand.
-	function parseOperand(parser, b0) {
-	    var b1;
-	    var b2;
-	    var b3;
-	    var b4;
+  // Parse a `CFF` DICT operand.
+  function parseOperand(parser, b0) {
+	    let b1;
+	    let b2;
+	    let b3;
+	    let b4;
 	    if (b0 === 28) {
 	        b1 = parser.parseByte();
 	        b2 = parser.parseByte();
@@ -3999,17 +4000,17 @@
 	        return -(b0 - 251) * 256 - b1 - 108;
 	    }
 
-	    throw new Error('Invalid b0 ' + b0);
-	}
+	    throw new Error(`Invalid b0 ${b0}`);
+  }
 
-	// Convert the entries returned by `parseDict` to a proper dictionary.
-	// If a value is a list of one, it is unpacked.
-	function entriesToObject(entries) {
-	    var o = {};
-	    for (var i = 0; i < entries.length; i += 1) {
-	        var key = entries[i][0];
-	        var values = entries[i][1];
-	        var value = (void 0);
+  // Convert the entries returned by `parseDict` to a proper dictionary.
+  // If a value is a list of one, it is unpacked.
+  function entriesToObject(entries) {
+	    const o = {};
+	    for (let i = 0; i < entries.length; i = i + 1) {
+	        const key = entries[i][0];
+	        const values = entries[i][1];
+	        let value = (void 0);
 	        if (values.length === 1) {
 	            value = values[0];
 	        } else {
@@ -4017,26 +4018,26 @@
 	        }
 
 	        if (o.hasOwnProperty(key) && !isNaN(o[key])) {
-	            throw new Error('Object ' + o + ' already has key ' + key);
+	            throw new Error(`Object ${o} already has key ${key}`);
 	        }
 
 	        o[key] = value;
 	    }
 
 	    return o;
-	}
+  }
 
-	// Parse a `CFF` DICT object.
-	// A dictionary contains key-value pairs in a compact tokenized format.
-	function parseCFFDict(data, start, size) {
+  // Parse a `CFF` DICT object.
+  // A dictionary contains key-value pairs in a compact tokenized format.
+  function parseCFFDict(data, start, size) {
 	    start = start !== undefined ? start : 0;
-	    var parser = new parse.Parser(data, start);
-	    var entries = [];
-	    var operands = [];
+	    const parser = new parse.Parser(data, start);
+	    const entries = [];
+	    let operands = [];
 	    size = size !== undefined ? size : data.length;
 
 	    while (parser.relativeOffset < size) {
-	        var op = parser.parseByte();
+	        let op = parser.parseByte();
 
 	        // The first byte for each dict item distinguishes between operator (key) and operand (value).
 	        // Values <= 21 are operators.
@@ -4056,11 +4057,11 @@
 	    }
 
 	    return entriesToObject(entries);
-	}
+  }
 
-	// Given a String Index (SID), return the value of the string.
-	// Strings below index 392 are standard CFF strings and are not encoded in the font.
-	function getCFFString(strings, index) {
+  // Given a String Index (SID), return the value of the string.
+  // Strings below index 392 are standard CFF strings and are not encoded in the font.
+  function getCFFString(strings, index) {
 	    if (index <= 390) {
 	        index = cffStandardStrings[index];
 	    } else {
@@ -4068,23 +4069,23 @@
 	    }
 
 	    return index;
-	}
+  }
 
-	// Interpret a dictionary and return a new dictionary with readable keys and values for missing entries.
-	// This function takes `meta` which is a list of objects containing `operand`, `name` and `default`.
-	function interpretDict(dict, meta, strings) {
-	    var newDict = {};
-	    var value;
+  // Interpret a dictionary and return a new dictionary with readable keys and values for missing entries.
+  // This function takes `meta` which is a list of objects containing `operand`, `name` and `default`.
+  function interpretDict(dict, meta, strings) {
+	    const newDict = {};
+	    let value;
 
 	    // Because we also want to include missing values, we start out from the meta list
 	    // and lookup values in the dict.
-	    for (var i = 0; i < meta.length; i += 1) {
-	        var m = meta[i];
+	    for (let i = 0; i < meta.length; i = i + 1) {
+	        const m = meta[i];
 
 	        if (Array.isArray(m.type)) {
-	            var values = [];
+	            const values = [];
 	            values.length = m.type.length;
-	            for (var j = 0; j < m.type.length; j++) {
+	            for (let j = 0; j < m.type.length; j++) {
 	                value = dict[m.op] !== undefined ? dict[m.op][j] : undefined;
 	                if (value === undefined) {
 	                    value = m.value !== undefined && m.value[j] !== undefined ? m.value[j] : null;
@@ -4109,11 +4110,11 @@
 	    }
 
 	    return newDict;
-	}
+  }
 
-	// Parse the CFF header.
-	function parseCFFHeader(data, start) {
-	    var header = {};
+  // Parse the CFF header.
+  function parseCFFHeader(data, start) {
+	    const header = {};
 	    header.formatMajor = parse.getCard8(data, start);
 	    header.formatMinor = parse.getCard8(data, start + 1);
 	    header.size = parse.getCard8(data, start + 2);
@@ -4121,96 +4122,136 @@
 	    header.startOffset = start;
 	    header.endOffset = start + 4;
 	    return header;
-	}
+  }
 
-	var TOP_DICT_META = [
-	    {name: 'version', op: 0, type: 'SID'},
-	    {name: 'notice', op: 1, type: 'SID'},
-	    {name: 'copyright', op: 1200, type: 'SID'},
-	    {name: 'fullName', op: 2, type: 'SID'},
-	    {name: 'familyName', op: 3, type: 'SID'},
-	    {name: 'weight', op: 4, type: 'SID'},
-	    {name: 'isFixedPitch', op: 1201, type: 'number', value: 0},
-	    {name: 'italicAngle', op: 1202, type: 'number', value: 0},
-	    {name: 'underlinePosition', op: 1203, type: 'number', value: -100},
-	    {name: 'underlineThickness', op: 1204, type: 'number', value: 50},
-	    {name: 'paintType', op: 1205, type: 'number', value: 0},
-	    {name: 'charstringType', op: 1206, type: 'number', value: 2},
+  const TOP_DICT_META = [
+	    { name: 'version', op: 0, type: 'SID' },
+	    { name: 'notice', op: 1, type: 'SID' },
+	    { name: 'copyright', op: 1200, type: 'SID' },
+	    { name: 'fullName', op: 2, type: 'SID' },
+	    { name: 'familyName', op: 3, type: 'SID' },
+	    { name: 'weight', op: 4, type: 'SID' },
+	    {
+      name: 'isFixedPitch', op: 1201, type: 'number', value: 0,
+    },
+	    {
+      name: 'italicAngle', op: 1202, type: 'number', value: 0,
+    },
+	    {
+      name: 'underlinePosition', op: 1203, type: 'number', value: -100,
+    },
+	    {
+      name: 'underlineThickness', op: 1204, type: 'number', value: 50,
+    },
+	    {
+      name: 'paintType', op: 1205, type: 'number', value: 0,
+    },
+	    {
+      name: 'charstringType', op: 1206, type: 'number', value: 2,
+    },
 	    {
 	        name: 'fontMatrix',
 	        op: 1207,
 	        type: ['real', 'real', 'real', 'real', 'real', 'real'],
-	        value: [0.001, 0, 0, 0.001, 0, 0]
+	        value: [0.001, 0, 0, 0.001, 0, 0],
 	    },
-	    {name: 'uniqueId', op: 13, type: 'number'},
-	    {name: 'fontBBox', op: 5, type: ['number', 'number', 'number', 'number'], value: [0, 0, 0, 0]},
-	    {name: 'strokeWidth', op: 1208, type: 'number', value: 0},
-	    {name: 'xuid', op: 14, type: [], value: null},
-	    {name: 'charset', op: 15, type: 'offset', value: 0},
-	    {name: 'encoding', op: 16, type: 'offset', value: 0},
-	    {name: 'charStrings', op: 17, type: 'offset', value: 0},
-	    {name: 'private', op: 18, type: ['number', 'offset'], value: [0, 0]},
-	    {name: 'ros', op: 1230, type: ['SID', 'SID', 'number']},
-	    {name: 'cidFontVersion', op: 1231, type: 'number', value: 0},
-	    {name: 'cidFontRevision', op: 1232, type: 'number', value: 0},
-	    {name: 'cidFontType', op: 1233, type: 'number', value: 0},
-	    {name: 'cidCount', op: 1234, type: 'number', value: 8720},
-	    {name: 'uidBase', op: 1235, type: 'number'},
-	    {name: 'fdArray', op: 1236, type: 'offset'},
-	    {name: 'fdSelect', op: 1237, type: 'offset'},
-	    {name: 'fontName', op: 1238, type: 'SID'}
-	];
+	    { name: 'uniqueId', op: 13, type: 'number' },
+	    {
+      name: 'fontBBox', op: 5, type: ['number', 'number', 'number', 'number'], value: [0, 0, 0, 0],
+    },
+	    {
+      name: 'strokeWidth', op: 1208, type: 'number', value: 0,
+    },
+	    {
+      name: 'xuid', op: 14, type: [], value: null,
+    },
+	    {
+      name: 'charset', op: 15, type: 'offset', value: 0,
+    },
+	    {
+      name: 'encoding', op: 16, type: 'offset', value: 0,
+    },
+	    {
+      name: 'charStrings', op: 17, type: 'offset', value: 0,
+    },
+	    {
+      name: 'private', op: 18, type: ['number', 'offset'], value: [0, 0],
+    },
+	    { name: 'ros', op: 1230, type: ['SID', 'SID', 'number'] },
+	    {
+      name: 'cidFontVersion', op: 1231, type: 'number', value: 0,
+    },
+	    {
+      name: 'cidFontRevision', op: 1232, type: 'number', value: 0,
+    },
+	    {
+      name: 'cidFontType', op: 1233, type: 'number', value: 0,
+    },
+	    {
+      name: 'cidCount', op: 1234, type: 'number', value: 8720,
+    },
+	    { name: 'uidBase', op: 1235, type: 'number' },
+	    { name: 'fdArray', op: 1236, type: 'offset' },
+	    { name: 'fdSelect', op: 1237, type: 'offset' },
+	    { name: 'fontName', op: 1238, type: 'SID' },
+  ];
 
-	var PRIVATE_DICT_META = [
-	    {name: 'subrs', op: 19, type: 'offset', value: 0},
-	    {name: 'defaultWidthX', op: 20, type: 'number', value: 0},
-	    {name: 'nominalWidthX', op: 21, type: 'number', value: 0}
-	];
+  const PRIVATE_DICT_META = [
+	    {
+      name: 'subrs', op: 19, type: 'offset', value: 0,
+    },
+	    {
+      name: 'defaultWidthX', op: 20, type: 'number', value: 0,
+    },
+	    {
+      name: 'nominalWidthX', op: 21, type: 'number', value: 0,
+    },
+  ];
 
-	// Parse the CFF top dictionary. A CFF table can contain multiple fonts, each with their own top dictionary.
-	// The top dictionary contains the essential metadata for the font, together with the private dictionary.
-	function parseCFFTopDict(data, strings) {
-	    var dict = parseCFFDict(data, 0, data.byteLength);
+  // Parse the CFF top dictionary. A CFF table can contain multiple fonts, each with their own top dictionary.
+  // The top dictionary contains the essential metadata for the font, together with the private dictionary.
+  function parseCFFTopDict(data, strings) {
+	    const dict = parseCFFDict(data, 0, data.byteLength);
 	    return interpretDict(dict, TOP_DICT_META, strings);
-	}
+  }
 
-	// Parse the CFF private dictionary. We don't fully parse out all the values, only the ones we need.
-	function parseCFFPrivateDict(data, start, size, strings) {
-	    var dict = parseCFFDict(data, start, size);
+  // Parse the CFF private dictionary. We don't fully parse out all the values, only the ones we need.
+  function parseCFFPrivateDict(data, start, size, strings) {
+	    const dict = parseCFFDict(data, start, size);
 	    return interpretDict(dict, PRIVATE_DICT_META, strings);
-	}
+  }
 
-	// Returns a list of "Top DICT"s found using an INDEX list.
-	// Used to read both the usual high-level Top DICTs and also the FDArray
-	// discovered inside CID-keyed fonts.  When a Top DICT has a reference to
-	// a Private DICT that is read and saved into the Top DICT.
-	//
-	// In addition to the expected/optional values as outlined in TOP_DICT_META
-	// the following values might be saved into the Top DICT.
-	//
-	//    _subrs []        array of local CFF subroutines from Private DICT
-	//    _subrsBias       bias value computed from number of subroutines
-	//                      (see calcCFFSubroutineBias() and parseCFFCharstring())
-	//    _defaultWidthX   default widths for CFF characters
-	//    _nominalWidthX   bias added to width embedded within glyph description
-	//
-	//    _privateDict     saved copy of parsed Private DICT from Top DICT
-	function gatherCFFTopDicts(data, start, cffIndex, strings) {
-	    var topDictArray = [];
-	    for (var iTopDict = 0; iTopDict < cffIndex.length; iTopDict += 1) {
-	        var topDictData = new DataView(new Uint8Array(cffIndex[iTopDict]).buffer);
-	        var topDict = parseCFFTopDict(topDictData, strings);
+  // Returns a list of "Top DICT"s found using an INDEX list.
+  // Used to read both the usual high-level Top DICTs and also the FDArray
+  // discovered inside CID-keyed fonts.  When a Top DICT has a reference to
+  // a Private DICT that is read and saved into the Top DICT.
+  //
+  // In addition to the expected/optional values as outlined in TOP_DICT_META
+  // the following values might be saved into the Top DICT.
+  //
+  //    _subrs []        array of local CFF subroutines from Private DICT
+  //    _subrsBias       bias value computed from number of subroutines
+  //                      (see calcCFFSubroutineBias() and parseCFFCharstring())
+  //    _defaultWidthX   default widths for CFF characters
+  //    _nominalWidthX   bias added to width embedded within glyph description
+  //
+  //    _privateDict     saved copy of parsed Private DICT from Top DICT
+  function gatherCFFTopDicts(data, start, cffIndex, strings) {
+	    const topDictArray = [];
+	    for (let iTopDict = 0; iTopDict < cffIndex.length; iTopDict = iTopDict + 1) {
+	        const topDictData = new DataView(new Uint8Array(cffIndex[iTopDict]).buffer);
+	        const topDict = parseCFFTopDict(topDictData, strings);
 	        topDict._subrs = [];
 	        topDict._subrsBias = 0;
-	        var privateSize = topDict.private[0];
-	        var privateOffset = topDict.private[1];
+	        const privateSize = topDict.private[0];
+	        const privateOffset = topDict.private[1];
 	        if (privateSize !== 0 && privateOffset !== 0) {
-	            var privateDict = parseCFFPrivateDict(data, privateOffset + start, privateSize, strings);
+	            const privateDict = parseCFFPrivateDict(data, privateOffset + start, privateSize, strings);
 	            topDict._defaultWidthX = privateDict.defaultWidthX;
 	            topDict._nominalWidthX = privateDict.nominalWidthX;
 	            if (privateDict.subrs !== 0) {
-	                var subrOffset = privateOffset + privateDict.subrs;
-	                var subrIndex = parseCFFIndex(data, subrOffset + start);
+	                const subrOffset = privateOffset + privateDict.subrs;
+	                const subrIndex = parseCFFIndex(data, subrOffset + start);
 	                topDict._subrs = subrIndex.objects;
 	                topDict._subrsBias = calcCFFSubroutineBias(topDict._subrs);
 	            }
@@ -4219,23 +4260,23 @@
 	        topDictArray.push(topDict);
 	    }
 	    return topDictArray;
-	}
+  }
 
-	// Parse the CFF charset table, which contains internal names for all the glyphs.
-	// This function will return a list of glyph names.
-	// See Adobe TN #5176 chapter 13, "Charsets".
-	function parseCFFCharset(data, start, nGlyphs, strings) {
-	    var sid;
-	    var count;
-	    var parser = new parse.Parser(data, start);
+  // Parse the CFF charset table, which contains internal names for all the glyphs.
+  // This function will return a list of glyph names.
+  // See Adobe TN #5176 chapter 13, "Charsets".
+  function parseCFFCharset(data, start, nGlyphs, strings) {
+	    let sid;
+	    let count;
+	    const parser = new parse.Parser(data, start);
 
 	    // The .notdef glyph is not included, so subtract 1.
-	    nGlyphs -= 1;
-	    var charset = ['.notdef'];
+	    nGlyphs = nGlyphs - 1;
+	    const charset = ['.notdef'];
 
-	    var format = parser.parseCard8();
+	    const format = parser.parseCard8();
 	    if (format === 0) {
-	        for (var i = 0; i < nGlyphs; i += 1) {
+	        for (let i = 0; i < nGlyphs; i = i + 1) {
 	            sid = parser.parseSID();
 	            charset.push(getCFFString(strings, sid));
 	        }
@@ -4243,80 +4284,80 @@
 	        while (charset.length <= nGlyphs) {
 	            sid = parser.parseSID();
 	            count = parser.parseCard8();
-	            for (var i$1 = 0; i$1 <= count; i$1 += 1) {
+	            for (let i$1 = 0; i$1 <= count; i$1 = i$1 + 1) {
 	                charset.push(getCFFString(strings, sid));
-	                sid += 1;
+	                sid = sid + 1;
 	            }
 	        }
 	    } else if (format === 2) {
 	        while (charset.length <= nGlyphs) {
 	            sid = parser.parseSID();
 	            count = parser.parseCard16();
-	            for (var i$2 = 0; i$2 <= count; i$2 += 1) {
+	            for (let i$2 = 0; i$2 <= count; i$2 = i$2 + 1) {
 	                charset.push(getCFFString(strings, sid));
-	                sid += 1;
+	                sid = sid + 1;
 	            }
 	        }
 	    } else {
-	        throw new Error('Unknown charset format ' + format);
+	        throw new Error(`Unknown charset format ${format}`);
 	    }
 
 	    return charset;
-	}
+  }
 
-	// Parse the CFF encoding data. Only one encoding can be specified per font.
-	// See Adobe TN #5176 chapter 12, "Encodings".
-	function parseCFFEncoding(data, start, charset) {
-	    var code;
-	    var enc = {};
-	    var parser = new parse.Parser(data, start);
-	    var format = parser.parseCard8();
+  // Parse the CFF encoding data. Only one encoding can be specified per font.
+  // See Adobe TN #5176 chapter 12, "Encodings".
+  function parseCFFEncoding(data, start, charset) {
+	    let code;
+	    const enc = {};
+	    const parser = new parse.Parser(data, start);
+	    const format = parser.parseCard8();
 	    if (format === 0) {
-	        var nCodes = parser.parseCard8();
-	        for (var i = 0; i < nCodes; i += 1) {
+	        const nCodes = parser.parseCard8();
+	        for (let i = 0; i < nCodes; i = i + 1) {
 	            code = parser.parseCard8();
 	            enc[code] = i;
 	        }
 	    } else if (format === 1) {
-	        var nRanges = parser.parseCard8();
+	        const nRanges = parser.parseCard8();
 	        code = 1;
-	        for (var i$1 = 0; i$1 < nRanges; i$1 += 1) {
-	            var first = parser.parseCard8();
-	            var nLeft = parser.parseCard8();
-	            for (var j = first; j <= first + nLeft; j += 1) {
+	        for (let i$1 = 0; i$1 < nRanges; i$1 = i$1 + 1) {
+	            const first = parser.parseCard8();
+	            const nLeft = parser.parseCard8();
+	            for (let j = first; j <= first + nLeft; j = j + 1) {
 	                enc[j] = code;
-	                code += 1;
+	                code = code + 1;
 	            }
 	        }
 	    } else {
-	        throw new Error('Unknown encoding format ' + format);
+	        throw new Error(`Unknown encoding format ${format}`);
 	    }
 
 	    return new CffEncoding(enc, charset);
-	}
+  }
 
-	// Take in charstring code and return a Glyph object.
-	// The encoding is described in the Type 2 Charstring Format
-	// https://www.microsoft.com/typography/OTSPEC/charstr2.htm
-	function parseCFFCharstring(font, glyph, code) {
-	    var c1x;
-	    var c1y;
-	    var c2x;
-	    var c2y;
-	    var p = new Path();
-	    var stack = [];
-	    var nStems = 0;
-	    var haveWidth = false;
-	    var open = false;
-	    var x = 0;
-	    var y = 0;
-	    var subrs;
-	    var subrsBias;
-	    var defaultWidthX;
-	    var nominalWidthX;
+  // Take in charstring code and return a Glyph object.
+  // The encoding is described in the Type 2 Charstring Format
+  // https://www.microsoft.com/typography/OTSPEC/charstr2.htm
+  function parseCFFCharstring(font, glyph, code) {
+	    let c1x;
+	    let c1y;
+	    let c2x;
+	    let c2y;
+	    const p = new Path();
+	    const stack = [];
+	    let nStems = 0;
+	    let haveWidth = false;
+	    let open = false;
+	    let x = 0;
+	    let y = 0;
+	    let subrs;
+	    let subrsBias;
+	    let defaultWidthX;
+	    let nominalWidthX;
 	    if (font.isCIDFont) {
-	        var fdIndex = font.tables.cff.topDict._fdSelect[glyph.index];
-	        var fdDict = font.tables.cff.topDict._fdArray[fdIndex];
+	        const fdIndex = font.tables.cff.topDict._fdSelect[glyph.index];
+	        const fdDict = font.tables.cff.topDict._fdArray[fdIndex];
 	        subrs = fdDict._subrs;
 	        subrsBias = fdDict._subrsBias;
 	        defaultWidthX = fdDict._defaultWidthX;
@@ -4327,7 +4368,7 @@
 	        defaultWidthX = font.tables.cff.topDict._defaultWidthX;
 	        nominalWidthX = font.tables.cff.topDict._nominalWidthX;
 	    }
-	    var width = defaultWidthX;
+	    let width = defaultWidthX;
 
 	    function newContour(x, y) {
 	        if (open) {
@@ -4339,7 +4380,7 @@
 	    }
 
 	    function parseStems() {
-	        var hasWidthArg;
+	        let hasWidthArg;
 
 	        // The number of stem operators on the stack is always even.
 	        // If the value is uneven, that means a width is specified.
@@ -4348,29 +4389,29 @@
 	            width = stack.shift() + nominalWidthX;
 	        }
 
-	        nStems += stack.length >> 1;
+	        nStems = nStems + (stack.length >> 1);
 	        stack.length = 0;
 	        haveWidth = true;
 	    }
 
 	    function parse(code) {
-	        var b1;
-	        var b2;
-	        var b3;
-	        var b4;
-	        var codeIndex;
-	        var subrCode;
-	        var jpx;
-	        var jpy;
-	        var c3x;
-	        var c3y;
-	        var c4x;
-	        var c4y;
+	        let b1;
+	        let b2;
+	        let b3;
+	        let b4;
+	        let codeIndex;
+	        let subrCode;
+	        let jpx;
+	        let jpy;
+	        let c3x;
+	        let c3y;
+	        let c4x;
+	        let c4y;
 
-	        var i = 0;
+	        let i = 0;
 	        while (i < code.length) {
-	            var v = code[i];
-	            i += 1;
+	            let v = code[i];
+	            i = i + 1;
 	            switch (v) {
 	                case 1: // hstem
 	                    parseStems();
@@ -4384,39 +4425,39 @@
 	                        haveWidth = true;
 	                    }
 
-	                    y += stack.pop();
+	                    y = y + stack.pop();
 	                    newContour(x, y);
 	                    break;
 	                case 5: // rlineto
 	                    while (stack.length > 0) {
-	                        x += stack.shift();
-	                        y += stack.shift();
+	                        x = x + stack.shift();
+	                        y = y + stack.shift();
 	                        p.lineTo(x, y);
 	                    }
 
 	                    break;
 	                case 6: // hlineto
 	                    while (stack.length > 0) {
-	                        x += stack.shift();
+	                        x = x + stack.shift();
 	                        p.lineTo(x, y);
 	                        if (stack.length === 0) {
 	                            break;
 	                        }
 
-	                        y += stack.shift();
+	                        y = y + stack.shift();
 	                        p.lineTo(x, y);
 	                    }
 
 	                    break;
 	                case 7: // vlineto
 	                    while (stack.length > 0) {
-	                        y += stack.shift();
+	                        y = y + stack.shift();
 	                        p.lineTo(x, y);
 	                        if (stack.length === 0) {
 	                            break;
 	                        }
 
-	                        x += stack.shift();
+	                        x = x + stack.shift();
 	                        p.lineTo(x, y);
 	                    }
 
@@ -4445,70 +4486,70 @@
 	                    return;
 	                case 12: // flex operators
 	                    v = code[i];
-	                    i += 1;
+	                    i = i + 1;
 	                    switch (v) {
 	                        case 35: // flex
 	                            // |- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 dx6 dy6 fd flex (12 35) |-
-	                            c1x = x   + stack.shift();    // dx1
-	                            c1y = y   + stack.shift();    // dy1
-	                            c2x = c1x + stack.shift();    // dx2
-	                            c2y = c1y + stack.shift();    // dy2
-	                            jpx = c2x + stack.shift();    // dx3
-	                            jpy = c2y + stack.shift();    // dy3
-	                            c3x = jpx + stack.shift();    // dx4
-	                            c3y = jpy + stack.shift();    // dy4
-	                            c4x = c3x + stack.shift();    // dx5
-	                            c4y = c3y + stack.shift();    // dy5
-	                            x = c4x   + stack.shift();    // dx6
-	                            y = c4y   + stack.shift();    // dy6
-	                            stack.shift();                // flex depth
+	                            c1x = x + stack.shift(); // dx1
+	                            c1y = y + stack.shift(); // dy1
+	                            c2x = c1x + stack.shift(); // dx2
+	                            c2y = c1y + stack.shift(); // dy2
+	                            jpx = c2x + stack.shift(); // dx3
+	                            jpy = c2y + stack.shift(); // dy3
+	                            c3x = jpx + stack.shift(); // dx4
+	                            c3y = jpy + stack.shift(); // dy4
+	                            c4x = c3x + stack.shift(); // dx5
+	                            c4y = c3y + stack.shift(); // dy5
+	                            x = c4x + stack.shift(); // dx6
+	                            y = c4y + stack.shift(); // dy6
+	                            stack.shift(); // flex depth
 	                            p.curveTo(c1x, c1y, c2x, c2y, jpx, jpy);
 	                            p.curveTo(c3x, c3y, c4x, c4y, x, y);
 	                            break;
 	                        case 34: // hflex
 	                            // |- dx1 dx2 dy2 dx3 dx4 dx5 dx6 hflex (12 34) |-
-	                            c1x = x   + stack.shift();    // dx1
-	                            c1y = y;                      // dy1
-	                            c2x = c1x + stack.shift();    // dx2
-	                            c2y = c1y + stack.shift();    // dy2
-	                            jpx = c2x + stack.shift();    // dx3
-	                            jpy = c2y;                    // dy3
-	                            c3x = jpx + stack.shift();    // dx4
-	                            c3y = c2y;                    // dy4
-	                            c4x = c3x + stack.shift();    // dx5
-	                            c4y = y;                      // dy5
-	                            x = c4x + stack.shift();      // dx6
+	                            c1x = x + stack.shift(); // dx1
+	                            c1y = y; // dy1
+	                            c2x = c1x + stack.shift(); // dx2
+	                            c2y = c1y + stack.shift(); // dy2
+	                            jpx = c2x + stack.shift(); // dx3
+	                            jpy = c2y; // dy3
+	                            c3x = jpx + stack.shift(); // dx4
+	                            c3y = c2y; // dy4
+	                            c4x = c3x + stack.shift(); // dx5
+	                            c4y = y; // dy5
+	                            x = c4x + stack.shift(); // dx6
 	                            p.curveTo(c1x, c1y, c2x, c2y, jpx, jpy);
 	                            p.curveTo(c3x, c3y, c4x, c4y, x, y);
 	                            break;
 	                        case 36: // hflex1
 	                            // |- dx1 dy1 dx2 dy2 dx3 dx4 dx5 dy5 dx6 hflex1 (12 36) |-
-	                            c1x = x   + stack.shift();    // dx1
-	                            c1y = y   + stack.shift();    // dy1
-	                            c2x = c1x + stack.shift();    // dx2
-	                            c2y = c1y + stack.shift();    // dy2
-	                            jpx = c2x + stack.shift();    // dx3
-	                            jpy = c2y;                    // dy3
-	                            c3x = jpx + stack.shift();    // dx4
-	                            c3y = c2y;                    // dy4
-	                            c4x = c3x + stack.shift();    // dx5
-	                            c4y = c3y + stack.shift();    // dy5
-	                            x = c4x + stack.shift();      // dx6
+	                            c1x = x + stack.shift(); // dx1
+	                            c1y = y + stack.shift(); // dy1
+	                            c2x = c1x + stack.shift(); // dx2
+	                            c2y = c1y + stack.shift(); // dy2
+	                            jpx = c2x + stack.shift(); // dx3
+	                            jpy = c2y; // dy3
+	                            c3x = jpx + stack.shift(); // dx4
+	                            c3y = c2y; // dy4
+	                            c4x = c3x + stack.shift(); // dx5
+	                            c4y = c3y + stack.shift(); // dy5
+	                            x = c4x + stack.shift(); // dx6
 	                            p.curveTo(c1x, c1y, c2x, c2y, jpx, jpy);
 	                            p.curveTo(c3x, c3y, c4x, c4y, x, y);
 	                            break;
 	                        case 37: // flex1
 	                            // |- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 d6 flex1 (12 37) |-
-	                            c1x = x   + stack.shift();    // dx1
-	                            c1y = y   + stack.shift();    // dy1
-	                            c2x = c1x + stack.shift();    // dx2
-	                            c2y = c1y + stack.shift();    // dy2
-	                            jpx = c2x + stack.shift();    // dx3
-	                            jpy = c2y + stack.shift();    // dy3
-	                            c3x = jpx + stack.shift();    // dx4
-	                            c3y = jpy + stack.shift();    // dy4
-	                            c4x = c3x + stack.shift();    // dx5
-	                            c4y = c3y + stack.shift();    // dy5
+	                            c1x = x + stack.shift(); // dx1
+	                            c1y = y + stack.shift(); // dy1
+	                            c2x = c1x + stack.shift(); // dx2
+	                            c2y = c1y + stack.shift(); // dy2
+	                            jpx = c2x + stack.shift(); // dx3
+	                            jpy = c2y + stack.shift(); // dy3
+	                            c3x = jpx + stack.shift(); // dx4
+	                            c3y = jpy + stack.shift(); // dy4
+	                            c4x = c3x + stack.shift(); // dx5
+	                            c4y = c3y + stack.shift(); // dy5
 	                            if (Math.abs(c4x - x) > Math.abs(c4y - y)) {
 	                                x = c4x + stack.shift();
 	                            } else {
@@ -4519,7 +4560,7 @@
 	                            p.curveTo(c3x, c3y, c4x, c4y, x, y);
 	                            break;
 	                        default:
-	                            console.log('Glyph ' + glyph.index + ': unknown operator ' + 1200 + v);
+	                            console.log(`Glyph ${glyph.index}: unknown operator ${1200}${v}`);
 	                            stack.length = 0;
 	                    }
 	                    break;
@@ -4541,7 +4582,7 @@
 	                case 19: // hintmask
 	                case 20: // cntrmask
 	                    parseStems();
-	                    i += (nStems + 7) >> 3;
+	                    i = i + ((nStems + 7) >> 3);
 	                    break;
 	                case 21: // rmoveto
 	                    if (stack.length > 2 && !haveWidth) {
@@ -4549,8 +4590,8 @@
 	                        haveWidth = true;
 	                    }
 
-	                    y += stack.pop();
-	                    x += stack.pop();
+	                    y = y + stack.pop();
+	                    x = x + stack.pop();
 	                    newContour(x, y);
 	                    break;
 	                case 22: // hmoveto
@@ -4559,7 +4600,7 @@
 	                        haveWidth = true;
 	                    }
 
-	                    x += stack.pop();
+	                    x = x + stack.pop();
 	                    newContour(x, y);
 	                    break;
 	                case 23: // vstemhm
@@ -4576,14 +4617,14 @@
 	                        p.curveTo(c1x, c1y, c2x, c2y, x, y);
 	                    }
 
-	                    x += stack.shift();
-	                    y += stack.shift();
+	                    x = x + stack.shift();
+	                    y = y + stack.shift();
 	                    p.lineTo(x, y);
 	                    break;
 	                case 25: // rlinecurve
 	                    while (stack.length > 6) {
-	                        x += stack.shift();
-	                        y += stack.shift();
+	                        x = x + stack.shift();
+	                        y = y + stack.shift();
 	                        p.lineTo(x, y);
 	                    }
 
@@ -4597,7 +4638,7 @@
 	                    break;
 	                case 26: // vvcurveto
 	                    if (stack.length % 2) {
-	                        x += stack.shift();
+	                        x = x + stack.shift();
 	                    }
 
 	                    while (stack.length > 0) {
@@ -4613,7 +4654,7 @@
 	                    break;
 	                case 27: // hhcurveto
 	                    if (stack.length % 2) {
-	                        y += stack.shift();
+	                        y = y + stack.shift();
 	                    }
 
 	                    while (stack.length > 0) {
@@ -4631,7 +4672,7 @@
 	                    b1 = code[i];
 	                    b2 = code[i + 1];
 	                    stack.push(((b1 << 24) | (b2 << 16)) >> 16);
-	                    i += 2;
+	                    i = i + 2;
 	                    break;
 	                case 29: // callgsubr
 	                    codeIndex = stack.pop() + font.gsubrsBias;
@@ -4689,23 +4730,23 @@
 	                    break;
 	                default:
 	                    if (v < 32) {
-	                        console.log('Glyph ' + glyph.index + ': unknown operator ' + v);
+	                        console.log(`Glyph ${glyph.index}: unknown operator ${v}`);
 	                    } else if (v < 247) {
 	                        stack.push(v - 139);
 	                    } else if (v < 251) {
 	                        b1 = code[i];
-	                        i += 1;
+	                        i = i + 1;
 	                        stack.push((v - 247) * 256 + b1 + 108);
 	                    } else if (v < 255) {
 	                        b1 = code[i];
-	                        i += 1;
+	                        i = i + 1;
 	                        stack.push(-(v - 251) * 256 - b1 - 108);
 	                    } else {
 	                        b1 = code[i];
 	                        b2 = code[i + 1];
 	                        b3 = code[i + 2];
 	                        b4 = code[i + 3];
-	                        i += 4;
+	                        i = i + 4;
 	                        stack.push(((b1 << 24) | (b2 << 16) | (b3 << 8) | b4) / 65536);
 	                    }
 	            }
@@ -4716,38 +4757,38 @@
 
 	    glyph.advanceWidth = width;
 	    return p;
-	}
+  }
 
-	function parseCFFFDSelect(data, start, nGlyphs, fdArrayCount) {
-	    var fdSelect = [];
-	    var fdIndex;
-	    var parser = new parse.Parser(data, start);
-	    var format = parser.parseCard8();
+  function parseCFFFDSelect(data, start, nGlyphs, fdArrayCount) {
+	    const fdSelect = [];
+	    let fdIndex;
+	    const parser = new parse.Parser(data, start);
+	    const format = parser.parseCard8();
 	    if (format === 0) {
 	        // Simple list of nGlyphs elements
-	        for (var iGid = 0; iGid < nGlyphs; iGid++) {
+	        for (let iGid = 0; iGid < nGlyphs; iGid++) {
 	            fdIndex = parser.parseCard8();
 	            if (fdIndex >= fdArrayCount) {
-	                throw new Error('CFF table CID Font FDSelect has bad FD index value ' + fdIndex + ' (FD count ' + fdArrayCount + ')');
+	                throw new Error(`CFF table CID Font FDSelect has bad FD index value ${fdIndex} (FD count ${fdArrayCount})`);
 	            }
 	            fdSelect.push(fdIndex);
 	        }
 	    } else if (format === 3) {
 	        // Ranges
-	        var nRanges = parser.parseCard16();
-	        var first = parser.parseCard16();
+	        const nRanges = parser.parseCard16();
+	        let first = parser.parseCard16();
 	        if (first !== 0) {
-	            throw new Error('CFF Table CID Font FDSelect format 3 range has bad initial GID ' + first);
+	            throw new Error(`CFF Table CID Font FDSelect format 3 range has bad initial GID ${first}`);
 	        }
-	        var next;
-	        for (var iRange = 0; iRange < nRanges; iRange++) {
+	        let next;
+	        for (let iRange = 0; iRange < nRanges; iRange++) {
 	            fdIndex = parser.parseCard8();
 	            next = parser.parseCard16();
 	            if (fdIndex >= fdArrayCount) {
-	                throw new Error('CFF table CID Font FDSelect has bad FD index value ' + fdIndex + ' (FD count ' + fdArrayCount + ')');
+	                throw new Error(`CFF table CID Font FDSelect has bad FD index value ${fdIndex} (FD count ${fdArrayCount})`);
 	            }
 	            if (next > nGlyphs) {
-	                throw new Error('CFF Table CID Font FDSelect format 3 range has bad GID ' + next);
+	                throw new Error(`CFF Table CID Font FDSelect format 3 range has bad GID ${next}`);
 	            }
 	            for (; first < next; first++) {
 	                fdSelect.push(fdIndex);
@@ -4755,31 +4796,31 @@
 	            first = next;
 	        }
 	        if (next !== nGlyphs) {
-	            throw new Error('CFF Table CID Font FDSelect format 3 range has bad final GID ' + next);
+	            throw new Error(`CFF Table CID Font FDSelect format 3 range has bad final GID ${next}`);
 	        }
 	    } else {
-	        throw new Error('CFF Table CID Font FDSelect table has unsupported format ' + format);
+	        throw new Error(`CFF Table CID Font FDSelect table has unsupported format ${format}`);
 	    }
 	    return fdSelect;
-	}
+  }
 
-	// Parse the `CFF` table, which contains the glyph outlines in PostScript format.
-	function parseCFFTable(data, start, font, opt) {
+  // Parse the `CFF` table, which contains the glyph outlines in PostScript format.
+  function parseCFFTable(data, start, font, opt) {
 	    font.tables.cff = {};
-	    var header = parseCFFHeader(data, start);
-	    var nameIndex = parseCFFIndex(data, header.endOffset, parse.bytesToString);
-	    var topDictIndex = parseCFFIndex(data, nameIndex.endOffset);
-	    var stringIndex = parseCFFIndex(data, topDictIndex.endOffset, parse.bytesToString);
-	    var globalSubrIndex = parseCFFIndex(data, stringIndex.endOffset);
+	    const header = parseCFFHeader(data, start);
+	    const nameIndex = parseCFFIndex(data, header.endOffset, parse.bytesToString);
+	    const topDictIndex = parseCFFIndex(data, nameIndex.endOffset);
+	    const stringIndex = parseCFFIndex(data, topDictIndex.endOffset, parse.bytesToString);
+	    const globalSubrIndex = parseCFFIndex(data, stringIndex.endOffset);
 	    font.gsubrs = globalSubrIndex.objects;
 	    font.gsubrsBias = calcCFFSubroutineBias(font.gsubrs);
 
-	    var topDictArray = gatherCFFTopDicts(data, start, topDictIndex.objects, stringIndex.objects);
+	    const topDictArray = gatherCFFTopDicts(data, start, topDictIndex.objects, stringIndex.objects);
 	    if (topDictArray.length !== 1) {
-	        throw new Error('CFF table has too many fonts in \'FontSet\' - count of fonts NameIndex.length = ' + topDictArray.length);
+	        throw new Error(`CFF table has too many fonts in 'FontSet' - count of fonts NameIndex.length = ${topDictArray.length}`);
 	    }
 
-	    var topDict = topDictArray[0];
+	    const topDict = topDictArray[0];
 	    font.tables.cff.topDict = topDict;
 
 	    if (topDict._privateDict) {
@@ -4792,27 +4833,27 @@
 	    }
 
 	    if (font.isCIDFont) {
-	        var fdArrayOffset = topDict.fdArray;
-	        var fdSelectOffset = topDict.fdSelect;
+	        let fdArrayOffset = topDict.fdArray;
+	        let fdSelectOffset = topDict.fdSelect;
 	        if (fdArrayOffset === 0 || fdSelectOffset === 0) {
 	            throw new Error('Font is marked as a CID font, but FDArray and/or FDSelect information is missing');
 	        }
-	        fdArrayOffset += start;
-	        var fdArrayIndex = parseCFFIndex(data, fdArrayOffset);
-	        var fdArray = gatherCFFTopDicts(data, start, fdArrayIndex.objects, stringIndex.objects);
+	        fdArrayOffset = fdArrayOffset + start;
+	        const fdArrayIndex = parseCFFIndex(data, fdArrayOffset);
+	        const fdArray = gatherCFFTopDicts(data, start, fdArrayIndex.objects, stringIndex.objects);
 	        topDict._fdArray = fdArray;
-	        fdSelectOffset += start;
+	        fdSelectOffset = fdSelectOffset + start;
 	        topDict._fdSelect = parseCFFFDSelect(data, fdSelectOffset, font.numGlyphs, fdArray.length);
 	    }
 
-	    var privateDictOffset = start + topDict.private[1];
-	    var privateDict = parseCFFPrivateDict(data, privateDictOffset, topDict.private[0], stringIndex.objects);
+	    const privateDictOffset = start + topDict.private[1];
+	    const privateDict = parseCFFPrivateDict(data, privateDictOffset, topDict.private[0], stringIndex.objects);
 	    font.defaultWidthX = privateDict.defaultWidthX;
 	    font.nominalWidthX = privateDict.nominalWidthX;
 
 	    if (privateDict.subrs !== 0) {
-	        var subrOffset = privateDictOffset + privateDict.subrs;
-	        var subrIndex = parseCFFIndex(data, subrOffset);
+	        const subrOffset = privateDictOffset + privateDict.subrs;
+	        const subrIndex = parseCFFIndex(data, subrOffset);
 	        font.subrs = subrIndex.objects;
 	        font.subrsBias = calcCFFSubroutineBias(font.subrs);
 	    } else {
@@ -4821,7 +4862,7 @@
 	    }
 
 	    // Offsets in the top dict are relative to the beginning of the CFF data, so add the CFF start offset.
-	    var charStringsIndex;
+	    let charStringsIndex;
 	    if (opt.lowMemory) {
 	        charStringsIndex = parseCFFIndexLowMemory(data, start + topDict.charStrings);
 	        font.nGlyphs = charStringsIndex.offsets.length;
@@ -4830,7 +4871,7 @@
 	        font.nGlyphs = charStringsIndex.objects.length;
 	    }
 
-	    var charset = parseCFFCharset(data, start + topDict.charset, font.nGlyphs, stringIndex.objects);
+	    const charset = parseCFFCharset(data, start + topDict.charset, font.nGlyphs, stringIndex.objects);
 	    if (topDict.encoding === 0) {
 	        // Standard encoding
 	        font.cffEncoding = new CffEncoding(cffStandardEncoding, charset);
@@ -4846,25 +4887,25 @@
 
 	    font.glyphs = new glyphset.GlyphSet(font);
 	    if (opt.lowMemory) {
-	        font._push = function(i) {
-	            var charString = getCffIndexObject(i, charStringsIndex.offsets, data, start + topDict.charStrings);
+	        font._push = function (i) {
+	            const charString = getCffIndexObject(i, charStringsIndex.offsets, data, start + topDict.charStrings);
 	            font.glyphs.push(i, glyphset.cffGlyphLoader(font, i, parseCFFCharstring, charString));
 	        };
 	    } else {
-	        for (var i = 0; i < font.nGlyphs; i += 1) {
-	            var charString = charStringsIndex.objects[i];
+	        for (let i = 0; i < font.nGlyphs; i = i + 1) {
+	            const charString = charStringsIndex.objects[i];
 	            font.glyphs.push(i, glyphset.cffGlyphLoader(font, i, parseCFFCharstring, charString));
 	        }
 	    }
-	}
+  }
 
-	// Convert a string to a String ID (SID).
-	// The list of strings is modified in place.
-	function encodeString(s, strings) {
-	    var sid;
+  // Convert a string to a String ID (SID).
+  // The list of strings is modified in place.
+  function encodeString(s, strings) {
+	    let sid;
 
 	    // Is the string in the CFF standard strings?
-	    var i = cffStandardStrings.indexOf(s);
+	    let i = cffStandardStrings.indexOf(s);
 	    if (i >= 0) {
 	        sid = i;
 	    }
@@ -4879,110 +4920,110 @@
 	    }
 
 	    return sid;
-	}
+  }
 
-	function makeHeader() {
+  function makeHeader() {
 	    return new table.Record('Header', [
-	        {name: 'major', type: 'Card8', value: 1},
-	        {name: 'minor', type: 'Card8', value: 0},
-	        {name: 'hdrSize', type: 'Card8', value: 4},
-	        {name: 'major', type: 'Card8', value: 1}
+	        { name: 'major', type: 'Card8', value: 1 },
+	        { name: 'minor', type: 'Card8', value: 0 },
+	        { name: 'hdrSize', type: 'Card8', value: 4 },
+	        { name: 'major', type: 'Card8', value: 1 },
 	    ]);
-	}
+  }
 
-	function makeNameIndex(fontNames) {
-	    var t = new table.Record('Name INDEX', [
-	        {name: 'names', type: 'INDEX', value: []}
+  function makeNameIndex(fontNames) {
+	    const t = new table.Record('Name INDEX', [
+	        { name: 'names', type: 'INDEX', value: [] },
 	    ]);
 	    t.names = [];
-	    for (var i = 0; i < fontNames.length; i += 1) {
-	        t.names.push({name: 'name_' + i, type: 'NAME', value: fontNames[i]});
+	    for (let i = 0; i < fontNames.length; i = i + 1) {
+	        t.names.push({ name: `name_${i}`, type: 'NAME', value: fontNames[i] });
 	    }
 
 	    return t;
-	}
+  }
 
-	// Given a dictionary's metadata, create a DICT structure.
-	function makeDict(meta, attrs, strings) {
-	    var m = {};
-	    for (var i = 0; i < meta.length; i += 1) {
-	        var entry = meta[i];
-	        var value = attrs[entry.name];
+  // Given a dictionary's metadata, create a DICT structure.
+  function makeDict(meta, attrs, strings) {
+	    const m = {};
+	    for (let i = 0; i < meta.length; i = i + 1) {
+	        const entry = meta[i];
+	        let value = attrs[entry.name];
 	        if (value !== undefined && !equals(value, entry.value)) {
 	            if (entry.type === 'SID') {
 	                value = encodeString(value, strings);
 	            }
 
-	            m[entry.op] = {name: entry.name, type: entry.type, value: value};
+	            m[entry.op] = { name: entry.name, type: entry.type, value };
 	        }
 	    }
 
 	    return m;
-	}
+  }
 
-	// The Top DICT houses the global font attributes.
-	function makeTopDict(attrs, strings) {
-	    var t = new table.Record('Top DICT', [
-	        {name: 'dict', type: 'DICT', value: {}}
+  // The Top DICT houses the global font attributes.
+  function makeTopDict(attrs, strings) {
+	    const t = new table.Record('Top DICT', [
+	        { name: 'dict', type: 'DICT', value: {} },
 	    ]);
 	    t.dict = makeDict(TOP_DICT_META, attrs, strings);
 	    return t;
-	}
+  }
 
-	function makeTopDictIndex(topDict) {
-	    var t = new table.Record('Top DICT INDEX', [
-	        {name: 'topDicts', type: 'INDEX', value: []}
+  function makeTopDictIndex(topDict) {
+	    const t = new table.Record('Top DICT INDEX', [
+	        { name: 'topDicts', type: 'INDEX', value: [] },
 	    ]);
-	    t.topDicts = [{name: 'topDict_0', type: 'TABLE', value: topDict}];
+	    t.topDicts = [{ name: 'topDict_0', type: 'TABLE', value: topDict }];
 	    return t;
-	}
+  }
 
-	function makeStringIndex(strings) {
-	    var t = new table.Record('String INDEX', [
-	        {name: 'strings', type: 'INDEX', value: []}
+  function makeStringIndex(strings) {
+	    const t = new table.Record('String INDEX', [
+	        { name: 'strings', type: 'INDEX', value: [] },
 	    ]);
 	    t.strings = [];
-	    for (var i = 0; i < strings.length; i += 1) {
-	        t.strings.push({name: 'string_' + i, type: 'STRING', value: strings[i]});
+	    for (let i = 0; i < strings.length; i = i + 1) {
+	        t.strings.push({ name: `string_${i}`, type: 'STRING', value: strings[i] });
 	    }
 
 	    return t;
-	}
+  }
 
-	function makeGlobalSubrIndex() {
+  function makeGlobalSubrIndex() {
 	    // Currently we don't use subroutines.
 	    return new table.Record('Global Subr INDEX', [
-	        {name: 'subrs', type: 'INDEX', value: []}
+	        { name: 'subrs', type: 'INDEX', value: [] },
 	    ]);
-	}
+  }
 
-	function makeCharsets(glyphNames, strings) {
-	    var t = new table.Record('Charsets', [
-	        {name: 'format', type: 'Card8', value: 0}
+  function makeCharsets(glyphNames, strings) {
+	    const t = new table.Record('Charsets', [
+	        { name: 'format', type: 'Card8', value: 0 },
 	    ]);
-	    for (var i = 0; i < glyphNames.length; i += 1) {
-	        var glyphName = glyphNames[i];
-	        var glyphSID = encodeString(glyphName, strings);
-	        t.fields.push({name: 'glyph_' + i, type: 'SID', value: glyphSID});
+	    for (let i = 0; i < glyphNames.length; i = i + 1) {
+	        const glyphName = glyphNames[i];
+	        const glyphSID = encodeString(glyphName, strings);
+	        t.fields.push({ name: `glyph_${i}`, type: 'SID', value: glyphSID });
 	    }
 
 	    return t;
-	}
+  }
 
-	function glyphToOps(glyph) {
-	    var ops = [];
-	    var path = glyph.path;
-	    ops.push({name: 'width', type: 'NUMBER', value: glyph.advanceWidth});
-	    var x = 0;
-	    var y = 0;
-	    for (var i = 0; i < path.commands.length; i += 1) {
-	        var dx = (void 0);
-	        var dy = (void 0);
-	        var cmd = path.commands[i];
+  function glyphToOps(glyph) {
+	    const ops = [];
+	    const { path } = glyph;
+	    ops.push({ name: 'width', type: 'NUMBER', value: glyph.advanceWidth });
+	    let x = 0;
+	    let y = 0;
+	    for (let i = 0; i < path.commands.length; i = i + 1) {
+	        let dx = (void 0);
+	        let dy = (void 0);
+	        let cmd = path.commands[i];
 	        if (cmd.type === 'Q') {
 	            // CFF only supports bézier curves, so convert the quad to a bézier.
-	            var _13 = 1 / 3;
-	            var _23 = 2 / 3;
+	            const _13 = 1 / 3;
+	            const _23 = 2 / 3;
 
 	            // We're going to create a new command so we don't change the original path.
 	            cmd = {
@@ -4992,40 +5033,40 @@
 	                x1: _13 * x + _23 * cmd.x1,
 	                y1: _13 * y + _23 * cmd.y1,
 	                x2: _13 * cmd.x + _23 * cmd.x1,
-	                y2: _13 * cmd.y + _23 * cmd.y1
+	                y2: _13 * cmd.y + _23 * cmd.y1,
 	            };
 	        }
 
 	        if (cmd.type === 'M') {
 	            dx = Math.round(cmd.x - x);
 	            dy = Math.round(cmd.y - y);
-	            ops.push({name: 'dx', type: 'NUMBER', value: dx});
-	            ops.push({name: 'dy', type: 'NUMBER', value: dy});
-	            ops.push({name: 'rmoveto', type: 'OP', value: 21});
+	            ops.push({ name: 'dx', type: 'NUMBER', value: dx });
+	            ops.push({ name: 'dy', type: 'NUMBER', value: dy });
+	            ops.push({ name: 'rmoveto', type: 'OP', value: 21 });
 	            x = Math.round(cmd.x);
 	            y = Math.round(cmd.y);
 	        } else if (cmd.type === 'L') {
 	            dx = Math.round(cmd.x - x);
 	            dy = Math.round(cmd.y - y);
-	            ops.push({name: 'dx', type: 'NUMBER', value: dx});
-	            ops.push({name: 'dy', type: 'NUMBER', value: dy});
-	            ops.push({name: 'rlineto', type: 'OP', value: 5});
+	            ops.push({ name: 'dx', type: 'NUMBER', value: dx });
+	            ops.push({ name: 'dy', type: 'NUMBER', value: dy });
+	            ops.push({ name: 'rlineto', type: 'OP', value: 5 });
 	            x = Math.round(cmd.x);
 	            y = Math.round(cmd.y);
 	        } else if (cmd.type === 'C') {
-	            var dx1 = Math.round(cmd.x1 - x);
-	            var dy1 = Math.round(cmd.y1 - y);
-	            var dx2 = Math.round(cmd.x2 - cmd.x1);
-	            var dy2 = Math.round(cmd.y2 - cmd.y1);
+	            const dx1 = Math.round(cmd.x1 - x);
+	            const dy1 = Math.round(cmd.y1 - y);
+	            const dx2 = Math.round(cmd.x2 - cmd.x1);
+	            const dy2 = Math.round(cmd.y2 - cmd.y1);
 	            dx = Math.round(cmd.x - cmd.x2);
 	            dy = Math.round(cmd.y - cmd.y2);
-	            ops.push({name: 'dx1', type: 'NUMBER', value: dx1});
-	            ops.push({name: 'dy1', type: 'NUMBER', value: dy1});
-	            ops.push({name: 'dx2', type: 'NUMBER', value: dx2});
-	            ops.push({name: 'dy2', type: 'NUMBER', value: dy2});
-	            ops.push({name: 'dx', type: 'NUMBER', value: dx});
-	            ops.push({name: 'dy', type: 'NUMBER', value: dy});
-	            ops.push({name: 'rrcurveto', type: 'OP', value: 8});
+	            ops.push({ name: 'dx1', type: 'NUMBER', value: dx1 });
+	            ops.push({ name: 'dy1', type: 'NUMBER', value: dy1 });
+	            ops.push({ name: 'dx2', type: 'NUMBER', value: dx2 });
+	            ops.push({ name: 'dy2', type: 'NUMBER', value: dy2 });
+	            ops.push({ name: 'dx', type: 'NUMBER', value: dx });
+	            ops.push({ name: 'dy', type: 'NUMBER', value: dy });
+	            ops.push({ name: 'rrcurveto', type: 'OP', value: 8 });
 	            x = Math.round(cmd.x);
 	            y = Math.round(cmd.y);
 	        }
@@ -5033,49 +5074,49 @@
 	        // Contours are closed automatically.
 	    }
 
-	    ops.push({name: 'endchar', type: 'OP', value: 14});
+	    ops.push({ name: 'endchar', type: 'OP', value: 14 });
 	    return ops;
-	}
+  }
 
-	function makeCharStringsIndex(glyphs) {
-	    var t = new table.Record('CharStrings INDEX', [
-	        {name: 'charStrings', type: 'INDEX', value: []}
+  function makeCharStringsIndex(glyphs) {
+	    const t = new table.Record('CharStrings INDEX', [
+	        { name: 'charStrings', type: 'INDEX', value: [] },
 	    ]);
 
-	    for (var i = 0; i < glyphs.length; i += 1) {
-	        var glyph = glyphs.get(i);
-	        var ops = glyphToOps(glyph);
-	        t.charStrings.push({name: glyph.name, type: 'CHARSTRING', value: ops});
+	    for (let i = 0; i < glyphs.length; i = i + 1) {
+	        const glyph = glyphs.get(i);
+	        const ops = glyphToOps(glyph);
+	        t.charStrings.push({ name: glyph.name, type: 'CHARSTRING', value: ops });
 	    }
 
 	    return t;
-	}
+  }
 
-	function makePrivateDict(attrs, strings) {
-	    var t = new table.Record('Private DICT', [
-	        {name: 'dict', type: 'DICT', value: {}}
+  function makePrivateDict(attrs, strings) {
+	    const t = new table.Record('Private DICT', [
+	        { name: 'dict', type: 'DICT', value: {} },
 	    ]);
 	    t.dict = makeDict(PRIVATE_DICT_META, attrs, strings);
 	    return t;
-	}
+  }
 
-	function makeCFFTable(glyphs, options) {
-	    var t = new table.Table('CFF ', [
-	        {name: 'header', type: 'RECORD'},
-	        {name: 'nameIndex', type: 'RECORD'},
-	        {name: 'topDictIndex', type: 'RECORD'},
-	        {name: 'stringIndex', type: 'RECORD'},
-	        {name: 'globalSubrIndex', type: 'RECORD'},
-	        {name: 'charsets', type: 'RECORD'},
-	        {name: 'charStringsIndex', type: 'RECORD'},
-	        {name: 'privateDict', type: 'RECORD'}
+  function makeCFFTable(glyphs, options) {
+	    const t = new table.Table('CFF ', [
+	        { name: 'header', type: 'RECORD' },
+	        { name: 'nameIndex', type: 'RECORD' },
+	        { name: 'topDictIndex', type: 'RECORD' },
+	        { name: 'stringIndex', type: 'RECORD' },
+	        { name: 'globalSubrIndex', type: 'RECORD' },
+	        { name: 'charsets', type: 'RECORD' },
+	        { name: 'charStringsIndex', type: 'RECORD' },
+	        { name: 'privateDict', type: 'RECORD' },
 	    ]);
 
-	    var fontScale = 1 / options.unitsPerEm;
+	    const fontScale = 1 / options.unitsPerEm;
 	    // We use non-zero values for the offsets so that the DICT encodes them.
 	    // This is important because the size of the Top DICT plays a role in offset calculation,
 	    // and the size shouldn't change after we've written correct offsets.
-	    var attrs = {
+	    const attrs = {
 	        version: options.version,
 	        fullName: options.fullName,
 	        familyName: options.familyName,
@@ -5085,25 +5126,25 @@
 	        charset: 999,
 	        encoding: 0,
 	        charStrings: 999,
-	        private: [0, 999]
+	        private: [0, 999],
 	    };
 
-	    var privateAttrs = {};
+	    const privateAttrs = {};
 
-	    var glyphNames = [];
-	    var glyph;
+	    const glyphNames = [];
+	    let glyph;
 
 	    // Skip first glyph (.notdef)
-	    for (var i = 1; i < glyphs.length; i += 1) {
+	    for (let i = 1; i < glyphs.length; i = i + 1) {
 	        glyph = glyphs.get(i);
 	        glyphNames.push(glyph.name);
 	    }
 
-	    var strings = [];
+	    const strings = [];
 
 	    t.header = makeHeader();
 	    t.nameIndex = makeNameIndex([options.postScriptName]);
-	    var topDict = makeTopDict(attrs, strings);
+	    let topDict = makeTopDict(attrs, strings);
 	    t.topDictIndex = makeTopDictIndex(topDict);
 	    t.globalSubrIndex = makeGlobalSubrIndex();
 	    t.charsets = makeCharsets(glyphNames, strings);
@@ -5113,11 +5154,11 @@
 	    // Needs to come at the end, to encode all custom strings used in the font.
 	    t.stringIndex = makeStringIndex(strings);
 
-	    var startOffset = t.header.sizeOf() +
-	        t.nameIndex.sizeOf() +
-	        t.topDictIndex.sizeOf() +
-	        t.stringIndex.sizeOf() +
-	        t.globalSubrIndex.sizeOf();
+	    const startOffset = t.header.sizeOf()
+	        + t.nameIndex.sizeOf()
+	        + t.topDictIndex.sizeOf()
+	        + t.stringIndex.sizeOf()
+	        + t.globalSubrIndex.sizeOf();
 	    attrs.charset = startOffset;
 
 	    // We use the CFF standard encoding; proper encoding will be handled in cmap.
@@ -5130,16 +5171,16 @@
 	    t.topDictIndex = makeTopDictIndex(topDict);
 
 	    return t;
-	}
+  }
 
-	var cff = { parse: parseCFFTable, make: makeCFFTable };
+  const cff = { parse: parseCFFTable, make: makeCFFTable };
 
-	// The `head` table contains global information about the font.
+  // The `head` table contains global information about the font.
 
-	// Parse the header `head` table
-	function parseHeadTable(data, start) {
-	    var head = {};
-	    var p = new parse.Parser(data, start);
+  // Parse the header `head` table
+  function parseHeadTable(data, start) {
+	    const head = {};
+	    const p = new parse.Parser(data, start);
 	    head.version = p.parseVersion();
 	    head.fontRevision = Math.round(p.parseFixed() * 1000) / 1000;
 	    head.checkSumAdjustment = p.parseULong();
@@ -5159,46 +5200,46 @@
 	    head.indexToLocFormat = p.parseShort();
 	    head.glyphDataFormat = p.parseShort();
 	    return head;
-	}
+  }
 
-	function makeHeadTable(options) {
+  function makeHeadTable(options) {
 	    // Apple Mac timestamp epoch is 01/01/1904 not 01/01/1970
-	    var timestamp = Math.round(new Date().getTime() / 1000) + 2082844800;
-	    var createdTimestamp = timestamp;
+	    const timestamp = Math.round(new Date().getTime() / 1000) + 2082844800;
+	    let createdTimestamp = timestamp;
 
 	    if (options.createdTimestamp) {
 	        createdTimestamp = options.createdTimestamp + 2082844800;
 	    }
 
 	    return new table.Table('head', [
-	        {name: 'version', type: 'FIXED', value: 0x00010000},
-	        {name: 'fontRevision', type: 'FIXED', value: 0x00010000},
-	        {name: 'checkSumAdjustment', type: 'ULONG', value: 0},
-	        {name: 'magicNumber', type: 'ULONG', value: 0x5F0F3CF5},
-	        {name: 'flags', type: 'USHORT', value: 0},
-	        {name: 'unitsPerEm', type: 'USHORT', value: 1000},
-	        {name: 'created', type: 'LONGDATETIME', value: createdTimestamp},
-	        {name: 'modified', type: 'LONGDATETIME', value: timestamp},
-	        {name: 'xMin', type: 'SHORT', value: 0},
-	        {name: 'yMin', type: 'SHORT', value: 0},
-	        {name: 'xMax', type: 'SHORT', value: 0},
-	        {name: 'yMax', type: 'SHORT', value: 0},
-	        {name: 'macStyle', type: 'USHORT', value: 0},
-	        {name: 'lowestRecPPEM', type: 'USHORT', value: 0},
-	        {name: 'fontDirectionHint', type: 'SHORT', value: 2},
-	        {name: 'indexToLocFormat', type: 'SHORT', value: 0},
-	        {name: 'glyphDataFormat', type: 'SHORT', value: 0}
+	        { name: 'version', type: 'FIXED', value: 0x00010000 },
+	        { name: 'fontRevision', type: 'FIXED', value: 0x00010000 },
+	        { name: 'checkSumAdjustment', type: 'ULONG', value: 0 },
+	        { name: 'magicNumber', type: 'ULONG', value: 0x5F0F3CF5 },
+	        { name: 'flags', type: 'USHORT', value: 0 },
+	        { name: 'unitsPerEm', type: 'USHORT', value: 1000 },
+	        { name: 'created', type: 'LONGDATETIME', value: createdTimestamp },
+	        { name: 'modified', type: 'LONGDATETIME', value: timestamp },
+	        { name: 'xMin', type: 'SHORT', value: 0 },
+	        { name: 'yMin', type: 'SHORT', value: 0 },
+	        { name: 'xMax', type: 'SHORT', value: 0 },
+	        { name: 'yMax', type: 'SHORT', value: 0 },
+	        { name: 'macStyle', type: 'USHORT', value: 0 },
+	        { name: 'lowestRecPPEM', type: 'USHORT', value: 0 },
+	        { name: 'fontDirectionHint', type: 'SHORT', value: 2 },
+	        { name: 'indexToLocFormat', type: 'SHORT', value: 0 },
+	        { name: 'glyphDataFormat', type: 'SHORT', value: 0 },
 	    ], options);
-	}
+  }
 
-	var head = { parse: parseHeadTable, make: makeHeadTable };
+  const head = { parse: parseHeadTable, make: makeHeadTable };
 
-	// The `hhea` table contains information for horizontal layout.
+  // The `hhea` table contains information for horizontal layout.
 
-	// Parse the horizontal header `hhea` table
-	function parseHheaTable(data, start) {
-	    var hhea = {};
-	    var p = new parse.Parser(data, start);
+  // Parse the horizontal header `hhea` table
+  function parseHheaTable(data, start) {
+	    const hhea = {};
+	    const p = new parse.Parser(data, start);
 	    hhea.version = p.parseVersion();
 	    hhea.ascender = p.parseShort();
 	    hhea.descender = p.parseShort();
@@ -5210,62 +5251,62 @@
 	    hhea.caretSlopeRise = p.parseShort();
 	    hhea.caretSlopeRun = p.parseShort();
 	    hhea.caretOffset = p.parseShort();
-	    p.relativeOffset += 8;
+	    p.relativeOffset = p.relativeOffset + 8;
 	    hhea.metricDataFormat = p.parseShort();
 	    hhea.numberOfHMetrics = p.parseUShort();
 	    return hhea;
-	}
+  }
 
-	function makeHheaTable(options) {
+  function makeHheaTable(options) {
 	    return new table.Table('hhea', [
-	        {name: 'version', type: 'FIXED', value: 0x00010000},
-	        {name: 'ascender', type: 'FWORD', value: 0},
-	        {name: 'descender', type: 'FWORD', value: 0},
-	        {name: 'lineGap', type: 'FWORD', value: 0},
-	        {name: 'advanceWidthMax', type: 'UFWORD', value: 0},
-	        {name: 'minLeftSideBearing', type: 'FWORD', value: 0},
-	        {name: 'minRightSideBearing', type: 'FWORD', value: 0},
-	        {name: 'xMaxExtent', type: 'FWORD', value: 0},
-	        {name: 'caretSlopeRise', type: 'SHORT', value: 1},
-	        {name: 'caretSlopeRun', type: 'SHORT', value: 0},
-	        {name: 'caretOffset', type: 'SHORT', value: 0},
-	        {name: 'reserved1', type: 'SHORT', value: 0},
-	        {name: 'reserved2', type: 'SHORT', value: 0},
-	        {name: 'reserved3', type: 'SHORT', value: 0},
-	        {name: 'reserved4', type: 'SHORT', value: 0},
-	        {name: 'metricDataFormat', type: 'SHORT', value: 0},
-	        {name: 'numberOfHMetrics', type: 'USHORT', value: 0}
+	        { name: 'version', type: 'FIXED', value: 0x00010000 },
+	        { name: 'ascender', type: 'FWORD', value: 0 },
+	        { name: 'descender', type: 'FWORD', value: 0 },
+	        { name: 'lineGap', type: 'FWORD', value: 0 },
+	        { name: 'advanceWidthMax', type: 'UFWORD', value: 0 },
+	        { name: 'minLeftSideBearing', type: 'FWORD', value: 0 },
+	        { name: 'minRightSideBearing', type: 'FWORD', value: 0 },
+	        { name: 'xMaxExtent', type: 'FWORD', value: 0 },
+	        { name: 'caretSlopeRise', type: 'SHORT', value: 1 },
+	        { name: 'caretSlopeRun', type: 'SHORT', value: 0 },
+	        { name: 'caretOffset', type: 'SHORT', value: 0 },
+	        { name: 'reserved1', type: 'SHORT', value: 0 },
+	        { name: 'reserved2', type: 'SHORT', value: 0 },
+	        { name: 'reserved3', type: 'SHORT', value: 0 },
+	        { name: 'reserved4', type: 'SHORT', value: 0 },
+	        { name: 'metricDataFormat', type: 'SHORT', value: 0 },
+	        { name: 'numberOfHMetrics', type: 'USHORT', value: 0 },
 	    ], options);
-	}
+  }
 
-	var hhea = { parse: parseHheaTable, make: makeHheaTable };
+  const hhea = { parse: parseHheaTable, make: makeHheaTable };
 
-	// The `hmtx` table contains the horizontal metrics for all glyphs.
+  // The `hmtx` table contains the horizontal metrics for all glyphs.
 
-	function parseHmtxTableAll(data, start, numMetrics, numGlyphs, glyphs) {
-	    var advanceWidth;
-	    var leftSideBearing;
-	    var p = new parse.Parser(data, start);
-	    for (var i = 0; i < numGlyphs; i += 1) {
+  function parseHmtxTableAll(data, start, numMetrics, numGlyphs, glyphs) {
+	    let advanceWidth;
+	    let leftSideBearing;
+	    const p = new parse.Parser(data, start);
+	    for (let i = 0; i < numGlyphs; i = i + 1) {
 	        // If the font is monospaced, only one entry is needed. This last entry applies to all subsequent glyphs.
 	        if (i < numMetrics) {
 	            advanceWidth = p.parseUShort();
 	            leftSideBearing = p.parseShort();
 	        }
 
-	        var glyph = glyphs.get(i);
+	        const glyph = glyphs.get(i);
 	        glyph.advanceWidth = advanceWidth;
 	        glyph.leftSideBearing = leftSideBearing;
 	    }
-	}
+  }
 
-	function parseHmtxTableOnLowMemory(font, data, start, numMetrics, numGlyphs) {
+  function parseHmtxTableOnLowMemory(font, data, start, numMetrics, numGlyphs) {
 	    font._hmtxTableData = {};
 
-	    var advanceWidth;
-	    var leftSideBearing;
-	    var p = new parse.Parser(data, start);
-	    for (var i = 0; i < numGlyphs; i += 1) {
+	    let advanceWidth;
+	    let leftSideBearing;
+	    const p = new parse.Parser(data, start);
+	    for (let i = 0; i < numGlyphs; i = i + 1) {
 	        // If the font is monospaced, only one entry is needed. This last entry applies to all subsequent glyphs.
 	        if (i < numMetrics) {
 	            advanceWidth = p.parseUShort();
@@ -5273,93 +5314,90 @@
 	        }
 
 	        font._hmtxTableData[i] = {
-	            advanceWidth: advanceWidth,
-	            leftSideBearing: leftSideBearing
+	            advanceWidth,
+	            leftSideBearing,
 	        };
 	    }
-	}
+  }
 
-	// Parse the `hmtx` table, which contains the horizontal metrics for all glyphs.
-	// This function augments the glyph array, adding the advanceWidth and leftSideBearing to each glyph.
-	function parseHmtxTable(font, data, start, numMetrics, numGlyphs, glyphs, opt) {
-	    if (opt.lowMemory)
-	        { parseHmtxTableOnLowMemory(font, data, start, numMetrics, numGlyphs); }
-	    else
-	        { parseHmtxTableAll(data, start, numMetrics, numGlyphs, glyphs); }
-	}
+  // Parse the `hmtx` table, which contains the horizontal metrics for all glyphs.
+  // This function augments the glyph array, adding the advanceWidth and leftSideBearing to each glyph.
+  function parseHmtxTable(font, data, start, numMetrics, numGlyphs, glyphs, opt) {
+	    if (opt.lowMemory) { parseHmtxTableOnLowMemory(font, data, start, numMetrics, numGlyphs); } else { parseHmtxTableAll(data, start, numMetrics, numGlyphs, glyphs); }
+  }
 
-	function makeHmtxTable(glyphs) {
-	    var t = new table.Table('hmtx', []);
-	    for (var i = 0; i < glyphs.length; i += 1) {
-	        var glyph = glyphs.get(i);
-	        var advanceWidth = glyph.advanceWidth || 0;
-	        var leftSideBearing = glyph.leftSideBearing || 0;
-	        t.fields.push({name: 'advanceWidth_' + i, type: 'USHORT', value: advanceWidth});
-	        t.fields.push({name: 'leftSideBearing_' + i, type: 'SHORT', value: leftSideBearing});
+  function makeHmtxTable(glyphs) {
+	    const t = new table.Table('hmtx', []);
+	    for (let i = 0; i < glyphs.length; i = i + 1) {
+	        const glyph = glyphs.get(i);
+	        const advanceWidth = glyph.advanceWidth || 0;
+	        const leftSideBearing = glyph.leftSideBearing || 0;
+	        t.fields.push({ name: `advanceWidth_${i}`, type: 'USHORT', value: advanceWidth });
+	        t.fields.push({ name: `leftSideBearing_${i}`, type: 'SHORT', value: leftSideBearing });
 	    }
 
 	    return t;
-	}
+  }
 
-	var hmtx = { parse: parseHmtxTable, make: makeHmtxTable };
+  const hmtx = { parse: parseHmtxTable, make: makeHmtxTable };
 
-	// The `ltag` table stores IETF BCP-47 language tags. It allows supporting
+  // The `ltag` table stores IETF BCP-47 language tags. It allows supporting
 
-	function makeLtagTable(tags) {
-	    var result = new table.Table('ltag', [
-	        {name: 'version', type: 'ULONG', value: 1},
-	        {name: 'flags', type: 'ULONG', value: 0},
-	        {name: 'numTags', type: 'ULONG', value: tags.length}
+  function makeLtagTable(tags) {
+	    const result = new table.Table('ltag', [
+	        { name: 'version', type: 'ULONG', value: 1 },
+	        { name: 'flags', type: 'ULONG', value: 0 },
+	        { name: 'numTags', type: 'ULONG', value: tags.length },
 	    ]);
 
-	    var stringPool = '';
-	    var stringPoolOffset = 12 + tags.length * 4;
-	    for (var i = 0; i < tags.length; ++i) {
-	        var pos = stringPool.indexOf(tags[i]);
+	    let stringPool = '';
+	    const stringPoolOffset = 12 + tags.length * 4;
+	    for (let i = 0; i < tags.length; ++i) {
+	        let pos = stringPool.indexOf(tags[i]);
 	        if (pos < 0) {
 	            pos = stringPool.length;
-	            stringPool += tags[i];
+	            stringPool = stringPool + tags[i];
 	        }
 
-	        result.fields.push({name: 'offset ' + i, type: 'USHORT', value: stringPoolOffset + pos});
-	        result.fields.push({name: 'length ' + i, type: 'USHORT', value: tags[i].length});
+	        result.fields.push({ name: `offset ${i}`, type: 'USHORT', value: stringPoolOffset + pos });
+	        result.fields.push({ name: `length ${i}`, type: 'USHORT', value: tags[i].length });
 	    }
 
-	    result.fields.push({name: 'stringPool', type: 'CHARARRAY', value: stringPool});
+	    result.fields.push({ name: 'stringPool', type: 'CHARARRAY', value: stringPool });
 	    return result;
-	}
+  }
 
-	function parseLtagTable(data, start) {
-	    var p = new parse.Parser(data, start);
-	    var tableVersion = p.parseULong();
+  function parseLtagTable(data, start) {
+	    const p = new parse.Parser(data, start);
+	    const tableVersion = p.parseULong();
 	    check.argument(tableVersion === 1, 'Unsupported ltag table version.');
 	    // The 'ltag' specification does not define any flags; skip the field.
 	    p.skip('uLong', 1);
-	    var numTags = p.parseULong();
+	    const numTags = p.parseULong();
 
-	    var tags = [];
-	    for (var i = 0; i < numTags; i++) {
-	        var tag = '';
-	        var offset = start + p.parseUShort();
-	        var length = p.parseUShort();
-	        for (var j = offset; j < offset + length; ++j) {
-	            tag += String.fromCharCode(data.getInt8(j));
+	    const tags = [];
+	    for (let i = 0; i < numTags; i++) {
+	        let tag = '';
+	        const offset = start + p.parseUShort();
+	        const length = p.parseUShort();
+	        for (let j = offset; j < offset + length; ++j) {
+	            tag = tag + String.fromCharCode(data.getInt8(j));
 	        }
 
 	        tags.push(tag);
 	    }
 
 	    return tags;
-	}
+  }
 
-	var ltag = { make: makeLtagTable, parse: parseLtagTable };
+  const ltag = { make: makeLtagTable, parse: parseLtagTable };
 
-	// The `maxp` table establishes the memory requirements for the font.
+  // The `maxp` table establishes the memory requirements for the font.
 
-	// Parse the maximum profile `maxp` table.
-	function parseMaxpTable(data, start) {
-	    var maxp = {};
-	    var p = new parse.Parser(data, start);
+  // Parse the maximum profile `maxp` table.
+  function parseMaxpTable(data, start) {
+	    const maxp = {};
+	    const p = new parse.Parser(data, start);
 	    maxp.version = p.parseVersion();
 	    maxp.numGlyphs = p.parseUShort();
 	    if (maxp.version === 1.0) {
@@ -5379,47 +5417,47 @@
 	    }
 
 	    return maxp;
-	}
+  }
 
-	function makeMaxpTable(numGlyphs) {
+  function makeMaxpTable(numGlyphs) {
 	    return new table.Table('maxp', [
-	        {name: 'version', type: 'FIXED', value: 0x00005000},
-	        {name: 'numGlyphs', type: 'USHORT', value: numGlyphs}
+	        { name: 'version', type: 'FIXED', value: 0x00005000 },
+	        { name: 'numGlyphs', type: 'USHORT', value: numGlyphs },
 	    ]);
-	}
+  }
 
-	var maxp = { parse: parseMaxpTable, make: makeMaxpTable };
+  const maxp = { parse: parseMaxpTable, make: makeMaxpTable };
 
-	// The `name` naming table.
+  // The `name` naming table.
 
-	// NameIDs for the name table.
-	var nameTableNames = [
-	    'copyright',              // 0
-	    'fontFamily',             // 1
-	    'fontSubfamily',          // 2
-	    'uniqueID',               // 3
-	    'fullName',               // 4
-	    'version',                // 5
-	    'postScriptName',         // 6
-	    'trademark',              // 7
-	    'manufacturer',           // 8
-	    'designer',               // 9
-	    'description',            // 10
-	    'manufacturerURL',        // 11
-	    'designerURL',            // 12
-	    'license',                // 13
-	    'licenseURL',             // 14
-	    'reserved',               // 15
-	    'preferredFamily',        // 16
-	    'preferredSubfamily',     // 17
-	    'compatibleFullName',     // 18
-	    'sampleText',             // 19
+  // NameIDs for the name table.
+  const nameTableNames = [
+	    'copyright', // 0
+	    'fontFamily', // 1
+	    'fontSubfamily', // 2
+	    'uniqueID', // 3
+	    'fullName', // 4
+	    'version', // 5
+	    'postScriptName', // 6
+	    'trademark', // 7
+	    'manufacturer', // 8
+	    'designer', // 9
+	    'description', // 10
+	    'manufacturerURL', // 11
+	    'designerURL', // 12
+	    'license', // 13
+	    'licenseURL', // 14
+	    'reserved', // 15
+	    'preferredFamily', // 16
+	    'preferredSubfamily', // 17
+	    'compatibleFullName', // 18
+	    'sampleText', // 19
 	    'postScriptFindFontName', // 20
-	    'wwsFamily',              // 21
-	    'wwsSubfamily'            // 22
-	];
+	    'wwsFamily', // 21
+	    'wwsSubfamily', // 22
+  ];
 
-	var macLanguages = {
+  const macLanguages = {
 	    0: 'en',
 	    1: 'fr',
 	    2: 'de',
@@ -5538,160 +5576,160 @@
 	    148: 'el-polyton',
 	    149: 'kl',
 	    150: 'az',
-	    151: 'nn'
-	};
+	    151: 'nn',
+  };
 
-	// MacOS language ID → MacOS script ID
-	//
-	// Note that the script ID is not sufficient to determine what encoding
-	// to use in TrueType files. For some languages, MacOS used a modification
-	// of a mainstream script. For example, an Icelandic name would be stored
-	// with smRoman in the TrueType naming table, but the actual encoding
-	// is a special Icelandic version of the normal Macintosh Roman encoding.
-	// As another example, Inuktitut uses an 8-bit encoding for Canadian Aboriginal
-	// Syllables but MacOS had run out of available script codes, so this was
-	// done as a (pretty radical) "modification" of Ethiopic.
-	//
-	// http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/Readme.txt
-	var macLanguageToScript = {
-	    0: 0,  // langEnglish → smRoman
-	    1: 0,  // langFrench → smRoman
-	    2: 0,  // langGerman → smRoman
-	    3: 0,  // langItalian → smRoman
-	    4: 0,  // langDutch → smRoman
-	    5: 0,  // langSwedish → smRoman
-	    6: 0,  // langSpanish → smRoman
-	    7: 0,  // langDanish → smRoman
-	    8: 0,  // langPortuguese → smRoman
-	    9: 0,  // langNorwegian → smRoman
-	    10: 5,  // langHebrew → smHebrew
-	    11: 1,  // langJapanese → smJapanese
-	    12: 4,  // langArabic → smArabic
-	    13: 0,  // langFinnish → smRoman
-	    14: 6,  // langGreek → smGreek
-	    15: 0,  // langIcelandic → smRoman (modified)
-	    16: 0,  // langMaltese → smRoman
-	    17: 0,  // langTurkish → smRoman (modified)
-	    18: 0,  // langCroatian → smRoman (modified)
-	    19: 2,  // langTradChinese → smTradChinese
-	    20: 4,  // langUrdu → smArabic
-	    21: 9,  // langHindi → smDevanagari
-	    22: 21,  // langThai → smThai
-	    23: 3,  // langKorean → smKorean
-	    24: 29,  // langLithuanian → smCentralEuroRoman
-	    25: 29,  // langPolish → smCentralEuroRoman
-	    26: 29,  // langHungarian → smCentralEuroRoman
-	    27: 29,  // langEstonian → smCentralEuroRoman
-	    28: 29,  // langLatvian → smCentralEuroRoman
-	    29: 0,  // langSami → smRoman
-	    30: 0,  // langFaroese → smRoman (modified)
-	    31: 4,  // langFarsi → smArabic (modified)
-	    32: 7,  // langRussian → smCyrillic
-	    33: 25,  // langSimpChinese → smSimpChinese
-	    34: 0,  // langFlemish → smRoman
-	    35: 0,  // langIrishGaelic → smRoman (modified)
-	    36: 0,  // langAlbanian → smRoman
-	    37: 0,  // langRomanian → smRoman (modified)
-	    38: 29,  // langCzech → smCentralEuroRoman
-	    39: 29,  // langSlovak → smCentralEuroRoman
-	    40: 0,  // langSlovenian → smRoman (modified)
-	    41: 5,  // langYiddish → smHebrew
-	    42: 7,  // langSerbian → smCyrillic
-	    43: 7,  // langMacedonian → smCyrillic
-	    44: 7,  // langBulgarian → smCyrillic
-	    45: 7,  // langUkrainian → smCyrillic (modified)
-	    46: 7,  // langByelorussian → smCyrillic
-	    47: 7,  // langUzbek → smCyrillic
-	    48: 7,  // langKazakh → smCyrillic
-	    49: 7,  // langAzerbaijani → smCyrillic
-	    50: 4,  // langAzerbaijanAr → smArabic
-	    51: 24,  // langArmenian → smArmenian
-	    52: 23,  // langGeorgian → smGeorgian
-	    53: 7,  // langMoldavian → smCyrillic
-	    54: 7,  // langKirghiz → smCyrillic
-	    55: 7,  // langTajiki → smCyrillic
-	    56: 7,  // langTurkmen → smCyrillic
-	    57: 27,  // langMongolian → smMongolian
-	    58: 7,  // langMongolianCyr → smCyrillic
-	    59: 4,  // langPashto → smArabic
-	    60: 4,  // langKurdish → smArabic
-	    61: 4,  // langKashmiri → smArabic
-	    62: 4,  // langSindhi → smArabic
-	    63: 26,  // langTibetan → smTibetan
-	    64: 9,  // langNepali → smDevanagari
-	    65: 9,  // langSanskrit → smDevanagari
-	    66: 9,  // langMarathi → smDevanagari
-	    67: 13,  // langBengali → smBengali
-	    68: 13,  // langAssamese → smBengali
-	    69: 11,  // langGujarati → smGujarati
-	    70: 10,  // langPunjabi → smGurmukhi
-	    71: 12,  // langOriya → smOriya
-	    72: 17,  // langMalayalam → smMalayalam
-	    73: 16,  // langKannada → smKannada
-	    74: 14,  // langTamil → smTamil
-	    75: 15,  // langTelugu → smTelugu
-	    76: 18,  // langSinhalese → smSinhalese
-	    77: 19,  // langBurmese → smBurmese
-	    78: 20,  // langKhmer → smKhmer
-	    79: 22,  // langLao → smLao
-	    80: 30,  // langVietnamese → smVietnamese
-	    81: 0,  // langIndonesian → smRoman
-	    82: 0,  // langTagalog → smRoman
-	    83: 0,  // langMalayRoman → smRoman
-	    84: 4,  // langMalayArabic → smArabic
-	    85: 28,  // langAmharic → smEthiopic
-	    86: 28,  // langTigrinya → smEthiopic
-	    87: 28,  // langOromo → smEthiopic
-	    88: 0,  // langSomali → smRoman
-	    89: 0,  // langSwahili → smRoman
-	    90: 0,  // langKinyarwanda → smRoman
-	    91: 0,  // langRundi → smRoman
-	    92: 0,  // langNyanja → smRoman
-	    93: 0,  // langMalagasy → smRoman
-	    94: 0,  // langEsperanto → smRoman
-	    128: 0,  // langWelsh → smRoman (modified)
-	    129: 0,  // langBasque → smRoman
-	    130: 0,  // langCatalan → smRoman
-	    131: 0,  // langLatin → smRoman
-	    132: 0,  // langQuechua → smRoman
-	    133: 0,  // langGuarani → smRoman
-	    134: 0,  // langAymara → smRoman
-	    135: 7,  // langTatar → smCyrillic
-	    136: 4,  // langUighur → smArabic
-	    137: 26,  // langDzongkha → smTibetan
-	    138: 0,  // langJavaneseRom → smRoman
-	    139: 0,  // langSundaneseRom → smRoman
-	    140: 0,  // langGalician → smRoman
-	    141: 0,  // langAfrikaans → smRoman
-	    142: 0,  // langBreton → smRoman (modified)
-	    143: 28,  // langInuktitut → smEthiopic (modified)
-	    144: 0,  // langScottishGaelic → smRoman (modified)
-	    145: 0,  // langManxGaelic → smRoman (modified)
-	    146: 0,  // langIrishGaelicScript → smRoman (modified)
-	    147: 0,  // langTongan → smRoman
-	    148: 6,  // langGreekAncient → smRoman
-	    149: 0,  // langGreenlandic → smRoman
-	    150: 0,  // langAzerbaijanRoman → smRoman
-	    151: 0   // langNynorsk → smRoman
-	};
+  // MacOS language ID → MacOS script ID
+  //
+  // Note that the script ID is not sufficient to determine what encoding
+  // to use in TrueType files. For some languages, MacOS used a modification
+  // of a mainstream script. For example, an Icelandic name would be stored
+  // with smRoman in the TrueType naming table, but the actual encoding
+  // is a special Icelandic version of the normal Macintosh Roman encoding.
+  // As another example, Inuktitut uses an 8-bit encoding for Canadian Aboriginal
+  // Syllables but MacOS had run out of available script codes, so this was
+  // done as a (pretty radical) "modification" of Ethiopic.
+  //
+  // http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/Readme.txt
+  const macLanguageToScript = {
+	    0: 0, // langEnglish → smRoman
+	    1: 0, // langFrench → smRoman
+	    2: 0, // langGerman → smRoman
+	    3: 0, // langItalian → smRoman
+	    4: 0, // langDutch → smRoman
+	    5: 0, // langSwedish → smRoman
+	    6: 0, // langSpanish → smRoman
+	    7: 0, // langDanish → smRoman
+	    8: 0, // langPortuguese → smRoman
+	    9: 0, // langNorwegian → smRoman
+	    10: 5, // langHebrew → smHebrew
+	    11: 1, // langJapanese → smJapanese
+	    12: 4, // langArabic → smArabic
+	    13: 0, // langFinnish → smRoman
+	    14: 6, // langGreek → smGreek
+	    15: 0, // langIcelandic → smRoman (modified)
+	    16: 0, // langMaltese → smRoman
+	    17: 0, // langTurkish → smRoman (modified)
+	    18: 0, // langCroatian → smRoman (modified)
+	    19: 2, // langTradChinese → smTradChinese
+	    20: 4, // langUrdu → smArabic
+	    21: 9, // langHindi → smDevanagari
+	    22: 21, // langThai → smThai
+	    23: 3, // langKorean → smKorean
+	    24: 29, // langLithuanian → smCentralEuroRoman
+	    25: 29, // langPolish → smCentralEuroRoman
+	    26: 29, // langHungarian → smCentralEuroRoman
+	    27: 29, // langEstonian → smCentralEuroRoman
+	    28: 29, // langLatvian → smCentralEuroRoman
+	    29: 0, // langSami → smRoman
+	    30: 0, // langFaroese → smRoman (modified)
+	    31: 4, // langFarsi → smArabic (modified)
+	    32: 7, // langRussian → smCyrillic
+	    33: 25, // langSimpChinese → smSimpChinese
+	    34: 0, // langFlemish → smRoman
+	    35: 0, // langIrishGaelic → smRoman (modified)
+	    36: 0, // langAlbanian → smRoman
+	    37: 0, // langRomanian → smRoman (modified)
+	    38: 29, // langCzech → smCentralEuroRoman
+	    39: 29, // langSlovak → smCentralEuroRoman
+	    40: 0, // langSlovenian → smRoman (modified)
+	    41: 5, // langYiddish → smHebrew
+	    42: 7, // langSerbian → smCyrillic
+	    43: 7, // langMacedonian → smCyrillic
+	    44: 7, // langBulgarian → smCyrillic
+	    45: 7, // langUkrainian → smCyrillic (modified)
+	    46: 7, // langByelorussian → smCyrillic
+	    47: 7, // langUzbek → smCyrillic
+	    48: 7, // langKazakh → smCyrillic
+	    49: 7, // langAzerbaijani → smCyrillic
+	    50: 4, // langAzerbaijanAr → smArabic
+	    51: 24, // langArmenian → smArmenian
+	    52: 23, // langGeorgian → smGeorgian
+	    53: 7, // langMoldavian → smCyrillic
+	    54: 7, // langKirghiz → smCyrillic
+	    55: 7, // langTajiki → smCyrillic
+	    56: 7, // langTurkmen → smCyrillic
+	    57: 27, // langMongolian → smMongolian
+	    58: 7, // langMongolianCyr → smCyrillic
+	    59: 4, // langPashto → smArabic
+	    60: 4, // langKurdish → smArabic
+	    61: 4, // langKashmiri → smArabic
+	    62: 4, // langSindhi → smArabic
+	    63: 26, // langTibetan → smTibetan
+	    64: 9, // langNepali → smDevanagari
+	    65: 9, // langSanskrit → smDevanagari
+	    66: 9, // langMarathi → smDevanagari
+	    67: 13, // langBengali → smBengali
+	    68: 13, // langAssamese → smBengali
+	    69: 11, // langGujarati → smGujarati
+	    70: 10, // langPunjabi → smGurmukhi
+	    71: 12, // langOriya → smOriya
+	    72: 17, // langMalayalam → smMalayalam
+	    73: 16, // langKannada → smKannada
+	    74: 14, // langTamil → smTamil
+	    75: 15, // langTelugu → smTelugu
+	    76: 18, // langSinhalese → smSinhalese
+	    77: 19, // langBurmese → smBurmese
+	    78: 20, // langKhmer → smKhmer
+	    79: 22, // langLao → smLao
+	    80: 30, // langVietnamese → smVietnamese
+	    81: 0, // langIndonesian → smRoman
+	    82: 0, // langTagalog → smRoman
+	    83: 0, // langMalayRoman → smRoman
+	    84: 4, // langMalayArabic → smArabic
+	    85: 28, // langAmharic → smEthiopic
+	    86: 28, // langTigrinya → smEthiopic
+	    87: 28, // langOromo → smEthiopic
+	    88: 0, // langSomali → smRoman
+	    89: 0, // langSwahili → smRoman
+	    90: 0, // langKinyarwanda → smRoman
+	    91: 0, // langRundi → smRoman
+	    92: 0, // langNyanja → smRoman
+	    93: 0, // langMalagasy → smRoman
+	    94: 0, // langEsperanto → smRoman
+	    128: 0, // langWelsh → smRoman (modified)
+	    129: 0, // langBasque → smRoman
+	    130: 0, // langCatalan → smRoman
+	    131: 0, // langLatin → smRoman
+	    132: 0, // langQuechua → smRoman
+	    133: 0, // langGuarani → smRoman
+	    134: 0, // langAymara → smRoman
+	    135: 7, // langTatar → smCyrillic
+	    136: 4, // langUighur → smArabic
+	    137: 26, // langDzongkha → smTibetan
+	    138: 0, // langJavaneseRom → smRoman
+	    139: 0, // langSundaneseRom → smRoman
+	    140: 0, // langGalician → smRoman
+	    141: 0, // langAfrikaans → smRoman
+	    142: 0, // langBreton → smRoman (modified)
+	    143: 28, // langInuktitut → smEthiopic (modified)
+	    144: 0, // langScottishGaelic → smRoman (modified)
+	    145: 0, // langManxGaelic → smRoman (modified)
+	    146: 0, // langIrishGaelicScript → smRoman (modified)
+	    147: 0, // langTongan → smRoman
+	    148: 6, // langGreekAncient → smRoman
+	    149: 0, // langGreenlandic → smRoman
+	    150: 0, // langAzerbaijanRoman → smRoman
+	    151: 0, // langNynorsk → smRoman
+  };
 
-	// While Microsoft indicates a region/country for all its language
-	// IDs, we omit the region code if it's equal to the "most likely
-	// region subtag" according to Unicode CLDR. For scripts, we omit
-	// the subtag if it is equal to the Suppress-Script entry in the
-	// IANA language subtag registry for IETF BCP 47.
-	//
-	// For example, Microsoft states that its language code 0x041A is
-	// Croatian in Croatia. We transform this to the BCP 47 language code 'hr'
-	// and not 'hr-HR' because Croatia is the default country for Croatian,
-	// according to Unicode CLDR. As another example, Microsoft states
-	// that 0x101A is Croatian (Latin) in Bosnia-Herzegovina. We transform
-	// this to 'hr-BA' and not 'hr-Latn-BA' because Latin is the default script
-	// for the Croatian language, according to IANA.
-	//
-	// http://www.unicode.org/cldr/charts/latest/supplemental/likely_subtags.html
-	// http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-	var windowsLanguages = {
+  // While Microsoft indicates a region/country for all its language
+  // IDs, we omit the region code if it's equal to the "most likely
+  // region subtag" according to Unicode CLDR. For scripts, we omit
+  // the subtag if it is equal to the Suppress-Script entry in the
+  // IANA language subtag registry for IETF BCP 47.
+  //
+  // For example, Microsoft states that its language code 0x041A is
+  // Croatian in Croatia. We transform this to the BCP 47 language code 'hr'
+  // and not 'hr-HR' because Croatia is the default country for Croatian,
+  // according to Unicode CLDR. As another example, Microsoft states
+  // that 0x101A is Croatian (Latin) in Bosnia-Herzegovina. We transform
+  // this to 'hr-BA' and not 'hr-Latn-BA' because Latin is the default script
+  // for the Croatian language, according to IANA.
+  //
+  // http://www.unicode.org/cldr/charts/latest/supplemental/likely_subtags.html
+  // http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+  const windowsLanguages = {
 	    0x0436: 'af',
 	    0x041C: 'sq',
 	    0x0484: 'gsw',
@@ -5905,101 +5943,101 @@
 	    0x0488: 'wo',
 	    0x0485: 'sah',
 	    0x0478: 'ii',
-	    0x046A: 'yo'
-	};
+	    0x046A: 'yo',
+  };
 
-	// Returns a IETF BCP 47 language code, for example 'zh-Hant'
-	// for 'Chinese in the traditional script'.
-	function getLanguageCode(platformID, languageID, ltag) {
+  // Returns a IETF BCP 47 language code, for example 'zh-Hant'
+  // for 'Chinese in the traditional script'.
+  function getLanguageCode(platformID, languageID, ltag) {
 	    switch (platformID) {
-	        case 0:  // Unicode
+	        case 0: // Unicode
 	            if (languageID === 0xFFFF) {
 	                return 'und';
-	            } else if (ltag) {
+	            } if (ltag) {
 	                return ltag[languageID];
 	            }
 
 	            break;
 
-	        case 1:  // Macintosh
+	        case 1: // Macintosh
 	            return macLanguages[languageID];
 
-	        case 3:  // Windows
+	        case 3: // Windows
 	            return windowsLanguages[languageID];
 	    }
 
 	    return undefined;
-	}
+  }
 
-	var utf16 = 'utf-16';
+  const utf16 = 'utf-16';
 
-	// MacOS script ID → encoding. This table stores the default case,
-	// which can be overridden by macLanguageEncodings.
-	var macScriptEncodings = {
-	    0: 'macintosh',           // smRoman
-	    1: 'x-mac-japanese',      // smJapanese
-	    2: 'x-mac-chinesetrad',   // smTradChinese
-	    3: 'x-mac-korean',        // smKorean
-	    6: 'x-mac-greek',         // smGreek
-	    7: 'x-mac-cyrillic',      // smCyrillic
-	    9: 'x-mac-devanagai',     // smDevanagari
-	    10: 'x-mac-gurmukhi',     // smGurmukhi
-	    11: 'x-mac-gujarati',     // smGujarati
-	    12: 'x-mac-oriya',        // smOriya
-	    13: 'x-mac-bengali',      // smBengali
-	    14: 'x-mac-tamil',        // smTamil
-	    15: 'x-mac-telugu',       // smTelugu
-	    16: 'x-mac-kannada',      // smKannada
-	    17: 'x-mac-malayalam',    // smMalayalam
-	    18: 'x-mac-sinhalese',    // smSinhalese
-	    19: 'x-mac-burmese',      // smBurmese
-	    20: 'x-mac-khmer',        // smKhmer
-	    21: 'x-mac-thai',         // smThai
-	    22: 'x-mac-lao',          // smLao
-	    23: 'x-mac-georgian',     // smGeorgian
-	    24: 'x-mac-armenian',     // smArmenian
-	    25: 'x-mac-chinesesimp',  // smSimpChinese
-	    26: 'x-mac-tibetan',      // smTibetan
-	    27: 'x-mac-mongolian',    // smMongolian
-	    28: 'x-mac-ethiopic',     // smEthiopic
-	    29: 'x-mac-ce',           // smCentralEuroRoman
-	    30: 'x-mac-vietnamese',   // smVietnamese
-	    31: 'x-mac-extarabic'     // smExtArabic
-	};
+  // MacOS script ID → encoding. This table stores the default case,
+  // which can be overridden by macLanguageEncodings.
+  const macScriptEncodings = {
+	    0: 'macintosh', // smRoman
+	    1: 'x-mac-japanese', // smJapanese
+	    2: 'x-mac-chinesetrad', // smTradChinese
+	    3: 'x-mac-korean', // smKorean
+	    6: 'x-mac-greek', // smGreek
+	    7: 'x-mac-cyrillic', // smCyrillic
+	    9: 'x-mac-devanagai', // smDevanagari
+	    10: 'x-mac-gurmukhi', // smGurmukhi
+	    11: 'x-mac-gujarati', // smGujarati
+	    12: 'x-mac-oriya', // smOriya
+	    13: 'x-mac-bengali', // smBengali
+	    14: 'x-mac-tamil', // smTamil
+	    15: 'x-mac-telugu', // smTelugu
+	    16: 'x-mac-kannada', // smKannada
+	    17: 'x-mac-malayalam', // smMalayalam
+	    18: 'x-mac-sinhalese', // smSinhalese
+	    19: 'x-mac-burmese', // smBurmese
+	    20: 'x-mac-khmer', // smKhmer
+	    21: 'x-mac-thai', // smThai
+	    22: 'x-mac-lao', // smLao
+	    23: 'x-mac-georgian', // smGeorgian
+	    24: 'x-mac-armenian', // smArmenian
+	    25: 'x-mac-chinesesimp', // smSimpChinese
+	    26: 'x-mac-tibetan', // smTibetan
+	    27: 'x-mac-mongolian', // smMongolian
+	    28: 'x-mac-ethiopic', // smEthiopic
+	    29: 'x-mac-ce', // smCentralEuroRoman
+	    30: 'x-mac-vietnamese', // smVietnamese
+	    31: 'x-mac-extarabic', // smExtArabic
+  };
 
-	// MacOS language ID → encoding. This table stores the exceptional
-	// cases, which override macScriptEncodings. For writing MacOS naming
-	// tables, we need to emit a MacOS script ID. Therefore, we cannot
-	// merge macScriptEncodings into macLanguageEncodings.
-	//
-	// http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/Readme.txt
-	var macLanguageEncodings = {
-	    15: 'x-mac-icelandic',    // langIcelandic
-	    17: 'x-mac-turkish',      // langTurkish
-	    18: 'x-mac-croatian',     // langCroatian
-	    24: 'x-mac-ce',           // langLithuanian
-	    25: 'x-mac-ce',           // langPolish
-	    26: 'x-mac-ce',           // langHungarian
-	    27: 'x-mac-ce',           // langEstonian
-	    28: 'x-mac-ce',           // langLatvian
-	    30: 'x-mac-icelandic',    // langFaroese
-	    37: 'x-mac-romanian',     // langRomanian
-	    38: 'x-mac-ce',           // langCzech
-	    39: 'x-mac-ce',           // langSlovak
-	    40: 'x-mac-ce',           // langSlovenian
-	    143: 'x-mac-inuit',       // langInuktitut
-	    146: 'x-mac-gaelic'       // langIrishGaelicScript
-	};
+  // MacOS language ID → encoding. This table stores the exceptional
+  // cases, which override macScriptEncodings. For writing MacOS naming
+  // tables, we need to emit a MacOS script ID. Therefore, we cannot
+  // merge macScriptEncodings into macLanguageEncodings.
+  //
+  // http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/Readme.txt
+  const macLanguageEncodings = {
+	    15: 'x-mac-icelandic', // langIcelandic
+	    17: 'x-mac-turkish', // langTurkish
+	    18: 'x-mac-croatian', // langCroatian
+	    24: 'x-mac-ce', // langLithuanian
+	    25: 'x-mac-ce', // langPolish
+	    26: 'x-mac-ce', // langHungarian
+	    27: 'x-mac-ce', // langEstonian
+	    28: 'x-mac-ce', // langLatvian
+	    30: 'x-mac-icelandic', // langFaroese
+	    37: 'x-mac-romanian', // langRomanian
+	    38: 'x-mac-ce', // langCzech
+	    39: 'x-mac-ce', // langSlovak
+	    40: 'x-mac-ce', // langSlovenian
+	    143: 'x-mac-inuit', // langInuktitut
+	    146: 'x-mac-gaelic', // langIrishGaelicScript
+  };
 
-	function getEncoding(platformID, encodingID, languageID) {
+  function getEncoding(platformID, encodingID, languageID) {
 	    switch (platformID) {
-	        case 0:  // Unicode
+	        case 0: // Unicode
 	            return utf16;
 
-	        case 1:  // Apple Macintosh
+	        case 1: // Apple Macintosh
 	            return macLanguageEncodings[languageID] || macScriptEncodings[encodingID];
 
-	        case 3:  // Microsoft Windows
+	        case 3: // Microsoft Windows
 	            if (encodingID === 1 || encodingID === 10) {
 	                return utf16;
 	            }
@@ -6008,29 +6046,29 @@
 	    }
 
 	    return undefined;
-	}
+  }
 
-	// Parse the naming `name` table.
-	// FIXME: Format 1 additional fields are not supported yet.
-	// ltag is the content of the `ltag' table, such as ['en', 'zh-Hans', 'de-CH-1904'].
-	function parseNameTable(data, start, ltag) {
-	    var name = {};
-	    var p = new parse.Parser(data, start);
-	    var format = p.parseUShort();
-	    var count = p.parseUShort();
-	    var stringOffset = p.offset + p.parseUShort();
-	    for (var i = 0; i < count; i++) {
-	        var platformID = p.parseUShort();
-	        var encodingID = p.parseUShort();
-	        var languageID = p.parseUShort();
-	        var nameID = p.parseUShort();
-	        var property = nameTableNames[nameID] || nameID;
-	        var byteLength = p.parseUShort();
-	        var offset = p.parseUShort();
-	        var language = getLanguageCode(platformID, languageID, ltag);
-	        var encoding = getEncoding(platformID, encodingID, languageID);
+  // Parse the naming `name` table.
+  // FIXME: Format 1 additional fields are not supported yet.
+  // ltag is the content of the `ltag' table, such as ['en', 'zh-Hans', 'de-CH-1904'].
+  function parseNameTable(data, start, ltag) {
+	    const name = {};
+	    const p = new parse.Parser(data, start);
+	    const format = p.parseUShort();
+	    const count = p.parseUShort();
+	    const stringOffset = p.offset + p.parseUShort();
+	    for (let i = 0; i < count; i++) {
+	        const platformID = p.parseUShort();
+	        const encodingID = p.parseUShort();
+	        const languageID = p.parseUShort();
+	        const nameID = p.parseUShort();
+	        const property = nameTableNames[nameID] || nameID;
+	        const byteLength = p.parseUShort();
+	        const offset = p.parseUShort();
+	        const language = getLanguageCode(platformID, languageID, ltag);
+	        const encoding = getEncoding(platformID, encodingID, languageID);
 	        if (encoding !== undefined && language !== undefined) {
-	            var text = (void 0);
+	            let text = (void 0);
 	            if (encoding === utf16) {
 	                text = decode.UTF16(data, stringOffset + offset, byteLength);
 	            } else {
@@ -6038,7 +6076,7 @@
 	            }
 
 	            if (text) {
-	                var translations = name[property];
+	                let translations = name[property];
 	                if (translations === undefined) {
 	                    translations = name[property] = {};
 	                }
@@ -6048,47 +6086,47 @@
 	        }
 	    }
 
-	    var langTagCount = 0;
+	    let langTagCount = 0;
 	    if (format === 1) {
 	        // FIXME: Also handle Microsoft's 'name' table 1.
 	        langTagCount = p.parseUShort();
 	    }
 
 	    return name;
-	}
+  }
 
-	// {23: 'foo'} → {'foo': 23}
-	// ['bar', 'baz'] → {'bar': 0, 'baz': 1}
-	function reverseDict(dict) {
-	    var result = {};
-	    for (var key in dict) {
+  // {23: 'foo'} → {'foo': 23}
+  // ['bar', 'baz'] → {'bar': 0, 'baz': 1}
+  function reverseDict(dict) {
+	    const result = {};
+	    for (const key in dict) {
 	        result[dict[key]] = parseInt(key);
 	    }
 
 	    return result;
-	}
+  }
 
-	function makeNameRecord(platformID, encodingID, languageID, nameID, length, offset) {
+  function makeNameRecord(platformID, encodingID, languageID, nameID, length, offset) {
 	    return new table.Record('NameRecord', [
-	        {name: 'platformID', type: 'USHORT', value: platformID},
-	        {name: 'encodingID', type: 'USHORT', value: encodingID},
-	        {name: 'languageID', type: 'USHORT', value: languageID},
-	        {name: 'nameID', type: 'USHORT', value: nameID},
-	        {name: 'length', type: 'USHORT', value: length},
-	        {name: 'offset', type: 'USHORT', value: offset}
+	        { name: 'platformID', type: 'USHORT', value: platformID },
+	        { name: 'encodingID', type: 'USHORT', value: encodingID },
+	        { name: 'languageID', type: 'USHORT', value: languageID },
+	        { name: 'nameID', type: 'USHORT', value: nameID },
+	        { name: 'length', type: 'USHORT', value: length },
+	        { name: 'offset', type: 'USHORT', value: offset },
 	    ]);
-	}
+  }
 
-	// Finds the position of needle in haystack, or -1 if not there.
-	// Like String.indexOf(), but for arrays.
-	function findSubArray(needle, haystack) {
-	    var needleLength = needle.length;
-	    var limit = haystack.length - needleLength + 1;
+  // Finds the position of needle in haystack, or -1 if not there.
+  // Like String.indexOf(), but for arrays.
+  function findSubArray(needle, haystack) {
+	    const needleLength = needle.length;
+	    const limit = haystack.length - needleLength + 1;
 
 	    loop:
-	    for (var pos = 0; pos < limit; pos++) {
+	    for (let pos = 0; pos < limit; pos++) {
 	        for (; pos < limit; pos++) {
-	            for (var k = 0; k < needleLength; k++) {
+	            for (let k = 0; k < needleLength; k++) {
 	                if (haystack[pos + k] !== needle[k]) {
 	                    continue loop;
 	                }
@@ -6099,31 +6137,30 @@
 	    }
 
 	    return -1;
-	}
+  }
 
-	function addStringToPool(s, pool) {
-	    var offset = findSubArray(s, pool);
+  function addStringToPool(s, pool) {
+	    let offset = findSubArray(s, pool);
 	    if (offset < 0) {
 	        offset = pool.length;
-	        var i = 0;
-	        var len = s.length;
+	        let i = 0;
+	        const len = s.length;
 	        for (; i < len; ++i) {
 	            pool.push(s[i]);
 	        }
-
 	    }
 
 	    return offset;
-	}
+  }
 
-	function makeNameTable(names, ltag) {
-	    var nameID;
-	    var nameIDs = [];
+  function makeNameTable(names, ltag) {
+	    let nameID;
+	    const nameIDs = [];
 
-	    var namesWithNumericKeys = {};
-	    var nameTableIds = reverseDict(nameTableNames);
-	    for (var key in names) {
-	        var id = nameTableIds[key];
+	    const namesWithNumericKeys = {};
+	    const nameTableIds = reverseDict(nameTableNames);
+	    for (const key in names) {
+	        let id = nameTableIds[key];
 	        if (id === undefined) {
 	            id = key;
 	        }
@@ -6131,24 +6168,24 @@
 	        nameID = parseInt(id);
 
 	        if (isNaN(nameID)) {
-	            throw new Error('Name table entry "' + key + '" does not exist, see nameTableNames for complete list.');
+	            throw new Error(`Name table entry "${key}" does not exist, see nameTableNames for complete list.`);
 	        }
 
 	        namesWithNumericKeys[nameID] = names[key];
 	        nameIDs.push(nameID);
 	    }
 
-	    var macLanguageIds = reverseDict(macLanguages);
-	    var windowsLanguageIds = reverseDict(windowsLanguages);
+	    const macLanguageIds = reverseDict(macLanguages);
+	    const windowsLanguageIds = reverseDict(windowsLanguages);
 
-	    var nameRecords = [];
-	    var stringPool = [];
+	    const nameRecords = [];
+	    const stringPool = [];
 
-	    for (var i = 0; i < nameIDs.length; i++) {
+	    for (let i = 0; i < nameIDs.length; i++) {
 	        nameID = nameIDs[i];
-	        var translations = namesWithNumericKeys[nameID];
-	        for (var lang in translations) {
-	            var text = translations[lang];
+	        const translations = namesWithNumericKeys[nameID];
+	        for (const lang in translations) {
+	            const text = translations[lang];
 
 	            // For MacOS, we try to emit the name in the form that was introduced
 	            // in the initial version of the TrueType spec (in the late 1980s).
@@ -6164,203 +6201,201 @@
 	            // However, there are many applications and libraries that read
 	            // 'name' tables directly, and these will usually only recognize
 	            // the ancient form (silently skipping the unrecognized names).
-	            var macPlatform = 1;  // Macintosh
-	            var macLanguage = macLanguageIds[lang];
-	            var macScript = macLanguageToScript[macLanguage];
-	            var macEncoding = getEncoding(macPlatform, macScript, macLanguage);
-	            var macName = encode.MACSTRING(text, macEncoding);
+	            let macPlatform = 1; // Macintosh
+	            let macLanguage = macLanguageIds[lang];
+	            let macScript = macLanguageToScript[macLanguage];
+	            const macEncoding = getEncoding(macPlatform, macScript, macLanguage);
+	            let macName = encode.MACSTRING(text, macEncoding);
 	            if (macName === undefined) {
-	                macPlatform = 0;  // Unicode
+	                macPlatform = 0; // Unicode
 	                macLanguage = ltag.indexOf(lang);
 	                if (macLanguage < 0) {
 	                    macLanguage = ltag.length;
 	                    ltag.push(lang);
 	                }
 
-	                macScript = 4;  // Unicode 2.0 and later
+	                macScript = 4; // Unicode 2.0 and later
 	                macName = encode.UTF16(text);
 	            }
 
-	            var macNameOffset = addStringToPool(macName, stringPool);
+	            const macNameOffset = addStringToPool(macName, stringPool);
 	            nameRecords.push(makeNameRecord(macPlatform, macScript, macLanguage,
 	                                            nameID, macName.length, macNameOffset));
 
-	            var winLanguage = windowsLanguageIds[lang];
+	            const winLanguage = windowsLanguageIds[lang];
 	            if (winLanguage !== undefined) {
-	                var winName = encode.UTF16(text);
-	                var winNameOffset = addStringToPool(winName, stringPool);
+	                const winName = encode.UTF16(text);
+	                const winNameOffset = addStringToPool(winName, stringPool);
 	                nameRecords.push(makeNameRecord(3, 1, winLanguage,
 	                                                nameID, winName.length, winNameOffset));
 	            }
 	        }
 	    }
 
-	    nameRecords.sort(function(a, b) {
-	        return ((a.platformID - b.platformID) ||
-	                (a.encodingID - b.encodingID) ||
-	                (a.languageID - b.languageID) ||
-	                (a.nameID - b.nameID));
-	    });
+	    nameRecords.sort((a, b) => ((a.platformID - b.platformID)
+	                || (a.encodingID - b.encodingID)
+	                || (a.languageID - b.languageID)
+	                || (a.nameID - b.nameID)));
 
-	    var t = new table.Table('name', [
-	        {name: 'format', type: 'USHORT', value: 0},
-	        {name: 'count', type: 'USHORT', value: nameRecords.length},
-	        {name: 'stringOffset', type: 'USHORT', value: 6 + nameRecords.length * 12}
+	    const t = new table.Table('name', [
+	        { name: 'format', type: 'USHORT', value: 0 },
+	        { name: 'count', type: 'USHORT', value: nameRecords.length },
+	        { name: 'stringOffset', type: 'USHORT', value: 6 + nameRecords.length * 12 },
 	    ]);
 
-	    for (var r = 0; r < nameRecords.length; r++) {
-	        t.fields.push({name: 'record_' + r, type: 'RECORD', value: nameRecords[r]});
+	    for (let r = 0; r < nameRecords.length; r++) {
+	        t.fields.push({ name: `record_${r}`, type: 'RECORD', value: nameRecords[r] });
 	    }
 
-	    t.fields.push({name: 'strings', type: 'LITERAL', value: stringPool});
+	    t.fields.push({ name: 'strings', type: 'LITERAL', value: stringPool });
 	    return t;
-	}
+  }
 
-	var _name = { parse: parseNameTable, make: makeNameTable };
+  const _name = { parse: parseNameTable, make: makeNameTable };
 
-	// The `OS/2` table contains metrics required in OpenType fonts.
+  // The `OS/2` table contains metrics required in OpenType fonts.
 
-	var unicodeRanges = [
-	    {begin: 0x0000, end: 0x007F}, // Basic Latin
-	    {begin: 0x0080, end: 0x00FF}, // Latin-1 Supplement
-	    {begin: 0x0100, end: 0x017F}, // Latin Extended-A
-	    {begin: 0x0180, end: 0x024F}, // Latin Extended-B
-	    {begin: 0x0250, end: 0x02AF}, // IPA Extensions
-	    {begin: 0x02B0, end: 0x02FF}, // Spacing Modifier Letters
-	    {begin: 0x0300, end: 0x036F}, // Combining Diacritical Marks
-	    {begin: 0x0370, end: 0x03FF}, // Greek and Coptic
-	    {begin: 0x2C80, end: 0x2CFF}, // Coptic
-	    {begin: 0x0400, end: 0x04FF}, // Cyrillic
-	    {begin: 0x0530, end: 0x058F}, // Armenian
-	    {begin: 0x0590, end: 0x05FF}, // Hebrew
-	    {begin: 0xA500, end: 0xA63F}, // Vai
-	    {begin: 0x0600, end: 0x06FF}, // Arabic
-	    {begin: 0x07C0, end: 0x07FF}, // NKo
-	    {begin: 0x0900, end: 0x097F}, // Devanagari
-	    {begin: 0x0980, end: 0x09FF}, // Bengali
-	    {begin: 0x0A00, end: 0x0A7F}, // Gurmukhi
-	    {begin: 0x0A80, end: 0x0AFF}, // Gujarati
-	    {begin: 0x0B00, end: 0x0B7F}, // Oriya
-	    {begin: 0x0B80, end: 0x0BFF}, // Tamil
-	    {begin: 0x0C00, end: 0x0C7F}, // Telugu
-	    {begin: 0x0C80, end: 0x0CFF}, // Kannada
-	    {begin: 0x0D00, end: 0x0D7F}, // Malayalam
-	    {begin: 0x0E00, end: 0x0E7F}, // Thai
-	    {begin: 0x0E80, end: 0x0EFF}, // Lao
-	    {begin: 0x10A0, end: 0x10FF}, // Georgian
-	    {begin: 0x1B00, end: 0x1B7F}, // Balinese
-	    {begin: 0x1100, end: 0x11FF}, // Hangul Jamo
-	    {begin: 0x1E00, end: 0x1EFF}, // Latin Extended Additional
-	    {begin: 0x1F00, end: 0x1FFF}, // Greek Extended
-	    {begin: 0x2000, end: 0x206F}, // General Punctuation
-	    {begin: 0x2070, end: 0x209F}, // Superscripts And Subscripts
-	    {begin: 0x20A0, end: 0x20CF}, // Currency Symbol
-	    {begin: 0x20D0, end: 0x20FF}, // Combining Diacritical Marks For Symbols
-	    {begin: 0x2100, end: 0x214F}, // Letterlike Symbols
-	    {begin: 0x2150, end: 0x218F}, // Number Forms
-	    {begin: 0x2190, end: 0x21FF}, // Arrows
-	    {begin: 0x2200, end: 0x22FF}, // Mathematical Operators
-	    {begin: 0x2300, end: 0x23FF}, // Miscellaneous Technical
-	    {begin: 0x2400, end: 0x243F}, // Control Pictures
-	    {begin: 0x2440, end: 0x245F}, // Optical Character Recognition
-	    {begin: 0x2460, end: 0x24FF}, // Enclosed Alphanumerics
-	    {begin: 0x2500, end: 0x257F}, // Box Drawing
-	    {begin: 0x2580, end: 0x259F}, // Block Elements
-	    {begin: 0x25A0, end: 0x25FF}, // Geometric Shapes
-	    {begin: 0x2600, end: 0x26FF}, // Miscellaneous Symbols
-	    {begin: 0x2700, end: 0x27BF}, // Dingbats
-	    {begin: 0x3000, end: 0x303F}, // CJK Symbols And Punctuation
-	    {begin: 0x3040, end: 0x309F}, // Hiragana
-	    {begin: 0x30A0, end: 0x30FF}, // Katakana
-	    {begin: 0x3100, end: 0x312F}, // Bopomofo
-	    {begin: 0x3130, end: 0x318F}, // Hangul Compatibility Jamo
-	    {begin: 0xA840, end: 0xA87F}, // Phags-pa
-	    {begin: 0x3200, end: 0x32FF}, // Enclosed CJK Letters And Months
-	    {begin: 0x3300, end: 0x33FF}, // CJK Compatibility
-	    {begin: 0xAC00, end: 0xD7AF}, // Hangul Syllables
-	    {begin: 0xD800, end: 0xDFFF}, // Non-Plane 0 *
-	    {begin: 0x10900, end: 0x1091F}, // Phoenicia
-	    {begin: 0x4E00, end: 0x9FFF}, // CJK Unified Ideographs
-	    {begin: 0xE000, end: 0xF8FF}, // Private Use Area (plane 0)
-	    {begin: 0x31C0, end: 0x31EF}, // CJK Strokes
-	    {begin: 0xFB00, end: 0xFB4F}, // Alphabetic Presentation Forms
-	    {begin: 0xFB50, end: 0xFDFF}, // Arabic Presentation Forms-A
-	    {begin: 0xFE20, end: 0xFE2F}, // Combining Half Marks
-	    {begin: 0xFE10, end: 0xFE1F}, // Vertical Forms
-	    {begin: 0xFE50, end: 0xFE6F}, // Small Form Variants
-	    {begin: 0xFE70, end: 0xFEFF}, // Arabic Presentation Forms-B
-	    {begin: 0xFF00, end: 0xFFEF}, // Halfwidth And Fullwidth Forms
-	    {begin: 0xFFF0, end: 0xFFFF}, // Specials
-	    {begin: 0x0F00, end: 0x0FFF}, // Tibetan
-	    {begin: 0x0700, end: 0x074F}, // Syriac
-	    {begin: 0x0780, end: 0x07BF}, // Thaana
-	    {begin: 0x0D80, end: 0x0DFF}, // Sinhala
-	    {begin: 0x1000, end: 0x109F}, // Myanmar
-	    {begin: 0x1200, end: 0x137F}, // Ethiopic
-	    {begin: 0x13A0, end: 0x13FF}, // Cherokee
-	    {begin: 0x1400, end: 0x167F}, // Unified Canadian Aboriginal Syllabics
-	    {begin: 0x1680, end: 0x169F}, // Ogham
-	    {begin: 0x16A0, end: 0x16FF}, // Runic
-	    {begin: 0x1780, end: 0x17FF}, // Khmer
-	    {begin: 0x1800, end: 0x18AF}, // Mongolian
-	    {begin: 0x2800, end: 0x28FF}, // Braille Patterns
-	    {begin: 0xA000, end: 0xA48F}, // Yi Syllables
-	    {begin: 0x1700, end: 0x171F}, // Tagalog
-	    {begin: 0x10300, end: 0x1032F}, // Old Italic
-	    {begin: 0x10330, end: 0x1034F}, // Gothic
-	    {begin: 0x10400, end: 0x1044F}, // Deseret
-	    {begin: 0x1D000, end: 0x1D0FF}, // Byzantine Musical Symbols
-	    {begin: 0x1D400, end: 0x1D7FF}, // Mathematical Alphanumeric Symbols
-	    {begin: 0xFF000, end: 0xFFFFD}, // Private Use (plane 15)
-	    {begin: 0xFE00, end: 0xFE0F}, // Variation Selectors
-	    {begin: 0xE0000, end: 0xE007F}, // Tags
-	    {begin: 0x1900, end: 0x194F}, // Limbu
-	    {begin: 0x1950, end: 0x197F}, // Tai Le
-	    {begin: 0x1980, end: 0x19DF}, // New Tai Lue
-	    {begin: 0x1A00, end: 0x1A1F}, // Buginese
-	    {begin: 0x2C00, end: 0x2C5F}, // Glagolitic
-	    {begin: 0x2D30, end: 0x2D7F}, // Tifinagh
-	    {begin: 0x4DC0, end: 0x4DFF}, // Yijing Hexagram Symbols
-	    {begin: 0xA800, end: 0xA82F}, // Syloti Nagri
-	    {begin: 0x10000, end: 0x1007F}, // Linear B Syllabary
-	    {begin: 0x10140, end: 0x1018F}, // Ancient Greek Numbers
-	    {begin: 0x10380, end: 0x1039F}, // Ugaritic
-	    {begin: 0x103A0, end: 0x103DF}, // Old Persian
-	    {begin: 0x10450, end: 0x1047F}, // Shavian
-	    {begin: 0x10480, end: 0x104AF}, // Osmanya
-	    {begin: 0x10800, end: 0x1083F}, // Cypriot Syllabary
-	    {begin: 0x10A00, end: 0x10A5F}, // Kharoshthi
-	    {begin: 0x1D300, end: 0x1D35F}, // Tai Xuan Jing Symbols
-	    {begin: 0x12000, end: 0x123FF}, // Cuneiform
-	    {begin: 0x1D360, end: 0x1D37F}, // Counting Rod Numerals
-	    {begin: 0x1B80, end: 0x1BBF}, // Sundanese
-	    {begin: 0x1C00, end: 0x1C4F}, // Lepcha
-	    {begin: 0x1C50, end: 0x1C7F}, // Ol Chiki
-	    {begin: 0xA880, end: 0xA8DF}, // Saurashtra
-	    {begin: 0xA900, end: 0xA92F}, // Kayah Li
-	    {begin: 0xA930, end: 0xA95F}, // Rejang
-	    {begin: 0xAA00, end: 0xAA5F}, // Cham
-	    {begin: 0x10190, end: 0x101CF}, // Ancient Symbols
-	    {begin: 0x101D0, end: 0x101FF}, // Phaistos Disc
-	    {begin: 0x102A0, end: 0x102DF}, // Carian
-	    {begin: 0x1F030, end: 0x1F09F}  // Domino Tiles
-	];
+  const unicodeRanges = [
+	    { begin: 0x0000, end: 0x007F }, // Basic Latin
+	    { begin: 0x0080, end: 0x00FF }, // Latin-1 Supplement
+	    { begin: 0x0100, end: 0x017F }, // Latin Extended-A
+	    { begin: 0x0180, end: 0x024F }, // Latin Extended-B
+	    { begin: 0x0250, end: 0x02AF }, // IPA Extensions
+	    { begin: 0x02B0, end: 0x02FF }, // Spacing Modifier Letters
+	    { begin: 0x0300, end: 0x036F }, // Combining Diacritical Marks
+	    { begin: 0x0370, end: 0x03FF }, // Greek and Coptic
+	    { begin: 0x2C80, end: 0x2CFF }, // Coptic
+	    { begin: 0x0400, end: 0x04FF }, // Cyrillic
+	    { begin: 0x0530, end: 0x058F }, // Armenian
+	    { begin: 0x0590, end: 0x05FF }, // Hebrew
+	    { begin: 0xA500, end: 0xA63F }, // Vai
+	    { begin: 0x0600, end: 0x06FF }, // Arabic
+	    { begin: 0x07C0, end: 0x07FF }, // NKo
+	    { begin: 0x0900, end: 0x097F }, // Devanagari
+	    { begin: 0x0980, end: 0x09FF }, // Bengali
+	    { begin: 0x0A00, end: 0x0A7F }, // Gurmukhi
+	    { begin: 0x0A80, end: 0x0AFF }, // Gujarati
+	    { begin: 0x0B00, end: 0x0B7F }, // Oriya
+	    { begin: 0x0B80, end: 0x0BFF }, // Tamil
+	    { begin: 0x0C00, end: 0x0C7F }, // Telugu
+	    { begin: 0x0C80, end: 0x0CFF }, // Kannada
+	    { begin: 0x0D00, end: 0x0D7F }, // Malayalam
+	    { begin: 0x0E00, end: 0x0E7F }, // Thai
+	    { begin: 0x0E80, end: 0x0EFF }, // Lao
+	    { begin: 0x10A0, end: 0x10FF }, // Georgian
+	    { begin: 0x1B00, end: 0x1B7F }, // Balinese
+	    { begin: 0x1100, end: 0x11FF }, // Hangul Jamo
+	    { begin: 0x1E00, end: 0x1EFF }, // Latin Extended Additional
+	    { begin: 0x1F00, end: 0x1FFF }, // Greek Extended
+	    { begin: 0x2000, end: 0x206F }, // General Punctuation
+	    { begin: 0x2070, end: 0x209F }, // Superscripts And Subscripts
+	    { begin: 0x20A0, end: 0x20CF }, // Currency Symbol
+	    { begin: 0x20D0, end: 0x20FF }, // Combining Diacritical Marks For Symbols
+	    { begin: 0x2100, end: 0x214F }, // Letterlike Symbols
+	    { begin: 0x2150, end: 0x218F }, // Number Forms
+	    { begin: 0x2190, end: 0x21FF }, // Arrows
+	    { begin: 0x2200, end: 0x22FF }, // Mathematical Operators
+	    { begin: 0x2300, end: 0x23FF }, // Miscellaneous Technical
+	    { begin: 0x2400, end: 0x243F }, // Control Pictures
+	    { begin: 0x2440, end: 0x245F }, // Optical Character Recognition
+	    { begin: 0x2460, end: 0x24FF }, // Enclosed Alphanumerics
+	    { begin: 0x2500, end: 0x257F }, // Box Drawing
+	    { begin: 0x2580, end: 0x259F }, // Block Elements
+	    { begin: 0x25A0, end: 0x25FF }, // Geometric Shapes
+	    { begin: 0x2600, end: 0x26FF }, // Miscellaneous Symbols
+	    { begin: 0x2700, end: 0x27BF }, // Dingbats
+	    { begin: 0x3000, end: 0x303F }, // CJK Symbols And Punctuation
+	    { begin: 0x3040, end: 0x309F }, // Hiragana
+	    { begin: 0x30A0, end: 0x30FF }, // Katakana
+	    { begin: 0x3100, end: 0x312F }, // Bopomofo
+	    { begin: 0x3130, end: 0x318F }, // Hangul Compatibility Jamo
+	    { begin: 0xA840, end: 0xA87F }, // Phags-pa
+	    { begin: 0x3200, end: 0x32FF }, // Enclosed CJK Letters And Months
+	    { begin: 0x3300, end: 0x33FF }, // CJK Compatibility
+	    { begin: 0xAC00, end: 0xD7AF }, // Hangul Syllables
+	    { begin: 0xD800, end: 0xDFFF }, // Non-Plane 0 *
+	    { begin: 0x10900, end: 0x1091F }, // Phoenicia
+	    { begin: 0x4E00, end: 0x9FFF }, // CJK Unified Ideographs
+	    { begin: 0xE000, end: 0xF8FF }, // Private Use Area (plane 0)
+	    { begin: 0x31C0, end: 0x31EF }, // CJK Strokes
+	    { begin: 0xFB00, end: 0xFB4F }, // Alphabetic Presentation Forms
+	    { begin: 0xFB50, end: 0xFDFF }, // Arabic Presentation Forms-A
+	    { begin: 0xFE20, end: 0xFE2F }, // Combining Half Marks
+	    { begin: 0xFE10, end: 0xFE1F }, // Vertical Forms
+	    { begin: 0xFE50, end: 0xFE6F }, // Small Form Variants
+	    { begin: 0xFE70, end: 0xFEFF }, // Arabic Presentation Forms-B
+	    { begin: 0xFF00, end: 0xFFEF }, // Halfwidth And Fullwidth Forms
+	    { begin: 0xFFF0, end: 0xFFFF }, // Specials
+	    { begin: 0x0F00, end: 0x0FFF }, // Tibetan
+	    { begin: 0x0700, end: 0x074F }, // Syriac
+	    { begin: 0x0780, end: 0x07BF }, // Thaana
+	    { begin: 0x0D80, end: 0x0DFF }, // Sinhala
+	    { begin: 0x1000, end: 0x109F }, // Myanmar
+	    { begin: 0x1200, end: 0x137F }, // Ethiopic
+	    { begin: 0x13A0, end: 0x13FF }, // Cherokee
+	    { begin: 0x1400, end: 0x167F }, // Unified Canadian Aboriginal Syllabics
+	    { begin: 0x1680, end: 0x169F }, // Ogham
+	    { begin: 0x16A0, end: 0x16FF }, // Runic
+	    { begin: 0x1780, end: 0x17FF }, // Khmer
+	    { begin: 0x1800, end: 0x18AF }, // Mongolian
+	    { begin: 0x2800, end: 0x28FF }, // Braille Patterns
+	    { begin: 0xA000, end: 0xA48F }, // Yi Syllables
+	    { begin: 0x1700, end: 0x171F }, // Tagalog
+	    { begin: 0x10300, end: 0x1032F }, // Old Italic
+	    { begin: 0x10330, end: 0x1034F }, // Gothic
+	    { begin: 0x10400, end: 0x1044F }, // Deseret
+	    { begin: 0x1D000, end: 0x1D0FF }, // Byzantine Musical Symbols
+	    { begin: 0x1D400, end: 0x1D7FF }, // Mathematical Alphanumeric Symbols
+	    { begin: 0xFF000, end: 0xFFFFD }, // Private Use (plane 15)
+	    { begin: 0xFE00, end: 0xFE0F }, // Variation Selectors
+	    { begin: 0xE0000, end: 0xE007F }, // Tags
+	    { begin: 0x1900, end: 0x194F }, // Limbu
+	    { begin: 0x1950, end: 0x197F }, // Tai Le
+	    { begin: 0x1980, end: 0x19DF }, // New Tai Lue
+	    { begin: 0x1A00, end: 0x1A1F }, // Buginese
+	    { begin: 0x2C00, end: 0x2C5F }, // Glagolitic
+	    { begin: 0x2D30, end: 0x2D7F }, // Tifinagh
+	    { begin: 0x4DC0, end: 0x4DFF }, // Yijing Hexagram Symbols
+	    { begin: 0xA800, end: 0xA82F }, // Syloti Nagri
+	    { begin: 0x10000, end: 0x1007F }, // Linear B Syllabary
+	    { begin: 0x10140, end: 0x1018F }, // Ancient Greek Numbers
+	    { begin: 0x10380, end: 0x1039F }, // Ugaritic
+	    { begin: 0x103A0, end: 0x103DF }, // Old Persian
+	    { begin: 0x10450, end: 0x1047F }, // Shavian
+	    { begin: 0x10480, end: 0x104AF }, // Osmanya
+	    { begin: 0x10800, end: 0x1083F }, // Cypriot Syllabary
+	    { begin: 0x10A00, end: 0x10A5F }, // Kharoshthi
+	    { begin: 0x1D300, end: 0x1D35F }, // Tai Xuan Jing Symbols
+	    { begin: 0x12000, end: 0x123FF }, // Cuneiform
+	    { begin: 0x1D360, end: 0x1D37F }, // Counting Rod Numerals
+	    { begin: 0x1B80, end: 0x1BBF }, // Sundanese
+	    { begin: 0x1C00, end: 0x1C4F }, // Lepcha
+	    { begin: 0x1C50, end: 0x1C7F }, // Ol Chiki
+	    { begin: 0xA880, end: 0xA8DF }, // Saurashtra
+	    { begin: 0xA900, end: 0xA92F }, // Kayah Li
+	    { begin: 0xA930, end: 0xA95F }, // Rejang
+	    { begin: 0xAA00, end: 0xAA5F }, // Cham
+	    { begin: 0x10190, end: 0x101CF }, // Ancient Symbols
+	    { begin: 0x101D0, end: 0x101FF }, // Phaistos Disc
+	    { begin: 0x102A0, end: 0x102DF }, // Carian
+	    { begin: 0x1F030, end: 0x1F09F }, // Domino Tiles
+  ];
 
-	function getUnicodeRange(unicode) {
-	    for (var i = 0; i < unicodeRanges.length; i += 1) {
-	        var range = unicodeRanges[i];
+  function getUnicodeRange(unicode) {
+	    for (let i = 0; i < unicodeRanges.length; i = i + 1) {
+	        const range = unicodeRanges[i];
 	        if (unicode >= range.begin && unicode < range.end) {
 	            return i;
 	        }
 	    }
 
 	    return -1;
-	}
+  }
 
-	// Parse the OS/2 and Windows metrics `OS/2` table
-	function parseOS2Table(data, start) {
-	    var os2 = {};
-	    var p = new parse.Parser(data, start);
+  // Parse the OS/2 and Windows metrics `OS/2` table
+  function parseOS2Table(data, start) {
+	    const os2 = {};
+	    const p = new parse.Parser(data, start);
 	    os2.version = p.parseUShort();
 	    os2.xAvgCharWidth = p.parseShort();
 	    os2.usWeightClass = p.parseUShort();
@@ -6378,7 +6413,7 @@
 	    os2.yStrikeoutPosition = p.parseShort();
 	    os2.sFamilyClass = p.parseShort();
 	    os2.panose = [];
-	    for (var i = 0; i < 10; i++) {
+	    for (let i = 0; i < 10; i++) {
 	        os2.panose[i] = p.parseByte();
 	    }
 
@@ -6409,67 +6444,69 @@
 	    }
 
 	    return os2;
-	}
+  }
 
-	function makeOS2Table(options) {
+  function makeOS2Table(options) {
 	    return new table.Table('OS/2', [
-	        {name: 'version', type: 'USHORT', value: 0x0003},
-	        {name: 'xAvgCharWidth', type: 'SHORT', value: 0},
-	        {name: 'usWeightClass', type: 'USHORT', value: 0},
-	        {name: 'usWidthClass', type: 'USHORT', value: 0},
-	        {name: 'fsType', type: 'USHORT', value: 0},
-	        {name: 'ySubscriptXSize', type: 'SHORT', value: 650},
-	        {name: 'ySubscriptYSize', type: 'SHORT', value: 699},
-	        {name: 'ySubscriptXOffset', type: 'SHORT', value: 0},
-	        {name: 'ySubscriptYOffset', type: 'SHORT', value: 140},
-	        {name: 'ySuperscriptXSize', type: 'SHORT', value: 650},
-	        {name: 'ySuperscriptYSize', type: 'SHORT', value: 699},
-	        {name: 'ySuperscriptXOffset', type: 'SHORT', value: 0},
-	        {name: 'ySuperscriptYOffset', type: 'SHORT', value: 479},
-	        {name: 'yStrikeoutSize', type: 'SHORT', value: 49},
-	        {name: 'yStrikeoutPosition', type: 'SHORT', value: 258},
-	        {name: 'sFamilyClass', type: 'SHORT', value: 0},
-	        {name: 'bFamilyType', type: 'BYTE', value: 0},
-	        {name: 'bSerifStyle', type: 'BYTE', value: 0},
-	        {name: 'bWeight', type: 'BYTE', value: 0},
-	        {name: 'bProportion', type: 'BYTE', value: 0},
-	        {name: 'bContrast', type: 'BYTE', value: 0},
-	        {name: 'bStrokeVariation', type: 'BYTE', value: 0},
-	        {name: 'bArmStyle', type: 'BYTE', value: 0},
-	        {name: 'bLetterform', type: 'BYTE', value: 0},
-	        {name: 'bMidline', type: 'BYTE', value: 0},
-	        {name: 'bXHeight', type: 'BYTE', value: 0},
-	        {name: 'ulUnicodeRange1', type: 'ULONG', value: 0},
-	        {name: 'ulUnicodeRange2', type: 'ULONG', value: 0},
-	        {name: 'ulUnicodeRange3', type: 'ULONG', value: 0},
-	        {name: 'ulUnicodeRange4', type: 'ULONG', value: 0},
-	        {name: 'achVendID', type: 'CHARARRAY', value: 'XXXX'},
-	        {name: 'fsSelection', type: 'USHORT', value: 0},
-	        {name: 'usFirstCharIndex', type: 'USHORT', value: 0},
-	        {name: 'usLastCharIndex', type: 'USHORT', value: 0},
-	        {name: 'sTypoAscender', type: 'SHORT', value: 0},
-	        {name: 'sTypoDescender', type: 'SHORT', value: 0},
-	        {name: 'sTypoLineGap', type: 'SHORT', value: 0},
-	        {name: 'usWinAscent', type: 'USHORT', value: 0},
-	        {name: 'usWinDescent', type: 'USHORT', value: 0},
-	        {name: 'ulCodePageRange1', type: 'ULONG', value: 0},
-	        {name: 'ulCodePageRange2', type: 'ULONG', value: 0},
-	        {name: 'sxHeight', type: 'SHORT', value: 0},
-	        {name: 'sCapHeight', type: 'SHORT', value: 0},
-	        {name: 'usDefaultChar', type: 'USHORT', value: 0},
-	        {name: 'usBreakChar', type: 'USHORT', value: 0},
-	        {name: 'usMaxContext', type: 'USHORT', value: 0}
+	        { name: 'version', type: 'USHORT', value: 0x0003 },
+	        { name: 'xAvgCharWidth', type: 'SHORT', value: 0 },
+	        { name: 'usWeightClass', type: 'USHORT', value: 0 },
+	        { name: 'usWidthClass', type: 'USHORT', value: 0 },
+	        { name: 'fsType', type: 'USHORT', value: 0 },
+	        { name: 'ySubscriptXSize', type: 'SHORT', value: 650 },
+	        { name: 'ySubscriptYSize', type: 'SHORT', value: 699 },
+	        { name: 'ySubscriptXOffset', type: 'SHORT', value: 0 },
+	        { name: 'ySubscriptYOffset', type: 'SHORT', value: 140 },
+	        { name: 'ySuperscriptXSize', type: 'SHORT', value: 650 },
+	        { name: 'ySuperscriptYSize', type: 'SHORT', value: 699 },
+	        { name: 'ySuperscriptXOffset', type: 'SHORT', value: 0 },
+	        { name: 'ySuperscriptYOffset', type: 'SHORT', value: 479 },
+	        { name: 'yStrikeoutSize', type: 'SHORT', value: 49 },
+	        { name: 'yStrikeoutPosition', type: 'SHORT', value: 258 },
+	        { name: 'sFamilyClass', type: 'SHORT', value: 0 },
+	        { name: 'bFamilyType', type: 'BYTE', value: 0 },
+	        { name: 'bSerifStyle', type: 'BYTE', value: 0 },
+	        { name: 'bWeight', type: 'BYTE', value: 0 },
+	        { name: 'bProportion', type: 'BYTE', value: 0 },
+	        { name: 'bContrast', type: 'BYTE', value: 0 },
+	        { name: 'bStrokeVariation', type: 'BYTE', value: 0 },
+	        { name: 'bArmStyle', type: 'BYTE', value: 0 },
+	        { name: 'bLetterform', type: 'BYTE', value: 0 },
+	        { name: 'bMidline', type: 'BYTE', value: 0 },
+	        { name: 'bXHeight', type: 'BYTE', value: 0 },
+	        { name: 'ulUnicodeRange1', type: 'ULONG', value: 0 },
+	        { name: 'ulUnicodeRange2', type: 'ULONG', value: 0 },
+	        { name: 'ulUnicodeRange3', type: 'ULONG', value: 0 },
+	        { name: 'ulUnicodeRange4', type: 'ULONG', value: 0 },
+	        { name: 'achVendID', type: 'CHARARRAY', value: 'XXXX' },
+	        { name: 'fsSelection', type: 'USHORT', value: 0 },
+	        { name: 'usFirstCharIndex', type: 'USHORT', value: 0 },
+	        { name: 'usLastCharIndex', type: 'USHORT', value: 0 },
+	        { name: 'sTypoAscender', type: 'SHORT', value: 0 },
+	        { name: 'sTypoDescender', type: 'SHORT', value: 0 },
+	        { name: 'sTypoLineGap', type: 'SHORT', value: 0 },
+	        { name: 'usWinAscent', type: 'USHORT', value: 0 },
+	        { name: 'usWinDescent', type: 'USHORT', value: 0 },
+	        { name: 'ulCodePageRange1', type: 'ULONG', value: 0 },
+	        { name: 'ulCodePageRange2', type: 'ULONG', value: 0 },
+	        { name: 'sxHeight', type: 'SHORT', value: 0 },
+	        { name: 'sCapHeight', type: 'SHORT', value: 0 },
+	        { name: 'usDefaultChar', type: 'USHORT', value: 0 },
+	        { name: 'usBreakChar', type: 'USHORT', value: 0 },
+	        { name: 'usMaxContext', type: 'USHORT', value: 0 },
 	    ], options);
-	}
+  }
 
-	var os2 = { parse: parseOS2Table, make: makeOS2Table, unicodeRanges: unicodeRanges, getUnicodeRange: getUnicodeRange };
+  const os2 = {
+    parse: parseOS2Table, make: makeOS2Table, unicodeRanges, getUnicodeRange,
+  };
 
-	// The `post` table stores additional PostScript information, such as glyph names.
+  // The `post` table stores additional PostScript information, such as glyph names.
 
-	// Parse the PostScript `post` table
-	function parsePostTable(data, start) {
-	    var post = {};
-	    var p = new parse.Parser(data, start);
+  // Parse the PostScript `post` table
+  function parsePostTable(data, start) {
+	    const post = {};
+	    const p = new parse.Parser(data, start);
 	    post.version = p.parseVersion();
 	    post.italicAngle = p.parseFixed();
 	    post.underlinePosition = p.parseShort();
@@ -6486,14 +6523,14 @@
 	        case 2:
 	            post.numberOfGlyphs = p.parseUShort();
 	            post.glyphNameIndex = new Array(post.numberOfGlyphs);
-	            for (var i = 0; i < post.numberOfGlyphs; i++) {
+	            for (let i = 0; i < post.numberOfGlyphs; i++) {
 	                post.glyphNameIndex[i] = p.parseUShort();
 	            }
 
 	            post.names = [];
-	            for (var i$1 = 0; i$1 < post.numberOfGlyphs; i$1++) {
+	            for (let i$1 = 0; i$1 < post.numberOfGlyphs; i$1++) {
 	                if (post.glyphNameIndex[i$1] >= standardNames.length) {
-	                    var nameLength = p.parseChar();
+	                    const nameLength = p.parseChar();
 	                    post.names.push(p.parseString(nameLength));
 	                }
 	            }
@@ -6502,477 +6539,466 @@
 	        case 2.5:
 	            post.numberOfGlyphs = p.parseUShort();
 	            post.offset = new Array(post.numberOfGlyphs);
-	            for (var i$2 = 0; i$2 < post.numberOfGlyphs; i$2++) {
+	            for (let i$2 = 0; i$2 < post.numberOfGlyphs; i$2++) {
 	                post.offset[i$2] = p.parseChar();
 	            }
 
 	            break;
 	    }
 	    return post;
-	}
+  }
 
-	function makePostTable() {
+  function makePostTable() {
 	    return new table.Table('post', [
-	        {name: 'version', type: 'FIXED', value: 0x00030000},
-	        {name: 'italicAngle', type: 'FIXED', value: 0},
-	        {name: 'underlinePosition', type: 'FWORD', value: 0},
-	        {name: 'underlineThickness', type: 'FWORD', value: 0},
-	        {name: 'isFixedPitch', type: 'ULONG', value: 0},
-	        {name: 'minMemType42', type: 'ULONG', value: 0},
-	        {name: 'maxMemType42', type: 'ULONG', value: 0},
-	        {name: 'minMemType1', type: 'ULONG', value: 0},
-	        {name: 'maxMemType1', type: 'ULONG', value: 0}
+	        { name: 'version', type: 'FIXED', value: 0x00030000 },
+	        { name: 'italicAngle', type: 'FIXED', value: 0 },
+	        { name: 'underlinePosition', type: 'FWORD', value: 0 },
+	        { name: 'underlineThickness', type: 'FWORD', value: 0 },
+	        { name: 'isFixedPitch', type: 'ULONG', value: 0 },
+	        { name: 'minMemType42', type: 'ULONG', value: 0 },
+	        { name: 'maxMemType42', type: 'ULONG', value: 0 },
+	        { name: 'minMemType1', type: 'ULONG', value: 0 },
+	        { name: 'maxMemType1', type: 'ULONG', value: 0 },
 	    ]);
-	}
+  }
 
-	var post = { parse: parsePostTable, make: makePostTable };
+  const post = { parse: parsePostTable, make: makePostTable };
 
-	// The `GSUB` table contains ligatures, among other things.
+  // The `GSUB` table contains ligatures, among other things.
 
-	var subtableParsers = new Array(9);         // subtableParsers[0] is unused
+  const subtableParsers = new Array(9); // subtableParsers[0] is unused
 
-	// https://www.microsoft.com/typography/OTSPEC/GSUB.htm#SS
-	subtableParsers[1] = function parseLookup1() {
-	    var start = this.offset + this.relativeOffset;
-	    var substFormat = this.parseUShort();
+  // https://www.microsoft.com/typography/OTSPEC/GSUB.htm#SS
+  subtableParsers[1] = function parseLookup1() {
+	    const start = this.offset + this.relativeOffset;
+	    const substFormat = this.parseUShort();
 	    if (substFormat === 1) {
 	        return {
 	            substFormat: 1,
 	            coverage: this.parsePointer(Parser.coverage),
-	            deltaGlyphId: this.parseUShort()
+	            deltaGlyphId: this.parseUShort(),
 	        };
-	    } else if (substFormat === 2) {
+	    } if (substFormat === 2) {
 	        return {
 	            substFormat: 2,
 	            coverage: this.parsePointer(Parser.coverage),
-	            substitute: this.parseOffset16List()
+	            substitute: this.parseOffset16List(),
 	        };
 	    }
-	    check.assert(false, '0x' + start.toString(16) + ': lookup type 1 format must be 1 or 2.');
-	};
+	    check.assert(false, `0x${start.toString(16)}: lookup type 1 format must be 1 or 2.`);
+  };
 
-	// https://www.microsoft.com/typography/OTSPEC/GSUB.htm#MS
-	subtableParsers[2] = function parseLookup2() {
-	    var substFormat = this.parseUShort();
+  // https://www.microsoft.com/typography/OTSPEC/GSUB.htm#MS
+  subtableParsers[2] = function parseLookup2() {
+	    const substFormat = this.parseUShort();
 	    check.argument(substFormat === 1, 'GSUB Multiple Substitution Subtable identifier-format must be 1');
 	    return {
-	        substFormat: substFormat,
+	        substFormat,
 	        coverage: this.parsePointer(Parser.coverage),
-	        sequences: this.parseListOfLists()
+	        sequences: this.parseListOfLists(),
 	    };
-	};
+  };
 
-	// https://www.microsoft.com/typography/OTSPEC/GSUB.htm#AS
-	subtableParsers[3] = function parseLookup3() {
-	    var substFormat = this.parseUShort();
+  // https://www.microsoft.com/typography/OTSPEC/GSUB.htm#AS
+  subtableParsers[3] = function parseLookup3() {
+	    const substFormat = this.parseUShort();
 	    check.argument(substFormat === 1, 'GSUB Alternate Substitution Subtable identifier-format must be 1');
 	    return {
-	        substFormat: substFormat,
+	        substFormat,
 	        coverage: this.parsePointer(Parser.coverage),
-	        alternateSets: this.parseListOfLists()
+	        alternateSets: this.parseListOfLists(),
 	    };
-	};
+  };
 
-	// https://www.microsoft.com/typography/OTSPEC/GSUB.htm#LS
-	subtableParsers[4] = function parseLookup4() {
-	    var substFormat = this.parseUShort();
+  // https://www.microsoft.com/typography/OTSPEC/GSUB.htm#LS
+  subtableParsers[4] = function parseLookup4() {
+	    const substFormat = this.parseUShort();
 	    check.argument(substFormat === 1, 'GSUB ligature table identifier-format must be 1');
 	    return {
-	        substFormat: substFormat,
+	        substFormat,
 	        coverage: this.parsePointer(Parser.coverage),
-	        ligatureSets: this.parseListOfLists(function() {
+	        ligatureSets: this.parseListOfLists(function () {
 	            return {
 	                ligGlyph: this.parseUShort(),
-	                components: this.parseUShortList(this.parseUShort() - 1)
+	                components: this.parseUShortList(this.parseUShort() - 1),
 	            };
-	        })
+	        }),
 	    };
-	};
+  };
 
-	var lookupRecordDesc = {
+  const lookupRecordDesc = {
 	    sequenceIndex: Parser.uShort,
-	    lookupListIndex: Parser.uShort
-	};
+	    lookupListIndex: Parser.uShort,
+  };
 
-	// https://www.microsoft.com/typography/OTSPEC/GSUB.htm#CSF
-	subtableParsers[5] = function parseLookup5() {
-	    var start = this.offset + this.relativeOffset;
-	    var substFormat = this.parseUShort();
+  // https://www.microsoft.com/typography/OTSPEC/GSUB.htm#CSF
+  subtableParsers[5] = function parseLookup5() {
+	    const start = this.offset + this.relativeOffset;
+	    const substFormat = this.parseUShort();
 
 	    if (substFormat === 1) {
 	        return {
-	            substFormat: substFormat,
+	            substFormat,
 	            coverage: this.parsePointer(Parser.coverage),
-	            ruleSets: this.parseListOfLists(function() {
-	                var glyphCount = this.parseUShort();
-	                var substCount = this.parseUShort();
+	            ruleSets: this.parseListOfLists(function () {
+	                const glyphCount = this.parseUShort();
+	                const substCount = this.parseUShort();
 	                return {
 	                    input: this.parseUShortList(glyphCount - 1),
-	                    lookupRecords: this.parseRecordList(substCount, lookupRecordDesc)
+	                    lookupRecords: this.parseRecordList(substCount, lookupRecordDesc),
 	                };
-	            })
+	            }),
 	        };
-	    } else if (substFormat === 2) {
+	    } if (substFormat === 2) {
 	        return {
-	            substFormat: substFormat,
+	            substFormat,
 	            coverage: this.parsePointer(Parser.coverage),
 	            classDef: this.parsePointer(Parser.classDef),
-	            classSets: this.parseListOfLists(function() {
-	                var glyphCount = this.parseUShort();
-	                var substCount = this.parseUShort();
+	            classSets: this.parseListOfLists(function () {
+	                const glyphCount = this.parseUShort();
+	                const substCount = this.parseUShort();
 	                return {
 	                    classes: this.parseUShortList(glyphCount - 1),
-	                    lookupRecords: this.parseRecordList(substCount, lookupRecordDesc)
+	                    lookupRecords: this.parseRecordList(substCount, lookupRecordDesc),
 	                };
-	            })
+	            }),
 	        };
-	    } else if (substFormat === 3) {
-	        var glyphCount = this.parseUShort();
-	        var substCount = this.parseUShort();
+	    } if (substFormat === 3) {
+	        const glyphCount = this.parseUShort();
+	        const substCount = this.parseUShort();
 	        return {
-	            substFormat: substFormat,
+	            substFormat,
 	            coverages: this.parseList(glyphCount, Parser.pointer(Parser.coverage)),
-	            lookupRecords: this.parseRecordList(substCount, lookupRecordDesc)
+	            lookupRecords: this.parseRecordList(substCount, lookupRecordDesc),
 	        };
 	    }
-	    check.assert(false, '0x' + start.toString(16) + ': lookup type 5 format must be 1, 2 or 3.');
-	};
+	    check.assert(false, `0x${start.toString(16)}: lookup type 5 format must be 1, 2 or 3.`);
+  };
 
-	// https://www.microsoft.com/typography/OTSPEC/GSUB.htm#CC
-	subtableParsers[6] = function parseLookup6() {
-	    var start = this.offset + this.relativeOffset;
-	    var substFormat = this.parseUShort();
+  // https://www.microsoft.com/typography/OTSPEC/GSUB.htm#CC
+  subtableParsers[6] = function parseLookup6() {
+	    const start = this.offset + this.relativeOffset;
+	    const substFormat = this.parseUShort();
 	    if (substFormat === 1) {
 	        return {
 	            substFormat: 1,
 	            coverage: this.parsePointer(Parser.coverage),
-	            chainRuleSets: this.parseListOfLists(function() {
+	            chainRuleSets: this.parseListOfLists(function () {
 	                return {
 	                    backtrack: this.parseUShortList(),
 	                    input: this.parseUShortList(this.parseShort() - 1),
 	                    lookahead: this.parseUShortList(),
-	                    lookupRecords: this.parseRecordList(lookupRecordDesc)
+	                    lookupRecords: this.parseRecordList(lookupRecordDesc),
 	                };
-	            })
+	            }),
 	        };
-	    } else if (substFormat === 2) {
+	    } if (substFormat === 2) {
 	        return {
 	            substFormat: 2,
 	            coverage: this.parsePointer(Parser.coverage),
 	            backtrackClassDef: this.parsePointer(Parser.classDef),
 	            inputClassDef: this.parsePointer(Parser.classDef),
 	            lookaheadClassDef: this.parsePointer(Parser.classDef),
-	            chainClassSet: this.parseListOfLists(function() {
+	            chainClassSet: this.parseListOfLists(function () {
 	                return {
 	                    backtrack: this.parseUShortList(),
 	                    input: this.parseUShortList(this.parseShort() - 1),
 	                    lookahead: this.parseUShortList(),
-	                    lookupRecords: this.parseRecordList(lookupRecordDesc)
+	                    lookupRecords: this.parseRecordList(lookupRecordDesc),
 	                };
-	            })
+	            }),
 	        };
-	    } else if (substFormat === 3) {
+	    } if (substFormat === 3) {
 	        return {
 	            substFormat: 3,
 	            backtrackCoverage: this.parseList(Parser.pointer(Parser.coverage)),
 	            inputCoverage: this.parseList(Parser.pointer(Parser.coverage)),
 	            lookaheadCoverage: this.parseList(Parser.pointer(Parser.coverage)),
-	            lookupRecords: this.parseRecordList(lookupRecordDesc)
+	            lookupRecords: this.parseRecordList(lookupRecordDesc),
 	        };
 	    }
-	    check.assert(false, '0x' + start.toString(16) + ': lookup type 6 format must be 1, 2 or 3.');
-	};
+	    check.assert(false, `0x${start.toString(16)}: lookup type 6 format must be 1, 2 or 3.`);
+  };
 
-	// https://www.microsoft.com/typography/OTSPEC/GSUB.htm#ES
-	subtableParsers[7] = function parseLookup7() {
+  // https://www.microsoft.com/typography/OTSPEC/GSUB.htm#ES
+  subtableParsers[7] = function parseLookup7() {
 	    // Extension Substitution subtable
-	    var substFormat = this.parseUShort();
+	    const substFormat = this.parseUShort();
 	    check.argument(substFormat === 1, 'GSUB Extension Substitution subtable identifier-format must be 1');
-	    var extensionLookupType = this.parseUShort();
-	    var extensionParser = new Parser(this.data, this.offset + this.parseULong());
+	    const extensionLookupType = this.parseUShort();
+	    const extensionParser = new Parser(this.data, this.offset + this.parseULong());
 	    return {
 	        substFormat: 1,
 	        lookupType: extensionLookupType,
-	        extension: subtableParsers[extensionLookupType].call(extensionParser)
+	        extension: subtableParsers[extensionLookupType].call(extensionParser),
 	    };
-	};
+  };
 
-	// https://www.microsoft.com/typography/OTSPEC/GSUB.htm#RCCS
-	subtableParsers[8] = function parseLookup8() {
-	    var substFormat = this.parseUShort();
+  // https://www.microsoft.com/typography/OTSPEC/GSUB.htm#RCCS
+  subtableParsers[8] = function parseLookup8() {
+	    const substFormat = this.parseUShort();
 	    check.argument(substFormat === 1, 'GSUB Reverse Chaining Contextual Single Substitution Subtable identifier-format must be 1');
 	    return {
-	        substFormat: substFormat,
+	        substFormat,
 	        coverage: this.parsePointer(Parser.coverage),
 	        backtrackCoverage: this.parseList(Parser.pointer(Parser.coverage)),
 	        lookaheadCoverage: this.parseList(Parser.pointer(Parser.coverage)),
-	        substitutes: this.parseUShortList()
+	        substitutes: this.parseUShortList(),
 	    };
-	};
+  };
 
-	// https://www.microsoft.com/typography/OTSPEC/gsub.htm
-	function parseGsubTable(data, start) {
+  // https://www.microsoft.com/typography/OTSPEC/gsub.htm
+  function parseGsubTable(data, start) {
 	    start = start || 0;
-	    var p = new Parser(data, start);
-	    var tableVersion = p.parseVersion(1);
+	    const p = new Parser(data, start);
+	    const tableVersion = p.parseVersion(1);
 	    check.argument(tableVersion === 1 || tableVersion === 1.1, 'Unsupported GSUB table version.');
 	    if (tableVersion === 1) {
 	        return {
 	            version: tableVersion,
 	            scripts: p.parseScriptList(),
 	            features: p.parseFeatureList(),
-	            lookups: p.parseLookupList(subtableParsers)
+	            lookups: p.parseLookupList(subtableParsers),
 	        };
-	    } else {
+	    }
 	        return {
 	            version: tableVersion,
 	            scripts: p.parseScriptList(),
 	            features: p.parseFeatureList(),
 	            lookups: p.parseLookupList(subtableParsers),
-	            variations: p.parseFeatureVariationsList()
+	            variations: p.parseFeatureVariationsList(),
 	        };
-	    }
+  }
 
-	}
+  // GSUB Writing //////////////////////////////////////////////
+  const subtableMakers = new Array(9);
 
-	// GSUB Writing //////////////////////////////////////////////
-	var subtableMakers = new Array(9);
-
-	subtableMakers[1] = function makeLookup1(subtable) {
+  subtableMakers[1] = function makeLookup1(subtable) {
 	    if (subtable.substFormat === 1) {
 	        return new table.Table('substitutionTable', [
-	            {name: 'substFormat', type: 'USHORT', value: 1},
-	            {name: 'coverage', type: 'TABLE', value: new table.Coverage(subtable.coverage)},
-	            {name: 'deltaGlyphID', type: 'USHORT', value: subtable.deltaGlyphId}
+	            { name: 'substFormat', type: 'USHORT', value: 1 },
+	            { name: 'coverage', type: 'TABLE', value: new table.Coverage(subtable.coverage) },
+	            { name: 'deltaGlyphID', type: 'USHORT', value: subtable.deltaGlyphId },
 	        ]);
-	    } else {
-	        return new table.Table('substitutionTable', [
-	            {name: 'substFormat', type: 'USHORT', value: 2},
-	            {name: 'coverage', type: 'TABLE', value: new table.Coverage(subtable.coverage)}
-	        ].concat(table.ushortList('substitute', subtable.substitute)));
 	    }
-	};
+	        return new table.Table('substitutionTable', [
+	            { name: 'substFormat', type: 'USHORT', value: 2 },
+	            { name: 'coverage', type: 'TABLE', value: new table.Coverage(subtable.coverage) },
+	        ].concat(table.ushortList('substitute', subtable.substitute)));
+  };
 
-	subtableMakers[3] = function makeLookup3(subtable) {
+  subtableMakers[3] = function makeLookup3(subtable) {
 	    check.assert(subtable.substFormat === 1, 'Lookup type 3 substFormat must be 1.');
 	    return new table.Table('substitutionTable', [
-	        {name: 'substFormat', type: 'USHORT', value: 1},
-	        {name: 'coverage', type: 'TABLE', value: new table.Coverage(subtable.coverage)}
-	    ].concat(table.tableList('altSet', subtable.alternateSets, function(alternateSet) {
-	        return new table.Table('alternateSetTable', table.ushortList('alternate', alternateSet));
-	    })));
-	};
+	        { name: 'substFormat', type: 'USHORT', value: 1 },
+	        { name: 'coverage', type: 'TABLE', value: new table.Coverage(subtable.coverage) },
+	    ].concat(table.tableList('altSet', subtable.alternateSets, (alternateSet) => new table.Table('alternateSetTable', table.ushortList('alternate', alternateSet)))));
+  };
 
-	subtableMakers[4] = function makeLookup4(subtable) {
+  subtableMakers[4] = function makeLookup4(subtable) {
 	    check.assert(subtable.substFormat === 1, 'Lookup type 4 substFormat must be 1.');
 	    return new table.Table('substitutionTable', [
-	        {name: 'substFormat', type: 'USHORT', value: 1},
-	        {name: 'coverage', type: 'TABLE', value: new table.Coverage(subtable.coverage)}
-	    ].concat(table.tableList('ligSet', subtable.ligatureSets, function(ligatureSet) {
-	        return new table.Table('ligatureSetTable', table.tableList('ligature', ligatureSet, function(ligature) {
-	            return new table.Table('ligatureTable',
-	                [{name: 'ligGlyph', type: 'USHORT', value: ligature.ligGlyph}]
-	                .concat(table.ushortList('component', ligature.components, ligature.components.length + 1))
-	            );
-	        }));
-	    })));
-	};
+	        { name: 'substFormat', type: 'USHORT', value: 1 },
+	        { name: 'coverage', type: 'TABLE', value: new table.Coverage(subtable.coverage) },
+	    ].concat(table.tableList('ligSet', subtable.ligatureSets, (ligatureSet) => new table.Table('ligatureSetTable', table.tableList('ligature', ligatureSet, (ligature) => new table.Table('ligatureTable',
+	                [{ name: 'ligGlyph', type: 'USHORT', value: ligature.ligGlyph }]
+	                .concat(table.ushortList('component', ligature.components, ligature.components.length + 1))))))));
+  };
 
-	function makeGsubTable(gsub) {
+  function makeGsubTable(gsub) {
 	    return new table.Table('GSUB', [
-	        {name: 'version', type: 'ULONG', value: 0x10000},
-	        {name: 'scripts', type: 'TABLE', value: new table.ScriptList(gsub.scripts)},
-	        {name: 'features', type: 'TABLE', value: new table.FeatureList(gsub.features)},
-	        {name: 'lookups', type: 'TABLE', value: new table.LookupList(gsub.lookups, subtableMakers)}
+	        { name: 'version', type: 'ULONG', value: 0x10000 },
+	        { name: 'scripts', type: 'TABLE', value: new table.ScriptList(gsub.scripts) },
+	        { name: 'features', type: 'TABLE', value: new table.FeatureList(gsub.features) },
+	        { name: 'lookups', type: 'TABLE', value: new table.LookupList(gsub.lookups, subtableMakers) },
 	    ]);
-	}
+  }
 
-	var gsub = { parse: parseGsubTable, make: makeGsubTable };
+  const gsub = { parse: parseGsubTable, make: makeGsubTable };
 
-	// The `GPOS` table contains kerning pairs, among other things.
+  // The `GPOS` table contains kerning pairs, among other things.
 
-	// Parse the metadata `meta` table.
-	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6meta.html
-	function parseMetaTable(data, start) {
-	    var p = new parse.Parser(data, start);
-	    var tableVersion = p.parseULong();
+  // Parse the metadata `meta` table.
+  // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6meta.html
+  function parseMetaTable(data, start) {
+	    const p = new parse.Parser(data, start);
+	    const tableVersion = p.parseULong();
 	    check.argument(tableVersion === 1, 'Unsupported META table version.');
 	    p.parseULong(); // flags - currently unused and set to 0
 	    p.parseULong(); // tableOffset
-	    var numDataMaps = p.parseULong();
+	    const numDataMaps = p.parseULong();
 
-	    var tags = {};
-	    for (var i = 0; i < numDataMaps; i++) {
-	        var tag = p.parseTag();
-	        var dataOffset = p.parseULong();
-	        var dataLength = p.parseULong();
-	        var text = decode.UTF8(data, start + dataOffset, dataLength);
+	    const tags = {};
+	    for (let i = 0; i < numDataMaps; i++) {
+	        const tag = p.parseTag();
+	        const dataOffset = p.parseULong();
+	        const dataLength = p.parseULong();
+	        const text = decode.UTF8(data, start + dataOffset, dataLength);
 
 	        tags[tag] = text;
 	    }
 	    return tags;
-	}
+  }
 
-	function makeMetaTable(tags) {
-	    var numTags = Object.keys(tags).length;
-	    var stringPool = '';
-	    var stringPoolOffset = 16 + numTags * 12;
+  function makeMetaTable(tags) {
+	    const numTags = Object.keys(tags).length;
+	    let stringPool = '';
+	    const stringPoolOffset = 16 + numTags * 12;
 
-	    var result = new table.Table('meta', [
-	        {name: 'version', type: 'ULONG', value: 1},
-	        {name: 'flags', type: 'ULONG', value: 0},
-	        {name: 'offset', type: 'ULONG', value: stringPoolOffset},
-	        {name: 'numTags', type: 'ULONG', value: numTags}
+	    const result = new table.Table('meta', [
+	        { name: 'version', type: 'ULONG', value: 1 },
+	        { name: 'flags', type: 'ULONG', value: 0 },
+	        { name: 'offset', type: 'ULONG', value: stringPoolOffset },
+	        { name: 'numTags', type: 'ULONG', value: numTags },
 	    ]);
 
-	    for (var tag in tags) {
-	        var pos = stringPool.length;
-	        stringPool += tags[tag];
+	    for (const tag in tags) {
+	        const pos = stringPool.length;
+	        stringPool = stringPool + tags[tag];
 
-	        result.fields.push({name: 'tag ' + tag, type: 'TAG', value: tag});
-	        result.fields.push({name: 'offset ' + tag, type: 'ULONG', value: stringPoolOffset + pos});
-	        result.fields.push({name: 'length ' + tag, type: 'ULONG', value: tags[tag].length});
+	        result.fields.push({ name: `tag ${tag}`, type: 'TAG', value: tag });
+	        result.fields.push({ name: `offset ${tag}`, type: 'ULONG', value: stringPoolOffset + pos });
+	        result.fields.push({ name: `length ${tag}`, type: 'ULONG', value: tags[tag].length });
 	    }
 
-	    result.fields.push({name: 'stringPool', type: 'CHARARRAY', value: stringPool});
+	    result.fields.push({ name: 'stringPool', type: 'CHARARRAY', value: stringPool });
 
 	    return result;
-	}
+  }
 
-	var meta = { parse: parseMetaTable, make: makeMetaTable };
+  const meta = { parse: parseMetaTable, make: makeMetaTable };
 
-	// The `sfnt` wrapper provides organization for the tables in the font.
+  // The `sfnt` wrapper provides organization for the tables in the font.
 
-	function log2(v) {
+  function log2(v) {
 	    return Math.log(v) / Math.log(2) | 0;
-	}
+  }
 
-	function computeCheckSum(bytes) {
+  function computeCheckSum(bytes) {
 	    while (bytes.length % 4 !== 0) {
 	        bytes.push(0);
 	    }
 
-	    var sum = 0;
-	    for (var i = 0; i < bytes.length; i += 4) {
-	        sum += (bytes[i] << 24) +
-	            (bytes[i + 1] << 16) +
-	            (bytes[i + 2] << 8) +
-	            (bytes[i + 3]);
+	    let sum = 0;
+	    for (let i = 0; i < bytes.length; i = i + 4) {
+	        sum = sum + ((bytes[i] << 24)
+	            + (bytes[i + 1] << 16)
+	            + (bytes[i + 2] << 8)
+	            + (bytes[i + 3]));
 	    }
 
-	    sum %= Math.pow(2, 32);
+	    sum = sum % Math.pow(2, 32);
 	    return sum;
-	}
+  }
 
-	function makeTableRecord(tag, checkSum, offset, length) {
+  function makeTableRecord(tag, checkSum, offset, length) {
 	    return new table.Record('Table Record', [
-	        {name: 'tag', type: 'TAG', value: tag !== undefined ? tag : ''},
-	        {name: 'checkSum', type: 'ULONG', value: checkSum !== undefined ? checkSum : 0},
-	        {name: 'offset', type: 'ULONG', value: offset !== undefined ? offset : 0},
-	        {name: 'length', type: 'ULONG', value: length !== undefined ? length : 0}
+	        { name: 'tag', type: 'TAG', value: tag !== undefined ? tag : '' },
+	        { name: 'checkSum', type: 'ULONG', value: checkSum !== undefined ? checkSum : 0 },
+	        { name: 'offset', type: 'ULONG', value: offset !== undefined ? offset : 0 },
+	        { name: 'length', type: 'ULONG', value: length !== undefined ? length : 0 },
 	    ]);
-	}
+  }
 
-	function makeSfntTable(tables) {
-	    var sfnt = new table.Table('sfnt', [
-	        {name: 'version', type: 'TAG', value: 'OTTO'},
-	        {name: 'numTables', type: 'USHORT', value: 0},
-	        {name: 'searchRange', type: 'USHORT', value: 0},
-	        {name: 'entrySelector', type: 'USHORT', value: 0},
-	        {name: 'rangeShift', type: 'USHORT', value: 0}
+  function makeSfntTable(tables) {
+	    const sfnt = new table.Table('sfnt', [
+	        { name: 'version', type: 'TAG', value: 'OTTO' },
+	        { name: 'numTables', type: 'USHORT', value: 0 },
+	        { name: 'searchRange', type: 'USHORT', value: 0 },
+	        { name: 'entrySelector', type: 'USHORT', value: 0 },
+	        { name: 'rangeShift', type: 'USHORT', value: 0 },
 	    ]);
 	    sfnt.tables = tables;
 	    sfnt.numTables = tables.length;
-	    var highestPowerOf2 = Math.pow(2, log2(sfnt.numTables));
+	    const highestPowerOf2 = Math.pow(2, log2(sfnt.numTables));
 	    sfnt.searchRange = 16 * highestPowerOf2;
 	    sfnt.entrySelector = log2(highestPowerOf2);
 	    sfnt.rangeShift = sfnt.numTables * 16 - sfnt.searchRange;
 
-	    var recordFields = [];
-	    var tableFields = [];
+	    const recordFields = [];
+	    const tableFields = [];
 
-	    var offset = sfnt.sizeOf() + (makeTableRecord().sizeOf() * sfnt.numTables);
+	    let offset = sfnt.sizeOf() + (makeTableRecord().sizeOf() * sfnt.numTables);
 	    while (offset % 4 !== 0) {
-	        offset += 1;
-	        tableFields.push({name: 'padding', type: 'BYTE', value: 0});
+	        offset = offset + 1;
+	        tableFields.push({ name: 'padding', type: 'BYTE', value: 0 });
 	    }
 
-	    for (var i = 0; i < tables.length; i += 1) {
-	        var t = tables[i];
-	        check.argument(t.tableName.length === 4, 'Table name' + t.tableName + ' is invalid.');
-	        var tableLength = t.sizeOf();
-	        var tableRecord = makeTableRecord(t.tableName, computeCheckSum(t.encode()), offset, tableLength);
-	        recordFields.push({name: tableRecord.tag + ' Table Record', type: 'RECORD', value: tableRecord});
-	        tableFields.push({name: t.tableName + ' table', type: 'RECORD', value: t});
-	        offset += tableLength;
+	    for (let i = 0; i < tables.length; i = i + 1) {
+	        const t = tables[i];
+	        check.argument(t.tableName.length === 4, `Table name${t.tableName} is invalid.`);
+	        const tableLength = t.sizeOf();
+	        const tableRecord = makeTableRecord(t.tableName, computeCheckSum(t.encode()), offset, tableLength);
+	        recordFields.push({ name: `${tableRecord.tag} Table Record`, type: 'RECORD', value: tableRecord });
+	        tableFields.push({ name: `${t.tableName} table`, type: 'RECORD', value: t });
+	        offset = offset + tableLength;
 	        check.argument(!isNaN(offset), 'Something went wrong calculating the offset.');
 	        while (offset % 4 !== 0) {
-	            offset += 1;
-	            tableFields.push({name: 'padding', type: 'BYTE', value: 0});
+	            offset = offset + 1;
+	            tableFields.push({ name: 'padding', type: 'BYTE', value: 0 });
 	        }
 	    }
 
 	    // Table records need to be sorted alphabetically.
-	    recordFields.sort(function(r1, r2) {
+	    recordFields.sort((r1, r2) => {
 	        if (r1.value.tag > r2.value.tag) {
 	            return 1;
-	        } else {
-	            return -1;
 	        }
+	            return -1;
 	    });
 
 	    sfnt.fields = sfnt.fields.concat(recordFields);
 	    sfnt.fields = sfnt.fields.concat(tableFields);
 	    return sfnt;
-	}
+  }
 
-	// Get the metrics for a character. If the string has more than one character
-	// this function returns metrics for the first available character.
-	// You can provide optional fallback metrics if no characters are available.
-	function metricsForChar(font, chars, notFoundMetrics) {
-	    for (var i = 0; i < chars.length; i += 1) {
-	        var glyphIndex = font.charToGlyphIndex(chars[i]);
+  // Get the metrics for a character. If the string has more than one character
+  // this function returns metrics for the first available character.
+  // You can provide optional fallback metrics if no characters are available.
+  function metricsForChar(font, chars, notFoundMetrics) {
+	    for (let i = 0; i < chars.length; i = i + 1) {
+	        const glyphIndex = font.charToGlyphIndex(chars[i]);
 	        if (glyphIndex > 0) {
-	            var glyph = font.glyphs.get(glyphIndex);
+	            const glyph = font.glyphs.get(glyphIndex);
 	            return glyph.getMetrics();
 	        }
 	    }
 
 	    return notFoundMetrics;
-	}
+  }
 
-	function average(vs) {
-	    var sum = 0;
-	    for (var i = 0; i < vs.length; i += 1) {
-	        sum += vs[i];
+  function average(vs) {
+	    let sum = 0;
+	    for (let i = 0; i < vs.length; i = i + 1) {
+	        sum = sum + vs[i];
 	    }
 
 	    return sum / vs.length;
-	}
+  }
 
-	// Convert the font object to a SFNT data structure.
-	// This structure contains all the necessary tables and metadata to create a binary OTF file.
-	function fontToSfntTable(font) {
-	    var xMins = [];
-	    var yMins = [];
-	    var xMaxs = [];
-	    var yMaxs = [];
-	    var advanceWidths = [];
-	    var leftSideBearings = [];
-	    var rightSideBearings = [];
-	    var firstCharIndex;
-	    var lastCharIndex = 0;
-	    var ulUnicodeRange1 = 0;
-	    var ulUnicodeRange2 = 0;
-	    var ulUnicodeRange3 = 0;
-	    var ulUnicodeRange4 = 0;
+  // Convert the font object to a SFNT data structure.
+  // This structure contains all the necessary tables and metadata to create a binary OTF file.
+  function fontToSfntTable(font) {
+	    const xMins = [];
+	    const yMins = [];
+	    const xMaxs = [];
+	    const yMaxs = [];
+	    const advanceWidths = [];
+	    const leftSideBearings = [];
+	    const rightSideBearings = [];
+	    let firstCharIndex;
+	    let lastCharIndex = 0;
+	    let ulUnicodeRange1 = 0;
+	    let ulUnicodeRange2 = 0;
+	    let ulUnicodeRange3 = 0;
+	    let ulUnicodeRange4 = 0;
 
-	    for (var i = 0; i < font.glyphs.length; i += 1) {
-	        var glyph = font.glyphs.get(i);
-	        var unicode = glyph.unicode | 0;
+	    for (let i = 0; i < font.glyphs.length; i = i + 1) {
+	        const glyph = font.glyphs.get(i);
+	        const unicode = glyph.unicode | 0;
 
 	        if (isNaN(glyph.advanceWidth)) {
-	            throw new Error('Glyph ' + glyph.name + ' (' + i + '): advanceWidth is not a number.');
+	            throw new Error(`Glyph ${glyph.name} (${i}): advanceWidth is not a number.`);
 	        }
 
 	        if (firstCharIndex > unicode || firstCharIndex === undefined) {
@@ -6986,21 +7012,21 @@
 	            lastCharIndex = unicode;
 	        }
 
-	        var position = os2.getUnicodeRange(unicode);
+	        const position = os2.getUnicodeRange(unicode);
 	        if (position < 32) {
-	            ulUnicodeRange1 |= 1 << position;
+	            ulUnicodeRange1 = ulUnicodeRange1 | 1 << position;
 	        } else if (position < 64) {
-	            ulUnicodeRange2 |= 1 << position - 32;
+	            ulUnicodeRange2 = ulUnicodeRange2 | 1 << position - 32;
 	        } else if (position < 96) {
-	            ulUnicodeRange3 |= 1 << position - 64;
+	            ulUnicodeRange3 = ulUnicodeRange3 | 1 << position - 64;
 	        } else if (position < 123) {
-	            ulUnicodeRange4 |= 1 << position - 96;
+	            ulUnicodeRange4 = ulUnicodeRange4 | 1 << position - 96;
 	        } else {
 	            throw new Error('Unicode ranges bits > 123 are reserved for internal usage');
 	        }
 	        // Skip non-important characters.
 	        if (glyph.name === '.notdef') { continue; }
-	        var metrics = glyph.getMetrics();
+	        const metrics = glyph.getMetrics();
 	        xMins.push(metrics.xMin);
 	        yMins.push(metrics.yMin);
 	        xMaxs.push(metrics.xMax);
@@ -7010,7 +7036,7 @@
 	        advanceWidths.push(glyph.advanceWidth);
 	    }
 
-	    var globals = {
+	    const globals = {
 	        xMin: Math.min.apply(null, xMins),
 	        yMin: Math.min.apply(null, yMins),
 	        xMax: Math.max.apply(null, xMaxs),
@@ -7019,12 +7045,12 @@
 	        advanceWidthAvg: average(advanceWidths),
 	        minLeftSideBearing: Math.min.apply(null, leftSideBearings),
 	        maxLeftSideBearing: Math.max.apply(null, leftSideBearings),
-	        minRightSideBearing: Math.min.apply(null, rightSideBearings)
+	        minRightSideBearing: Math.min.apply(null, rightSideBearings),
 	    };
 	    globals.ascender = font.ascender;
 	    globals.descender = font.descender;
 
-	    var headTable = head.make({
+	    const headTable = head.make({
 	        flags: 3, // 00000011 (baseline for font at y=0; left sidebearing point at x=0)
 	        unitsPerEm: font.unitsPerEm,
 	        xMin: globals.xMin,
@@ -7032,29 +7058,29 @@
 	        xMax: globals.xMax,
 	        yMax: globals.yMax,
 	        lowestRecPPEM: 3,
-	        createdTimestamp: font.createdTimestamp
+	        createdTimestamp: font.createdTimestamp,
 	    });
 
-	    var hheaTable = hhea.make({
+	    const hheaTable = hhea.make({
 	        ascender: globals.ascender,
 	        descender: globals.descender,
 	        advanceWidthMax: globals.advanceWidthMax,
 	        minLeftSideBearing: globals.minLeftSideBearing,
 	        minRightSideBearing: globals.minRightSideBearing,
 	        xMaxExtent: globals.maxLeftSideBearing + (globals.xMax - globals.xMin),
-	        numberOfHMetrics: font.glyphs.length
+	        numberOfHMetrics: font.glyphs.length,
 	    });
 
-	    var maxpTable = maxp.make(font.glyphs.length);
+	    const maxpTable = maxp.make(font.glyphs.length);
 
-	    var os2Table = os2.make(Object.assign({
-	        xAvgCharWidth: Math.round(globals.advanceWidthAvg),
+	    const os2Table = os2.make({
+      xAvgCharWidth: Math.round(globals.advanceWidthAvg),
 	        usFirstCharIndex: firstCharIndex,
 	        usLastCharIndex: lastCharIndex,
-	        ulUnicodeRange1: ulUnicodeRange1,
-	        ulUnicodeRange2: ulUnicodeRange2,
-	        ulUnicodeRange3: ulUnicodeRange3,
-	        ulUnicodeRange4: ulUnicodeRange4,
+	        ulUnicodeRange1,
+	        ulUnicodeRange2,
+	        ulUnicodeRange3,
+	        ulUnicodeRange4,
 	        // See http://typophile.com/node/13081 for more info on vertical metrics.
 	        // We get metrics for typical characters (such as "x" for xHeight).
 	        // We provide some fallback characters if characters are unavailable: their
@@ -7065,34 +7091,35 @@
 	        usWinAscent: globals.yMax,
 	        usWinDescent: Math.abs(globals.yMin),
 	        ulCodePageRange1: 1, // FIXME: hard-code Latin 1 support for now
-	        sxHeight: metricsForChar(font, 'xyvw', {yMax: Math.round(globals.ascender / 2)}).yMax,
+	        sxHeight: metricsForChar(font, 'xyvw', { yMax: Math.round(globals.ascender / 2) }).yMax,
 	        sCapHeight: metricsForChar(font, 'HIKLEFJMNTZBDPRAGOQSUVWXY', globals).yMax,
 	        usDefaultChar: font.hasChar(' ') ? 32 : 0, // Use space as the default character, if available.
 	        usBreakChar: font.hasChar(' ') ? 32 : 0, // Use space as the break character, if available.
-	    }, font.tables.os2));
+	     ...font.tables.os2,
+    });
 
-	    var hmtxTable = hmtx.make(font.glyphs);
-	    var cmapTable = cmap.make(font.glyphs);
+	    const hmtxTable = hmtx.make(font.glyphs);
+	    const cmapTable = cmap.make(font.glyphs);
 
-	    var englishFamilyName = font.getEnglishName('fontFamily');
-	    var englishStyleName = font.getEnglishName('fontSubfamily');
-	    var englishFullName = englishFamilyName + ' ' + englishStyleName;
-	    var postScriptName = font.getEnglishName('postScriptName');
+	    const englishFamilyName = font.getEnglishName('fontFamily');
+	    const englishStyleName = font.getEnglishName('fontSubfamily');
+	    const englishFullName = `${englishFamilyName} ${englishStyleName}`;
+	    let postScriptName = font.getEnglishName('postScriptName');
 	    if (!postScriptName) {
-	        postScriptName = englishFamilyName.replace(/\s/g, '') + '-' + englishStyleName;
+	        postScriptName = `${englishFamilyName.replace(/\s/g, '')}-${englishStyleName}`;
 	    }
 
-	    var names = {};
-	    for (var n in font.names) {
+	    const names = {};
+	    for (const n in font.names) {
 	        names[n] = font.names[n];
 	    }
 
 	    if (!names.uniqueID) {
-	        names.uniqueID = {en: font.getEnglishName('manufacturer') + ':' + englishFullName};
+	        names.uniqueID = { en: `${font.getEnglishName('manufacturer')}:${englishFullName}` };
 	    }
 
 	    if (!names.postScriptName) {
-	        names.postScriptName = {en: postScriptName};
+	        names.postScriptName = { en: postScriptName };
 	    }
 
 	    if (!names.preferredFamily) {
@@ -7103,25 +7130,25 @@
 	        names.preferredSubfamily = font.names.fontSubfamily;
 	    }
 
-	    var languageTags = [];
-	    var nameTable = _name.make(names, languageTags);
-	    var ltagTable = (languageTags.length > 0 ? ltag.make(languageTags) : undefined);
+	    const languageTags = [];
+	    const nameTable = _name.make(names, languageTags);
+	    const ltagTable = (languageTags.length > 0 ? ltag.make(languageTags) : undefined);
 
-	    var postTable = post.make();
-	    var cffTable = cff.make(font.glyphs, {
+	    const postTable = post.make();
+	    const cffTable = cff.make(font.glyphs, {
 	        version: font.getEnglishName('version'),
 	        fullName: englishFullName,
 	        familyName: englishFamilyName,
 	        weightName: englishStyleName,
-	        postScriptName: postScriptName,
+	        postScriptName,
 	        unitsPerEm: font.unitsPerEm,
-	        fontBBox: [0, globals.yMin, globals.ascender, globals.advanceWidthMax]
+	        fontBBox: [0, globals.yMin, globals.ascender, globals.advanceWidthMax],
 	    });
 
-	    var metaTable = (font.metas && Object.keys(font.metas).length > 0) ? meta.make(font.metas) : undefined;
+	    const metaTable = (font.metas && Object.keys(font.metas).length > 0) ? meta.make(font.metas) : undefined;
 
 	    // The order does not matter because makeSfntTable() will sort them.
-	    var tables = [headTable, hheaTable, maxpTable, os2Table, nameTable, cmapTable, postTable, cffTable, hmtxTable];
+	    const tables = [headTable, hheaTable, maxpTable, os2Table, nameTable, cmapTable, postTable, cffTable, hmtxTable];
 	    if (ltagTable) {
 	        tables.push(ltagTable);
 	    }
@@ -7133,14 +7160,14 @@
 	        tables.push(metaTable);
 	    }
 
-	    var sfntTable = makeSfntTable(tables);
+	    const sfntTable = makeSfntTable(tables);
 
 	    // Compute the font's checkSum and store it in head.checkSumAdjustment.
-	    var bytes = sfntTable.encode();
-	    var checkSum = computeCheckSum(bytes);
-	    var tableFields = sfntTable.fields;
-	    var checkSumAdjusted = false;
-	    for (var i$1 = 0; i$1 < tableFields.length; i$1 += 1) {
+	    const bytes = sfntTable.encode();
+	    const checkSum = computeCheckSum(bytes);
+	    const tableFields = sfntTable.fields;
+	    let checkSumAdjusted = false;
+	    for (let i$1 = 0; i$1 < tableFields.length; i$1 = i$1 + 1) {
 	        if (tableFields[i$1].name === 'head table') {
 	            tableFields[i$1].value.checkSumAdjustment = 0xB1B0AFBA - checkSum;
 	            checkSumAdjusted = true;
@@ -7153,59 +7180,59 @@
 	    }
 
 	    return sfntTable;
-	}
+  }
 
-	var sfnt = { make: makeSfntTable, fontToTable: fontToSfntTable, computeCheckSum: computeCheckSum };
+  const sfnt = { make: makeSfntTable, fontToTable: fontToSfntTable, computeCheckSum };
 
-	// The Layout object is the prototype of Substitution objects, and provides
+  // The Layout object is the prototype of Substitution objects, and provides
 
-	function searchTag(arr, tag) {
+  function searchTag(arr, tag) {
 	    /* jshint bitwise: false */
-	    var imin = 0;
-	    var imax = arr.length - 1;
+	    let imin = 0;
+	    let imax = arr.length - 1;
 	    while (imin <= imax) {
-	        var imid = (imin + imax) >>> 1;
-	        var val = arr[imid].tag;
+	        const imid = (imin + imax) >>> 1;
+	        const val = arr[imid].tag;
 	        if (val === tag) {
 	            return imid;
-	        } else if (val < tag) {
+	        } if (val < tag) {
 	            imin = imid + 1;
 	        } else { imax = imid - 1; }
 	    }
 	    // Not found: return -1-insertion point
 	    return -imin - 1;
-	}
+  }
 
-	function binSearch(arr, value) {
+  function binSearch(arr, value) {
 	    /* jshint bitwise: false */
-	    var imin = 0;
-	    var imax = arr.length - 1;
+	    let imin = 0;
+	    let imax = arr.length - 1;
 	    while (imin <= imax) {
-	        var imid = (imin + imax) >>> 1;
-	        var val = arr[imid];
+	        const imid = (imin + imax) >>> 1;
+	        const val = arr[imid];
 	        if (val === value) {
 	            return imid;
-	        } else if (val < value) {
+	        } if (val < value) {
 	            imin = imid + 1;
 	        } else { imax = imid - 1; }
 	    }
 	    // Not found: return -1-insertion point
 	    return -imin - 1;
-	}
+  }
 
-	// binary search in a list of ranges (coverage, class definition)
-	function searchRange(ranges, value) {
+  // binary search in a list of ranges (coverage, class definition)
+  function searchRange(ranges, value) {
 	    // jshint bitwise: false
-	    var range;
-	    var imin = 0;
-	    var imax = ranges.length - 1;
+	    let range;
+	    let imin = 0;
+	    let imax = ranges.length - 1;
 	    while (imin <= imax) {
-	        var imid = (imin + imax) >>> 1;
+	        const imid = (imin + imax) >>> 1;
 	        range = ranges[imid];
-	        var start = range.start;
+	        const { start } = range;
 	        if (start === value) {
 	            return range;
-	        } else if (start < value) {
+	        } if (start < value) {
 	            imin = imid + 1;
 	        } else { imax = imid - 1; }
 	    }
@@ -7214,18 +7241,18 @@
 	        if (value > range.end) { return 0; }
 	        return range;
 	    }
-	}
+  }
 
-	/**
+  /**
 	 * @exports opentype.Layout
 	 * @class
 	 */
-	function Layout(font, tableName) {
+  function Layout(font, tableName) {
 	    this.font = font;
 	    this.tableName = tableName;
-	}
+  }
 
-	Layout.prototype = {
+  Layout.prototype = {
 
 	    /**
 	     * Binary search an object by "tag" property
@@ -7236,7 +7263,7 @@
 	     * @param  {string} tag
 	     * @return {number}
 	     */
-	    searchTag: searchTag,
+	    searchTag,
 
 	    /**
 	     * Binary search in a list of numbers
@@ -7247,15 +7274,15 @@
 	     * @param  {number} value
 	     * @return {number}
 	     */
-	    binSearch: binSearch,
+	    binSearch,
 
 	    /**
 	     * Get or create the Layout table (GSUB, GPOS etc).
 	     * @param  {boolean} create - Whether to create a new one.
 	     * @return {Object} The GSUB or GPOS table.
 	     */
-	    getTable: function(create) {
-	        var layout = this.font.tables[this.tableName];
+	    getTable(create) {
+	        let layout = this.font.tables[this.tableName];
 	        if (!layout && create) {
 	            layout = this.font.tables[this.tableName] = this.createDefaultTable();
 	        }
@@ -7267,12 +7294,10 @@
 	     * @instance
 	     * @return {Array}
 	     */
-	    getScriptNames: function() {
-	        var layout = this.getTable();
+	    getScriptNames() {
+	        const layout = this.getTable();
 	        if (!layout) { return []; }
-	        return layout.scripts.map(function(script) {
-	            return script.tag;
-	        });
+	        return layout.scripts.map((script) => script.tag);
 	    },
 
 	    /**
@@ -7281,12 +7306,12 @@
 	     * If not, returns 'latn' if it exists.
 	     * If neither exist, returns undefined.
 	     */
-	    getDefaultScriptName: function() {
-	        var layout = this.getTable();
+	    getDefaultScriptName() {
+	        const layout = this.getTable();
 	        if (!layout) { return; }
-	        var hasLatn = false;
-	        for (var i = 0; i < layout.scripts.length; i++) {
-	            var name = layout.scripts[i].tag;
+	        let hasLatn = false;
+	        for (let i = 0; i < layout.scripts.length; i++) {
+	            const name = layout.scripts[i].tag;
 	            if (name === 'DFLT') { return name; }
 	            if (name === 'latn') { hasLatn = true; }
 	        }
@@ -7300,21 +7325,21 @@
 	     * @param {boolean} create - forces the creation of this script table if it doesn't exist.
 	     * @return {Object} An object with tag and script properties.
 	     */
-	    getScriptTable: function(script, create) {
-	        var layout = this.getTable(create);
+	    getScriptTable(script, create) {
+	        const layout = this.getTable(create);
 	        if (layout) {
 	            script = script || 'DFLT';
-	            var scripts = layout.scripts;
-	            var pos = searchTag(layout.scripts, script);
+	            const { scripts } = layout;
+	            const pos = searchTag(layout.scripts, script);
 	            if (pos >= 0) {
 	                return scripts[pos].script;
-	            } else if (create) {
-	                var scr = {
+	            } if (create) {
+	                const scr = {
 	                    tag: script,
 	                    script: {
-	                        defaultLangSys: {reserved: 0, reqFeatureIndex: 0xffff, featureIndexes: []},
-	                        langSysRecords: []
-	                    }
+	                        defaultLangSys: { reserved: 0, reqFeatureIndex: 0xffff, featureIndexes: [] },
+	                        langSysRecords: [],
+	                    },
 	                };
 	                scripts.splice(-1 - pos, 0, scr);
 	                return scr.script;
@@ -7330,19 +7355,19 @@
 	     * @param {boolean} create - forces the creation of this langSysTable if it doesn't exist.
 	     * @return {Object}
 	     */
-	    getLangSysTable: function(script, language, create) {
-	        var scriptTable = this.getScriptTable(script, create);
+	    getLangSysTable(script, language, create) {
+	        const scriptTable = this.getScriptTable(script, create);
 	        if (scriptTable) {
 	            if (!language || language === 'dflt' || language === 'DFLT') {
 	                return scriptTable.defaultLangSys;
 	            }
-	            var pos = searchTag(scriptTable.langSysRecords, language);
+	            const pos = searchTag(scriptTable.langSysRecords, language);
 	            if (pos >= 0) {
 	                return scriptTable.langSysRecords[pos].langSys;
-	            } else if (create) {
-	                var langSysRecord = {
+	            } if (create) {
+	                const langSysRecord = {
 	                    tag: language,
-	                    langSys: {reserved: 0, reqFeatureIndex: 0xffff, featureIndexes: []}
+	                    langSys: { reserved: 0, reqFeatureIndex: 0xffff, featureIndexes: [] },
 	                };
 	                scriptTable.langSysRecords.splice(-1 - pos, 0, langSysRecord);
 	                return langSysRecord.langSys;
@@ -7359,27 +7384,27 @@
 	     * @param {boolean} create - forces the creation of the feature table if it doesn't exist.
 	     * @return {Object}
 	     */
-	    getFeatureTable: function(script, language, feature, create) {
-	        var langSysTable = this.getLangSysTable(script, language, create);
+	    getFeatureTable(script, language, feature, create) {
+	        const langSysTable = this.getLangSysTable(script, language, create);
 	        if (langSysTable) {
-	            var featureRecord;
-	            var featIndexes = langSysTable.featureIndexes;
-	            var allFeatures = this.font.tables[this.tableName].features;
+	            let featureRecord;
+	            const featIndexes = langSysTable.featureIndexes;
+	            const allFeatures = this.font.tables[this.tableName].features;
 	            // The FeatureIndex array of indices is in arbitrary order,
 	            // even if allFeatures is sorted alphabetically by feature tag.
-	            for (var i = 0; i < featIndexes.length; i++) {
+	            for (let i = 0; i < featIndexes.length; i++) {
 	                featureRecord = allFeatures[featIndexes[i]];
 	                if (featureRecord.tag === feature) {
 	                    return featureRecord.feature;
 	                }
 	            }
 	            if (create) {
-	                var index = allFeatures.length;
+	                const index = allFeatures.length;
 	                // Automatic ordering of features would require to shift feature indexes in the script list.
 	                check.assert(index === 0 || feature >= allFeatures[index - 1].tag, 'Features must be added in alphabetical order.');
 	                featureRecord = {
 	                    tag: feature,
-	                    feature: { params: 0, lookupListIndexes: [] }
+	                    feature: { params: 0, lookupListIndexes: [] },
 	                };
 	                allFeatures.push(featureRecord);
 	                featIndexes.push(index);
@@ -7398,15 +7423,15 @@
 	     * @param {boolean} create - forces the creation of the lookup table if it doesn't exist, with no subtables.
 	     * @return {Object[]}
 	     */
-	    getLookupTables: function(script, language, feature, lookupType, create) {
-	        var featureTable = this.getFeatureTable(script, language, feature, create);
-	        var tables = [];
+	    getLookupTables(script, language, feature, lookupType, create) {
+	        const featureTable = this.getFeatureTable(script, language, feature, create);
+	        const tables = [];
 	        if (featureTable) {
-	            var lookupTable;
-	            var lookupListIndexes = featureTable.lookupListIndexes;
-	            var allLookups = this.font.tables[this.tableName].lookups;
+	            let lookupTable;
+	            const { lookupListIndexes } = featureTable;
+	            const allLookups = this.font.tables[this.tableName].lookups;
 	            // lookupListIndexes are in no particular order, so use naive search.
-	            for (var i = 0; i < lookupListIndexes.length; i++) {
+	            for (let i = 0; i < lookupListIndexes.length; i++) {
 	                lookupTable = allLookups[lookupListIndexes[i]];
 	                if (lookupTable.lookupType === lookupType) {
 	                    tables.push(lookupTable);
@@ -7414,12 +7439,12 @@
 	            }
 	            if (tables.length === 0 && create) {
 	                lookupTable = {
-	                    lookupType: lookupType,
+	                    lookupType,
 	                    lookupFlag: 0,
 	                    subtables: [],
-	                    markFilteringSet: undefined
+	                    markFilteringSet: undefined,
 	                };
-	                var index = allLookups.length;
+	                const index = allLookups.length;
 	                allLookups.push(lookupTable);
 	                lookupListIndexes.push(index);
 	                return [lookupTable];
@@ -7435,7 +7460,7 @@
 	     * @param {number} glyphIndex - the index of the glyph to find
 	     * @returns {number} -1 if not found
 	     */
-	    getGlyphClass: function(classDefTable, glyphIndex) {
+	    getGlyphClass(classDefTable, glyphIndex) {
 	        switch (classDefTable.format) {
 	            case 1:
 	                if (classDefTable.startGlyph <= glyphIndex && glyphIndex < classDefTable.startGlyph + classDefTable.classes.length) {
@@ -7455,7 +7480,7 @@
 	     * @param {number} glyphIndex - the index of the glyph to find
 	     * @returns {number} -1 if not found
 	     */
-	    getCoverageIndex: function(coverageTable, glyphIndex) {
+	    getCoverageIndex(coverageTable, glyphIndex) {
 	        switch (coverageTable.format) {
 	            case 1:
 	                var index = binSearch(coverageTable.glyphs, glyphIndex);
@@ -7474,74 +7499,73 @@
 	     * @param  {Object} coverageTable
 	     * @return {Array}
 	     */
-	    expandCoverage: function(coverageTable) {
+	    expandCoverage(coverageTable) {
 	        if (coverageTable.format === 1) {
 	            return coverageTable.glyphs;
-	        } else {
-	            var glyphs = [];
-	            var ranges = coverageTable.ranges;
-	            for (var i = 0; i < ranges.length; i++) {
-	                var range = ranges[i];
-	                var start = range.start;
-	                var end = range.end;
-	                for (var j = start; j <= end; j++) {
+	        }
+	            const glyphs = [];
+	            const { ranges } = coverageTable;
+	            for (let i = 0; i < ranges.length; i++) {
+	                const range = ranges[i];
+	                const { start } = range;
+	                const { end } = range;
+	                for (let j = start; j <= end; j++) {
 	                    glyphs.push(j);
 	                }
 	            }
 	            return glyphs;
-	        }
-	    }
+	    },
 
-	};
+  };
 
-	// The Position object provides utility methods to manipulate
+  // The Position object provides utility methods to manipulate
 
-	/**
+  /**
 	 * @exports opentype.Position
 	 * @class
 	 * @extends opentype.Layout
 	 * @param {opentype.Font}
 	 * @constructor
 	 */
-	function Position(font) {
+  function Position(font) {
 	    Layout.call(this, font, 'gpos');
-	}
+  }
 
-	Position.prototype = Layout.prototype;
+  Position.prototype = Layout.prototype;
 
-	/**
+  /**
 	 * Init some data for faster and easier access later.
 	 */
-	Position.prototype.init = function() {
-	    var script = this.getDefaultScriptName();
+  Position.prototype.init = function () {
+	    const script = this.getDefaultScriptName();
 	    this.defaultKerningTables = this.getKerningTables(script);
-	};
+  };
 
-	/**
+  /**
 	 * Find a glyph pair in a list of lookup tables of type 2 and retrieve the xAdvance kerning value.
 	 *
 	 * @param {integer} leftIndex - left glyph index
 	 * @param {integer} rightIndex - right glyph index
 	 * @returns {integer}
 	 */
-	Position.prototype.getKerningValue = function(kerningLookups, leftIndex, rightIndex) {
-	    for (var i = 0; i < kerningLookups.length; i++) {
-	        var subtables = kerningLookups[i].subtables;
-	        for (var j = 0; j < subtables.length; j++) {
-	            var subtable = subtables[j];
-	            var covIndex = this.getCoverageIndex(subtable.coverage, leftIndex);
+  Position.prototype.getKerningValue = function (kerningLookups, leftIndex, rightIndex) {
+	    for (let i = 0; i < kerningLookups.length; i++) {
+	        const { subtables } = kerningLookups[i];
+	        for (let j = 0; j < subtables.length; j++) {
+	            const subtable = subtables[j];
+	            const covIndex = this.getCoverageIndex(subtable.coverage, leftIndex);
 	            if (covIndex < 0) { continue; }
 	            switch (subtable.posFormat) {
 	                case 1:
 	                    // Search Pair Adjustment Positioning Format 1
 	                    var pairSet = subtable.pairSets[covIndex];
-	                    for (var k = 0; k < pairSet.length; k++) {
-	                        var pair = pairSet[k];
+	                    for (let k = 0; k < pairSet.length; k++) {
+	                        const pair = pairSet[k];
 	                        if (pair.secondGlyph === rightIndex) {
 	                            return pair.value1 && pair.value1.xAdvance || 0;
 	                        }
 	                    }
-	                    break;      // left glyph found, not right glyph - try next subtable
+	                    break; // left glyph found, not right glyph - try next subtable
 	                case 2:
 	                    // Search Pair Adjustment Positioning Format 2
 	                    var class1 = this.getGlyphClass(subtable.classDef1, leftIndex);
@@ -7552,49 +7576,49 @@
 	        }
 	    }
 	    return 0;
-	};
+  };
 
-	/**
+  /**
 	 * List all kerning lookup tables.
 	 *
 	 * @param {string} [script='DFLT'] - use font.position.getDefaultScriptName() for a better default value
 	 * @param {string} [language='dflt']
 	 * @return {object[]} The list of kerning lookup tables (may be empty), or undefined if there is no GPOS table (and we should use the kern table)
 	 */
-	Position.prototype.getKerningTables = function(script, language) {
+  Position.prototype.getKerningTables = function (script, language) {
 	    if (this.font.tables.gpos) {
 	        return this.getLookupTables(script, language, 'kern', 2);
 	    }
-	};
+  };
 
-	// The Substitution object provides utility methods to manipulate
+  // The Substitution object provides utility methods to manipulate
 
-	/**
+  /**
 	 * @exports opentype.Substitution
 	 * @class
 	 * @extends opentype.Layout
 	 * @param {opentype.Font}
 	 * @constructor
 	 */
-	function Substitution(font) {
+  function Substitution(font) {
 	    Layout.call(this, font, 'gsub');
-	}
+  }
 
-	// Check if 2 arrays of primitives are equal.
-	function arraysEqual(ar1, ar2) {
-	    var n = ar1.length;
+  // Check if 2 arrays of primitives are equal.
+  function arraysEqual(ar1, ar2) {
+	    const n = ar1.length;
 	    if (n !== ar2.length) { return false; }
-	    for (var i = 0; i < n; i++) {
+	    for (let i = 0; i < n; i++) {
 	        if (ar1[i] !== ar2[i]) { return false; }
 	    }
 	    return true;
-	}
+  }
 
-	// Find the first subtable of a lookup table in a particular format.
-	function getSubstFormat(lookupTable, format, defaultSubtable) {
-	    var subtables = lookupTable.subtables;
-	    for (var i = 0; i < subtables.length; i++) {
-	        var subtable = subtables[i];
+  // Find the first subtable of a lookup table in a particular format.
+  function getSubstFormat(lookupTable, format, defaultSubtable) {
+	    const { subtables } = lookupTable;
+	    for (let i = 0; i < subtables.length; i++) {
+	        const subtable = subtables[i];
 	        if (subtable.substFormat === format) {
 	            return subtable;
 	        }
@@ -7604,15 +7628,15 @@
 	        return defaultSubtable;
 	    }
 	    return undefined;
-	}
+  }
 
-	Substitution.prototype = Layout.prototype;
+  Substitution.prototype = Layout.prototype;
 
-	/**
+  /**
 	 * Create a default GSUB table.
 	 * @return {Object} gsub - The GSUB table.
 	 */
-	Substitution.prototype.createDefaultTable = function() {
+  Substitution.prototype.createDefaultTable = function () {
 	    // Generate a default empty GSUB table with just a DFLT script and dflt lang sys.
 	    return {
 	        version: 1,
@@ -7620,38 +7644,38 @@
 	            tag: 'DFLT',
 	            script: {
 	                defaultLangSys: { reserved: 0, reqFeatureIndex: 0xffff, featureIndexes: [] },
-	                langSysRecords: []
-	            }
+	                langSysRecords: [],
+	            },
 	        }],
 	        features: [],
-	        lookups: []
+	        lookups: [],
 	    };
-	};
+  };
 
-	/**
+  /**
 	 * List all single substitutions (lookup type 1) for a given script, language, and feature.
 	 * @param {string} [script='DFLT']
 	 * @param {string} [language='dflt']
 	 * @param {string} feature - 4-character feature name ('aalt', 'salt', 'ss01'...)
 	 * @return {Array} substitutions - The list of substitutions.
 	 */
-	Substitution.prototype.getSingle = function(feature, script, language) {
-	    var substitutions = [];
-	    var lookupTables = this.getLookupTables(script, language, feature, 1);
-	    for (var idx = 0; idx < lookupTables.length; idx++) {
-	        var subtables = lookupTables[idx].subtables;
-	        for (var i = 0; i < subtables.length; i++) {
-	            var subtable = subtables[i];
-	            var glyphs = this.expandCoverage(subtable.coverage);
-	            var j = (void 0);
+  Substitution.prototype.getSingle = function (feature, script, language) {
+	    const substitutions = [];
+	    const lookupTables = this.getLookupTables(script, language, feature, 1);
+	    for (let idx = 0; idx < lookupTables.length; idx++) {
+	        const { subtables } = lookupTables[idx];
+	        for (let i = 0; i < subtables.length; i++) {
+	            const subtable = subtables[i];
+	            const glyphs = this.expandCoverage(subtable.coverage);
+	            let j = (void 0);
 	            if (subtable.substFormat === 1) {
-	                var delta = subtable.deltaGlyphId;
+	                const delta = subtable.deltaGlyphId;
 	                for (j = 0; j < glyphs.length; j++) {
-	                    var glyph = glyphs[j];
+	                    const glyph = glyphs[j];
 	                    substitutions.push({ sub: glyph, by: glyph + delta });
 	                }
 	            } else {
-	                var substitute = subtable.substitute;
+	                const { substitute } = subtable;
 	                for (j = 0; j < glyphs.length; j++) {
 	                    substitutions.push({ sub: glyphs[j], by: substitute[j] });
 	                }
@@ -7659,33 +7683,33 @@
 	        }
 	    }
 	    return substitutions;
-	};
+  };
 
-	/**
+  /**
 	 * List all alternates (lookup type 3) for a given script, language, and feature.
 	 * @param {string} [script='DFLT']
 	 * @param {string} [language='dflt']
 	 * @param {string} feature - 4-character feature name ('aalt', 'salt'...)
 	 * @return {Array} alternates - The list of alternates
 	 */
-	Substitution.prototype.getAlternates = function(feature, script, language) {
-	    var alternates = [];
-	    var lookupTables = this.getLookupTables(script, language, feature, 3);
-	    for (var idx = 0; idx < lookupTables.length; idx++) {
-	        var subtables = lookupTables[idx].subtables;
-	        for (var i = 0; i < subtables.length; i++) {
-	            var subtable = subtables[i];
-	            var glyphs = this.expandCoverage(subtable.coverage);
-	            var alternateSets = subtable.alternateSets;
-	            for (var j = 0; j < glyphs.length; j++) {
+  Substitution.prototype.getAlternates = function (feature, script, language) {
+	    const alternates = [];
+	    const lookupTables = this.getLookupTables(script, language, feature, 3);
+	    for (let idx = 0; idx < lookupTables.length; idx++) {
+	        const { subtables } = lookupTables[idx];
+	        for (let i = 0; i < subtables.length; i++) {
+	            const subtable = subtables[i];
+	            const glyphs = this.expandCoverage(subtable.coverage);
+	            const { alternateSets } = subtable;
+	            for (let j = 0; j < glyphs.length; j++) {
 	                alternates.push({ sub: glyphs[j], by: alternateSets[j] });
 	            }
 	        }
 	    }
 	    return alternates;
-	};
+  };
 
-	/**
+  /**
 	 * List all ligatures (lookup type 4) for a given script, language, and feature.
 	 * The result is an array of ligature objects like { sub: [ids], by: id }
 	 * @param {string} feature - 4-letter feature name ('liga', 'rlig', 'dlig'...)
@@ -7693,32 +7717,32 @@
 	 * @param {string} [language='dflt']
 	 * @return {Array} ligatures - The list of ligatures.
 	 */
-	Substitution.prototype.getLigatures = function(feature, script, language) {
-	    var ligatures = [];
-	    var lookupTables = this.getLookupTables(script, language, feature, 4);
-	    for (var idx = 0; idx < lookupTables.length; idx++) {
-	        var subtables = lookupTables[idx].subtables;
-	        for (var i = 0; i < subtables.length; i++) {
-	            var subtable = subtables[i];
-	            var glyphs = this.expandCoverage(subtable.coverage);
-	            var ligatureSets = subtable.ligatureSets;
-	            for (var j = 0; j < glyphs.length; j++) {
-	                var startGlyph = glyphs[j];
-	                var ligSet = ligatureSets[j];
-	                for (var k = 0; k < ligSet.length; k++) {
-	                    var lig = ligSet[k];
+  Substitution.prototype.getLigatures = function (feature, script, language) {
+	    const ligatures = [];
+	    const lookupTables = this.getLookupTables(script, language, feature, 4);
+	    for (let idx = 0; idx < lookupTables.length; idx++) {
+	        const { subtables } = lookupTables[idx];
+	        for (let i = 0; i < subtables.length; i++) {
+	            const subtable = subtables[i];
+	            const glyphs = this.expandCoverage(subtable.coverage);
+	            const { ligatureSets } = subtable;
+	            for (let j = 0; j < glyphs.length; j++) {
+	                const startGlyph = glyphs[j];
+	                const ligSet = ligatureSets[j];
+	                for (let k = 0; k < ligSet.length; k++) {
+	                    const lig = ligSet[k];
 	                    ligatures.push({
 	                        sub: [startGlyph].concat(lig.components),
-	                        by: lig.ligGlyph
+	                        by: lig.ligGlyph,
 	                    });
 	                }
 	            }
 	        }
 	    }
 	    return ligatures;
-	};
+  };
 
-	/**
+  /**
 	 * Add or modify a single substitution (lookup type 1)
 	 * Format 2, more flexible, is always used.
 	 * @param {string} feature - 4-letter feature name ('liga', 'rlig', 'dlig'...)
@@ -7726,50 +7750,50 @@
 	 * @param {string} [script='DFLT']
 	 * @param {string} [language='dflt']
 	 */
-	Substitution.prototype.addSingle = function(feature, substitution, script, language) {
-	    var lookupTable = this.getLookupTables(script, language, feature, 1, true)[0];
-	    var subtable = getSubstFormat(lookupTable, 2, {                // lookup type 1 subtable, format 2, coverage format 1
+  Substitution.prototype.addSingle = function (feature, substitution, script, language) {
+	    const lookupTable = this.getLookupTables(script, language, feature, 1, true)[0];
+	    const subtable = getSubstFormat(lookupTable, 2, { // lookup type 1 subtable, format 2, coverage format 1
 	        substFormat: 2,
-	        coverage: {format: 1, glyphs: []},
-	        substitute: []
+	        coverage: { format: 1, glyphs: [] },
+	        substitute: [],
 	    });
-	    check.assert(subtable.coverage.format === 1, 'Ligature: unable to modify coverage table format ' + subtable.coverage.format);
-	    var coverageGlyph = substitution.sub;
-	    var pos = this.binSearch(subtable.coverage.glyphs, coverageGlyph);
+	    check.assert(subtable.coverage.format === 1, `Ligature: unable to modify coverage table format ${subtable.coverage.format}`);
+	    const coverageGlyph = substitution.sub;
+	    let pos = this.binSearch(subtable.coverage.glyphs, coverageGlyph);
 	    if (pos < 0) {
 	        pos = -1 - pos;
 	        subtable.coverage.glyphs.splice(pos, 0, coverageGlyph);
 	        subtable.substitute.splice(pos, 0, 0);
 	    }
 	    subtable.substitute[pos] = substitution.by;
-	};
+  };
 
-	/**
+  /**
 	 * Add or modify an alternate substitution (lookup type 1)
 	 * @param {string} feature - 4-letter feature name ('liga', 'rlig', 'dlig'...)
 	 * @param {Object} substitution - { sub: id, by: [ids] }
 	 * @param {string} [script='DFLT']
 	 * @param {string} [language='dflt']
 	 */
-	Substitution.prototype.addAlternate = function(feature, substitution, script, language) {
-	    var lookupTable = this.getLookupTables(script, language, feature, 3, true)[0];
-	    var subtable = getSubstFormat(lookupTable, 1, {                // lookup type 3 subtable, format 1, coverage format 1
+  Substitution.prototype.addAlternate = function (feature, substitution, script, language) {
+	    const lookupTable = this.getLookupTables(script, language, feature, 3, true)[0];
+	    const subtable = getSubstFormat(lookupTable, 1, { // lookup type 3 subtable, format 1, coverage format 1
 	        substFormat: 1,
-	        coverage: {format: 1, glyphs: []},
-	        alternateSets: []
+	        coverage: { format: 1, glyphs: [] },
+	        alternateSets: [],
 	    });
-	    check.assert(subtable.coverage.format === 1, 'Ligature: unable to modify coverage table format ' + subtable.coverage.format);
-	    var coverageGlyph = substitution.sub;
-	    var pos = this.binSearch(subtable.coverage.glyphs, coverageGlyph);
+	    check.assert(subtable.coverage.format === 1, `Ligature: unable to modify coverage table format ${subtable.coverage.format}`);
+	    const coverageGlyph = substitution.sub;
+	    let pos = this.binSearch(subtable.coverage.glyphs, coverageGlyph);
 	    if (pos < 0) {
 	        pos = -1 - pos;
 	        subtable.coverage.glyphs.splice(pos, 0, coverageGlyph);
 	        subtable.alternateSets.splice(pos, 0, 0);
 	    }
 	    subtable.alternateSets[pos] = substitution.by;
-	};
+  };
 
-	/**
+  /**
 	 * Add a ligature (lookup type 4)
 	 * Ligatures with more components must be stored ahead of those with fewer components in order to be found
 	 * @param {string} feature - 4-letter feature name ('liga', 'rlig', 'dlig'...)
@@ -7777,29 +7801,29 @@
 	 * @param {string} [script='DFLT']
 	 * @param {string} [language='dflt']
 	 */
-	Substitution.prototype.addLigature = function(feature, ligature, script, language) {
-	    var lookupTable = this.getLookupTables(script, language, feature, 4, true)[0];
-	    var subtable = lookupTable.subtables[0];
+  Substitution.prototype.addLigature = function (feature, ligature, script, language) {
+	    const lookupTable = this.getLookupTables(script, language, feature, 4, true)[0];
+	    let subtable = lookupTable.subtables[0];
 	    if (!subtable) {
-	        subtable = {                // lookup type 4 subtable, format 1, coverage format 1
+	        subtable = { // lookup type 4 subtable, format 1, coverage format 1
 	            substFormat: 1,
 	            coverage: { format: 1, glyphs: [] },
-	            ligatureSets: []
+	            ligatureSets: [],
 	        };
 	        lookupTable.subtables[0] = subtable;
 	    }
-	    check.assert(subtable.coverage.format === 1, 'Ligature: unable to modify coverage table format ' + subtable.coverage.format);
-	    var coverageGlyph = ligature.sub[0];
-	    var ligComponents = ligature.sub.slice(1);
-	    var ligatureTable = {
+	    check.assert(subtable.coverage.format === 1, `Ligature: unable to modify coverage table format ${subtable.coverage.format}`);
+	    const coverageGlyph = ligature.sub[0];
+	    const ligComponents = ligature.sub.slice(1);
+	    const ligatureTable = {
 	        ligGlyph: ligature.by,
-	        components: ligComponents
+	        components: ligComponents,
 	    };
-	    var pos = this.binSearch(subtable.coverage.glyphs, coverageGlyph);
+	    let pos = this.binSearch(subtable.coverage.glyphs, coverageGlyph);
 	    if (pos >= 0) {
 	        // ligatureSet already exists
-	        var ligatureSet = subtable.ligatureSets[pos];
-	        for (var i = 0; i < ligatureSet.length; i++) {
+	        const ligatureSet = subtable.ligatureSets[pos];
+	        for (let i = 0; i < ligatureSet.length; i++) {
 	            // If ligature already exists, return.
 	            if (arraysEqual(ligatureSet[i].components, ligComponents)) {
 	                return;
@@ -7813,16 +7837,16 @@
 	        subtable.coverage.glyphs.splice(pos, 0, coverageGlyph);
 	        subtable.ligatureSets.splice(pos, 0, [ligatureTable]);
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * List all feature data for a given script and language.
 	 * @param {string} feature - 4-letter feature name
 	 * @param {string} [script='DFLT']
 	 * @param {string} [language='dflt']
 	 * @return {Array} substitutions - The list of substitutions.
 	 */
-	Substitution.prototype.getFeature = function(feature, script, language) {
+  Substitution.prototype.getFeature = function (feature, script, language) {
 	    if (/ss\d\d/.test(feature)) {
 	        // ss01 - ss20
 	        return this.getSingle(feature, script, language);
@@ -7837,16 +7861,16 @@
 	        case 'rlig': return this.getLigatures(feature, script, language);
 	    }
 	    return undefined;
-	};
+  };
 
-	/**
+  /**
 	 * Add a substitution to a feature for a given script and language.
 	 * @param {string} feature - 4-letter feature name
 	 * @param {Object} sub - the substitution to add (an object like { sub: id or [ids], by: id or [ids] })
 	 * @param {string} [script='DFLT']
 	 * @param {string} [language='dflt']
 	 */
-	Substitution.prototype.add = function(feature, sub, script, language) {
+  Substitution.prototype.add = function (feature, sub, script, language) {
 	    if (/ss\d\d/.test(feature)) {
 	        // ss01 - ss20
 	        return this.addSingle(feature, sub, script, language);
@@ -7864,43 +7888,43 @@
 	            return this.addLigature(feature, sub, script, language);
 	    }
 	    return undefined;
-	};
+  };
 
-	function isBrowser() {
+  function isBrowser() {
 	    return typeof window !== 'undefined';
-	}
+  }
 
-	function nodeBufferToArrayBuffer(buffer) {
-	    var ab = new ArrayBuffer(buffer.length);
-	    var view = new Uint8Array(ab);
-	    for (var i = 0; i < buffer.length; ++i) {
+  function nodeBufferToArrayBuffer(buffer) {
+	    const ab = new ArrayBuffer(buffer.length);
+	    const view = new Uint8Array(ab);
+	    for (let i = 0; i < buffer.length; ++i) {
 	        view[i] = buffer[i];
 	    }
 
 	    return ab;
-	}
+  }
 
-	function arrayBufferToNodeBuffer(ab) {
-	    var buffer = new Buffer(ab.byteLength);
-	    var view = new Uint8Array(ab);
-	    for (var i = 0; i < buffer.length; ++i) {
+  function arrayBufferToNodeBuffer(ab) {
+	    const buffer = new Buffer(ab.byteLength);
+	    const view = new Uint8Array(ab);
+	    for (let i = 0; i < buffer.length; ++i) {
 	        buffer[i] = view[i];
 	    }
 
 	    return buffer;
-	}
+  }
 
-	function checkArgument(expression, message) {
+  function checkArgument(expression, message) {
 	    if (!expression) {
 	        throw message;
 	    }
-	}
+  }
 
-	// The `glyf` table describes the glyphs in TrueType outline format.
+  // The `glyf` table describes the glyphs in TrueType outline format.
 
-	// Parse the coordinate data for a glyph.
-	function parseGlyphCoordinate(p, flag, previousValue, shortVectorBitMask, sameBitMask) {
-	    var v;
+  // Parse the coordinate data for a glyph.
+  function parseGlyphCoordinate(p, flag, previousValue, shortVectorBitMask, sameBitMask) {
+	    let v;
 	    if ((flag & shortVectorBitMask) > 0) {
 	        // The coordinate is 1 byte long.
 	        v = p.parseByte();
@@ -7922,43 +7946,43 @@
 	    }
 
 	    return v;
-	}
+  }
 
-	// Parse a TrueType glyph.
-	function parseGlyph(glyph, data, start) {
-	    var p = new parse.Parser(data, start);
+  // Parse a TrueType glyph.
+  function parseGlyph(glyph, data, start) {
+	    const p = new parse.Parser(data, start);
 	    glyph.numberOfContours = p.parseShort();
 	    glyph._xMin = p.parseShort();
 	    glyph._yMin = p.parseShort();
 	    glyph._xMax = p.parseShort();
 	    glyph._yMax = p.parseShort();
-	    var flags;
-	    var flag;
+	    let flags;
+	    let flag;
 
 	    if (glyph.numberOfContours > 0) {
 	        // This glyph is not a composite.
-	        var endPointIndices = glyph.endPointIndices = [];
-	        for (var i = 0; i < glyph.numberOfContours; i += 1) {
+	        const endPointIndices = glyph.endPointIndices = [];
+	        for (let i = 0; i < glyph.numberOfContours; i = i + 1) {
 	            endPointIndices.push(p.parseUShort());
 	        }
 
 	        glyph.instructionLength = p.parseUShort();
 	        glyph.instructions = [];
-	        for (var i$1 = 0; i$1 < glyph.instructionLength; i$1 += 1) {
+	        for (let i$1 = 0; i$1 < glyph.instructionLength; i$1 = i$1 + 1) {
 	            glyph.instructions.push(p.parseByte());
 	        }
 
-	        var numberOfCoordinates = endPointIndices[endPointIndices.length - 1] + 1;
+	        const numberOfCoordinates = endPointIndices[endPointIndices.length - 1] + 1;
 	        flags = [];
-	        for (var i$2 = 0; i$2 < numberOfCoordinates; i$2 += 1) {
+	        for (let i$2 = 0; i$2 < numberOfCoordinates; i$2 = i$2 + 1) {
 	            flag = p.parseByte();
 	            flags.push(flag);
 	            // If bit 3 is set, we repeat this flag n times, where n is the next byte.
 	            if ((flag & 8) > 0) {
-	                var repeatCount = p.parseByte();
-	                for (var j = 0; j < repeatCount; j += 1) {
+	                const repeatCount = p.parseByte();
+	                for (let j = 0; j < repeatCount; j = j + 1) {
 	                    flags.push(flag);
-	                    i$2 += 1;
+	                    i$2 = i$2 + 1;
 	                }
 	            }
 	        }
@@ -7966,11 +7990,11 @@
 	        check.argument(flags.length === numberOfCoordinates, 'Bad flags.');
 
 	        if (endPointIndices.length > 0) {
-	            var points = [];
-	            var point;
+	            const points = [];
+	            let point;
 	            // X/Y coordinates are relative to the previous point, except for the first point which is relative to 0,0.
 	            if (numberOfCoordinates > 0) {
-	                for (var i$3 = 0; i$3 < numberOfCoordinates; i$3 += 1) {
+	                for (let i$3 = 0; i$3 < numberOfCoordinates; i$3 = i$3 + 1) {
 	                    flag = flags[i$3];
 	                    point = {};
 	                    point.onCurve = !!(flag & 1);
@@ -7978,16 +8002,16 @@
 	                    points.push(point);
 	                }
 
-	                var px = 0;
-	                for (var i$4 = 0; i$4 < numberOfCoordinates; i$4 += 1) {
+	                let px = 0;
+	                for (let i$4 = 0; i$4 < numberOfCoordinates; i$4 = i$4 + 1) {
 	                    flag = flags[i$4];
 	                    point = points[i$4];
 	                    point.x = parseGlyphCoordinate(p, flag, px, 2, 16);
 	                    px = point.x;
 	                }
 
-	                var py = 0;
-	                for (var i$5 = 0; i$5 < numberOfCoordinates; i$5 += 1) {
+	                let py = 0;
+	                for (let i$5 = 0; i$5 < numberOfCoordinates; i$5 = i$5 + 1) {
 	                    flag = flags[i$5];
 	                    point = points[i$5];
 	                    point.y = parseGlyphCoordinate(p, flag, py, 4, 32);
@@ -8005,17 +8029,17 @@
 	        glyph.isComposite = true;
 	        glyph.points = [];
 	        glyph.components = [];
-	        var moreComponents = true;
+	        let moreComponents = true;
 	        while (moreComponents) {
 	            flags = p.parseUShort();
-	            var component = {
+	            const component = {
 	                glyphIndex: p.parseUShort(),
 	                xScale: 1,
 	                scale01: 0,
 	                scale10: 0,
 	                yScale: 1,
 	                dx: 0,
-	                dy: 0
+	                dy: 0,
 	            };
 	            if ((flags & 1) > 0) {
 	                // The arguments are words
@@ -8027,7 +8051,6 @@
 	                    // values are matched points
 	                    component.matchedPoints = [p.parseUShort(), p.parseUShort()];
 	                }
-
 	            } else {
 	                // The arguments are bytes
 	                if ((flags & 2) > 0) {
@@ -8062,35 +8085,35 @@
 	            // We have instructions
 	            glyph.instructionLength = p.parseUShort();
 	            glyph.instructions = [];
-	            for (var i$6 = 0; i$6 < glyph.instructionLength; i$6 += 1) {
+	            for (let i$6 = 0; i$6 < glyph.instructionLength; i$6 = i$6 + 1) {
 	                glyph.instructions.push(p.parseByte());
 	            }
 	        }
 	    }
-	}
+  }
 
-	// Transform an array of points and return a new array.
-	function transformPoints(points, transform) {
-	    var newPoints = [];
-	    for (var i = 0; i < points.length; i += 1) {
-	        var pt = points[i];
-	        var newPt = {
+  // Transform an array of points and return a new array.
+  function transformPoints(points, transform) {
+	    const newPoints = [];
+	    for (let i = 0; i < points.length; i = i + 1) {
+	        const pt = points[i];
+	        const newPt = {
 	            x: transform.xScale * pt.x + transform.scale01 * pt.y + transform.dx,
 	            y: transform.scale10 * pt.x + transform.yScale * pt.y + transform.dy,
 	            onCurve: pt.onCurve,
-	            lastPointOfContour: pt.lastPointOfContour
+	            lastPointOfContour: pt.lastPointOfContour,
 	        };
 	        newPoints.push(newPt);
 	    }
 
 	    return newPoints;
-	}
+  }
 
-	function getContours(points) {
-	    var contours = [];
-	    var currentContour = [];
-	    for (var i = 0; i < points.length; i += 1) {
-	        var pt = points[i];
+  function getContours(points) {
+	    const contours = [];
+	    let currentContour = [];
+	    for (let i = 0; i < points.length; i = i + 1) {
+	        const pt = points[i];
 	        currentContour.push(pt);
 	        if (pt.lastPointOfContour) {
 	            contours.push(currentContour);
@@ -8100,37 +8123,35 @@
 
 	    check.argument(currentContour.length === 0, 'There are still points left in the current contour.');
 	    return contours;
-	}
+  }
 
-	// Convert the TrueType glyph outline to a Path.
-	function getPath(points) {
-	    var p = new Path();
+  // Convert the TrueType glyph outline to a Path.
+  function getPath(points) {
+	    const p = new Path();
 	    if (!points) {
 	        return p;
 	    }
 
-	    var contours = getContours(points);
+	    const contours = getContours(points);
 
-	    for (var contourIndex = 0; contourIndex < contours.length; ++contourIndex) {
-	        var contour = contours[contourIndex];
+	    for (let contourIndex = 0; contourIndex < contours.length; ++contourIndex) {
+	        const contour = contours[contourIndex];
 
-	        var prev = null;
-	        var curr = contour[contour.length - 1];
-	        var next = contour[0];
+	        let prev = null;
+	        let curr = contour[contour.length - 1];
+	        let next = contour[0];
 
 	        if (curr.onCurve) {
 	            p.moveTo(curr.x, curr.y);
-	        } else {
-	            if (next.onCurve) {
+	        } else if (next.onCurve) {
 	                p.moveTo(next.x, next.y);
 	            } else {
 	                // If both first and last points are off-curve, start at their middle.
-	                var start = {x: (curr.x + next.x) * 0.5, y: (curr.y + next.y) * 0.5};
+	                const start = { x: (curr.x + next.x) * 0.5, y: (curr.y + next.y) * 0.5 };
 	                p.moveTo(start.x, start.y);
 	            }
-	        }
 
-	        for (var i = 0; i < contour.length; ++i) {
+	        for (let i = 0; i < contour.length; ++i) {
 	            prev = curr;
 	            curr = next;
 	            next = contour[(i + 1) % contour.length];
@@ -8139,8 +8160,8 @@
 	                // This is a straight line.
 	                p.lineTo(curr.x, curr.y);
 	            } else {
-	                var prev2 = prev;
-	                var next2 = next;
+	                let prev2 = prev;
+	                let next2 = next;
 
 	                if (!prev.onCurve) {
 	                    prev2 = { x: (curr.x + prev.x) * 0.5, y: (curr.y + prev.y) * 0.5 };
@@ -8157,32 +8178,35 @@
 	        p.closePath();
 	    }
 	    return p;
-	}
+  }
 
-	function buildPath(glyphs, glyph) {
+  function buildPath(glyphs, glyph) {
 	    if (glyph.isComposite) {
-	        for (var j = 0; j < glyph.components.length; j += 1) {
-	            var component = glyph.components[j];
-	            var componentGlyph = glyphs.get(component.glyphIndex);
+	        for (let j = 0; j < glyph.components.length; j = j + 1) {
+	            const component = glyph.components[j];
+	            const componentGlyph = glyphs.get(component.glyphIndex);
 	            // Force the ttfGlyphLoader to parse the glyph.
 	            componentGlyph.getPath();
 	            if (componentGlyph.points) {
-	                var transformedPoints = (void 0);
+	                let transformedPoints = (void 0);
 	                if (component.matchedPoints === undefined) {
 	                    // component positioned by offset
 	                    transformedPoints = transformPoints(componentGlyph.points, component);
 	                } else {
 	                    // component positioned by matched points
-	                    if ((component.matchedPoints[0] > glyph.points.length - 1) ||
-	                        (component.matchedPoints[1] > componentGlyph.points.length - 1)) {
-	                        throw Error('Matched points out of range in ' + glyph.name);
+	                    if ((component.matchedPoints[0] > glyph.points.length - 1)
+	                        || (component.matchedPoints[1] > componentGlyph.points.length - 1)) {
+	                        throw Error(`Matched points out of range in ${glyph.name}`);
 	                    }
-	                    var firstPt = glyph.points[component.matchedPoints[0]];
-	                    var secondPt = componentGlyph.points[component.matchedPoints[1]];
-	                    var transform = {
-	                        xScale: component.xScale, scale01: component.scale01,
-	                        scale10: component.scale10, yScale: component.yScale,
-	                        dx: 0, dy: 0
+	                    const firstPt = glyph.points[component.matchedPoints[0]];
+	                    let secondPt = componentGlyph.points[component.matchedPoints[1]];
+	                    const transform = {
+	                        xScale: component.xScale,
+              scale01: component.scale01,
+	                        scale10: component.scale10,
+              yScale: component.yScale,
+	                        dx: 0,
+              dy: 0,
 	                    };
 	                    secondPt = transformPoints([secondPt], transform)[0];
 	                    transform.dx = firstPt.x - secondPt.x;
@@ -8195,15 +8219,15 @@
 	    }
 
 	    return getPath(glyph.points);
-	}
+  }
 
-	function parseGlyfTableAll(data, start, loca, font) {
-	    var glyphs = new glyphset.GlyphSet(font);
+  function parseGlyfTableAll(data, start, loca, font) {
+	    const glyphs = new glyphset.GlyphSet(font);
 
 	    // The last element of the loca table is invalid.
-	    for (var i = 0; i < loca.length - 1; i += 1) {
-	        var offset = loca[i];
-	        var nextOffset = loca[i + 1];
+	    for (let i = 0; i < loca.length - 1; i = i + 1) {
+	        const offset = loca[i];
+	        const nextOffset = loca[i + 1];
 	        if (offset !== nextOffset) {
 	            glyphs.push(i, glyphset.ttfGlyphLoader(font, i, parseGlyph, data, start + offset, buildPath));
 	        } else {
@@ -8212,14 +8236,14 @@
 	    }
 
 	    return glyphs;
-	}
+  }
 
-	function parseGlyfTableOnLowMemory(data, start, loca, font) {
-	    var glyphs = new glyphset.GlyphSet(font);
+  function parseGlyfTableOnLowMemory(data, start, loca, font) {
+	    const glyphs = new glyphset.GlyphSet(font);
 
-	    font._push = function(i) {
-	        var offset = loca[i];
-	        var nextOffset = loca[i + 1];
+	    font._push = function (i) {
+	        const offset = loca[i];
+	        const nextOffset = loca[i + 1];
 	        if (offset !== nextOffset) {
 	            glyphs.push(i, glyphset.ttfGlyphLoader(font, i, parseGlyph, data, start + offset, buildPath));
 	        } else {
@@ -8228,19 +8252,16 @@
 	    };
 
 	    return glyphs;
-	}
+  }
 
-	// Parse all the glyphs according to the offsets from the `loca` table.
-	function parseGlyfTable(data, start, loca, font, opt) {
-	    if (opt.lowMemory)
-	        { return parseGlyfTableOnLowMemory(data, start, loca, font); }
-	    else
-	        { return parseGlyfTableAll(data, start, loca, font); }
-	}
+  // Parse all the glyphs according to the offsets from the `loca` table.
+  function parseGlyfTable(data, start, loca, font, opt) {
+	    if (opt.lowMemory) { return parseGlyfTableOnLowMemory(data, start, loca, font); } return parseGlyfTableAll(data, start, loca, font);
+  }
 
-	var glyf = { getPath: getPath, parse: parseGlyfTable};
+  const glyf = { getPath, parse: parseGlyfTable };
 
-	/* A TrueType font hinting interpreter.
+  /* A TrueType font hinting interpreter.
 	*
 	* (c) 2017 Axel Kittenberger
 	*
@@ -8268,18 +8289,18 @@
 	* The exports.DEBUG statements are removed on the minified distribution file.
 	*/
 
-	var instructionTable;
-	var exec;
-	var execGlyph;
-	var execComponent;
+  let instructionTable;
+  let exec;
+  let execGlyph;
+  let execComponent;
 
-	/*
+  /*
 	* Creates a hinting object.
 	*
 	* There ought to be exactly one
 	* for each truetype font that is used for hinting.
 	*/
-	function Hinting(font) {
+  function Hinting(font) {
 	    // the font this hinting object is for
 	    this.font = font;
 
@@ -8288,9 +8309,7 @@
 	    };
 
 	    // cached states
-	    this._fpgmState  =
-	    this._prepState  =
-	        undefined;
+	    this._fpgmState = this._prepState = undefined;
 
 	    // errorState
 	    // 0 ... all okay
@@ -8300,81 +8319,81 @@
 	    // 2 ... error at prep, stop hinting at this ppem
 	    // 3 ... error at fpeg, stop hinting for this font at all
 	    this._errorState = 0;
-	}
+  }
 
-	/*
+  /*
 	* Not rounding.
 	*/
-	function roundOff(v) {
+  function roundOff(v) {
 	    return v;
-	}
+  }
 
-	/*
+  /*
 	* Rounding to grid.
 	*/
-	function roundToGrid(v) {
-	    //Rounding in TT is supposed to "symmetrical around zero"
+  function roundToGrid(v) {
+	    // Rounding in TT is supposed to "symmetrical around zero"
 	    return Math.sign(v) * Math.round(Math.abs(v));
-	}
+  }
 
-	/*
+  /*
 	* Rounding to double grid.
 	*/
-	function roundToDoubleGrid(v) {
+  function roundToDoubleGrid(v) {
 	    return Math.sign(v) * Math.round(Math.abs(v * 2)) / 2;
-	}
+  }
 
-	/*
+  /*
 	* Rounding to half grid.
 	*/
-	function roundToHalfGrid(v) {
+  function roundToHalfGrid(v) {
 	    return Math.sign(v) * (Math.round(Math.abs(v) + 0.5) - 0.5);
-	}
+  }
 
-	/*
+  /*
 	* Rounding to up to grid.
 	*/
-	function roundUpToGrid(v) {
+  function roundUpToGrid(v) {
 	    return Math.sign(v) * Math.ceil(Math.abs(v));
-	}
+  }
 
-	/*
+  /*
 	* Rounding to down to grid.
 	*/
-	function roundDownToGrid(v) {
+  function roundDownToGrid(v) {
 	    return Math.sign(v) * Math.floor(Math.abs(v));
-	}
+  }
 
-	/*
+  /*
 	* Super rounding.
 	*/
-	var roundSuper = function (v) {
-	    var period = this.srPeriod;
-	    var phase = this.srPhase;
-	    var threshold = this.srThreshold;
-	    var sign = 1;
+  const roundSuper = function (v) {
+	    const period = this.srPeriod;
+	    const phase = this.srPhase;
+	    const threshold = this.srThreshold;
+	    let sign = 1;
 
 	    if (v < 0) {
 	        v = -v;
 	        sign = -1;
 	    }
 
-	    v += threshold - phase;
+	    v = v + (threshold - phase);
 
 	    v = Math.trunc(v / period) * period;
 
-	    v += phase;
+	    v = v + phase;
 
 	    // according to http://xgridfit.sourceforge.net/round.html
 	    if (v < 0) { return phase * sign; }
 
 	    return v * sign;
-	};
+  };
 
-	/*
+  /*
 	* Unit vector of x-axis.
 	*/
-	var xUnitVector = {
+  var xUnitVector = {
 	    x: 1,
 
 	    y: 0,
@@ -8383,7 +8402,7 @@
 
 	    // Gets the projected distance between two points.
 	    // o1/o2 ... if true, respective original position is used.
-	    distance: function (p1, p2, o1, o2) {
+	    distance(p1, p2, o1, o2) {
 	        return (o1 ? p1.xo : p1.x) - (o2 ? p2.xo : p2.x);
 	    },
 
@@ -8392,14 +8411,14 @@
 	    // original positions had.
 	    //
 	    // See APPENDIX on INTERPOLATE at the bottom of this file.
-	    interpolate: function (p, rp1, rp2, pv) {
-	        var do1;
-	        var do2;
-	        var doa1;
-	        var doa2;
-	        var dm1;
-	        var dm2;
-	        var dt;
+	    interpolate(p, rp1, rp2, pv) {
+	        let do1;
+	        let do2;
+	        let doa1;
+	        let doa2;
+	        let dm1;
+	        let dm2;
+	        let dt;
 
 	        if (!pv || pv === this) {
 	            do1 = p.xo - rp1.xo;
@@ -8448,16 +8467,16 @@
 	    // d   ... distance on projection vector
 	    // pv  ... projection vector (undefined = this)
 	    // org ... if true, uses the original position of rp as reference.
-	    setRelative: function (p, rp, d, pv, org) {
+	    setRelative(p, rp, d, pv, org) {
 	        if (!pv || pv === this) {
 	            p.x = (org ? rp.xo : rp.x) + d;
 	            return;
 	        }
 
-	        var rpx = org ? rp.xo : rp.x;
-	        var rpy = org ? rp.yo : rp.y;
-	        var rpdx = rpx + d * pv.x;
-	        var rpdy = rpy + d * pv.y;
+	        const rpx = org ? rp.xo : rp.x;
+	        const rpy = org ? rp.yo : rp.y;
+	        const rpdx = rpx + d * pv.x;
+	        const rpdy = rpy + d * pv.y;
 
 	        p.x = rpdx + (p.y - rpdy) / pv.normalSlope;
 	    },
@@ -8466,25 +8485,25 @@
 	    slope: 0,
 
 	    // Touches the point p.
-	    touch: function (p) {
+	    touch(p) {
 	        p.xTouched = true;
 	    },
 
 	    // Tests if a point p is touched.
-	    touched: function (p) {
+	    touched(p) {
 	        return p.xTouched;
 	    },
 
 	    // Untouches the point p.
-	    untouch: function (p) {
+	    untouch(p) {
 	        p.xTouched = false;
-	    }
-	};
+	    },
+  };
 
-	/*
+  /*
 	* Unit vector of y-axis.
 	*/
-	var yUnitVector = {
+  var yUnitVector = {
 	    x: 0,
 
 	    y: 1,
@@ -8493,7 +8512,7 @@
 
 	    // Gets the projected distance between two points.
 	    // o1/o2 ... if true, respective original position is used.
-	    distance: function (p1, p2, o1, o2) {
+	    distance(p1, p2, o1, o2) {
 	        return (o1 ? p1.yo : p1.y) - (o2 ? p2.yo : p2.y);
 	    },
 
@@ -8502,14 +8521,14 @@
 	    // original positions had.
 	    //
 	    // See APPENDIX on INTERPOLATE at the bottom of this file.
-	    interpolate: function (p, rp1, rp2, pv) {
-	        var do1;
-	        var do2;
-	        var doa1;
-	        var doa2;
-	        var dm1;
-	        var dm2;
-	        var dt;
+	    interpolate(p, rp1, rp2, pv) {
+	        let do1;
+	        let do2;
+	        let doa1;
+	        let doa2;
+	        let dm1;
+	        let dm2;
+	        let dt;
 
 	        if (!pv || pv === this) {
 	            do1 = p.yo - rp1.yo;
@@ -8558,16 +8577,16 @@
 	    // d   ... distance on projection vector
 	    // pv  ... projection vector (undefined = this)
 	    // org ... if true, uses the original position of rp as reference.
-	    setRelative: function (p, rp, d, pv, org) {
+	    setRelative(p, rp, d, pv, org) {
 	        if (!pv || pv === this) {
 	            p.y = (org ? rp.yo : rp.y) + d;
 	            return;
 	        }
 
-	        var rpx = org ? rp.xo : rp.x;
-	        var rpy = org ? rp.yo : rp.y;
-	        var rpdx = rpx + d * pv.x;
-	        var rpdy = rpy + d * pv.y;
+	        const rpx = org ? rp.xo : rp.x;
+	        const rpy = org ? rp.yo : rp.y;
+	        const rpdx = rpx + d * pv.x;
+	        const rpdy = rpy + d * pv.y;
 
 	        p.y = rpdy + pv.normalSlope * (p.x - rpdx);
 	    },
@@ -8576,62 +8595,62 @@
 	    slope: Number.POSITIVE_INFINITY,
 
 	    // Touches the point p.
-	    touch: function (p) {
+	    touch(p) {
 	        p.yTouched = true;
 	    },
 
 	    // Tests if a point p is touched.
-	    touched: function (p) {
+	    touched(p) {
 	        return p.yTouched;
 	    },
 
 	    // Untouches the point p.
-	    untouch: function (p) {
+	    untouch(p) {
 	        p.yTouched = false;
-	    }
-	};
+	    },
+  };
 
-	Object.freeze(xUnitVector);
-	Object.freeze(yUnitVector);
+  Object.freeze(xUnitVector);
+  Object.freeze(yUnitVector);
 
-	/*
+  /*
 	* Creates a unit vector that is not x- or y-axis.
 	*/
-	function UnitVector(x, y) {
+  function UnitVector(x, y) {
 	    this.x = x;
 	    this.y = y;
 	    this.axis = undefined;
 	    this.slope = y / x;
 	    this.normalSlope = -x / y;
 	    Object.freeze(this);
-	}
+  }
 
-	/*
+  /*
 	* Gets the projected distance between two points.
 	* o1/o2 ... if true, respective original position is used.
 	*/
-	UnitVector.prototype.distance = function(p1, p2, o1, o2) {
+  UnitVector.prototype.distance = function (p1, p2, o1, o2) {
 	    return (
-	        this.x * xUnitVector.distance(p1, p2, o1, o2) +
-	        this.y * yUnitVector.distance(p1, p2, o1, o2)
+	        this.x * xUnitVector.distance(p1, p2, o1, o2)
+	        + this.y * yUnitVector.distance(p1, p2, o1, o2)
 	    );
-	};
+  };
 
-	/*
+  /*
 	* Moves point p so the moved position has the same relative
 	* position to the moved positions of rp1 and rp2 than the
 	* original positions had.
 	*
 	* See APPENDIX on INTERPOLATE at the bottom of this file.
 	*/
-	UnitVector.prototype.interpolate = function(p, rp1, rp2, pv) {
-	    var dm1;
-	    var dm2;
-	    var do1;
-	    var do2;
-	    var doa1;
-	    var doa2;
-	    var dt;
+  UnitVector.prototype.interpolate = function (p, rp1, rp2, pv) {
+	    let dm1;
+	    let dm2;
+	    let do1;
+	    let do2;
+	    let doa1;
+	    let doa2;
+	    let dt;
 
 	    do1 = pv.distance(p, rp1, true, true);
 	    do2 = pv.distance(p, rp2, true, true);
@@ -8647,9 +8666,9 @@
 	    }
 
 	    this.setRelative(p, p, (dm1 * doa2 + dm2 * doa1) / dt, pv, true);
-	};
+  };
 
-	/*
+  /*
 	* Sets the point 'p' relative to point 'rp'
 	* by the distance 'd'
 	*
@@ -8661,55 +8680,53 @@
 	* pv  ... projection vector (undefined = this)
 	* org ... if true, uses the original position of rp as reference.
 	*/
-	UnitVector.prototype.setRelative = function(p, rp, d, pv, org) {
+  UnitVector.prototype.setRelative = function (p, rp, d, pv, org) {
 	    pv = pv || this;
 
-	    var rpx = org ? rp.xo : rp.x;
-	    var rpy = org ? rp.yo : rp.y;
-	    var rpdx = rpx + d * pv.x;
-	    var rpdy = rpy + d * pv.y;
+	    const rpx = org ? rp.xo : rp.x;
+	    const rpy = org ? rp.yo : rp.y;
+	    const rpdx = rpx + d * pv.x;
+	    const rpdy = rpy + d * pv.y;
 
-	    var pvns = pv.normalSlope;
-	    var fvs = this.slope;
+	    const pvns = pv.normalSlope;
+	    const fvs = this.slope;
 
-	    var px = p.x;
-	    var py = p.y;
+	    const px = p.x;
+	    const py = p.y;
 
 	    p.x = (fvs * px - pvns * rpdx + rpdy - py) / (fvs - pvns);
 	    p.y = fvs * (p.x - px) + py;
-	};
+  };
 
-	/*
+  /*
 	* Touches the point p.
 	*/
-	UnitVector.prototype.touch = function(p) {
+  UnitVector.prototype.touch = function (p) {
 	    p.xTouched = true;
 	    p.yTouched = true;
-	};
+  };
 
-	/*
+  /*
 	* Returns a unit vector with x/y coordinates.
 	*/
-	function getUnitVector(x, y) {
-	    var d = Math.sqrt(x * x + y * y);
+  function getUnitVector(x, y) {
+	    const d = Math.sqrt(x * x + y * y);
 
-	    x /= d;
-	    y /= d;
+	    x = x / d;
+	    y = y / d;
 
-	    if (x === 1 && y === 0) { return xUnitVector; }
-	    else if (x === 0 && y === 1) { return yUnitVector; }
-	    else { return new UnitVector(x, y); }
-	}
+	    if (x === 1 && y === 0) { return xUnitVector; } if (x === 0 && y === 1) { return yUnitVector; } return new UnitVector(x, y);
+  }
 
-	/*
+  /*
 	* Creates a point in the hinting engine.
 	*/
-	function HPoint(
+  function HPoint(
 	    x,
 	    y,
 	    lastPointOfContour,
-	    onCurve
-	) {
+	    onCurve,
+  ) {
 	    this.x = this.xo = Math.round(x * 64) / 64; // hinted x value and original x-value
 	    this.y = this.yo = Math.round(y * 64) / 64; // hinted y value and original y-value
 
@@ -8721,40 +8738,40 @@
 	    this.yTouched = false;
 
 	    Object.preventExtensions(this);
-	}
+  }
 
-	/*
+  /*
 	* Returns the next touched point on the contour.
 	*
 	* v  ... unit vector to test touch axis.
 	*/
-	HPoint.prototype.nextTouched = function(v) {
-	    var p = this.nextPointOnContour;
+  HPoint.prototype.nextTouched = function (v) {
+	    let p = this.nextPointOnContour;
 
 	    while (!v.touched(p) && p !== this) { p = p.nextPointOnContour; }
 
 	    return p;
-	};
+  };
 
-	/*
+  /*
 	* Returns the previous touched point on the contour
 	*
 	* v  ... unit vector to test touch axis.
 	*/
-	HPoint.prototype.prevTouched = function(v) {
-	    var p = this.prevPointOnContour;
+  HPoint.prototype.prevTouched = function (v) {
+	    let p = this.prevPointOnContour;
 
 	    while (!v.touched(p) && p !== this) { p = p.prevPointOnContour; }
 
 	    return p;
-	};
+  };
 
-	/*
+  /*
 	* The zero point.
 	*/
-	var HPZero = Object.freeze(new HPoint(0, 0));
+  const HPZero = Object.freeze(new HPoint(0, 0));
 
-	/*
+  /*
 	* The default state of the interpreter.
 	*
 	* Note: Freezing the defaultState and then deriving from it
@@ -8762,38 +8779,38 @@
 	* so this is avoided, albeit the defaultState shouldn't
 	* ever change.
 	*/
-	var defaultState = {
-	    cvCutIn: 17 / 16,    // control value cut in
+  const defaultState = {
+	    cvCutIn: 17 / 16, // control value cut in
 	    deltaBase: 9,
 	    deltaShift: 0.125,
-	    loop: 1,             // loops some instructions
-	    minDis: 1,           // minimum distance
-	    autoFlip: true
-	};
+	    loop: 1, // loops some instructions
+	    minDis: 1, // minimum distance
+	    autoFlip: true,
+  };
 
-	/*
+  /*
 	* The current state of the interpreter.
 	*
 	* env  ... 'fpgm' or 'prep' or 'glyf'
 	* prog ... the program
 	*/
-	function State(env, prog) {
+  function State(env, prog) {
 	    this.env = env;
 	    this.stack = [];
 	    this.prog = prog;
 
 	    switch (env) {
-	        case 'glyf' :
+	        case 'glyf':
 	            this.zp0 = this.zp1 = this.zp2 = 1;
 	            this.rp0 = this.rp1 = this.rp2 = 0;
 	            /* fall through */
-	        case 'prep' :
+	        case 'prep':
 	            this.fv = this.pv = this.dpv = xUnitVector;
 	            this.round = roundToGrid;
 	    }
-	}
+  }
 
-	/*
+  /*
 	* Executes a glyph program.
 	*
 	* This does the hinting for each glyph.
@@ -8803,7 +8820,7 @@
 	* glyph: the glyph to hint
 	* ppem: the size the glyph is rendered for
 	*/
-	Hinting.prototype.exec = function(glyph, ppem) {
+  Hinting.prototype.exec = function (glyph, ppem) {
 	    if (typeof ppem !== 'number') {
 	        throw new Error('Point size is not a number!');
 	    }
@@ -8811,22 +8828,20 @@
 	    // Received a fatal error, don't do any hinting anymore.
 	    if (this._errorState > 2) { return; }
 
-	    var font = this.font;
-	    var prepState = this._prepState;
+	    const { font } = this;
+	    let prepState = this._prepState;
 
 	    if (!prepState || prepState.ppem !== ppem) {
-	        var fpgmState = this._fpgmState;
+	        let fpgmState = this._fpgmState;
 
 	        if (!fpgmState) {
 	            // Executes the fpgm state.
 	            // This is used by fonts to define functions.
 	            State.prototype = defaultState;
 
-	            fpgmState =
-	            this._fpgmState =
-	                new State('fpgm', font.tables.fpgm);
+	            fpgmState = this._fpgmState = new State('fpgm', font.tables.fpgm);
 
-	            fpgmState.funcs = [ ];
+	            fpgmState.funcs = [];
 	            fpgmState.font = font;
 
 	            if (exports.DEBUG) {
@@ -8837,7 +8852,7 @@
 	            try {
 	                exec(fpgmState);
 	            } catch (e) {
-	                console.log('Hinting error in FPGM:' + e);
+	                console.log(`Hinting error in FPGM:${e}`);
 	                this._errorState = 3;
 	                return;
 	            }
@@ -8848,19 +8863,17 @@
 	        // depending on to be rendered font size.
 
 	        State.prototype = fpgmState;
-	        prepState =
-	        this._prepState =
-	            new State('prep', font.tables.prep);
+	        prepState = this._prepState = new State('prep', font.tables.prep);
 
 	        prepState.ppem = ppem;
 
 	        // Creates a copy of the cvt table
 	        // and scales it to the current ppem setting.
-	        var oCvt = font.tables.cvt;
+	        const oCvt = font.tables.cvt;
 	        if (oCvt) {
-	            var cvt = prepState.cvt = new Array(oCvt.length);
-	            var scale = ppem / font.unitsPerEm;
-	            for (var c = 0; c < oCvt.length; c++) {
+	            const cvt = prepState.cvt = new Array(oCvt.length);
+	            const scale = ppem / font.unitsPerEm;
+	            for (let c = 0; c < oCvt.length; c++) {
 	                cvt[c] = oCvt[c] * scale;
 	            }
 	        } else {
@@ -8876,7 +8889,7 @@
 	            exec(prepState);
 	        } catch (e) {
 	            if (this._errorState < 2) {
-	                console.log('Hinting error in PREP:' + e);
+	                console.log(`Hinting error in PREP:${e}`);
 	            }
 	            this._errorState = 2;
 	        }
@@ -8888,25 +8901,25 @@
 	        return execGlyph(glyph, prepState);
 	    } catch (e) {
 	        if (this._errorState < 1) {
-	            console.log('Hinting error:' + e);
+	            console.log(`Hinting error:${e}`);
 	            console.log('Note: further hinting errors are silenced');
 	        }
 	        this._errorState = 1;
 	        return undefined;
 	    }
-	};
+  };
 
-	/*
+  /*
 	* Executes the hinting program for a glyph.
 	*/
-	execGlyph = function(glyph, prepState) {
+  execGlyph = function (glyph, prepState) {
 	    // original point positions
-	    var xScale = prepState.ppem / prepState.font.unitsPerEm;
-	    var yScale = xScale;
-	    var components = glyph.components;
-	    var contours;
-	    var gZone;
-	    var state;
+	    const xScale = prepState.ppem / prepState.font.unitsPerEm;
+	    const yScale = xScale;
+	    const { components } = glyph;
+	    let contours;
+	    let gZone;
+	    let state;
 
 	    State.prototype = prepState;
 	    if (!components) {
@@ -8918,37 +8931,37 @@
 	        execComponent(glyph, state, xScale, yScale);
 	        gZone = state.gZone;
 	    } else {
-	        var font = prepState.font;
+	        const { font } = prepState;
 	        gZone = [];
 	        contours = [];
-	        for (var i = 0; i < components.length; i++) {
-	            var c = components[i];
-	            var cg = font.glyphs.get(c.glyphIndex);
+	        for (let i = 0; i < components.length; i++) {
+	            const c = components[i];
+	            const cg = font.glyphs.get(c.glyphIndex);
 
 	            state = new State('glyf', cg.instructions);
 
 	            if (exports.DEBUG) {
-	                console.log('---EXEC COMP ' + i + '---');
+	                console.log(`---EXEC COMP ${i}---`);
 	                state.step = -1;
 	            }
 
 	            execComponent(cg, state, xScale, yScale);
 	            // appends the computed points to the result array
 	            // post processes the component points
-	            var dx = Math.round(c.dx * xScale);
-	            var dy = Math.round(c.dy * yScale);
-	            var gz = state.gZone;
-	            var cc = state.contours;
-	            for (var pi = 0; pi < gz.length; pi++) {
-	                var p = gz[pi];
+	            const dx = Math.round(c.dx * xScale);
+	            const dy = Math.round(c.dy * yScale);
+	            const gz = state.gZone;
+	            const cc = state.contours;
+	            for (let pi = 0; pi < gz.length; pi++) {
+	                const p = gz[pi];
 	                p.xTouched = p.yTouched = false;
 	                p.xo = p.x = p.x + dx;
 	                p.yo = p.y = p.y + dy;
 	            }
 
-	            var gLen = gZone.length;
+	            const gLen = gZone.length;
 	            gZone.push.apply(gZone, gz);
-	            for (var j = 0; j < cc.length; j++) {
+	            for (let j = 0; j < cc.length; j++) {
 	                contours.push(cc[j] + gLen);
 	            }
 	        }
@@ -8965,7 +8978,7 @@
 	            //       the point might be modified
 	            gZone.push(
 	                new HPoint(0, 0),
-	                new HPoint(Math.round(glyph.advanceWidth * xScale), 0)
+	                new HPoint(Math.round(glyph.advanceWidth * xScale), 0),
 	            );
 
 	            if (exports.DEBUG) {
@@ -8975,43 +8988,42 @@
 
 	            exec(state);
 
-	            gZone.length -= 2;
+	            gZone.length = gZone.length - 2;
 	        }
 	    }
 
 	    return gZone;
-	};
+  };
 
-	/*
+  /*
 	* Executes the hinting program for a component of a multi-component glyph
 	* or of the glyph itself for a non-component glyph.
 	*/
-	execComponent = function(glyph, state, xScale, yScale)
-	{
-	    var points = glyph.points || [];
-	    var pLen = points.length;
-	    var gZone = state.gZone = state.z0 = state.z1 = state.z2 = [];
-	    var contours = state.contours = [];
+  execComponent = function (glyph, state, xScale, yScale) {
+	    const points = glyph.points || [];
+	    const pLen = points.length;
+	    const gZone = state.gZone = state.z0 = state.z1 = state.z2 = [];
+	    const contours = state.contours = [];
 
 	    // Scales the original points and
 	    // makes copies for the hinted points.
-	    var cp; // current point
-	    for (var i = 0; i < pLen; i++) {
+	    let cp; // current point
+	    for (let i = 0; i < pLen; i++) {
 	        cp = points[i];
 
 	        gZone[i] = new HPoint(
 	            cp.x * xScale,
 	            cp.y * yScale,
 	            cp.lastPointOfContour,
-	            cp.onCurve
+	            cp.onCurve,
 	        );
 	    }
 
 	    // Chain links the contours.
-	    var sp; // start point
-	    var np; // next point
+	    let sp; // start point
+	    let np; // next point
 
-	    for (var i$1 = 0; i$1 < pLen; i$1++) {
+	    for (let i$1 = 0; i$1 < pLen; i$1++) {
 	        cp = gZone[i$1];
 
 	        if (!sp) {
@@ -9034,39 +9046,39 @@
 
 	    if (exports.DEBUG) {
 	        console.log('PROCESSING GLYPH', state.stack);
-	        for (var i$2 = 0; i$2 < pLen; i$2++) {
+	        for (let i$2 = 0; i$2 < pLen; i$2++) {
 	            console.log(i$2, gZone[i$2].x, gZone[i$2].y);
 	        }
 	    }
 
 	    gZone.push(
 	        new HPoint(0, 0),
-	        new HPoint(Math.round(glyph.advanceWidth * xScale), 0)
+	        new HPoint(Math.round(glyph.advanceWidth * xScale), 0),
 	    );
 
 	    exec(state);
 
 	    // Removes the extra points.
-	    gZone.length -= 2;
+	    gZone.length = gZone.length - 2;
 
 	    if (exports.DEBUG) {
 	        console.log('FINISHED GLYPH', state.stack);
-	        for (var i$3 = 0; i$3 < pLen; i$3++) {
+	        for (let i$3 = 0; i$3 < pLen; i$3++) {
 	            console.log(i$3, gZone[i$3].x, gZone[i$3].y);
 	        }
 	    }
-	};
+  };
 
-	/*
+  /*
 	* Executes the program loaded in state.
 	*/
-	exec = function(state) {
-	    var prog = state.prog;
+  exec = function (state) {
+	    const { prog } = state;
 
 	    if (!prog) { return; }
 
-	    var pLen = prog.length;
-	    var ins;
+	    const pLen = prog.length;
+	    let ins;
 
 	    for (state.ip = 0; state.ip < pLen; state.ip++) {
 	        if (exports.DEBUG) { state.step++; }
@@ -9074,8 +9086,8 @@
 
 	        if (!ins) {
 	            throw new Error(
-	                'unknown instruction: 0x' +
-	                Number(prog[state.ip]).toString(16)
+	                `unknown instruction: 0x${
+	                Number(prog[state.ip]).toString(16)}`,
 	            );
 	        }
 
@@ -9123,98 +9135,89 @@
 	        }
 	        */
 	    }
-	};
+  };
 
-	/*
+  /*
 	* Initializes the twilight zone.
 	*
 	* This is only done if a SZPx instruction
 	* refers to the twilight zone.
 	*/
-	function initTZone(state)
-	{
-	    var tZone = state.tZone = new Array(state.gZone.length);
+  function initTZone(state) {
+	    const tZone = state.tZone = new Array(state.gZone.length);
 
 	    // no idea if this is actually correct...
-	    for (var i = 0; i < tZone.length; i++)
-	    {
+	    for (let i = 0; i < tZone.length; i++) {
 	        tZone[i] = new HPoint(0, 0);
 	    }
-	}
+  }
 
-	/*
+  /*
 	* Skips the instruction pointer ahead over an IF/ELSE block.
 	* handleElse .. if true breaks on matching ELSE
 	*/
-	function skip(state, handleElse)
-	{
-	    var prog = state.prog;
-	    var ip = state.ip;
-	    var nesting = 1;
-	    var ins;
+  function skip(state, handleElse) {
+	    const { prog } = state;
+	    let { ip } = state;
+	    let nesting = 1;
+	    let ins;
 
 	    do {
 	        ins = prog[++ip];
 	        if (ins === 0x58) // IF
-	            { nesting++; }
-	        else if (ins === 0x59) // EIF
-	            { nesting--; }
-	        else if (ins === 0x40) // NPUSHB
-	            { ip += prog[ip + 1] + 1; }
-	        else if (ins === 0x41) // NPUSHW
-	            { ip += 2 * prog[ip + 1] + 1; }
-	        else if (ins >= 0xB0 && ins <= 0xB7) // PUSHB
-	            { ip += ins - 0xB0 + 1; }
-	        else if (ins >= 0xB8 && ins <= 0xBF) // PUSHW
-	            { ip += (ins - 0xB8 + 1) * 2; }
-	        else if (handleElse && nesting === 1 && ins === 0x1B) // ELSE
+	            { nesting++; } else if (ins === 0x59) // EIF
+	            { nesting--; } else if (ins === 0x40) // NPUSHB
+	            { ip = ip + (prog[ip + 1] + 1); } else if (ins === 0x41) // NPUSHW
+	            { ip = ip + (2 * prog[ip + 1] + 1); } else if (ins >= 0xB0 && ins <= 0xB7) // PUSHB
+	            { ip = ip + (ins - 0xB0 + 1); } else if (ins >= 0xB8 && ins <= 0xBF) // PUSHW
+	            { ip = ip + (ins - 0xB8 + 1) * 2; } else if (handleElse && nesting === 1 && ins === 0x1B) // ELSE
 	            { break; }
 	    } while (nesting > 0);
 
 	    state.ip = ip;
-	}
+  }
 
-	/*----------------------------------------------------------*
+  /* ----------------------------------------------------------*
 	*          And then a lot of instructions...                *
 	*----------------------------------------------------------*/
 
-	// SVTCA[a] Set freedom and projection Vectors To Coordinate Axis
-	// 0x00-0x01
-	function SVTCA(v, state) {
-	    if (exports.DEBUG) { console.log(state.step, 'SVTCA[' + v.axis + ']'); }
+  // SVTCA[a] Set freedom and projection Vectors To Coordinate Axis
+  // 0x00-0x01
+  function SVTCA(v, state) {
+	    if (exports.DEBUG) { console.log(state.step, `SVTCA[${v.axis}]`); }
 
 	    state.fv = state.pv = state.dpv = v;
-	}
+  }
 
-	// SPVTCA[a] Set Projection Vector to Coordinate Axis
-	// 0x02-0x03
-	function SPVTCA(v, state) {
-	    if (exports.DEBUG) { console.log(state.step, 'SPVTCA[' + v.axis + ']'); }
+  // SPVTCA[a] Set Projection Vector to Coordinate Axis
+  // 0x02-0x03
+  function SPVTCA(v, state) {
+	    if (exports.DEBUG) { console.log(state.step, `SPVTCA[${v.axis}]`); }
 
 	    state.pv = state.dpv = v;
-	}
+  }
 
-	// SFVTCA[a] Set Freedom Vector to Coordinate Axis
-	// 0x04-0x05
-	function SFVTCA(v, state) {
-	    if (exports.DEBUG) { console.log(state.step, 'SFVTCA[' + v.axis + ']'); }
+  // SFVTCA[a] Set Freedom Vector to Coordinate Axis
+  // 0x04-0x05
+  function SFVTCA(v, state) {
+	    if (exports.DEBUG) { console.log(state.step, `SFVTCA[${v.axis}]`); }
 
 	    state.fv = v;
-	}
+  }
 
-	// SPVTL[a] Set Projection Vector To Line
-	// 0x06-0x07
-	function SPVTL(a, state) {
-	    var stack = state.stack;
-	    var p2i = stack.pop();
-	    var p1i = stack.pop();
-	    var p2 = state.z2[p2i];
-	    var p1 = state.z1[p1i];
+  // SPVTL[a] Set Projection Vector To Line
+  // 0x06-0x07
+  function SPVTL(a, state) {
+	    const { stack } = state;
+	    const p2i = stack.pop();
+	    const p1i = stack.pop();
+	    const p2 = state.z2[p2i];
+	    const p1 = state.z1[p1i];
 
-	    if (exports.DEBUG) { console.log('SPVTL[' + a + ']', p2i, p1i); }
+	    if (exports.DEBUG) { console.log(`SPVTL[${a}]`, p2i, p1i); }
 
-	    var dx;
-	    var dy;
+	    let dx;
+	    let dy;
 
 	    if (!a) {
 	        dx = p1.x - p2.x;
@@ -9225,21 +9228,21 @@
 	    }
 
 	    state.pv = state.dpv = getUnitVector(dx, dy);
-	}
+  }
 
-	// SFVTL[a] Set Freedom Vector To Line
-	// 0x08-0x09
-	function SFVTL(a, state) {
-	    var stack = state.stack;
-	    var p2i = stack.pop();
-	    var p1i = stack.pop();
-	    var p2 = state.z2[p2i];
-	    var p1 = state.z1[p1i];
+  // SFVTL[a] Set Freedom Vector To Line
+  // 0x08-0x09
+  function SFVTL(a, state) {
+	    const { stack } = state;
+	    const p2i = stack.pop();
+	    const p1i = stack.pop();
+	    const p2 = state.z2[p2i];
+	    const p1 = state.z1[p1i];
 
-	    if (exports.DEBUG) { console.log('SFVTL[' + a + ']', p2i, p1i); }
+	    if (exports.DEBUG) { console.log(`SFVTL[${a}]`, p2i, p1i); }
 
-	    var dx;
-	    var dy;
+	    let dx;
+	    let dy;
 
 	    if (!a) {
 	        dx = p1.x - p2.x;
@@ -9250,132 +9253,131 @@
 	    }
 
 	    state.fv = getUnitVector(dx, dy);
-	}
+  }
 
-	// SPVFS[] Set Projection Vector From Stack
-	// 0x0A
-	function SPVFS(state) {
-	    var stack = state.stack;
-	    var y = stack.pop();
-	    var x = stack.pop();
+  // SPVFS[] Set Projection Vector From Stack
+  // 0x0A
+  function SPVFS(state) {
+	    const { stack } = state;
+	    const y = stack.pop();
+	    const x = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SPVFS[]', y, x); }
 
 	    state.pv = state.dpv = getUnitVector(x, y);
-	}
+  }
 
-	// SFVFS[] Set Freedom Vector From Stack
-	// 0x0B
-	function SFVFS(state) {
-	    var stack = state.stack;
-	    var y = stack.pop();
-	    var x = stack.pop();
+  // SFVFS[] Set Freedom Vector From Stack
+  // 0x0B
+  function SFVFS(state) {
+	    const { stack } = state;
+	    const y = stack.pop();
+	    const x = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SPVFS[]', y, x); }
 
 	    state.fv = getUnitVector(x, y);
-	}
+  }
 
-	// GPV[] Get Projection Vector
-	// 0x0C
-	function GPV(state) {
-	    var stack = state.stack;
-	    var pv = state.pv;
+  // GPV[] Get Projection Vector
+  // 0x0C
+  function GPV(state) {
+	    const { stack } = state;
+	    const { pv } = state;
 
 	    if (exports.DEBUG) { console.log(state.step, 'GPV[]'); }
 
 	    stack.push(pv.x * 0x4000);
 	    stack.push(pv.y * 0x4000);
-	}
+  }
 
-	// GFV[] Get Freedom Vector
-	// 0x0C
-	function GFV(state) {
-	    var stack = state.stack;
-	    var fv = state.fv;
+  // GFV[] Get Freedom Vector
+  // 0x0C
+  function GFV(state) {
+	    const { stack } = state;
+	    const { fv } = state;
 
 	    if (exports.DEBUG) { console.log(state.step, 'GFV[]'); }
 
 	    stack.push(fv.x * 0x4000);
 	    stack.push(fv.y * 0x4000);
-	}
+  }
 
-	// SFVTPV[] Set Freedom Vector To Projection Vector
-	// 0x0E
-	function SFVTPV(state) {
+  // SFVTPV[] Set Freedom Vector To Projection Vector
+  // 0x0E
+  function SFVTPV(state) {
 	    state.fv = state.pv;
 
 	    if (exports.DEBUG) { console.log(state.step, 'SFVTPV[]'); }
-	}
+  }
 
-	// ISECT[] moves point p to the InterSECTion of two lines
-	// 0x0F
-	function ISECT(state)
-	{
-	    var stack = state.stack;
-	    var pa0i = stack.pop();
-	    var pa1i = stack.pop();
-	    var pb0i = stack.pop();
-	    var pb1i = stack.pop();
-	    var pi = stack.pop();
-	    var z0 = state.z0;
-	    var z1 = state.z1;
-	    var pa0 = z0[pa0i];
-	    var pa1 = z0[pa1i];
-	    var pb0 = z1[pb0i];
-	    var pb1 = z1[pb1i];
-	    var p = state.z2[pi];
+  // ISECT[] moves point p to the InterSECTion of two lines
+  // 0x0F
+  function ISECT(state) {
+	    const { stack } = state;
+	    const pa0i = stack.pop();
+	    const pa1i = stack.pop();
+	    const pb0i = stack.pop();
+	    const pb1i = stack.pop();
+	    const pi = stack.pop();
+	    const { z0 } = state;
+	    const { z1 } = state;
+	    const pa0 = z0[pa0i];
+	    const pa1 = z0[pa1i];
+	    const pb0 = z1[pb0i];
+	    const pb1 = z1[pb1i];
+	    const p = state.z2[pi];
 
 	    if (exports.DEBUG) { console.log('ISECT[], ', pa0i, pa1i, pb0i, pb1i, pi); }
 
 	    // math from
 	    // en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
 
-	    var x1 = pa0.x;
-	    var y1 = pa0.y;
-	    var x2 = pa1.x;
-	    var y2 = pa1.y;
-	    var x3 = pb0.x;
-	    var y3 = pb0.y;
-	    var x4 = pb1.x;
-	    var y4 = pb1.y;
+	    const x1 = pa0.x;
+	    const y1 = pa0.y;
+	    const x2 = pa1.x;
+	    const y2 = pa1.y;
+	    const x3 = pb0.x;
+	    const y3 = pb0.y;
+	    const x4 = pb1.x;
+	    const y4 = pb1.y;
 
-	    var div = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-	    var f1 = x1 * y2 - y1 * x2;
-	    var f2 = x3 * y4 - y3 * x4;
+	    const div = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+	    const f1 = x1 * y2 - y1 * x2;
+	    const f2 = x3 * y4 - y3 * x4;
 
 	    p.x = (f1 * (x3 - x4) - f2 * (x1 - x2)) / div;
 	    p.y = (f1 * (y3 - y4) - f2 * (y1 - y2)) / div;
-	}
+  }
 
-	// SRP0[] Set Reference Point 0
-	// 0x10
-	function SRP0(state) {
+  // SRP0[] Set Reference Point 0
+  // 0x10
+  function SRP0(state) {
 	    state.rp0 = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SRP0[]', state.rp0); }
-	}
+  }
 
-	// SRP1[] Set Reference Point 1
-	// 0x11
-	function SRP1(state) {
+  // SRP1[] Set Reference Point 1
+  // 0x11
+  function SRP1(state) {
 	    state.rp1 = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SRP1[]', state.rp1); }
-	}
+  }
 
-	// SRP1[] Set Reference Point 2
-	// 0x12
-	function SRP2(state) {
+  // SRP1[] Set Reference Point 2
+  // 0x12
+  function SRP2(state) {
 	    state.rp2 = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SRP2[]', state.rp2); }
-	}
+  }
 
-	// SZP0[] Set Zone Pointer 0
-	// 0x13
-	function SZP0(state) {
-	    var n = state.stack.pop();
+  // SZP0[] Set Zone Pointer 0
+  // 0x13
+  function SZP0(state) {
+	    const n = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SZP0[]', n); }
 
@@ -9386,18 +9388,18 @@
 	            if (!state.tZone) { initTZone(state); }
 	            state.z0 = state.tZone;
 	            break;
-	        case 1 :
+	        case 1:
 	            state.z0 = state.gZone;
 	            break;
-	        default :
+	        default:
 	            throw new Error('Invalid zone pointer');
 	    }
-	}
+  }
 
-	// SZP1[] Set Zone Pointer 1
-	// 0x14
-	function SZP1(state) {
-	    var n = state.stack.pop();
+  // SZP1[] Set Zone Pointer 1
+  // 0x14
+  function SZP1(state) {
+	    const n = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SZP1[]', n); }
 
@@ -9408,18 +9410,18 @@
 	            if (!state.tZone) { initTZone(state); }
 	            state.z1 = state.tZone;
 	            break;
-	        case 1 :
+	        case 1:
 	            state.z1 = state.gZone;
 	            break;
-	        default :
+	        default:
 	            throw new Error('Invalid zone pointer');
 	    }
-	}
+  }
 
-	// SZP2[] Set Zone Pointer 2
-	// 0x15
-	function SZP2(state) {
-	    var n = state.stack.pop();
+  // SZP2[] Set Zone Pointer 2
+  // 0x15
+  function SZP2(state) {
+	    const n = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SZP2[]', n); }
 
@@ -9430,18 +9432,18 @@
 	            if (!state.tZone) { initTZone(state); }
 	            state.z2 = state.tZone;
 	            break;
-	        case 1 :
+	        case 1:
 	            state.z2 = state.gZone;
 	            break;
-	        default :
+	        default:
 	            throw new Error('Invalid zone pointer');
 	    }
-	}
+  }
 
-	// SZPS[] Set Zone PointerS
-	// 0x16
-	function SZPS(state) {
-	    var n = state.stack.pop();
+  // SZPS[] Set Zone PointerS
+  // 0x16
+  function SZPS(state) {
+	    const n = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SZPS[]', n); }
 
@@ -9452,51 +9454,51 @@
 	            if (!state.tZone) { initTZone(state); }
 	            state.z0 = state.z1 = state.z2 = state.tZone;
 	            break;
-	        case 1 :
+	        case 1:
 	            state.z0 = state.z1 = state.z2 = state.gZone;
 	            break;
-	        default :
+	        default:
 	            throw new Error('Invalid zone pointer');
 	    }
-	}
+  }
 
-	// SLOOP[] Set LOOP variable
-	// 0x17
-	function SLOOP(state) {
+  // SLOOP[] Set LOOP variable
+  // 0x17
+  function SLOOP(state) {
 	    state.loop = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SLOOP[]', state.loop); }
-	}
+  }
 
-	// RTG[] Round To Grid
-	// 0x18
-	function RTG(state) {
+  // RTG[] Round To Grid
+  // 0x18
+  function RTG(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'RTG[]'); }
 
 	    state.round = roundToGrid;
-	}
+  }
 
-	// RTHG[] Round To Half Grid
-	// 0x19
-	function RTHG(state) {
+  // RTHG[] Round To Half Grid
+  // 0x19
+  function RTHG(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'RTHG[]'); }
 
 	    state.round = roundToHalfGrid;
-	}
+  }
 
-	// SMD[] Set Minimum Distance
-	// 0x1A
-	function SMD(state) {
-	    var d = state.stack.pop();
+  // SMD[] Set Minimum Distance
+  // 0x1A
+  function SMD(state) {
+	    const d = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SMD[]', d); }
 
 	    state.minDis = d / 0x40;
-	}
+  }
 
-	// ELSE[] ELSE clause
-	// 0x1B
-	function ELSE(state) {
+  // ELSE[] ELSE clause
+  // 0x1B
+  function ELSE(state) {
 	    // This instruction has been reached by executing a then branch
 	    // so it just skips ahead until matching EIF.
 	    //
@@ -9506,120 +9508,122 @@
 	    if (exports.DEBUG) { console.log(state.step, 'ELSE[]'); }
 
 	    skip(state, false);
-	}
+  }
 
-	// JMPR[] JuMP Relative
-	// 0x1C
-	function JMPR(state) {
-	    var o = state.stack.pop();
+  // JMPR[] JuMP Relative
+  // 0x1C
+  function JMPR(state) {
+	    const o = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'JMPR[]', o); }
 
 	    // A jump by 1 would do nothing.
-	    state.ip += o - 1;
-	}
+	    state.ip = state.ip + (o - 1);
+  }
 
-	// SCVTCI[] Set Control Value Table Cut-In
-	// 0x1D
-	function SCVTCI(state) {
-	    var n = state.stack.pop();
+  // SCVTCI[] Set Control Value Table Cut-In
+  // 0x1D
+  function SCVTCI(state) {
+	    const n = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SCVTCI[]', n); }
 
 	    state.cvCutIn = n / 0x40;
-	}
+  }
 
-	// DUP[] DUPlicate top stack element
-	// 0x20
-	function DUP(state) {
-	    var stack = state.stack;
+  // DUP[] DUPlicate top stack element
+  // 0x20
+  function DUP(state) {
+	    const { stack } = state;
 
 	    if (exports.DEBUG) { console.log(state.step, 'DUP[]'); }
 
 	    stack.push(stack[stack.length - 1]);
-	}
+  }
 
-	// POP[] POP top stack element
-	// 0x21
-	function POP(state) {
+  // POP[] POP top stack element
+  // 0x21
+  function POP(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'POP[]'); }
 
 	    state.stack.pop();
-	}
+  }
 
-	// CLEAR[] CLEAR the stack
-	// 0x22
-	function CLEAR(state) {
+  // CLEAR[] CLEAR the stack
+  // 0x22
+  function CLEAR(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'CLEAR[]'); }
 
 	    state.stack.length = 0;
-	}
+  }
 
-	// SWAP[] SWAP the top two elements on the stack
-	// 0x23
-	function SWAP(state) {
-	    var stack = state.stack;
+  // SWAP[] SWAP the top two elements on the stack
+  // 0x23
+  function SWAP(state) {
+	    const { stack } = state;
 
-	    var a = stack.pop();
-	    var b = stack.pop();
+	    const a = stack.pop();
+	    const b = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SWAP[]'); }
 
 	    stack.push(a);
 	    stack.push(b);
-	}
+  }
 
-	// DEPTH[] DEPTH of the stack
-	// 0x24
-	function DEPTH(state) {
-	    var stack = state.stack;
+  // DEPTH[] DEPTH of the stack
+  // 0x24
+  function DEPTH(state) {
+	    const { stack } = state;
 
 	    if (exports.DEBUG) { console.log(state.step, 'DEPTH[]'); }
 
 	    stack.push(stack.length);
-	}
+  }
 
-	// LOOPCALL[] LOOPCALL function
-	// 0x2A
-	function LOOPCALL(state) {
-	    var stack = state.stack;
-	    var fn = stack.pop();
-	    var c = stack.pop();
+  // LOOPCALL[] LOOPCALL function
+  // 0x2A
+  function LOOPCALL(state) {
+	    const { stack } = state;
+	    const fn = stack.pop();
+	    const c = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'LOOPCALL[]', fn, c); }
 
 	    // saves callers program
-	    var cip = state.ip;
-	    var cprog = state.prog;
+	    const cip = state.ip;
+	    const cprog = state.prog;
 
 	    state.prog = state.funcs[fn];
 
 	    // executes the function
-	    for (var i = 0; i < c; i++) {
+	    for (let i = 0; i < c; i++) {
 	        exec(state);
 
-	        if (exports.DEBUG) { console.log(
+	        if (exports.DEBUG) {
+        console.log(
 	            ++state.step,
 	            i + 1 < c ? 'next loopcall' : 'done loopcall',
-	            i
-	        ); }
+	            i,
+	        );
+      }
 	    }
 
 	    // restores the callers program
 	    state.ip = cip;
 	    state.prog = cprog;
-	}
+  }
 
-	// CALL[] CALL function
-	// 0x2B
-	function CALL(state) {
-	    var fn = state.stack.pop();
+  // CALL[] CALL function
+  // 0x2B
+  function CALL(state) {
+	    const fn = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'CALL[]', fn); }
 
 	    // saves callers program
-	    var cip = state.ip;
-	    var cprog = state.prog;
+	    const cip = state.ip;
+	    const cprog = state.prog;
 
 	    state.prog = state.funcs[fn];
 
@@ -9631,62 +9635,62 @@
 	    state.prog = cprog;
 
 	    if (exports.DEBUG) { console.log(++state.step, 'returning from', fn); }
-	}
+  }
 
-	// CINDEX[] Copy the INDEXed element to the top of the stack
-	// 0x25
-	function CINDEX(state) {
-	    var stack = state.stack;
-	    var k = stack.pop();
+  // CINDEX[] Copy the INDEXed element to the top of the stack
+  // 0x25
+  function CINDEX(state) {
+	    const { stack } = state;
+	    const k = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'CINDEX[]', k); }
 
 	    // In case of k == 1, it copies the last element after popping
 	    // thus stack.length - k.
 	    stack.push(stack[stack.length - k]);
-	}
+  }
 
-	// MINDEX[] Move the INDEXed element to the top of the stack
-	// 0x26
-	function MINDEX(state) {
-	    var stack = state.stack;
-	    var k = stack.pop();
+  // MINDEX[] Move the INDEXed element to the top of the stack
+  // 0x26
+  function MINDEX(state) {
+	    const { stack } = state;
+	    const k = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'MINDEX[]', k); }
 
 	    stack.push(stack.splice(stack.length - k, 1)[0]);
-	}
+  }
 
-	// FDEF[] Function DEFinition
-	// 0x2C
-	function FDEF(state) {
+  // FDEF[] Function DEFinition
+  // 0x2C
+  function FDEF(state) {
 	    if (state.env !== 'fpgm') { throw new Error('FDEF not allowed here'); }
-	    var stack = state.stack;
-	    var prog = state.prog;
-	    var ip = state.ip;
+	    const { stack } = state;
+	    const { prog } = state;
+	    let { ip } = state;
 
-	    var fn = stack.pop();
-	    var ipBegin = ip;
+	    const fn = stack.pop();
+	    const ipBegin = ip;
 
 	    if (exports.DEBUG) { console.log(state.step, 'FDEF[]', fn); }
 
-	    while (prog[++ip] !== 0x2D){ }
+	    while (prog[++ip] !== 0x2D) { }
 
 	    state.ip = ip;
 	    state.funcs[fn] = prog.slice(ipBegin + 1, ip);
-	}
+  }
 
-	// MDAP[a] Move Direct Absolute Point
-	// 0x2E-0x2F
-	function MDAP(round, state) {
-	    var pi = state.stack.pop();
-	    var p = state.z0[pi];
-	    var fv = state.fv;
-	    var pv = state.pv;
+  // MDAP[a] Move Direct Absolute Point
+  // 0x2E-0x2F
+  function MDAP(round, state) {
+	    const pi = state.stack.pop();
+	    const p = state.z0[pi];
+	    const { fv } = state;
+	    const { pv } = state;
 
-	    if (exports.DEBUG) { console.log(state.step, 'MDAP[' + round + ']', pi); }
+	    if (exports.DEBUG) { console.log(state.step, `MDAP[${round}]`, pi); }
 
-	    var d = pv.distance(p, HPZero);
+	    let d = pv.distance(p, HPZero);
 
 	    if (round) { d = state.round(d); }
 
@@ -9694,20 +9698,20 @@
 	    fv.touch(p);
 
 	    state.rp0 = state.rp1 = pi;
-	}
+  }
 
-	// IUP[a] Interpolate Untouched Points through the outline
-	// 0x30
-	function IUP(v, state) {
-	    var z2 = state.z2;
-	    var pLen = z2.length - 2;
-	    var cp;
-	    var pp;
-	    var np;
+  // IUP[a] Interpolate Untouched Points through the outline
+  // 0x30
+  function IUP(v, state) {
+	    const { z2 } = state;
+	    const pLen = z2.length - 2;
+	    let cp;
+	    let pp;
+	    let np;
 
-	    if (exports.DEBUG) { console.log(state.step, 'IUP[' + v.axis + ']'); }
+	    if (exports.DEBUG) { console.log(state.step, `IUP[${v.axis}]`); }
 
-	    for (var i = 0; i < pLen; i++) {
+	    for (let i = 0; i < pLen; i++) {
 	        cp = z2[i]; // current point
 
 	        // if this point has been touched go on
@@ -9729,114 +9733,112 @@
 
 	        v.interpolate(cp, pp, np, v);
 	    }
-	}
+  }
 
-	// SHP[] SHift Point using reference point
-	// 0x32-0x33
-	function SHP(a, state) {
-	    var stack = state.stack;
-	    var rpi = a ? state.rp1 : state.rp2;
-	    var rp = (a ? state.z0 : state.z1)[rpi];
-	    var fv = state.fv;
-	    var pv = state.pv;
-	    var loop = state.loop;
-	    var z2 = state.z2;
+  // SHP[] SHift Point using reference point
+  // 0x32-0x33
+  function SHP(a, state) {
+	    const { stack } = state;
+	    const rpi = a ? state.rp1 : state.rp2;
+	    const rp = (a ? state.z0 : state.z1)[rpi];
+	    const { fv } = state;
+	    const { pv } = state;
+	    let { loop } = state;
+	    const { z2 } = state;
 
-	    while (loop--)
-	    {
-	        var pi = stack.pop();
-	        var p = z2[pi];
+	    while (loop--) {
+	        const pi = stack.pop();
+	        const p = z2[pi];
 
-	        var d = pv.distance(rp, rp, false, true);
+	        const d = pv.distance(rp, rp, false, true);
 	        fv.setRelative(p, p, d, pv);
 	        fv.touch(p);
 
 	        if (exports.DEBUG) {
 	            console.log(
 	                state.step,
-	                (state.loop > 1 ?
-	                   'loop ' + (state.loop - loop) + ': ' :
-	                   ''
-	                ) +
-	                'SHP[' + (a ? 'rp1' : 'rp2') + ']', pi
+	                `${state.loop > 1
+	                   ? `loop ${state.loop - loop}: `
+	                   : ''
+
+	                }SHP[${a ? 'rp1' : 'rp2'}]`, pi,
 	            );
 	        }
 	    }
 
 	    state.loop = 1;
-	}
+  }
 
-	// SHC[] SHift Contour using reference point
-	// 0x36-0x37
-	function SHC(a, state) {
-	    var stack = state.stack;
-	    var rpi = a ? state.rp1 : state.rp2;
-	    var rp = (a ? state.z0 : state.z1)[rpi];
-	    var fv = state.fv;
-	    var pv = state.pv;
-	    var ci = stack.pop();
-	    var sp = state.z2[state.contours[ci]];
-	    var p = sp;
+  // SHC[] SHift Contour using reference point
+  // 0x36-0x37
+  function SHC(a, state) {
+	    const { stack } = state;
+	    const rpi = a ? state.rp1 : state.rp2;
+	    const rp = (a ? state.z0 : state.z1)[rpi];
+	    const { fv } = state;
+	    const { pv } = state;
+	    const ci = stack.pop();
+	    const sp = state.z2[state.contours[ci]];
+	    let p = sp;
 
-	    if (exports.DEBUG) { console.log(state.step, 'SHC[' + a + ']', ci); }
+	    if (exports.DEBUG) { console.log(state.step, `SHC[${a}]`, ci); }
 
-	    var d = pv.distance(rp, rp, false, true);
+	    const d = pv.distance(rp, rp, false, true);
 
 	    do {
 	        if (p !== rp) { fv.setRelative(p, p, d, pv); }
 	        p = p.nextPointOnContour;
 	    } while (p !== sp);
-	}
+  }
 
-	// SHZ[] SHift Zone using reference point
-	// 0x36-0x37
-	function SHZ(a, state) {
-	    var stack = state.stack;
-	    var rpi = a ? state.rp1 : state.rp2;
-	    var rp = (a ? state.z0 : state.z1)[rpi];
-	    var fv = state.fv;
-	    var pv = state.pv;
+  // SHZ[] SHift Zone using reference point
+  // 0x36-0x37
+  function SHZ(a, state) {
+	    const { stack } = state;
+	    const rpi = a ? state.rp1 : state.rp2;
+	    const rp = (a ? state.z0 : state.z1)[rpi];
+	    const { fv } = state;
+	    const { pv } = state;
 
-	    var e = stack.pop();
+	    const e = stack.pop();
 
-	    if (exports.DEBUG) { console.log(state.step, 'SHZ[' + a + ']', e); }
+	    if (exports.DEBUG) { console.log(state.step, `SHZ[${a}]`, e); }
 
-	    var z;
+	    let z;
 	    switch (e) {
-	        case 0 : z = state.tZone; break;
-	        case 1 : z = state.gZone; break;
-	        default : throw new Error('Invalid zone');
+	        case 0: z = state.tZone; break;
+	        case 1: z = state.gZone; break;
+	        default: throw new Error('Invalid zone');
 	    }
 
-	    var p;
-	    var d = pv.distance(rp, rp, false, true);
-	    var pLen = z.length - 2;
-	    for (var i = 0; i < pLen; i++)
-	    {
+	    let p;
+	    const d = pv.distance(rp, rp, false, true);
+	    const pLen = z.length - 2;
+	    for (let i = 0; i < pLen; i++) {
 	        p = z[i];
 	        fv.setRelative(p, p, d, pv);
-	        //if (p !== rp) fv.setRelative(p, p, d, pv);
+	        // if (p !== rp) fv.setRelative(p, p, d, pv);
 	    }
-	}
+  }
 
-	// SHPIX[] SHift point by a PIXel amount
-	// 0x38
-	function SHPIX(state) {
-	    var stack = state.stack;
-	    var loop = state.loop;
-	    var fv = state.fv;
-	    var d = stack.pop() / 0x40;
-	    var z2 = state.z2;
+  // SHPIX[] SHift point by a PIXel amount
+  // 0x38
+  function SHPIX(state) {
+	    const { stack } = state;
+	    let { loop } = state;
+	    const { fv } = state;
+	    const d = stack.pop() / 0x40;
+	    const { z2 } = state;
 
 	    while (loop--) {
-	        var pi = stack.pop();
-	        var p = z2[pi];
+	        const pi = stack.pop();
+	        const p = z2[pi];
 
 	        if (exports.DEBUG) {
 	            console.log(
 	                state.step,
-	                (state.loop > 1 ? 'loop ' + (state.loop - loop) + ': ' : '') +
-	                'SHPIX[]', pi, d
+	                `${state.loop > 1 ? `loop ${state.loop - loop}: ` : ''
+	                }SHPIX[]`, pi, d,
 	            );
 	        }
 
@@ -9845,30 +9847,30 @@
 	    }
 
 	    state.loop = 1;
-	}
+  }
 
-	// IP[] Interpolate Point
-	// 0x39
-	function IP(state) {
-	    var stack = state.stack;
-	    var rp1i = state.rp1;
-	    var rp2i = state.rp2;
-	    var loop = state.loop;
-	    var rp1 = state.z0[rp1i];
-	    var rp2 = state.z1[rp2i];
-	    var fv = state.fv;
-	    var pv = state.dpv;
-	    var z2 = state.z2;
+  // IP[] Interpolate Point
+  // 0x39
+  function IP(state) {
+	    const { stack } = state;
+	    const rp1i = state.rp1;
+	    const rp2i = state.rp2;
+	    let { loop } = state;
+	    const rp1 = state.z0[rp1i];
+	    const rp2 = state.z1[rp2i];
+	    const { fv } = state;
+	    const pv = state.dpv;
+	    const { z2 } = state;
 
 	    while (loop--) {
-	        var pi = stack.pop();
-	        var p = z2[pi];
+	        const pi = stack.pop();
+	        const p = z2[pi];
 
 	        if (exports.DEBUG) {
 	            console.log(
 	                state.step,
-	                (state.loop > 1 ? 'loop ' + (state.loop - loop) + ': ' : '') +
-	                'IP[]', pi, rp1i, '<->', rp2i
+	                `${state.loop > 1 ? `loop ${state.loop - loop}: ` : ''
+	                }IP[]`, pi, rp1i, '<->', rp2i,
 	            );
 	        }
 
@@ -9878,49 +9880,49 @@
 	    }
 
 	    state.loop = 1;
-	}
+  }
 
-	// MSIRP[a] Move Stack Indirect Relative Point
-	// 0x3A-0x3B
-	function MSIRP(a, state) {
-	    var stack = state.stack;
-	    var d = stack.pop() / 64;
-	    var pi = stack.pop();
-	    var p = state.z1[pi];
-	    var rp0 = state.z0[state.rp0];
-	    var fv = state.fv;
-	    var pv = state.pv;
+  // MSIRP[a] Move Stack Indirect Relative Point
+  // 0x3A-0x3B
+  function MSIRP(a, state) {
+	    const { stack } = state;
+	    const d = stack.pop() / 64;
+	    const pi = stack.pop();
+	    const p = state.z1[pi];
+	    const rp0 = state.z0[state.rp0];
+	    const { fv } = state;
+	    const { pv } = state;
 
 	    fv.setRelative(p, rp0, d, pv);
 	    fv.touch(p);
 
-	    if (exports.DEBUG) { console.log(state.step, 'MSIRP[' + a + ']', d, pi); }
+	    if (exports.DEBUG) { console.log(state.step, `MSIRP[${a}]`, d, pi); }
 
 	    state.rp1 = state.rp0;
 	    state.rp2 = pi;
 	    if (a) { state.rp0 = pi; }
-	}
+  }
 
-	// ALIGNRP[] Align to reference point.
-	// 0x3C
-	function ALIGNRP(state) {
-	    var stack = state.stack;
-	    var rp0i = state.rp0;
-	    var rp0 = state.z0[rp0i];
-	    var loop = state.loop;
-	    var fv = state.fv;
-	    var pv = state.pv;
-	    var z1 = state.z1;
+  // ALIGNRP[] Align to reference point.
+  // 0x3C
+  function ALIGNRP(state) {
+	    const { stack } = state;
+	    const rp0i = state.rp0;
+	    const rp0 = state.z0[rp0i];
+	    let { loop } = state;
+	    const { fv } = state;
+	    const { pv } = state;
+	    const { z1 } = state;
 
 	    while (loop--) {
-	        var pi = stack.pop();
-	        var p = z1[pi];
+	        const pi = stack.pop();
+	        const p = z1[pi];
 
 	        if (exports.DEBUG) {
 	            console.log(
 	                state.step,
-	                (state.loop > 1 ? 'loop ' + (state.loop - loop) + ': ' : '') +
-	                'ALIGNRP[]', pi
+	                `${state.loop > 1 ? `loop ${state.loop - loop}: ` : ''
+	                }ALIGNRP[]`, pi,
 	            );
 	        }
 
@@ -9929,36 +9931,36 @@
 	    }
 
 	    state.loop = 1;
-	}
+  }
 
-	// RTG[] Round To Double Grid
-	// 0x3D
-	function RTDG(state) {
+  // RTG[] Round To Double Grid
+  // 0x3D
+  function RTDG(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'RTDG[]'); }
 
 	    state.round = roundToDoubleGrid;
-	}
+  }
 
-	// MIAP[a] Move Indirect Absolute Point
-	// 0x3E-0x3F
-	function MIAP(round, state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
-	    var pi = stack.pop();
-	    var p = state.z0[pi];
-	    var fv = state.fv;
-	    var pv = state.pv;
-	    var cv = state.cvt[n];
+  // MIAP[a] Move Indirect Absolute Point
+  // 0x3E-0x3F
+  function MIAP(round, state) {
+	    const { stack } = state;
+	    const n = stack.pop();
+	    const pi = stack.pop();
+	    const p = state.z0[pi];
+	    const { fv } = state;
+	    const { pv } = state;
+	    const cv = state.cvt[n];
 
 	    if (exports.DEBUG) {
 	        console.log(
 	            state.step,
-	            'MIAP[' + round + ']',
-	            n, '(', cv, ')', pi
+	            `MIAP[${round}]`,
+	            n, '(', cv, ')', pi,
 	        );
 	    }
 
-	    var d = pv.distance(p, HPZero);
+	    let d = pv.distance(p, HPZero);
 
 	    if (round) {
 	        if (Math.abs(d - cv) < state.cvCutIn) { d = cv; }
@@ -9976,237 +9978,237 @@
 	    fv.touch(p);
 
 	    state.rp0 = state.rp1 = pi;
-	}
+  }
 
-	// NPUSB[] PUSH N Bytes
-	// 0x40
-	function NPUSHB(state) {
-	    var prog = state.prog;
-	    var ip = state.ip;
-	    var stack = state.stack;
+  // NPUSB[] PUSH N Bytes
+  // 0x40
+  function NPUSHB(state) {
+	    const { prog } = state;
+	    let { ip } = state;
+	    const { stack } = state;
 
-	    var n = prog[++ip];
+	    const n = prog[++ip];
 
 	    if (exports.DEBUG) { console.log(state.step, 'NPUSHB[]', n); }
 
-	    for (var i = 0; i < n; i++) { stack.push(prog[++ip]); }
+	    for (let i = 0; i < n; i++) { stack.push(prog[++ip]); }
 
 	    state.ip = ip;
-	}
+  }
 
-	// NPUSHW[] PUSH N Words
-	// 0x41
-	function NPUSHW(state) {
-	    var ip = state.ip;
-	    var prog = state.prog;
-	    var stack = state.stack;
-	    var n = prog[++ip];
+  // NPUSHW[] PUSH N Words
+  // 0x41
+  function NPUSHW(state) {
+	    let { ip } = state;
+	    const { prog } = state;
+	    const { stack } = state;
+	    const n = prog[++ip];
 
 	    if (exports.DEBUG) { console.log(state.step, 'NPUSHW[]', n); }
 
-	    for (var i = 0; i < n; i++) {
-	        var w = (prog[++ip] << 8) | prog[++ip];
+	    for (let i = 0; i < n; i++) {
+	        let w = (prog[++ip] << 8) | prog[++ip];
 	        if (w & 0x8000) { w = -((w ^ 0xffff) + 1); }
 	        stack.push(w);
 	    }
 
 	    state.ip = ip;
-	}
+  }
 
-	// WS[] Write Store
-	// 0x42
-	function WS(state) {
-	    var stack = state.stack;
-	    var store = state.store;
+  // WS[] Write Store
+  // 0x42
+  function WS(state) {
+	    const { stack } = state;
+	    let { store } = state;
 
 	    if (!store) { store = state.store = []; }
 
-	    var v = stack.pop();
-	    var l = stack.pop();
+	    const v = stack.pop();
+	    const l = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'WS', v, l); }
 
 	    store[l] = v;
-	}
+  }
 
-	// RS[] Read Store
-	// 0x43
-	function RS(state) {
-	    var stack = state.stack;
-	    var store = state.store;
+  // RS[] Read Store
+  // 0x43
+  function RS(state) {
+	    const { stack } = state;
+	    const { store } = state;
 
-	    var l = stack.pop();
+	    const l = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'RS', l); }
 
-	    var v = (store && store[l]) || 0;
+	    const v = (store && store[l]) || 0;
 
 	    stack.push(v);
-	}
+  }
 
-	// WCVTP[] Write Control Value Table in Pixel units
-	// 0x44
-	function WCVTP(state) {
-	    var stack = state.stack;
+  // WCVTP[] Write Control Value Table in Pixel units
+  // 0x44
+  function WCVTP(state) {
+	    const { stack } = state;
 
-	    var v = stack.pop();
-	    var l = stack.pop();
+	    const v = stack.pop();
+	    const l = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'WCVTP', v, l); }
 
 	    state.cvt[l] = v / 0x40;
-	}
+  }
 
-	// RCVT[] Read Control Value Table entry
-	// 0x45
-	function RCVT(state) {
-	    var stack = state.stack;
-	    var cvte = stack.pop();
+  // RCVT[] Read Control Value Table entry
+  // 0x45
+  function RCVT(state) {
+	    const { stack } = state;
+	    const cvte = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'RCVT', cvte); }
 
 	    stack.push(state.cvt[cvte] * 0x40);
-	}
+  }
 
-	// GC[] Get Coordinate projected onto the projection vector
-	// 0x46-0x47
-	function GC(a, state) {
-	    var stack = state.stack;
-	    var pi = stack.pop();
-	    var p = state.z2[pi];
+  // GC[] Get Coordinate projected onto the projection vector
+  // 0x46-0x47
+  function GC(a, state) {
+	    const { stack } = state;
+	    const pi = stack.pop();
+	    const p = state.z2[pi];
 
-	    if (exports.DEBUG) { console.log(state.step, 'GC[' + a + ']', pi); }
+	    if (exports.DEBUG) { console.log(state.step, `GC[${a}]`, pi); }
 
 	    stack.push(state.dpv.distance(p, HPZero, a, false) * 0x40);
-	}
+  }
 
-	// MD[a] Measure Distance
-	// 0x49-0x4A
-	function MD(a, state) {
-	    var stack = state.stack;
-	    var pi2 = stack.pop();
-	    var pi1 = stack.pop();
-	    var p2 = state.z1[pi2];
-	    var p1 = state.z0[pi1];
-	    var d = state.dpv.distance(p1, p2, a, a);
+  // MD[a] Measure Distance
+  // 0x49-0x4A
+  function MD(a, state) {
+	    const { stack } = state;
+	    const pi2 = stack.pop();
+	    const pi1 = stack.pop();
+	    const p2 = state.z1[pi2];
+	    const p1 = state.z0[pi1];
+	    const d = state.dpv.distance(p1, p2, a, a);
 
-	    if (exports.DEBUG) { console.log(state.step, 'MD[' + a + ']', pi2, pi1, '->', d); }
+	    if (exports.DEBUG) { console.log(state.step, `MD[${a}]`, pi2, pi1, '->', d); }
 
 	    state.stack.push(Math.round(d * 64));
-	}
+  }
 
-	// MPPEM[] Measure Pixels Per EM
-	// 0x4B
-	function MPPEM(state) {
+  // MPPEM[] Measure Pixels Per EM
+  // 0x4B
+  function MPPEM(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'MPPEM[]'); }
 	    state.stack.push(state.ppem);
-	}
+  }
 
-	// FLIPON[] set the auto FLIP Boolean to ON
-	// 0x4D
-	function FLIPON(state) {
+  // FLIPON[] set the auto FLIP Boolean to ON
+  // 0x4D
+  function FLIPON(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'FLIPON[]'); }
 	    state.autoFlip = true;
-	}
+  }
 
-	// LT[] Less Than
-	// 0x50
-	function LT(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // LT[] Less Than
+  // 0x50
+  function LT(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'LT[]', e2, e1); }
 
 	    stack.push(e1 < e2 ? 1 : 0);
-	}
+  }
 
-	// LTEQ[] Less Than or EQual
-	// 0x53
-	function LTEQ(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // LTEQ[] Less Than or EQual
+  // 0x53
+  function LTEQ(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'LTEQ[]', e2, e1); }
 
 	    stack.push(e1 <= e2 ? 1 : 0);
-	}
+  }
 
-	// GTEQ[] Greater Than
-	// 0x52
-	function GT(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // GTEQ[] Greater Than
+  // 0x52
+  function GT(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'GT[]', e2, e1); }
 
 	    stack.push(e1 > e2 ? 1 : 0);
-	}
+  }
 
-	// GTEQ[] Greater Than or EQual
-	// 0x53
-	function GTEQ(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // GTEQ[] Greater Than or EQual
+  // 0x53
+  function GTEQ(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'GTEQ[]', e2, e1); }
 
 	    stack.push(e1 >= e2 ? 1 : 0);
-	}
+  }
 
-	// EQ[] EQual
-	// 0x54
-	function EQ(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // EQ[] EQual
+  // 0x54
+  function EQ(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'EQ[]', e2, e1); }
 
 	    stack.push(e2 === e1 ? 1 : 0);
-	}
+  }
 
-	// NEQ[] Not EQual
-	// 0x55
-	function NEQ(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // NEQ[] Not EQual
+  // 0x55
+  function NEQ(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'NEQ[]', e2, e1); }
 
 	    stack.push(e2 !== e1 ? 1 : 0);
-	}
+  }
 
-	// ODD[] ODD
-	// 0x56
-	function ODD(state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // ODD[] ODD
+  // 0x56
+  function ODD(state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'ODD[]', n); }
 
 	    stack.push(Math.trunc(n) % 2 ? 1 : 0);
-	}
+  }
 
-	// EVEN[] EVEN
-	// 0x57
-	function EVEN(state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // EVEN[] EVEN
+  // 0x57
+  function EVEN(state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'EVEN[]', n); }
 
 	    stack.push(Math.trunc(n) % 2 ? 0 : 1);
-	}
+  }
 
-	// IF[] IF test
-	// 0x58
-	function IF(state) {
-	    var test = state.stack.pop();
+  // IF[] IF test
+  // 0x58
+  function IF(state) {
+	    const test = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'IF[]', test); }
 
@@ -10215,263 +10217,263 @@
 	    if (!test) {
 	        skip(state, true);
 
-	        if (exports.DEBUG) { console.log(state.step,  'EIF[]'); }
+	        if (exports.DEBUG) { console.log(state.step, 'EIF[]'); }
 	    }
-	}
+  }
 
-	// EIF[] End IF
-	// 0x59
-	function EIF(state) {
+  // EIF[] End IF
+  // 0x59
+  function EIF(state) {
 	    // this can be reached normally when
 	    // executing an else branch.
 	    // -> just ignore it
 
 	    if (exports.DEBUG) { console.log(state.step, 'EIF[]'); }
-	}
+  }
 
-	// AND[] logical AND
-	// 0x5A
-	function AND(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // AND[] logical AND
+  // 0x5A
+  function AND(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'AND[]', e2, e1); }
 
 	    stack.push(e2 && e1 ? 1 : 0);
-	}
+  }
 
-	// OR[] logical OR
-	// 0x5B
-	function OR(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // OR[] logical OR
+  // 0x5B
+  function OR(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'OR[]', e2, e1); }
 
 	    stack.push(e2 || e1 ? 1 : 0);
-	}
+  }
 
-	// NOT[] logical NOT
-	// 0x5C
-	function NOT(state) {
-	    var stack = state.stack;
-	    var e = stack.pop();
+  // NOT[] logical NOT
+  // 0x5C
+  function NOT(state) {
+	    const { stack } = state;
+	    const e = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'NOT[]', e); }
 
 	    stack.push(e ? 0 : 1);
-	}
+  }
 
-	// DELTAP1[] DELTA exception P1
-	// DELTAP2[] DELTA exception P2
-	// DELTAP3[] DELTA exception P3
-	// 0x5D, 0x71, 0x72
-	function DELTAP123(b, state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
-	    var fv = state.fv;
-	    var pv = state.pv;
-	    var ppem = state.ppem;
-	    var base = state.deltaBase + (b - 1) * 16;
-	    var ds = state.deltaShift;
-	    var z0 = state.z0;
+  // DELTAP1[] DELTA exception P1
+  // DELTAP2[] DELTA exception P2
+  // DELTAP3[] DELTA exception P3
+  // 0x5D, 0x71, 0x72
+  function DELTAP123(b, state) {
+	    const { stack } = state;
+	    const n = stack.pop();
+	    const { fv } = state;
+	    const { pv } = state;
+	    const { ppem } = state;
+	    const base = state.deltaBase + (b - 1) * 16;
+	    const ds = state.deltaShift;
+	    const { z0 } = state;
 
-	    if (exports.DEBUG) { console.log(state.step, 'DELTAP[' + b + ']', n, stack); }
+	    if (exports.DEBUG) { console.log(state.step, `DELTAP[${b}]`, n, stack); }
 
-	    for (var i = 0; i < n; i++) {
-	        var pi = stack.pop();
-	        var arg = stack.pop();
-	        var appem = base + ((arg & 0xF0) >> 4);
+	    for (let i = 0; i < n; i++) {
+	        const pi = stack.pop();
+	        const arg = stack.pop();
+	        const appem = base + ((arg & 0xF0) >> 4);
 	        if (appem !== ppem) { continue; }
 
-	        var mag = (arg & 0x0F) - 8;
+	        let mag = (arg & 0x0F) - 8;
 	        if (mag >= 0) { mag++; }
 	        if (exports.DEBUG) { console.log(state.step, 'DELTAPFIX', pi, 'by', mag * ds); }
 
-	        var p = z0[pi];
+	        const p = z0[pi];
 	        fv.setRelative(p, p, mag * ds, pv);
 	    }
-	}
+  }
 
-	// SDB[] Set Delta Base in the graphics state
-	// 0x5E
-	function SDB(state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // SDB[] Set Delta Base in the graphics state
+  // 0x5E
+  function SDB(state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SDB[]', n); }
 
 	    state.deltaBase = n;
-	}
+  }
 
-	// SDS[] Set Delta Shift in the graphics state
-	// 0x5F
-	function SDS(state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // SDS[] Set Delta Shift in the graphics state
+  // 0x5F
+  function SDS(state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SDS[]', n); }
 
 	    state.deltaShift = Math.pow(0.5, n);
-	}
+  }
 
-	// ADD[] ADD
-	// 0x60
-	function ADD(state) {
-	    var stack = state.stack;
-	    var n2 = stack.pop();
-	    var n1 = stack.pop();
+  // ADD[] ADD
+  // 0x60
+  function ADD(state) {
+	    const { stack } = state;
+	    const n2 = stack.pop();
+	    const n1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'ADD[]', n2, n1); }
 
 	    stack.push(n1 + n2);
-	}
+  }
 
-	// SUB[] SUB
-	// 0x61
-	function SUB(state) {
-	    var stack = state.stack;
-	    var n2 = stack.pop();
-	    var n1 = stack.pop();
+  // SUB[] SUB
+  // 0x61
+  function SUB(state) {
+	    const { stack } = state;
+	    const n2 = stack.pop();
+	    const n1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SUB[]', n2, n1); }
 
 	    stack.push(n1 - n2);
-	}
+  }
 
-	// DIV[] DIV
-	// 0x62
-	function DIV(state) {
-	    var stack = state.stack;
-	    var n2 = stack.pop();
-	    var n1 = stack.pop();
+  // DIV[] DIV
+  // 0x62
+  function DIV(state) {
+	    const { stack } = state;
+	    const n2 = stack.pop();
+	    const n1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'DIV[]', n2, n1); }
 
 	    stack.push(n1 * 64 / n2);
-	}
+  }
 
-	// MUL[] MUL
-	// 0x63
-	function MUL(state) {
-	    var stack = state.stack;
-	    var n2 = stack.pop();
-	    var n1 = stack.pop();
+  // MUL[] MUL
+  // 0x63
+  function MUL(state) {
+	    const { stack } = state;
+	    const n2 = stack.pop();
+	    const n1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'MUL[]', n2, n1); }
 
 	    stack.push(n1 * n2 / 64);
-	}
+  }
 
-	// ABS[] ABSolute value
-	// 0x64
-	function ABS(state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // ABS[] ABSolute value
+  // 0x64
+  function ABS(state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'ABS[]', n); }
 
 	    stack.push(Math.abs(n));
-	}
+  }
 
-	// NEG[] NEGate
-	// 0x65
-	function NEG(state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // NEG[] NEGate
+  // 0x65
+  function NEG(state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'NEG[]', n); }
 
 	    stack.push(-n);
-	}
+  }
 
-	// FLOOR[] FLOOR
-	// 0x66
-	function FLOOR(state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // FLOOR[] FLOOR
+  // 0x66
+  function FLOOR(state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'FLOOR[]', n); }
 
 	    stack.push(Math.floor(n / 0x40) * 0x40);
-	}
+  }
 
-	// CEILING[] CEILING
-	// 0x67
-	function CEILING(state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // CEILING[] CEILING
+  // 0x67
+  function CEILING(state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'CEILING[]', n); }
 
 	    stack.push(Math.ceil(n / 0x40) * 0x40);
-	}
+  }
 
-	// ROUND[ab] ROUND value
-	// 0x68-0x6B
-	function ROUND(dt, state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
+  // ROUND[ab] ROUND value
+  // 0x68-0x6B
+  function ROUND(dt, state) {
+	    const { stack } = state;
+	    const n = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'ROUND[]'); }
 
 	    stack.push(state.round(n / 0x40) * 0x40);
-	}
+  }
 
-	// WCVTF[] Write Control Value Table in Funits
-	// 0x70
-	function WCVTF(state) {
-	    var stack = state.stack;
-	    var v = stack.pop();
-	    var l = stack.pop();
+  // WCVTF[] Write Control Value Table in Funits
+  // 0x70
+  function WCVTF(state) {
+	    const { stack } = state;
+	    const v = stack.pop();
+	    const l = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'WCVTF[]', v, l); }
 
 	    state.cvt[l] = v * state.ppem / state.font.unitsPerEm;
-	}
+  }
 
-	// DELTAC1[] DELTA exception C1
-	// DELTAC2[] DELTA exception C2
-	// DELTAC3[] DELTA exception C3
-	// 0x73, 0x74, 0x75
-	function DELTAC123(b, state) {
-	    var stack = state.stack;
-	    var n = stack.pop();
-	    var ppem = state.ppem;
-	    var base = state.deltaBase + (b - 1) * 16;
-	    var ds = state.deltaShift;
+  // DELTAC1[] DELTA exception C1
+  // DELTAC2[] DELTA exception C2
+  // DELTAC3[] DELTA exception C3
+  // 0x73, 0x74, 0x75
+  function DELTAC123(b, state) {
+	    const { stack } = state;
+	    const n = stack.pop();
+	    const { ppem } = state;
+	    const base = state.deltaBase + (b - 1) * 16;
+	    const ds = state.deltaShift;
 
-	    if (exports.DEBUG) { console.log(state.step, 'DELTAC[' + b + ']', n, stack); }
+	    if (exports.DEBUG) { console.log(state.step, `DELTAC[${b}]`, n, stack); }
 
-	    for (var i = 0; i < n; i++) {
-	        var c = stack.pop();
-	        var arg = stack.pop();
-	        var appem = base + ((arg & 0xF0) >> 4);
+	    for (let i = 0; i < n; i++) {
+	        const c = stack.pop();
+	        const arg = stack.pop();
+	        const appem = base + ((arg & 0xF0) >> 4);
 	        if (appem !== ppem) { continue; }
 
-	        var mag = (arg & 0x0F) - 8;
+	        let mag = (arg & 0x0F) - 8;
 	        if (mag >= 0) { mag++; }
 
-	        var delta = mag * ds;
+	        const delta = mag * ds;
 
 	        if (exports.DEBUG) { console.log(state.step, 'DELTACFIX', c, 'by', delta); }
 
 	        state.cvt[c] += delta;
 	    }
-	}
+  }
 
-	// SROUND[] Super ROUND
-	// 0x76
-	function SROUND(state) {
-	    var n = state.stack.pop();
+  // SROUND[] Super ROUND
+  // 0x76
+  function SROUND(state) {
+	    let n = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'SROUND[]', n); }
 
 	    state.round = roundSuper;
 
-	    var period;
+	    let period;
 
 	    switch (n & 0xC0) {
 	        case 0x00:
@@ -10497,7 +10499,7 @@
 	            state.srPhase = 0.25 * period;
 	            break;
 	        case 0x20:
-	            state.srPhase = 0.5  * period;
+	            state.srPhase = 0.5 * period;
 	            break;
 	        case 0x30:
 	            state.srPhase = 0.75 * period;
@@ -10505,22 +10507,21 @@
 	        default: throw new Error('invalid SROUND value');
 	    }
 
-	    n &= 0x0F;
+	    n = n & 0x0F;
 
-	    if (n === 0) { state.srThreshold = 0; }
-	    else { state.srThreshold = (n / 8 - 0.5) * period; }
-	}
+	    if (n === 0) { state.srThreshold = 0; } else { state.srThreshold = (n / 8 - 0.5) * period; }
+  }
 
-	// S45ROUND[] Super ROUND 45 degrees
-	// 0x77
-	function S45ROUND(state) {
-	    var n = state.stack.pop();
+  // S45ROUND[] Super ROUND 45 degrees
+  // 0x77
+  function S45ROUND(state) {
+	    let n = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'S45ROUND[]', n); }
 
 	    state.round = roundSuper;
 
-	    var period;
+	    let period;
 
 	    switch (n & 0xC0) {
 	        case 0x00:
@@ -10546,7 +10547,7 @@
 	            state.srPhase = 0.25 * period;
 	            break;
 	        case 0x20:
-	            state.srPhase = 0.5  * period;
+	            state.srPhase = 0.5 * period;
 	            break;
 	        case 0x30:
 	            state.srPhase = 0.75 * period;
@@ -10555,59 +10556,58 @@
 	            throw new Error('invalid S45ROUND value');
 	    }
 
-	    n &= 0x0F;
+	    n = n & 0x0F;
 
-	    if (n === 0) { state.srThreshold = 0; }
-	    else { state.srThreshold = (n / 8 - 0.5) * period; }
-	}
+	    if (n === 0) { state.srThreshold = 0; } else { state.srThreshold = (n / 8 - 0.5) * period; }
+  }
 
-	// ROFF[] Round Off
-	// 0x7A
-	function ROFF(state) {
+  // ROFF[] Round Off
+  // 0x7A
+  function ROFF(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'ROFF[]'); }
 
 	    state.round = roundOff;
-	}
+  }
 
-	// RUTG[] Round Up To Grid
-	// 0x7C
-	function RUTG(state) {
+  // RUTG[] Round Up To Grid
+  // 0x7C
+  function RUTG(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'RUTG[]'); }
 
 	    state.round = roundUpToGrid;
-	}
+  }
 
-	// RDTG[] Round Down To Grid
-	// 0x7D
-	function RDTG(state) {
+  // RDTG[] Round Down To Grid
+  // 0x7D
+  function RDTG(state) {
 	    if (exports.DEBUG) { console.log(state.step, 'RDTG[]'); }
 
 	    state.round = roundDownToGrid;
-	}
+  }
 
-	// SCANCTRL[] SCAN conversion ConTRoL
-	// 0x85
-	function SCANCTRL(state) {
-	    var n = state.stack.pop();
+  // SCANCTRL[] SCAN conversion ConTRoL
+  // 0x85
+  function SCANCTRL(state) {
+	    const n = state.stack.pop();
 
 	    // ignored by opentype.js
 
 	    if (exports.DEBUG) { console.log(state.step, 'SCANCTRL[]', n); }
-	}
+  }
 
-	// SDPVTL[a] Set Dual Projection Vector To Line
-	// 0x86-0x87
-	function SDPVTL(a, state) {
-	    var stack = state.stack;
-	    var p2i = stack.pop();
-	    var p1i = stack.pop();
-	    var p2 = state.z2[p2i];
-	    var p1 = state.z1[p1i];
+  // SDPVTL[a] Set Dual Projection Vector To Line
+  // 0x86-0x87
+  function SDPVTL(a, state) {
+	    const { stack } = state;
+	    const p2i = stack.pop();
+	    const p1i = stack.pop();
+	    const p2 = state.z2[p2i];
+	    const p1 = state.z1[p1i];
 
-	    if (exports.DEBUG) { console.log(state.step, 'SDPVTL[' + a + ']', p2i, p1i); }
+	    if (exports.DEBUG) { console.log(state.step, `SDPVTL[${a}]`, p2i, p1i); }
 
-	    var dx;
-	    var dy;
+	    let dx;
+	    let dy;
 
 	    if (!a) {
 	        dx = p1.x - p2.x;
@@ -10618,14 +10618,14 @@
 	    }
 
 	    state.dpv = getUnitVector(dx, dy);
-	}
+  }
 
-	// GETINFO[] GET INFOrmation
-	// 0x88
-	function GETINFO(state) {
-	    var stack = state.stack;
-	    var sel = stack.pop();
-	    var r = 0;
+  // GETINFO[] GET INFOrmation
+  // 0x88
+  function GETINFO(state) {
+	    const { stack } = state;
+	    const sel = stack.pop();
+	    let r = 0;
 
 	    if (exports.DEBUG) { console.log(state.step, 'GETINFO[]', sel); }
 
@@ -10636,130 +10636,130 @@
 	    // and thus those GETINFO are always 0.
 
 	    // opentype.js is always gray scaling
-	    if (sel & 0x20) { r |= 0x1000; }
+	    if (sel & 0x20) { r = r | 0x1000; }
 
 	    stack.push(r);
-	}
+  }
 
-	// ROLL[] ROLL the top three stack elements
-	// 0x8A
-	function ROLL(state) {
-	    var stack = state.stack;
-	    var a = stack.pop();
-	    var b = stack.pop();
-	    var c = stack.pop();
+  // ROLL[] ROLL the top three stack elements
+  // 0x8A
+  function ROLL(state) {
+	    const { stack } = state;
+	    const a = stack.pop();
+	    const b = stack.pop();
+	    const c = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'ROLL[]'); }
 
 	    stack.push(b);
 	    stack.push(a);
 	    stack.push(c);
-	}
+  }
 
-	// MAX[] MAXimum of top two stack elements
-	// 0x8B
-	function MAX(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // MAX[] MAXimum of top two stack elements
+  // 0x8B
+  function MAX(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'MAX[]', e2, e1); }
 
 	    stack.push(Math.max(e1, e2));
-	}
+  }
 
-	// MIN[] MINimum of top two stack elements
-	// 0x8C
-	function MIN(state) {
-	    var stack = state.stack;
-	    var e2 = stack.pop();
-	    var e1 = stack.pop();
+  // MIN[] MINimum of top two stack elements
+  // 0x8C
+  function MIN(state) {
+	    const { stack } = state;
+	    const e2 = stack.pop();
+	    const e1 = stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'MIN[]', e2, e1); }
 
 	    stack.push(Math.min(e1, e2));
-	}
+  }
 
-	// SCANTYPE[] SCANTYPE
-	// 0x8D
-	function SCANTYPE(state) {
-	    var n = state.stack.pop();
+  // SCANTYPE[] SCANTYPE
+  // 0x8D
+  function SCANTYPE(state) {
+	    const n = state.stack.pop();
 	    // ignored by opentype.js
 	    if (exports.DEBUG) { console.log(state.step, 'SCANTYPE[]', n); }
-	}
+  }
 
-	// INSTCTRL[] INSTCTRL
-	// 0x8D
-	function INSTCTRL(state) {
-	    var s = state.stack.pop();
-	    var v = state.stack.pop();
+  // INSTCTRL[] INSTCTRL
+  // 0x8D
+  function INSTCTRL(state) {
+	    const s = state.stack.pop();
+	    const v = state.stack.pop();
 
 	    if (exports.DEBUG) { console.log(state.step, 'INSTCTRL[]', s, v); }
 
 	    switch (s) {
-	        case 1 : state.inhibitGridFit = !!v; return;
-	        case 2 : state.ignoreCvt = !!v; return;
+	        case 1: state.inhibitGridFit = !!v; return;
+	        case 2: state.ignoreCvt = !!v; return;
 	        default: throw new Error('invalid INSTCTRL[] selector');
 	    }
-	}
+  }
 
-	// PUSHB[abc] PUSH Bytes
-	// 0xB0-0xB7
-	function PUSHB(n, state) {
-	    var stack = state.stack;
-	    var prog = state.prog;
-	    var ip = state.ip;
+  // PUSHB[abc] PUSH Bytes
+  // 0xB0-0xB7
+  function PUSHB(n, state) {
+	    const { stack } = state;
+	    const { prog } = state;
+	    let { ip } = state;
 
-	    if (exports.DEBUG) { console.log(state.step, 'PUSHB[' + n + ']'); }
+	    if (exports.DEBUG) { console.log(state.step, `PUSHB[${n}]`); }
 
-	    for (var i = 0; i < n; i++) { stack.push(prog[++ip]); }
+	    for (let i = 0; i < n; i++) { stack.push(prog[++ip]); }
 
 	    state.ip = ip;
-	}
+  }
 
-	// PUSHW[abc] PUSH Words
-	// 0xB8-0xBF
-	function PUSHW(n, state) {
-	    var ip = state.ip;
-	    var prog = state.prog;
-	    var stack = state.stack;
+  // PUSHW[abc] PUSH Words
+  // 0xB8-0xBF
+  function PUSHW(n, state) {
+	    let { ip } = state;
+	    const { prog } = state;
+	    const { stack } = state;
 
-	    if (exports.DEBUG) { console.log(state.ip, 'PUSHW[' + n + ']'); }
+	    if (exports.DEBUG) { console.log(state.ip, `PUSHW[${n}]`); }
 
-	    for (var i = 0; i < n; i++) {
-	        var w = (prog[++ip] << 8) | prog[++ip];
+	    for (let i = 0; i < n; i++) {
+	        let w = (prog[++ip] << 8) | prog[++ip];
 	        if (w & 0x8000) { w = -((w ^ 0xffff) + 1); }
 	        stack.push(w);
 	    }
 
 	    state.ip = ip;
-	}
+  }
 
-	// MDRP[abcde] Move Direct Relative Point
-	// 0xD0-0xEF
-	// (if indirect is 0)
-	//
-	// and
-	//
-	// MIRP[abcde] Move Indirect Relative Point
-	// 0xE0-0xFF
-	// (if indirect is 1)
+  // MDRP[abcde] Move Direct Relative Point
+  // 0xD0-0xEF
+  // (if indirect is 0)
+  //
+  // and
+  //
+  // MIRP[abcde] Move Indirect Relative Point
+  // 0xE0-0xFF
+  // (if indirect is 1)
 
-	function MDRP_MIRP(indirect, setRp0, keepD, ro, dt, state) {
-	    var stack = state.stack;
-	    var cvte = indirect && stack.pop();
-	    var pi = stack.pop();
-	    var rp0i = state.rp0;
-	    var rp = state.z0[rp0i];
-	    var p = state.z1[pi];
+  function MDRP_MIRP(indirect, setRp0, keepD, ro, dt, state) {
+	    const { stack } = state;
+	    const cvte = indirect && stack.pop();
+	    const pi = stack.pop();
+	    const rp0i = state.rp0;
+	    const rp = state.z0[rp0i];
+	    const p = state.z1[pi];
 
-	    var md = state.minDis;
-	    var fv = state.fv;
-	    var pv = state.dpv;
-	    var od; // original distance
-	    var d; // moving distance
-	    var sign; // sign of distance
-	    var cv;
+	    const md = state.minDis;
+	    const { fv } = state;
+	    const pv = state.dpv;
+	    let od; // original distance
+	    let d; // moving distance
+	    let sign; // sign of distance
+	    let cv;
 
 	    d = od = pv.distance(p, rp, true, true);
 	    sign = d >= 0 ? 1 : -1; // Math.sign would be 0 in case of 0
@@ -10783,29 +10783,29 @@
 	    if (exports.DEBUG) {
 	        console.log(
 	            state.step,
-	            (indirect ? 'MIRP[' : 'MDRP[') +
-	            (setRp0 ? 'M' : 'm') +
-	            (keepD ? '>' : '_') +
-	            (ro ? 'R' : '_') +
-	            (dt === 0 ? 'Gr' : (dt === 1 ? 'Bl' : (dt === 2 ? 'Wh' : ''))) +
-	            ']',
-	            indirect ?
-	                cvte + '(' + state.cvt[cvte] + ',' +  cv + ')' :
-	                '',
+	            `${(indirect ? 'MIRP[' : 'MDRP[')
+	            + (setRp0 ? 'M' : 'm')
+	            + (keepD ? '>' : '_')
+	            + (ro ? 'R' : '_')
+	            + (dt === 0 ? 'Gr' : (dt === 1 ? 'Bl' : (dt === 2 ? 'Wh' : '')))
+	            }]`,
+	            indirect
+	                ? `${cvte}(${state.cvt[cvte]},${cv})`
+	                : '',
 	            pi,
-	            '(d =', od, '->', sign * d, ')'
+	            '(d =', od, '->', sign * d, ')',
 	        );
 	    }
 
 	    state.rp1 = state.rp0;
 	    state.rp2 = pi;
 	    if (setRp0) { state.rp0 = pi; }
-	}
+  }
 
-	/*
+  /*
 	* The instruction table.
 	*/
-	instructionTable = [
+  instructionTable = [
 	    /* 0x00 */ SVTCA.bind(undefined, yUnitVector),
 	    /* 0x01 */ SVTCA.bind(undefined, xUnitVector),
 	    /* 0x02 */ SPVTCA.bind(undefined, yUnitVector),
@@ -10836,8 +10836,8 @@
 	    /* 0x1B */ ELSE,
 	    /* 0x1C */ JMPR,
 	    /* 0x1D */ SCVTCI,
-	    /* 0x1E */ undefined,   // TODO SSWCI
-	    /* 0x1F */ undefined,   // TODO SSW
+	    /* 0x1E */ undefined, // TODO SSWCI
+	    /* 0x1F */ undefined, // TODO SSW
 	    /* 0x20 */ DUP,
 	    /* 0x21 */ POP,
 	    /* 0x22 */ CLEAR,
@@ -10845,13 +10845,13 @@
 	    /* 0x24 */ DEPTH,
 	    /* 0x25 */ CINDEX,
 	    /* 0x26 */ MINDEX,
-	    /* 0x27 */ undefined,   // TODO ALIGNPTS
+	    /* 0x27 */ undefined, // TODO ALIGNPTS
 	    /* 0x28 */ undefined,
-	    /* 0x29 */ undefined,   // TODO UTP
+	    /* 0x29 */ undefined, // TODO UTP
 	    /* 0x2A */ LOOPCALL,
 	    /* 0x2B */ CALL,
 	    /* 0x2C */ FDEF,
-	    /* 0x2D */ undefined,   // ENDF (eaten by FDEF)
+	    /* 0x2D */ undefined, // ENDF (eaten by FDEF)
 	    /* 0x2E */ MDAP.bind(undefined, 0),
 	    /* 0x2F */ MDAP.bind(undefined, 1),
 	    /* 0x30 */ IUP.bind(undefined, yUnitVector),
@@ -10878,14 +10878,14 @@
 	    /* 0x45 */ RCVT,
 	    /* 0x46 */ GC.bind(undefined, 0),
 	    /* 0x47 */ GC.bind(undefined, 1),
-	    /* 0x48 */ undefined,   // TODO SCFS
+	    /* 0x48 */ undefined, // TODO SCFS
 	    /* 0x49 */ MD.bind(undefined, 0),
 	    /* 0x4A */ MD.bind(undefined, 1),
 	    /* 0x4B */ MPPEM,
-	    /* 0x4C */ undefined,   // TODO MPS
+	    /* 0x4C */ undefined, // TODO MPS
 	    /* 0x4D */ FLIPON,
-	    /* 0x4E */ undefined,   // TODO FLIPOFF
-	    /* 0x4F */ undefined,   // TODO DEBUG
+	    /* 0x4E */ undefined, // TODO FLIPOFF
+	    /* 0x4F */ undefined, // TODO DEBUG
 	    /* 0x50 */ LT,
 	    /* 0x51 */ LTEQ,
 	    /* 0x52 */ GT,
@@ -10914,10 +10914,10 @@
 	    /* 0x69 */ ROUND.bind(undefined, 1),
 	    /* 0x6A */ ROUND.bind(undefined, 2),
 	    /* 0x6B */ ROUND.bind(undefined, 3),
-	    /* 0x6C */ undefined,   // TODO NROUND[ab]
-	    /* 0x6D */ undefined,   // TODO NROUND[ab]
-	    /* 0x6E */ undefined,   // TODO NROUND[ab]
-	    /* 0x6F */ undefined,   // TODO NROUND[ab]
+	    /* 0x6C */ undefined, // TODO NROUND[ab]
+	    /* 0x6D */ undefined, // TODO NROUND[ab]
+	    /* 0x6E */ undefined, // TODO NROUND[ab]
+	    /* 0x6F */ undefined, // TODO NROUND[ab]
 	    /* 0x70 */ WCVTF,
 	    /* 0x71 */ DELTAP123.bind(undefined, 2),
 	    /* 0x72 */ DELTAP123.bind(undefined, 3),
@@ -10926,24 +10926,24 @@
 	    /* 0x75 */ DELTAC123.bind(undefined, 3),
 	    /* 0x76 */ SROUND,
 	    /* 0x77 */ S45ROUND,
-	    /* 0x78 */ undefined,   // TODO JROT[]
-	    /* 0x79 */ undefined,   // TODO JROF[]
+	    /* 0x78 */ undefined, // TODO JROT[]
+	    /* 0x79 */ undefined, // TODO JROF[]
 	    /* 0x7A */ ROFF,
 	    /* 0x7B */ undefined,
 	    /* 0x7C */ RUTG,
 	    /* 0x7D */ RDTG,
 	    /* 0x7E */ POP, // actually SANGW, supposed to do only a pop though
 	    /* 0x7F */ POP, // actually AA, supposed to do only a pop though
-	    /* 0x80 */ undefined,   // TODO FLIPPT
-	    /* 0x81 */ undefined,   // TODO FLIPRGON
-	    /* 0x82 */ undefined,   // TODO FLIPRGOFF
+	    /* 0x80 */ undefined, // TODO FLIPPT
+	    /* 0x81 */ undefined, // TODO FLIPRGON
+	    /* 0x82 */ undefined, // TODO FLIPRGOFF
 	    /* 0x83 */ undefined,
 	    /* 0x84 */ undefined,
 	    /* 0x85 */ SCANCTRL,
 	    /* 0x86 */ SDPVTL.bind(undefined, 0),
 	    /* 0x87 */ SDPVTL.bind(undefined, 1),
 	    /* 0x88 */ GETINFO,
-	    /* 0x89 */ undefined,   // TODO IDEF
+	    /* 0x89 */ undefined, // TODO IDEF
 	    /* 0x8A */ ROLL,
 	    /* 0x8B */ MAX,
 	    /* 0x8C */ MIN,
@@ -11061,10 +11061,10 @@
 	    /* 0xFC */ MDRP_MIRP.bind(undefined, 1, 1, 1, 1, 0),
 	    /* 0xFD */ MDRP_MIRP.bind(undefined, 1, 1, 1, 1, 1),
 	    /* 0xFE */ MDRP_MIRP.bind(undefined, 1, 1, 1, 1, 2),
-	    /* 0xFF */ MDRP_MIRP.bind(undefined, 1, 1, 1, 1, 3)
-	];
+	    /* 0xFF */ MDRP_MIRP.bind(undefined, 1, 1, 1, 1, 3),
+  ];
 
-	/*****************************
+  /** ***************************
 	  Mathematical Considerations
 	******************************
 
@@ -11105,7 +11105,6 @@
 
 	   x = rpdx + ( p.y - rpdy ) / pvns
 
-
 	case freedom vector == y-axis:
 	------------------------------
 
@@ -11141,11 +11140,8 @@
 
 	   y = rpdy +  pvns * (p.x - rpdx)
 
-
-
 	generic case:
 	-------------
-
 
 	                              .'(fv)
 	                            .'
@@ -11177,7 +11173,6 @@
 
 	    y - py = fvs * (x - px)
 
-
 	  on pm both equations are true for same x/y
 
 	    y - rpdy = pvns * (x - rpdx)
@@ -11200,8 +11195,6 @@
 
 	    fvs * x - pvns * x = fvs * px - pvns * rpdx - py + rpdy
 
-
-
 	          fvs * px - pvns * rpdx + rpdy - py
 	    x =  -----------------------------------
 	                 fvs - pvns
@@ -11209,8 +11202,6 @@
 	  and:
 
 	    y = fvs * (x - px) + py
-
-
 
 	INTERPOLATE:
 	============
@@ -11224,9 +11215,6 @@
 
 	If the sum of both distances is 0, then move the point by the
 	arithmetic average of the movement of both reference points.
-
-
-
 
 	           (+6)
 	    rp1o *---->*rp1
@@ -11244,10 +11232,7 @@
 	               |...........|.......................|
 	                                  36
 
-
 	-------
-
-
 
 	           (+10)
 	    rp1o *-------->*rp1
@@ -11265,9 +11250,7 @@
 	                   |....|..............|
 	                     5        15
 
-
 	-------
-
 
 	           (+10)
 	    rp1o *-------->*rp1
@@ -11275,12 +11258,10 @@
 	         .         .
 	    rp2o *-------->*rp2
 
-
 	                               (+10)
 	                          po *-------->* p
 
 	-------
-
 
 	           (+10)
 	    rp1o *-------->*rp1
@@ -11288,128 +11269,125 @@
 	         .         .(+30)
 	    rp2o *---------------------------->*rp2
 
-
 	                                        (+25)
 	                          po *----------------------->* p
 
-
-
 	vim: set ts=4 sw=4 expandtab:
-	*****/
+	**** */
 
-	/**
+  /**
 	 * Converts a string into a list of tokens.
 	 */
 
-	/**
+  /**
 	 * Create a new token
 	 * @param {string} char a single char
 	 */
-	function Token(char) {
+  function Token(char) {
 	    this.char = char;
 	    this.state = {};
 	    this.activeState = null;
-	}
+  }
 
-	/**
+  /**
 	 * Create a new context range
 	 * @param {number} startIndex range start index
 	 * @param {number} endOffset range end index offset
 	 * @param {string} contextName owner context name
 	 */
-	function ContextRange(startIndex, endOffset, contextName) {
+  function ContextRange(startIndex, endOffset, contextName) {
 	    this.contextName = contextName;
 	    this.startIndex = startIndex;
 	    this.endOffset = endOffset;
-	}
+  }
 
-	/**
+  /**
 	 * Check context start and end
 	 * @param {string} contextName a unique context name
 	 * @param {function} checkStart a predicate function the indicates a context's start
 	 * @param {function} checkEnd a predicate function the indicates a context's end
 	 */
-	function ContextChecker(contextName, checkStart, checkEnd) {
+  function ContextChecker(contextName, checkStart, checkEnd) {
 	    this.contextName = contextName;
 	    this.openRange = null;
 	    this.ranges = [];
 	    this.checkStart = checkStart;
 	    this.checkEnd = checkEnd;
-	}
+  }
 
-	/**
+  /**
 	 * @typedef ContextParams
 	 * @type Object
 	 * @property {array} context context items
 	 * @property {number} currentIndex current item index
 	 */
 
-	/**
+  /**
 	 * Create a context params
 	 * @param {array} context a list of items
 	 * @param {number} currentIndex current item index
 	 */
-	function ContextParams(context, currentIndex) {
+  function ContextParams(context, currentIndex) {
 	    this.context = context;
 	    this.index = currentIndex;
 	    this.length = context.length;
 	    this.current = context[currentIndex];
 	    this.backtrack = context.slice(0, currentIndex);
 	    this.lookahead = context.slice(currentIndex + 1);
-	}
+  }
 
-	/**
+  /**
 	 * Create an event instance
 	 * @param {string} eventId event unique id
 	 */
-	function Event(eventId) {
+  function Event(eventId) {
 	    this.eventId = eventId;
 	    this.subscribers = [];
-	}
+  }
 
-	/**
+  /**
 	 * Initialize a core events and auto subscribe required event handlers
 	 * @param {any} events an object that enlists core events handlers
 	 */
-	function initializeCoreEvents(events) {
-	    var this$1 = this;
+  function initializeCoreEvents(events) {
+	    const this$1 = this;
 
-	    var coreEvents = [
+	    const coreEvents = [
 	        'start', 'end', 'next', 'newToken', 'contextStart',
 	        'contextEnd', 'insertToken', 'removeToken', 'removeRange',
-	        'replaceToken', 'replaceRange', 'composeRUD', 'updateContextsRanges'
+	        'replaceToken', 'replaceRange', 'composeRUD', 'updateContextsRanges',
 	    ];
 
-	    coreEvents.forEach(function (eventId) {
+	    coreEvents.forEach((eventId) => {
 	        Object.defineProperty(this$1.events, eventId, {
-	            value: new Event(eventId)
+	            value: new Event(eventId),
 	        });
 	    });
 
-	    if (!!events) {
-	        coreEvents.forEach(function (eventId) {
-	            var event = events[eventId];
+	    if (events) {
+	        coreEvents.forEach((eventId) => {
+	            const event = events[eventId];
 	            if (typeof event === 'function') {
 	                this$1.events[eventId].subscribe(event);
 	            }
 	        });
 	    }
-	    var requiresContextUpdate = [
+	    const requiresContextUpdate = [
 	        'insertToken', 'removeToken', 'removeRange',
-	        'replaceToken', 'replaceRange', 'composeRUD'
+	        'replaceToken', 'replaceRange', 'composeRUD',
 	    ];
-	    requiresContextUpdate.forEach(function (eventId) {
+	    requiresContextUpdate.forEach((eventId) => {
 	        this$1.events[eventId].subscribe(
-	            this$1.updateContextsRanges
+	            this$1.updateContextsRanges,
 	        );
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Converts a string into a list of tokens
 	 * @param {any} events tokenizer core events
 	 */
-	function Tokenizer(events) {
+  function Tokenizer(events) {
 	    this.tokens = [];
 	    this.registeredContexts = {};
 	    this.contextCheckers = [];
@@ -11417,203 +11395,200 @@
 	    this.registeredModifiers = [];
 
 	    initializeCoreEvents.call(this, events);
-	}
+  }
 
-	/**
+  /**
 	 * Sets the state of a token, usually called by a state modifier.
 	 * @param {string} key state item key
 	 * @param {any} value state item value
 	 */
-	Token.prototype.setState = function(key, value) {
+  Token.prototype.setState = function (key, value) {
 	    this.state[key] = value;
-	    this.activeState = { key: key, value: this.state[key] };
+	    this.activeState = { key, value: this.state[key] };
 	    return this.activeState;
-	};
+  };
 
-	Token.prototype.getState = function (stateId) {
+  Token.prototype.getState = function (stateId) {
 	    return this.state[stateId] || null;
-	};
+  };
 
-	/**
+  /**
 	 * Checks if an index exists in the tokens list.
 	 * @param {number} index token index
 	 */
-	Tokenizer.prototype.inboundIndex = function(index) {
+  Tokenizer.prototype.inboundIndex = function (index) {
 	    return index >= 0 && index < this.tokens.length;
-	};
+  };
 
-	/**
+  /**
 	 * Compose and apply a list of operations (replace, update, delete)
 	 * @param {array} RUDs replace, update and delete operations
 	 * TODO: Perf. Optimization (lengthBefore === lengthAfter ? dispatch once)
 	 */
-	Tokenizer.prototype.composeRUD = function (RUDs) {
-	    var this$1 = this;
+  Tokenizer.prototype.composeRUD = function (RUDs) {
+	    const this$1 = this;
 
-	    var silent = true;
-	    var state = RUDs.map(function (RUD) { return (
+	    const silent = true;
+	    const state = RUDs.map((RUD) => (
 	        this$1[RUD[0]].apply(this$1, RUD.slice(1).concat(silent))
-	    ); });
-	    var hasFAILObject = function (obj) { return (
-	        typeof obj === 'object' &&
-	        obj.hasOwnProperty('FAIL')
-	    ); };
+	    ));
+	    const hasFAILObject = function (obj) {
+      return (
+	        typeof obj === 'object'
+	        && obj.hasOwnProperty('FAIL')
+	    );
+    };
 	    if (state.every(hasFAILObject)) {
 	        return {
 	            FAIL: "composeRUD: one or more operations hasn't completed successfully",
-	            report: state.filter(hasFAILObject)
+	            report: state.filter(hasFAILObject),
 	        };
 	    }
-	    this.dispatch('composeRUD', [state.filter(function (op) { return !hasFAILObject(op); })]);
-	};
+	    this.dispatch('composeRUD', [state.filter((op) => !hasFAILObject(op))]);
+  };
 
-	/**
+  /**
 	 * Replace a range of tokens with a list of tokens
 	 * @param {number} startIndex range start index
 	 * @param {number} offset range offset
 	 * @param {token} tokens a list of tokens to replace
 	 * @param {boolean} silent dispatch events and update context ranges
 	 */
-	Tokenizer.prototype.replaceRange = function (startIndex, offset, tokens, silent) {
+  Tokenizer.prototype.replaceRange = function (startIndex, offset, tokens, silent) {
 	    offset = offset !== null ? offset : this.tokens.length;
-	    var isTokenType = tokens.every(function (token) { return token instanceof Token; });
+	    const isTokenType = tokens.every((token) => token instanceof Token);
 	    if (!isNaN(startIndex) && this.inboundIndex(startIndex) && isTokenType) {
-	        var replaced = this.tokens.splice.apply(
-	            this.tokens, [startIndex, offset].concat(tokens)
+	        const replaced = this.tokens.splice.apply(
+	            this.tokens, [startIndex, offset].concat(tokens),
 	        );
 	        if (!silent) { this.dispatch('replaceToken', [startIndex, offset, tokens]); }
 	        return [replaced, tokens];
-	    } else {
-	        return { FAIL: 'replaceRange: invalid tokens or startIndex.' };
 	    }
-	};
+	        return { FAIL: 'replaceRange: invalid tokens or startIndex.' };
+  };
 
-	/**
+  /**
 	 * Replace a token with another token
 	 * @param {number} index token index
 	 * @param {token} token a token to replace
 	 * @param {boolean} silent dispatch events and update context ranges
 	 */
-	Tokenizer.prototype.replaceToken = function (index, token, silent) {
+  Tokenizer.prototype.replaceToken = function (index, token, silent) {
 	    if (!isNaN(index) && this.inboundIndex(index) && token instanceof Token) {
-	        var replaced = this.tokens.splice(index, 1, token);
+	        const replaced = this.tokens.splice(index, 1, token);
 	        if (!silent) { this.dispatch('replaceToken', [index, token]); }
 	        return [replaced[0], token];
-	    } else {
-	        return { FAIL: 'replaceToken: invalid token or index.' };
 	    }
-	};
+	        return { FAIL: 'replaceToken: invalid token or index.' };
+  };
 
-	/**
+  /**
 	 * Removes a range of tokens
 	 * @param {number} startIndex range start index
 	 * @param {number} offset range offset
 	 * @param {boolean} silent dispatch events and update context ranges
 	 */
-	Tokenizer.prototype.removeRange = function(startIndex, offset, silent) {
+  Tokenizer.prototype.removeRange = function (startIndex, offset, silent) {
 	    offset = !isNaN(offset) ? offset : this.tokens.length;
-	    var tokens = this.tokens.splice(startIndex, offset);
+	    const tokens = this.tokens.splice(startIndex, offset);
 	    if (!silent) { this.dispatch('removeRange', [tokens, startIndex, offset]); }
 	    return tokens;
-	};
+  };
 
-	/**
+  /**
 	 * Remove a token at a certain index
 	 * @param {number} index token index
 	 * @param {boolean} silent dispatch events and update context ranges
 	 */
-	Tokenizer.prototype.removeToken = function(index, silent) {
+  Tokenizer.prototype.removeToken = function (index, silent) {
 	    if (!isNaN(index) && this.inboundIndex(index)) {
-	        var token = this.tokens.splice(index, 1);
+	        const token = this.tokens.splice(index, 1);
 	        if (!silent) { this.dispatch('removeToken', [token, index]); }
 	        return token;
-	    } else {
-	        return { FAIL: 'removeToken: invalid token index.' };
 	    }
-	};
+	        return { FAIL: 'removeToken: invalid token index.' };
+  };
 
-	/**
+  /**
 	 * Insert a list of tokens at a certain index
 	 * @param {array} tokens a list of tokens to insert
 	 * @param {number} index insert the list of tokens at index
 	 * @param {boolean} silent dispatch events and update context ranges
 	 */
-	Tokenizer.prototype.insertToken = function (tokens, index, silent) {
-	    var tokenType = tokens.every(
-	        function (token) { return token instanceof Token; }
+  Tokenizer.prototype.insertToken = function (tokens, index, silent) {
+	    const tokenType = tokens.every(
+	        (token) => token instanceof Token,
 	    );
 	    if (tokenType) {
 	        this.tokens.splice.apply(
-	            this.tokens, [index, 0].concat(tokens)
+	            this.tokens, [index, 0].concat(tokens),
 	        );
 	        if (!silent) { this.dispatch('insertToken', [tokens, index]); }
 	        return tokens;
-	    } else {
-	        return { FAIL: 'insertToken: invalid token(s).' };
 	    }
-	};
+	        return { FAIL: 'insertToken: invalid token(s).' };
+  };
 
-	/**
+  /**
 	 * A state modifier that is called on 'newToken' event
 	 * @param {string} modifierId state modifier id
 	 * @param {function} condition a predicate function that returns true or false
 	 * @param {function} modifier a function to update token state
 	 */
-	Tokenizer.prototype.registerModifier = function(modifierId, condition, modifier) {
-	    this.events.newToken.subscribe(function(token, contextParams) {
-	        var conditionParams = [token, contextParams];
-	        var canApplyModifier = (
-	            condition === null ||
-	            condition.apply(this, conditionParams) === true
+  Tokenizer.prototype.registerModifier = function (modifierId, condition, modifier) {
+	    this.events.newToken.subscribe(function (token, contextParams) {
+	        const conditionParams = [token, contextParams];
+	        const canApplyModifier = (
+	            condition === null
+	            || condition.apply(this, conditionParams) === true
 	        );
-	        var modifierParams = [token, contextParams];
+	        const modifierParams = [token, contextParams];
 	        if (canApplyModifier) {
-	            var newStateValue = modifier.apply(this, modifierParams);
+	            const newStateValue = modifier.apply(this, modifierParams);
 	            token.setState(modifierId, newStateValue);
 	        }
 	    });
 	    this.registeredModifiers.push(modifierId);
-	};
+  };
 
-	/**
+  /**
 	 * Subscribe a handler to an event
 	 * @param {function} eventHandler an event handler function
 	 */
-	Event.prototype.subscribe = function (eventHandler) {
+  Event.prototype.subscribe = function (eventHandler) {
 	    if (typeof eventHandler === 'function') {
 	        return ((this.subscribers.push(eventHandler)) - 1);
-	    } else {
-	        return { FAIL: ("invalid '" + (this.eventId) + "' event handler")};
 	    }
-	};
+	        return { FAIL: (`invalid '${this.eventId}' event handler`) };
+  };
 
-	/**
+  /**
 	 * Unsubscribe an event handler
 	 * @param {string} subsId subscription id
 	 */
-	Event.prototype.unsubscribe = function (subsId) {
+  Event.prototype.unsubscribe = function (subsId) {
 	    this.subscribers.splice(subsId, 1);
-	};
+  };
 
-	/**
+  /**
 	 * Sets context params current value index
 	 * @param {number} index context params current value index
 	 */
-	ContextParams.prototype.setCurrentIndex = function(index) {
+  ContextParams.prototype.setCurrentIndex = function (index) {
 	    this.index = index;
 	    this.current = this.context[index];
 	    this.backtrack = this.context.slice(0, index);
 	    this.lookahead = this.context.slice(index + 1);
-	};
+  };
 
-	/**
+  /**
 	 * Get an item at an offset from the current value
 	 * example (current value is 3):
 	 *  1    2   [3]   4    5   |   items values
 	 * -2   -1    0    1    2   |   offset values
 	 * @param {number} offset an offset from current value index
 	 */
-	ContextParams.prototype.get = function (offset) {
+  ContextParams.prototype.get = function (offset) {
 	    switch (true) {
 	        case (offset === 0):
 	            return this.current;
@@ -11624,265 +11599,269 @@
 	        default:
 	            return null;
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Converts a context range into a string value
 	 * @param {contextRange} range a context range
 	 */
-	Tokenizer.prototype.rangeToText = function (range) {
+  Tokenizer.prototype.rangeToText = function (range) {
 	    if (range instanceof ContextRange) {
 	        return (
 	            this.getRangeTokens(range)
-	                .map(function (token) { return token.char; }).join('')
+	                .map((token) => token.char).join('')
 	        );
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Converts all tokens into a string
 	 */
-	Tokenizer.prototype.getText = function () {
-	    return this.tokens.map(function (token) { return token.char; }).join('');
-	};
+  Tokenizer.prototype.getText = function () {
+	    return this.tokens.map((token) => token.char).join('');
+  };
 
-	/**
+  /**
 	 * Get a context by name
 	 * @param {string} contextName context name to get
 	 */
-	Tokenizer.prototype.getContext = function (contextName) {
-	    var context = this.registeredContexts[contextName];
-	    return !!context ? context : null;
-	};
+  Tokenizer.prototype.getContext = function (contextName) {
+	    const context = this.registeredContexts[contextName];
+	    return context || null;
+  };
 
-	/**
+  /**
 	 * Subscribes a new event handler to an event
 	 * @param {string} eventName event name to subscribe to
 	 * @param {function} eventHandler a function to be invoked on event
 	 */
-	Tokenizer.prototype.on = function(eventName, eventHandler) {
-	    var event = this.events[eventName];
-	    if (!!event) {
+  Tokenizer.prototype.on = function (eventName, eventHandler) {
+	    const event = this.events[eventName];
+	    if (event) {
 	        return event.subscribe(eventHandler);
-	    } else {
-	        return null;
 	    }
-	};
+	        return null;
+  };
 
-	/**
+  /**
 	 * Dispatches an event
 	 * @param {string} eventName event name
 	 * @param {any} args event handler arguments
 	 */
-	Tokenizer.prototype.dispatch = function(eventName, args) {
-	    var this$1 = this;
+  Tokenizer.prototype.dispatch = function (eventName, args) {
+	    const this$1 = this;
 
-	    var event = this.events[eventName];
+	    const event = this.events[eventName];
 	    if (event instanceof Event) {
-	        event.subscribers.forEach(function (subscriber) {
+	        event.subscribers.forEach((subscriber) => {
 	            subscriber.apply(this$1, args || []);
 	        });
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Register a new context checker
 	 * @param {string} contextName a unique context name
 	 * @param {function} contextStartCheck a predicate function that returns true on context start
 	 * @param {function} contextEndCheck  a predicate function that returns true on context end
 	 * TODO: call tokenize on registration to update context ranges with the new context.
 	 */
-	Tokenizer.prototype.registerContextChecker = function(contextName, contextStartCheck, contextEndCheck) {
-	    if (!!this.getContext(contextName)) { return {
+  Tokenizer.prototype.registerContextChecker = function (contextName, contextStartCheck, contextEndCheck) {
+	    if (this.getContext(contextName)) {
+      return {
 	        FAIL:
-	        ("context name '" + contextName + "' is already registered.")
-	    }; }
-	    if (typeof contextStartCheck !== 'function') { return {
+	        (`context name '${contextName}' is already registered.`),
+	    };
+    }
+	    if (typeof contextStartCheck !== 'function') {
+      return {
 	        FAIL:
-	        "missing context start check."
-	    }; }
-	    if (typeof contextEndCheck !== 'function') { return {
+	        'missing context start check.',
+	    };
+    }
+	    if (typeof contextEndCheck !== 'function') {
+      return {
 	        FAIL:
-	        "missing context end check."
-	    }; }
-	    var contextCheckers = new ContextChecker(
-	        contextName, contextStartCheck, contextEndCheck
+	        'missing context end check.',
+	    };
+    }
+	    const contextCheckers = new ContextChecker(
+	        contextName, contextStartCheck, contextEndCheck,
 	    );
 	    this.registeredContexts[contextName] = contextCheckers;
 	    this.contextCheckers.push(contextCheckers);
 	    return contextCheckers;
-	};
+  };
 
-	/**
+  /**
 	 * Gets a context range tokens
 	 * @param {contextRange} range a context range
 	 */
-	Tokenizer.prototype.getRangeTokens = function(range) {
-	    var endIndex = range.startIndex + range.endOffset;
+  Tokenizer.prototype.getRangeTokens = function (range) {
+	    const endIndex = range.startIndex + range.endOffset;
 	    return [].concat(
 	        this.tokens
-	            .slice(range.startIndex, endIndex)
+	            .slice(range.startIndex, endIndex),
 	    );
-	};
+  };
 
-	/**
+  /**
 	 * Gets the ranges of a context
 	 * @param {string} contextName context name
 	 */
-	Tokenizer.prototype.getContextRanges = function(contextName) {
-	    var context = this.getContext(contextName);
-	    if (!!context) {
+  Tokenizer.prototype.getContextRanges = function (contextName) {
+	    const context = this.getContext(contextName);
+	    if (context) {
 	        return context.ranges;
-	    } else {
-	        return { FAIL: ("context checker '" + contextName + "' is not registered.") };
 	    }
-	};
+	        return { FAIL: (`context checker '${contextName}' is not registered.`) };
+  };
 
-	/**
+  /**
 	 * Resets context ranges to run context update
 	 */
-	Tokenizer.prototype.resetContextsRanges = function () {
-	    var registeredContexts = this.registeredContexts;
-	    for (var contextName in registeredContexts) {
+  Tokenizer.prototype.resetContextsRanges = function () {
+	    const { registeredContexts } = this;
+	    for (const contextName in registeredContexts) {
 	        if (registeredContexts.hasOwnProperty(contextName)) {
-	            var context = registeredContexts[contextName];
+	            const context = registeredContexts[contextName];
 	            context.ranges = [];
 	        }
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Updates context ranges
 	 */
-	Tokenizer.prototype.updateContextsRanges = function () {
+  Tokenizer.prototype.updateContextsRanges = function () {
 	    this.resetContextsRanges();
-	    var chars = this.tokens.map(function (token) { return token.char; });
-	    for (var i = 0; i < chars.length; i++) {
-	        var contextParams = new ContextParams(chars, i);
+	    const chars = this.tokens.map((token) => token.char);
+	    for (let i = 0; i < chars.length; i++) {
+	        const contextParams = new ContextParams(chars, i);
 	        this.runContextCheck(contextParams);
 	    }
 	    this.dispatch('updateContextsRanges', [this.registeredContexts]);
-	};
+  };
 
-	/**
+  /**
 	 * Sets the end offset of an open range
 	 * @param {number} offset range end offset
 	 * @param {string} contextName context name
 	 */
-	Tokenizer.prototype.setEndOffset = function (offset, contextName) {
-	    var startIndex = this.getContext(contextName).openRange.startIndex;
-	    var range = new ContextRange(startIndex, offset, contextName);
-	    var ranges = this.getContext(contextName).ranges;
-	    range.rangeId = contextName + "." + (ranges.length);
+  Tokenizer.prototype.setEndOffset = function (offset, contextName) {
+	    const { startIndex } = this.getContext(contextName).openRange;
+	    const range = new ContextRange(startIndex, offset, contextName);
+	    const { ranges } = this.getContext(contextName);
+	    range.rangeId = `${contextName}.${ranges.length}`;
 	    ranges.push(range);
 	    this.getContext(contextName).openRange = null;
 	    return range;
-	};
+  };
 
-	/**
+  /**
 	 * Runs a context check on the current context
 	 * @param {contextParams} contextParams current context params
 	 */
-	Tokenizer.prototype.runContextCheck = function(contextParams) {
-	    var this$1 = this;
+  Tokenizer.prototype.runContextCheck = function (contextParams) {
+	    const this$1 = this;
 
-	    var index = contextParams.index;
-	    this.contextCheckers.forEach(function (contextChecker) {
-	        var contextName = contextChecker.contextName;
-	        var openRange = this$1.getContext(contextName).openRange;
+	    const { index } = contextParams;
+	    this.contextCheckers.forEach((contextChecker) => {
+	        const { contextName } = contextChecker;
+	        let { openRange } = this$1.getContext(contextName);
 	        if (!openRange && contextChecker.checkStart(contextParams)) {
 	            openRange = new ContextRange(index, null, contextName);
 	            this$1.getContext(contextName).openRange = openRange;
 	            this$1.dispatch('contextStart', [contextName, index]);
 	        }
 	        if (!!openRange && contextChecker.checkEnd(contextParams)) {
-	            var offset = (index - openRange.startIndex) + 1;
-	            var range = this$1.setEndOffset(offset, contextName);
+	            const offset = (index - openRange.startIndex) + 1;
+	            const range = this$1.setEndOffset(offset, contextName);
 	            this$1.dispatch('contextEnd', [contextName, range]);
 	        }
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * Converts a text into a list of tokens
 	 * @param {string} text a text to tokenize
 	 */
-	Tokenizer.prototype.tokenize = function (text) {
+  Tokenizer.prototype.tokenize = function (text) {
 	    this.tokens = [];
 	    this.resetContextsRanges();
-	    var chars = Array.from(text);
+	    const chars = Array.from(text);
 	    this.dispatch('start');
-	    for (var i = 0; i < chars.length; i++) {
-	        var char = chars[i];
-	        var contextParams = new ContextParams(chars, i);
+	    for (let i = 0; i < chars.length; i++) {
+	        const char = chars[i];
+	        const contextParams = new ContextParams(chars, i);
 	        this.dispatch('next', [contextParams]);
 	        this.runContextCheck(contextParams);
-	        var token = new Token(char);
+	        const token = new Token(char);
 	        this.tokens.push(token);
 	        this.dispatch('newToken', [token, contextParams]);
 	    }
 	    this.dispatch('end', [this.tokens]);
 	    return this.tokens;
-	};
+  };
 
-	// ╭─┄┄┄────────────────────────┄─────────────────────────────────────────────╮
-	// ┊ Character Class Assertions ┊ Checks if a char belongs to a certain class ┊
-	// ╰─╾──────────────────────────┄─────────────────────────────────────────────╯
-	// jscs:disable maximumLineLength
-	/**
+  // ╭─┄┄┄────────────────────────┄─────────────────────────────────────────────╮
+  // ┊ Character Class Assertions ┊ Checks if a char belongs to a certain class ┊
+  // ╰─╾──────────────────────────┄─────────────────────────────────────────────╯
+  // jscs:disable maximumLineLength
+  /**
 	 * Check if a char is Arabic
 	 * @param {string} c a single char
 	 */
-	function isArabicChar(c) {
+  function isArabicChar(c) {
 	    return /[\u0600-\u065F\u066A-\u06D2\u06FA-\u06FF]/.test(c);
-	}
+  }
 
-	/**
+  /**
 	 * Check if a char is an isolated arabic char
 	 * @param {string} c a single char
 	 */
-	function isIsolatedArabicChar(char) {
+  function isIsolatedArabicChar(char) {
 	    return /[\u0630\u0690\u0621\u0631\u0661\u0671\u0622\u0632\u0672\u0692\u06C2\u0623\u0673\u0693\u06C3\u0624\u0694\u06C4\u0625\u0675\u0695\u06C5\u06E5\u0676\u0696\u06C6\u0627\u0677\u0697\u06C7\u0648\u0688\u0698\u06C8\u0689\u0699\u06C9\u068A\u06CA\u066B\u068B\u06CB\u068C\u068D\u06CD\u06FD\u068E\u06EE\u06FE\u062F\u068F\u06CF\u06EF]/.test(char);
-	}
+  }
 
-	/**
+  /**
 	 * Check if a char is an Arabic Tashkeel char
 	 * @param {string} c a single char
 	 */
-	function isTashkeelArabicChar(char) {
+  function isTashkeelArabicChar(char) {
 	    return /[\u0600-\u0605\u060C-\u060E\u0610-\u061B\u061E\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED]/.test(char);
-	}
+  }
 
-	/**
+  /**
 	 * Check if a char is Latin
 	 * @param {string} c a single char
 	 */
-	function isLatinChar(c) {
+  function isLatinChar(c) {
 	    return /[A-z]/.test(c);
-	}
+  }
 
-	/**
+  /**
 	 * Check if a char is whitespace char
 	 * @param {string} c a single char
 	 */
-	function isWhiteSpace(c) {
+  function isWhiteSpace(c) {
 	    return /\s/.test(c);
-	}
+  }
 
-	/**
+  /**
 	 * Query a feature by some of it's properties to lookup a glyph substitution.
 	 */
 
-	/**
+  /**
 	 * Create feature query instance
 	 * @param {Font} font opentype font instance
 	 */
-	function FeatureQuery(font) {
+  function FeatureQuery(font) {
 	    this.font = font;
 	    this.features = {};
-	}
+  }
 
-	/**
+  /**
 	 * @typedef SubstitutionAction
 	 * @type Object
 	 * @property {number} id substitution type
@@ -11890,33 +11869,33 @@
 	 * @property {any} substitution substitution value(s)
 	 */
 
-	/**
+  /**
 	 * Create a substitution action instance
 	 * @param {SubstitutionAction} action
 	 */
-	function SubstitutionAction(action) {
+  function SubstitutionAction(action) {
 	    this.id = action.id;
 	    this.tag = action.tag;
 	    this.substitution = action.substitution;
-	}
+  }
 
-	/**
+  /**
 	 * Lookup a coverage table
 	 * @param {number} glyphIndex glyph index
 	 * @param {CoverageTable} coverage coverage table
 	 */
-	function lookupCoverage(glyphIndex, coverage) {
+  function lookupCoverage(glyphIndex, coverage) {
 	    if (!glyphIndex) { return -1; }
 	    switch (coverage.format) {
 	        case 1:
 	            return coverage.glyphs.indexOf(glyphIndex);
 
 	        case 2:
-	            var ranges = coverage.ranges;
-	            for (var i = 0; i < ranges.length; i++) {
-	                var range = ranges[i];
+	            var { ranges } = coverage;
+	            for (let i = 0; i < ranges.length; i++) {
+	                const range = ranges[i];
 	                if (glyphIndex >= range.start && glyphIndex <= range.end) {
-	                    var offset = glyphIndex - range.start;
+	                    const offset = glyphIndex - range.start;
 	                    return range.index + offset;
 	                }
 	            }
@@ -11925,105 +11904,105 @@
 	            return -1; // not found
 	    }
 	    return -1;
-	}
+  }
 
-	/**
+  /**
 	 * Handle a single substitution - format 1
 	 * @param {ContextParams} contextParams context params to lookup
 	 */
-	function singleSubstitutionFormat1(glyphIndex, subtable) {
-	    var substituteIndex = lookupCoverage(glyphIndex, subtable.coverage);
+  function singleSubstitutionFormat1(glyphIndex, subtable) {
+	    const substituteIndex = lookupCoverage(glyphIndex, subtable.coverage);
 	    if (substituteIndex === -1) { return null; }
 	    return glyphIndex + subtable.deltaGlyphId;
-	}
+  }
 
-	/**
+  /**
 	 * Handle a single substitution - format 2
 	 * @param {ContextParams} contextParams context params to lookup
 	 */
-	function singleSubstitutionFormat2(glyphIndex, subtable) {
-	    var substituteIndex = lookupCoverage(glyphIndex, subtable.coverage);
+  function singleSubstitutionFormat2(glyphIndex, subtable) {
+	    const substituteIndex = lookupCoverage(glyphIndex, subtable.coverage);
 	    if (substituteIndex === -1) { return null; }
 	    return subtable.substitute[substituteIndex];
-	}
+  }
 
-	/**
+  /**
 	 * Lookup a list of coverage tables
 	 * @param {any} coverageList a list of coverage tables
 	 * @param {ContextParams} contextParams context params to lookup
 	 */
-	function lookupCoverageList(coverageList, contextParams) {
-	    var lookupList = [];
-	    for (var i = 0; i < coverageList.length; i++) {
-	        var coverage = coverageList[i];
-	        var glyphIndex = contextParams.current;
+  function lookupCoverageList(coverageList, contextParams) {
+	    const lookupList = [];
+	    for (let i = 0; i < coverageList.length; i++) {
+	        const coverage = coverageList[i];
+	        let glyphIndex = contextParams.current;
 	        glyphIndex = Array.isArray(glyphIndex) ? glyphIndex[0] : glyphIndex;
-	        var lookupIndex = lookupCoverage(glyphIndex, coverage);
+	        const lookupIndex = lookupCoverage(glyphIndex, coverage);
 	        if (lookupIndex !== -1) {
 	            lookupList.push(lookupIndex);
 	        }
 	    }
 	    if (lookupList.length !== coverageList.length) { return -1; }
 	    return lookupList;
-	}
+  }
 
-	/**
+  /**
 	 * Handle chaining context substitution - format 3
 	 * @param {ContextParams} contextParams context params to lookup
 	 */
-	function chainingSubstitutionFormat3(contextParams, subtable) {
-	    var lookupsCount = (
-	        subtable.inputCoverage.length +
-	        subtable.lookaheadCoverage.length +
-	        subtable.backtrackCoverage.length
+  function chainingSubstitutionFormat3(contextParams, subtable) {
+	    const lookupsCount = (
+	        subtable.inputCoverage.length
+	        + subtable.lookaheadCoverage.length
+	        + subtable.backtrackCoverage.length
 	    );
 	    if (contextParams.context.length < lookupsCount) { return []; }
 	    // INPUT LOOKUP //
-	    var inputLookups = lookupCoverageList(
-	        subtable.inputCoverage, contextParams
+	    const inputLookups = lookupCoverageList(
+	        subtable.inputCoverage, contextParams,
 	    );
 	    if (inputLookups === -1) { return []; }
 	    // LOOKAHEAD LOOKUP //
-	    var lookaheadOffset = subtable.inputCoverage.length - 1;
+	    const lookaheadOffset = subtable.inputCoverage.length - 1;
 	    if (contextParams.lookahead.length < subtable.lookaheadCoverage.length) { return []; }
-	    var lookaheadContext = contextParams.lookahead.slice(lookaheadOffset);
+	    const lookaheadContext = contextParams.lookahead.slice(lookaheadOffset);
 	    while (lookaheadContext.length && isTashkeelArabicChar(lookaheadContext[0].char)) {
 	        lookaheadContext.shift();
 	    }
-	    var lookaheadParams = new ContextParams(lookaheadContext, 0);
-	    var lookaheadLookups = lookupCoverageList(
-	        subtable.lookaheadCoverage, lookaheadParams
+	    const lookaheadParams = new ContextParams(lookaheadContext, 0);
+	    const lookaheadLookups = lookupCoverageList(
+	        subtable.lookaheadCoverage, lookaheadParams,
 	    );
 	    // BACKTRACK LOOKUP //
-	    var backtrackContext = [].concat(contextParams.backtrack);
+	    const backtrackContext = [].concat(contextParams.backtrack);
 	    backtrackContext.reverse();
 	    while (backtrackContext.length && isTashkeelArabicChar(backtrackContext[0].char)) {
 	        backtrackContext.shift();
 	    }
 	    if (backtrackContext.length < subtable.backtrackCoverage.length) { return []; }
-	    var backtrackParams = new ContextParams(backtrackContext, 0);
-	    var backtrackLookups = lookupCoverageList(
-	        subtable.backtrackCoverage, backtrackParams
+	    const backtrackParams = new ContextParams(backtrackContext, 0);
+	    const backtrackLookups = lookupCoverageList(
+	        subtable.backtrackCoverage, backtrackParams,
 	    );
-	    var contextRulesMatch = (
-	        inputLookups.length === subtable.inputCoverage.length &&
-	        lookaheadLookups.length === subtable.lookaheadCoverage.length &&
-	        backtrackLookups.length === subtable.backtrackCoverage.length
+	    const contextRulesMatch = (
+	        inputLookups.length === subtable.inputCoverage.length
+	        && lookaheadLookups.length === subtable.lookaheadCoverage.length
+	        && backtrackLookups.length === subtable.backtrackCoverage.length
 	    );
-	    var substitutions = [];
+	    const substitutions = [];
 	    if (contextRulesMatch) {
-	        for (var i = 0; i < subtable.lookupRecords.length; i++) {
-	            var lookupRecord = subtable.lookupRecords[i];
-	            var lookupListIndex = lookupRecord.lookupListIndex;
-	            var lookupTable = this.getLookupByIndex(lookupListIndex);
-	            for (var s = 0; s < lookupTable.subtables.length; s++) {
-	                var subtable$1 = lookupTable.subtables[s];
-	                var lookup = this.getLookupMethod(lookupTable, subtable$1);
-	                var substitutionType = this.getSubstitutionType(lookupTable, subtable$1);
+	        for (let i = 0; i < subtable.lookupRecords.length; i++) {
+	            const lookupRecord = subtable.lookupRecords[i];
+	            const { lookupListIndex } = lookupRecord;
+	            const lookupTable = this.getLookupByIndex(lookupListIndex);
+	            for (let s = 0; s < lookupTable.subtables.length; s++) {
+	                const subtable$1 = lookupTable.subtables[s];
+	                const lookup = this.getLookupMethod(lookupTable, subtable$1);
+	                const substitutionType = this.getSubstitutionType(lookupTable, subtable$1);
 	                if (substitutionType === '12') {
-	                    for (var n = 0; n < inputLookups.length; n++) {
-	                        var glyphIndex = contextParams.get(n);
-	                        var substitution = lookup(glyphIndex);
+	                    for (let n = 0; n < inputLookups.length; n++) {
+	                        const glyphIndex = contextParams.get(n);
+	                        const substitution = lookup(glyphIndex);
 	                        if (substitution) { substitutions.push(substitution); }
 	                    }
 	                }
@@ -12031,169 +12010,180 @@
 	        }
 	    }
 	    return substitutions;
-	}
+  }
 
-	/**
+  /**
 	 * Handle ligature substitution - format 1
 	 * @param {ContextParams} contextParams context params to lookup
 	 */
-	function ligatureSubstitutionFormat1(contextParams, subtable) {
+  function ligatureSubstitutionFormat1(contextParams, subtable) {
 	    // COVERAGE LOOKUP //
-	    var glyphIndex = contextParams.current;
-	    var ligSetIndex = lookupCoverage(glyphIndex, subtable.coverage);
+	    const glyphIndex = contextParams.current;
+	    const ligSetIndex = lookupCoverage(glyphIndex, subtable.coverage);
 	    if (ligSetIndex === -1) { return null; }
 	    // COMPONENTS LOOKUP
 	    // (!) note, components are ordered in the written direction.
-	    var ligature;
-	    var ligatureSet = subtable.ligatureSets[ligSetIndex];
-	    for (var s = 0; s < ligatureSet.length; s++) {
+	    let ligature;
+	    const ligatureSet = subtable.ligatureSets[ligSetIndex];
+	    for (let s = 0; s < ligatureSet.length; s++) {
 	        ligature = ligatureSet[s];
-	        for (var l = 0; l < ligature.components.length; l++) {
-	            var lookaheadItem = contextParams.lookahead[l];
-	            var component = ligature.components[l];
+	        for (let l = 0; l < ligature.components.length; l++) {
+	            const lookaheadItem = contextParams.lookahead[l];
+	            const component = ligature.components[l];
 	            if (lookaheadItem !== component) { break; }
 	            if (l === ligature.components.length - 1) { return ligature; }
 	        }
 	    }
 	    return null;
-	}
+  }
 
-	/**
+  /**
 	 * Handle decomposition substitution - format 1
 	 * @param {number} glyphIndex glyph index
 	 * @param {any} subtable subtable
 	 */
-	function decompositionSubstitutionFormat1(glyphIndex, subtable) {
-	    var substituteIndex = lookupCoverage(glyphIndex, subtable.coverage);
+  function decompositionSubstitutionFormat1(glyphIndex, subtable) {
+	    const substituteIndex = lookupCoverage(glyphIndex, subtable.coverage);
 	    if (substituteIndex === -1) { return null; }
 	    return subtable.sequences[substituteIndex];
-	}
+  }
 
-	/**
+  /**
 	 * Get default script features indexes
 	 */
-	FeatureQuery.prototype.getDefaultScriptFeaturesIndexes = function () {
-	    var scripts = this.font.tables.gsub.scripts;
-	    for (var s = 0; s < scripts.length; s++) {
-	        var script = scripts[s];
-	        if (script.tag === 'DFLT') { return (
+  FeatureQuery.prototype.getDefaultScriptFeaturesIndexes = function () {
+	    const { scripts } = this.font.tables.gsub;
+	    for (let s = 0; s < scripts.length; s++) {
+	        const script = scripts[s];
+	        if (script.tag === 'DFLT') {
+        return (
 	            script.script.defaultLangSys.featureIndexes
-	        ); }
+	        );
+      }
 	    }
 	    return [];
-	};
+  };
 
-	/**
+  /**
 	 * Get feature indexes of a specific script
 	 * @param {string} scriptTag script tag
 	 */
-	FeatureQuery.prototype.getScriptFeaturesIndexes = function(scriptTag) {
-	    var tables = this.font.tables;
+  FeatureQuery.prototype.getScriptFeaturesIndexes = function (scriptTag) {
+	    const { tables } = this.font;
 	    if (!tables.gsub) { return []; }
 	    if (!scriptTag) { return this.getDefaultScriptFeaturesIndexes(); }
-	    var scripts = this.font.tables.gsub.scripts;
-	    for (var i = 0; i < scripts.length; i++) {
-	        var script = scripts[i];
+	    const { scripts } = this.font.tables.gsub;
+	    for (let i = 0; i < scripts.length; i++) {
+	        const script = scripts[i];
 	        if (script.tag === scriptTag && script.script.defaultLangSys) {
 	            return script.script.defaultLangSys.featureIndexes;
-	        } else {
-	            var langSysRecords = script.langSysRecords;
-	            if (!!langSysRecords) {
-	                for (var j = 0; j < langSysRecords.length; j++) {
-	                    var langSysRecord = langSysRecords[j];
+	        }
+	            const { langSysRecords } = script;
+	            if (langSysRecords) {
+	                for (let j = 0; j < langSysRecords.length; j++) {
+	                    const langSysRecord = langSysRecords[j];
 	                    if (langSysRecord.tag === scriptTag) {
-	                        var langSys = langSysRecord.langSys;
+	                        const { langSys } = langSysRecord;
 	                        return langSys.featureIndexes;
 	                    }
 	                }
 	            }
-	        }
 	    }
 	    return this.getDefaultScriptFeaturesIndexes();
-	};
+  };
 
-	/**
+  /**
 	 * Map a feature tag to a gsub feature
 	 * @param {any} features gsub features
 	 * @param {string} scriptTag script tag
 	 */
-	FeatureQuery.prototype.mapTagsToFeatures = function (features, scriptTag) {
-	    var tags = {};
-	    for (var i = 0; i < features.length; i++) {
-	        var tag = features[i].tag;
-	        var feature = features[i].feature;
+  FeatureQuery.prototype.mapTagsToFeatures = function (features, scriptTag) {
+	    const tags = {};
+	    for (let i = 0; i < features.length; i++) {
+	        const { tag } = features[i];
+	        const { feature } = features[i];
 	        tags[tag] = feature;
 	    }
 	    this.features[scriptTag].tags = tags;
-	};
+  };
 
-	/**
+  /**
 	 * Get features of a specific script
 	 * @param {string} scriptTag script tag
 	 */
-	FeatureQuery.prototype.getScriptFeatures = function (scriptTag) {
-	    var features = this.features[scriptTag];
+  FeatureQuery.prototype.getScriptFeatures = function (scriptTag) {
+	    let features = this.features[scriptTag];
 	    if (this.features.hasOwnProperty(scriptTag)) { return features; }
-	    var featuresIndexes = this.getScriptFeaturesIndexes(scriptTag);
+	    const featuresIndexes = this.getScriptFeaturesIndexes(scriptTag);
 	    if (!featuresIndexes) { return null; }
-	    var gsub = this.font.tables.gsub;
-	    features = featuresIndexes.map(function (index) { return gsub.features[index]; });
+	    const { gsub } = this.font.tables;
+	    features = featuresIndexes.map((index) => gsub.features[index]);
 	    this.features[scriptTag] = features;
 	    this.mapTagsToFeatures(features, scriptTag);
 	    return features;
-	};
+  };
 
-	/**
+  /**
 	 * Get substitution type
 	 * @param {any} lookupTable lookup table
 	 * @param {any} subtable subtable
 	 */
-	FeatureQuery.prototype.getSubstitutionType = function(lookupTable, subtable) {
-	    var lookupType = lookupTable.lookupType.toString();
-	    var substFormat = subtable.substFormat.toString();
+  FeatureQuery.prototype.getSubstitutionType = function (lookupTable, subtable) {
+	    const lookupType = lookupTable.lookupType.toString();
+	    const substFormat = subtable.substFormat.toString();
 	    return lookupType + substFormat;
-	};
+  };
 
-	/**
+  /**
 	 * Get lookup method
 	 * @param {any} lookupTable lookup table
 	 * @param {any} subtable subtable
 	 */
-	FeatureQuery.prototype.getLookupMethod = function(lookupTable, subtable) {
-	    var this$1 = this;
+  FeatureQuery.prototype.getLookupMethod = function (lookupTable, subtable) {
+	    const this$1 = this;
 
-	    var substitutionType = this.getSubstitutionType(lookupTable, subtable);
+	    const substitutionType = this.getSubstitutionType(lookupTable, subtable);
 	    switch (substitutionType) {
 	        case '11':
-	            return function (glyphIndex) { return singleSubstitutionFormat1.apply(
-	                this$1, [glyphIndex, subtable]
-	            ); };
+	            return function (glyphIndex) {
+          return singleSubstitutionFormat1.apply(
+	                this$1, [glyphIndex, subtable],
+	            );
+        };
 	        case '12':
-	            return function (glyphIndex) { return singleSubstitutionFormat2.apply(
-	                this$1, [glyphIndex, subtable]
-	            ); };
+	            return function (glyphIndex) {
+          return singleSubstitutionFormat2.apply(
+	                this$1, [glyphIndex, subtable],
+	            );
+        };
 	        case '63':
-	            return function (contextParams) { return chainingSubstitutionFormat3.apply(
-	                this$1, [contextParams, subtable]
-	            ); };
+	            return function (contextParams) {
+          return chainingSubstitutionFormat3.apply(
+	                this$1, [contextParams, subtable],
+	            );
+        };
 	        case '41':
-	            return function (contextParams) { return ligatureSubstitutionFormat1.apply(
-	                this$1, [contextParams, subtable]
-	            ); };
+	            return function (contextParams) {
+          return ligatureSubstitutionFormat1.apply(
+	                this$1, [contextParams, subtable],
+	            );
+        };
 	        case '21':
-	            return function (glyphIndex) { return decompositionSubstitutionFormat1.apply(
-	                this$1, [glyphIndex, subtable]
-	            ); };
+	            return function (glyphIndex) {
+          return decompositionSubstitutionFormat1.apply(
+	                this$1, [glyphIndex, subtable],
+	            );
+        };
 	        default:
 	            throw new Error(
-	                "lookupType: " + (lookupTable.lookupType) + " - " +
-	                "substFormat: " + (subtable.substFormat) + " " +
-	                "is not yet supported"
+	                `lookupType: ${lookupTable.lookupType} - `
+	                + `substFormat: ${subtable.substFormat} `
+	                + 'is not yet supported',
 	            );
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * [ LOOKUP TYPES ]
 	 * -------------------------------
 	 * Single                        1;
@@ -12208,7 +12198,7 @@
 	 *
 	 */
 
-	/**
+  /**
 	 * @typedef FQuery
 	 * @type Object
 	 * @param {string} tag feature tag
@@ -12216,37 +12206,39 @@
 	 * @param {ContextParams} contextParams context params
 	 */
 
-	/**
+  /**
 	 * Lookup a feature using a query parameters
 	 * @param {FQuery} query feature query
 	 */
-	FeatureQuery.prototype.lookupFeature = function (query) {
-	    var contextParams = query.contextParams;
-	    var currentIndex = contextParams.index;
-	    var feature = this.getFeature({
-	        tag: query.tag, script: query.script
+  FeatureQuery.prototype.lookupFeature = function (query) {
+	    let { contextParams } = query;
+	    const currentIndex = contextParams.index;
+	    const feature = this.getFeature({
+	        tag: query.tag, script: query.script,
 	    });
-	    if (!feature) { return new Error(
-	        "font '" + (this.font.names.fullName.en) + "' " +
-	        "doesn't support feature '" + (query.tag) + "' " +
-	        "for script '" + (query.script) + "'."
-	    ); }
-	    var lookups = this.getFeatureLookups(feature);
-	    var substitutions = [].concat(contextParams.context);
-	    for (var l = 0; l < lookups.length; l++) {
-	        var lookupTable = lookups[l];
-	        var subtables = this.getLookupSubtables(lookupTable);
-	        for (var s = 0; s < subtables.length; s++) {
-	            var subtable = subtables[s];
-	            var substType = this.getSubstitutionType(lookupTable, subtable);
-	            var lookup = this.getLookupMethod(lookupTable, subtable);
-	            var substitution = (void 0);
+	    if (!feature) {
+      return new Error(
+	        `font '${this.font.names.fullName.en}' `
+	        + `doesn't support feature '${query.tag}' `
+	        + `for script '${query.script}'.`,
+	    );
+    }
+	    const lookups = this.getFeatureLookups(feature);
+	    const substitutions = [].concat(contextParams.context);
+	    for (let l = 0; l < lookups.length; l++) {
+	        const lookupTable = lookups[l];
+	        const subtables = this.getLookupSubtables(lookupTable);
+	        for (let s = 0; s < subtables.length; s++) {
+	            const subtable = subtables[s];
+	            const substType = this.getSubstitutionType(lookupTable, subtable);
+	            const lookup = this.getLookupMethod(lookupTable, subtable);
+	            let substitution = (void 0);
 	            switch (substType) {
 	                case '11':
 	                    substitution = lookup(contextParams.current);
 	                    if (substitution) {
 	                        substitutions.splice(currentIndex, 1, new SubstitutionAction({
-	                            id: 11, tag: query.tag, substitution: substitution
+	                            id: 11, tag: query.tag, substitution,
 	                        }));
 	                    }
 	                    break;
@@ -12254,7 +12246,7 @@
 	                    substitution = lookup(contextParams.current);
 	                    if (substitution) {
 	                        substitutions.splice(currentIndex, 1, new SubstitutionAction({
-	                            id: 12, tag: query.tag, substitution: substitution
+	                            id: 12, tag: query.tag, substitution,
 	                        }));
 	                    }
 	                    break;
@@ -12262,7 +12254,7 @@
 	                    substitution = lookup(contextParams);
 	                    if (Array.isArray(substitution) && substitution.length) {
 	                        substitutions.splice(currentIndex, 1, new SubstitutionAction({
-	                            id: 63, tag: query.tag, substitution: substitution
+	                            id: 63, tag: query.tag, substitution,
 	                        }));
 	                    }
 	                    break;
@@ -12270,7 +12262,7 @@
 	                    substitution = lookup(contextParams);
 	                    if (substitution) {
 	                        substitutions.splice(currentIndex, 1, new SubstitutionAction({
-	                            id: 41, tag: query.tag, substitution: substitution
+	                            id: 41, tag: query.tag, substitution,
 	                        }));
 	                    }
 	                    break;
@@ -12278,7 +12270,7 @@
 	                    substitution = lookup(contextParams.current);
 	                    if (substitution) {
 	                        substitutions.splice(currentIndex, 1, new SubstitutionAction({
-	                            id: 21, tag: query.tag, substitution: substitution
+	                            id: 21, tag: query.tag, substitution,
 	                        }));
 	                    }
 	                    break;
@@ -12289,112 +12281,114 @@
 	        }
 	    }
 	    return substitutions.length ? substitutions : null;
-	};
+  };
 
-	/**
+  /**
 	 * Checks if a font supports a specific features
 	 * @param {FQuery} query feature query object
 	 */
-	FeatureQuery.prototype.supports = function (query) {
+  FeatureQuery.prototype.supports = function (query) {
 	    if (!query.script) { return false; }
 	    this.getScriptFeatures(query.script);
-	    var supportedScript = this.features.hasOwnProperty(query.script);
+	    const supportedScript = this.features.hasOwnProperty(query.script);
 	    if (!query.tag) { return supportedScript; }
-	    var supportedFeature = (
-	        this.features[query.script].some(function (feature) { return feature.tag === query.tag; })
+	    const supportedFeature = (
+	        this.features[query.script].some((feature) => feature.tag === query.tag)
 	    );
 	    return supportedScript && supportedFeature;
-	};
+  };
 
-	/**
+  /**
 	 * Get lookup table subtables
 	 * @param {any} lookupTable lookup table
 	 */
-	FeatureQuery.prototype.getLookupSubtables = function (lookupTable) {
+  FeatureQuery.prototype.getLookupSubtables = function (lookupTable) {
 	    return lookupTable.subtables || null;
-	};
+  };
 
-	/**
+  /**
 	 * Get lookup table by index
 	 * @param {number} index lookup table index
 	 */
-	FeatureQuery.prototype.getLookupByIndex = function (index) {
-	    var lookups = this.font.tables.gsub.lookups;
+  FeatureQuery.prototype.getLookupByIndex = function (index) {
+	    const { lookups } = this.font.tables.gsub;
 	    return lookups[index] || null;
-	};
+  };
 
-	/**
+  /**
 	 * Get lookup tables for a feature
 	 * @param {string} feature
 	 */
-	FeatureQuery.prototype.getFeatureLookups = function (feature) {
+  FeatureQuery.prototype.getFeatureLookups = function (feature) {
 	    // TODO: memoize
 	    return feature.lookupListIndexes.map(this.getLookupByIndex.bind(this));
-	};
+  };
 
-	/**
+  /**
 	 * Query a feature by it's properties
 	 * @param {any} query an object that describes the properties of a query
 	 */
-	FeatureQuery.prototype.getFeature = function getFeature(query) {
-	    if (!this.font) { return { FAIL: "No font was found"}; }
+  FeatureQuery.prototype.getFeature = function getFeature(query) {
+	    if (!this.font) { return { FAIL: 'No font was found' }; }
 	    if (!this.features.hasOwnProperty(query.script)) {
 	        this.getScriptFeatures(query.script);
 	    }
-	    var scriptFeatures = this.features[query.script];
-	    if (!scriptFeatures) { return (
-	        { FAIL: ("No feature for script " + (query.script))}
-	    ); }
+	    const scriptFeatures = this.features[query.script];
+	    if (!scriptFeatures) {
+      return (
+	        { FAIL: (`No feature for script ${query.script}`) }
+	    );
+    }
 	    if (!scriptFeatures.tags[query.tag]) { return null; }
 	    return this.features[query.script].tags[query.tag];
-	};
+  };
 
-	/**
+  /**
 	 * Arabic word context checkers
 	 */
 
-	function arabicWordStartCheck(contextParams) {
-	    var char = contextParams.current;
-	    var prevChar = contextParams.get(-1);
+  function arabicWordStartCheck(contextParams) {
+	    const char = contextParams.current;
+	    const prevChar = contextParams.get(-1);
 	    return (
 	        // ? arabic first char
-	        (prevChar === null && isArabicChar(char)) ||
+	        (prevChar === null && isArabicChar(char))
 	        // ? arabic char preceded with a non arabic char
-	        (!isArabicChar(prevChar) && isArabicChar(char))
+	        || (!isArabicChar(prevChar) && isArabicChar(char))
 	    );
-	}
+  }
 
-	function arabicWordEndCheck(contextParams) {
-	    var nextChar = contextParams.get(1);
+  function arabicWordEndCheck(contextParams) {
+	    const nextChar = contextParams.get(1);
 	    return (
 	        // ? last arabic char
-	        (nextChar === null) ||
+	        (nextChar === null)
 	        // ? next char is not arabic
-	        (!isArabicChar(nextChar))
+	        || (!isArabicChar(nextChar))
 	    );
-	}
+  }
 
-	var arabicWordCheck = {
+  const arabicWordCheck = {
 	    startCheck: arabicWordStartCheck,
-	    endCheck: arabicWordEndCheck
-	};
+	    endCheck: arabicWordEndCheck,
+  };
 
-	/**
+  /**
 	 * Arabic sentence context checkers
 	 */
 
-	function arabicSentenceStartCheck(contextParams) {
-	    var char = contextParams.current;
-	    var prevChar = contextParams.get(-1);
+  function arabicSentenceStartCheck(contextParams) {
+	    const char = contextParams.current;
+	    const prevChar = contextParams.get(-1);
 	    return (
 	        // ? an arabic char preceded with a non arabic char
-	        (isArabicChar(char) || isTashkeelArabicChar(char)) &&
-	        !isArabicChar(prevChar)
+	        (isArabicChar(char) || isTashkeelArabicChar(char))
+	        && !isArabicChar(prevChar)
 	    );
-	}
+  }
 
-	function arabicSentenceEndCheck(contextParams) {
-	    var nextChar = contextParams.get(1);
+  function arabicSentenceEndCheck(contextParams) {
+	    const nextChar = contextParams.get(1);
 	    switch (true) {
 	        case nextChar === null:
 	            return true;
@@ -12402,10 +12396,10 @@
 	            var nextIsWhitespace = isWhiteSpace(nextChar);
 	            if (!nextIsWhitespace) { return true; }
 	            if (nextIsWhitespace) {
-	                var arabicCharAhead = false;
+	                let arabicCharAhead = false;
 	                arabicCharAhead = (
 	                    contextParams.lookahead.some(
-	                        function (c) { return isArabicChar(c) || isTashkeelArabicChar(c); }
+	                        (c) => isArabicChar(c) || isTashkeelArabicChar(c),
 	                    )
 	                );
 	                if (!arabicCharAhead) { return true; }
@@ -12414,461 +12408,462 @@
 	        default:
 	            return false;
 	    }
-	}
+  }
 
-	var arabicSentenceCheck = {
+  const arabicSentenceCheck = {
 	    startCheck: arabicSentenceStartCheck,
-	    endCheck: arabicSentenceEndCheck
-	};
+	    endCheck: arabicSentenceEndCheck,
+  };
 
-	/**
+  /**
 	 * Apply single substitution format 1
 	 * @param {Array} substitutions substitutions
 	 * @param {any} tokens a list of tokens
 	 * @param {number} index token index
 	 */
-	function singleSubstitutionFormat1$1(action, tokens, index) {
+  function singleSubstitutionFormat1$1(action, tokens, index) {
 	    tokens[index].setState(action.tag, action.substitution);
-	}
+  }
 
-	/**
+  /**
 	 * Apply single substitution format 2
 	 * @param {Array} substitutions substitutions
 	 * @param {any} tokens a list of tokens
 	 * @param {number} index token index
 	 */
-	function singleSubstitutionFormat2$1(action, tokens, index) {
+  function singleSubstitutionFormat2$1(action, tokens, index) {
 	    tokens[index].setState(action.tag, action.substitution);
-	}
+  }
 
-	/**
+  /**
 	 * Apply chaining context substitution format 3
 	 * @param {Array} substitutions substitutions
 	 * @param {any} tokens a list of tokens
 	 * @param {number} index token index
 	 */
-	function chainingSubstitutionFormat3$1(action, tokens, index) {
-	    action.substitution.forEach(function (subst, offset) {
-	        var token = tokens[index + offset];
+  function chainingSubstitutionFormat3$1(action, tokens, index) {
+	    action.substitution.forEach((subst, offset) => {
+	        const token = tokens[index + offset];
 	        token.setState(action.tag, subst);
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Apply ligature substitution format 1
 	 * @param {Array} substitutions substitutions
 	 * @param {any} tokens a list of tokens
 	 * @param {number} index token index
 	 */
-	function ligatureSubstitutionFormat1$1(action, tokens, index) {
-	    var token = tokens[index];
+  function ligatureSubstitutionFormat1$1(action, tokens, index) {
+	    let token = tokens[index];
 	    token.setState(action.tag, action.substitution.ligGlyph);
-	    var compsCount = action.substitution.components.length;
-	    for (var i = 0; i < compsCount; i++) {
+	    const compsCount = action.substitution.components.length;
+	    for (let i = 0; i < compsCount; i++) {
 	        token = tokens[index + i + 1];
 	        token.setState('deleted', true);
 	    }
-	}
+  }
 
-	/**
+  /**
 	 * Supported substitutions
 	 */
-	var SUBSTITUTIONS = {
+  const SUBSTITUTIONS = {
 	    11: singleSubstitutionFormat1$1,
 	    12: singleSubstitutionFormat2$1,
 	    63: chainingSubstitutionFormat3$1,
-	    41: ligatureSubstitutionFormat1$1
-	};
+	    41: ligatureSubstitutionFormat1$1,
+  };
 
-	/**
+  /**
 	 * Apply substitutions to a list of tokens
 	 * @param {Array} substitutions substitutions
 	 * @param {any} tokens a list of tokens
 	 * @param {number} index token index
 	 */
-	function applySubstitution(action, tokens, index) {
+  function applySubstitution(action, tokens, index) {
 	    if (action instanceof SubstitutionAction && SUBSTITUTIONS[action.id]) {
 	        SUBSTITUTIONS[action.id](action, tokens, index);
 	    }
-	}
+  }
 
-	/**
+  /**
 	 * Apply Arabic presentation forms to a range of tokens
 	 */
 
-	/**
+  /**
 	 * Check if a char can be connected to it's preceding char
 	 * @param {ContextParams} charContextParams context params of a char
 	 */
-	function willConnectPrev(charContextParams) {
-	    var backtrack = [].concat(charContextParams.backtrack);
-	    for (var i = backtrack.length - 1; i >= 0; i--) {
-	        var prevChar = backtrack[i];
-	        var isolated = isIsolatedArabicChar(prevChar);
-	        var tashkeel = isTashkeelArabicChar(prevChar);
+  function willConnectPrev(charContextParams) {
+	    const backtrack = [].concat(charContextParams.backtrack);
+	    for (let i = backtrack.length - 1; i >= 0; i--) {
+	        const prevChar = backtrack[i];
+	        const isolated = isIsolatedArabicChar(prevChar);
+	        const tashkeel = isTashkeelArabicChar(prevChar);
 	        if (!isolated && !tashkeel) { return true; }
 	        if (isolated) { return false; }
 	    }
 	    return false;
-	}
+  }
 
-	/**
+  /**
 	 * Check if a char can be connected to it's proceeding char
 	 * @param {ContextParams} charContextParams context params of a char
 	 */
-	function willConnectNext(charContextParams) {
+  function willConnectNext(charContextParams) {
 	    if (isIsolatedArabicChar(charContextParams.current)) { return false; }
-	    for (var i = 0; i < charContextParams.lookahead.length; i++) {
-	        var nextChar = charContextParams.lookahead[i];
-	        var tashkeel = isTashkeelArabicChar(nextChar);
+	    for (let i = 0; i < charContextParams.lookahead.length; i++) {
+	        const nextChar = charContextParams.lookahead[i];
+	        const tashkeel = isTashkeelArabicChar(nextChar);
 	        if (!tashkeel) { return true; }
 	    }
 	    return false;
-	}
+  }
 
-	/**
+  /**
 	 * Apply arabic presentation forms to a list of tokens
 	 * @param {ContextRange} range a range of tokens
 	 */
-	function arabicPresentationForms(range) {
-	    var this$1 = this;
+  function arabicPresentationForms(range) {
+	    const this$1 = this;
 
-	    var script = 'arab';
-	    var tags = this.featuresTags[script];
-	    var tokens = this.tokenizer.getRangeTokens(range);
+	    const script = 'arab';
+	    const tags = this.featuresTags[script];
+	    const tokens = this.tokenizer.getRangeTokens(range);
 	    if (tokens.length === 1) { return; }
-	    var contextParams = new ContextParams(
-	        tokens.map(function (token) { return token.getState('glyphIndex'); }
-	    ), 0);
-	    var charContextParams = new ContextParams(
-	        tokens.map(function (token) { return token.char; }
-	    ), 0);
-	    tokens.forEach(function (token, index) {
+	    const contextParams = new ContextParams(
+	        tokens.map((token) => token.getState('glyphIndex')), 0,
+    );
+	    const charContextParams = new ContextParams(
+	        tokens.map((token) => token.char), 0,
+    );
+	    tokens.forEach((token, index) => {
 	        if (isTashkeelArabicChar(token.char)) { return; }
 	        contextParams.setCurrentIndex(index);
 	        charContextParams.setCurrentIndex(index);
-	        var CONNECT = 0; // 2 bits 00 (10: can connect next) (01: can connect prev)
-	        if (willConnectPrev(charContextParams)) { CONNECT |= 1; }
-	        if (willConnectNext(charContextParams)) { CONNECT |= 2; }
-	        var tag;
+	        let CONNECT = 0; // 2 bits 00 (10: can connect next) (01: can connect prev)
+	        if (willConnectPrev(charContextParams)) { CONNECT = CONNECT | 1; }
+	        if (willConnectNext(charContextParams)) { CONNECT = CONNECT | 2; }
+	        let tag;
 	        switch (CONNECT) {
 	            case 1: (tag = 'fina'); break;
 	            case 2: (tag = 'init'); break;
 	            case 3: (tag = 'medi'); break;
 	        }
 	        if (tags.indexOf(tag) === -1) { return; }
-	        var substitutions = this$1.query.lookupFeature({
-	            tag: tag, script: script, contextParams: contextParams
+	        const substitutions = this$1.query.lookupFeature({
+	            tag, script, contextParams,
 	        });
 	        if (substitutions instanceof Error) { return console.info(substitutions.message); }
-	        substitutions.forEach(function (action, index) {
+	        substitutions.forEach((action, index) => {
 	            if (action instanceof SubstitutionAction) {
 	                applySubstitution(action, tokens, index);
 	                contextParams.context[index] = action.substitution;
 	            }
 	        });
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Apply Arabic required ligatures feature to a range of tokens
 	 */
 
-	/**
+  /**
 	 * Update context params
 	 * @param {any} tokens a list of tokens
 	 * @param {number} index current item index
 	 */
-	function getContextParams(tokens, index) {
-	    var context = tokens.map(function (token) { return token.activeState.value; });
+  function getContextParams(tokens, index) {
+	    const context = tokens.map((token) => token.activeState.value);
 	    return new ContextParams(context, index || 0);
-	}
+  }
 
-	/**
+  /**
 	 * Apply Arabic required ligatures to a context range
 	 * @param {ContextRange} range a range of tokens
 	 */
-	function arabicRequiredLigatures(range) {
-	    var this$1 = this;
+  function arabicRequiredLigatures(range) {
+	    const this$1 = this;
 
-	    var script = 'arab';
-	    var tokens = this.tokenizer.getRangeTokens(range);
-	    var contextParams = getContextParams(tokens);
-	    contextParams.context.forEach(function (glyphIndex, index) {
+	    const script = 'arab';
+	    const tokens = this.tokenizer.getRangeTokens(range);
+	    let contextParams = getContextParams(tokens);
+	    contextParams.context.forEach((glyphIndex, index) => {
 	        contextParams.setCurrentIndex(index);
-	        var substitutions = this$1.query.lookupFeature({
-	            tag: 'rlig', script: script, contextParams: contextParams
+	        const substitutions = this$1.query.lookupFeature({
+	            tag: 'rlig', script, contextParams,
 	        });
 	        if (substitutions.length) {
 	            substitutions.forEach(
-	                function (action) { return applySubstitution(action, tokens, index); }
+	                (action) => applySubstitution(action, tokens, index),
 	            );
 	            contextParams = getContextParams(tokens);
 	        }
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Latin word context checkers
 	 */
 
-	function latinWordStartCheck(contextParams) {
-	    var char = contextParams.current;
-	    var prevChar = contextParams.get(-1);
+  function latinWordStartCheck(contextParams) {
+	    const char = contextParams.current;
+	    const prevChar = contextParams.get(-1);
 	    return (
 	        // ? latin first char
-	        (prevChar === null && isLatinChar(char)) ||
+	        (prevChar === null && isLatinChar(char))
 	        // ? latin char preceded with a non latin char
-	        (!isLatinChar(prevChar) && isLatinChar(char))
+	        || (!isLatinChar(prevChar) && isLatinChar(char))
 	    );
-	}
+  }
 
-	function latinWordEndCheck(contextParams) {
-	    var nextChar = contextParams.get(1);
+  function latinWordEndCheck(contextParams) {
+	    const nextChar = contextParams.get(1);
 	    return (
 	        // ? last latin char
-	        (nextChar === null) ||
+	        (nextChar === null)
 	        // ? next char is not latin
-	        (!isLatinChar(nextChar))
+	        || (!isLatinChar(nextChar))
 	    );
-	}
+  }
 
-	var latinWordCheck = {
+  const latinWordCheck = {
 	    startCheck: latinWordStartCheck,
-	    endCheck: latinWordEndCheck
-	};
+	    endCheck: latinWordEndCheck,
+  };
 
-	/**
+  /**
 	 * Apply Latin ligature feature to a range of tokens
 	 */
 
-	/**
+  /**
 	 * Update context params
 	 * @param {any} tokens a list of tokens
 	 * @param {number} index current item index
 	 */
-	function getContextParams$1(tokens, index) {
-	    var context = tokens.map(function (token) { return token.activeState.value; });
+  function getContextParams$1(tokens, index) {
+	    const context = tokens.map((token) => token.activeState.value);
 	    return new ContextParams(context, index || 0);
-	}
+  }
 
-	/**
+  /**
 	 * Apply Arabic required ligatures to a context range
 	 * @param {ContextRange} range a range of tokens
 	 */
-	function latinLigature(range) {
-	    var this$1 = this;
+  function latinLigature(range) {
+	    const this$1 = this;
 
-	    var script = 'latn';
-	    var tokens = this.tokenizer.getRangeTokens(range);
-	    var contextParams = getContextParams$1(tokens);
-	    contextParams.context.forEach(function (glyphIndex, index) {
+	    const script = 'latn';
+	    const tokens = this.tokenizer.getRangeTokens(range);
+	    let contextParams = getContextParams$1(tokens);
+	    contextParams.context.forEach((glyphIndex, index) => {
 	        contextParams.setCurrentIndex(index);
-	        var substitutions = this$1.query.lookupFeature({
-	            tag: 'liga', script: script, contextParams: contextParams
+	        const substitutions = this$1.query.lookupFeature({
+	            tag: 'liga', script, contextParams,
 	        });
 	        if (substitutions.length) {
 	            substitutions.forEach(
-	                function (action) { return applySubstitution(action, tokens, index); }
+	                (action) => applySubstitution(action, tokens, index),
 	            );
 	            contextParams = getContextParams$1(tokens);
 	        }
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Infer bidirectional properties for a given text and apply
 	 * the corresponding layout rules.
 	 */
 
-	/**
+  /**
 	 * Create Bidi. features
 	 * @param {string} baseDir text base direction. value either 'ltr' or 'rtl'
 	 */
-	function Bidi(baseDir) {
+  function Bidi(baseDir) {
 	    this.baseDir = baseDir || 'ltr';
 	    this.tokenizer = new Tokenizer();
 	    this.featuresTags = {};
-	}
+  }
 
-	/**
+  /**
 	 * Sets Bidi text
 	 * @param {string} text a text input
 	 */
-	Bidi.prototype.setText = function (text) {
+  Bidi.prototype.setText = function (text) {
 	    this.text = text;
-	};
+  };
 
-	/**
+  /**
 	 * Store essential context checks:
 	 * arabic word check for applying gsub features
 	 * arabic sentence check for adjusting arabic layout
 	 */
-	Bidi.prototype.contextChecks = ({
-	    latinWordCheck: latinWordCheck,
-	    arabicWordCheck: arabicWordCheck,
-	    arabicSentenceCheck: arabicSentenceCheck
-	});
+  Bidi.prototype.contextChecks = ({
+	    latinWordCheck,
+	    arabicWordCheck,
+	    arabicSentenceCheck,
+  });
 
-	/**
+  /**
 	 * Register arabic word check
 	 */
-	function registerContextChecker(checkId) {
-	    var check = this.contextChecks[(checkId + "Check")];
+  function registerContextChecker(checkId) {
+	    const check = this.contextChecks[(`${checkId}Check`)];
 	    return this.tokenizer.registerContextChecker(
-	        checkId, check.startCheck, check.endCheck
+	        checkId, check.startCheck, check.endCheck,
 	    );
-	}
+  }
 
-	/**
+  /**
 	 * Perform pre tokenization procedure then
 	 * tokenize text input
 	 */
-	function tokenizeText() {
+  function tokenizeText() {
 	    registerContextChecker.call(this, 'latinWord');
 	    registerContextChecker.call(this, 'arabicWord');
 	    registerContextChecker.call(this, 'arabicSentence');
 	    return this.tokenizer.tokenize(this.text);
-	}
+  }
 
-	/**
+  /**
 	 * Reverse arabic sentence layout
 	 * TODO: check base dir before applying adjustments - priority low
 	 */
-	function reverseArabicSentences() {
-	    var this$1 = this;
+  function reverseArabicSentences() {
+	    const this$1 = this;
 
-	    var ranges = this.tokenizer.getContextRanges('arabicSentence');
-	    ranges.forEach(function (range) {
-	        var rangeTokens = this$1.tokenizer.getRangeTokens(range);
+	    const ranges = this.tokenizer.getContextRanges('arabicSentence');
+	    ranges.forEach((range) => {
+	        const rangeTokens = this$1.tokenizer.getRangeTokens(range);
 	        this$1.tokenizer.replaceRange(
 	            range.startIndex,
 	            range.endOffset,
-	            rangeTokens.reverse()
+	            rangeTokens.reverse(),
 	        );
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Register supported features tags
 	 * @param {script} script script tag
 	 * @param {Array} tags features tags list
 	 */
-	Bidi.prototype.registerFeatures = function (script, tags) {
-	    var this$1 = this;
+  Bidi.prototype.registerFeatures = function (script, tags) {
+	    const this$1 = this;
 
-	    var supportedTags = tags.filter(
-	        function (tag) { return this$1.query.supports({script: script, tag: tag}); }
+	    const supportedTags = tags.filter(
+	        (tag) => this$1.query.supports({ script, tag }),
 	    );
 	    if (!this.featuresTags.hasOwnProperty(script)) {
 	        this.featuresTags[script] = supportedTags;
 	    } else {
-	        this.featuresTags[script] =
-	        this.featuresTags[script].concat(supportedTags);
+	        this.featuresTags[script] = this.featuresTags[script].concat(supportedTags);
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Apply GSUB features
 	 * @param {Array} tagsList a list of features tags
 	 * @param {string} script a script tag
 	 * @param {Font} font opentype font instance
 	 */
-	Bidi.prototype.applyFeatures = function (font, features) {
-	    if (!font) { throw new Error(
-	        'No valid font was provided to apply features'
-	    ); }
+  Bidi.prototype.applyFeatures = function (font, features) {
+	    if (!font) {
+      throw new Error(
+	        'No valid font was provided to apply features',
+	    );
+    }
 	    if (!this.query) { this.query = new FeatureQuery(font); }
-	    for (var f = 0; f < features.length; f++) {
-	        var feature = features[f];
-	        if (!this.query.supports({script: feature.script})) { continue; }
+	    for (let f = 0; f < features.length; f++) {
+	        const feature = features[f];
+	        if (!this.query.supports({ script: feature.script })) { continue; }
 	        this.registerFeatures(feature.script, feature.tags);
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Register a state modifier
 	 * @param {string} modifierId state modifier id
 	 * @param {function} condition a predicate function that returns true or false
 	 * @param {function} modifier a modifier function to set token state
 	 */
-	Bidi.prototype.registerModifier = function (modifierId, condition, modifier) {
+  Bidi.prototype.registerModifier = function (modifierId, condition, modifier) {
 	    this.tokenizer.registerModifier(modifierId, condition, modifier);
-	};
+  };
 
-	/**
+  /**
 	 * Check if 'glyphIndex' is registered
 	 */
-	function checkGlyphIndexStatus() {
+  function checkGlyphIndexStatus() {
 	    if (this.tokenizer.registeredModifiers.indexOf('glyphIndex') === -1) {
 	        throw new Error(
-	            'glyphIndex modifier is required to apply ' +
-	            'arabic presentation features.'
+	            'glyphIndex modifier is required to apply '
+	            + 'arabic presentation features.',
 	        );
 	    }
-	}
+  }
 
-	/**
+  /**
 	 * Apply arabic presentation forms features
 	 */
-	function applyArabicPresentationForms() {
-	    var this$1 = this;
+  function applyArabicPresentationForms() {
+	    const this$1 = this;
 
-	    var script = 'arab';
+	    const script = 'arab';
 	    if (!this.featuresTags.hasOwnProperty(script)) { return; }
 	    checkGlyphIndexStatus.call(this);
-	    var ranges = this.tokenizer.getContextRanges('arabicWord');
-	    ranges.forEach(function (range) {
+	    const ranges = this.tokenizer.getContextRanges('arabicWord');
+	    ranges.forEach((range) => {
 	        arabicPresentationForms.call(this$1, range);
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Apply required arabic ligatures
 	 */
-	function applyArabicRequireLigatures() {
-	    var this$1 = this;
+  function applyArabicRequireLigatures() {
+	    const this$1 = this;
 
-	    var script = 'arab';
+	    const script = 'arab';
 	    if (!this.featuresTags.hasOwnProperty(script)) { return; }
-	    var tags = this.featuresTags[script];
+	    const tags = this.featuresTags[script];
 	    if (tags.indexOf('rlig') === -1) { return; }
 	    checkGlyphIndexStatus.call(this);
-	    var ranges = this.tokenizer.getContextRanges('arabicWord');
-	    ranges.forEach(function (range) {
+	    const ranges = this.tokenizer.getContextRanges('arabicWord');
+	    ranges.forEach((range) => {
 	        arabicRequiredLigatures.call(this$1, range);
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Apply required arabic ligatures
 	 */
-	function applyLatinLigatures() {
-	    var this$1 = this;
+  function applyLatinLigatures() {
+	    const this$1 = this;
 
-	    var script = 'latn';
+	    const script = 'latn';
 	    if (!this.featuresTags.hasOwnProperty(script)) { return; }
-	    var tags = this.featuresTags[script];
+	    const tags = this.featuresTags[script];
 	    if (tags.indexOf('liga') === -1) { return; }
 	    checkGlyphIndexStatus.call(this);
-	    var ranges = this.tokenizer.getContextRanges('latinWord');
-	    ranges.forEach(function (range) {
+	    const ranges = this.tokenizer.getContextRanges('latinWord');
+	    ranges.forEach((range) => {
 	        latinLigature.call(this$1, range);
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Check if a context is registered
 	 * @param {string} contextId context id
 	 */
-	Bidi.prototype.checkContextReady = function (contextId) {
+  Bidi.prototype.checkContextReady = function (contextId) {
 	    return !!this.tokenizer.getContext(contextId);
-	};
+  };
 
-	/**
+  /**
 	 * Apply features to registered contexts
 	 */
-	Bidi.prototype.applyFeaturesToContexts = function () {
+  Bidi.prototype.applyFeaturesToContexts = function () {
 	    if (this.checkContextReady('arabicWord')) {
 	        applyArabicPresentationForms.call(this);
 	        applyArabicRequireLigatures.call(this);
@@ -12879,49 +12874,49 @@
 	    if (this.checkContextReady('arabicSentence')) {
 	        reverseArabicSentences.call(this);
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * process text input
 	 * @param {string} text an input text
 	 */
-	Bidi.prototype.processText = function(text) {
+  Bidi.prototype.processText = function (text) {
 	    if (!this.text || this.text !== text) {
 	        this.setText(text);
 	        tokenizeText.call(this);
 	        this.applyFeaturesToContexts();
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Process a string of text to identify and adjust
 	 * bidirectional text entities.
 	 * @param {string} text input text
 	 */
-	Bidi.prototype.getBidiText = function (text) {
+  Bidi.prototype.getBidiText = function (text) {
 	    this.processText(text);
 	    return this.tokenizer.getText();
-	};
+  };
 
-	/**
+  /**
 	 * Get the current state index of each token
 	 * @param {text} text an input text
 	 */
-	Bidi.prototype.getTextGlyphs = function (text) {
+  Bidi.prototype.getTextGlyphs = function (text) {
 	    this.processText(text);
-	    var indexes = [];
-	    for (var i = 0; i < this.tokenizer.tokens.length; i++) {
-	        var token = this.tokenizer.tokens[i];
+	    const indexes = [];
+	    for (let i = 0; i < this.tokenizer.tokens.length; i++) {
+	        const token = this.tokenizer.tokens[i];
 	        if (token.state.deleted) { continue; }
-	        var index = token.activeState.value;
+	        const index = token.activeState.value;
 	        indexes.push(Array.isArray(index) ? index[0] : index);
 	    }
 	    return indexes;
-	};
+  };
 
-	// The Font object
+  // The Font object
 
-	/**
+  /**
 	 * @typedef FontOptions
 	 * @type Object
 	 * @property {Boolean} empty - whether to create a new empty font
@@ -12948,7 +12943,7 @@
 	 * @property {string=} fsSelection
 	 */
 
-	/**
+  /**
 	 * A Font represents a loaded OpenType font file.
 	 * It contains a set of glyphs and methods to draw text on a drawing context,
 	 * or to get a path representing the text.
@@ -12957,7 +12952,7 @@
 	 * @param {FontOptions}
 	 * @constructor
 	 */
-	function Font(options) {
+  function Font(options) {
 	    options = options || {};
 	    options.tables = options.tables || {};
 
@@ -12971,32 +12966,33 @@
 
 	        // OS X will complain if the names are empty, so we put a single space everywhere by default.
 	        this.names = {
-	            fontFamily: {en: options.familyName || ' '},
-	            fontSubfamily: {en: options.styleName || ' '},
-	            fullName: {en: options.fullName || options.familyName + ' ' + options.styleName},
+	            fontFamily: { en: options.familyName || ' ' },
+	            fontSubfamily: { en: options.styleName || ' ' },
+	            fullName: { en: options.fullName || `${options.familyName} ${options.styleName}` },
 	            // postScriptName may not contain any whitespace
-	            postScriptName: {en: options.postScriptName || (options.familyName + options.styleName).replace(/\s/g, '')},
-	            designer: {en: options.designer || ' '},
-	            designerURL: {en: options.designerURL || ' '},
-	            manufacturer: {en: options.manufacturer || ' '},
-	            manufacturerURL: {en: options.manufacturerURL || ' '},
-	            license: {en: options.license || ' '},
-	            licenseURL: {en: options.licenseURL || ' '},
-	            version: {en: options.version || 'Version 0.1'},
-	            description: {en: options.description || ' '},
-	            copyright: {en: options.copyright || ' '},
-	            trademark: {en: options.trademark || ' '}
+	            postScriptName: { en: options.postScriptName || (options.familyName + options.styleName).replace(/\s/g, '') },
+	            designer: { en: options.designer || ' ' },
+	            designerURL: { en: options.designerURL || ' ' },
+	            manufacturer: { en: options.manufacturer || ' ' },
+	            manufacturerURL: { en: options.manufacturerURL || ' ' },
+	            license: { en: options.license || ' ' },
+	            licenseURL: { en: options.licenseURL || ' ' },
+	            version: { en: options.version || 'Version 0.1' },
+	            description: { en: options.description || ' ' },
+	            copyright: { en: options.copyright || ' ' },
+	            trademark: { en: options.trademark || ' ' },
 	        };
 	        this.unitsPerEm = options.unitsPerEm || 1000;
 	        this.ascender = options.ascender;
 	        this.descender = options.descender;
 	        this.createdTimestamp = options.createdTimestamp;
 	        this.tables = Object.assign(options.tables, {
-	            os2: Object.assign({
-	                usWeightClass: options.weightClass || this.usWeightClasses.MEDIUM,
+	            os2: {
+          usWeightClass: options.weightClass || this.usWeightClasses.MEDIUM,
 	                usWidthClass: options.widthClass || this.usWidthClasses.MEDIUM,
 	                fsSelection: options.fsSelection || this.fsSelectionValues.REGULAR,
-	            }, options.tables.os2)
+          ...options.tables.os2,
+        },
 	        });
 	    }
 
@@ -13012,72 +13008,71 @@
 	    this._hmtxTableData = {};
 
 	    Object.defineProperty(this, 'hinting', {
-	        get: function() {
+	        get() {
 	            if (this._hinting) { return this._hinting; }
 	            if (this.outlinesFormat === 'truetype') {
 	                return (this._hinting = new Hinting(this));
 	            }
-	        }
+	        },
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Check if the font has a glyph for the given character.
 	 * @param  {string}
 	 * @return {Boolean}
 	 */
-	Font.prototype.hasChar = function(c) {
+  Font.prototype.hasChar = function (c) {
 	    return this.encoding.charToGlyphIndex(c) !== null;
-	};
+  };
 
-	/**
+  /**
 	 * Convert the given character to a single glyph index.
 	 * Note that this function assumes that there is a one-to-one mapping between
 	 * the given character and a glyph; for complex scripts this might not be the case.
 	 * @param  {string}
 	 * @return {Number}
 	 */
-	Font.prototype.charToGlyphIndex = function(s) {
+  Font.prototype.charToGlyphIndex = function (s) {
 	    return this.encoding.charToGlyphIndex(s);
-	};
+  };
 
-	/**
+  /**
 	 * Convert the given character to a single Glyph object.
 	 * Note that this function assumes that there is a one-to-one mapping between
 	 * the given character and a glyph; for complex scripts this might not be the case.
 	 * @param  {string}
 	 * @return {opentype.Glyph}
 	 */
-	Font.prototype.charToGlyph = function(c) {
-	    var glyphIndex = this.charToGlyphIndex(c);
-	    var glyph = this.glyphs.get(glyphIndex);
+  Font.prototype.charToGlyph = function (c) {
+	    const glyphIndex = this.charToGlyphIndex(c);
+	    let glyph = this.glyphs.get(glyphIndex);
 	    if (!glyph) {
 	        // .notdef
 	        glyph = this.glyphs.get(0);
 	    }
 
 	    return glyph;
-	};
+  };
 
-	/**
+  /**
 	 * Update features
 	 * @param {any} options features options
 	 */
-	Font.prototype.updateFeatures = function (options) {
+  Font.prototype.updateFeatures = function (options) {
 	    // TODO: update all features options not only 'latn'.
-	    return this.defaultRenderOptions.features.map(function (feature) {
+	    return this.defaultRenderOptions.features.map((feature) => {
 	        if (feature.script === 'latn') {
 	            return {
 	                script: 'latn',
-	                tags: feature.tags.filter(function (tag) { return options[tag]; })
+	                tags: feature.tags.filter((tag) => options[tag]),
 	            };
-	        } else {
-	            return feature;
 	        }
+	            return feature;
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * Convert the given text to a list of Glyph objects.
 	 * Note that there is no strict one-to-one mapping between characters and
 	 * glyphs, so the list of returned glyphs can be larger or smaller than the
@@ -13086,72 +13081,71 @@
 	 * @param  {GlyphRenderOptions} [options]
 	 * @return {opentype.Glyph[]}
 	 */
-	Font.prototype.stringToGlyphs = function(s, options) {
-	    var this$1 = this;
+  Font.prototype.stringToGlyphs = function (s, options) {
+	    const this$1 = this;
 
-
-	    var bidi = new Bidi();
+	    const bidi = new Bidi();
 
 	    // Create and register 'glyphIndex' state modifier
-	    var charToGlyphIndexMod = function (token) { return this$1.charToGlyphIndex(token.char); };
+	    const charToGlyphIndexMod = function (token) { return this$1.charToGlyphIndex(token.char); };
 	    bidi.registerModifier('glyphIndex', null, charToGlyphIndexMod);
 
 	    // roll-back to default features
-	    var features = options ?
-	    this.updateFeatures(options.features) :
-	    this.defaultRenderOptions.features;
+	    const features = options
+	    ? this.updateFeatures(options.features)
+	    : this.defaultRenderOptions.features;
 
 	    bidi.applyFeatures(this, features);
 
-	    var indexes = bidi.getTextGlyphs(s);
+	    const indexes = bidi.getTextGlyphs(s);
 
-	    var length = indexes.length;
+	    const { length } = indexes;
 
 	    // convert glyph indexes to glyph objects
-	    var glyphs = new Array(length);
-	    var notdef = this.glyphs.get(0);
-	    for (var i = 0; i < length; i += 1) {
+	    const glyphs = new Array(length);
+	    const notdef = this.glyphs.get(0);
+	    for (let i = 0; i < length; i = i + 1) {
 	        glyphs[i] = this.glyphs.get(indexes[i]) || notdef;
 	    }
 	    return glyphs;
-	};
+  };
 
-	/**
+  /**
 	 * @param  {string}
 	 * @return {Number}
 	 */
-	Font.prototype.nameToGlyphIndex = function(name) {
+  Font.prototype.nameToGlyphIndex = function (name) {
 	    return this.glyphNames.nameToGlyphIndex(name);
-	};
+  };
 
-	/**
+  /**
 	 * @param  {string}
 	 * @return {opentype.Glyph}
 	 */
-	Font.prototype.nameToGlyph = function(name) {
-	    var glyphIndex = this.nameToGlyphIndex(name);
-	    var glyph = this.glyphs.get(glyphIndex);
+  Font.prototype.nameToGlyph = function (name) {
+	    const glyphIndex = this.nameToGlyphIndex(name);
+	    let glyph = this.glyphs.get(glyphIndex);
 	    if (!glyph) {
 	        // .notdef
 	        glyph = this.glyphs.get(0);
 	    }
 
 	    return glyph;
-	};
+  };
 
-	/**
+  /**
 	 * @param  {Number}
 	 * @return {String}
 	 */
-	Font.prototype.glyphIndexToName = function(gid) {
+  Font.prototype.glyphIndexToName = function (gid) {
 	    if (!this.glyphNames.glyphIndexToName) {
 	        return '';
 	    }
 
 	    return this.glyphNames.glyphIndexToName(gid);
-	};
+  };
 
-	/**
+  /**
 	 * Retrieve the value of the kerning pair between the left glyph (or its index)
 	 * and the right glyph (or its index). If no kerning pair is found, return 0.
 	 * The kerning value gets added to the advance width when calculating the spacing
@@ -13162,18 +13156,18 @@
 	 * @param  {opentype.Glyph} rightGlyph
 	 * @return {Number}
 	 */
-	Font.prototype.getKerningValue = function(leftGlyph, rightGlyph) {
+  Font.prototype.getKerningValue = function (leftGlyph, rightGlyph) {
 	    leftGlyph = leftGlyph.index || leftGlyph;
 	    rightGlyph = rightGlyph.index || rightGlyph;
-	    var gposKerning = this.position.defaultKerningTables;
+	    const gposKerning = this.position.defaultKerningTables;
 	    if (gposKerning) {
 	        return this.position.getKerningValue(gposKerning, leftGlyph, rightGlyph);
 	    }
 	    // "kern" table
-	    return this.kerningPairs[leftGlyph + ',' + rightGlyph] || 0;
-	};
+	    return this.kerningPairs[`${leftGlyph},${rightGlyph}`] || 0;
+  };
 
-	/**
+  /**
 	 * @typedef GlyphRenderOptions
 	 * @type Object
 	 * @property {string} [script] - script used to determine which features to apply. By default, 'DFLT' or 'latn' is used.
@@ -13184,7 +13178,7 @@
 	 * @property {object} [features] - OpenType Layout feature tags. Used to enable or disable the features of the given script/language system.
 	 *                                 See https://www.microsoft.com/typography/otspec/featuretags.htm
 	 */
-	Font.prototype.defaultRenderOptions = {
+  Font.prototype.defaultRenderOptions = {
 	    kerning: true,
 	    features: [
 	        /**
@@ -13192,11 +13186,11 @@
 	         * and shouldn't be turned off when rendering arabic text.
 	         */
 	        { script: 'arab', tags: ['init', 'medi', 'fina', 'rlig'] },
-	        { script: 'latn', tags: ['liga', 'rlig'] }
-	    ]
-	};
+	        { script: 'latn', tags: ['liga', 'rlig'] },
+	    ],
+  };
 
-	/**
+  /**
 	 * Helper function that invokes the given callback for each glyph in the given text.
 	 * The callback gets `(glyph, x, y, fontSize, options)`.* @param  {string} text
 	 * @param {string} text - The text to apply.
@@ -13206,44 +13200,44 @@
 	 * @param  {GlyphRenderOptions=} options
 	 * @param  {Function} callback
 	 */
-	Font.prototype.forEachGlyph = function(text, x, y, fontSize, options, callback) {
+  Font.prototype.forEachGlyph = function (text, x, y, fontSize, options, callback) {
 	    x = x !== undefined ? x : 0;
 	    y = y !== undefined ? y : 0;
 	    fontSize = fontSize !== undefined ? fontSize : 72;
-	    options = Object.assign({}, this.defaultRenderOptions, options);
-	    var fontScale = 1 / this.unitsPerEm * fontSize;
-	    var glyphs = this.stringToGlyphs(text, options);
-	    var kerningLookups;
+	    options = { ...this.defaultRenderOptions, ...options };
+	    const fontScale = 1 / this.unitsPerEm * fontSize;
+	    const glyphs = this.stringToGlyphs(text, options);
+	    let kerningLookups;
 	    if (options.kerning) {
-	        var script = options.script || this.position.getDefaultScriptName();
+	        const script = options.script || this.position.getDefaultScriptName();
 	        kerningLookups = this.position.getKerningTables(script, options.language);
 	    }
-	    for (var i = 0; i < glyphs.length; i += 1) {
-	        var glyph = glyphs[i];
+	    for (let i = 0; i < glyphs.length; i = i + 1) {
+	        const glyph = glyphs[i];
 	        callback.call(this, glyph, x, y, fontSize, options);
 	        if (glyph.advanceWidth) {
-	            x += glyph.advanceWidth * fontScale;
+	            x = x + glyph.advanceWidth * fontScale;
 	        }
 
 	        if (options.kerning && i < glyphs.length - 1) {
 	            // We should apply position adjustment lookups in a more generic way.
 	            // Here we only use the xAdvance value.
-	            var kerningValue = kerningLookups ?
-	                  this.position.getKerningValue(kerningLookups, glyph.index, glyphs[i + 1].index) :
-	                  this.getKerningValue(glyph, glyphs[i + 1]);
-	            x += kerningValue * fontScale;
+	            const kerningValue = kerningLookups
+	                  ? this.position.getKerningValue(kerningLookups, glyph.index, glyphs[i + 1].index)
+	                  : this.getKerningValue(glyph, glyphs[i + 1]);
+	            x = x + kerningValue * fontScale;
 	        }
 
 	        if (options.letterSpacing) {
-	            x += options.letterSpacing * fontSize;
+	            x = x + options.letterSpacing * fontSize;
 	        } else if (options.tracking) {
-	            x += (options.tracking / 1000) * fontSize;
+	            x = x + (options.tracking / 1000) * fontSize;
 	        }
 	    }
 	    return x;
-	};
+  };
 
-	/**
+  /**
 	 * Create a Path object that represents the given text.
 	 * @param  {string} text - The text to create.
 	 * @param  {number} [x=0] - Horizontal position of the beginning of the text.
@@ -13252,16 +13246,16 @@
 	 * @param  {GlyphRenderOptions=} options
 	 * @return {opentype.Path}
 	 */
-	Font.prototype.getPath = function(text, x, y, fontSize, options) {
-	    var fullPath = new Path();
-	    this.forEachGlyph(text, x, y, fontSize, options, function(glyph, gX, gY, gFontSize) {
-	        var glyphPath = glyph.getPath(gX, gY, gFontSize, options, this);
+  Font.prototype.getPath = function (text, x, y, fontSize, options) {
+	    const fullPath = new Path();
+	    this.forEachGlyph(text, x, y, fontSize, options, function (glyph, gX, gY, gFontSize) {
+	        const glyphPath = glyph.getPath(gX, gY, gFontSize, options, this);
 	        fullPath.extend(glyphPath);
 	    });
 	    return fullPath;
-	};
+  };
 
-	/**
+  /**
 	 * Create an array of Path objects that represent the glyphs of a given text.
 	 * @param  {string} text - The text to create.
 	 * @param  {number} [x=0] - Horizontal position of the beginning of the text.
@@ -13270,17 +13264,17 @@
 	 * @param  {GlyphRenderOptions=} options
 	 * @return {opentype.Path[]}
 	 */
-	Font.prototype.getPaths = function(text, x, y, fontSize, options) {
-	    var glyphPaths = [];
-	    this.forEachGlyph(text, x, y, fontSize, options, function(glyph, gX, gY, gFontSize) {
-	        var glyphPath = glyph.getPath(gX, gY, gFontSize, options, this);
+  Font.prototype.getPaths = function (text, x, y, fontSize, options) {
+	    const glyphPaths = [];
+	    this.forEachGlyph(text, x, y, fontSize, options, function (glyph, gX, gY, gFontSize) {
+	        const glyphPath = glyph.getPath(gX, gY, gFontSize, options, this);
 	        glyphPaths.push(glyphPath);
 	    });
 
 	    return glyphPaths;
-	};
+  };
 
-	/**
+  /**
 	 * Returns the advance width of a text.
 	 *
 	 * This is something different than Path.getBoundingBox() as for example a
@@ -13295,11 +13289,11 @@
 	 * @param  {GlyphRenderOptions=} options
 	 * @return advance width
 	 */
-	Font.prototype.getAdvanceWidth = function(text, fontSize, options) {
-	    return this.forEachGlyph(text, 0, 0, fontSize, options, function() {});
-	};
+  Font.prototype.getAdvanceWidth = function (text, fontSize, options) {
+	    return this.forEachGlyph(text, 0, 0, fontSize, options, () => {});
+  };
 
-	/**
+  /**
 	 * Draw the text on the given drawing context.
 	 * @param  {CanvasRenderingContext2D} ctx - A 2D drawing context, like Canvas.
 	 * @param  {string} text - The text to create.
@@ -13308,11 +13302,11 @@
 	 * @param  {number} [fontSize=72] - Font size in pixels. We scale the glyph units by `1 / unitsPerEm * fontSize`.
 	 * @param  {GlyphRenderOptions=} options
 	 */
-	Font.prototype.draw = function(ctx, text, x, y, fontSize, options) {
+  Font.prototype.draw = function (ctx, text, x, y, fontSize, options) {
 	    this.getPath(text, x, y, fontSize, options).draw(ctx);
-	};
+  };
 
-	/**
+  /**
 	 * Draw the points of all glyphs in the text.
 	 * On-curve points will be drawn in blue, off-curve points will be drawn in red.
 	 * @param {CanvasRenderingContext2D} ctx - A 2D drawing context, like Canvas.
@@ -13322,13 +13316,13 @@
 	 * @param {number} [fontSize=72] - Font size in pixels. We scale the glyph units by `1 / unitsPerEm * fontSize`.
 	 * @param {GlyphRenderOptions=} options
 	 */
-	Font.prototype.drawPoints = function(ctx, text, x, y, fontSize, options) {
-	    this.forEachGlyph(text, x, y, fontSize, options, function(glyph, gX, gY, gFontSize) {
+  Font.prototype.drawPoints = function (ctx, text, x, y, fontSize, options) {
+	    this.forEachGlyph(text, x, y, fontSize, options, (glyph, gX, gY, gFontSize) => {
 	        glyph.drawPoints(ctx, gX, gY, gFontSize);
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * Draw lines indicating important font measurements for all glyphs in the text.
 	 * Black lines indicate the origin of the coordinate system (point 0,0).
 	 * Blue lines indicate the glyph bounding box.
@@ -13340,34 +13334,34 @@
 	 * @param {number} [fontSize=72] - Font size in pixels. We scale the glyph units by `1 / unitsPerEm * fontSize`.
 	 * @param {GlyphRenderOptions=} options
 	 */
-	Font.prototype.drawMetrics = function(ctx, text, x, y, fontSize, options) {
-	    this.forEachGlyph(text, x, y, fontSize, options, function(glyph, gX, gY, gFontSize) {
+  Font.prototype.drawMetrics = function (ctx, text, x, y, fontSize, options) {
+	    this.forEachGlyph(text, x, y, fontSize, options, (glyph, gX, gY, gFontSize) => {
 	        glyph.drawMetrics(ctx, gX, gY, gFontSize);
 	    });
-	};
+  };
 
-	/**
+  /**
 	 * @param  {string}
 	 * @return {string}
 	 */
-	Font.prototype.getEnglishName = function(name) {
-	    var translations = this.names[name];
+  Font.prototype.getEnglishName = function (name) {
+	    const translations = this.names[name];
 	    if (translations) {
 	        return translations.en;
 	    }
-	};
+  };
 
-	/**
+  /**
 	 * Validate
 	 */
-	Font.prototype.validate = function() {
-	    var _this = this;
+  Font.prototype.validate = function () {
+	    const _this = this;
 
 	    function assert(predicate, message) {
 	    }
 
 	    function assertNamePresent(name) {
-	        var englishName = _this.getEnglishName(name);
+	        const englishName = _this.getEnglishName(name);
 	        assert(englishName && englishName.trim().length > 0);
 	    }
 
@@ -13380,91 +13374,91 @@
 
 	    // Dimension information
 	    assert(this.unitsPerEm > 0);
-	};
+  };
 
-	/**
+  /**
 	 * Convert the font object to a SFNT data structure.
 	 * This structure contains all the necessary tables and metadata to create a binary OTF file.
 	 * @return {opentype.Table}
 	 */
-	Font.prototype.toTables = function() {
+  Font.prototype.toTables = function () {
 	    return sfnt.fontToTable(this);
-	};
-	/**
+  };
+  /**
 	 * @deprecated Font.toBuffer is deprecated. Use Font.toArrayBuffer instead.
 	 */
-	Font.prototype.toBuffer = function() {
+  Font.prototype.toBuffer = function () {
 	    console.warn('Font.toBuffer is deprecated. Use Font.toArrayBuffer instead.');
 	    return this.toArrayBuffer();
-	};
-	/**
+  };
+  /**
 	 * Converts a `opentype.Font` into an `ArrayBuffer`
 	 * @return {ArrayBuffer}
 	 */
-	Font.prototype.toArrayBuffer = function() {
-	    var sfntTable = this.toTables();
-	    var bytes = sfntTable.encode();
-	    var buffer = new ArrayBuffer(bytes.length);
-	    var intArray = new Uint8Array(buffer);
-	    for (var i = 0; i < bytes.length; i++) {
+  Font.prototype.toArrayBuffer = function () {
+	    const sfntTable = this.toTables();
+	    const bytes = sfntTable.encode();
+	    const buffer = new ArrayBuffer(bytes.length);
+	    const intArray = new Uint8Array(buffer);
+	    for (let i = 0; i < bytes.length; i++) {
 	        intArray[i] = bytes[i];
 	    }
 
 	    return buffer;
-	};
+  };
 
-	/**
+  /**
 	 * Initiate a download of the OpenType font.
 	 */
-	Font.prototype.download = function(fileName) {
-	    var familyName = this.getEnglishName('fontFamily');
-	    var styleName = this.getEnglishName('fontSubfamily');
-	    fileName = fileName || familyName.replace(/\s/g, '') + '-' + styleName + '.otf';
-	    var arrayBuffer = this.toArrayBuffer();
+  Font.prototype.download = function (fileName) {
+	    const familyName = this.getEnglishName('fontFamily');
+	    const styleName = this.getEnglishName('fontSubfamily');
+	    fileName = fileName || `${familyName.replace(/\s/g, '')}-${styleName}.otf`;
+	    const arrayBuffer = this.toArrayBuffer();
 
 	    if (isBrowser()) {
 	        window.URL = window.URL || window.webkitURL;
 
 	        if (window.URL) {
-	            var dataView = new DataView(arrayBuffer);
-	            var blob = new Blob([dataView], {type: 'font/opentype'});
+	            const dataView = new DataView(arrayBuffer);
+	            const blob = new Blob([dataView], { type: 'font/opentype' });
 
-	            var link = document.createElement('a');
+	            const link = document.createElement('a');
 	            link.href = window.URL.createObjectURL(blob);
 	            link.download = fileName;
 
-	            var event = document.createEvent('MouseEvents');
+	            const event = document.createEvent('MouseEvents');
 	            event.initEvent('click', true, false);
 	            link.dispatchEvent(event);
 	        } else {
 	            console.warn('Font file could not be downloaded. Try using a different browser.');
 	        }
 	    } else {
-	        var fs = require('fs');
-	        var buffer = arrayBufferToNodeBuffer(arrayBuffer);
+	        const fs = require('fs');
+	        const buffer = arrayBufferToNodeBuffer(arrayBuffer);
 	        fs.writeFileSync(fileName, buffer);
 	    }
-	};
-	/**
+  };
+  /**
 	 * @private
 	 */
-	Font.prototype.fsSelectionValues = {
-	    ITALIC:              0x001, //1
-	    UNDERSCORE:          0x002, //2
-	    NEGATIVE:            0x004, //4
-	    OUTLINED:            0x008, //8
-	    STRIKEOUT:           0x010, //16
-	    BOLD:                0x020, //32
-	    REGULAR:             0x040, //64
-	    USER_TYPO_METRICS:   0x080, //128
-	    WWS:                 0x100, //256
-	    OBLIQUE:             0x200  //512
-	};
+  Font.prototype.fsSelectionValues = {
+	    ITALIC: 0x001, // 1
+	    UNDERSCORE: 0x002, // 2
+	    NEGATIVE: 0x004, // 4
+	    OUTLINED: 0x008, // 8
+	    STRIKEOUT: 0x010, // 16
+	    BOLD: 0x020, // 32
+	    REGULAR: 0x040, // 64
+	    USER_TYPO_METRICS: 0x080, // 128
+	    WWS: 0x100, // 256
+	    OBLIQUE: 0x200, // 512
+  };
 
-	/**
+  /**
 	 * @private
 	 */
-	Font.prototype.usWidthClasses = {
+  Font.prototype.usWidthClasses = {
 	    ULTRA_CONDENSED: 1,
 	    EXTRA_CONDENSED: 2,
 	    CONDENSED: 3,
@@ -13473,13 +13467,13 @@
 	    SEMI_EXPANDED: 6,
 	    EXPANDED: 7,
 	    EXTRA_EXPANDED: 8,
-	    ULTRA_EXPANDED: 9
-	};
+	    ULTRA_EXPANDED: 9,
+  };
 
-	/**
+  /**
 	 * @private
 	 */
-	Font.prototype.usWeightClasses = {
+  Font.prototype.usWeightClasses = {
 	    THIN: 100,
 	    EXTRA_LIGHT: 200,
 	    LIGHT: 300,
@@ -13488,16 +13482,16 @@
 	    SEMI_BOLD: 600,
 	    BOLD: 700,
 	    EXTRA_BOLD: 800,
-	    BLACK:    900
-	};
+	    BLACK: 900,
+  };
 
-	// The `fvar` table stores font variation axes and instances.
+  // The `fvar` table stores font variation axes and instances.
 
-	function addName(name, names) {
-	    var nameString = JSON.stringify(name);
-	    var nameID = 256;
-	    for (var nameKey in names) {
-	        var n = parseInt(nameKey);
+  function addName(name, names) {
+	    const nameString = JSON.stringify(name);
+	    let nameID = 256;
+	    for (const nameKey in names) {
+	        const n = parseInt(nameKey);
 	        if (!n || n < 256) {
 	            continue;
 	        }
@@ -13513,372 +13507,368 @@
 
 	    names[nameID] = name;
 	    return nameID;
-	}
+  }
 
-	function makeFvarAxis(n, axis, names) {
-	    var nameID = addName(axis.name, names);
+  function makeFvarAxis(n, axis, names) {
+	    const nameID = addName(axis.name, names);
 	    return [
-	        {name: 'tag_' + n, type: 'TAG', value: axis.tag},
-	        {name: 'minValue_' + n, type: 'FIXED', value: axis.minValue << 16},
-	        {name: 'defaultValue_' + n, type: 'FIXED', value: axis.defaultValue << 16},
-	        {name: 'maxValue_' + n, type: 'FIXED', value: axis.maxValue << 16},
-	        {name: 'flags_' + n, type: 'USHORT', value: 0},
-	        {name: 'nameID_' + n, type: 'USHORT', value: nameID}
+	        { name: `tag_${n}`, type: 'TAG', value: axis.tag },
+	        { name: `minValue_${n}`, type: 'FIXED', value: axis.minValue << 16 },
+	        { name: `defaultValue_${n}`, type: 'FIXED', value: axis.defaultValue << 16 },
+	        { name: `maxValue_${n}`, type: 'FIXED', value: axis.maxValue << 16 },
+	        { name: `flags_${n}`, type: 'USHORT', value: 0 },
+	        { name: `nameID_${n}`, type: 'USHORT', value: nameID },
 	    ];
-	}
+  }
 
-	function parseFvarAxis(data, start, names) {
-	    var axis = {};
-	    var p = new parse.Parser(data, start);
+  function parseFvarAxis(data, start, names) {
+	    const axis = {};
+	    const p = new parse.Parser(data, start);
 	    axis.tag = p.parseTag();
 	    axis.minValue = p.parseFixed();
 	    axis.defaultValue = p.parseFixed();
 	    axis.maxValue = p.parseFixed();
-	    p.skip('uShort', 1);  // reserved for flags; no values defined
+	    p.skip('uShort', 1); // reserved for flags; no values defined
 	    axis.name = names[p.parseUShort()] || {};
 	    return axis;
-	}
+  }
 
-	function makeFvarInstance(n, inst, axes, names) {
-	    var nameID = addName(inst.name, names);
-	    var fields = [
-	        {name: 'nameID_' + n, type: 'USHORT', value: nameID},
-	        {name: 'flags_' + n, type: 'USHORT', value: 0}
+  function makeFvarInstance(n, inst, axes, names) {
+	    const nameID = addName(inst.name, names);
+	    const fields = [
+	        { name: `nameID_${n}`, type: 'USHORT', value: nameID },
+	        { name: `flags_${n}`, type: 'USHORT', value: 0 },
 	    ];
 
-	    for (var i = 0; i < axes.length; ++i) {
-	        var axisTag = axes[i].tag;
+	    for (let i = 0; i < axes.length; ++i) {
+	        const axisTag = axes[i].tag;
 	        fields.push({
-	            name: 'axis_' + n + ' ' + axisTag,
+	            name: `axis_${n} ${axisTag}`,
 	            type: 'FIXED',
-	            value: inst.coordinates[axisTag] << 16
+	            value: inst.coordinates[axisTag] << 16,
 	        });
 	    }
 
 	    return fields;
-	}
+  }
 
-	function parseFvarInstance(data, start, axes, names) {
-	    var inst = {};
-	    var p = new parse.Parser(data, start);
+  function parseFvarInstance(data, start, axes, names) {
+	    const inst = {};
+	    const p = new parse.Parser(data, start);
 	    inst.name = names[p.parseUShort()] || {};
-	    p.skip('uShort', 1);  // reserved for flags; no values defined
+	    p.skip('uShort', 1); // reserved for flags; no values defined
 
 	    inst.coordinates = {};
-	    for (var i = 0; i < axes.length; ++i) {
+	    for (let i = 0; i < axes.length; ++i) {
 	        inst.coordinates[axes[i].tag] = p.parseFixed();
 	    }
 
 	    return inst;
-	}
+  }
 
-	function makeFvarTable(fvar, names) {
-	    var result = new table.Table('fvar', [
-	        {name: 'version', type: 'ULONG', value: 0x10000},
-	        {name: 'offsetToData', type: 'USHORT', value: 0},
-	        {name: 'countSizePairs', type: 'USHORT', value: 2},
-	        {name: 'axisCount', type: 'USHORT', value: fvar.axes.length},
-	        {name: 'axisSize', type: 'USHORT', value: 20},
-	        {name: 'instanceCount', type: 'USHORT', value: fvar.instances.length},
-	        {name: 'instanceSize', type: 'USHORT', value: 4 + fvar.axes.length * 4}
+  function makeFvarTable(fvar, names) {
+	    const result = new table.Table('fvar', [
+	        { name: 'version', type: 'ULONG', value: 0x10000 },
+	        { name: 'offsetToData', type: 'USHORT', value: 0 },
+	        { name: 'countSizePairs', type: 'USHORT', value: 2 },
+	        { name: 'axisCount', type: 'USHORT', value: fvar.axes.length },
+	        { name: 'axisSize', type: 'USHORT', value: 20 },
+	        { name: 'instanceCount', type: 'USHORT', value: fvar.instances.length },
+	        { name: 'instanceSize', type: 'USHORT', value: 4 + fvar.axes.length * 4 },
 	    ]);
 	    result.offsetToData = result.sizeOf();
 
-	    for (var i = 0; i < fvar.axes.length; i++) {
+	    for (let i = 0; i < fvar.axes.length; i++) {
 	        result.fields = result.fields.concat(makeFvarAxis(i, fvar.axes[i], names));
 	    }
 
-	    for (var j = 0; j < fvar.instances.length; j++) {
+	    for (let j = 0; j < fvar.instances.length; j++) {
 	        result.fields = result.fields.concat(makeFvarInstance(j, fvar.instances[j], fvar.axes, names));
 	    }
 
 	    return result;
-	}
+  }
 
-	function parseFvarTable(data, start, names) {
-	    var p = new parse.Parser(data, start);
-	    var tableVersion = p.parseULong();
+  function parseFvarTable(data, start, names) {
+	    const p = new parse.Parser(data, start);
+	    const tableVersion = p.parseULong();
 	    check.argument(tableVersion === 0x00010000, 'Unsupported fvar table version.');
-	    var offsetToData = p.parseOffset16();
+	    const offsetToData = p.parseOffset16();
 	    // Skip countSizePairs.
 	    p.skip('uShort', 1);
-	    var axisCount = p.parseUShort();
-	    var axisSize = p.parseUShort();
-	    var instanceCount = p.parseUShort();
-	    var instanceSize = p.parseUShort();
+	    const axisCount = p.parseUShort();
+	    const axisSize = p.parseUShort();
+	    const instanceCount = p.parseUShort();
+	    const instanceSize = p.parseUShort();
 
-	    var axes = [];
-	    for (var i = 0; i < axisCount; i++) {
+	    const axes = [];
+	    for (let i = 0; i < axisCount; i++) {
 	        axes.push(parseFvarAxis(data, start + offsetToData + i * axisSize, names));
 	    }
 
-	    var instances = [];
-	    var instanceStart = start + offsetToData + axisCount * axisSize;
-	    for (var j = 0; j < instanceCount; j++) {
+	    const instances = [];
+	    const instanceStart = start + offsetToData + axisCount * axisSize;
+	    for (let j = 0; j < instanceCount; j++) {
 	        instances.push(parseFvarInstance(data, instanceStart + j * instanceSize, axes, names));
 	    }
 
-	    return {axes: axes, instances: instances};
-	}
+	    return { axes, instances };
+  }
 
-	var fvar = { make: makeFvarTable, parse: parseFvarTable };
+  const fvar = { make: makeFvarTable, parse: parseFvarTable };
 
-	// The `GPOS` table contains kerning pairs, among other things.
+  // The `GPOS` table contains kerning pairs, among other things.
 
-	var subtableParsers$1 = new Array(10);         // subtableParsers[0] is unused
+  const subtableParsers$1 = new Array(10); // subtableParsers[0] is unused
 
-	// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-1-single-adjustment-positioning-subtable
-	// this = Parser instance
-	subtableParsers$1[1] = function parseLookup1() {
-	    var start = this.offset + this.relativeOffset;
-	    var posformat = this.parseUShort();
+  // https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-1-single-adjustment-positioning-subtable
+  // this = Parser instance
+  subtableParsers$1[1] = function parseLookup1() {
+	    const start = this.offset + this.relativeOffset;
+	    const posformat = this.parseUShort();
 	    if (posformat === 1) {
 	        return {
 	            posFormat: 1,
 	            coverage: this.parsePointer(Parser.coverage),
-	            value: this.parseValueRecord()
+	            value: this.parseValueRecord(),
 	        };
-	    } else if (posformat === 2) {
+	    } if (posformat === 2) {
 	        return {
 	            posFormat: 2,
 	            coverage: this.parsePointer(Parser.coverage),
-	            values: this.parseValueRecordList()
+	            values: this.parseValueRecordList(),
 	        };
 	    }
-	    check.assert(false, '0x' + start.toString(16) + ': GPOS lookup type 1 format must be 1 or 2.');
-	};
+	    check.assert(false, `0x${start.toString(16)}: GPOS lookup type 1 format must be 1 or 2.`);
+  };
 
-	// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-2-pair-adjustment-positioning-subtable
-	subtableParsers$1[2] = function parseLookup2() {
-	    var start = this.offset + this.relativeOffset;
-	    var posFormat = this.parseUShort();
-	    check.assert(posFormat === 1 || posFormat === 2, '0x' + start.toString(16) + ': GPOS lookup type 2 format must be 1 or 2.');
-	    var coverage = this.parsePointer(Parser.coverage);
-	    var valueFormat1 = this.parseUShort();
-	    var valueFormat2 = this.parseUShort();
+  // https://docs.microsoft.com/en-us/typography/opentype/spec/gpos#lookup-type-2-pair-adjustment-positioning-subtable
+  subtableParsers$1[2] = function parseLookup2() {
+	    const start = this.offset + this.relativeOffset;
+	    const posFormat = this.parseUShort();
+	    check.assert(posFormat === 1 || posFormat === 2, `0x${start.toString(16)}: GPOS lookup type 2 format must be 1 or 2.`);
+	    const coverage = this.parsePointer(Parser.coverage);
+	    const valueFormat1 = this.parseUShort();
+	    const valueFormat2 = this.parseUShort();
 	    if (posFormat === 1) {
 	        // Adjustments for Glyph Pairs
 	        return {
-	            posFormat: posFormat,
-	            coverage: coverage,
-	            valueFormat1: valueFormat1,
-	            valueFormat2: valueFormat2,
-	            pairSets: this.parseList(Parser.pointer(Parser.list(function() {
-	                return {        // pairValueRecord
+	            posFormat,
+	            coverage,
+	            valueFormat1,
+	            valueFormat2,
+	            pairSets: this.parseList(Parser.pointer(Parser.list(function () {
+	                return { // pairValueRecord
 	                    secondGlyph: this.parseUShort(),
 	                    value1: this.parseValueRecord(valueFormat1),
-	                    value2: this.parseValueRecord(valueFormat2)
+	                    value2: this.parseValueRecord(valueFormat2),
 	                };
-	            })))
+	            }))),
 	        };
-	    } else if (posFormat === 2) {
-	        var classDef1 = this.parsePointer(Parser.classDef);
-	        var classDef2 = this.parsePointer(Parser.classDef);
-	        var class1Count = this.parseUShort();
-	        var class2Count = this.parseUShort();
+	    } if (posFormat === 2) {
+	        const classDef1 = this.parsePointer(Parser.classDef);
+	        const classDef2 = this.parsePointer(Parser.classDef);
+	        const class1Count = this.parseUShort();
+	        const class2Count = this.parseUShort();
 	        return {
 	            // Class Pair Adjustment
-	            posFormat: posFormat,
-	            coverage: coverage,
-	            valueFormat1: valueFormat1,
-	            valueFormat2: valueFormat2,
-	            classDef1: classDef1,
-	            classDef2: classDef2,
-	            class1Count: class1Count,
-	            class2Count: class2Count,
-	            classRecords: this.parseList(class1Count, Parser.list(class2Count, function() {
+	            posFormat,
+	            coverage,
+	            valueFormat1,
+	            valueFormat2,
+	            classDef1,
+	            classDef2,
+	            class1Count,
+	            class2Count,
+	            classRecords: this.parseList(class1Count, Parser.list(class2Count, function () {
 	                return {
 	                    value1: this.parseValueRecord(valueFormat1),
-	                    value2: this.parseValueRecord(valueFormat2)
+	                    value2: this.parseValueRecord(valueFormat2),
 	                };
-	            }))
+	            })),
 	        };
 	    }
-	};
+  };
 
-	subtableParsers$1[3] = function parseLookup3() { return { error: 'GPOS Lookup 3 not supported' }; };
-	subtableParsers$1[4] = function parseLookup4() { return { error: 'GPOS Lookup 4 not supported' }; };
-	subtableParsers$1[5] = function parseLookup5() { return { error: 'GPOS Lookup 5 not supported' }; };
-	subtableParsers$1[6] = function parseLookup6() { return { error: 'GPOS Lookup 6 not supported' }; };
-	subtableParsers$1[7] = function parseLookup7() { return { error: 'GPOS Lookup 7 not supported' }; };
-	subtableParsers$1[8] = function parseLookup8() { return { error: 'GPOS Lookup 8 not supported' }; };
-	subtableParsers$1[9] = function parseLookup9() { return { error: 'GPOS Lookup 9 not supported' }; };
+  subtableParsers$1[3] = function parseLookup3() { return { error: 'GPOS Lookup 3 not supported' }; };
+  subtableParsers$1[4] = function parseLookup4() { return { error: 'GPOS Lookup 4 not supported' }; };
+  subtableParsers$1[5] = function parseLookup5() { return { error: 'GPOS Lookup 5 not supported' }; };
+  subtableParsers$1[6] = function parseLookup6() { return { error: 'GPOS Lookup 6 not supported' }; };
+  subtableParsers$1[7] = function parseLookup7() { return { error: 'GPOS Lookup 7 not supported' }; };
+  subtableParsers$1[8] = function parseLookup8() { return { error: 'GPOS Lookup 8 not supported' }; };
+  subtableParsers$1[9] = function parseLookup9() { return { error: 'GPOS Lookup 9 not supported' }; };
 
-	// https://docs.microsoft.com/en-us/typography/opentype/spec/gpos
-	function parseGposTable(data, start) {
+  // https://docs.microsoft.com/en-us/typography/opentype/spec/gpos
+  function parseGposTable(data, start) {
 	    start = start || 0;
-	    var p = new Parser(data, start);
-	    var tableVersion = p.parseVersion(1);
-	    check.argument(tableVersion === 1 || tableVersion === 1.1, 'Unsupported GPOS table version ' + tableVersion);
+	    const p = new Parser(data, start);
+	    const tableVersion = p.parseVersion(1);
+	    check.argument(tableVersion === 1 || tableVersion === 1.1, `Unsupported GPOS table version ${tableVersion}`);
 
 	    if (tableVersion === 1) {
 	        return {
 	            version: tableVersion,
 	            scripts: p.parseScriptList(),
 	            features: p.parseFeatureList(),
-	            lookups: p.parseLookupList(subtableParsers$1)
+	            lookups: p.parseLookupList(subtableParsers$1),
 	        };
-	    } else {
+	    }
 	        return {
 	            version: tableVersion,
 	            scripts: p.parseScriptList(),
 	            features: p.parseFeatureList(),
 	            lookups: p.parseLookupList(subtableParsers$1),
-	            variations: p.parseFeatureVariationsList()
+	            variations: p.parseFeatureVariationsList(),
 	        };
-	    }
+  }
 
-	}
+  // GPOS Writing //////////////////////////////////////////////
+  // NOT SUPPORTED
+  const subtableMakers$1 = new Array(10);
 
-	// GPOS Writing //////////////////////////////////////////////
-	// NOT SUPPORTED
-	var subtableMakers$1 = new Array(10);
-
-	function makeGposTable(gpos) {
+  function makeGposTable(gpos) {
 	    return new table.Table('GPOS', [
-	        {name: 'version', type: 'ULONG', value: 0x10000},
-	        {name: 'scripts', type: 'TABLE', value: new table.ScriptList(gpos.scripts)},
-	        {name: 'features', type: 'TABLE', value: new table.FeatureList(gpos.features)},
-	        {name: 'lookups', type: 'TABLE', value: new table.LookupList(gpos.lookups, subtableMakers$1)}
+	        { name: 'version', type: 'ULONG', value: 0x10000 },
+	        { name: 'scripts', type: 'TABLE', value: new table.ScriptList(gpos.scripts) },
+	        { name: 'features', type: 'TABLE', value: new table.FeatureList(gpos.features) },
+	        { name: 'lookups', type: 'TABLE', value: new table.LookupList(gpos.lookups, subtableMakers$1) },
 	    ]);
-	}
+  }
 
-	var gpos = { parse: parseGposTable, make: makeGposTable };
+  const gpos = { parse: parseGposTable, make: makeGposTable };
 
-	// The `kern` table contains kerning pairs.
+  // The `kern` table contains kerning pairs.
 
-	function parseWindowsKernTable(p) {
-	    var pairs = {};
+  function parseWindowsKernTable(p) {
+	    const pairs = {};
 	    // Skip nTables.
 	    p.skip('uShort');
-	    var subtableVersion = p.parseUShort();
+	    const subtableVersion = p.parseUShort();
 	    check.argument(subtableVersion === 0, 'Unsupported kern sub-table version.');
 	    // Skip subtableLength, subtableCoverage
 	    p.skip('uShort', 2);
-	    var nPairs = p.parseUShort();
+	    const nPairs = p.parseUShort();
 	    // Skip searchRange, entrySelector, rangeShift.
 	    p.skip('uShort', 3);
-	    for (var i = 0; i < nPairs; i += 1) {
-	        var leftIndex = p.parseUShort();
-	        var rightIndex = p.parseUShort();
-	        var value = p.parseShort();
-	        pairs[leftIndex + ',' + rightIndex] = value;
+	    for (let i = 0; i < nPairs; i = i + 1) {
+	        const leftIndex = p.parseUShort();
+	        const rightIndex = p.parseUShort();
+	        const value = p.parseShort();
+	        pairs[`${leftIndex},${rightIndex}`] = value;
 	    }
 	    return pairs;
-	}
+  }
 
-	function parseMacKernTable(p) {
-	    var pairs = {};
+  function parseMacKernTable(p) {
+	    const pairs = {};
 	    // The Mac kern table stores the version as a fixed (32 bits) but we only loaded the first 16 bits.
 	    // Skip the rest.
 	    p.skip('uShort');
-	    var nTables = p.parseULong();
-	    //check.argument(nTables === 1, 'Only 1 subtable is supported (got ' + nTables + ').');
+	    const nTables = p.parseULong();
+	    // check.argument(nTables === 1, 'Only 1 subtable is supported (got ' + nTables + ').');
 	    if (nTables > 1) {
 	        console.warn('Only the first kern subtable is supported.');
 	    }
 	    p.skip('uLong');
-	    var coverage = p.parseUShort();
-	    var subtableVersion = coverage & 0xFF;
+	    const coverage = p.parseUShort();
+	    const subtableVersion = coverage & 0xFF;
 	    p.skip('uShort');
 	    if (subtableVersion === 0) {
-	        var nPairs = p.parseUShort();
+	        const nPairs = p.parseUShort();
 	        // Skip searchRange, entrySelector, rangeShift.
 	        p.skip('uShort', 3);
-	        for (var i = 0; i < nPairs; i += 1) {
-	            var leftIndex = p.parseUShort();
-	            var rightIndex = p.parseUShort();
-	            var value = p.parseShort();
-	            pairs[leftIndex + ',' + rightIndex] = value;
+	        for (let i = 0; i < nPairs; i = i + 1) {
+	            const leftIndex = p.parseUShort();
+	            const rightIndex = p.parseUShort();
+	            const value = p.parseShort();
+	            pairs[`${leftIndex},${rightIndex}`] = value;
 	        }
 	    }
 	    return pairs;
-	}
+  }
 
-	// Parse the `kern` table which contains kerning pairs.
-	function parseKernTable(data, start) {
-	    var p = new parse.Parser(data, start);
-	    var tableVersion = p.parseUShort();
+  // Parse the `kern` table which contains kerning pairs.
+  function parseKernTable(data, start) {
+	    const p = new parse.Parser(data, start);
+	    const tableVersion = p.parseUShort();
 	    if (tableVersion === 0) {
 	        return parseWindowsKernTable(p);
-	    } else if (tableVersion === 1) {
+	    } if (tableVersion === 1) {
 	        return parseMacKernTable(p);
-	    } else {
-	        throw new Error('Unsupported kern table version (' + tableVersion + ').');
 	    }
-	}
+	        throw new Error(`Unsupported kern table version (${tableVersion}).`);
+  }
 
-	var kern = { parse: parseKernTable };
+  const kern = { parse: parseKernTable };
 
-	// The `loca` table stores the offsets to the locations of the glyphs in the font.
+  // The `loca` table stores the offsets to the locations of the glyphs in the font.
 
-	// Parse the `loca` table. This table stores the offsets to the locations of the glyphs in the font,
-	// relative to the beginning of the glyphData table.
-	// The number of glyphs stored in the `loca` table is specified in the `maxp` table (under numGlyphs)
-	// The loca table has two versions: a short version where offsets are stored as uShorts, and a long
-	// version where offsets are stored as uLongs. The `head` table specifies which version to use
-	// (under indexToLocFormat).
-	function parseLocaTable(data, start, numGlyphs, shortVersion) {
-	    var p = new parse.Parser(data, start);
-	    var parseFn = shortVersion ? p.parseUShort : p.parseULong;
+  // Parse the `loca` table. This table stores the offsets to the locations of the glyphs in the font,
+  // relative to the beginning of the glyphData table.
+  // The number of glyphs stored in the `loca` table is specified in the `maxp` table (under numGlyphs)
+  // The loca table has two versions: a short version where offsets are stored as uShorts, and a long
+  // version where offsets are stored as uLongs. The `head` table specifies which version to use
+  // (under indexToLocFormat).
+  function parseLocaTable(data, start, numGlyphs, shortVersion) {
+	    const p = new parse.Parser(data, start);
+	    const parseFn = shortVersion ? p.parseUShort : p.parseULong;
 	    // There is an extra entry after the last index element to compute the length of the last glyph.
 	    // That's why we use numGlyphs + 1.
-	    var glyphOffsets = [];
-	    for (var i = 0; i < numGlyphs + 1; i += 1) {
-	        var glyphOffset = parseFn.call(p);
+	    const glyphOffsets = [];
+	    for (let i = 0; i < numGlyphs + 1; i = i + 1) {
+	        let glyphOffset = parseFn.call(p);
 	        if (shortVersion) {
 	            // The short table version stores the actual offset divided by 2.
-	            glyphOffset *= 2;
+	            glyphOffset = glyphOffset * 2;
 	        }
 
 	        glyphOffsets.push(glyphOffset);
 	    }
 
 	    return glyphOffsets;
-	}
+  }
 
-	var loca = { parse: parseLocaTable };
+  const loca = { parse: parseLocaTable };
 
-	// opentype.js
+  // opentype.js
 
-	/**
+  /**
 	 * The opentype library.
 	 * @namespace opentype
 	 */
 
-	// File loaders /////////////////////////////////////////////////////////
-	/**
+  // File loaders /////////////////////////////////////////////////////////
+  /**
 	 * Loads a font from a file. The callback throws an error message as the first parameter if it fails
 	 * and the font as an ArrayBuffer in the second parameter if it succeeds.
 	 * @param  {string} path - The path of the file
 	 * @param  {Function} callback - The function to call when the font load completes
 	 */
-	function loadFromFile(path, callback) {
-	    var fs = require('fs');
-	    fs.readFile(path, function(err, buffer) {
+  function loadFromFile(path, callback) {
+	    const fs = require('fs');
+	    fs.readFile(path, (err, buffer) => {
 	        if (err) {
 	            return callback(err.message);
 	        }
 
 	        callback(null, nodeBufferToArrayBuffer(buffer));
 	    });
-	}
-	/**
+  }
+  /**
 	 * Loads a font from a URL. The callback throws an error message as the first parameter if it fails
 	 * and the font as an ArrayBuffer in the second parameter if it succeeds.
 	 * @param  {string} url - The URL of the font file.
 	 * @param  {Function} callback - The function to call when the font load completes
 	 */
-	function loadFromUrl(url, callback) {
-	    var request = new XMLHttpRequest();
+  function loadFromUrl(url, callback) {
+	    const request = new XMLHttpRequest();
 	    request.open('get', url, true);
 	    request.responseType = 'arraybuffer';
-	    request.onload = function() {
+	    request.onload = function () {
 	        if (request.response) {
 	            return callback(null, request.response);
-	        } else {
-	            return callback('Font could not be loaded: ' + request.statusText);
 	        }
+	            return callback(`Font could not be loaded: ${request.statusText}`);
 	    };
 
 	    request.onerror = function () {
@@ -13886,113 +13876,119 @@
 	    };
 
 	    request.send();
-	}
+  }
 
-	// Table Directory Entries //////////////////////////////////////////////
-	/**
+  // Table Directory Entries //////////////////////////////////////////////
+  /**
 	 * Parses OpenType table entries.
 	 * @param  {DataView}
 	 * @param  {Number}
 	 * @return {Object[]}
 	 */
-	function parseOpenTypeTableEntries(data, numTables) {
-	    var tableEntries = [];
-	    var p = 12;
-	    for (var i = 0; i < numTables; i += 1) {
-	        var tag = parse.getTag(data, p);
-	        var checksum = parse.getULong(data, p + 4);
-	        var offset = parse.getULong(data, p + 8);
-	        var length = parse.getULong(data, p + 12);
-	        tableEntries.push({tag: tag, checksum: checksum, offset: offset, length: length, compression: false});
-	        p += 16;
+  function parseOpenTypeTableEntries(data, numTables) {
+	    const tableEntries = [];
+	    let p = 12;
+	    for (let i = 0; i < numTables; i = i + 1) {
+	        const tag = parse.getTag(data, p);
+	        const checksum = parse.getULong(data, p + 4);
+	        const offset = parse.getULong(data, p + 8);
+	        const length = parse.getULong(data, p + 12);
+	        tableEntries.push({
+        tag, checksum, offset, length, compression: false,
+      });
+	        p = p + 16;
 	    }
 
 	    return tableEntries;
-	}
+  }
 
-	/**
+  /**
 	 * Parses WOFF table entries.
 	 * @param  {DataView}
 	 * @param  {Number}
 	 * @return {Object[]}
 	 */
-	function parseWOFFTableEntries(data, numTables) {
-	    var tableEntries = [];
-	    var p = 44; // offset to the first table directory entry.
-	    for (var i = 0; i < numTables; i += 1) {
-	        var tag = parse.getTag(data, p);
-	        var offset = parse.getULong(data, p + 4);
-	        var compLength = parse.getULong(data, p + 8);
-	        var origLength = parse.getULong(data, p + 12);
-	        var compression = (void 0);
+  function parseWOFFTableEntries(data, numTables) {
+	    const tableEntries = [];
+	    let p = 44; // offset to the first table directory entry.
+	    for (let i = 0; i < numTables; i = i + 1) {
+	        const tag = parse.getTag(data, p);
+	        const offset = parse.getULong(data, p + 4);
+	        const compLength = parse.getULong(data, p + 8);
+	        const origLength = parse.getULong(data, p + 12);
+	        let compression = (void 0);
 	        if (compLength < origLength) {
 	            compression = 'WOFF';
 	        } else {
 	            compression = false;
 	        }
 
-	        tableEntries.push({tag: tag, offset: offset, compression: compression,
-	            compressedLength: compLength, length: origLength});
-	        p += 20;
+	        tableEntries.push({
+        tag,
+        offset,
+        compression,
+	            compressedLength: compLength,
+        length: origLength,
+      });
+	        p = p + 20;
 	    }
 
 	    return tableEntries;
-	}
+  }
 
-	/**
+  /**
 	 * @typedef TableData
 	 * @type Object
 	 * @property {DataView} data - The DataView
 	 * @property {number} offset - The data offset.
 	 */
 
-	/**
+  /**
 	 * @param  {DataView}
 	 * @param  {Object}
 	 * @return {TableData}
 	 */
-	function uncompressTable(data, tableEntry) {
+  function uncompressTable(data, tableEntry) {
 	    if (tableEntry.compression === 'WOFF') {
-	        var inBuffer = new Uint8Array(data.buffer, tableEntry.offset + 2, tableEntry.compressedLength - 2);
-	        var outBuffer = new Uint8Array(tableEntry.length);
+	        const inBuffer = new Uint8Array(data.buffer, tableEntry.offset + 2, tableEntry.compressedLength - 2);
+	        const outBuffer = new Uint8Array(tableEntry.length);
 	        tinyInflate(inBuffer, outBuffer);
 	        if (outBuffer.byteLength !== tableEntry.length) {
-	            throw new Error('Decompression error: ' + tableEntry.tag + ' decompressed length doesn\'t match recorded length');
+	            throw new Error(`Decompression error: ${tableEntry.tag} decompressed length doesn't match recorded length`);
 	        }
 
-	        var view = new DataView(outBuffer.buffer, 0);
-	        return {data: view, offset: 0};
-	    } else {
-	        return {data: data, offset: tableEntry.offset};
+	        const view = new DataView(outBuffer.buffer, 0);
+	        return { data: view, offset: 0 };
 	    }
-	}
+	        return { data, offset: tableEntry.offset };
+  }
 
-	// Public API ///////////////////////////////////////////////////////////
+  // Public API ///////////////////////////////////////////////////////////
 
-	/**
+  /**
 	 * Parse the OpenType file data (as an ArrayBuffer) and return a Font object.
 	 * Throws an error if the font could not be parsed.
 	 * @param  {ArrayBuffer}
 	 * @param  {Object} opt - options for parsing
 	 * @return {opentype.Font}
 	 */
-	function parseBuffer(buffer, opt) {
-	    opt = (opt === undefined || opt === null) ?  {} : opt;
+  function parseBuffer(buffer, opt) {
+	    opt = (opt === undefined || opt === null) ? {} : opt;
 
-	    var indexToLocFormat;
-	    var ltagTable;
+	    let indexToLocFormat;
+	    let ltagTable;
 
 	    // Since the constructor can also be called to create new fonts from scratch, we indicate this
 	    // should be an empty font that we'll fill with our own data.
-	    var font = new Font({empty: true});
+	    const font = new Font({ empty: true });
 
 	    // OpenType fonts use big endian byte ordering.
 	    // We can't rely on typed array view types, because they operate with the endianness of the host computer.
 	    // Instead we use DataViews where we can specify endianness.
-	    var data = new DataView(buffer, 0);
-	    var numTables;
-	    var tableEntries = [];
-	    var signature = parse.getTag(data, 0);
+	    const data = new DataView(buffer, 0);
+	    let numTables;
+	    let tableEntries = [];
+	    const signature = parse.getTag(data, 0);
 	    if (signature === String.fromCharCode(0, 1, 0, 0) || signature === 'true' || signature === 'typ1') {
 	        font.outlinesFormat = 'truetype';
 	        numTables = parse.getUShort(data, 4);
@@ -14002,43 +13998,43 @@
 	        numTables = parse.getUShort(data, 4);
 	        tableEntries = parseOpenTypeTableEntries(data, numTables);
 	    } else if (signature === 'wOFF') {
-	        var flavor = parse.getTag(data, 4);
+	        const flavor = parse.getTag(data, 4);
 	        if (flavor === String.fromCharCode(0, 1, 0, 0)) {
 	            font.outlinesFormat = 'truetype';
 	        } else if (flavor === 'OTTO') {
 	            font.outlinesFormat = 'cff';
 	        } else {
-	            throw new Error('Unsupported OpenType flavor ' + signature);
+	            throw new Error(`Unsupported OpenType flavor ${signature}`);
 	        }
 
 	        numTables = parse.getUShort(data, 12);
 	        tableEntries = parseWOFFTableEntries(data, numTables);
 	    } else {
-	        throw new Error('Unsupported OpenType signature ' + signature);
+	        throw new Error(`Unsupported OpenType signature ${signature}`);
 	    }
 
-	    var cffTableEntry;
-	    var fvarTableEntry;
-	    var glyfTableEntry;
-	    var gposTableEntry;
-	    var gsubTableEntry;
-	    var hmtxTableEntry;
-	    var kernTableEntry;
-	    var locaTableEntry;
-	    var nameTableEntry;
-	    var metaTableEntry;
-	    var p;
+	    let cffTableEntry;
+	    let fvarTableEntry;
+	    let glyfTableEntry;
+	    let gposTableEntry;
+	    let gsubTableEntry;
+	    let hmtxTableEntry;
+	    let kernTableEntry;
+	    let locaTableEntry;
+	    let nameTableEntry;
+	    let metaTableEntry;
+	    let p;
 
-	    for (var i = 0; i < numTables; i += 1) {
-	        var tableEntry = tableEntries[i];
-	        var table = (void 0);
+	    for (let i = 0; i < numTables; i = i + 1) {
+	        const tableEntry = tableEntries[i];
+	        let table = (void 0);
 	        switch (tableEntry.tag) {
 	            case 'cmap':
 	                table = uncompressTable(data, tableEntry);
 	                font.tables.cmap = cmap.parse(table.data, table.offset);
 	                font.encoding = new CmapEncoding(font.tables.cmap);
 	                break;
-	            case 'cvt ' :
+	            case 'cvt ':
 	                table = uncompressTable(data, tableEntry);
 	                p = new parse.Parser(table.data, table.offset);
 	                font.tables.cvt = p.parseShortList(tableEntry.length / 2);
@@ -14046,7 +14042,7 @@
 	            case 'fvar':
 	                fvarTableEntry = tableEntry;
 	                break;
-	            case 'fpgm' :
+	            case 'fpgm':
 	                table = uncompressTable(data, tableEntry);
 	                p = new parse.Parser(table.data, table.offset);
 	                font.tables.fpgm = p.parseByteList(tableEntry.length);
@@ -14088,7 +14084,7 @@
 	                font.tables.post = post.parse(table.data, table.offset);
 	                font.glyphNames = new GlyphNames(font.tables.post);
 	                break;
-	            case 'prep' :
+	            case 'prep':
 	                table = uncompressTable(data, tableEntry);
 	                p = new parse.Parser(table.data, table.offset);
 	                font.tables.prep = p.parseByteList(tableEntry.length);
@@ -14117,60 +14113,60 @@
 	        }
 	    }
 
-	    var nameTable = uncompressTable(data, nameTableEntry);
+	    const nameTable = uncompressTable(data, nameTableEntry);
 	    font.tables.name = _name.parse(nameTable.data, nameTable.offset, ltagTable);
 	    font.names = font.tables.name;
 
 	    if (glyfTableEntry && locaTableEntry) {
-	        var shortVersion = indexToLocFormat === 0;
-	        var locaTable = uncompressTable(data, locaTableEntry);
-	        var locaOffsets = loca.parse(locaTable.data, locaTable.offset, font.numGlyphs, shortVersion);
-	        var glyfTable = uncompressTable(data, glyfTableEntry);
+	        const shortVersion = indexToLocFormat === 0;
+	        const locaTable = uncompressTable(data, locaTableEntry);
+	        const locaOffsets = loca.parse(locaTable.data, locaTable.offset, font.numGlyphs, shortVersion);
+	        const glyfTable = uncompressTable(data, glyfTableEntry);
 	        font.glyphs = glyf.parse(glyfTable.data, glyfTable.offset, locaOffsets, font, opt);
 	    } else if (cffTableEntry) {
-	        var cffTable = uncompressTable(data, cffTableEntry);
+	        const cffTable = uncompressTable(data, cffTableEntry);
 	        cff.parse(cffTable.data, cffTable.offset, font, opt);
 	    } else {
 	        throw new Error('Font doesn\'t contain TrueType or CFF outlines.');
 	    }
 
-	    var hmtxTable = uncompressTable(data, hmtxTableEntry);
+	    const hmtxTable = uncompressTable(data, hmtxTableEntry);
 	    hmtx.parse(font, hmtxTable.data, hmtxTable.offset, font.numberOfHMetrics, font.numGlyphs, font.glyphs, opt);
 	    addGlyphNames(font, opt);
 
 	    if (kernTableEntry) {
-	        var kernTable = uncompressTable(data, kernTableEntry);
+	        const kernTable = uncompressTable(data, kernTableEntry);
 	        font.kerningPairs = kern.parse(kernTable.data, kernTable.offset);
 	    } else {
 	        font.kerningPairs = {};
 	    }
 
 	    if (gposTableEntry) {
-	        var gposTable = uncompressTable(data, gposTableEntry);
+	        const gposTable = uncompressTable(data, gposTableEntry);
 	        font.tables.gpos = gpos.parse(gposTable.data, gposTable.offset);
 	        font.position.init();
 	    }
 
 	    if (gsubTableEntry) {
-	        var gsubTable = uncompressTable(data, gsubTableEntry);
+	        const gsubTable = uncompressTable(data, gsubTableEntry);
 	        font.tables.gsub = gsub.parse(gsubTable.data, gsubTable.offset);
 	    }
 
 	    if (fvarTableEntry) {
-	        var fvarTable = uncompressTable(data, fvarTableEntry);
+	        const fvarTable = uncompressTable(data, fvarTableEntry);
 	        font.tables.fvar = fvar.parse(fvarTable.data, fvarTable.offset, font.names);
 	    }
 
 	    if (metaTableEntry) {
-	        var metaTable = uncompressTable(data, metaTableEntry);
+	        const metaTable = uncompressTable(data, metaTableEntry);
 	        font.tables.meta = meta.parse(metaTable.data, metaTable.offset);
 	        font.metas = font.tables.meta;
 	    }
 
 	    return font;
-	}
+  }
 
-	/**
+  /**
 	 * Asynchronously load the font from a URL or a filesystem. When done, call the callback
 	 * with two arguments `(err, font)`. The `err` will be null on success,
 	 * the `font` is a Font object.
@@ -14180,39 +14176,36 @@
 	 * @param  {string} url - The URL of the font to load.
 	 * @param  {Function} callback - The callback.
 	 */
-	function load(url, callback, opt) {
-	    var isNode = typeof window === 'undefined';
-	    var loadFn = isNode ? loadFromFile : loadFromUrl;
+  function load(url, callback, opt) {
+	    const isNode = typeof window === 'undefined';
+	    const loadFn = isNode ? loadFromFile : loadFromUrl;
 
-	    return new Promise(function (resolve, reject) {
-	        loadFn(url, function(err, arrayBuffer) {
+	    return new Promise((resolve, reject) => {
+	        loadFn(url, (err, arrayBuffer) => {
 	            if (err) {
 	                if (callback) {
 	                    return callback(err);
-	                } else {
-	                    reject(err);
 	                }
+	                    reject(err);
 	            }
-	            var font;
+	            let font;
 	            try {
 	                font = parseBuffer(arrayBuffer, opt);
 	            } catch (e) {
 	                if (callback) {
 	                    return callback(e, null);
-	                } else {
-	                    reject(e);
 	                }
+	                    reject(e);
 	            }
 	            if (callback) {
 	                return callback(null, font);
-	            } else {
-	                resolve(font);
 	            }
+	                resolve(font);
 	        });
 	    });
-	}
+  }
 
-	/**
+  /**
 	 * Synchronously load the font from a URL or file.
 	 * When done, returns the font object or throws an error.
 	 * @alias opentype.loadSync
@@ -14220,35 +14213,34 @@
 	 * @param  {Object} opt - opt.lowMemory
 	 * @return {opentype.Font}
 	 */
-	function loadSync(url, opt) {
-	    var fs = require('fs');
-	    var buffer = fs.readFileSync(url);
+  function loadSync(url, opt) {
+	    const fs = require('fs');
+	    const buffer = fs.readFileSync(url);
 	    return parseBuffer(nodeBufferToArrayBuffer(buffer), opt);
-	}
+  }
 
-	var opentype = /*#__PURE__*/Object.freeze({
-		__proto__: null,
-		Font: Font,
-		Glyph: Glyph,
-		Path: Path,
-		BoundingBox: BoundingBox,
-		_parse: parse,
-		parse: parseBuffer,
-		load: load,
-		loadSync: loadSync
-	});
+  const opentype = /* #__PURE__ */Object.freeze({
+    __proto__: null,
+    Font,
+    Glyph,
+    Path,
+    BoundingBox,
+    _parse: parse,
+    parse: parseBuffer,
+    load,
+    loadSync,
+  });
 
-	exports.BoundingBox = BoundingBox;
-	exports.Font = Font;
-	exports.Glyph = Glyph;
-	exports.Path = Path;
-	exports._parse = parse;
-	exports.default = opentype;
-	exports.load = load;
-	exports.loadSync = loadSync;
-	exports.parse = parseBuffer;
+  exports.BoundingBox = BoundingBox;
+  exports.Font = Font;
+  exports.Glyph = Glyph;
+  exports.Path = Path;
+  exports._parse = parse;
+  exports.default = opentype;
+  exports.load = load;
+  exports.loadSync = loadSync;
+  exports.parse = parseBuffer;
 
-	Object.defineProperty(exports, '__esModule', { value: true });
-
+  Object.defineProperty(exports, '__esModule', { value: true });
 })));
-//# sourceMappingURL=opentype.js.map
+// # sourceMappingURL=opentype.js.map

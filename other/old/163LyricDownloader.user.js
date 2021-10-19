@@ -14,55 +14,55 @@
 // ==/UserScript==
 init();
 function init() {
-  document.querySelector('.wrap>ul>li.lst').innerHTML = '<span><a><em class="_163LyricDownloader">下载歌词</em></a></span>'
+  document.querySelector('.wrap>ul>li.lst').innerHTML = '<span><a><em class="_163LyricDownloader">下载歌词</em></a></span>';
   document.querySelector('._163LyricDownloader').onclick = function () {
     getStatus();
-  }
+  };
 }
 function getStatus() {
-  var musicHref = window.frames['contentFrame'].document.querySelectorAll('.txt>a');
+  const musicHref = window.frames.contentFrame.document.querySelectorAll('.txt>a');
   if (musicHref.length === 0) return;
-  var musicAuthor = window.frames['contentFrame'].document.querySelectorAll('.text>span');
-  var musicStatus = new Object();
+  const musicAuthor = window.frames.contentFrame.document.querySelectorAll('.text>span');
+  const musicStatus = new Object();
   musicStatus.length = musicHref.length;
-  var downloadingList = new Array();
-  var downloadingNow = new Array();
-  var tempId;
-  for (var i = 0; i < musicHref.length; i++) {
+  const downloadingList = new Array();
+  const downloadingNow = new Array();
+  let tempId;
+  for (let i = 0; i < musicHref.length; i++) {
     tempId = musicHref[i].href.replace(/.*song\?id=/, '');
     musicStatus[tempId] = {
-      'id': tempId,
-      'ok': false,
-      'musicUrl': musicHref[i].href,
-      'lyricUrl': 'http://music.163.com/api/song/media?id=' + tempId,
-      'name': musicHref[i].innerText,
-      'singer': musicAuthor[i].innerText.replace(/\//g, ','),
-      'lyric': ''
+      id: tempId,
+      ok: false,
+      musicUrl: musicHref[i].href,
+      lyricUrl: `http://music.163.com/api/song/media?id=${tempId}`,
+      name: musicHref[i].innerText,
+      singer: musicAuthor[i].innerText.replace(/\//g, ','),
+      lyric: '',
     };
     downloadingList.push(tempId);
   }
   window._status = musicStatus;
   window._list = downloadingList;
   window._now = downloadingNow;
-  var isDownloaded = setInterval(function () {
+  var isDownloaded = setInterval(() => {
     addDownloadTask();
     if (checkDownloaded()) {
       clearInterval(isDownloaded);
-      var zip = new JSZip();
-      for (var i in window._status) {
+      const zip = new JSZip();
+      for (const i in window._status) {
         if (!/^\d+$/.test(i)) continue;
-        zip.file(window._status[i].singer + ' - ' + window._status[i].name + '.lrc', window._status[i].lyric);
+        zip.file(`${window._status[i].singer} - ${window._status[i].name}.lrc`, window._status[i].lyric);
       }
       zip.generateAsync({
-        type: 'blob'
-      }).then(function (content) {
-        saveAs(content, window.frames['contentFrame'].document.querySelector('h2.f-ff2').innerText + '.zip');
+        type: 'blob',
+      }).then((content) => {
+        saveAs(content, `${window.frames.contentFrame.document.querySelector('h2.f-ff2').innerText}.zip`);
       });
     }
   }, 200);
 }
 function addDownloadTask() {
-  for (var i = 0; i < window._now.length; i++) {
+  for (let i = 0; i < window._now.length; i++) {
     if (!window._now[i].start) {
       window._now[i].start = true;
       getLyric(i);
@@ -76,7 +76,7 @@ function addDownloadTask() {
     window._now.push({
       id: window._list[0],
       start: false,
-      ok: false
+      ok: false,
     });
     window._list.splice(0, 1);
     addDownloadTask();
@@ -85,31 +85,30 @@ function addDownloadTask() {
 function getLyric(num) {
   GM_xmlhttpRequest({
     method: 'GET',
-    url: 'http://music.163.com/api/song/media?id=' + window._now[num].id,
+    url: `http://music.163.com/api/song/media?id=${window._now[num].id}`,
     timeout: 1500,
-    onload: function (res) {
+    onload(res) {
       window._status[window._now[num].id].lyric = JSON.parse(res.response).lyric;
       window._now[num].ok = true;
       window._status[window._now[num].id].ok = true;
     },
-    ontimeout: function () {
+    ontimeout() {
       window._status[window._now[num].id].lyric = '下载超时，请重试';
       window._now[num].ok = true;
       window._status[window._now[num].id].ok = true;
-    }
+    },
   });
 }
 function checkDownloaded() {
-  var downloaded = 0;
-  for (var i in window._status) {
+  let downloaded = 0;
+  for (const i in window._status) {
     if (!/^\d+$/.test(i)) continue;
     if (window._status[i].ok) downloaded++;
   }
   if (downloaded === window._status.length) {
     document.title = '歌词下载完成';
     return true;
-  } else {
-    document.title = downloaded + '/' + window._status.length;
-    return false;
   }
+  document.title = `${downloaded}/${window._status.length}`;
+  return false;
 }

@@ -25,10 +25,8 @@
 /* global GM_registerMenuCommand GM_getValue GM_setValue */
 /* global $ xhr */
 (function () {
-  'use strict';
-
   const whitelist = GM_getValue('whitelist', []);
-  const host = window.location.host;
+  const { host } = window.location;
   const urls = GM_getValue('urls', []);
 
   if (whitelist.includes(host)) {
@@ -37,7 +35,7 @@
       init();
     });
 
-    GM_registerMenuCommand('Auto-WaybackMachine: DO NOT Effect ' + host, function () {
+    GM_registerMenuCommand(`Auto-WaybackMachine: DO NOT Effect ${host}`, () => {
       const whitelist = GM_getValue('whitelist', []);
       if (whitelist.includes(host)) {
         whitelist.splice(whitelist.indexOf(host), 1);
@@ -46,7 +44,7 @@
       }
     }, 'N');
   } else {
-    GM_registerMenuCommand('Auto-WaybackMachine: Effect ' + host, function () {
+    GM_registerMenuCommand(`Auto-WaybackMachine: Effect ${host}`, () => {
       const whitelist = GM_getValue('whitelist', []);
       if (!whitelist.includes(host)) {
         whitelist.push(host);
@@ -56,7 +54,7 @@
     }, 'N');
   }
 
-  async function init (url) {
+  async function init(url) {
     url = url || window.location.href;
     if (urls.includes(url)) return;
     urls.push(url);
@@ -71,4 +69,4 @@
       console.log('近期快照', res.response.archived_snapshots.closest.url);
     }
   }
-})();
+}());

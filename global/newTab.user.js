@@ -24,16 +24,16 @@
 // @run-at      document-end
 // ==/UserScript==
 /* global GM_registerMenuCommand GM_getValue GM_setValue */
-(function total () {
+(function total() {
   if (document.title.match(/^Index of /) && document.querySelector('[href="../"]')) {
     return;
   }
 
   const blacklist = GM_getValue('blacklist', []);
-  const host = window.location.host;
+  const { host } = window.location;
 
   if (blacklist.includes(host)) {
-    GM_registerMenuCommand('newTab: Effect ' + host, function () {
+    GM_registerMenuCommand(`newTab: Effect ${host}`, () => {
       const blacklist = GM_getValue('blacklist', []);
       if (blacklist.includes(host)) {
         blacklist.splice(blacklist.indexOf(host), 1);
@@ -43,16 +43,16 @@
     }, 'N');
   } else {
     init();
-    const observer = new window.MutationObserver(mutationsList => {
-      let list = mutationsList.filter(i => i.addedNodes.length).map(i => [...i.addedNodes]);
+    const observer = new window.MutationObserver((mutationsList) => {
+      let list = mutationsList.filter((i) => i.addedNodes.length).map((i) => [...i.addedNodes]);
       list = [].concat(...list);
       if (list.length) init(list);
     });
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
-    GM_registerMenuCommand('newTab: DO NOT Effect ' + host, function () {
+    GM_registerMenuCommand(`newTab: DO NOT Effect ${host}`, () => {
       const blacklist = GM_getValue('blacklist', []);
       if (!blacklist.includes(host)) {
         blacklist.push(host);
@@ -62,20 +62,20 @@
     }, 'N');
   }
 
-  function init (parents) {
+  function init(parents) {
     let elems = parents || [document];
-    elems = elems.filter(i => i.querySelectorAll).map(i => ['A', 'AREA'].includes(i.tagName) ? i : [...i.querySelectorAll(':not([target="_blank"]):not([data-newtab="true"])')].filter(j => ['A', 'AREA'].includes(j.tagName))); // BASE FORM
+    elems = elems.filter((i) => i.querySelectorAll).map((i) => (['A', 'AREA'].includes(i.tagName) ? i : [...i.querySelectorAll(':not([target="_blank"]):not([data-newtab="true"])')].filter((j) => ['A', 'AREA'].includes(j.tagName)))); // BASE FORM
     elems = [].concat(...elems);
 
     // let raw = []
     // let changed = []
-    elems.forEach(link => {
+    elems.forEach((link) => {
       link.setAttribute('data-newtab', 'true');
       const prop = link.tagName === 'FORM' ? 'action' : 'href';
       if (!link[prop]) return;
       const url = new URL(link[prop]);
       const protocol = !url.protocol.match(/^(http.?|ftp):$/);
-      const host = url.href === window.location.origin || url.href === window.location.origin + '/';
+      const host = url.href === window.location.origin || url.href === `${window.location.origin}/`;
       const hash = !!url.href.match('#') && url.pathname === window.location.pathname;
       const next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/);
       const text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后|首|末|尾)一?(章|页|话|集|节|卷|篇|章|頁|話|集|節|卷|篇)|Prev(ious)?|Next/i);
@@ -100,4 +100,4 @@
     });
     /* console.error('Set newtab: ', changed, '\ndon\'t change: ', raw); */
   }
-})();
+}());

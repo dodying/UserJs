@@ -16,20 +16,19 @@
 /* global  */
 /* eslint-disable no-debugger  */
 (function () {
-  'use strict';
   // 来自 https://developer.mozilla.org/zh-CN/docs/Web/API/GlobalEventHandlers/onerror#注意事项
   window.onerror = function (msg, url, lineNo, columnNo, error) {
-    var string = msg.toLowerCase();
-    var substring = 'script error';
+    const string = msg.toLowerCase();
+    const substring = 'script error';
     if (string.indexOf(substring) > -1) {
       window.alert('Script Error: See Browser Console for Detail');
     } else {
-      var message = [
-        'Message: ' + msg,
-        'URL: ' + url,
-        'Line: ' + lineNo,
-        'Column: ' + columnNo,
-        'Error object: ' + JSON.stringify(error)
+      const message = [
+        `Message: ${msg}`,
+        `URL: ${url}`,
+        `Line: ${lineNo}`,
+        `Column: ${columnNo}`,
+        `Error object: ${JSON.stringify(error)}`,
       ].join(' - ');
 
       window.alert(message);
@@ -37,4 +36,4 @@
 
     return false;
   };
-})();
+}());

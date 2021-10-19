@@ -27,299 +27,297 @@
 // @run-at       document-end
 // ==/UserScript==
 /* eslint-disable camelcase */
-(function init () {
+(function init() {
   if (window.location.host === 'e-hentai.org') {
-    var href = getValue('url') || (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org')
-    href = gE('#eventpane>div>a') ? href + '/' + gE('#eventpane>div>a').href.split('/')[3] : getValue('lastEncounter') || href
+    let href = getValue('url') || (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
+    href = gE('#eventpane>div>a') ? `${href}/${gE('#eventpane>div>a').href.split('/')[3]}` : getValue('lastEncounter') || href;
     if (window.location.href === 'https://e-hentai.org/news.php?encounter') {
-      openUrl(href)
+      openUrl(href);
     } else if (gE('#eventpane>div>a')) {
-      setValue('lastEncounter', href)
+      setValue('lastEncounter', href);
     }
-    return
+    return;
   }
-  setValue('url', window.location.origin)
+  setValue('url', window.location.origin);
   if (!gE('#navbar,#riddlecounter,#textlog')) {
-    setTimeout(goto, 5 * 60 * 1000)
-    return
+    setTimeout(goto, 5 * 60 * 1000);
+    return;
   }
-  g('version', GM_info ? GM_info.script.version.substr(0, 4) : '2.89')
+  g('version', GM_info ? GM_info.script.version.substr(0, 4) : '2.89');
   if (getValue('option')) {
-    g('option', getValue('option', true))
-    g('lang', g('option').lang || '0')
-    addStyle(g('lang'))
+    g('option', getValue('option', true));
+    g('lang', g('option').lang || '0');
+    addStyle(g('lang'));
     if (g('option').version !== g('version')) {
-      gE('.hvAAButton').click()
-      if (_alert(1, 'hvAutoAttack版本更新，请重新设置\n强烈推荐【重置设置】后再设置。\n是否查看更新说明？', 'hvAutoAttack版本更新，請重新設置\n強烈推薦【重置設置】後再設置。\n是否查看更新說明？', 'hvAutoAttack version update, please reset\nIt\'s recommended to reset all configuration.\nDo you want to read the changelog?')) openUrl('https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js', true)
-      gE('.hvAAReset').focus()
-      return
+      gE('.hvAAButton').click();
+      if (_alert(1, 'hvAutoAttack版本更新，请重新设置\n强烈推荐【重置设置】后再设置。\n是否查看更新说明？', 'hvAutoAttack版本更新，請重新設置\n強烈推薦【重置設置】後再設置。\n是否查看更新說明？', 'hvAutoAttack version update, please reset\nIt\'s recommended to reset all configuration.\nDo you want to read the changelog?')) openUrl('https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js', true);
+      gE('.hvAAReset').focus();
+      return;
     }
   } else {
-    g('lang', window.prompt('请输入以下语言代码对应的数字\nPlease put in the number of your preferred language (0, 1 or 2)\n0.简体中文\n1.繁體中文\n2.English', 0) || 2)
-    addStyle(g('lang'))
-    _alert(0, '请设置hvAutoAttack', '請設置hvAutoAttack', 'Please config this script')
-    gE('.hvAAButton').click()
-    return
+    g('lang', window.prompt('请输入以下语言代码对应的数字\nPlease put in the number of your preferred language (0, 1 or 2)\n0.简体中文\n1.繁體中文\n2.English', 0) || 2);
+    addStyle(g('lang'));
+    _alert(0, '请设置hvAutoAttack', '請設置hvAutoAttack', 'Please config this script');
+    gE('.hvAAButton').click();
+    return;
   }
   if (gE('[class^="c5"],[class^="c4"]') && _alert(1, '请设置字体\n使用默认字体可能使某些功能失效\n是否查看相关说明？', '請設置字體\n使用默認字體可能使某些功能失效\n是否查看相關說明？', 'Please set the font\nThe default font may make some functions fail to work\nDo you want to see instructions?')) {
-    openUrl('https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README' + (g('lang') === '2' ? '_en.md#about-font' : '.md#关于字体的说明'), true)
-    return
+    openUrl(`https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README${g('lang') === '2' ? '_en.md#about-font' : '.md#关于字体的说明'}`, true);
+    return;
   }
-  unsafeWindow = typeof unsafeWindow === 'undefined' ? window : unsafeWindow
+  unsafeWindow = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
   if (gE('#riddlecounter')) { // 需要答题
     if (g('option').riddlePopup && !window.opener) {
-      window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707')
+      window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
     } else {
-      riddleAlert() // 答题警报
+      riddleAlert(); // 答题警报
     }
   } else if (!gE('#navbar')) { // 战斗中
-    var box2 = gE('#battle_main').appendChild(cE('div'))
-    box2.id = 'hvAABox2'
+    const box2 = gE('#battle_main').appendChild(cE('div'));
+    box2.id = 'hvAABox2';
     if (g('option').pauseButton) {
-      var button = box2.appendChild(cE('button'))
-      button.innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>'
-      button.className = 'pauseChange'
+      const button = box2.appendChild(cE('button'));
+      button.innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
+      button.className = 'pauseChange';
       button.onclick = function () {
-        pauseChange()
-      }
+        pauseChange();
+      };
     }
     if (g('option').pauseHotkey) {
-      document.addEventListener('keydown', function pause (e) {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         if (e.keyCode === g('option').pauseHotkeyCode) {
-          pauseChange()
+          pauseChange();
           // document.removeEventListener('keydown', pause, false);
         }
-      }, false)
+      }, false);
     }
-    reloader()
-    g('attackStatus', g('option').attackStatus)
-    g('timeNow', time(0))
-    g('runSpeed', 1)
-    newRound()
-    if (g('option').recordEach && !getValue('battleCode')) setValue('battleCode', time(1) + ': ' + g('roundType').toUpperCase() + '-' + g('roundAll'))
-    main()
+    reloader();
+    g('attackStatus', g('option').attackStatus);
+    g('timeNow', time(0));
+    g('runSpeed', 1);
+    newRound();
+    if (g('option').recordEach && !getValue('battleCode')) setValue('battleCode', `${time(1)}: ${g('roundType').toUpperCase()}-${g('roundAll')}`);
+    main();
   } else { // 战斗外
-    delValue(2)
-    g('dateNow', time(2))
-    if (g('option').quickSite) quickSite()
-    if (g('option').encounter) encounterCheck()
-    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return
+    delValue(2);
+    g('dateNow', time(2));
+    if (g('option').quickSite) quickSite();
+    if (g('option').encounter) encounterCheck();
+    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return;
     if (g('option').repair) {
-      var json, checkOnload, checkLength
-      var len = 0
-      var eqps = []
+      let json; let checkOnload; let
+        checkLength;
+      let len = 0;
+      const eqps = [];
       checkOnload = function () {
         if (json) {
-          setTimeout(checkOnload, 200)
+          setTimeout(checkOnload, 200);
         } else {
-          post('?s=Forge&ss=re', function (data) {
-            post(gE('#mainpane>script[src]', data).src, function (data1) {
-              json = JSON.parse(data1.match(/{.*}/)[0])
-              gE('.eqp>[id]', 'all', data).forEach(function (i) {
-                eqps.push(i.id.match(/\d+/)[0])
-              })
-              eqps.forEach(function (id) {
+          post('?s=Forge&ss=re', (data) => {
+            post(gE('#mainpane>script[src]', data).src, (data1) => {
+              json = JSON.parse(data1.match(/{.*}/)[0]);
+              gE('.eqp>[id]', 'all', data).forEach((i) => {
+                eqps.push(i.id.match(/\d+/)[0]);
+              });
+              eqps.forEach((id) => {
                 if (json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1] <= g('option').repairValue) {
-                  post('?s=Forge&ss=re', checkLength, 'select_item=' + id)
+                  post('?s=Forge&ss=re', checkLength, `select_item=${id}`);
                 } else {
-                  checkLength()
+                  checkLength();
                 }
-              })
-            }, null, 'text')
-          })
+              });
+            }, null, 'text');
+          });
         }
-      }
+      };
       checkLength = function () {
-        len++
-        if (len === eqps.length && g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000)
-      }
-      checkOnload()
-      return
+        len++;
+        if (len === eqps.length && g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
+      };
+      checkOnload();
+      return;
     }
-    if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000)
+    if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
   }
-})()
+}());
 // 通用//
-function getKeys (objArr, prop) {
-  var out = []
-  objArr.forEach(function (_objArr) {
-    out = prop ? out.concat(Object.keys(_objArr[prop])) : out.concat(Object.keys(_objArr))
-  })
-  out = out.sort()
-  for (var i = 1; i < out.length; i++) {
+function getKeys(objArr, prop) {
+  let out = [];
+  objArr.forEach((_objArr) => {
+    out = prop ? out.concat(Object.keys(_objArr[prop])) : out.concat(Object.keys(_objArr));
+  });
+  out = out.sort();
+  for (let i = 1; i < out.length; i++) {
     if (out[i - 1] === out[i]) {
-      out.splice(i, 1)
-      i--
+      out.splice(i, 1);
+      i--;
     }
   }
-  return out
+  return out;
 }
 
-function time (e, stamp) {
-  var date = stamp ? new Date(stamp) : new Date()
+function time(e, stamp) {
+  const date = stamp ? new Date(stamp) : new Date();
   if (e === 0) {
-    return date.getTime()
-  } else if (e === 1) {
-    return (date.getUTCMonth() + 1) + '/' + date.getUTCDate()
-  } else if (e === 2) { // date.toLocaleDateString(lang,option);
-    return date.getUTCFullYear() + '/' + (date.getUTCMonth() + 1) + '/' + date.getUTCDate()
-  } else if (e === 3) {
+    return date.getTime();
+  } if (e === 1) {
+    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
+  } if (e === 2) { // date.toLocaleDateString(lang,option);
+    return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
+  } if (e === 3) {
     return date.toLocaleString(navigator.language, {
-      hour12: false
-    })
+      hour12: false,
+    });
   }
 }
 
-function gE (ele, mode, parent) { // 获取元素
+function gE(ele, mode, parent) { // 获取元素
   if (typeof ele === 'object') {
-    return ele
-  } else if (mode === undefined && parent === undefined) {
-    return (isNaN(ele * 1)) ? document.querySelector(ele) : document.getElementById(ele)
-  } else if (mode === 'all') {
-    return (parent === undefined) ? document.querySelectorAll(ele) : parent.querySelectorAll(ele)
-  } else if (typeof mode === 'object' && parent === undefined) {
-    return mode.querySelector(ele)
+    return ele;
+  } if (mode === undefined && parent === undefined) {
+    return (isNaN(ele * 1)) ? document.querySelector(ele) : document.getElementById(ele);
+  } if (mode === 'all') {
+    return (parent === undefined) ? document.querySelectorAll(ele) : parent.querySelectorAll(ele);
+  } if (typeof mode === 'object' && parent === undefined) {
+    return mode.querySelector(ele);
   }
 }
 
-function cE (name) { // 创建元素
-  return document.createElement(name)
+function cE(name) { // 创建元素
+  return document.createElement(name);
 }
 
-function isOn (id) { // 是否可以施放技能/使用物品
+function isOn(id) { // 是否可以施放技能/使用物品
   if (id * 1 > 10000) { // 使用物品
-    return gE('.bti3>div[onmouseover*="' + id + '"]')
-  } else { // 施放技能
-    return (gE(id) && gE(id).style.opacity !== '0.5') ? gE(id) : false
-  }
+    return gE(`.bti3>div[onmouseover*="${id}"]`);
+  } // 施放技能
+  return (gE(id) && gE(id).style.opacity !== '0.5') ? gE(id) : false;
 }
 
-function setValue (item, value) { // 储存数据
+function setValue(item, value) { // 储存数据
   if (typeof GM_setValue === 'undefined') {
-    window.localStorage['hvAA-' + item] = (typeof value === 'string') ? value : JSON.stringify(value)
+    window.localStorage[`hvAA-${item}`] = (typeof value === 'string') ? value : JSON.stringify(value);
   } else {
-    GM_setValue(item, value)
+    GM_setValue(item, value);
   }
 }
 
-function getValue (item, toJSON) { // 读取数据
+function getValue(item, toJSON) { // 读取数据
   if (typeof GM_getValue === 'undefined' || !GM_getValue(item, null)) {
-    item = 'hvAA-' + item
-    return (item in window.localStorage) ? ((toJSON) ? JSON.parse(window.localStorage[item]) : window.localStorage[item]) : null
-  } else {
-    return GM_getValue(item, null)
+    item = `hvAA-${item}`;
+    return (item in window.localStorage) ? ((toJSON) ? JSON.parse(window.localStorage[item]) : window.localStorage[item]) : null;
   }
+  return GM_getValue(item, null);
 }
 
-function delValue (item) { // 删除数据
+function delValue(item) { // 删除数据
   if (typeof item === 'string') {
     if (typeof GM_deleteValue === 'undefined') {
-      window.localStorage.removeItem('hvAA-' + item)
+      window.localStorage.removeItem(`hvAA-${item}`);
     } else {
-      GM_deleteValue(item)
+      GM_deleteValue(item);
     }
   } else if (typeof item === 'number') {
     if (item === 0) {
-      delValue('disabled')
+      delValue('disabled');
     } else if (item === 1) {
-      delValue('roundNow')
-      delValue('roundAll')
-      delValue('monsterStatus')
+      delValue('roundNow');
+      delValue('roundAll');
+      delValue('monsterStatus');
     } else if (item === 2) {
-      delValue('roundType')
-      delValue('battleCode')
-      delValue(0)
-      delValue(1)
+      delValue('roundType');
+      delValue('battleCode');
+      delValue(0);
+      delValue(1);
     }
   }
 }
 
-function goto () { // 前进
-  window.location.href = window.location
-  setTimeout(goto, 5000)
+function goto() { // 前进
+  window.location.href = window.location;
+  setTimeout(goto, 5000);
 }
 
-function g (key, value) { // 全局变量
-  var hvAA = window.hvAA || {}
+function g(key, value) { // 全局变量
+  const hvAA = window.hvAA || {};
   if (key === undefined && value === undefined) {
-    return hvAA
-  } else if (value === undefined) {
-    return hvAA[key]
-  } else {
-    hvAA[key] = value
-    window.hvAA = hvAA
+    return hvAA;
+  } if (value === undefined) {
+    return hvAA[key];
   }
+  hvAA[key] = value;
+  window.hvAA = hvAA;
 }
 
-function post (href, func, parm, type) { // post
-  var xhr = new window.XMLHttpRequest()
-  xhr.open(parm ? 'POST' : 'GET', href)
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-  xhr.responseType = type || 'document'
+function post(href, func, parm, type) { // post
+  let xhr = new window.XMLHttpRequest();
+  xhr.open(parm ? 'POST' : 'GET', href);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  xhr.responseType = type || 'document';
   xhr.onerror = function () {
-    xhr = null
-    post(href, func, parm, type)
-  }
+    xhr = null;
+    post(href, func, parm, type);
+  };
   xhr.onload = function (e) {
     if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
-      var data = e.target.response
+      const data = e.target.response;
       if (xhr.responseType === 'document' && gE('#messagebox', data)) {
         if (gE('#messagebox')) {
-          gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'))
+          gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
         } else {
-          gE('#csp').appendChild(gE('#messagebox', data))
+          gE('#csp').appendChild(gE('#messagebox', data));
         }
       }
-      func(data, e)
+      func(data, e);
     }
-    xhr = null
-  }
-  xhr.send(parm)
+    xhr = null;
+  };
+  xhr.send(parm);
 }
 
-function objArrSort (key) { // 对象数组排序函数，从小到大排序
+function objArrSort(key) { // 对象数组排序函数，从小到大排序
   return function (obj1, obj2) {
-    return (obj2[key] < obj1[key]) ? 1 : (obj2[key] > obj1[key]) ? -1 : 0
-  }
+    return (obj2[key] < obj1[key]) ? 1 : (obj2[key] > obj1[key]) ? -1 : 0;
+  };
 }
 
-function objSort (obj) { // 对象排序
-  var objNew = {}
-  var arr = Object.keys(obj).sort()
-  arr.forEach(function (key) {
-    objNew[key] = obj[key]
-  })
-  return objNew
+function objSort(obj) { // 对象排序
+  const objNew = {};
+  const arr = Object.keys(obj).sort();
+  arr.forEach((key) => {
+    objNew[key] = obj[key];
+  });
+  return objNew;
 }
 
-function _alert (func, l0, l1, l2, answer) {
-  var lang = [l0, l1, l2][g('lang')]
+function _alert(func, l0, l1, l2, answer) {
+  const lang = [l0, l1, l2][g('lang')];
   if (func === -1) {
-    return lang
-  } else if (func === 0) {
-    window.alert(lang)
+    return lang;
+  } if (func === 0) {
+    window.alert(lang);
   } else if (func === 1) {
-    return window.confirm(lang)
+    return window.confirm(lang);
   } else if (func === 2) {
-    return window.prompt(lang, answer)
+    return window.prompt(lang, answer);
   }
 }
 
-function openUrl (url, newTab) {
-  var a = gE('body').appendChild(cE('a'))
-  a.href = url
-  a.target = newTab ? '_blank' : '_self'
-  a.click()
+function openUrl(url, newTab) {
+  const a = gE('body').appendChild(cE('a'));
+  a.href = url;
+  a.target = newTab ? '_blank' : '_self';
+  a.click();
 }
 
-function addStyle (lang) { // CSS
-  var langStyle = gE('head').appendChild(cE('style'))
-  langStyle.className = 'hvAA-LangStyle'
-  langStyle.textContent = 'l' + lang + '{display:inline!important;}'
-  if (/^[01]$/.test(lang)) langStyle.textContent += 'l01{display:inline!important;}'
-  var globalStyle = gE('head').appendChild(cE('style'))
-  var cssContent = [
+function addStyle(lang) { // CSS
+  const langStyle = gE('head').appendChild(cE('style'));
+  langStyle.className = 'hvAA-LangStyle';
+  langStyle.textContent = `l${lang}{display:inline!important;}`;
+  if (/^[01]$/.test(lang)) langStyle.textContent = `${langStyle.textContent}l01{display:inline!important;}`;
+  const globalStyle = gE('head').appendChild(cE('style'));
+  const cssContent = [
     // hvAA
     'l0,l1,l01,l2{display:none;}', // l0: 简体 l1: 繁体 l01:简繁体共用 l2: 英文
     '.hvAALog{font-size:20px;}',
@@ -345,7 +343,7 @@ function addStyle (lang) { // CSS
     '#hvAATab-Drop td,#hvAATab-Usage td{text-align:right;white-space:nowrap;}',
     // '#hvAATab-Drop td:empty:before,#hvAATab-Usage td:empty:before{content:"";}',
     '.selectTable{cursor:pointer;}',
-    '.selectTable:before{content:"' + String.fromCharCode(parseInt('22A0', 16).toString(10)) + '";}',
+    `.selectTable:before{content:"${String.fromCharCode(0x22A0.toString(10))}";}`,
     '.hvAACenter{text-align:center;}',
     '.hvAATitle{font-weight:bolder;}',
     '.hvAAGoto{cursor:pointer;text-decoration:underline;color:#5C0D11;}',
@@ -378,32 +376,32 @@ function addStyle (lang) { // CSS
     // hv
     '#riddleform>div:nth-child(3)>img{width:700px;}',
     '#battle_right{overflow:visible;}',
-    '#pane_log{height:403px;}'
+    '#pane_log{height:403px;}',
     // '#pane_monster{counter-reset:order;}',
     // '.btm2>div:nth-child(1):before{font-size:30px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
     // '.btm2>div:nth-child(1)>img{display:none;}'
-  ].join('')
-  globalStyle.textContent = cssContent
-  optionButton(lang)
+  ].join('');
+  globalStyle.textContent = cssContent;
+  optionButton(lang);
 }
 
-function optionButton (lang) { // 配置按钮
-  var optionButton = gE('body').appendChild(cE('div'))
-  optionButton.className = 'hvAAButton'
+function optionButton(lang) { // 配置按钮
+  const optionButton = gE('body').appendChild(cE('div'));
+  optionButton.className = 'hvAAButton';
   optionButton.onclick = function () {
     if (gE('#hvAABox')) {
-      gE('#hvAABox').style.display = (gE('#hvAABox').style.display === 'none') ? 'block' : 'none'
+      gE('#hvAABox').style.display = (gE('#hvAABox').style.display === 'none') ? 'block' : 'none';
     } else {
-      optionBox()
-      gE('#hvAATab-Main').style.zIndex = 1
-      gE('select[name="lang"]').value = lang
+      optionBox();
+      gE('#hvAATab-Main').style.zIndex = 1;
+      gE('select[name="lang"]').value = lang;
     }
-  }
+  };
 }
 
-function optionBox () { // 配置界面
-  var optionBox = gE('body').appendChild(cE('div'))
-  optionBox.id = 'hvAABox'
+function optionBox() { // 配置界面
+  const optionBox = gE('body').appendChild(cE('div'));
+  optionBox.id = 'hvAABox';
   optionBox.innerHTML = [
     '<div class="hvAACenter">',
     '  <h1 style="display:inline;">hvAutoAttack</h1>',
@@ -614,497 +612,501 @@ function optionBox () { // 配置界面
     '    <l2>If you encounter a bug and would like to help the author fix it<br>You should provide the following information: <br>1. the Situation<br>2. Your Configuration<br>3. Console Log (press Ctrl + Shift + i to open the Developer Assistant, And then select the Console panel)<br>4. Battle Log (if in combat)<br>If you are unable to tolerate this bug or even the bug made the script fail, try installing the old version<hr>If you have some suggestions to make this script more useful, then: <br>1. Please briefly describe your thoughts<br>2. If you can, please provide some scenes (to facilitate the author to better understand)<br>PS. For English user, please express in basic English (Oh my poor English, thanks for Google Translate)</l2></div></div>',
     '</div>',
     '<div class="hvAAButtonBox hvAACenter">',
-    '  <button class="hvAAReset"><l0>重置设置</l0><l1>重置設置</l1><l2>Reset</l2></button><button class="hvAAApply"><l0>应用</l0><l1>應用</l1><l2>Apply</l2></button><button class="hvAACancel"><l01>取消</l01><l2>Cancel</l2></button></div>'
-  ].join('').replace(/{{(.*?)}}/g, '<div class="customize" name="$1"></div>')
+    '  <button class="hvAAReset"><l0>重置设置</l0><l1>重置設置</l1><l2>Reset</l2></button><button class="hvAAApply"><l0>应用</l0><l1>應用</l1><l2>Apply</l2></button><button class="hvAACancel"><l01>取消</l01><l2>Cancel</l2></button></div>',
+  ].join('').replace(/{{(.*?)}}/g, '<div class="customize" name="$1"></div>');
   // 绑定事件
   gE('select[name="lang"]', optionBox).onchange = function () { // 选择语言
-    gE('.hvAA-LangStyle').textContent = 'l' + this.value + '{display:inline!important;}'
-    if (/^[01]$/.test(this.value)) gE('.hvAA-LangStyle').textContent += 'l01{display:inline!important;}'
-    g('lang', this.value)
-  }
+    gE('.hvAA-LangStyle').textContent = `l${this.value}{display:inline!important;}`;
+    if (/^[01]$/.test(this.value)) gE('.hvAA-LangStyle').textContent += 'l01{display:inline!important;}';
+    g('lang', this.value);
+  };
   gE('.hvAATabmenu', optionBox).onclick = function (e) { // 标签页事件
-    if (e.target.tagName === 'INPUT') return
-    var target = (e.target.tagName === 'SPAN') ? e.target : e.target.parentNode
-    var name = target.getAttribute('name')
-    var i, _html
+    if (e.target.tagName === 'INPUT') return;
+    const target = (e.target.tagName === 'SPAN') ? e.target : e.target.parentNode;
+    const name = target.getAttribute('name');
+    let i; let
+      _html;
     if (name === 'Drop') { // 掉落监测
-      var drop = getValue('drop', true) || {}
-      var dropOld = getValue('dropOld', true) || []
-      drop = objSort(drop)
-      _html = '<tbody>'
+      let drop = getValue('drop', true) || {};
+      const dropOld = getValue('dropOld', true) || [];
+      drop = objSort(drop);
+      _html = '<tbody>';
       if (dropOld.length === 0 || (dropOld.length === 1 && !getValue('drop', true))) {
-        if (dropOld.length === 1) drop = dropOld[0]
-        _html += '<tr class="hvAATh"><td></td><td><l0>数量</l0><l1>數量</l1><l2>Amount</l2></td></tr>'
+        if (dropOld.length === 1) drop = dropOld[0];
+        _html = `${_html}<tr class="hvAATh"><td></td><td><l0>数量</l0><l1>數量</l1><l2>Amount</l2></td></tr>`;
         for (i in drop) {
-          _html += '<tr><td>' + i + '</td><td>' + drop[i] + '</td></tr>'
+          _html = `${_html}<tr><td>${i}</td><td>${drop[i]}</td></tr>`;
         }
       } else {
         if (getValue('drop')) {
-          drop.__name = getValue('battleCode')
-          dropOld.push(drop)
+          drop.__name = getValue('battleCode');
+          dropOld.push(drop);
         }
-        dropOld.reverse()
-        _html += '<tr class="hvAATh"><td class="selectTable"></td>'
-        dropOld.forEach(function (_dropOld) {
-          _html += '<td>' + _dropOld.__name + '</td>'
-        })
-        _html += '</tr>'
-        getKeys(dropOld).forEach(function (key) {
-          if (key === '__name') return
-          _html += '<tr><td>' + key + '</td>'
-          dropOld.forEach(function (_dropOld) {
+        dropOld.reverse();
+        _html = `${_html}<tr class="hvAATh"><td class="selectTable"></td>`;
+        dropOld.forEach((_dropOld) => {
+          _html = `${_html}<td>${_dropOld.__name}</td>`;
+        });
+        _html = `${_html}</tr>`;
+        getKeys(dropOld).forEach((key) => {
+          if (key === '__name') return;
+          _html = `${_html}<tr><td>${key}</td>`;
+          dropOld.forEach((_dropOld) => {
             if (key in _dropOld) {
-              _html += '<td>' + _dropOld[key] + '</td>'
+              _html = `${_html}<td>${_dropOld[key]}</td>`;
             } else {
-              _html += '<td></td>'
+              _html = `${_html}<td></td>`;
             }
-          })
-          _html += '</tr>'
-        })
+          });
+          _html = `${_html}</tr>`;
+        });
       }
-      _html += '</tbody>'
-      gE('#hvAATab-Drop>table').innerHTML = _html
+      _html = `${_html}</tbody>`;
+      gE('#hvAATab-Drop>table').innerHTML = _html;
     } else if (name === 'Usage') { // 数据记录
-      var stats = getValue('stats', true) || {}
-      var statsOld = getValue('statsOld', true) || []
-      var translation = {
+      let stats = getValue('stats', true) || {};
+      const statsOld = getValue('statsOld', true) || [];
+      const translation = {
         self: '<l0>自身 (次数)</l0><l1>自身 (次數)</l1><l2>Self (Frequency)</l2>',
         restore: '<l0>回复 (总量)</l0><l1>回复 (總量)</l1><l2>Restore (Amount)</l2>',
         items: '<l0>物品 (次数)</l0><l1>物品 (次數)</l1><l2>Items (Frequency)</l2>',
         magic: '<l0>技能 (次数)</l0><l1>技能 (次數)</l1><l2>Magic (Frequency)</l2>',
         damage: '<l0>伤害 (总量)</l0><l1>傷害 (總量)</l1><l2>Damage (Amount)</l2>',
         hurt: '<l0>受伤 (总量)</l0><l1>受傷 (總量)</l1><l2>Loss (Amount)</l2>',
-        proficiency: '<l0>熟练度 (总量)</l0><l1>熟練度 (總量)</l1><l2>Proficiency (Amount)</l2>'
-      }
-      _html = '<tbody>'
+        proficiency: '<l0>熟练度 (总量)</l0><l1>熟練度 (總量)</l1><l2>Proficiency (Amount)</l2>',
+      };
+      _html = '<tbody>';
       if (statsOld.length === 0 || (statsOld.length === 1 && !getValue('stats', true))) {
-        if (statsOld.length === 1) stats = statsOld[0]
+        if (statsOld.length === 1) stats = statsOld[0];
         for (i in stats) {
-          _html += '<tr class="hvAATh"><td>' + translation[i] + '</td><td><l01>值</l01><l2>Value</l2></td></tr>'
-          stats[i] = objSort(stats[i])
-          for (var j in stats[i]) {
-            _html += '<tr><td>' + j + '</td><td>' + stats[i][j] + '</td></tr>'
+          _html = `${_html}<tr class="hvAATh"><td>${translation[i]}</td><td><l01>值</l01><l2>Value</l2></td></tr>`;
+          stats[i] = objSort(stats[i]);
+          for (const j in stats[i]) {
+            _html = `${_html}<tr><td>${j}</td><td>${stats[i][j]}</td></tr>`;
           }
         }
       } else {
         if (getValue('stats')) {
-          stats.__name = getValue('battleCode')
-          statsOld.push(stats)
+          stats.__name = getValue('battleCode');
+          statsOld.push(stats);
         }
-        statsOld.reverse()
-        _html += '<tr class="hvAATh"><td class="selectTable"></td>'
-        statsOld.forEach(function (_dropOld) {
-          _html += '<td>' + _dropOld.__name + '</td>'
-        })
-        _html += '</tr>'
-        Object.keys(translation).forEach(function (i) {
-          if (i === '__name') return
-          _html += '<tr class="hvAATh"><td colspan="' + (statsOld.length + 1) + '">' + translation[i] + '</td></tr>'
-          getKeys(statsOld, i).forEach(function (key) {
-            _html += '<tr><td>' + key + '</td>'
-            statsOld.forEach(function (_statsOld) {
+        statsOld.reverse();
+        _html = `${_html}<tr class="hvAATh"><td class="selectTable"></td>`;
+        statsOld.forEach((_dropOld) => {
+          _html = `${_html}<td>${_dropOld.__name}</td>`;
+        });
+        _html = `${_html}</tr>`;
+        Object.keys(translation).forEach((i) => {
+          if (i === '__name') return;
+          _html = `${_html}<tr class="hvAATh"><td colspan="${statsOld.length + 1}">${translation[i]}</td></tr>`;
+          getKeys(statsOld, i).forEach((key) => {
+            _html = `${_html}<tr><td>${key}</td>`;
+            statsOld.forEach((_statsOld) => {
               if (key in _statsOld[i]) {
-                _html += '<td>' + _statsOld[i][key] + '</td>'
+                _html = `${_html}<td>${_statsOld[i][key]}</td>`;
               } else {
-                _html += '<td></td>'
+                _html = `${_html}<td></td>`;
               }
-            })
-          })
-        })
+            });
+          });
+        });
       }
-      _html += '</tbody>'
-      gE('#hvAATab-Usage>table').innerHTML = _html
+      _html = `${_html}</tbody>`;
+      gE('#hvAATab-Usage>table').innerHTML = _html;
     } else if (name === 'About') { // 关于本脚本
-      gE('.hvAADebug', 'all', optionBox).forEach(function (input) {
-        if (getValue(input.name)) input.value = getValue(input.name)
-      })
+      gE('.hvAADebug', 'all', optionBox).forEach((input) => {
+        if (getValue(input.name)) input.value = getValue(input.name);
+      });
     }
     if (name === 'Drop' || name === 'Usage') {
-      gE('.selectTable', 'all', optionBox).forEach(function (i) {
-        i.onclick = null
+      gE('.selectTable', 'all', optionBox).forEach((i) => {
+        i.onclick = null;
         i.onclick = function (e) {
-          var select = window.getSelection()
-          select.removeAllRanges()
-          var range = document.createRange()
-          range.selectNodeContents(e.target.parentNode.parentNode.parentNode)
-          select.addRange(range)
-        }
-      })
+          const select = window.getSelection();
+          select.removeAllRanges();
+          const range = document.createRange();
+          range.selectNodeContents(e.target.parentNode.parentNode.parentNode);
+          select.addRange(range);
+        };
+      });
     }
-    gE('.hvAATab', 'all', optionBox).forEach(function (i) {
-      i.style.display = (i.id === 'hvAATab-' + name) ? 'block' : 'none'
-    })
-  }
-  gE('.hvAAGoto', 'all', optionBox).forEach(function (i) {
+    gE('.hvAATab', 'all', optionBox).forEach((i) => {
+      i.style.display = (i.id === `hvAATab-${name}`) ? 'block' : 'none';
+    });
+  };
+  gE('.hvAAGoto', 'all', optionBox).forEach((i) => {
     i.onclick = function () {
-      gE('.hvAATabmenu>span[name="' + this.name.replace('hvAATab-', '') + '"]').click()
-    }
-  })
+      gE(`.hvAATabmenu>span[name="${this.name.replace('hvAATab-', '')}"]`).click();
+    };
+  });
 
-  function updateGroup () {
-    var group = gE('.customizeGroup', 'all', g('customizeTarget'))
-    var customizeBox = gE('.customizeBox')
-    if (group.length + 1 === gE('select[name="groupChoose"]>option', 'all', customizeBox).length) return
-    gE('select[name="groupChoose"]', customizeBox).textContent = ''
-    for (var i = 0; i <= group.length; i++) {
-      var option = gE('select[name="groupChoose"]', customizeBox).appendChild(cE('option'))
+  function updateGroup() {
+    const group = gE('.customizeGroup', 'all', g('customizeTarget'));
+    const customizeBox = gE('.customizeBox');
+    if (group.length + 1 === gE('select[name="groupChoose"]>option', 'all', customizeBox).length) return;
+    gE('select[name="groupChoose"]', customizeBox).textContent = '';
+    for (let i = 0; i <= group.length; i++) {
+      const option = gE('select[name="groupChoose"]', customizeBox).appendChild(cE('option'));
       if (i === group.length) {
-        option.value = 'new'
-        option.textContent = 'new'
+        option.value = 'new';
+        option.textContent = 'new';
       } else {
-        option.value = i + 1
-        option.textContent = i + 1
+        option.value = i + 1;
+        option.textContent = i + 1;
       }
     }
   }
   optionBox.onmousemove = function (e) { // 自定义条件相关事件
-    var target = (e.target.className === 'customize') ? e.target : (e.target.parentNode.className === 'customize') ? e.target.parentNode : e.target.parentNode.parentNode
-    if (!gE('.customizeBox')) customizeBox()
-    updateGroup()
+    const target = (e.target.className === 'customize') ? e.target : (e.target.parentNode.className === 'customize') ? e.target.parentNode : e.target.parentNode.parentNode;
+    if (!gE('.customizeBox')) customizeBox();
+    updateGroup();
     if (target.className !== 'customize' && target.parentNode.className !== 'customize') {
-      if (!target.className.match('customize')) gE('.customizeBox').style.zIndex = -1
-      return
+      if (!target.className.match('customize')) gE('.customizeBox').style.zIndex = -1;
+      return;
     }
-    g('customizeTarget', target)
-    var position = target.getBoundingClientRect()
-    gE('.customizeBox').style.zIndex = 5
-    gE('.customizeBox').style.top = position.bottom + window.scrollY + 'px'
-    gE('.customizeBox').style.left = position.left + window.scrollX + 'px'
-  }
+    g('customizeTarget', target);
+    const position = target.getBoundingClientRect();
+    gE('.customizeBox').style.zIndex = 5;
+    gE('.customizeBox').style.top = `${position.bottom + window.scrollY}px`;
+    gE('.customizeBox').style.left = `${position.left + window.scrollX}px`;
+  };
   // 标签页-主要选项
   gE('input[name="pauseHotkeyStr"]', optionBox).onkeyup = function (e) {
-    this.value = (/^[a-z]$/.test(e.key)) ? e.key.toUpperCase() : e.key
-    gE('input[name="pauseHotkeyCode"]', optionBox).value = e.keyCode
-  }
+    this.value = (/^[a-z]$/.test(e.key)) ? e.key.toUpperCase() : e.key;
+    gE('input[name="pauseHotkeyCode"]', optionBox).value = e.keyCode;
+  };
   gE('.testNotification', optionBox).onclick = function () {
-    _alert(0, '接下来开始预处理。\n如果询问是否允许，请选择允许', '接下來開始預處理。\n如果詢問是否允許，請選擇允許', 'Now, pretreat.\nPlease allow to receive notifications if you are asked for permission')
-    setNotification('Test')
-  }
+    _alert(0, '接下来开始预处理。\n如果询问是否允许，请选择允许', '接下來開始預處理。\n如果詢問是否允許，請選擇允許', 'Now, pretreat.\nPlease allow to receive notifications if you are asked for permission');
+    setNotification('Test');
+  };
   gE('.testPopup', optionBox).onclick = function () {
-    _alert(0, '接下来开始预处理。\n关闭本警告框之后，请切换到其他标签页，\n并在足够长的时间后再打开本标签页', '接下來開始預處理。\n關閉本警告框之後，請切換到其他標籤頁，\n並在足夠長的時間後再打開本標籤頁', 'Now, pretreat.\nAfter dismissing this alert, focus other tab,\nfocus this tab again after long time.')
-    setTimeout(function () {
-      var riddleWindow = window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707')
+    _alert(0, '接下来开始预处理。\n关闭本警告框之后，请切换到其他标签页，\n并在足够长的时间后再打开本标签页', '接下來開始預處理。\n關閉本警告框之後，請切換到其他標籤頁，\n並在足夠長的時間後再打開本標籤頁', 'Now, pretreat.\nAfter dismissing this alert, focus other tab,\nfocus this tab again after long time.');
+    setTimeout(() => {
+      const riddleWindow = window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
       if (riddleWindow) {
-        setTimeout(function () {
-          riddleWindow.close()
-        }, 200)
+        setTimeout(() => {
+          riddleWindow.close();
+        }, 200);
       }
-    }, 3000)
-  }
+    }, 3000);
+  };
   gE('.staminaLostLog', optionBox).onclick = function () {
-    var out = []
-    var staminaLostLog = getValue('staminaLostLog', true)
-    for (var i in staminaLostLog) {
-      out.push(i + ': ' + staminaLostLog[i])
+    const out = [];
+    const staminaLostLog = getValue('staminaLostLog', true);
+    for (const i in staminaLostLog) {
+      out.push(`${i}: ${staminaLostLog[i]}`);
     }
-    if (window.confirm('总共' + out.length + '条记录 (There are ' + out.length + ' logs): \n' + out.reverse().join('\n') + '\n是否重置 (Whether to reset)?')) setValue('staminaLostLog', {})
-  }
+    if (window.confirm(`总共${out.length}条记录 (There are ${out.length} logs): \n${out.reverse().join('\n')}\n是否重置 (Whether to reset)?`)) setValue('staminaLostLog', {});
+  };
   gE('.idleArenaReset', optionBox).onclick = function () {
-    if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('arena')
-  }
+    if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('arena');
+  };
   gE('.hvAAShowLevels', optionBox).onclick = function () {
-    gE('.hvAAArenaLevels').style.display = (gE('.hvAAArenaLevels').style.display === 'block') ? 'none' : 'block'
-  }
+    gE('.hvAAArenaLevels').style.display = (gE('.hvAAArenaLevels').style.display === 'block') ? 'none' : 'block';
+  };
   gE('.hvAALevelsClear', optionBox).onclick = function () {
-    gE('[name="idleArenaLevels"]', optionBox).value = ''
-    gE('[name="idleArenaValue"]', optionBox).value = ''
-    gE('.hvAAArenaLevels>input', 'all', optionBox).forEach(function (input) {
-      input.checked = false
-    })
-  }
+    gE('[name="idleArenaLevels"]', optionBox).value = '';
+    gE('[name="idleArenaValue"]', optionBox).value = '';
+    gE('.hvAAArenaLevels>input', 'all', optionBox).forEach((input) => {
+      input.checked = false;
+    });
+  };
   gE('.hvAAArenaLevels', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return
-    var valueArray = e.target.value.split(',')
-    var levels = gE('input[name="idleArenaLevels"]').value
-    var value = gE('input[name="idleArenaValue"]').value
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+    const valueArray = e.target.value.split(',');
+    let levels = gE('input[name="idleArenaLevels"]').value;
+    let { value } = gE('input[name="idleArenaValue"]');
     if (e.target.checked) {
-      levels += (levels) ? ',' + valueArray[0] : valueArray[0]
-      value += (value) ? ',' + valueArray[1] : valueArray[1]
+      levels = levels + ((levels) ? `,${valueArray[0]}` : valueArray[0]);
+      value = value + ((value) ? `,${valueArray[1]}` : valueArray[1]);
     } else {
-      levels = levels.replace(new RegExp('(^|,)' + valueArray[0] + '(,|$)'), '$2').replace(/^,/, '')
-      value = value.replace(new RegExp('(^|,)' + valueArray[1] + '(,|$)'), '$2').replace(/^,/, '')
+      levels = levels.replace(new RegExp(`(^|,)${valueArray[0]}(,|$)`), '$2').replace(/^,/, '');
+      value = value.replace(new RegExp(`(^|,)${valueArray[1]}(,|$)`), '$2').replace(/^,/, '');
     }
-    gE('input[name="idleArenaLevels"]').value = levels
-    gE('input[name="idleArenaValue"]').value = value
-  }
+    gE('input[name="idleArenaLevels"]').value = levels;
+    gE('input[name="idleArenaValue"]').value = value;
+  };
   // 标签页-物品
   gE('.itemOrder', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return
-    var valueArray = e.target.value.split(',')
-    var name = gE('input[name="itemOrderName"]').value
-    var value = gE('input[name="itemOrderValue"]').value
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+    const valueArray = e.target.value.split(',');
+    let name = gE('input[name="itemOrderName"]').value;
+    let { value } = gE('input[name="itemOrderValue"]');
     if (e.target.checked) {
-      name += (name) ? ',' + valueArray[0] : valueArray[0]
-      value += (value) ? ',' + valueArray[1] : valueArray[1]
+      name = name + ((name) ? `,${valueArray[0]}` : valueArray[0]);
+      value = value + ((value) ? `,${valueArray[1]}` : valueArray[1]);
     } else {
-      name = name.replace(new RegExp('(^|,)' + valueArray[0] + '(,|$)'), '$2').replace(/^,/, '')
-      value = value.replace(new RegExp('(^|,)' + valueArray[1] + '(,|$)'), '$2').replace(/^,/, '')
+      name = name.replace(new RegExp(`(^|,)${valueArray[0]}(,|$)`), '$2').replace(/^,/, '');
+      value = value.replace(new RegExp(`(^|,)${valueArray[1]}(,|$)`), '$2').replace(/^,/, '');
     }
-    gE('input[name="itemOrderName"]').value = name
-    gE('input[name="itemOrderValue"]').value = value
-  }
+    gE('input[name="itemOrderName"]').value = name;
+    gE('input[name="itemOrderValue"]').value = value;
+  };
   // 标签页-Channel技能
   gE('.channelSkill2Order', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return
-    var valueArray = e.target.value.split(',')
-    var name = gE('input[name="channelSkill2OrderName"]').value
-    var value = gE('input[name="channelSkill2OrderValue"]').value
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+    const valueArray = e.target.value.split(',');
+    let name = gE('input[name="channelSkill2OrderName"]').value;
+    let { value } = gE('input[name="channelSkill2OrderValue"]');
     if (e.target.checked) {
-      name += (name) ? ',' + valueArray[0] : valueArray[0]
-      value += (value) ? ',' + valueArray[1] : valueArray[1]
+      name = name + ((name) ? `,${valueArray[0]}` : valueArray[0]);
+      value = value + ((value) ? `,${valueArray[1]}` : valueArray[1]);
     } else {
-      name = name.replace(new RegExp('(^|,)' + valueArray[0] + '(,|$)'), '$2').replace(/^,/, '')
-      value = value.replace(new RegExp('(^|,)' + valueArray[1] + '(,|$)'), '$2').replace(/^,/, '')
+      name = name.replace(new RegExp(`(^|,)${valueArray[0]}(,|$)`), '$2').replace(/^,/, '');
+      value = value.replace(new RegExp(`(^|,)${valueArray[1]}(,|$)`), '$2').replace(/^,/, '');
     }
-    gE('input[name="channelSkill2OrderName"]').value = name
-    gE('input[name="channelSkill2OrderValue"]').value = value
-  }
+    gE('input[name="channelSkill2OrderName"]').value = name;
+    gE('input[name="channelSkill2OrderValue"]').value = value;
+  };
   // 标签页-BUFF技能
   gE('.buffSkillOrder', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return
-    var name = e.target.id.match(/_(.*)/)[1]
-    var value = gE('input[name="buffSkillOrderValue"]').value
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+    const name = e.target.id.match(/_(.*)/)[1];
+    let { value } = gE('input[name="buffSkillOrderValue"]');
     if (e.target.checked) {
-      value += (value) ? ',' + name : name
+      value = value + ((value) ? `,${name}` : name);
     } else {
-      value = value.replace(new RegExp('(^|,)' + name + '(,|$)'), '$2').replace(/^,/, '')
+      value = value.replace(new RegExp(`(^|,)${name}(,|$)`), '$2').replace(/^,/, '');
     }
-    gE('input[name="buffSkillOrderValue"]').value = value
-  }
+    gE('input[name="buffSkillOrderValue"]').value = value;
+  };
   // 标签页-DEBUFF技能
   gE('.debuffSkillOrder', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return
-    var name = e.target.id.match(/_(.*)/)[1]
-    var value = gE('input[name="debuffSkillOrderValue"]').value
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+    const name = e.target.id.match(/_(.*)/)[1];
+    let { value } = gE('input[name="debuffSkillOrderValue"]');
     if (e.target.checked) {
-      value += (value) ? ',' + name : name
+      value = value + ((value) ? `,${name}` : name);
     } else {
-      value = value.replace(new RegExp('(^|,)' + name + '(,|$)'), '$2').replace(/^,/, '')
+      value = value.replace(new RegExp(`(^|,)${name}(,|$)`), '$2').replace(/^,/, '');
     }
-    gE('input[name="debuffSkillOrderValue"]').value = value
-  }
+    gE('input[name="debuffSkillOrderValue"]').value = value;
+  };
   // 标签页-其他技能
   gE('.skillOrder', optionBox).onclick = function (e) {
-    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return
-    var name = e.target.id.match(/_(.*)/)[1]
-    var value = gE('input[name="skillOrderValue"]').value
+    if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+    const name = e.target.id.match(/_(.*)/)[1];
+    let { value } = gE('input[name="skillOrderValue"]');
     if (e.target.checked) {
-      value += (value) ? ',' + name : name
+      value = value + ((value) ? `,${name}` : name);
     } else {
-      value = value.replace(new RegExp('(^|,)' + name + '(,|$)'), '$2').replace(/^,/, '')
+      value = value.replace(new RegExp(`(^|,)${name}(,|$)`), '$2').replace(/^,/, '');
     }
-    gE('input[name="skillOrderValue"]').value = value
-  }
+    gE('input[name="skillOrderValue"]').value = value;
+  };
   // 标签页-警报
   gE('input[name="audio_Text"]', optionBox).onchange = function () {
-    if (this.value === '') return
+    if (this.value === '') return;
     if (!/^http(s)?:|^ftp:|^data:audio/.test(this.value)) {
-      _alert(0, '地址必须以"http:","https:","ftp:","data:audio"开头', '地址必須以"http:","https:","ftp:","data:audio"開頭', 'The address must start with "http:", "https:", "ftp:", and "data:audio"')
-      return
+      _alert(0, '地址必须以"http:","https:","ftp:","data:audio"开头', '地址必須以"http:","https:","ftp:","data:audio"開頭', 'The address must start with "http:", "https:", "ftp:", and "data:audio"');
+      return;
     }
-    _alert(0, '接下来将测试该音频\n如果该音频无法播放或无法载入，请变更\n请测试完成后再键入另一个音频', '接下來將測試該音頻\n如果該音頻無法播放或無法載入，請變更\n請測試完成後再鍵入另一個音頻', 'The audio will be tested after you close this prompt\nIf the audio doesn\'t load or play, change the url')
-    var box = gE('#hvAATab-Alarm').appendChild(cE('div'))
-    box.innerHTML = this.value
-    var audio = box.appendChild(cE('audio'))
-    audio.controls = true
-    audio.src = this.value
-    audio.play()
-  }
+    _alert(0, '接下来将测试该音频\n如果该音频无法播放或无法载入，请变更\n请测试完成后再键入另一个音频', '接下來將測試該音頻\n如果該音頻無法播放或無法載入，請變更\n請測試完成後再鍵入另一個音頻', 'The audio will be tested after you close this prompt\nIf the audio doesn\'t load or play, change the url');
+    const box = gE('#hvAATab-Alarm').appendChild(cE('div'));
+    box.innerHTML = this.value;
+    const audio = box.appendChild(cE('audio'));
+    audio.controls = true;
+    audio.src = this.value;
+    audio.play();
+  };
   // 标签页-掉落监测
   gE('.reDropMonitor', optionBox).onclick = function () {
     if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
-      delValue('drop')
-      delValue('dropOld')
+      delValue('drop');
+      delValue('dropOld');
     }
-  }
+  };
   // 标签页-数据记录
   gE('.reRecordUsage', optionBox).onclick = function () {
     if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
-      delValue('stats')
-      delValue('statsOld')
+      delValue('stats');
+      delValue('statsOld');
     }
-  }
+  };
   // 标签页-关于本脚本
   gE('.hvAAFix', optionBox).onclick = function () {
-    gE('.hvAADebug[name^="round"]', 'all', optionBox).forEach(function (input) {
-      setValue(input.name, input.value || input.placeholder)
-    })
-  }
+    gE('.hvAADebug[name^="round"]', 'all', optionBox).forEach((input) => {
+      setValue(input.name, input.value || input.placeholder);
+    });
+  };
   gE('.quickSiteAdd', optionBox).onclick = function () {
-    var tr = gE('.hvAAQuickSite>table>tbody', optionBox).appendChild(cE('tr'))
-    tr.innerHTML = '<td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td>'
-  }
+    const tr = gE('.hvAAQuickSite>table>tbody', optionBox).appendChild(cE('tr'));
+    tr.innerHTML = '<td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td><td><input class="hvAADebug" type="text"></td>';
+  };
   gE('.hvAAConfig', optionBox).onclick = function () {
-    this.style.height = 0
-    this.style.height = this.scrollHeight + 'px'
-    this.select()
-  }
+    this.style.height = 0;
+    this.style.height = `${this.scrollHeight}px`;
+    this.select();
+  };
   gE('.hvAABackup', optionBox).onclick = function () {
-    var code = _alert(2, '请输入当前配置代号', '請輸入當前配置代號', 'Please put in a name for the current configuration') || time(3)
-    var backups = getValue('backup', true) || {}
-    backups[code] = getValue('option')
-    setValue('backup', backups)
-    var li = gE('.hvAABackupList', optionBox).appendChild(cE('li'))
-    li.textContent = code
-  }
+    const code = _alert(2, '请输入当前配置代号', '請輸入當前配置代號', 'Please put in a name for the current configuration') || time(3);
+    const backups = getValue('backup', true) || {};
+    backups[code] = getValue('option');
+    setValue('backup', backups);
+    const li = gE('.hvAABackupList', optionBox).appendChild(cE('li'));
+    li.textContent = code;
+  };
   gE('.hvAARestore', optionBox).onclick = function () {
-    var code = _alert(2, '请输入配置代号', '請輸入配置代號', 'Please put in a name for a configuration')
-    var backups = getValue('backup', true) || {}
-    if (!(code in backups) || !code) return
-    setValue('option', backups[code])
-    goto()
-  }
+    const code = _alert(2, '请输入配置代号', '請輸入配置代號', 'Please put in a name for a configuration');
+    const backups = getValue('backup', true) || {};
+    if (!(code in backups) || !code) return;
+    setValue('option', backups[code]);
+    goto();
+  };
   gE('.hvAADelete', optionBox).onclick = function () {
-    var code = _alert(2, '请输入配置代号', '請輸入配置代號', 'Please put in a name for a configuration')
-    var backups = getValue('backup', true) || {}
-    if (!(code in backups) || !code) return
-    delete backups[code]
-    setValue('backup', backups)
-    goto()
-  }
+    const code = _alert(2, '请输入配置代号', '請輸入配置代號', 'Please put in a name for a configuration');
+    const backups = getValue('backup', true) || {};
+    if (!(code in backups) || !code) return;
+    delete backups[code];
+    setValue('backup', backups);
+    goto();
+  };
   gE('.hvAAExport', optionBox).onclick = function () {
-    var t = getValue('option')
-    gE('.hvAAConfig').value = typeof t === 'string' ? t : JSON.stringify(t)
-  }
+    const t = getValue('option');
+    gE('.hvAAConfig').value = typeof t === 'string' ? t : JSON.stringify(t);
+  };
   gE('.hvAAImport', optionBox).onclick = function () {
-    var option = JSON.parse(gE('.hvAAConfig').value)
-    if (!option) return
+    const option = JSON.parse(gE('.hvAAConfig').value);
+    if (!option) return;
     if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
-      setValue('option', option)
-      goto()
+      setValue('option', option);
+      goto();
     }
-  }
+  };
   //
   gE('.hvAAReset', optionBox).onclick = function () {
-    if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('option')
-  }
+    if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('option');
+  };
   gE('.hvAAApply', optionBox).onclick = function () {
     if (gE('select[name="attackStatus"] option[value="-1"]:checked', optionBox)) {
-      _alert(0, '请选择攻击模式', '請選擇攻擊模式', 'Please select the attack mode')
-      gE('.hvAATabmenu>span[name="Main"]').click()
-      gE('#attackStatus', optionBox).style.border = '1px solid red'
-      setTimeout(function () {
-        gE('#attackStatus', optionBox).style.border = ''
-      }, 0.5 * 1000)
-      return
+      _alert(0, '请选择攻击模式', '請選擇攻擊模式', 'Please select the attack mode');
+      gE('.hvAATabmenu>span[name="Main"]').click();
+      gE('#attackStatus', optionBox).style.border = '1px solid red';
+      setTimeout(() => {
+        gE('#attackStatus', optionBox).style.border = '';
+      }, 0.5 * 1000);
+      return;
     }
-    var _option = {
-      version: g('version')
-    }
-    var inputs = gE('input,select', 'all', optionBox)
-    var itemName, itemArray, itemValue, i
+    const _option = {
+      version: g('version'),
+    };
+    let inputs = gE('input,select', 'all', optionBox);
+    let itemName; let itemArray; let itemValue; let
+      i;
     for (i = 0; i < inputs.length; i++) {
       if (inputs[i].className === 'hvAADebug') {
-        continue
+        continue;
       } else if (inputs[i].className === 'hvAANumber') {
-        itemName = inputs[i].name
-        itemValue = (inputs[i].value || inputs[i].placeholder) * 1
-        if (isNaN(itemValue)) continue
+        itemName = inputs[i].name;
+        itemValue = (inputs[i].value || inputs[i].placeholder) * 1;
+        if (isNaN(itemValue)) continue;
       } else if (inputs[i].type === 'text' || inputs[i].type === 'hidden') {
-        itemName = inputs[i].name
-        itemValue = inputs[i].value || inputs[i].placeholder
-        if (itemValue === '') continue
+        itemName = inputs[i].name;
+        itemValue = inputs[i].value || inputs[i].placeholder;
+        if (itemValue === '') continue;
       } else if (inputs[i].type === 'checkbox') {
-        itemName = inputs[i].id
-        itemValue = inputs[i].checked
-        if (itemValue === false) continue
+        itemName = inputs[i].id;
+        itemValue = inputs[i].checked;
+        if (itemValue === false) continue;
       } else if (inputs[i].type === 'select-one') {
-        itemName = inputs[i].name
-        itemValue = inputs[i].value
+        itemName = inputs[i].name;
+        itemValue = inputs[i].value;
       }
-      itemArray = itemName.split('_')
+      itemArray = itemName.split('_');
       if (itemArray.length === 1) {
-        _option[itemName] = itemValue
+        _option[itemName] = itemValue;
       } else {
-        if (!(itemArray[0] in _option)) _option[itemArray[0]] = {}
+        if (!(itemArray[0] in _option)) _option[itemArray[0]] = {};
         if (inputs[i].className === 'customizeInput') {
-          if (typeof _option[itemArray[0]][itemArray[1]] === 'undefined') _option[itemArray[0]][itemArray[1]] = []
-          _option[itemArray[0]][itemArray[1]].push(itemValue)
+          if (typeof _option[itemArray[0]][itemArray[1]] === 'undefined') _option[itemArray[0]][itemArray[1]] = [];
+          _option[itemArray[0]][itemArray[1]].push(itemValue);
         } else {
-          _option[itemArray[0]][itemArray[1]] = itemValue
+          _option[itemArray[0]][itemArray[1]] = itemValue;
         }
       }
     }
-    inputs = gE('.hvAAQuickSite input[type="text"]', 'all', optionBox)
+    inputs = gE('.hvAAQuickSite input[type="text"]', 'all', optionBox);
     for (i = 0; 3 * i < inputs.length; i++) {
-      if (i === 0 && inputs.length !== 0) _option.quickSite = []
-      if (inputs[3 * i + 1].value === '') continue
+      if (i === 0 && inputs.length !== 0) _option.quickSite = [];
+      if (inputs[3 * i + 1].value === '') continue;
       _option.quickSite.push({
         fav: inputs[3 * i].value,
         name: inputs[3 * i + 1].value,
-        url: inputs[3 * i + 2].value
-      })
+        url: inputs[3 * i + 2].value,
+      });
     }
-    setValue('option', _option)
-    optionBox.style.display = 'none'
-    goto()
-  }
+    setValue('option', _option);
+    optionBox.style.display = 'none';
+    goto();
+  };
   gE('.hvAACancel', optionBox).onclick = function () {
-    optionBox.style.display = 'none'
-  }
+    optionBox.style.display = 'none';
+  };
   if (g('option')) {
-    var i, j, k
-    var _option = g('option')
-    var inputs = gE('input,select', 'all', optionBox)
-    var itemName, itemArray, itemValue, _html
+    let i; let j; let
+      k;
+    const _option = g('option');
+    const inputs = gE('input,select', 'all', optionBox);
+    let itemName; let itemArray; let itemValue; let
+      _html;
     for (i = 0; i < inputs.length; i++) {
-      if (inputs[i].className === 'hvAADebug') continue
-      itemName = inputs[i].name || inputs[i].id
+      if (inputs[i].className === 'hvAADebug') continue;
+      itemName = inputs[i].name || inputs[i].id;
       if (typeof _option[itemName] !== 'undefined') {
-        itemValue = _option[itemName]
+        itemValue = _option[itemName];
       } else {
-        itemArray = itemName.split('_')
-        itemValue = ''
+        itemArray = itemName.split('_');
+        itemValue = '';
         if (itemArray.length === 2 && typeof _option[itemArray[0]] === 'object' && inputs[i].className !== 'hvAACustomize' && typeof _option[itemArray[0]][itemArray[1]] !== 'undefined') {
-          itemValue = _option[itemArray[0]][itemArray[1]]
+          itemValue = _option[itemArray[0]][itemArray[1]];
         }
       }
       if (inputs[i].type === 'text' || inputs[i].type === 'hidden' || inputs[i].type === 'select-one' || inputs[i].type === 'number') {
-        inputs[i].value = itemValue
+        inputs[i].value = itemValue;
       } else if (inputs[i].type === 'checkbox') {
-        inputs[i].checked = itemValue
+        inputs[i].checked = itemValue;
       }
     }
-    var customize = gE('.customize', 'all', optionBox)
+    const customize = gE('.customize', 'all', optionBox);
     for (i = 0; i < customize.length; i++) {
-      itemName = customize[i].getAttribute('name')
+      itemName = customize[i].getAttribute('name');
       if (itemName in _option) {
         for (j in _option[itemName]) {
-          var group = customize[i].appendChild(cE('div'))
-          group.className = 'customizeGroup'
-          group.innerHTML = j * 1 + 1 + '. '
+          const group = customize[i].appendChild(cE('div'));
+          group.className = 'customizeGroup';
+          group.innerHTML = `${j * 1 + 1}. `;
           for (k = 0; k < _option[itemName][j].length; k++) {
-            var input = group.appendChild(cE('input'))
-            input.type = 'text'
-            input.className = 'customizeInput'
-            input.name = itemName + '_' + j
-            input.value = _option[itemName][j][k]
+            const input = group.appendChild(cE('input'));
+            input.type = 'text';
+            input.className = 'customizeInput';
+            input.name = `${itemName}_${j}`;
+            input.value = _option[itemName][j][k];
           }
         }
       }
     }
     if (_option.quickSite) {
-      _html = '<tr class="hvAATh"><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr>'
-      _option.quickSite.forEach(function (i) {
-        _html += '<tr><td><input class="hvAADebug" type="text" value="' + i.fav + '"></td><td><input class="hvAADebug" type="text" value="' + i.name + '"></td><td><input class="hvAADebug" type="text" value="' + i.url + '"></td></tr>'
-      })
-      gE('.hvAAQuickSite>table>tbody', optionBox).innerHTML = _html
+      _html = '<tr class="hvAATh"><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr>';
+      _option.quickSite.forEach((i) => {
+        _html = `${_html}<tr><td><input class="hvAADebug" type="text" value="${i.fav}"></td><td><input class="hvAADebug" type="text" value="${i.name}"></td><td><input class="hvAADebug" type="text" value="${i.url}"></td></tr>`;
+      });
+      gE('.hvAAQuickSite>table>tbody', optionBox).innerHTML = _html;
     }
     if (getValue('backup')) {
-      var backups = getValue('backup', true)
-      _html = ''
+      const backups = getValue('backup', true);
+      _html = '';
       for (i in backups) {
-        _html += '<li>' + i + '</li>'
+        _html = `${_html}<li>${i}</li>`;
       }
-      gE('.hvAABackupList', optionBox).innerHTML = _html
+      gE('.hvAABackupList', optionBox).innerHTML = _html;
     }
   }
 }
 
-function customizeBox () { // 自定义条件界面
-  var customizeBox = gE('body').appendChild(cE('div'))
-  customizeBox.className = 'customizeBox'
-  var statusOption = [
+function customizeBox() { // 自定义条件界面
+  const customizeBox = gE('body').appendChild(cE('div'));
+  customizeBox.className = 'customizeBox';
+  const statusOption = [
     '<option value="hp">hp</option>',
     '<option value="mp">mp</option>',
     '<option value="sp">sp</option>',
@@ -1124,1054 +1126,1054 @@ function customizeBox () { // 自定义条件界面
     '<option value="">- - - -</option>',
     '<option value="_isCd_">isCd</option>',
     '<option value="_buffTurn_">buffTurn</option>',
-    '<option value=""></option>'
-  ].join('')
+    '<option value=""></option>',
+  ].join('');
   customizeBox.innerHTML = [
     '<span><l01><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#自定义判断条件" target="_blank">?</a></l01><l2><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README_en.md#customize-condition" target="_blank">?</a></l2></span>',
-    '<span class="hvAAInspect" title="off">' + String.fromCharCode(parseInt('21F1', 16).toString(10)) + '</span>',
+    `<span class="hvAAInspect" title="off">${String.fromCharCode(0x21F1.toString(10))}</span>`,
     '<select name="groupChoose"></select>',
-    '<select name="statusA">' + statusOption + '</select>',
+    `<select name="statusA">${statusOption}</select>`,
     '<select name="compareAB"><option value="1">＞</option><option value="2">＜</option><option value="3">≥</option><option value="4">≤</option><option value="5">＝</option><option value="6">≠</option></select>',
-    '<select name="statusB">' + statusOption + '</select>',
-    '<button class="groupAdd">ADD</button>'
-  ].join(' ')
-  var funcSelect = function (e) {
-    var box
+    `<select name="statusB">${statusOption}</select>`,
+    '<button class="groupAdd">ADD</button>',
+  ].join(' ');
+  const funcSelect = function (e) {
+    let box;
     if (gE('#hvAAInspectBox')) {
-      box = gE('#hvAAInspectBox')
+      box = gE('#hvAAInspectBox');
     } else {
-      box = gE('body').appendChild(cE('div'))
-      box.id = 'hvAAInspectBox'
+      box = gE('body').appendChild(cE('div'));
+      box.id = 'hvAAInspectBox';
     }
-    var target = e.target
-    var find = attr(target)
+    let { target } = e;
+    let find = attr(target);
     while (!find) {
-      target = target.parentNode
+      target = target.parentNode;
       if (target.id === 'csp' || target.tagName === 'BODY') {
-        box.style.display = 'none'
-        return
+        box.style.display = 'none';
+        return;
       }
-      find = attr(target)
+      find = attr(target);
     }
-    box.textContent = find
-    box.style.display = 'block'
-    box.style.left = e.pageX - e.offsetX + target.offsetWidth + 'px'
-    box.style.top = e.pageY - e.offsetY + target.offsetHeight + 'px'
-  }
+    box.textContent = find;
+    box.style.display = 'block';
+    box.style.left = `${e.pageX - e.offsetX + target.offsetWidth}px`;
+    box.style.top = `${e.pageY - e.offsetY + target.offsetHeight}px`;
+  };
   gE('.hvAAInspect', customizeBox).onclick = function () {
     if (this.title === 'on') {
-      this.title = 'off'
-      gE('#csp').removeEventListener('mousemove', funcSelect)
+      this.title = 'off';
+      gE('#csp').removeEventListener('mousemove', funcSelect);
     } else {
-      this.title = 'on'
-      gE('#csp').addEventListener('mousemove', funcSelect)
+      this.title = 'on';
+      gE('#csp').addEventListener('mousemove', funcSelect);
     }
-  }
+  };
   gE('.groupAdd', customizeBox).onclick = function () {
-    var target = g('customizeTarget')
-    var selects = gE('select', 'all', customizeBox)
-    var groupChoose = selects[0].value
-    var group
+    const target = g('customizeTarget');
+    const selects = gE('select', 'all', customizeBox);
+    let groupChoose = selects[0].value;
+    let group;
     if (groupChoose === 'new') {
-      groupChoose = gE('option', 'all', selects[0]).length
-      group = target.appendChild(cE('div'))
-      group.className = 'customizeGroup'
-      group.innerHTML = groupChoose + '. '
-      selects[0].click()
+      groupChoose = gE('option', 'all', selects[0]).length;
+      group = target.appendChild(cE('div'));
+      group.className = 'customizeGroup';
+      group.innerHTML = `${groupChoose}. `;
+      selects[0].click();
     } else {
-      group = gE('.customizeGroup', 'all', target)[groupChoose - 1]
+      group = gE('.customizeGroup', 'all', target)[groupChoose - 1];
     }
-    var input = group.appendChild(cE('input'))
-    input.type = 'text'
-    input.className = 'customizeInput'
-    input.name = target.getAttribute('name') + '_' + (groupChoose - 1)
-    input.value = selects[1].value + ',' + selects[2].value + ',' + selects[3].value
-  }
+    const input = group.appendChild(cE('input'));
+    input.type = 'text';
+    input.className = 'customizeInput';
+    input.name = `${target.getAttribute('name')}_${groupChoose - 1}`;
+    input.value = `${selects[1].value},${selects[2].value},${selects[3].value}`;
+  };
 
-  function attr (target) {
-    var onmouseover = target.getAttribute('onmouseover')
+  function attr(target) {
+    const onmouseover = target.getAttribute('onmouseover');
     if (target.className === 'btsd') {
-      return 'Skill Id: ' + target.id
-    } else if (onmouseover && onmouseover.match('common.show_itemc_box')) {
-      return 'Item Id: ' + onmouseover.match(/(\d+)\)/)[1]
-    } else if (onmouseover && onmouseover.match('equips.set')) {
-      return 'Equip Id: ' + onmouseover.match(/(\d+)/)[1]
-    } else if (onmouseover && onmouseover.match('battle.set_infopane_effect')) {
-      return 'Buff Img: ' + target.src.match(/\/e\/(.*?).png/)[1]
+      return `Skill Id: ${target.id}`;
+    } if (onmouseover && onmouseover.match('common.show_itemc_box')) {
+      return `Item Id: ${onmouseover.match(/(\d+)\)/)[1]}`;
+    } if (onmouseover && onmouseover.match('equips.set')) {
+      return `Equip Id: ${onmouseover.match(/(\d+)/)[1]}`;
+    } if (onmouseover && onmouseover.match('battle.set_infopane_effect')) {
+      return `Buff Img: ${target.src.match(/\/e\/(.*?).png/)[1]}`;
     }
   }
 }
 
-function setAlarm (e) { // 发出警报
-  e = e || 'Common'
-  if (g('option').notification) setNotification(e)
-  if (g('option').alert && g('option').audioEnable && g('option').audioEnable[e]) setAudioAlarm(e)
+function setAlarm(e) { // 发出警报
+  e = e || 'Common';
+  if (g('option').notification) setNotification(e);
+  if (g('option').alert && g('option').audioEnable && g('option').audioEnable[e]) setAudioAlarm(e);
 }
 
-function setAudioAlarm (e) { // 发出音频警报
-  var audio
-  if (gE('#hvAAAlert-' + e)) {
-    audio = gE('#hvAAAlert-' + e)
+function setAudioAlarm(e) { // 发出音频警报
+  let audio;
+  if (gE(`#hvAAAlert-${e}`)) {
+    audio = gE(`#hvAAAlert-${e}`);
   } else {
-    audio = gE('body').appendChild(cE('audio'))
-    audio.id = 'hvAAAlert-' + e
-    var fileType = '.ogg' // var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
-    audio.src = (g('option').audio && g('option').audio[e]) ? g('option').audio[e] : 'https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/' + e + fileType
-    audio.controls = true
-    audio.loop = (e === 'Riddle')
+    audio = gE('body').appendChild(cE('audio'));
+    audio.id = `hvAAAlert-${e}`;
+    const fileType = '.ogg'; // var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
+    audio.src = (g('option').audio && g('option').audio[e]) ? g('option').audio[e] : `https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/${e}${fileType}`;
+    audio.controls = true;
+    audio.loop = (e === 'Riddle');
   }
-  audio.play()
+  audio.play();
 
-  function pauseAudio (e) {
-    audio.pause()
-    document.removeEventListener(e.type, pauseAudio, true)
+  function pauseAudio(e) {
+    audio.pause();
+    document.removeEventListener(e.type, pauseAudio, true);
   }
-  document.addEventListener('mousemove', pauseAudio, true)
+  document.addEventListener('mousemove', pauseAudio, true);
 }
 
-function setNotification (e) { // 发出桌面通知
-  var notification = [
+function setNotification(e) { // 发出桌面通知
+  const notification = [
     {
       Common: {
         text: '未知',
-        time: 5
+        time: 5,
       },
       Error: {
         text: '某些错误发生了',
-        time: 10
+        time: 10,
       },
       Defeat: {
         text: '游戏失败\n玩家可自行查看战斗Log寻找失败原因',
-        time: 5
+        time: 5,
       },
       Riddle: {
         text: '小马答题\n紧急！\n紧急！\n紧急！',
-        time: 30
+        time: 30,
       },
       Victory: {
         text: '游戏胜利\n页面将在3秒后刷新',
-        time: 3
+        time: 3,
       },
       Test: {
         text: '测试文本',
-        time: 3
-      }
+        time: 3,
+      },
     }, {
       Common: {
         text: '未知',
-        time: 5
+        time: 5,
       },
       Error: {
         text: '某些錯誤發生了',
-        time: 10
+        time: 10,
       },
       Defeat: {
         text: '遊戲失敗\n玩家可自行查看戰鬥Log尋找失敗原因',
-        time: 5
+        time: 5,
       },
       Riddle: {
         text: '小馬答題\n緊急！\n緊急！\n緊急！',
-        time: 30
+        time: 30,
       },
       Victory: {
         text: '遊戲勝利\n頁面將在3秒後刷新',
-        time: 3
+        time: 3,
       },
       Test: {
         text: '測試文本',
-        time: 3
-      }
+        time: 3,
+      },
     }, {
       Common: {
         text: 'unknown',
-        time: 5
+        time: 5,
       },
       Error: {
         text: 'Some errors have occurred',
-        time: 10
+        time: 10,
       },
       Defeat: {
         text: 'You have been defeated.\nYou can check the battle log.',
-        time: 5
+        time: 5,
       },
       Riddle: {
         text: 'Riddle\nURGENT\nURGENT\nURGENT',
-        time: 30
+        time: 30,
       },
       Victory: {
         text: 'You\'re victorious.\nThis page will refresh in 3 seconds.',
-        time: 3
+        time: 3,
       },
       Test: {
         text: 'testText',
-        time: 3
-      }
-    }
-  ][g('lang')][e]
+        time: 3,
+      },
+    },
+  ][g('lang')][e];
   if (typeof GM_notification !== 'undefined') {
     GM_notification({
       text: notification.text,
-      image: window.location.origin + '/y/hentaiverse.png',
+      image: `${window.location.origin}/y/hentaiverse.png`,
       highlight: true,
-      timeout: 1000 * notification.time
-    })
+      timeout: 1000 * notification.time,
+    });
   }
   if (window.Notification && window.Notification.permission !== 'denied') {
-    window.Notification.requestPermission(function (status) {
+    window.Notification.requestPermission((status) => {
       if (status === 'granted') {
-        var n = new window.Notification(notification.text, {
-          icon: '/y/hentaiverse.png'
-        })
-        setTimeout(function () {
-          if (n) n.close()
-        }, 1000 * notification.time)
+        const n = new window.Notification(notification.text, {
+          icon: '/y/hentaiverse.png',
+        });
+        setTimeout(() => {
+          if (n) n.close();
+        }, 1000 * notification.time);
 
         var nClose = function (e) {
-          if (n) n.close()
-          document.removeEventListener(e.type, nClose, true)
-        }
-        document.addEventListener('mousemove', nClose, true)
+          if (n) n.close();
+          document.removeEventListener(e.type, nClose, true);
+        };
+        document.addEventListener('mousemove', nClose, true);
         // document.addEventListener('click', nClose, true);
       }
-    })
+    });
   }
 }
 
-function checkCondition (parms) {
-  if (typeof parms === 'undefined') return true
-  var i, j, k
-  var result = []
-  var returnValue = function (str) {
+function checkCondition(parms) {
+  if (typeof parms === 'undefined') return true;
+  let i; let j; let
+    k;
+  const result = [];
+  const returnValue = function (str) {
     if (str.match(/^_/)) {
-      var arr = str.split('_')
-      return func[arr[1]](...[...arr].splice(2))
-    } else if (str.match(/^'.*?'$|^".*?"$/)) {
-      return str.substr(1, str.length - 2)
-    } else if (isNaN(str * 1)) {
-      return g(str)
-    } else {
-      return str * 1
+      const arr = str.split('_');
+      return func[arr[1]](...[...arr].splice(2));
+    } if (str.match(/^'.*?'$|^".*?"$/)) {
+      return str.substr(1, str.length - 2);
+    } if (isNaN(str * 1)) {
+      return g(str);
     }
-  }
+    return str * 1;
+  };
   var func = {
-    isCd: function (id) {
-      return isOn(id) ? 0 : 1
+    isCd(id) {
+      return isOn(id) ? 0 : 1;
     },
-    buffTurn: function (img) {
-      var buff = gE('#pane_effects>img[src*="' + img + '"]')
+    buffTurn(img) {
+      let buff = gE(`#pane_effects>img[src*="${img}"]`);
       if (!buff) {
-        return 0
-      } else {
-        buff = buff.getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1
-        return isNaN(buff) ? Infinity : buff
+        return 0;
       }
-    }
-  }
+      buff = buff.getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1;
+      return isNaN(buff) ? Infinity : buff;
+    },
+  };
 
   for (i in parms) {
     for (j = 0; j < parms[i].length; j++) {
-      if (!(parms[i] instanceof Array)) continue
-      k = parms[i][j].split(',')
-      k[0] = returnValue(k[0])
-      k[2] = returnValue(k[2])
+      if (!(parms[i] instanceof Array)) continue;
+      k = parms[i][j].split(',');
+      k[0] = returnValue(k[0]);
+      k[2] = returnValue(k[2]);
       switch (k[1]) {
         case '1':
-          result[i] = k[0] > k[2]
-          break
+          result[i] = k[0] > k[2];
+          break;
         case '2':
-          result[i] = k[0] < k[2]
-          break
+          result[i] = k[0] < k[2];
+          break;
         case '3':
-          result[i] = k[0] >= k[2]
-          break
+          result[i] = k[0] >= k[2];
+          break;
         case '4':
-          result[i] = k[0] <= k[2]
-          break
+          result[i] = k[0] <= k[2];
+          break;
         case '5':
-          result[i] = k[0] === k[2]
-          break
+          result[i] = k[0] === k[2];
+          break;
         case '6':
-          result[i] = k[0] !== k[2]
-          break
+          result[i] = k[0] !== k[2];
+          break;
       }
-      if (result[i] === false) j = parms[i].length
+      if (result[i] === false) j = parms[i].length;
     }
-    if (result[i] === true) return true
+    if (result[i] === true) return true;
   }
-  return false
+  return false;
 }
 // 答题//
-function riddleAlert () { // 答题警报
+function riddleAlert() { // 答题警报
   if (window.opener) {
     gE('#riddleanswer+img').onclick = function () {
-      riddleSubmit(gE('#riddleanswer').value)
-    }
+      riddleSubmit(gE('#riddleanswer').value);
+    };
   }
-  setAlarm('Riddle')
-  var answers = ['A', 'B', 'C']
+  setAlarm('Riddle');
+  const answers = ['A', 'B', 'C'];
   document.onkeydown = function (e) {
-    gE('#hvAAAlert-Riddle').pause()
+    gE('#hvAAAlert-Riddle').pause();
     if (/^[abc]$/i.test(e.key)) {
-      riddleSubmit(e.key.toUpperCase())
-      this.onkeydown = null
+      riddleSubmit(e.key.toUpperCase());
+      this.onkeydown = null;
     } else if (/^[123]$/.test(e.key)) {
-      riddleSubmit(answers[e.key - 1])
-      this.onkeydown = null
+      riddleSubmit(answers[e.key - 1]);
+      this.onkeydown = null;
     }
-  }
+  };
   if (g('option').riddleRadio) {
-    var bar = gE('body').appendChild(cE('div'))
-    bar.className = 'answerBar'
-    answers.forEach(function (answer) {
-      var button = bar.appendChild(cE('div'))
-      button.value = answer
+    const bar = gE('body').appendChild(cE('div'));
+    bar.className = 'answerBar';
+    answers.forEach((answer) => {
+      const button = bar.appendChild(cE('div'));
+      button.value = answer;
       button.onclick = function () {
-        riddleSubmit(this.value)
-      }
-    })
+        riddleSubmit(this.value);
+      };
+    });
   }
-  var checkTime = function () {
-    var time
+  const checkTime = function () {
+    let time;
     if (typeof g('time') === 'undefined') {
-      var timeDiv = gE('#riddlecounter>div>div', 'all')
-      if (timeDiv.length === 0) return
-      time = ''
-      for (var j = 0; j < timeDiv.length; j++) {
-        time = (timeDiv[j].style.backgroundPosition.match(/(\d+)px$/)[1] / 12).toString() + time
+      const timeDiv = gE('#riddlecounter>div>div', 'all');
+      if (timeDiv.length === 0) return;
+      time = '';
+      for (let j = 0; j < timeDiv.length; j++) {
+        time = (timeDiv[j].style.backgroundPosition.match(/(\d+)px$/)[1] / 12).toString() + time;
       }
-      g('time', time * 1)
+      g('time', time * 1);
     } else {
-      time = g('time')
-      time--
-      g('time', time)
+      time = g('time');
+      time--;
+      g('time', time);
     }
-    document.title = time
-    if (time <= g('option').riddleAnswerTime) riddleSubmit(gE('#riddleanswer').value || answers[parseInt(Math.random() * 3)])
-  }
-  for (var i = 0; i < 30; i++) {
-    setTimeout(checkTime, i * 1000)
+    document.title = time;
+    if (time <= g('option').riddleAnswerTime) riddleSubmit(gE('#riddleanswer').value || answers[parseInt(Math.random() * 3)]);
+  };
+  for (let i = 0; i < 30; i++) {
+    setTimeout(checkTime, i * 1000);
   }
 
-  function riddleSubmit (answer) {
+  function riddleSubmit(answer) {
     if (!window.opener) {
-      gE('#riddleanswer').value = answer
-      gE('#riddleanswer+img').click()
+      gE('#riddleanswer').value = answer;
+      gE('#riddleanswer+img').click();
     } else {
-      post(window.location.href, function () { // 待续
-        window.opener.document.location.href = window.location.href
-        window.close()
-      }, 'riddleanswer=' + answer)
+      post(window.location.href, () => { // 待续
+        window.opener.document.location.href = window.location.href;
+        window.close();
+      }, `riddleanswer=${answer}`);
     }
   }
 }
 // 战斗外//
-function quickSite () { // 快捷站点
-  var quickSiteBar = gE('body').appendChild(cE('div'))
-  quickSiteBar.className = 'quickSiteBar'
-  quickSiteBar.innerHTML = '<span><a href="javascript:void(0);"class="quickSiteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>'
+function quickSite() { // 快捷站点
+  const quickSiteBar = gE('body').appendChild(cE('div'));
+  quickSiteBar.className = 'quickSiteBar';
+  quickSiteBar.innerHTML = '<span><a href="javascript:void(0);"class="quickSiteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
   if (g('option').quickSite) {
-    g('option').quickSite.forEach(function (site) {
-      quickSiteBar.innerHTML += '<span title="' + site.name + '"><a href="' + site.url + '"target="_blank">' + ((site.fav) ? '<img src="' + site.fav + '"class="favicon"></img>' : '') + site.name + '</a></span>'
-    })
+    g('option').quickSite.forEach((site) => {
+      quickSiteBar.innerHTML = `${quickSiteBar.innerHTML}<span title="${site.name}"><a href="${site.url}"target="_blank">${(site.fav) ? `<img src="${site.fav}"class="favicon"></img>` : ''}${site.name}</a></span>`;
+    });
   }
   gE('.quickSiteBarToggle', quickSiteBar).onclick = function () {
-    var spans = gE('span', 'all', quickSiteBar)
-    for (var i = 1; i < spans.length; i++) {
-      spans[i].style.display = (this.textContent === '<<') ? 'none' : 'block'
+    const spans = gE('span', 'all', quickSiteBar);
+    for (let i = 1; i < spans.length; i++) {
+      spans[i].style.display = (this.textContent === '<<') ? 'none' : 'block';
     }
-    this.textContent = (this.textContent === '<<') ? '>>' : '<<'
-  }
+    this.textContent = (this.textContent === '<<') ? '>>' : '<<';
+  };
 }
 
-function idleArena () { // 闲置竞技场
-  var arena = getValue('arena', true) || {}
+function idleArena() { // 闲置竞技场
+  let arena = getValue('arena', true) || {};
   if (arena.date !== g('dateNow')) {
     arena = {
       date: g('dateNow'),
       gr: g('option').idleArenaGrTime,
       token: {
-        length: 0
-      }
-    }
+        length: 0,
+      },
+    };
     // iframe打开四个网站，设定四个判断值，同时true才继续
-    var getToken = function (data, e) {
-      var imgs = gE('img[src*="startchallenge.png"]', 'all', data)
+    const getToken = function (data, e) {
+      const imgs = gE('img[src*="startchallenge.png"]', 'all', data);
       if (e.target.responseURL.match(/ss=gr$/)) {
-        arena.token.gr = gE('img[src*="startgrindfest.png"]', data).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1]
+        arena.token.gr = gE('img[src*="startgrindfest.png"]', data).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
       } else {
-        imgs.forEach(function (_) {
-          var temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/)
-          arena.token[temp[1]] = temp[2]
-        })
+        imgs.forEach((_) => {
+          const temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
+          arena.token[temp[1]] = temp[2];
+        });
       }
-      arena.token.length++
-    }
-    post('?s=Battle&ss=gr', getToken)
-    post('?s=Battle&ss=ar', getToken)
-    post('?s=Battle&ss=ar&page=2', getToken)
-    post('?s=Battle&ss=rb', getToken)
+      arena.token.length++;
+    };
+    post('?s=Battle&ss=gr', getToken);
+    post('?s=Battle&ss=ar', getToken);
+    post('?s=Battle&ss=ar&page=2', getToken);
+    post('?s=Battle&ss=rb', getToken);
     var checkOnload = function () {
       if (arena.token.length < 4) {
-        setTimeout(checkOnload, 200)
+        setTimeout(checkOnload, 200);
       } else {
-        setValue('arena', arena)
-        setTimeout(idleArena, 200)
+        setValue('arena', arena);
+        setTimeout(idleArena, 200);
       }
-    }
-    checkOnload()
-    return
+    };
+    checkOnload();
+    return;
   }
-  if (arena.isOk) return
+  if (arena.isOk) return;
   if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 < 85) {
-    post(window.location.href, goto, 'recover=stamina')
-    return
+    post(window.location.href, goto, 'recover=stamina');
+    return;
   }
-  arena.array = arena.array || g('option').idleArenaValue.split(',')
-  var href, id
+  arena.array = arena.array || g('option').idleArenaValue.split(',');
+  let href; let
+    id;
   while (arena.array.length > 0) {
-    id = arena.array[0] * 1
+    id = arena.array[0] * 1;
     if (isNaN(id)) {
-      href = 'gr'
-      id = 'gr'
+      href = 'gr';
+      id = 'gr';
     } else if (id >= 105) {
-      href = 'rb'
+      href = 'rb';
     } else if (id >= 19) {
-      href = 'ar&page=2'
+      href = 'ar&page=2';
     } else {
-      href = 'ar'
+      href = 'ar';
     }
     if (!(id in arena.token)) {
-      arena.array.splice(0, 1)
+      arena.array.splice(0, 1);
     } else {
-      break
+      break;
     }
   }
-  document.title = _alert(-1, '闲置竞技场', '閒置競技場開始', 'Idle Arena start')
+  document.title = _alert(-1, '闲置竞技场', '閒置競技場開始', 'Idle Arena start');
   if (arena.array[0] === 'gr' && arena.gr <= 0) {
-    arena.array.splice(0, 1)
-    setValue('arena', arena)
-    idleArena()
-    return
-  } else if (arena.array[0] === 'gr' && arena.gr > 0) {
-    arena.gr--
+    arena.array.splice(0, 1);
+    setValue('arena', arena);
+    idleArena();
+    return;
+  } if (arena.array[0] === 'gr' && arena.gr > 0) {
+    arena.gr--;
   } else {
-    arena.array.splice(0, 1)
+    arena.array.splice(0, 1);
   }
-  if (arena.array.length === 0) arena.isOk = true
-  setValue('arena', arena)
-  var token = arena.token[id]
-  if (id === 'gr') id = 1
-  post('?s=Battle&ss=' + href, goto, 'initid=' + String(id) + '&inittoken=' + token)
+  if (arena.array.length === 0) arena.isOk = true;
+  setValue('arena', arena);
+  const token = arena.token[id];
+  if (id === 'gr') id = 1;
+  post(`?s=Battle&ss=${href}`, goto, `initid=${String(id)}&inittoken=${token}`);
 }
 
-function encounterCheck () { // encounter
-  var timeNow = time(0)
-  var encounter = (getValue('encounter') && getValue('encounter', true).dateNow === g('dateNow')) ? getValue('encounter', true) : {
+function encounterCheck() { // encounter
+  const timeNow = time(0);
+  const encounter = (getValue('encounter') && getValue('encounter', true).dateNow === g('dateNow')) ? getValue('encounter', true) : {
     dateNow: g('dateNow'),
-    time: 0
-  }
+    time: 0,
+  };
   if (!encounter.lastTime || (timeNow - encounter.lastTime >= 30 * 60 * 1000 && encounter.time < 24)) {
     if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
-      post(window.location.href, goto, 'recover=stamina')
-      return
+      post(window.location.href, goto, 'recover=stamina');
+      return;
     }
-    encounter.lastTime = timeNow
-    setValue('encounter', encounter)
-    openUrl('https://e-hentai.org/news.php?encounter')
-    return
+    encounter.lastTime = timeNow;
+    setValue('encounter', encounter);
+    openUrl('https://e-hentai.org/news.php?encounter');
+    return;
   }
-  var lastEncounter
+  let lastEncounter;
   if (gE('.lastEncounter')) {
-    lastEncounter = gE('.lastEncounter')
+    lastEncounter = gE('.lastEncounter');
   } else {
-    lastEncounter = gE('body').appendChild(cE('a'))
-    lastEncounter.className = 'lastEncounter'
-    lastEncounter.title = time(3, encounter.lastTime) + '\nEncounter TIme: ' + encounter.time
-    lastEncounter.href = 'https://e-hentai.org/news.php?encounter'
+    lastEncounter = gE('body').appendChild(cE('a'));
+    lastEncounter.className = 'lastEncounter';
+    lastEncounter.title = `${time(3, encounter.lastTime)}\nEncounter TIme: ${encounter.time}`;
+    lastEncounter.href = 'https://e-hentai.org/news.php?encounter';
     lastEncounter.onclick = function () {
-      if (encounter.time >= 24 && _alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('encounter')
-    }
+      if (encounter.time >= 24 && _alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('encounter');
+    };
   }
-  lastEncounter.innerHTML = Math.floor((timeNow - encounter.lastTime) / 1000 / 60) + '<l0>分钟前</l0><l1>分鐘前</l1><l2> mins before</l2>'
-  setTimeout(encounterCheck, 1 * 60 * 1000 * (Math.random() * 20 + 90) / 100)
+  lastEncounter.innerHTML = `${Math.floor((timeNow - encounter.lastTime) / 1000 / 60)}<l0>分钟前</l0><l1>分鐘前</l1><l2> mins before</l2>`;
+  setTimeout(encounterCheck, 1 * 60 * 1000 * (Math.random() * 20 + 90) / 100);
 }
 // 战斗中//
-function main () { // 主程序
+function main() { // 主程序
   if (getValue('disabled')) { // 如果禁用
-    document.title = _alert(-1, 'hvAutoAttack暂停中', 'hvAutoAttack暫停中', 'hvAutoAttack Paused')
-    gE('#hvAABox2>button').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>'
-    return
+    document.title = _alert(-1, 'hvAutoAttack暂停中', 'hvAutoAttack暫停中', 'hvAutoAttack Paused');
+    gE('#hvAABox2>button').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
+    return;
   }
-  g('end', false)
+  g('end', false);
   if (getValue('monsterStatus') && getValue('monsterStatus', true).length === g('monsterAll')) {
-    g('monsterStatus', getValue('monsterStatus', true))
+    g('monsterStatus', getValue('monsterStatus', true));
   } else {
-    fixMonsterStatus()
+    fixMonsterStatus();
   }
-  g('turn', g('turn') + 1)
+  g('turn', g('turn') + 1);
   if (gE('#vbh')) {
-    g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100)
-    g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100)
-    g('sp', gE('#vbs>div>img').offsetWidth / 210 * 100)
-    g('oc', gE('#vcp>div>div') ? (gE('#vcp>div>div', 'all').length - gE('#vcp>div>div#vcr', 'all').length) * 25 : 0)
+    g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
+    g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100);
+    g('sp', gE('#vbs>div>img').offsetWidth / 210 * 100);
+    g('oc', gE('#vcp>div>div') ? (gE('#vcp>div>div', 'all').length - gE('#vcp>div>div#vcr', 'all').length) * 25 : 0);
   } else {
-    g('hp', gE('#dvbh>div>img').offsetWidth / 418 * 100)
-    g('mp', gE('#dvbm>div>img').offsetWidth / 418 * 100)
-    g('sp', gE('#dvbs>div>img').offsetWidth / 418 * 100)
-    g('oc', gE('#dvrc').textContent)
+    g('hp', gE('#dvbh>div>img').offsetWidth / 418 * 100);
+    g('mp', gE('#dvbm>div>img').offsetWidth / 418 * 100);
+    g('sp', gE('#dvbs>div>img').offsetWidth / 418 * 100);
+    g('oc', gE('#dvrc').textContent);
   }
-  battleInfo() // 战斗战况
-  countMonsterHP() // 统计敌人血量
+  battleInfo(); // 战斗战况
+  countMonsterHP(); // 统计敌人血量
   if (g('option').autoFlee && checkCondition(g('option').fleeCondition)) {
-    gE('1001').click()
-    setTimeout(goto, 3 * 1000)
-    return
+    gE('1001').click();
+    setTimeout(goto, 3 * 1000);
+    return;
   }
   if (g('option').autoPause && checkCondition(g('option').pauseCondition)) {
-    pauseChange()
-    return
+    pauseChange();
+    return;
   }
-  if (gE('#ikey_p')) useGem() // 自动使用宝石
-  if (g('end')) return
-  if (g('option').item && g('option').itemOrderValue) deadSoon() // 自动回血回魔
-  if (g('end')) return
+  if (gE('#ikey_p')) useGem(); // 自动使用宝石
+  if (g('end')) return;
+  if (g('option').item && g('option').itemOrderValue) deadSoon(); // 自动回血回魔
+  if (g('end')) return;
   if (g('option').defend && checkCondition(g('option').defendCondition)) {
-    gE('#ckey_defend').click()
-    return
+    gE('#ckey_defend').click();
+    return;
   }
-  if (g('option').scrollSwitch && g('option').scroll && checkCondition(g('option').scrollCondition) && g('option').scrollRoundType && g('option').scrollRoundType[g('roundType')]) useScroll() // 自动使用卷轴
-  if (g('end')) return
-  if (g('option').channelSkillSwitch && g('option').channelSkill && gE('#pane_effects>img[src*="channeling"]')) useChannelSkill() // 自动施法Channel技能
-  if (g('end')) return
-  if (g('option').buffSkillSwitch && g('option').buffSkill && checkCondition(g('option').buffSkillCondition)) useBuffSkill() // 自动施法BUFF技能
-  if (g('end')) return
-  if (g('attackStatus') !== 0 && g('option').infusionSwitch && checkCondition(g('option').infusionCondition)) useInfusions() // 自动使用魔药
-  if (g('end')) return
-  if (g('option').debuffSkillSwitch && g('option').debuffSkillAllIm && gE('div.btm6 img[src*="imperil"]', 'all').length < g('monsterAlive')) allImperiled() // 给所有敌人上Imperil
-  if (g('end')) return
-  if (g('option').debuffSkillSwitch && g('option').debuffSkill && checkCondition(g('option').debuffSkillCondition)) useDeSkill() // 自动施法DEBUFF技能
-  if (g('end')) return
-  attack() // 自动打怪
+  if (g('option').scrollSwitch && g('option').scroll && checkCondition(g('option').scrollCondition) && g('option').scrollRoundType && g('option').scrollRoundType[g('roundType')]) useScroll(); // 自动使用卷轴
+  if (g('end')) return;
+  if (g('option').channelSkillSwitch && g('option').channelSkill && gE('#pane_effects>img[src*="channeling"]')) useChannelSkill(); // 自动施法Channel技能
+  if (g('end')) return;
+  if (g('option').buffSkillSwitch && g('option').buffSkill && checkCondition(g('option').buffSkillCondition)) useBuffSkill(); // 自动施法BUFF技能
+  if (g('end')) return;
+  if (g('attackStatus') !== 0 && g('option').infusionSwitch && checkCondition(g('option').infusionCondition)) useInfusions(); // 自动使用魔药
+  if (g('end')) return;
+  if (g('option').debuffSkillSwitch && g('option').debuffSkillAllIm && gE('div.btm6 img[src*="imperil"]', 'all').length < g('monsterAlive')) allImperiled(); // 给所有敌人上Imperil
+  if (g('end')) return;
+  if (g('option').debuffSkillSwitch && g('option').debuffSkill && checkCondition(g('option').debuffSkillCondition)) useDeSkill(); // 自动施法DEBUFF技能
+  if (g('end')) return;
+  attack(); // 自动打怪
   // if (g('end')) return
 }
 
-function pauseChange () { // 暂停状态更改
+function pauseChange() { // 暂停状态更改
   if (getValue('disabled')) {
-    if (gE('.pauseChange')) gE('.pauseChange').innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>'
-    delValue(0)
-    main()
+    if (gE('.pauseChange')) gE('.pauseChange').innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
+    delValue(0);
+    main();
   } else {
-    if (gE('.pauseChange')) gE('.pauseChange').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>'
-    setValue('disabled', true)
-    g('end', true)
+    if (gE('.pauseChange')) gE('.pauseChange').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
+    setValue('disabled', true);
+    g('end', true);
   }
 }
 
-function reloader () {
-  var delayAlert, delayReload, obj, a, cost
-  var eventStart = cE('a')
-  eventStart.id = 'eventStart'
+function reloader() {
+  let delayAlert; let delayReload; let obj; let a; let
+    cost;
+  const eventStart = cE('a');
+  eventStart.id = 'eventStart';
   eventStart.onclick = function () {
-    a = unsafeWindow.info
-    if (g('option').delayAlert) delayAlert = setTimeout(setAlarm, g('option').delayAlertTime * 1000)
-    if (g('option').delayReload) delayReload = setTimeout(goto, g('option').delayReloadTime * 1000)
+    a = unsafeWindow.info;
+    if (g('option').delayAlert) delayAlert = setTimeout(setAlarm, g('option').delayAlertTime * 1000);
+    if (g('option').delayReload) delayReload = setTimeout(goto, g('option').delayReloadTime * 1000);
     if (g('option').recordUsage) {
       obj = {
-        mode: a.mode
-      }
+        mode: a.mode,
+      };
       if (a.mode === 'items') {
-        obj.item = gE('#pane_item div[id^="ikey"][onclick*="skill(\'' + a.skill + '\')"]').textContent
+        obj.item = gE(`#pane_item div[id^="ikey"][onclick*="skill('${a.skill}')"]`).textContent;
       } else if (a.mode === 'magic') {
-        obj.magic = gE(a.skill).textContent
-        cost = gE(a.skill).getAttribute('onmouseover').match(/\('.*', '.*', '.*', (\d+), (\d+), \d+\)/)
-        obj.mp = cost[1] * 1
-        obj.oc = cost[2] * 1
+        obj.magic = gE(a.skill).textContent;
+        cost = gE(a.skill).getAttribute('onmouseover').match(/\('.*', '.*', '.*', (\d+), (\d+), \d+\)/);
+        obj.mp = cost[1] * 1;
+        obj.oc = cost[2] * 1;
       }
     }
-  }
-  gE('body').appendChild(eventStart)
-  var eventEnd = cE('a')
-  eventEnd.id = 'eventEnd'
+  };
+  gE('body').appendChild(eventStart);
+  const eventEnd = cE('a');
+  eventEnd.id = 'eventEnd';
   eventEnd.onclick = function () {
-    var timeNow = time(0)
-    g('runSpeed', (1000 / (timeNow - g('timeNow'))).toFixed(2))
-    g('timeNow', timeNow)
-    if (g('option').delayAlert) clearTimeout(delayAlert)
-    if (g('option').delayReload) clearTimeout(delayReload)
-    var monsterDead = gE('img[src*="nbardead"]', 'all').length
-    g('monsterAlive', g('monsterAll') - monsterDead)
-    var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length
-    g('bossAlive', g('bossAll') - bossDead)
-    var battleLog = gE('#textlog>tbody>tr>td', 'all')
+    const timeNow = time(0);
+    g('runSpeed', (1000 / (timeNow - g('timeNow'))).toFixed(2));
+    g('timeNow', timeNow);
+    if (g('option').delayAlert) clearTimeout(delayAlert);
+    if (g('option').delayReload) clearTimeout(delayReload);
+    const monsterDead = gE('img[src*="nbardead"]', 'all').length;
+    g('monsterAlive', g('monsterAll') - monsterDead);
+    const bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
+    g('bossAlive', g('bossAll') - bossDead);
+    const battleLog = gE('#textlog>tbody>tr>td', 'all');
     if (g('option').recordUsage) {
-      obj.log = battleLog
-      recordUsage(obj)
+      obj.log = battleLog;
+      recordUsage(obj);
     }
     if (gE('#btcp')) {
-      if (g('option').dropMonitor) dropMonitor(battleLog)
-      if (g('option').recordUsage) recordUsage2()
+      if (g('option').dropMonitor) dropMonitor(battleLog);
+      if (g('option').recordUsage) recordUsage2();
       if (g('monsterAlive') > 0) { // Defeat
-        setAlarm('Defeat')
-        delValue(2)
+        setAlarm('Defeat');
+        delValue(2);
       } else if (g('roundNow') !== g('roundAll')) { // Next Round
-        gE('#pane_completion').removeChild(gE('#btcp'))
-        post(window.location.href, function (data) {
+        gE('#pane_completion').removeChild(gE('#btcp'));
+        post(window.location.href, (data) => {
           if (gE('#riddlecounter', data)) {
             if (g('option').riddlePopup && !window.opener) {
-              window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707')
-              return
-            } else {
-              goto()
-              return
+              window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
+              return;
             }
+            goto();
+            return;
           }
-          gE('#battle_main').replaceChild(gE('#battle_right', data), gE('#battle_right'))
-          gE('#battle_main').replaceChild(gE('#battle_left', data), gE('#battle_left'))
-          unsafeWindow.battle = new unsafeWindow.Battle()
-          unsafeWindow.battle.clear_infopane()
-          newRound()
-          main()
-        })
+          gE('#battle_main').replaceChild(gE('#battle_right', data), gE('#battle_right'));
+          gE('#battle_main').replaceChild(gE('#battle_left', data), gE('#battle_left'));
+          unsafeWindow.battle = new unsafeWindow.Battle();
+          unsafeWindow.battle.clear_infopane();
+          newRound();
+          main();
+        });
       } else if (g('roundNow') === g('roundAll')) { // Victory
-        setAlarm('Victory')
-        delValue(2)
-        setTimeout(goto, 3 * 1000)
+        setAlarm('Victory');
+        delValue(2);
+        setTimeout(goto, 3 * 1000);
       }
     } else {
-      main()
+      main();
     }
-  }
-  gE('body').appendChild(eventEnd)
-  window.sessionStorage.delay = g('option').delay
-  window.sessionStorage.delay2 = g('option').delay2
-  var fakeApiCall = cE('script')
-  fakeApiCall.textContent = 'api_call = ' + function (b, a, d) {
-    var delay = window.sessionStorage.delay * 1
-    var delay2 = window.sessionStorage.delay2 * 1
-    window.info = a
-    b.open('POST', MAIN_URL + 'json')
-    b.setRequestHeader('Content-Type', 'application/json')
-    b.withCredentials = true
-    b.onreadystatechange = d
+  };
+  gE('body').appendChild(eventEnd);
+  window.sessionStorage.delay = g('option').delay;
+  window.sessionStorage.delay2 = g('option').delay2;
+  const fakeApiCall = cE('script');
+  fakeApiCall.textContent = `api_call = ${function (b, a, d) {
+    const delay = window.sessionStorage.delay * 1;
+    const delay2 = window.sessionStorage.delay2 * 1;
+    window.info = a;
+    b.open('POST', `${MAIN_URL}json`);
+    b.setRequestHeader('Content-Type', 'application/json');
+    b.withCredentials = true;
+    b.onreadystatechange = d;
     b.onload = function () {
-      document.getElementById('eventEnd').click()
-    }
-    document.getElementById('eventStart').click()
+      document.getElementById('eventEnd').click();
+    };
+    document.getElementById('eventStart').click();
     if (a.mode === 'magic' && a.skill >= 200) {
       if (delay <= 0) {
-        b.send(JSON.stringify(a))
+        b.send(JSON.stringify(a));
       } else {
-        setTimeout(function () {
-          b.send(JSON.stringify(a))
-        }, delay * (Math.random() * 50 + 50) / 100)
+        setTimeout(() => {
+          b.send(JSON.stringify(a));
+        }, delay * (Math.random() * 50 + 50) / 100);
       }
+    } else if (delay2 <= 0) {
+      b.send(JSON.stringify(a));
     } else {
-      if (delay2 <= 0) {
-        b.send(JSON.stringify(a))
-      } else {
-        setTimeout(function () {
-          b.send(JSON.stringify(a))
-        }, delay2 * (Math.random() * 50 + 50) / 100)
-      }
+      setTimeout(() => {
+        b.send(JSON.stringify(a));
+      }, delay2 * (Math.random() * 50 + 50) / 100);
     }
-  }.toString()
-  gE('head').appendChild(fakeApiCall)
-  var fakeApiResponse = cE('script')
-  fakeApiResponse.textContent = 'api_response = ' + function (b) {
+  }.toString()}`;
+  gE('head').appendChild(fakeApiCall);
+  const fakeApiResponse = cE('script');
+  fakeApiResponse.textContent = `api_response = ${function (b) {
     if (b.readyState === 4) {
       if (b.status === 200) {
-        var a = JSON.parse(b.responseText)
+        const a = JSON.parse(b.responseText);
         if (a.login !== undefined) {
-          top.window.location.href = login_url
+          top.window.location.href = login_url;
         } else {
-          if (a.error || a.reload) window.location.href = window.location.search
-          return a
+          if (a.error || a.reload) window.location.href = window.location.search;
+          return a;
         }
       } else {
-        window.location.href = window.location.search
+        window.location.href = window.location.search;
       }
     }
-    return false
-  }.toString()
-  gE('head').appendChild(fakeApiResponse)
+    return false;
+  }.toString()}`;
+  gE('head').appendChild(fakeApiResponse);
 }
 
-function newRound () { // New Round
-  g('turn', 0)
-  if (window.location.hash !== '') goto()
-  g('monsterAll', gE('div.btm1', 'all').length)
-  var monsterDead = gE('img[src*="nbardead"]', 'all').length
-  g('monsterAlive', g('monsterAll') - monsterDead)
-  g('bossAll', gE('div.btm2[style^="background"]', 'all').length)
-  var bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length
-  g('bossAlive', g('bossAll') - bossDead)
-  var battleLog = gE('#textlog>tbody>tr>td', 'all')
+function newRound() { // New Round
+  g('turn', 0);
+  if (window.location.hash !== '') goto();
+  g('monsterAll', gE('div.btm1', 'all').length);
+  const monsterDead = gE('img[src*="nbardead"]', 'all').length;
+  g('monsterAlive', g('monsterAll') - monsterDead);
+  g('bossAll', gE('div.btm2[style^="background"]', 'all').length);
+  const bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
+  g('bossAlive', g('bossAll') - bossDead);
+  const battleLog = gE('#textlog>tbody>tr>td', 'all');
   g('roundType', (function () {
     if (getValue('roundType')) {
-      return getValue('roundType')
-    } else {
-      var roundType
-      var temp = battleLog[battleLog.length - 1].textContent
-      if (!temp.match(/^Initializing/)) {
-        roundType = ''
-      } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 <= 33) {
-        roundType = 'ar'
-      } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 >= 105) {
-        roundType = 'rb'
-      } else if (temp.match(/^Initializing random encounter/)) {
-        roundType = 'ba'
-        if (g('option').encounter) {
-          var encounter = getValue('encounter', true)
-          encounter.lastTime = time(0)
-          encounter.time++
-          setValue('encounter', encounter)
-        }
-      } else if (temp.match(/^Initializing Item World/)) {
-        roundType = 'iw'
-      } else if (temp.match(/^Initializing Grindfest/)) {
-        roundType = 'gr'
-      } else {
-        roundType = ''
-      }
-      setValue('roundType', roundType)
-      return roundType
+      return getValue('roundType');
     }
-  })())
+    let roundType;
+    const temp = battleLog[battleLog.length - 1].textContent;
+    if (!temp.match(/^Initializing/)) {
+      roundType = '';
+    } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 <= 33) {
+      roundType = 'ar';
+    } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 >= 105) {
+      roundType = 'rb';
+    } else if (temp.match(/^Initializing random encounter/)) {
+      roundType = 'ba';
+      if (g('option').encounter) {
+        const encounter = getValue('encounter', true);
+        encounter.lastTime = time(0);
+        encounter.time++;
+        setValue('encounter', encounter);
+      }
+    } else if (temp.match(/^Initializing Item World/)) {
+      roundType = 'iw';
+    } else if (temp.match(/^Initializing Grindfest/)) {
+      roundType = 'gr';
+    } else {
+      roundType = '';
+    }
+    setValue('roundType', roundType);
+    return roundType;
+  }()));
   if (/You lose \d+ Stamina/.test(battleLog[0].textContent)) {
-    var staminaLostLog = getValue('staminaLostLog', true) || {}
-    staminaLostLog[time(3)] = battleLog[0].textContent.match(/You lose (\d+) Stamina/)[1] * 1
-    setValue('staminaLostLog', staminaLostLog)
-    var losedStamina = battleLog[0].textContent.match(/\d+/)[0] * 1
+    const staminaLostLog = getValue('staminaLostLog', true) || {};
+    staminaLostLog[time(3)] = battleLog[0].textContent.match(/You lose (\d+) Stamina/)[1] * 1;
+    setValue('staminaLostLog', staminaLostLog);
+    const losedStamina = battleLog[0].textContent.match(/\d+/)[0] * 1;
     if (losedStamina >= g('option').staminaLose) {
-      setAlarm('Error')
+      setAlarm('Error');
       if (!_alert(1, '当前Stamina过低\n或Stamina损失过多\n是否继续？', '當前Stamina過低\n或Stamina損失過多\n是否繼續？', 'Continue?\nYou either have too little Stamina or have lost too much')) {
-        pauseChange()
-        return
+        pauseChange();
+        return;
       }
     }
   }
   if (battleLog[battleLog.length - 1].textContent.match('Initializing')) {
-    var monsterStatus = []
-    var id = 0
-    for (var i = battleLog.length - 2; i > battleLog.length - 2 - g('monsterAll'); i--) {
-      var hp = battleLog[i].textContent.match(/HP=(\d+)$/)[1] * 1
-      if (isNaN(hp)) hp = monsterStatus[monsterStatus.length - 1].hp
+    const monsterStatus = [];
+    let id = 0;
+    for (let i = battleLog.length - 2; i > battleLog.length - 2 - g('monsterAll'); i--) {
+      let hp = battleLog[i].textContent.match(/HP=(\d+)$/)[1] * 1;
+      if (isNaN(hp)) hp = monsterStatus[monsterStatus.length - 1].hp;
       monsterStatus[id] = {
         order: id,
         id: (id === 9) ? 0 : id + 1,
-        hp: hp
-      }
-      id = id + 1
+        hp,
+      };
+      id = id + 1;
     }
-    setValue('monsterStatus', monsterStatus)
-    g('monsterStatus', monsterStatus)
-    var roundNow, roundAll
-    var round = battleLog[battleLog.length - 1].textContent.match(/\(Round (\d+) \/ (\d+)\)/)
+    setValue('monsterStatus', monsterStatus);
+    g('monsterStatus', monsterStatus);
+    let roundNow; let
+      roundAll;
+    const round = battleLog[battleLog.length - 1].textContent.match(/\(Round (\d+) \/ (\d+)\)/);
     if (g('roundType') !== 'ba' && round !== null) {
-      roundNow = round[1] * 1
-      roundAll = round[2] * 1
+      roundNow = round[1] * 1;
+      roundAll = round[2] * 1;
     } else {
-      roundNow = 1
-      roundAll = 1
+      roundNow = 1;
+      roundAll = 1;
     }
-    setValue('roundNow', roundNow)
-    setValue('roundAll', roundAll)
+    setValue('roundNow', roundNow);
+    setValue('roundAll', roundAll);
   } else if (!getValue('monsterStatus') || getValue('monsterStatus', true).length !== gE('div.btm2', 'all').length) {
-    setValue('roundNow', 1)
-    setValue('roundAll', 1)
-    fixMonsterStatus()
+    setValue('roundNow', 1);
+    setValue('roundAll', 1);
+    fixMonsterStatus();
   }
-  g('roundNow', getValue('roundNow') * 1)
-  g('roundAll', getValue('roundAll') * 1)
-  g('roundLeft', getValue('roundAll') - g('roundNow'))
+  g('roundNow', getValue('roundNow') * 1);
+  g('roundAll', getValue('roundAll') * 1);
+  g('roundLeft', getValue('roundAll') - g('roundNow'));
   g('skillOTOS', {
     OFC: 0,
     FRD: 0,
     T3: 0,
     T2: 0,
-    T1: 0
-  })
+    T1: 0,
+  });
 }
 
-function battleInfo () { // 战斗战况
+function battleInfo() { // 战斗战况
   if (!gE('.hvAALog')) {
-    var div = gE('#hvAABox2').appendChild(cE('div'))
-    div.className = 'hvAALog'
+    const div = gE('#hvAABox2').appendChild(cE('div'));
+    div.className = 'hvAALog';
   }
-  var status = [
+  const status = [
     '<l0>物理</l0><l1>物理</l1><l2>Physical</l2>',
     '<l0>火</l0><l1>火</l1><l2>Fire</l2>',
     '<l0>冰</l0><l1>冰</l1><l2>Cold</l2>',
     '<l0>雷</l0><l1>雷</l1><l2>Elec</l2>',
     '<l0>风</l0><l1>風</l1><l2>Wind</l2>',
     '<l0>圣</l0><l1>聖</l1><l2>Divine</l2>',
-    '<l0>暗</l0><l1>暗</l1><l2>Forbidden</l2>'
-  ]
+    '<l0>暗</l0><l1>暗</l1><l2>Forbidden</l2>',
+  ];
   gE('.hvAALog').innerHTML = [
-    'Turns: ' + g('turn'),
-    '<br>Speed: ' + g('runSpeed') + ' t/s',
-    '<br>Round: ' + g('roundNow') + '/' + g('roundAll'),
-    '<br><l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ' + status[g('attackStatus')],
-    '<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ' + g('monsterAlive') + '/' + g('monsterAll')
-  ].join('')
-  document.title = g('turn') + '||' + g('runSpeed') + '||' + g('roundNow') + '/' + g('roundAll') + '||' + g('monsterAlive') + '/' + g('monsterAll')
+    `Turns: ${g('turn')}`,
+    `<br>Speed: ${g('runSpeed')} t/s`,
+    `<br>Round: ${g('roundNow')}/${g('roundAll')}`,
+    `<br><l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ${status[g('attackStatus')]}`,
+    `<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
+  ].join('');
+  document.title = `${g('turn')}||${g('runSpeed')}||${g('roundNow')}/${g('roundAll')}||${g('monsterAlive')}/${g('monsterAll')}`;
 }
 
-function countMonsterHP () { // 统计敌人血量
-  var monsterHp = gE('div.btm4>div.btm5:nth-child(1)', 'all')
-  var monsterStatus = g('monsterStatus')
-  var i, j
-  var hpArray = []
+function countMonsterHP() { // 统计敌人血量
+  const monsterHp = gE('div.btm4>div.btm5:nth-child(1)', 'all');
+  const monsterStatus = g('monsterStatus');
+  let i; let
+    j;
+  const hpArray = [];
   for (i = 0; i < monsterHp.length; i++) {
     if (gE('img[src*="nbardead.png"]', monsterHp[i])) {
-      monsterStatus[i].isDead = true
-      monsterStatus[i].hpNow = Infinity
+      monsterStatus[i].isDead = true;
+      monsterStatus[i].hpNow = Infinity;
     } else {
-      monsterStatus[i].isDead = false
-      monsterStatus[i].hpNow = Math.floor(monsterStatus[i].hp * parseFloat(gE('img', monsterHp[i]).style.width) / 120) + 1
-      hpArray.push(monsterStatus[i].hpNow)
+      monsterStatus[i].isDead = false;
+      monsterStatus[i].hpNow = Math.floor(monsterStatus[i].hp * parseFloat(gE('img', monsterHp[i]).style.width) / 120) + 1;
+      hpArray.push(monsterStatus[i].hpNow);
     }
   }
-  setValue('monsterStatus', monsterStatus)
-  var hpLowest = Math.min.apply(null, hpArray)
-  var hpMost = Math.max.apply(null, hpArray)
+  setValue('monsterStatus', monsterStatus);
+  const hpLowest = Math.min.apply(null, hpArray);
+  const hpMost = Math.max.apply(null, hpArray);
   for (i = 0; i < monsterStatus.length; i++) {
-    monsterStatus[i].finWeight = (monsterStatus[i].isDead) ? Infinity : ((g('option').ruleReverse) ? hpMost / monsterStatus[i].hpNow * 10 : monsterStatus[i].hpNow / hpLowest * 10)
+    monsterStatus[i].finWeight = (monsterStatus[i].isDead) ? Infinity : ((g('option').ruleReverse) ? hpMost / monsterStatus[i].hpNow * 10 : monsterStatus[i].hpNow / hpLowest * 10);
   }
-  var skillLib = {
+  const skillLib = {
     Sle: {
       name: 'Sleep',
-      img: 'sleep'
+      img: 'sleep',
     },
     Bl: {
       name: 'Blind',
-      img: 'blind'
+      img: 'blind',
     },
     Slo: {
       name: 'Slow',
-      img: 'slow'
+      img: 'slow',
     },
     Im: {
       name: 'Imperil',
-      img: 'imperil'
+      img: 'imperil',
     },
     MN: {
       name: 'MagNet',
-      img: 'magnet'
+      img: 'magnet',
     },
     Si: {
       name: 'Silence',
-      img: 'silence'
+      img: 'silence',
     },
     Dr: {
       name: 'Drain',
-      img: 'drainhp'
+      img: 'drainhp',
     },
     We: {
       name: 'Weaken',
-      img: 'weaken'
+      img: 'weaken',
     },
     Co: {
       name: 'Confuse',
-      img: 'confuse'
+      img: 'confuse',
     },
     CM: {
       name: 'Coalesced Mana',
-      img: 'coalescemana'
+      img: 'coalescemana',
     },
     Stun: {
       name: 'Stunned',
-      img: 'wpn_stun'
+      img: 'wpn_stun',
     },
     PA: {
       name: 'Penetrated Armor',
-      img: 'wpn_ap'
+      img: 'wpn_ap',
     },
     BW: {
       name: 'Bleeding Wound',
-      img: 'wpn_bleed'
-    }
-  }
-  var monsterBuff = gE('div.btm6', 'all')
+      img: 'wpn_bleed',
+    },
+  };
+  const monsterBuff = gE('div.btm6', 'all');
   for (i = 0; i < monsterBuff.length; i++) {
     for (j in skillLib) {
-      monsterStatus[i].finWeight += (gE('img[src*="' + skillLib[j].img + '"]', monsterBuff[i])) ? ((g('option').ruleReverse) ? -g('option').weight[j] : g('option').weight[j]) : 0
+      monsterStatus[i].finWeight += (gE(`img[src*="${skillLib[j].img}"]`, monsterBuff[i])) ? ((g('option').ruleReverse) ? -g('option').weight[j] : g('option').weight[j]) : 0;
     }
   }
-  monsterStatus.sort(objArrSort('finWeight'))
-  g('monsterStatus', monsterStatus)
+  monsterStatus.sort(objArrSort('finWeight'));
+  g('monsterStatus', monsterStatus);
 }
 
-function useGem () { // 自动使用宝石
-  var Gem = gE('#ikey_p').textContent
+function useGem() { // 自动使用宝石
+  const Gem = gE('#ikey_p').textContent;
   if (Gem === 'Health Gem' && g('hp') <= g('option').hp1) {
-    gE('#ikey_p').click()
-    g('end', true)
+    gE('#ikey_p').click();
+    g('end', true);
   } else if (Gem === 'Mana Gem' && g('mp') <= g('option').mp1) {
-    gE('#ikey_p').click()
-    g('end', true)
+    gE('#ikey_p').click();
+    g('end', true);
   } else if (Gem === 'Spirit Gem' && g('sp') <= g('option').sp1) {
-    gE('#ikey_p').click()
-    g('end', true)
+    gE('#ikey_p').click();
+    g('end', true);
   } else if (Gem === 'Mystic Gem') {
-    gE('#ikey_p').click()
-    g('end', true)
+    gE('#ikey_p').click();
+    g('end', true);
   }
 }
 
-function deadSoon () { // 自动回血回魔
-  var name = g('option').itemOrderName.split(',')
-  var order = g('option').itemOrderValue.split(',')
-  for (var i = 0; i < name.length; i++) {
-    if (g('option').item[name[i]] && checkCondition(g('option')['item' + name[i] + 'Condition']) && isOn(order[i])) {
-      isOn(order[i]).click()
-      g('end', true)
-      return
+function deadSoon() { // 自动回血回魔
+  const name = g('option').itemOrderName.split(',');
+  const order = g('option').itemOrderValue.split(',');
+  for (let i = 0; i < name.length; i++) {
+    if (g('option').item[name[i]] && checkCondition(g('option')[`item${name[i]}Condition`]) && isOn(order[i])) {
+      isOn(order[i]).click();
+      g('end', true);
+      return;
     }
   }
 }
 
-function useScroll () { // 自动使用卷轴
-  var scrollLib = {
+function useScroll() { // 自动使用卷轴
+  const scrollLib = {
     Go: {
       name: 'Scroll of the Gods',
       id: 13299,
       mult: '3',
       img1: 'absorb',
       img2: 'shadowveil',
-      img3: 'sparklife'
+      img3: 'sparklife',
     },
     Av: {
       name: 'Scroll of the Avatar',
       id: 13199,
       mult: '2',
       img1: 'haste',
-      img2: 'protection'
+      img2: 'protection',
     },
     Pr: {
       name: 'Scroll of Protection',
       id: 13111,
       mult: '1',
-      img1: 'protection'
+      img1: 'protection',
     },
     Sw: {
       name: 'Scroll of Swiftness',
       id: 13101,
       mult: '1',
-      img1: 'haste'
+      img1: 'haste',
     },
     Li: {
       name: 'Scroll of Life',
       id: 13221,
       mult: '1',
-      img1: 'sparklife'
+      img1: 'sparklife',
     },
     Sh: {
       name: 'Scroll of Shadows',
       id: 13211,
       mult: '1',
-      img1: 'shadowveil'
+      img1: 'shadowveil',
     },
     Ab: {
       name: 'Scroll of Absorption',
       id: 13201,
       mult: '1',
-      img1: 'absorb'
-    }
-  }
-  var scrollFirst = (g('option').scrollFirst) ? '_scroll' : ''
-  var isUsed
-  for (var i in scrollLib) {
-    if (g('option').scroll[i] && gE('.bti3>div[onmouseover*="' + scrollLib[i].id + '"]') && checkCondition(g('option')['scroll' + i + 'Condition'])) {
-      for (var j = 1; j <= scrollLib[i].mult; j++) {
-        if (gE('#pane_effects>img[src*="' + scrollLib[i]['img' + j] + scrollFirst + '"]')) {
-          isUsed = true
-          break
+      img1: 'absorb',
+    },
+  };
+  const scrollFirst = (g('option').scrollFirst) ? '_scroll' : '';
+  let isUsed;
+  for (const i in scrollLib) {
+    if (g('option').scroll[i] && gE(`.bti3>div[onmouseover*="${scrollLib[i].id}"]`) && checkCondition(g('option')[`scroll${i}Condition`])) {
+      for (let j = 1; j <= scrollLib[i].mult; j++) {
+        if (gE(`#pane_effects>img[src*="${scrollLib[i][`img${j}`]}${scrollFirst}"]`)) {
+          isUsed = true;
+          break;
         }
-        isUsed = false
+        isUsed = false;
       }
       if (!isUsed) {
-        gE('.bti3>div[onmouseover*="' + scrollLib[i].id + '"]').click()
-        g('end', true)
-        return
+        gE(`.bti3>div[onmouseover*="${scrollLib[i].id}"]`).click();
+        g('end', true);
+        return;
       }
     }
   }
 }
 
-function useChannelSkill () { // 自动施法Channel技能
-  var skillLib = {
+function useChannelSkill() { // 自动施法Channel技能
+  const skillLib = {
     Pr: {
       name: 'Protection',
       id: '411',
-      img: 'protection'
+      img: 'protection',
     },
     SL: {
       name: 'Spark of Life',
       id: '422',
-      img: 'sparklife'
+      img: 'sparklife',
     },
     SS: {
       name: 'Spirit Shield',
       id: '423',
-      img: 'spiritshield'
+      img: 'spiritshield',
     },
     Ha: {
       name: 'Haste',
       id: '412',
-      img: 'haste'
+      img: 'haste',
     },
     AF: {
       name: 'Arcane Focus',
       id: '432',
-      img: 'arcanemeditation'
+      img: 'arcanemeditation',
     },
     He: {
       name: 'Heartseeker',
       id: '431',
-      img: 'heartseeker'
+      img: 'heartseeker',
     },
     Re: {
       name: 'Regen',
       id: '312',
-      img: 'regen'
+      img: 'regen',
     },
     SV: {
       name: 'Shadow Veil',
       id: '413',
-      img: 'shadowveil'
+      img: 'shadowveil',
     },
     Ab: {
       name: 'Absorb',
       id: '421',
-      img: 'absorb'
-    }
-  }
-  var i, j
-  var skillPack = g('option').buffSkillOrderValue.split(',')
+      img: 'absorb',
+    },
+  };
+  let i; let
+    j;
+  const skillPack = g('option').buffSkillOrderValue.split(',');
   if (g('option').channelSkill) {
     for (i = 0; i < skillPack.length; i++) {
-      j = skillPack[i]
-      if (g('option').channelSkill[j] && !gE('#pane_effects>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
-        gE(skillLib[j].id).click()
-        g('end', true)
-        return
+      j = skillPack[i];
+      if (g('option').channelSkill[j] && !gE(`#pane_effects>img[src*="${skillLib[j].img}"]`) && isOn(skillLib[j].id)) {
+        gE(skillLib[j].id).click();
+        g('end', true);
+        return;
       }
     }
   }
   if (g('option').channelSkill2 && g('option').channelSkill2OrderValue) {
-    var order = g('option').channelSkill2OrderValue.split(',')
+    const order = g('option').channelSkill2OrderValue.split(',');
     for (i = 0; i < order.length; i++) {
       if (isOn(order[i])) {
-        gE(order[i]).click()
-        g('end', true)
-        return
+        gE(order[i]).click();
+        g('end', true);
+        return;
       }
     }
   }
-  var buff = gE('#pane_effects>img', 'all')
+  const buff = gE('#pane_effects>img', 'all');
   if (buff.length > 0) {
-    var name2Skill = {
+    const name2Skill = {
       Protection: 'Pr',
       'Spark of Life': 'SL',
       'Spirit Shield': 'SS',
@@ -2179,399 +2181,401 @@ function useChannelSkill () { // 自动施法Channel技能
       'Arcane Focus': 'AF',
       Heartseeker: 'He',
       Regen: 'Re',
-      'Shadow Veil': 'SV'
-    }
+      'Shadow Veil': 'SV',
+    };
     for (i = 0; i < buff.length; i++) {
-      var spellName = buff[i].getAttribute('onmouseover').match(/'(.*?)'/)[1]
-      var buffLastTime = buff[i].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1
+      const spellName = buff[i].getAttribute('onmouseover').match(/'(.*?)'/)[1];
+      const buffLastTime = buff[i].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1;
       if (isNaN(buffLastTime) || buff[i].src.match(/_scroll.png$/)) {
-        continue
+        continue;
       } else {
         if (spellName === 'Cloak of the Fallen' && !gE('#pane_effects>img[src*="sparklife"]') && isOn('422')) {
-          gE('422').click()
-          g('end', true)
-          return
-        } else if (spellName in name2Skill && isOn(skillLib[name2Skill[spellName]].id)) {
-          gE(skillLib[name2Skill[spellName]].id).click()
-          g('end', true)
-          return
+          gE('422').click();
+          g('end', true);
+          return;
+        } if (spellName in name2Skill && isOn(skillLib[name2Skill[spellName]].id)) {
+          gE(skillLib[name2Skill[spellName]].id).click();
+          g('end', true);
+          return;
         }
       }
     }
   }
 }
 
-function useBuffSkill () { // 自动施法BUFF技能
-  var skillLib = {
+function useBuffSkill() { // 自动施法BUFF技能
+  const skillLib = {
     Pr: {
       name: 'Protection',
       id: '411',
-      img: 'protection'
+      img: 'protection',
     },
     SL: {
       name: 'Spark of Life',
       id: '422',
-      img: 'sparklife'
+      img: 'sparklife',
     },
     SS: {
       name: 'Spirit Shield',
       id: '423',
-      img: 'spiritshield'
+      img: 'spiritshield',
     },
     Ha: {
       name: 'Haste',
       id: '412',
-      img: 'haste'
+      img: 'haste',
     },
     AF: {
       name: 'Arcane Focus',
       id: '432',
-      img: 'arcanemeditation'
+      img: 'arcanemeditation',
     },
     He: {
       name: 'Heartseeker',
       id: '431',
-      img: 'heartseeker'
+      img: 'heartseeker',
     },
     Re: {
       name: 'Regen',
       id: '312',
-      img: 'regen'
+      img: 'regen',
     },
     SV: {
       name: 'Shadow Veil',
       id: '413',
-      img: 'shadowveil'
+      img: 'shadowveil',
     },
     Ab: {
       name: 'Absorb',
       id: '421',
-      img: 'absorb'
-    }
-  }
-  var i, j
-  var skillPack = g('option').buffSkillOrderValue.split(',')
+      img: 'absorb',
+    },
+  };
+  let i; let
+    j;
+  const skillPack = g('option').buffSkillOrderValue.split(',');
   for (i = 0; i < skillPack.length; i++) {
-    j = skillPack[i]
-    if (g('option').buffSkill[j] && checkCondition(g('option')['buffSkill' + j + 'Condition']) && !gE('#pane_effects>img[src*="' + skillLib[j].img + '"]') && isOn(skillLib[j].id)) {
-      gE(skillLib[j].id).click()
-      g('end', true)
-      return
+    j = skillPack[i];
+    if (g('option').buffSkill[j] && checkCondition(g('option')[`buffSkill${j}Condition`]) && !gE(`#pane_effects>img[src*="${skillLib[j].img}"]`) && isOn(skillLib[j].id)) {
+      gE(skillLib[j].id).click();
+      g('end', true);
+      return;
     }
   }
-  var draughtPack = {
+  const draughtPack = {
     HD: {
       id: 11191,
-      img: 'healthpot'
+      img: 'healthpot',
     },
     MD: {
       id: 11291,
-      img: 'manapot'
+      img: 'manapot',
     },
     SD: {
       id: 11391,
-      img: 'spiritpot'
+      img: 'spiritpot',
     },
     FV: {
       id: 19111,
-      img: 'flowers'
+      img: 'flowers',
     },
     BG: {
       id: 19131,
-      img: 'gum'
-    }
-  }
+      img: 'gum',
+    },
+  };
   for (i in draughtPack) {
-    if (!gE('#pane_effects>img[src*="' + draughtPack[i].img + '"]') && g('option').buffSkill && g('option').buffSkill[i] && checkCondition(g('option')['buffSkill' + i + 'Condition']) && gE('.bti3>div[onmouseover*="' + draughtPack[i].id + '"]')) {
-      gE('.bti3>div[onmouseover*="' + draughtPack[i].id + '"]').click()
-      g('end', true)
-      return
+    if (!gE(`#pane_effects>img[src*="${draughtPack[i].img}"]`) && g('option').buffSkill && g('option').buffSkill[i] && checkCondition(g('option')[`buffSkill${i}Condition`]) && gE(`.bti3>div[onmouseover*="${draughtPack[i].id}"]`)) {
+      gE(`.bti3>div[onmouseover*="${draughtPack[i].id}"]`).click();
+      g('end', true);
+      return;
     }
   }
 }
 
-function useInfusions () { // 自动使用魔药
-  var infusionLib = [null, {
+function useInfusions() { // 自动使用魔药
+  const infusionLib = [null, {
     id: 12101,
-    img: 'fireinfusion'
+    img: 'fireinfusion',
   }, {
     id: 12201,
-    img: 'coldinfusion'
+    img: 'coldinfusion',
   }, {
     id: 12301,
-    img: 'elecinfusion'
+    img: 'elecinfusion',
   }, {
     id: 12401,
-    img: 'windinfusion'
+    img: 'windinfusion',
   }, {
     id: 12501,
-    img: 'holyinfusion'
+    img: 'holyinfusion',
   }, {
     id: 12601,
-    img: 'darkinfusion'
-  }]
-  if (gE('.bti3>div[onmouseover*="' + infusionLib[g('attackStatus')].id + '"]') && !gE('#pane_effects>img[src*="' + infusionLib[[g('attackStatus')]].img + '"]')) {
-    gE('.bti3>div[onmouseover*="' + infusionLib[g('attackStatus')].id + '"]').click()
-    g('end', true)
+    img: 'darkinfusion',
+  }];
+  if (gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`) && !gE(`#pane_effects>img[src*="${infusionLib[[g('attackStatus')]].img}"]`)) {
+    gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`).click();
+    g('end', true);
   }
 }
 
-function allImperiled () { // 给所有敌人施放Imperil
-  g('monsterStatus').sort(objArrSort('order'))
-  var monsterBuff = gE('div.btm6', 'all')
-  var j
-  for (var i = -3; ;) {
+function allImperiled() { // 给所有敌人施放Imperil
+  g('monsterStatus').sort(objArrSort('order'));
+  const monsterBuff = gE('div.btm6', 'all');
+  let j;
+  for (let i = -3; ;) {
     if (!j && i >= monsterBuff.length) {
-      j = true
-      i = 0
+      j = true;
+      i = 0;
     } else if (j && i >= monsterBuff.length) {
-      break
+      break;
     } else if (!j) {
-      i = i + 3
+      i = i + 3;
     } else if (j) {
-      i = i + 1
+      i = i + 1;
     }
-    if (i >= monsterBuff.length) continue
-    var imgs = gE('img', 'all', monsterBuff[i])
+    if (i >= monsterBuff.length) continue;
+    const imgs = gE('img', 'all', monsterBuff[i]);
     if (!gE('img[src*="imperil"]', monsterBuff[i]) && isOn('213') && !g('monsterStatus')[i].isDead) {
       if (imgs.length < 6 || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn.Im) || !g('option').debuffSkillTurnAlert) {
-        gE('213').click()
+        gE('213').click();
         if (i + 1 < monsterBuff.length && !g('monsterStatus')[i + 1].isDead) {
-          gE('#mkey_' + g('monsterStatus')[i + 1].id).click()
+          gE(`#mkey_${g('monsterStatus')[i + 1].id}`).click();
         } else {
-          gE('#mkey_' + g('monsterStatus')[i].id).click()
+          gE(`#mkey_${g('monsterStatus')[i].id}`).click();
         }
-        g('end', true)
-        return
-      } else {
-        _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.')
-        pauseChange()
-        g('end', true)
-        return
+        g('end', true);
+        return;
       }
+      _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
+      pauseChange();
+      g('end', true);
+      return;
     }
   }
-  g('monsterStatus').sort(objArrSort('finWeight'))
+  g('monsterStatus').sort(objArrSort('finWeight'));
 }
 
-function useDeSkill () { // 自动施法DEBUFF技能
-  var skillLib = {
+function useDeSkill() { // 自动施法DEBUFF技能
+  const skillLib = {
     Sle: {
       name: 'Sleep',
       id: '222',
-      img: 'sleep'
+      img: 'sleep',
     },
     Bl: {
       name: 'Blind',
       id: '231',
-      img: 'blind'
+      img: 'blind',
     },
     Slo: {
       name: 'Slow',
       id: '221',
-      img: 'slow'
+      img: 'slow',
     },
     Im: {
       name: 'Imperil',
       id: '213',
-      img: 'imperil'
+      img: 'imperil',
     },
     MN: {
       name: 'MagNet',
       id: '233',
-      img: 'magnet'
+      img: 'magnet',
     },
     Si: {
       name: 'Silence',
       id: '232',
-      img: 'silence'
+      img: 'silence',
     },
     Dr: {
       name: 'Drain',
       id: '211',
-      img: 'drainhp'
+      img: 'drainhp',
     },
     We: {
       name: 'Weaken',
       id: '212',
-      img: 'weaken'
+      img: 'weaken',
     },
     Co: {
       name: 'Confuse',
       id: '223',
-      img: 'confuse'
-    }
-  }
-  var i, j
-  var skillPack = g('option').debuffSkillOrderValue.split(',')
-  var monsterBuff = gE('#mkey_' + g('monsterStatus')[0].id + '>.btm6')
+      img: 'confuse',
+    },
+  };
+  let i; let
+    j;
+  const skillPack = g('option').debuffSkillOrderValue.split(',');
+  const monsterBuff = gE(`#mkey_${g('monsterStatus')[0].id}>.btm6`);
   for (i = 0; i < skillPack.length; i++) {
-    j = skillPack[i]
-    if (g('option').debuffSkill[j] && isOn(skillLib[j].id) && checkCondition(g('option')['debuffSkill' + j + 'Condition']) && !gE('img[src*="' + skillLib[j].img + '"]', monsterBuff)) {
-      var imgs = gE('img', 'all', monsterBuff)
+    j = skillPack[i];
+    if (g('option').debuffSkill[j] && isOn(skillLib[j].id) && checkCondition(g('option')[`debuffSkill${j}Condition`]) && !gE(`img[src*="${skillLib[j].img}"]`, monsterBuff)) {
+      const imgs = gE('img', 'all', monsterBuff);
       if (imgs.length < 6 || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn[j]) || !g('option').debuffSkillTurnAlert) {
-        gE(skillLib[j].id).click()
+        gE(skillLib[j].id).click();
         if (i + 1 < monsterBuff.length && !g('monsterStatus')[i + 1].isDead) {
-          gE('#mkey_' + g('monsterStatus')[i + 1].id).click()
+          gE(`#mkey_${g('monsterStatus')[i + 1].id}`).click();
         } else {
-          gE('#mkey_' + g('monsterStatus')[0].id).click()
+          gE(`#mkey_${g('monsterStatus')[0].id}`).click();
         }
-        g('end', true)
-        return
-      } else {
-        _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.')
-        pauseChange()
-        g('end', true)
-        return
+        g('end', true);
+        return;
       }
+      _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
+      pauseChange();
+      g('end', true);
+      return;
     }
   }
 }
 
-function attack () { // 自动打怪
+function attack() { // 自动打怪
   if (g('option').focus && checkCondition(g('option').focusCondition)) {
-    gE('#ckey_focus').click()
-    return
+    gE('#ckey_focus').click();
+    return;
   }
   if ((g('option').turnOnSS && checkCondition(g('option').turnOnSSCondition) && !gE('#ckey_spirit[src*="spirit_a"]')) || (g('option').turnOffSS && checkCondition(g('option').turnOffSSCondition) && gE('#ckey_spirit[src*="spirit_a"]'))) {
-    gE('#ckey_spirit').click()
-    g('end', true)
-    return
+    gE('#ckey_spirit').click();
+    g('end', true);
+    return;
   }
-  if (g('option').etherTap && gE('#mkey_' + g('monsterStatus')[0].id + '>div.btm6>img[src*="coalescemana"]') && (!gE('#pane_effects>img[onmouseover*="Ether Tap (x2)"]') || gE('#pane_effects>img[src*="wpn_et"][id*="effect_expire"]')) && checkCondition(g('option').etherTapCondition)) {
+  if (g('option').etherTap && gE(`#mkey_${g('monsterStatus')[0].id}>div.btm6>img[src*="coalescemana"]`) && (!gE('#pane_effects>img[onmouseover*="Ether Tap (x2)"]') || gE('#pane_effects>img[src*="wpn_et"][id*="effect_expire"]')) && checkCondition(g('option').etherTapCondition)) {
     // nothing;
   } else if (g('attackStatus') !== 0) {
-    if (checkCondition(g('option').highSkillCondition) && isOn('1' + g('attackStatus') + '3')) {
-      gE('1' + g('attackStatus') + '3').click()
-    } else if (checkCondition(g('option').middleSkillCondition) && isOn('1' + g('attackStatus') + '2')) {
-      gE('1' + g('attackStatus') + '2').click()
-    } else if (isOn('1' + g('attackStatus') + '1')) {
-      gE('1' + g('attackStatus') + '1').click()
+    if (checkCondition(g('option').highSkillCondition) && isOn(`1${g('attackStatus')}3`)) {
+      gE(`1${g('attackStatus')}3`).click();
+    } else if (checkCondition(g('option').middleSkillCondition) && isOn(`1${g('attackStatus')}2`)) {
+      gE(`1${g('attackStatus')}2`).click();
+    } else if (isOn(`1${g('attackStatus')}1`)) {
+      gE(`1${g('attackStatus')}1`).click();
     }
   }
   if (g('option').skillSwitch) {
-    var i, spiritOn, condition, skill
-    var skillOrder = (g('option').skillOrderValue || 'OFC,FRD,T3,T2,T1').split(',')
-    var skillLib = {
+    let i; let spiritOn; let condition; let
+      skill;
+    const skillOrder = (g('option').skillOrderValue || 'OFC,FRD,T3,T2,T1').split(',');
+    const skillLib = {
       OFC: {
         id: '1111',
-        oc: 8
+        oc: 8,
       },
       FRD: {
         id: '1101',
-        oc: 4
+        oc: 4,
       },
       T3: {
-        id: '2' + g('option').fightingStyle + '03',
-        oc: 2
+        id: `2${g('option').fightingStyle}03`,
+        oc: 2,
       },
       T2: {
-        id: '2' + g('option').fightingStyle + '02',
-        oc: 2
+        id: `2${g('option').fightingStyle}02`,
+        oc: 2,
       },
       T1: {
-        id: '2' + g('option').fightingStyle + '01',
-        oc: 2
-      }
-    }
+        id: `2${g('option').fightingStyle}01`,
+        oc: 2,
+      },
+    };
     for (i = 0; i < skillOrder.length; i++) {
-      skill = skillOrder[i]
-      spiritOn = gE('#ckey_spirit[src*="spirit_a"]')
-      condition = checkCondition(g('option')['skill' + skill + 'Condition']) && isOn(skillLib[skill].id) && g('oc') >= skillLib[skill].oc
+      skill = skillOrder[i];
+      spiritOn = gE('#ckey_spirit[src*="spirit_a"]');
+      condition = checkCondition(g('option')[`skill${skill}Condition`]) && isOn(skillLib[skill].id) && g('oc') >= skillLib[skill].oc;
       if (spiritOn && condition) {
         if (g('option').skillOTOS && g('option').skillOTOS[skill] && g('skillOTOS')[skill] >= 1) {
           // nothing;
         } else {
-          g('skillOTOS')[skill]++
-          gE(skillLib[skill].id).click()
+          g('skillOTOS')[skill]++;
+          gE(skillLib[skill].id).click();
           if (g('option').mercifulBlow && g('option').fightingStyle === '2' && skill === 'T3') { // Merciful Blow
-            for (var j = 0; j < g('monsterStatus').length; j++) {
-              if (g('monsterStatus')[j].hpNow / g('monsterStatus')[j].hp < 0.25 && gE('#mkey_' + g('monsterStatus')[j].id + ' img[src*="wpn_bleed"]')) {
-                gE('#mkey_' + g('monsterStatus')[j].id).click()
-                g('end', true)
-                return
+            for (let j = 0; j < g('monsterStatus').length; j++) {
+              if (g('monsterStatus')[j].hpNow / g('monsterStatus')[j].hp < 0.25 && gE(`#mkey_${g('monsterStatus')[j].id} img[src*="wpn_bleed"]`)) {
+                gE(`#mkey_${g('monsterStatus')[j].id}`).click();
+                g('end', true);
+                return;
               }
             }
           }
-          break
+          break;
         }
       }
     }
   }
-  gE('#mkey_' + g('monsterStatus')[0].id).click()
-  g('end', true)
+  gE(`#mkey_${g('monsterStatus')[0].id}`).click();
+  g('end', true);
 }
 
-function fixMonsterStatus () { // 修复monsterStatus
-  document.title = _alert(-1, 'monsterStatus错误，正在尝试修复', 'monsterStatus錯誤，正在嘗試修復', 'monsterStatus Error, trying to fix')
-  var monsterStatus = []
-  gE('div.btm2', 'all').forEach(function (monster, i) {
+function fixMonsterStatus() { // 修复monsterStatus
+  document.title = _alert(-1, 'monsterStatus错误，正在尝试修复', 'monsterStatus錯誤，正在嘗試修復', 'monsterStatus Error, trying to fix');
+  const monsterStatus = [];
+  gE('div.btm2', 'all').forEach((monster, i) => {
     monsterStatus.push({
       order: i,
       id: (i === 9) ? 0 : i + 1,
-      hp: (monster.style.background === '') ? 1000 : 100000
-    })
-  })
-  setValue('monsterStatus', monsterStatus)
-  goto()
+      hp: (monster.style.background === '') ? 1000 : 100000,
+    });
+  });
+  setValue('monsterStatus', monsterStatus);
+  goto();
 }
 
-function dropMonitor (battleLog) { // 掉落监测
-  var drop = getValue('drop', true) || {
+function dropMonitor(battleLog) { // 掉落监测
+  const drop = getValue('drop', true) || {
     '#startTime': time(3),
     '#EXP': 0,
-    '#Credit': 0
-  }
-  var item, name, amount, regexp
-  for (var i = 0; i < battleLog.length; i++) {
+    '#Credit': 0,
+  };
+  let item; let name; let amount; let
+    regexp;
+  for (let i = 0; i < battleLog.length; i++) {
     if (/^You gain \d+ (EXP|Credit)/.test(battleLog[i].textContent)) {
-      regexp = battleLog[i].textContent.match(/^You gain (\d+) (EXP|Credit)/)
-      if (regexp) drop['#' + regexp[2]] += regexp[1] * 1
+      regexp = battleLog[i].textContent.match(/^You gain (\d+) (EXP|Credit)/);
+      if (regexp) drop[`#${regexp[2]}`] += regexp[1] * 1;
     } else if (gE('span', battleLog[i])) {
-      item = gE('span', battleLog[i])
-      name = item.textContent.match(/^\[(.*?)\]$/)[1]
+      item = gE('span', battleLog[i]);
+      name = item.textContent.match(/^\[(.*?)\]$/)[1];
       if (item.style.color === 'rgb(255, 0, 0)') {
-        var quality = ['Crude', 'Fair', 'Average', 'Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless']
-        for (var j = g('option').dropQuality; j < quality.length; j++) {
+        const quality = ['Crude', 'Fair', 'Average', 'Superior', 'Exquisite', 'Magnificent', 'Legendary', 'Peerless'];
+        for (let j = g('option').dropQuality; j < quality.length; j++) {
           if (name.match(quality[j])) {
-            name = 'Equipment of ' + name.match(/^\w+/)[0]
-            drop[name] = (name in drop) ? drop[name] + 1 : 1
-            break
+            name = `Equipment of ${name.match(/^\w+/)[0]}`;
+            drop[name] = (name in drop) ? drop[name] + 1 : 1;
+            break;
           }
         }
       } else if (item.style.color === 'rgb(186, 5, 180)') {
-        regexp = name.match(/^(\d+)x (Crystal of \w+)$/)
+        regexp = name.match(/^(\d+)x (Crystal of \w+)$/);
         if (regexp) {
-          name = regexp[2]
-          amount = regexp[1] * 1
+          name = regexp[2];
+          amount = regexp[1] * 1;
         } else {
-          name = name.match(/^(Crystal of \w+)$/)[1]
-          amount = 1
+          name = name.match(/^(Crystal of \w+)$/)[1];
+          amount = 1;
         }
-        drop[name] = (name in drop) ? drop[name] + amount : amount
+        drop[name] = (name in drop) ? drop[name] + amount : amount;
       } else if (item.style.color === 'rgb(168, 144, 0)') {
-        drop['#Credit'] += name.match(/\d+/)[0] * 1
+        drop['#Credit'] = drop['#Credit'] + name.match(/\d+/)[0] * 1;
       } else {
-        drop[name] = (name in drop) ? drop[name] + 1 : 1
+        drop[name] = (name in drop) ? drop[name] + 1 : 1;
       }
     } else if (battleLog[i].textContent === 'You are Victorious!') {
-      break
+      break;
     }
   }
   if (g('option').recordEach && g('roundNow') === g('roundAll')) {
-    var old = getValue('dropOld', true) || []
-    drop.__name = getValue('battleCode')
-    drop['#endTime'] = time(3)
-    old.push(drop)
-    setValue('dropOld', old)
-    delValue('drop')
+    const old = getValue('dropOld', true) || [];
+    drop.__name = getValue('battleCode');
+    drop['#endTime'] = time(3);
+    old.push(drop);
+    setValue('dropOld', old);
+    delValue('drop');
   } else {
-    setValue('drop', drop)
+    setValue('drop', drop);
   }
 }
 
-function recordUsage (parm) {
-  var stats = getValue('stats', true) || {
+function recordUsage(parm) {
+  const stats = getValue('stats', true) || {
     self: {
       _startTime: time(3),
       _turn: 0,
@@ -2581,7 +2585,7 @@ function recordUsage (parm) {
       _boss: 0,
       evade: 0,
       miss: 0,
-      focus: 0
+      focus: 0,
     },
     restore: { // 回复量
     },
@@ -2602,115 +2606,116 @@ function recordUsage (parm) {
       _mtotal: 0,
       _pavg: 0,
       _pcount: 0,
-      _ptotal: 0
+      _ptotal: 0,
     },
     proficiency: { // 熟练度
-    }
-  }
-  var text, magic, point, reg
+    },
+  };
+  let text; let magic; let point; let
+    reg;
   if (g('monsterAlive') === 0) {
-    stats.self._turn += g('turn')
-    stats.self._round += 1
-    if (g('roundNow') === g('roundAll')) stats.self._battle += 1
+    stats.self._turn += g('turn');
+    stats.self._round += 1;
+    if (g('roundNow') === g('roundAll')) stats.self._battle += 1;
   }
   if (parm.mode === 'magic') {
-    magic = parm.magic
-    stats.magic[magic] = (magic in stats.magic) ? stats.magic[magic] + 1 : 1
-    stats.hurt.mp += parm.mp
-    stats.hurt.oc += parm.oc
+    magic = parm.magic;
+    stats.magic[magic] = (magic in stats.magic) ? stats.magic[magic] + 1 : 1;
+    stats.hurt.mp += parm.mp;
+    stats.hurt.oc += parm.oc;
   } else if (parm.mode === 'items') {
-    stats.items[parm.item] = (parm.item in stats.items) ? stats.items[parm.item] + 1 : 1
+    stats.items[parm.item] = (parm.item in stats.items) ? stats.items[parm.item] + 1 : 1;
   } else {
-    stats.self[parm.mode] = (parm.mode in stats.self) ? stats.self[parm.mode] + 1 : 1
+    stats.self[parm.mode] = (parm.mode in stats.self) ? stats.self[parm.mode] + 1 : 1;
   }
-  var debug = false
-  var log = false
-  for (var i = 0; i < parm.log.length; i++) {
-    if (parm.log[i].className === 'tls') break
-    text = parm.log[i].textContent
-    if (debug) console.log(text)
+  const debug = false;
+  let log = false;
+  for (let i = 0; i < parm.log.length; i++) {
+    if (parm.log[i].className === 'tls') break;
+    text = parm.log[i].textContent;
+    if (debug) console.log(text);
     if (text.match(/you for \d+ \w+ damage/)) {
-      reg = text.match(/you for (\d+) (\w+) damage/)
-      magic = reg[2].replace('ing', '')
-      point = reg[1] * 1
-      stats.hurt[magic] = (magic in stats.hurt) ? stats.hurt[magic] + point : point
-      stats.hurt._count++
-      stats.hurt._total += point
-      stats.hurt._avg = Math.round(stats.hurt._total / stats.hurt._count)
+      reg = text.match(/you for (\d+) (\w+) damage/);
+      magic = reg[2].replace('ing', '');
+      point = reg[1] * 1;
+      stats.hurt[magic] = (magic in stats.hurt) ? stats.hurt[magic] + point : point;
+      stats.hurt._count++;
+      stats.hurt._total += point;
+      stats.hurt._avg = Math.round(stats.hurt._total / stats.hurt._count);
       if (magic.match(/pierc|crush|slash/)) {
-        stats.hurt._pcount++
-        stats.hurt._ptotal += point
-        stats.hurt._pavg = Math.round(stats.hurt._ptotal / stats.hurt._pcount)
+        stats.hurt._pcount++;
+        stats.hurt._ptotal += point;
+        stats.hurt._pavg = Math.round(stats.hurt._ptotal / stats.hurt._pcount);
       } else {
-        stats.hurt._mcount++
-        stats.hurt._mtotal += point
-        stats.hurt._mavg = Math.round(stats.hurt._mtotal / stats.hurt._mcount)
+        stats.hurt._mcount++;
+        stats.hurt._mtotal += point;
+        stats.hurt._mavg = Math.round(stats.hurt._mtotal / stats.hurt._mcount);
       }
     } else if (text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for \d+( .*)? damage/) || text.match(/^You .* for \d+ .* damage/)) { // text.match(/for \d+ .* damage/)
-      reg = text.match(/for (\d+)( .*)? damage/)
-      magic = text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ -]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1]
-      point = reg[1] * 1
-      stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point
+      reg = text.match(/for (\d+)( .*)? damage/);
+      magic = text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ -]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1];
+      point = reg[1] * 1;
+      stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point;
     } else if (text.match(/Vital Theft hits .*? for \d+ damage/)) {
-      magic = 'Vital Theft'
-      point = text.match(/Vital Theft hits .*? for (\d+) damage/)[1] * 1
-      stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point
+      magic = 'Vital Theft';
+      point = text.match(/Vital Theft hits .*? for (\d+) damage/)[1] * 1;
+      stats.damage[magic] = (magic in stats.damage) ? stats.damage[magic] + point : point;
     } else if (text.match(/You (evade|parry|block) the attack|misses the attack against you|(casts|uses) .* misses the attack/)) {
-      stats.self.evade++
+      stats.self.evade++;
     } else if (text.match(/(resists your spell|Your spell is absorbed|(evades|parries) your (attack|spell))|Your attack misses its mark|Your spell fails to connect/)) {
-      stats.self.miss++
+      stats.self.miss++;
     } else if (text.match(/You gain the effect Focusing/)) {
-      stats.self.focus++
+      stats.self.focus++;
     } else if (text.match(/^Recovered \d+ points of/) || text.match(/You are healed for \d+ Health Points/) || text.match(/You drain \d+ HP from/)) {
-      magic = (parm.mode === 'defend') ? 'defend' : text.match(/You drain \d+ HP from/) ? 'drain' : parm.magic || parm.item
-      point = text.match(/\d+/)[0] * 1
-      stats.restore[magic] = (magic in stats.restore) ? stats.restore[magic] + point : point
+      magic = (parm.mode === 'defend') ? 'defend' : text.match(/You drain \d+ HP from/) ? 'drain' : parm.magic || parm.item;
+      point = text.match(/\d+/)[0] * 1;
+      stats.restore[magic] = (magic in stats.restore) ? stats.restore[magic] + point : point;
     } else if (text.match(/(restores|drain) \d+ points of/)) {
-      reg = text.match(/^(.*) restores (\d+) points of (\w+)/) || text.match(/^You (drain) (\d+) points of (\w+)/)
-      magic = reg[1]
-      point = reg[2] * 1
-      stats.restore[magic] = (magic in stats.restore) ? stats.restore[magic] + point : point
+      reg = text.match(/^(.*) restores (\d+) points of (\w+)/) || text.match(/^You (drain) (\d+) points of (\w+)/);
+      magic = reg[1];
+      point = reg[2] * 1;
+      stats.restore[magic] = (magic in stats.restore) ? stats.restore[magic] + point : point;
     } else if (text.match(/absorbs \d+ points of damage from the attack into \d+ points of \w+ damage/)) {
-      reg = text.match(/(.*) absorbs (\d+) points of damage from the attack into (\d+) points of (\w+) damage/)
-      point = reg[2] * 1
-      magic = parm.log[i - 1].textContent.match(/you for (\d+) (\w+) damage/)[2].replace('ing', '')
-      stats.hurt[magic] = (magic in stats.hurt) ? stats.hurt[magic] + point : point
-      point = reg[3] * 1
-      magic = reg[1].replace('Your ', '') + '_' + reg[4]
-      stats.hurt[magic] = (magic in stats.hurt) ? stats.hurt[magic] + point : point
+      reg = text.match(/(.*) absorbs (\d+) points of damage from the attack into (\d+) points of (\w+) damage/);
+      point = reg[2] * 1;
+      magic = parm.log[i - 1].textContent.match(/you for (\d+) (\w+) damage/)[2].replace('ing', '');
+      stats.hurt[magic] = (magic in stats.hurt) ? stats.hurt[magic] + point : point;
+      point = reg[3] * 1;
+      magic = `${reg[1].replace('Your ', '')}_${reg[4]}`;
+      stats.hurt[magic] = (magic in stats.hurt) ? stats.hurt[magic] + point : point;
     } else if (text.match(/You gain .* proficiency/)) {
-      reg = text.match(/You gain ([\d.]+) points of (.*?) proficiency/)
-      magic = reg[2]
-      point = reg[1] * 1
-      stats.proficiency[magic] = (magic in stats.proficiency) ? stats.proficiency[magic] + point : point
-      stats.proficiency[magic] = stats.proficiency[magic].toFixed(3) * 1
+      reg = text.match(/You gain ([\d.]+) points of (.*?) proficiency/);
+      magic = reg[2];
+      point = reg[1] * 1;
+      stats.proficiency[magic] = (magic in stats.proficiency) ? stats.proficiency[magic] + point : point;
+      stats.proficiency[magic] = stats.proficiency[magic].toFixed(3) * 1;
     } else if (text.trim() === '' || text.match(/You (gain |cast |use |are Victorious|have reached Level|have obtained the title|do not have enough MP)/) || text.match(/Cooldown|has expired|Spirit Stance|gains the effect|insufficient Spirit|Stop beating dead ponies| defeat |Clear Bonus|brink of defeat|Stop \w+ing|Spawned Monster| drop(ped|s) |defeated/)) {
       // nothing;
     } else if (debug) {
-      log = true
-      setAudioAlarm('Error')
-      console.log(text)
+      log = true;
+      setAudioAlarm('Error');
+      console.log(text);
     }
   }
   if (debug && log) {
-    console.table(stats)
-    pauseChange()
+    console.table(stats);
+    pauseChange();
   }
-  setValue('stats', stats)
+  setValue('stats', stats);
 }
 
-function recordUsage2 () {
-  var stats = getValue('stats', true)
-  stats.self._monster += g('monsterAll')
-  stats.self._boss += g('bossAll')
+function recordUsage2() {
+  const stats = getValue('stats', true);
+  stats.self._monster += g('monsterAll');
+  stats.self._boss += g('bossAll');
   if (g('option').recordEach && g('roundNow') === g('roundAll')) {
-    var old = getValue('statsOld', true) || []
-    stats.__name = getValue('battleCode')
-    stats.self._endTime = time(3)
-    old.push(stats)
-    setValue('statsOld', old)
-    delValue('stats')
+    const old = getValue('statsOld', true) || [];
+    stats.__name = getValue('battleCode');
+    stats.self._endTime = time(3);
+    old.push(stats);
+    setValue('statsOld', old);
+    delValue('stats');
   } else {
-    setValue('stats', stats)
+    setValue('stats', stats);
   }
 }

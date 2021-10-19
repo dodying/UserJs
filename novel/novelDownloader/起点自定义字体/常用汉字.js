@@ -1,4 +1,3 @@
-
 // ==Headers==
 // @Name:               常用汉字
 // @Description:        常用汉字
@@ -26,8 +25,8 @@ const main = async () => {
   // http://glyphwiki.org/dump.tar.gz
   // https://zhs.glyphwiki.org/wiki/u6236
   const all = fs.readFileSync('./dump_all_versions.txt', 'utf-8').split(/[\r\n]+/);
-  const all1 = all.filter(i => i.match('^\\s*u(\\w{4})\\\\@\\d+\\s*\\|\\s*u3013\\s*\\|\\s*99:0:0:0:0:200:200:u'));
-  const all2 = all.filter(i => {
+  const all1 = all.filter((i) => i.match('^\\s*u(\\w{4})\\\\@\\d+\\s*\\|\\s*u3013\\s*\\|\\s*99:0:0:0:0:200:200:u'));
+  const all2 = all.filter((i) => {
     const matched = i.match('^\\s*u(\\w{4})\\\\@\\d+\\s*\\|\\s*u(\\w{4})\\s*\\|');
     return matched && matched[2] !== '3013';
   });
@@ -39,8 +38,8 @@ const main = async () => {
     const re1 = `^\\s*u(\\w{4})\\\\@\\d+\\s*\\|\\s*u3013\\s*\\|\\s*99:0:0:0:0:200:200:u${charCode}`; // /^\s*u\w{4}\\@\d+\s*\|\s*u3013\s*\|\s*99:0:0:0:0:200:200:u\w{4}/
     const re2 = `^\\s*u(\\w{4})\\\\@\\d+\\s*\\|\\s*u${charCode}\\s*\\|`;
     const similar = [charCode].concat(
-      all1.filter(j => j.match(re1)).map(j => j.match(re1)[1]),
-      all2.filter(j => j.match(re2)).map(j => j.match(re2)[1])
+      all1.filter((j) => j.match(re1)).map((j) => j.match(re1)[1]),
+      all2.filter((j) => j.match(re2)).map((j) => j.match(re2)[1]),
     );
     json[i] = Array.from(new Set(similar));
   }
@@ -49,7 +48,7 @@ const main = async () => {
 
 main().then(async () => {
   //
-}, async err => {
+}, async (err) => {
   console.error(err);
   process.exit();
 });

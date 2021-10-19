@@ -15,16 +15,17 @@
 // ==/UserScript==
 (function () {
   if (window.location.href.match('/search/') && $('.item').length === 1) {
-    window.location = $('.item>a').attr('href')
-    return
-  } else if (window.location.href.match('vl_searchbyid')) {
-    var find = $('.id').filter(function () {
-      return this.textContent === window.location.href.match(/keyword=(.*?)$/)[1] && !$(this).parents().eq(1).text().match('（ブルーレイディスク）')
-    })
-    if (find.length === 1) window.location = find.parent().attr('href')
-    return
+    window.location = $('.item>a').attr('href');
+    return;
+  } if (window.location.href.match('vl_searchbyid')) {
+    const find = $('.id').filter(function () {
+      return this.textContent === window.location.href.match(/keyword=(.*?)$/)[1] && !$(this).parents().eq(1).text()
+        .match('（ブルーレイディスク）');
+    });
+    if (find.length === 1) window.location = find.parent().attr('href');
+    return;
   }
-  var linkLib = {
+  const linkLib = {
     'www.javlibrary.com': {
       searchInput: '#idsearchbox',
       searchButton: '#idsearchbutton',
@@ -33,7 +34,7 @@
       star: 'span.star>a',
       genre: '.genre>a',
       score: 'span.score',
-      length: '#video_length .text'
+      length: '#video_length .text',
     },
     'www.javbus.com': {
       searchInput: '#search-input',
@@ -42,7 +43,7 @@
       name: 'h3',
       star: '.star-show~p:eq(0)>.genre>a',
       genre: '.header:contains(類別)~p:eq(0)>.genre>a',
-      length: '.info>p:eq(2)'
+      length: '.info>p:eq(2)',
     },
     'www.caribbeancompr.com': {
       searchInput: '#q',
@@ -51,11 +52,11 @@
       name: '.video-detail>h1',
       star: '.movie-info>dl:contains("出演") a',
       genre: '.movie-info-cat>dd>a',
-      length: function () {
-        var time = $('.movie-info>dl:contains("再生時間")>dd').text()
-        time = new Date('1970-01-01 ' + time + ' GMT+000').getTime()
-        return Math.round(time / 1000 / 60)
-      }
+      length() {
+        let time = $('.movie-info>dl:contains("再生時間")>dd').text();
+        time = new Date(`1970-01-01 ${time} GMT+000`).getTime();
+        return Math.round(time / 1000 / 60);
+      },
     },
     'www.caribbeancom.com': {
       searchInput: '#q',
@@ -64,60 +65,62 @@
       name: '.video-detail>h1',
       star: '.movie-info>dl:contains("出演") a',
       genre: '.movie-info-cat>dd>a',
-      length: function () {
-        var time = $('.movie-info>dl:contains("再生時間")>dd').text()
-        time = new Date('1970-01-01 ' + time + ' GMT+000').getTime()
-        return Math.round(time / 1000 / 60)
-      }
-    }
-  }
-  var rule = linkLib[window.location.host]
+      length() {
+        let time = $('.movie-info>dl:contains("再生時間")>dd').text();
+        time = new Date(`1970-01-01 ${time} GMT+000`).getTime();
+        return Math.round(time / 1000 / 60);
+      },
+    },
+  };
+  const rule = linkLib[window.location.host];
   $(rule.searchInput).on('paste', function () {
-    var _ = this
-    setTimeout(function () {
-      _.value = _.value.replace(/\..*$/, '')
+    const _ = this;
+    setTimeout(() => {
+      _.value = _.value.replace(/\..*$/, '');
       if (_.value && rule.searchButton) {
-        $(rule.searchButton).click()
+        $(rule.searchButton).click();
       } else if (_.value && rule.searchUrl) {
-        window.location.href = rule.searchUrl.replace('{{q}}', _.value)
+        window.location.href = rule.searchUrl.replace('{{q}}', _.value);
       }
-    }, 20)
-  })
-  var stars, genres, info // total info
-  var stars2 = [] // stars
-  stars = []
-  genres = []
+    }, 20);
+  });
+  let stars; let genres; let
+    info; // total info
+  const stars2 = []; // stars
+  stars = [];
+  genres = [];
   $(rule.star).each(function () {
-    stars.push(this.innerText)
-    stars2.push(this.innerText + '\t' + this.href)
-  })
+    stars.push(this.innerText);
+    stars2.push(`${this.innerText}\t${this.href}`);
+  });
   $(rule.genre).each(function () {
-    genres.push(this.innerText)
-  })
+    genres.push(this.innerText);
+  });
   info = [
     typeof rule.code === 'string' ? $(rule.code).text().trim() : window.location.href.match(rule.code)[1], // code
-    $(rule.name).text().replace(/^(\w+(_|-))?\w+ /, '').replace(/\n/g, '').trim(), // name
+    $(rule.name).text().replace(/^(\w+(_|-))?\w+ /, '').replace(/\n/g, '')
+      .trim(), // name
     stars.sort().join(' '), // star
-    genres.join(' ') // genre
-  ]
-  if (!info[0]) return
+    genres.join(' '), // genre
+  ];
+  if (!info[0]) return;
   if (typeof rule.score === 'string') { // score
-    info.push($(rule.score).text() ? $(rule.score).text().match(/[\d.]+/)[0] : '')
+    info.push($(rule.score).text() ? $(rule.score).text().match(/[\d.]+/)[0] : '');
   }
   if (typeof rule.length === 'string' && $(rule.length).length > 0) { // length
-    info.push($(rule.length).text().match(/\d+/)[0])
+    info.push($(rule.length).text().match(/\d+/)[0]);
   } else {
-    info.push(rule.length())
+    info.push(rule.length());
   }
-  document.title = info[0]
+  document.title = info[0];
   document.onkeydown = function (e) {
     if (e.ctrlKey && e.key === 'c' && window.getSelection().toString() === '') {
-      GM_setClipboard(info.join('\t'))
-      if ($('.hBanner')) $('.addCode').click()
+      GM_setClipboard(info.join('\t'));
+      if ($('.hBanner')) $('.addCode').click();
     } else if (e.ctrlKey && e.key === 'v' && e.target.tagName === 'BODY') {
-      $(rule.searchInput).select()
+      $(rule.searchInput).select();
     } else if (e.ctrlKey && e.key === 'x' && window.getSelection().toString() === '') {
-      GM_setClipboard(stars2.join('\r\n'))
+      GM_setClipboard(stars2.join('\r\n'));
     }
-  }
-})()
+  };
+}());

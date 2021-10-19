@@ -19,7 +19,6 @@
 /* global $ */
 /* global GM_registerMenuCommand */
 (function () {
-  'use strict';
   let script = window.location.hash.match(/#javascript:(.*)$/);
   if (script) {
     script = decodeURI(script[1]);
@@ -30,7 +29,7 @@
   $('<style>').text([
     '.urlLetContainer{width:98vw;height:98vh;position:fixed;top:0;left:0;}',
     '.urlLetContainer>a{background:#fff;font:18px/25px \'Droid Sans Mono\',sans-serif;}',
-    '.urlLetContainer>textarea{position:absolute;left:25%;top:8%;width:50%;height:80%;padding:20px;font:18px/25px \'Droid Sans Mono\',sans-serif;}'
+    '.urlLetContainer>textarea{position:absolute;left:25%;top:8%;width:50%;height:80%;padding:20px;font:18px/25px \'Droid Sans Mono\',sans-serif;}',
   ].join('')).appendTo('head');
   GM_registerMenuCommand('set urlLet', () => {
     const urlLetContainer = $('<div class="urlLetContainer">').on('click', (e) => {
@@ -39,8 +38,8 @@
     const link = $('<a target="_blank" href="#">').text(document.title).appendTo(urlLetContainer);
     const textarea = $('<textarea>').text(script).on('keyup', (e) => {
       script = textarea.val().trim();
-      const url = window.location.href.replace(/#javascript:(.*)$/, '') + '#javascript:' + encodeURI(script);
+      const url = `${window.location.href.replace(/#javascript:(.*)$/, '')}#javascript:${encodeURI(script)}`;
       $(link).attr('href', url);
     }).appendTo(urlLetContainer);
   });
-})();
+}());

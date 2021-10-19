@@ -15,17 +15,16 @@
 // ==/UserScript==
 /* eslint-disable no-debugger  */
 (function () {
-  'use strict'
-  ;[...document.querySelectorAll('[data-role="commentContent"]')].forEach(i => {
-    [...i.querySelectorAll('div,p')].forEach(j => {
-      let text = j.textContent.replace(/&#\d+;/g)
-      let site = text.match(/Site:\s*(https?:.*?)(\n|Sharecode)/i)
-      let sharecode = text.match(/Sharecode(\[\?\])*:\s*(.*?)(\n|$)/i)
+  [...document.querySelectorAll('[data-role="commentContent"]')].forEach((i) => {
+    [...i.querySelectorAll('div,p')].forEach((j) => {
+      const text = j.textContent.replace(/&#\d+;/g);
+      const site = text.match(/Site:\s*(https?:.*?)(\n|Sharecode)/i);
+      const sharecode = text.match(/Sharecode(\[\?\])*:\s*(.*?)(\n|$)/i);
       if (site && sharecode) {
-        let link = `${site[1]}${sharecode[2]}`
-        console.log(link)
-        j.innerHTML += `<br><a target="_blank" href="${link}">${link}</a>`
+        const link = `${site[1]}${sharecode[2]}`;
+        console.log(link);
+        j.innerHTML = `${j.innerHTML}<br><a target="_blank" href="${link}">${link}</a>`;
       }
-    })
-  })
-})()
+    });
+  });
+}());

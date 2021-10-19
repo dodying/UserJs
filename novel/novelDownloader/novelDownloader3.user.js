@@ -40,7 +40,8 @@
 /* eslint-disable no-debugger  */
 /* global $ xhr tranStr JSZip saveAs CryptoJS opentype */
 ; (function () { // eslint-disable-line no-extra-semi
-  'use strict';
+'use strict';
+
   let fontLib;
 
   /*
@@ -58,16 +59,16 @@
   Storage = {
     debug: {
       book: false,
-      content: false
+      content: false,
     },
     mode: null, // 1=index 2=chapter
     rule: null, // 当前规则
     book: {
-      image: []
+      image: [],
     },
-    xhr: xhr
+    xhr,
   };
-  const Config = Object.assign({
+  const Config = {
     thread: 5,
     retry: 3,
     timeout: 60000,
@@ -83,8 +84,9 @@
     addChapterNext: true,
     removeEmptyLine: 'auto',
     css: 'body {\n  line-height: 130%;\n  text-align: justify;\n  font-family: \\"Microsoft YaHei\\";\n  font-size: 22px;\n  margin: 0 auto;\n  background-color: #CCE8CF;\n  color: #000;\n}\n\nh1 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 28px;\n}\n\nh2 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 26px;\n}\n\nh3 {\n  text-align: center;\n  font-weight: bold;\n  font-size: 24px;\n}\n\np {\n  text-indent: 2em;\n}',
-    customize: '[]'
-  }, GM_getValue('config', {}));
+    customize: '[]',
+    ...GM_getValue('config', {}),
+  };
   const Rule = {
     // 如无说明，所有可以为*选择器*都可以是async (doc)=>string
     //                              章节内async (doc,res,request)
@@ -159,7 +161,7 @@
       '.zp_li a', 'dd a', '.chapter-list a', '.directoryArea a',
 
       '[id*="list"] a', '[class*="list"] a',
-      '[id*="chapter"] a', '[class*="chapter"] a'
+      '[id*="chapter"] a', '[class*="chapter"] a',
     ].join(','),
     // vipChapter:选择器 或 async (doc)=>url[]或{url,title}[]
 
@@ -194,7 +196,7 @@
       '#content1', '#content', '.content', '#arctext',
       '[itemprop="acticleBody"]', '.readerCon',
       '[id*="article"]:minsize(100)', '[class*="article"]:minsize(100)',
-      '[id*="content"]:minsize(100)', '[class*="content"]:minsize(100)'
+      '[id*="content"]:minsize(100)', '[class*="content"]:minsize(100)',
     ].join(','),
 
     // ?contentCheck: 检查页面是否正确，true时保留，否则content=null
@@ -210,7 +212,7 @@
 
     // ?chapterPrev,chapterNext:选择器 或 async (doc)=>url
     chapterPrev: 'a[rel="prev"],a:regexp("[上前]一?[章页话集节卷篇]+"),#prevUrl',
-    chapterNext: 'a[rel="next"],a:regexp("[下后]一?[章页话集节卷篇]+"),#nextUrl'
+    chapterNext: 'a[rel="next"],a:regexp("[下后]一?[章页话集节卷篇]+"),#nextUrl',
     // ?ignoreUrl:url[] 忽略的网站（用于过滤chapterPrev,chapterNext）
 
     // ?getChapters 在章节页面时使用，获取全部章节
@@ -247,11 +249,9 @@
     },
     { // https://www.manhuabei.com/ https://www.manhuafen.com/
       siteName: '漫画堆',
-      filter: () => {
-        return $('.dmzj-logo').length && $('.wrap_intro_l_comic').length && $('.wrap_intro_r').length && $('.list_con_li').length
-          ? 1
-          : $('.foot-detail:contains("漫画")').length && $('.dm_logo').length && $('.chapter-view').length ? 2 : 0;
-      },
+      filter: () => ($('.dmzj-logo').length && $('.wrap_intro_l_comic').length && $('.wrap_intro_r').length && $('.list_con_li').length
+        ? 1
+        : $('.foot-detail:contains("漫画")').length && $('.dm_logo').length && $('.chapter-view').length ? 2 : 0),
       title: '.comic_deCon>h1',
       writer: '.comic_deCon_liO>li>a[href^="/author/"]',
       intro: '.comic_deCon_d',
@@ -291,7 +291,7 @@
     // 文学
     { // http://gj.zdic.net
       siteName: '汉典古籍',
-      filter: () => window.location.host === 'gj.zdic.net' ? ($('#ml_1').length ? 1 : 2) : 0,
+      filter: () => (window.location.host === 'gj.zdic.net' ? ($('#ml_1').length ? 1 : 2) : 0),
       title: '#shuye>h1',
       intro: '#jj_2',
       chapter: '.mls>li>a',
@@ -340,7 +340,7 @@
     },
     { // https://www.kanunu8.com/book2/11107/index.html
       siteName: '努努书坊',
-      filter: () => window.location.href.match(/kanunu8.com\/book2/) ? ($('.book').length ? 1 : 2) : 0,
+      filter: () => (window.location.href.match(/kanunu8.com\/book2/) ? ($('.book').length ? 1 : 2) : 0),
       title: '.book>h1',
       writer: '.book>h2>a',
       intro: '.description>p',
@@ -351,7 +351,7 @@
     },
     { // https://www.kanunu8.com
       siteName: '努努书坊',
-      filter: () => window.location.host === 'www.kanunu8.com' ? ($(['body>div:nth-child(1)>table:nth-child(10)>tbody>tr:nth-child(4)>td>table:nth-child(2)>tbody>tr>td>a', 'body>div>table>tbody>tr>td>table>tbody>tr>td>table:not(:has([class^="p"])) a'].join(',')).length ? 1 : 2) : 0,
+      filter: () => (window.location.host === 'www.kanunu8.com' ? ($(['body>div:nth-child(1)>table:nth-child(10)>tbody>tr:nth-child(4)>td>table:nth-child(2)>tbody>tr>td>a', 'body>div>table>tbody>tr>td>table>tbody>tr>td>table:not(:has([class^="p"])) a'].join(',')).length ? 1 : 2) : 0),
       title: 'h1>strong>font,h2>b',
       writer: 'body > div:nth-child(1) > table:nth-child(10) > tbody > tr:nth-child(2) > td,body > div:nth-child(1) > table:nth-child(10) > tbody > tr > td:nth-child(2) > table:nth-child(2) > tbody > tr:nth-child(2) > td',
       intro: '[align="left"]>[class^="p"]',
@@ -361,13 +361,13 @@
     },
     { // http://www.my2852.com
       siteName: '梦远书城',
-      filter: () => window.location.href.match(/my2852?.com/) ? ($('a:contains("回目录")').length ? 2 : 1) : 0,
+      filter: () => (window.location.href.match(/my2852?.com/) ? ($('a:contains("回目录")').length ? 2 : 1) : 0),
       titleRegExp: /(.*?)[|_]/,
       title: '.book>h1',
       writer: 'b:contains("作者")',
       intro: '.zhj,body > div:nth-child(4) > table > tbody > tr > td.td6 > div > table > tbody > tr > td:nth-child(1) > div > table > tbody > tr:nth-child(1) > td',
       cover: 'img[alt="封面"]',
-      chapter: () => $('a[href]').toArray().filter(i => $(i).attr('href').match(/^\d+\.htm/)).map(i => ({ url: $(i).attr('href'), title: $(i).text().trim() })),
+      chapter: () => $('a[href]').toArray().filter((i) => $(i).attr('href').match(/^\d+\.htm/)).map((i) => ({ url: $(i).attr('href'), title: $(i).text().trim() })),
       content: 'td:has(br)'
     },
     { // https://www.tianyabooks.com
@@ -404,7 +404,7 @@
       cover: '.J-getJumpUrl>img',
       chapter: '.volume>.cf>li>a',
       vipChapter: '.volume>.cf>li:has(.iconfont)>a',
-      volume: () => $('.volume>h3').toArray().map(i => i.childNodes[2]),
+      volume: () => $('.volume>h3').toArray().map((i) => i.childNodes[2]),
       deal: async (chapter) => {
         const content = {};
         if (chapter.url.match(/vipreader.qidian.com/)) {
@@ -413,7 +413,7 @@
               chapter,
               url: `https://vipreader.qidian.com/ajax/chapter/chapterInfo?_csrfToken=${document.cookie.match('_csrfToken=(.*?);')[1]}&bookId=${chapter.url.split('/')[4]}&chapterId=${chapter.url.split('/')[5]}&authorId=${$('.writer,.info>a[href*="/author/"]').attr('href').match(/\/author\/(\d+)\//)[1]}`,
               method: 'GET',
-              onload: function (res, request) {
+              onload(res, request) {
                 try {
                   const json = JSON.parse(res.responseText);
                   content.title = json.data.chapterInfo.chapterName;
@@ -428,12 +428,12 @@
                       for (const i in font.glyphs.glyphs) {
                         const data = font.glyphs.glyphs[i].path.toPathData();
 
-                        const key = fontLib.find(i => i.path === data);
+                        const key = fontLib.find((i) => i.path === data);
                         if (key) obj[font.glyphs.glyphs[i].unicode] = key.unicode;
                         if (!key) undefinedFont.push(data);
                       }
                       if (undefinedFont.length) console.error('未确定字符', undefinedFont);
-                      content.content = json.data.chapterInfo.content.replace(/&#(\d+);/g, (matched, m1) => m1 in obj ? obj[m1] : matched);
+                      content.content = json.data.chapterInfo.content.replace(/&#(\d+);/g, (matched, m1) => (m1 in obj ? obj[m1] : matched));
                       resolve();
                     });
                   } else {
@@ -454,7 +454,7 @@
               url: chapter.url,
               method: 'GET',
               responseType: 'document',
-              onload: function (res, request) {
+              onload(res, request) {
                 content.title = $('.j_chapterName', res.response).text();
                 content.content = $('.j_readContent', res.response).html();
                 resolve();
@@ -467,8 +467,8 @@
       contentReplace: [
         [/<p>\s+.<\/p>/g, '']
       ],
-      chapterPrev: doc => [$('[id^="chapter-"]', doc).attr('data-purl')],
-      chapterNext: doc => [$('[id^="chapter-"]', doc).attr('data-nurl')]
+      chapterPrev: (doc) => [$('[id^="chapter-"]', doc).attr('data-purl')],
+      chapterNext: (doc) => [$('[id^="chapter-"]', doc).attr('data-nurl')]
     },
     { // https://www.ciweimao.com
       siteName: '刺猬猫',
@@ -489,7 +489,7 @@
             '/resources/js/enjs.min.js',
             '/resources/js/myEncrytExtend-min.js',
             '/resources/js/jquery-plugins/jquery.base64.min.js'
-          ].map(i => 'https://www.ciweimao.com' + i).map(i => xhr.sync(i, null, { cache: true })));
+          ].map((i) => `https://www.ciweimao.com${i}`).map((i) => xhr.sync(i, null, { cache: true })));
           for (const res of result) unsafeWindow.eval(res.responseText);
         }
 
@@ -498,15 +498,15 @@
           xhr.add({
             chapter,
             method: 'POST',
-            url: window.location.origin + '/chapter/ajax_get_session_code',
+            url: `${window.location.origin}/chapter/ajax_get_session_code`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            data: 'chapter_id=' + chapterId,
+            data: `chapter_id=${chapterId}`,
             responseType: 'json',
-            onload: function (res) {
+            onload(res) {
               resolve(res);
             }
           }, null, 0, true);
@@ -517,21 +517,21 @@
           xhr.add({
             chapter,
             method: 'POST',
-            url: window.location.origin + '/chapter/get_book_chapter_detail_info',
+            url: `${window.location.origin}/chapter/get_book_chapter_detail_info`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            data: 'chapter_id=' + chapterId + '&chapter_access_key=' + accessKey,
+            data: `chapter_id=${chapterId}&chapter_access_key=${accessKey}`,
             // responseType: 'json',
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 const content = unsafeWindow.$.myDecrypt({
                   content: json.chapter_content,
                   keys: json.encryt_keys,
-                  accessKey: accessKey
+                  accessKey
                 });
                 resolve(content);
               } catch (error) {
@@ -550,7 +550,7 @@
       vip: {
         deal: null,
         iframe: async (win) => {
-          win.getDataUrl = async img => {
+          win.getDataUrl = async (img) => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
@@ -593,7 +593,7 @@
       chapter: '#chapter_list .chapter_item>a',
       vipChapter: '#chapter_list .chapter_item:has(.lock)>a',
       chapterTitle: '.article-title',
-      deal: async (chapter) => Rule.special.find(i => i.siteName === '刺猬猫').deal(chapter),
+      deal: async (chapter) => Rule.special.find((i) => i.siteName === '刺猬猫').deal(chapter),
       elementRemove: 'span',
       chapterPrev: '#J_BtnPagePrev',
       chapterNext: '#J_BtnPageNext',
@@ -615,7 +615,7 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: window.location.origin + '/index.php/Bookreader/' + $('.title a:eq(0)').attr('href').match(/\/(\d+).html/)[1] + '/' + chapter.url.match(/-(\d+).html/)[1],
+            url: `${window.location.origin}/index.php/Bookreader/${$('.title a:eq(0)').attr('href').match(/\/(\d+).html/)[1]}/${chapter.url.match(/-(\d+).html/)[1]}`,
             method: 'POST',
             data: 'lang=zhs',
             headers: {
@@ -623,14 +623,14 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 let content = json.Content;
-                var base = 30;
-                var arrStr = [];
-                var arrText = content.split('\\');
-                for (var i = 1, len = arrText.length; i < len; i++) {
+                const base = 30;
+                const arrStr = [];
+                const arrText = content.split('\\');
+                for (let i = 1, len = arrText.length; i < len; i++) {
                   arrStr.push(String.fromCharCode(parseInt(arrText[i], base)));
                 }
                 let html = arrStr.join('');
@@ -645,12 +645,12 @@
                     for (const i in font.glyphs.glyphs) {
                       const data = font.glyphs.glyphs[i].path.toPathData();
 
-                      const key = fontLib.find(i => i.path === data);
+                      const key = fontLib.find((i) => i.path === data);
                       if (key) obj[font.glyphs.glyphs[i].unicode] = key.unicode;
                       if (!key) undefinedFont.push(data);
                     }
                     if (undefinedFont.length) console.error('未确定字符', undefinedFont);
-                    html = html.replace(/&#(\d+);/g, (matched, m1) => m1 in obj ? obj[m1] : matched);
+                    html = html.replace(/&#(\d+);/g, (matched, m1) => (m1 in obj ? obj[m1] : matched));
                     content = $('.bookreadercontent', html).html();
                     resolve(content);
                   });
@@ -682,7 +682,7 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: window.location.origin + '/read/' + unsafeWindow.bid + '/' + chapter.url.match(/cid=(\d+)/)[1],
+            url: `${window.location.origin}/read/${unsafeWindow.bid}/${chapter.url.match(/cid=(\d+)/)[1]}`,
             method: 'POST',
             data: 'lang=zhs',
             headers: {
@@ -690,7 +690,7 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 let content = json.Content;
@@ -732,18 +732,18 @@
       vipChapter: 'ul.dit-list>li:not(:has(.free))>a',
       deal: async (chapter) => {
         const result = await new Promise((resolve, reject) => {
-          var urlArr = chapter.url.split('-');
+          const urlArr = chapter.url.split('-');
           xhr.add({
             chapter,
             url: 'https://app3g.tianya.cn/webservice/web/read_chapter.jsp',
             method: 'POST',
-            data: 'bookid=' + urlArr[1] + '&chapterid=' + urlArr[2],
+            data: `bookid=${urlArr[1]}&chapterid=${urlArr[2]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: 'https://app3g.tianya.cn/webservice/web/proxy.html',
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 const title = json.data.curChapterName;
@@ -785,7 +785,7 @@
       cover: '.book-img>img',
       chapter: '.chapter-list a',
       vipChapter: '.chapter-list .vip>a',
-      volume: () => $('.volume').toArray().map(i => i.childNodes[6]),
+      volume: () => $('.volume').toArray().map((i) => i.childNodes[6]),
       chapterTitle: '.title_txtbox',
       content: '.content'
     },
@@ -837,10 +837,10 @@
           xhr.add({
             chapter,
             url: `http://${window.location.host.replace('www.', 'a.')}/ajax/chapter/content/${chapter.url.replace(/.*\//, '')}`,
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
-                const title = json.chapter.title;
+                const { title } = json.chapter;
                 const content = json.chapter.htmlContent;
                 resolve({ title, content });
               } catch (error) {
@@ -874,20 +874,20 @@
           /* eslint-disable camelcase */
           if (!unsafeWindow.image_do3) {
             unsafeWindow.image_do3 = function (num, o, id, n, en, t, k, u, time, fontsize, fontcolor, chaptertype, font_family_type) {
-              var type = 1;
-              var domain = '//read.faloo.com/';
+              const type = 1;
+              let domain = '//read.faloo.com/';
               if (chaptertype === 0) { domain = '//read6.faloo.com/'; }
               if (type === 2) { domain = '//read2.faloo.com/'; }
               if (typeof (font_family_type) === 'undefined' || font_family_type == null) {
                 font_family_type = 0;
               }
-              var url = domain + 'Page4VipImage.aspx?num=' + num + '&o=' + o + '&id=' + id + '&n=' + n + '&ct=' + chaptertype + '&en=' + en + '&t=' + t + '&font_size=' + fontsize + '&font_color=' + fontcolor + '&FontFamilyType=' + font_family_type + '&u=' + u + '&time=' + time + '&k=' + k;
+              let url = `${domain}Page4VipImage.aspx?num=${num}&o=${o}&id=${id}&n=${n}&ct=${chaptertype}&en=${en}&t=${t}&font_size=${fontsize}&font_color=${fontcolor}&FontFamilyType=${font_family_type}&u=${u}&time=${time}&k=${k}`;
               url = encodeURI(url);
               return url;
             };
           }
           /* eslint-enable camelcase */
-          const image = window.eval('window.' + func); // eslint-disable-line no-eval
+          const image = window.eval(`window.${func}`); // eslint-disable-line no-eval
           const elem = $('.noveContent', doc1);
           elem.find('.con_img').replaceWith(`<img src="${image}">`);
           return elem.html();
@@ -898,16 +898,15 @@
       siteName: '晋江文学城',
       filter: () => {
         if (window.location.href.match(/www.jjwxc.net\/onebook.php\?novelid=\d+$/)) {
-          $('[id^="vip_"]').toArray().forEach(i => {
+          $('[id^="vip_"]').toArray().forEach((i) => {
             i.href = i.rel;
             i.target = '_blank';
           });
           return 1;
-        } else if (window.location.href.match(/www.jjwxc.net\/onebook.php\?novelid=\d+&chapterid=\d+/)) {
+        } if (window.location.href.match(/www.jjwxc.net\/onebook.php\?novelid=\d+&chapterid=\d+/)) {
           return 2;
-        } else {
-          return 0;
         }
+        return 0;
       },
       title: '[itemprop="name"]',
       writer: '[itemprop="author"]',
@@ -934,7 +933,7 @@
       cover: '.bookprofile>dt>img',
       chapter: '.catalog-list>li>a',
       vipChapter: '.catalog-list>li.vip>a',
-      volume: () => $('.catalog-main>dt').toArray().map(i => i.childNodes[2]),
+      volume: () => $('.catalog-main>dt').toArray().map((i) => i.childNodes[2]),
       chapterTitle: '.chapter-title',
       content: '.chapter-main'
     },
@@ -1014,11 +1013,11 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 const title = json.data.name;
-                const content = json.data.content;
+                const { content } = json.data;
                 resolve({ title, content });
               } catch (error) {
                 console.error(error);
@@ -1115,7 +1114,7 @@
               Referer: request.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const content = res.responseText.match(/\{content:'(.*)'\}/)[1];
                 resolve(content);
@@ -1145,13 +1144,13 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: window.location.protocol + '//yuedu.163.com/getArticleContent.do?sourceUuid=' + urlArr[4] + '&articleUuid=' + urlArr[5],
+            url: `${window.location.protocol}//yuedu.163.com/getArticleContent.do?sourceUuid=${urlArr[4]}&articleUuid=${urlArr[5]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 const content = CryptoJS.enc.Base64.parse(json.content).toString(CryptoJS.enc.Utf8);
@@ -1179,7 +1178,7 @@
       chapter: '.item>a',
       vipChapter: '.vip>a',
       volume: '.title-1',
-      deal: async (chapter) => Rule.special.find(i => i.siteName === '网易云阅读').deal(chapter)
+      deal: async (chapter) => Rule.special.find((i) => i.siteName === '网易云阅读').deal(chapter)
     },
     { // https://www.yueduyun.com/
       siteName: '阅路小说网',
@@ -1203,7 +1202,7 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 const title = json.data.chapter_name;
@@ -1279,15 +1278,15 @@
         const res1 = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: window.location.protocol + '//www.hongshu.com/bookajax.do',
+            url: `${window.location.protocol}//www.hongshu.com/bookajax.do`,
             method: 'POST',
-            data: 'method=getchptkey&bid=' + urlArr[6] + '&cid=' + urlArr[8],
+            data: `method=getchptkey&bid=${urlArr[6]}&cid=${urlArr[8]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 resolve(json);
@@ -1301,19 +1300,19 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: window.location.protocol + '//www.hongshu.com/bookajax.do',
+            url: `${window.location.protocol}//www.hongshu.com/bookajax.do`,
             method: 'POST',
-            data: 'method=getchpcontent&bid=' + urlArr[6] + '&jid=' + urlArr[7] + '&cid=' + urlArr[8],
+            data: `method=getchpcontent&bid=${urlArr[6]}&jid=${urlArr[7]}&cid=${urlArr[8]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 const title = json.chptitle;
-                let content = json.content;
+                let { content } = json;
                 content = unsafeWindow.utf8to16(unsafeWindow.hs_decrypt(unsafeWindow.base64decode(content), res1.key));
                 // const other = unsafeWindow.utf8to16(unsafeWindow.hs_decrypt(unsafeWindow.base64decode(json.other), res1.key)); // 标点符号及常用字使用js生成的stylesheet显示
                 resolve({ title, content });
@@ -1341,13 +1340,13 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: 'http://script.qwsy.com/html/js/' + chapter.url.replace('http://www.qwsy.com/read.aspx?cid=', '') + '.js',
+            url: `http://script.qwsy.com/html/js/${chapter.url.replace('http://www.qwsy.com/read.aspx?cid=', '')}.js`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const content = res.responseText.match(/document.write\("(.*)"\);/)[1];
                 resolve(content);
@@ -1453,17 +1452,17 @@
       vipChapter: '.con_05 li:has(img)>a',
       volume: '.con_05>.bt',
       deal: async (chapter) => {
-        var info = chapter.url.match(/\d+/g);
+        const info = chapter.url.match(/\d+/g);
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: 'https://www.chuangbie.com/book/load_chapter_content?book_id=' + info[0] + '&chapter_id=' + info[1],
+            url: `https://www.chuangbie.com/book/load_chapter_content?book_id=${info[0]}&chapter_id=${info[1]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = unsafeWindow.strdecode(res.responseText);
                 const content = json.content.chapter_content;
@@ -1521,7 +1520,7 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 const title = json.data.chapterInfo.bookTitle;
@@ -1549,7 +1548,7 @@
       chapter: '.list-view .c2>a',
       chapterTitle: '.read-txt>h2',
       content: '.read-txt',
-      getChapters: (doc) => Rule.special.find(i => i.siteName === 'PO18臉紅心跳').getChapters(doc),
+      getChapters: (doc) => Rule.special.find((i) => i.siteName === 'PO18臉紅心跳').getChapters(doc),
       elementRemove: 'blockquote'
     },
     { // https://www.po18.tw/
@@ -1571,7 +1570,7 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 resolve(res.responseText);
               } catch (error) {
@@ -1593,7 +1592,7 @@
           },
           responseType: 'document'
         });
-        return $('a', res.response).toArray().map(i => ({
+        return $('a', res.response).toArray().map((i) => ({
           title: $(i).text(),
           url: $(i).prop('href'),
           vip: $(i).is(':has(img)')
@@ -1681,7 +1680,7 @@
         if ($('.title>a>img[alt="海棠文化线上文学城"]').length) {
           if (window.location.search.match('\\?act=showinfo&bookwritercode=.*?&bookid=')) {
             return 1;
-          } else if (window.location.search.match('\\?act=showpaper&paperid=')) {
+          } if (window.location.search.match('\\?act=showpaper&paperid=')) {
             return 2;
           }
         }
@@ -1705,14 +1704,14 @@
           await new Promise((resolve, reject) => {
             xhr.add({
               method: 'POST',
-              url: window.location.origin + '/papergbookresave.php',
+              url: `${window.location.origin}/papergbookresave.php`,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 Referer: request.raw.url,
                 'X-Requested-With': 'XMLHttpRequest'
               },
               data: `paperid=${paperid}&bookwritercode=${bookwritercode}&bookid=${bookid}&repapergbookid=0&papergbookpage=1&repostmsgtxt=${msgs[Math.floor(Math.random() * msgs.length)]}&postmode=1&giftid=0`,
-              onload: function (res) {
+              onload(res) {
                 resolve(res);
               }
             }, null, 0, true);
@@ -1721,14 +1720,14 @@
           const res2 = await new Promise((resolve, reject) => {
             xhr.add({
               method: 'POST',
-              url: window.location.origin + '/showpapereggs.php',
+              url: `${window.location.origin}/showpapereggs.php`,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 Referer: request.raw.url,
                 'X-Requested-With': 'XMLHttpRequest'
               },
               data: `paperid=${paperid}&bookwritercode=${bookwritercode}`,
-              onload: function (res) {
+              onload(res) {
                 resolve(res);
               }
             }, null, 0, true);
@@ -1753,7 +1752,7 @@
               'X-Requested-With': 'XMLHttpRequest'
             },
             data: `paperid=${paperid}&vercodechk=${vercodechk}`,
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const content = res.responseText;
                 resolve(content);
@@ -1764,14 +1763,14 @@
             }
           }, null, 0, true);
         });
-        return content + (writersay ? writersay + '<br>---<br>以下正文' : '') + (egg ? '<br>---<br>彩蛋內容：<br>' + egg : '');
+        return content + (writersay ? `${writersay}<br>---<br>以下正文` : '') + (egg ? `<br>---<br>彩蛋內容：<br>${egg}` : '');
       },
       getChapters: async (doc) => {
         const id = window.location.href.match(/bookid=(.*?)($|&)/)[1];
         const chapters = [];
         let pages = 1;
         while (true) {
-          const res = await xhr.sync(window.location.origin + '/showbooklist.php', `ebookid=${id}&pages=${pages}&showbooklisttype=1`, {
+          const res = await xhr.sync(`${window.location.origin}/showbooklist.php`, `ebookid=${id}&pages=${pages}&showbooklisttype=1`, {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: window.location.href,
@@ -1779,11 +1778,12 @@
             },
             responseType: 'document'
           });
-          chapters.push(...$('.uk-list>li>a[href^="/?act=showpaper&paperid="]', res.response).toArray().map(i => ({
+          chapters.push(...$('.uk-list>li>a[href^="/?act=showpaper&paperid="]', res.response).toArray().map((i) => ({
             title: $(i).text(),
             url: $(i).prop('href'),
             vip: $(i).is('.uk-list>li:not(:contains("免費"))>a[href^="/?act=showpaper&paperid="]'),
-            volume: $(i).parent().prevAll('.uk-list>li:not(:has(a[href^="/?act=showpaper&paperid="])):has(b>font)').eq(0).text()
+            volume: $(i).parent().prevAll('.uk-list>li:not(:has(a[href^="/?act=showpaper&paperid="])):has(b>font)').eq(0)
+              .text()
           })));
           if ($('.uk-list>li:has([onclick^="showbooklistpage"])', res.response).length && $('.uk-list>li:has([onclick^="showbooklistpage"])', res.response).eq(0).find('font:has(b)').next('a').length) {
             pages++;
@@ -1807,7 +1807,7 @@
       chapterTitle: '.chapter_tt',
       content: async (doc, res, request) => {
         const chapter = request.raw;
-        const token = $(res.responseText).toArray().find(i => i.tagName === 'META' && i.name === 'csrf-token').content; // same as XSRF-TOKEN<cookie>
+        const token = $(res.responseText).toArray().find((i) => i.tagName === 'META' && i.name === 'csrf-token').content; // same as XSRF-TOKEN<cookie>
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
@@ -1817,10 +1817,10 @@
               Referer: chapter.url,
               'x-csrf-token': token
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
-                const content = json.content;
+                const { content } = json;
                 resolve(content);
               } catch (error) {
                 console.error(error);
@@ -1848,13 +1848,11 @@
         const json = JSON.parse(res.responseText);
         const chapters = json.data.data;
         const volumes = json.data.volume;
-        return chapters.sort((a, b) => {
-          return Math.sign(volumes.find(i => i.volume_id === a.chapter_vid).volume_order - volumes.find(i => i.volume_id === b.chapter_vid).volume_order);
-        }).map(i => ({
+        return chapters.sort((a, b) => Math.sign(volumes.find((i) => i.volume_id === a.chapter_vid).volume_order - volumes.find((i) => i.volume_id === b.chapter_vid).volume_order)).map((i) => ({
           url: `${window.location.origin.replace('www', 'pre-api')}/api/readNew?nid=${urlArr[4]}&vid=${i.chapter_vid}&chapter_id=${i.chapter_id}&chapter_order=${i.chapter_order}&showpic=false`,
           title: i.chapter_name,
           vip: i.chapter_ispay,
-          volume: volumes.find(j => j.volume_id === i.chapter_vid).volume_name
+          volume: volumes.find((j) => j.volume_id === i.chapter_vid).volume_name
         }));
       },
       content: (doc, res, request) => JSON.parse(res.response).data.content
@@ -1885,7 +1883,7 @@
             });
           }
           if (json.list[chapters.length - 1].priceTag === '收费') break;
-          total += json.list.length;
+          total = total + json.list.length;
           if (total >= json.page.total) break;
         }
         return chapters;
@@ -1917,13 +1915,13 @@
         return chapters;
       },
       fns: {
-        cookieGet: function (e) {
-          var t = document.cookie.match(new RegExp('(?:\\s|^)' + e + '\\=([^;]*)'));
+        cookieGet(e) {
+          const t = document.cookie.match(new RegExp(`(?:\\s|^)${e}\\=([^;]*)`));
           return t ? decodeURIComponent(t[1]) : null;
         },
-        decrypt: async function test (t) {
-          const cookieGet = Rule.special.find(i => i.siteName === '豆瓣阅读').fns.cookieGet;
-          const e = Uint8Array.from(window.atob(t), t => t.charCodeAt(0));
+        decrypt: async function test(t) {
+          const { cookieGet } = Rule.special.find((i) => i.siteName === '豆瓣阅读').fns;
+          const e = Uint8Array.from(window.atob(t), (t) => t.charCodeAt(0));
           const i = e.buffer;
           const d = e.length - 16 - 13;
           const p = new Uint8Array(i, d, 16);
@@ -1936,8 +1934,8 @@
             const t = unsafeWindow.Ark.user;
             const e = t.isAnonymous ? cookieGet('bid') : t.id;
             const i = (new TextEncoder()).encode(e);
-            return window.crypto.subtle.digest('SHA-256', i).then(t => window.crypto.subtle.importKey('raw', t, 'AES-CBC', !0, ['decrypt']));
-          }()).then(t => window.crypto.subtle.decrypt(g, t, f)).then(t => JSON.parse((new TextDecoder()).decode(t)));
+            return window.crypto.subtle.digest('SHA-256', i).then((t) => window.crypto.subtle.importKey('raw', t, 'AES-CBC', !0, ['decrypt']));
+          }()).then((t) => window.crypto.subtle.decrypt(g, t, f)).then((t) => JSON.parse((new TextDecoder()).decode(t)));
         }
 
       },
@@ -1954,7 +1952,7 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 resolve(json.data);
@@ -1966,9 +1964,10 @@
           }, null, 0, true);
         });
         if (content) {
-          const json = await Rule.special.find(i => i.siteName === '豆瓣阅读').fns.decrypt(content);
+          const json = await Rule.special.find((i) => i.siteName === '豆瓣阅读').fns.decrypt(content);
           content = {
-            content: chapter.url.match('read.douban.com/reader/column') ? json.posts[0].contents.filter(i => i.data && i.data.text).map(i => i.data.text).flat().map(i => i.content).join('\n') : json.posts[0].contents.filter(i => i.data && i.data.text).map(i => (i.type === 'headline' ? '\n' : '') + i.data.text).join('\n'),
+            content: chapter.url.match('read.douban.com/reader/column') ? json.posts[0].contents.filter((i) => i.data && i.data.text).map((i) => i.data.text).flat().map((i) => i.content)
+              .join('\n') : json.posts[0].contents.filter((i) => i.data && i.data.text).map((i) => (i.type === 'headline' ? '\n' : '') + i.data.text).join('\n'),
             title: json.posts[0].title
           };
         }
@@ -1984,7 +1983,7 @@
       intro: '[itemprop="description"]>.info',
       cover: '.cover>[itemprop="image"]',
       chapter: '.btn-read',
-      deal: async (chapter) => Rule.special.find(i => i.siteName === '豆瓣阅读').deal(chapter)
+      deal: async (chapter) => Rule.special.find((i) => i.siteName === '豆瓣阅读').deal(chapter)
     },
     // 轻小说
     { // https://www.wenku8.net
@@ -2126,7 +2125,7 @@
       chapterTitle: '.article-title',
       content: (doc, res, request) => {
         const contentRaw = $('#article-main-contents', res.responseText).html();
-        const content = contentRaw.replace(/^(<br>)+/, '').split(/<div.*?>.*?<\/div>|(<br>\s*){3,}/).map(i => i && i.replace(/^(\s*|<br>)+/, '')).filter(i => i);
+        const content = contentRaw.replace(/^(<br>)+/, '').split(/<div.*?>.*?<\/div>|(<br>\s*){3,}/).map((i) => i && i.replace(/^(\s*|<br>)+/, '')).filter((i) => i);
         Storage.book.chapters.splice(Storage.book.chapters.indexOf(request.raw), 1, ...content.map((item, index) => ({
           title: `${request.raw.title} - 第${String(index + 1)}部分`,
           url: request.raw.url,
@@ -2144,11 +2143,9 @@
       writer: () => unsafeWindow.__NUXT__.data[0].series.author,
       intro: () => unsafeWindow.__NUXT__.data[0].series.intro,
       cover: () => unsafeWindow.__NUXT__.data[0].series.cover,
-      getChapters: () => {
-        return window.__NUXT__.data[0].series.articles.sort((a, b) => a.aid - b.aid).map(i => ({ title: i.title, url: `https://www.lightnovel.us/detail/${i.aid}` }));
-      },
+      getChapters: () => window.__NUXT__.data[0].series.articles.sort((a, b) => a.aid - b.aid).map((i) => ({ title: i.title, url: `https://www.lightnovel.us/detail/${i.aid}` })),
       chapterTitle: '.article-title',
-      content: (doc, res, request) => Rule.special.find(i => i.siteName === '轻之国度').content(doc, res, request)
+      content: (doc, res, request) => Rule.special.find((i) => i.siteName === '轻之国度').content(doc, res, request)
     },
     { // https://ncode.syosetu.com/
       siteName: '小説家になろう',
@@ -2176,8 +2173,11 @@
       chapter: '.story-parts__part',
       chapterTitle: '.panel-reading>h1.h2',
       content: '.part-content .page>div>pre',
-      chapterPrev: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).prevAll().find('a').toArray().map(i => i.href).reverse(),
-      chapterNext: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).nextAll().find('a').toArray().map(i => i.href)
+      chapterPrev: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).prevAll().find('a').toArray()
+        .map((i) => i.href)
+        .reverse(),
+      chapterNext: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).nextAll().find('a').toArray()
+        .map((i) => i.href)
     },
     { // http://xs.kdays.net/index
       siteName: '萌文库',
@@ -2240,7 +2240,7 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               resolve(res.responseText);
             }
           }, null, 0, true);
@@ -2268,11 +2268,11 @@
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText);
                 const title = json.data.chapter.name;
-                const content = json.data.chapter.content;
+                const { content } = json.data.chapter;
                 resolve({ title, content });
               } catch (error) {
                 console.error(error);
@@ -2430,13 +2430,13 @@
           const truth = order[i] - ((i + 1) % codeurl);
           arr[truth] = arrRaw[i];
         }
-        return arr.map(i => i.textContent);
+        return arr.map((i) => i.textContent);
       },
       chapterNext: '.chapterPages>a.curr~a,.p3>a'
     },
     { // https://www.ruth-tshirt.com/
       siteName: '老猫小说',
-      filter: () => $('[src="https://www.laomaoxs.com/static/image/qrcode.png"]').length && window.location.pathname.match(/\d+\.html$/) ? 1 : 0,
+      filter: () => ($('[src="https://www.laomaoxs.com/static/image/qrcode.png"]').length && window.location.pathname.match(/\d+\.html$/) ? 1 : 0),
       // chapterUrl: '://www.ruth-tshirt.com/ruth1/\\d+/\\w+.html',
       title: ['.h1title > .shuming > a[title]', '.chapter_nav > div:first > a:last', '#header > .readNav > span > a:last', 'div[align="center"] > .border_b > a:last', '.ydselect > .weizhi > a:last', '.bdsub > .bdsite > a:last', '#sitebar > a:last', '.con_top > a:last', '.breadCrumb > a:last'].join(','),
       chapter: ['[id*="list"] a', '[class*="list"] a', '[id*="chapter"] a', '[class*="chapter"] a'].join(','),
@@ -2444,7 +2444,7 @@
       content: (doc, res, request) => {
         let content = $('.txt', res.responseText).html();
         const str = '的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情己面最女但现前些所同日手又行意动';
-        content = content.replace(/[\ue800-\ue863]/g, matched => str[matched.charCodeAt(0) - 0xe800]);
+        content = content.replace(/[\ue800-\ue863]/g, (matched) => str[matched.charCodeAt(0) - 0xe800]);
         return content;
       }
     },
@@ -2459,7 +2459,7 @@
       chapter: '#list-chapterAll .panel-chapterlist>dd>a',
       chapterTitle: '.readTitle',
       content: '.panel-readcontent>.panel-body>div[id]',
-      chapterNext: async (doc, res, request) => res.responseText.match(/url = "(.*?)";/) ? res.responseText.match(/url = "(.*?)";/)[1] : []
+      chapterNext: async (doc, res, request) => (res.responseText.match(/url = "(.*?)";/) ? res.responseText.match(/url = "(.*?)";/)[1] : [])
     },
     { // https://www.lewenn.com/
       siteName: '乐文小说网',
@@ -2506,13 +2506,13 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter: request.raw,
-            url: window.location.origin + '/files/article/html' + ssid + '/' + xid + '/' + bookid + '/' + chapterid + hou,
+            url: `${window.location.origin}/files/article/html${ssid}/${xid}/${bookid}/${chapterid}${hou}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: request.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const content = window.eval(res.responseText); // eslint-disable-line no-eval
                 resolve(content);
@@ -2551,16 +2551,17 @@
       cover: '.book_cov>img',
       chapter: '#chapter>a',
       chapterTitle: '.article>h2',
-      content: (doc, res, request) => {
-        return $('#txt>dd', res.responseText).toArray().map(i => [$(i).data('id'), $(i).html()]).filter(i => i[0] !== 999).sort((a, b) => a[0] - b[0]).map(i => i[1]).join('');
-      },
+      content: (doc, res, request) => $('#txt>dd', res.responseText).toArray().map((i) => [$(i).data('id'), $(i).html()]).filter((i) => i[0] !== 999)
+        .sort((a, b) => a[0] - b[0])
+        .map((i) => i[1])
+        .join(''),
     },
     // 18X
     { // http://www.6mxs.com/ http://www.baxianxs.com/ http://www.iqqxs.com/
       siteName: '流氓小说网',
       // url: [/6mxs.com\/novel.asp\?id=\d+/, '://www.baxianxs.com/xiaoshuo.asp\\?id=\\d+'],
       // chapterUrl: [/6mxs.com\/pages.asp\?id=\d+/, '://www.baxianxs.com/page.asp\\?id=\\d+'],
-      filter: () => $('.viewxia').length ? ($('.content').length ? 2 : 1) : 0,
+      filter: () => ($('.viewxia').length ? ($('.content').length ? 2 : 1) : 0),
       title: '.lookmc>strong',
       writer: '.zl',
       intro: '.js',
@@ -2707,7 +2708,7 @@
     },
     { // https://www.cool18.com/bbs4/index.php
       siteName: '禁忌书屋',
-      filter: () => ['www.cool18.com'].includes(window.location.host) ? ($('#myform').length ? 2 : 1) : 0,
+      filter: () => (['www.cool18.com'].includes(window.location.host) ? ($('#myform').length ? 2 : 1) : 0),
       chapterUrl: '://www.cool18.com/bbs4/index.php\\?app=forum&act=threadview&tid=\\d+',
       title: 'font>b',
       chapter: 'a:not(:contains("(无内容)"))',
@@ -2865,13 +2866,13 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: window.location.protocol + '//xxread.net/getArticleContent.php?sourceUuid=' + info[0] + '&articleUuid=' + info[1],
+            url: `${window.location.protocol}//xxread.net/getArticleContent.php?sourceUuid=${info[0]}&articleUuid=${info[1]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const json = JSON.parse(res.responseText.match(/(\{.*\})/)[1]);
                 const content = CryptoJS.enc.Base64.parse(json.content).toString(CryptoJS.enc.Utf8);
@@ -2904,7 +2905,7 @@
     },
     { // https://18h.mm-cg.com/novel/index.htm
       siteName: '18H',
-      filter: () => $('meta[content*="18AV"],meta[content*="18av"]').length ? (window.location.href.match(/novel_\d+.html/) ? 2 : 1) : 0,
+      filter: () => ($('meta[content*="18AV"],meta[content*="18av"]').length ? (window.location.href.match(/novel_\d+.html/) ? 2 : 1) : 0),
       title: '.label>div',
       chapter: '.novel_leftright>span>a:visible',
       chapterTitle: 'h1',
@@ -2923,7 +2924,7 @@
     },
     { // https://aastory.space/
       siteName: '疯情书库',
-      filter: () => document.title.match('疯情书库') && ['/archive.php', '/read.php'].includes(window.location.pathname) ? (['/archive.php'].includes(window.location.pathname) ? 1 : 2) : 0,
+      filter: () => (document.title.match('疯情书库') && ['/archive.php', '/read.php'].includes(window.location.pathname) ? (['/archive.php'].includes(window.location.pathname) ? 1 : 2) : 0),
       // url: '://aastory.space/archive.php\\?id=\\d+',
       // chapterUrl: '://aastory.space/read.php\\?id=\\d+',
       title: '.index_title',
@@ -2935,13 +2936,13 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter: request.raw,
-            url: window.location.origin + '/_getcontent.php?id=' + request.url.match(/id=(\d+)/)[1] + '&v=' + res.responseText.match(/chapid\+"&v=(.*?)"/)[1],
+            url: `${window.location.origin}/_getcontent.php?id=${request.url.match(/id=(\d+)/)[1]}&v=${res.responseText.match(/chapid\+"&v=(.*?)"/)[1]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: request.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const content = res.responseText;
                 resolve(content);
@@ -2970,13 +2971,13 @@
         const content = await new Promise((resolve, reject) => {
           xhr.add({
             chapter,
-            url: window.location.origin + '/_getcontent.php?id=' + urlArr[5],
+            url: `${window.location.origin}/_getcontent.php?id=${urlArr[5]}`,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
               'X-Requested-With': 'XMLHttpRequest'
             },
-            onload: function (res, request) {
+            onload(res, request) {
               try {
                 const content = res.responseText;
                 resolve(content);
@@ -2988,14 +2989,14 @@
         });
         return content;
       },
-      chapterPrev: doc => [$('[id^="chapter-"]', doc).attr('data-purl')],
-      chapterNext: doc => [$('[id^="chapter-"]', doc).attr('data-nurl')]
+      chapterPrev: (doc) => [$('[id^="chapter-"]', doc).attr('data-purl')],
+      chapterNext: (doc) => [$('[id^="chapter-"]', doc).attr('data-nurl')]
     }
   ];
   Rule.template = [ // 模板网站
     { // http://www.xbiquge.la/54/54439/
       siteName: '模板网站-笔趣阁',
-      filter: () => ['.ywtop', '.nav', '.header_logo', '#wrapper', '.header_search'].every(i => $(i).length) ? ($('#content').length ? 2 : 1) : 0,
+      filter: () => (['.ywtop', '.nav', '.header_logo', '#wrapper', '.header_search'].every((i) => $(i).length) ? ($('#content').length ? 2 : 1) : 0),
       title: '#info>h1',
       writer: '#info>h1+p',
       intro: '#intro',
@@ -3007,7 +3008,7 @@
     },
     { // https://www.biqukan.com/57_57242/
       siteName: '模板网站-笔趣阁1',
-      filter: () => ['body>.ywtop', 'body>.header', 'body>.nav', 'body>.book', 'body>.listmain,body>.book.reader'].every(i => $(i).length) ? ($('#content').length ? 2 : 1) : 0,
+      filter: () => (['body>.ywtop', 'body>.header', 'body>.nav', 'body>.book', 'body>.listmain,body>.book.reader'].every((i) => $(i).length) ? ($('#content').length ? 2 : 1) : 0),
       title: '.info>h2',
       writer: '.info>h2+div>span:nth-child(1)',
       intro: '.intro',
@@ -3019,7 +3020,7 @@
     },
     { // https://www.x23qb.com/book/775/
       siteName: '模板网站-铅笔小说',
-      filter: () => ['#header .wrap980', '.search span.searchBox', '.tabstit', '.coverecom'].every(i => $(i).length) ? 1 : 0,
+      filter: () => (['#header .wrap980', '.search span.searchBox', '.tabstit', '.coverecom'].every((i) => $(i).length) ? 1 : 0),
       title: '.d_title>h1',
       writer: '.p_author>a',
       intro: '#bookintro>p',
@@ -3046,23 +3047,23 @@
     (async function () {
       if (typeof Storage.rule.popup === 'function') await Storage.rule.popup();
       window.localStorage.setItem('gm-nd-html', window.document.documentElement.outerHTML);
-    })();
+    }());
   }
 
-  function init () {
+  function init() {
     if (!Storage.rule) {
       if (Config.templateRule) Rule.special = Rule.special.concat(Rule.template);
       const _href = window.location.href;
       for (const rule of Rule.special) {
-        rule.url = [].concat(rule.url).filter(i => i);
-        rule.chapterUrl = [].concat(rule.chapterUrl).filter(i => i);
-        rule.ignoreUrl = [].concat(rule.ignoreUrl).filter(i => i);
+        rule.url = [].concat(rule.url).filter((i) => i);
+        rule.chapterUrl = [].concat(rule.chapterUrl).filter((i) => i);
+        rule.ignoreUrl = [].concat(rule.ignoreUrl).filter((i) => i);
       }
-      Storage.rule = Rule.special.find(i => (i.url.some(j => _href.match(j))) || (i.chapterUrl.some(j => _href.match(j))) || (i.filter && i.filter()));
+      Storage.rule = Rule.special.find((i) => (i.url.some((j) => _href.match(j))) || (i.chapterUrl.some((j) => _href.match(j))) || (i.filter && i.filter()));
       if (Storage.rule) {
-        if (Storage.rule.url.some(i => _href.match(i))) {
+        if (Storage.rule.url.some((i) => _href.match(i))) {
           Storage.mode = 1;
-        } else if (Storage.rule.chapterUrl.some(i => _href.match(i))) {
+        } else if (Storage.rule.chapterUrl.some((i) => _href.match(i))) {
           Storage.mode = 2;
         } else if (Storage.rule.filter && typeof Storage.rule.filter === 'function') {
           Storage.mode = Storage.rule.filter();
@@ -3071,9 +3072,9 @@
         Storage.rule = Rule;
         if (Config.modeManual) {
           Storage.mode = window.confirm('请问这是目录页面还是章节页面？\n目录页面选择“确定”，章节页面选择“取消”') ? 1 : 2;
-        } else if (Storage.rule.url.some(i => _href.match(i))) {
+        } else if (Storage.rule.url.some((i) => _href.match(i))) {
           Storage.mode = 1;
-        } else if (Storage.rule.chapterUrl.some(i => _href.match(i))) {
+        } else if (Storage.rule.chapterUrl.some((i) => _href.match(i))) {
           Storage.mode = 2;
         } else {
           Storage.mode = $(Storage.rule.content).length ? 2 : 1;
@@ -3082,7 +3083,7 @@
     }
   }
 
-  async function showUI () {
+  async function showUI() {
     if ($('.novel-downloader-v3').length) {
       $('.novel-downloader-v3').toggle();
       if ($('.novel-downloader-style-chapter[media]').length) { // https://stackoverflow.com/a/54441305
@@ -3093,7 +3094,8 @@
       return;
     }
 
-    let chapters, chaptersArr;
+    let chapters; let
+      chaptersArr;
     let vipChapters = [];
     const chaptersDownloaded = [];
 
@@ -3103,7 +3105,7 @@
       `- 浏览器: \`${GM_info.platform ? GM_info.platform.browserName : '浏览器'} v${GM_info.platform ? GM_info.platform.browserVersion : '版本'}\``,
       `- 扩展: \`${GM_info.scriptHandler} v${GM_info.version}\``,
       '---',
-      '<!-- 你的问题 -->'
+      '<!-- 你的问题 -->',
     ];
 
     // ui
@@ -3192,12 +3194,12 @@
       '<div name="progress">',
       '  <span title="章节完成进度\n当右下角显示【下载完成】，如果该进度条未走完，可以尝试再次点击，脚本会自行重试之前失败的章节\n（仅对网络问题造成的失败有效，如果是脚本的问题，请反馈或自行解决）">进度</span>: ',
       '  <progress max="0" value="0"></progress>',
-      '</div>'
+      '</div>',
     ].join('');
     const container = $('<div class="novel-downloader-v3"></div>').html(html).appendTo('body');
     container.find('input,select,textarea').attr('disabled', 'disabled');
     container.find('[name="config"]').find('input,select,textarea').on('change', function (e) {
-      const name = e.target.name;
+      const { name } = e.target;
       let value = e.target.type === 'checkbox' ? e.target.checked : e.target.type === 'number' ? (e.target.value || this.placeholder) * 1 : (e.target.value || e.target.placeholder);
       if (e.target.type === 'checkbox' && value && e.target.getAttribute('confirm')) {
         value = window.confirm(e.target.getAttribute('confirm'));
@@ -3229,12 +3231,12 @@
       }
       $(window).off('blur').off('focus').on({
         blur: () => Storage.audio.play(),
-        focus: () => Storage.audio.pause()
+        focus: () => Storage.audio.pause(),
       });
       Storage.title = document.title;
 
-      Storage.book.chapters = Config.vip ? chapters : chapters.filter(i => !(vipChapters.includes(i.url)));
-      Storage.rule.vip = Object.assign({}, Storage.rule, Storage.rule.vip || {});
+      Storage.book.chapters = Config.vip ? chapters : chapters.filter((i) => !(vipChapters.includes(i.url)));
+      Storage.rule.vip = { ...Storage.rule, ...Storage.rule.vip || {} };
 
       // 限制下载范围
       if (container.find('[name="limit"]>[name="range"]').val()) {
@@ -3252,7 +3254,7 @@
             if ((arr[i] - 1) in Storage.book.chapters) Storage.book.chapters[arr[i] - 1].filtered = true;
           }
         }
-        Storage.book.chapters = Storage.book.chapters.filter(i => {
+        Storage.book.chapters = Storage.book.chapters.filter((i) => {
           if (i.filtered) {
             delete i.filtered;
             return true;
@@ -3260,12 +3262,13 @@
         });
       }
       if (container.find('[name="limit"]>[name="batch"]').val()) {
-        Storage.book.chapters = container.find('[name="limit"]>[name="batch"]').val().split('\n').filter(i => i).map(i => {
-          const url = new URL(i, window.location.href).href;
-          return chaptersDownloaded.find(i => i.url === url) || { url };
-        });
+        Storage.book.chapters = container.find('[name="limit"]>[name="batch"]').val().split('\n').filter((i) => i)
+          .map((i) => {
+            const url = new URL(i, window.location.href).href;
+            return chaptersDownloaded.find((i) => i.url === url) || { url };
+          });
       }
-      chaptersArr = Storage.book.chapters.map(i => i.url);
+      chaptersArr = Storage.book.chapters.map((i) => i.url);
 
       const format = $(e.target).attr('format');
       const onComplete = async (force) => {
@@ -3274,7 +3277,7 @@
           container.find('[name="buttons"]').find('[name="force-download"]').attr('disabled', 'disabled');
         }
 
-        let chapters = Storage.book.chapters;
+        let { chapters } = Storage.book;
         if (Config.sort && chapters.length) {
           const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'case' });
           for (const chapter of chapters) chapter.sort = chapter.url;
@@ -3284,9 +3287,9 @@
           // }
           let ext = chapters[0].sort.split('.');
           if (ext.length > 1) {
-            ext = '.' + ext.slice(-1);
+            ext = `.${ext.slice(-1)}`;
             const extReversed = ext.split('').reverse().join('');
-            if (chapters.every(i => i.sort.split('').reverse().join('').indexOf(extReversed) === 0)) {
+            if (chapters.every((i) => i.sort.split('').reverse().join('').indexOf(extReversed) === 0)) {
               for (const chapter of chapters) chapter.sort = chapter.sort.substr(0, chapter.sort.length - ext.length);
             }
           }
@@ -3316,7 +3319,7 @@
                 title,
                 contentRaw: title,
                 content: title,
-                volume: chapter.volume
+                volume: chapter.volume,
               });
               i++;
             }
@@ -3330,9 +3333,9 @@
             content = await getFromRule(content, (content) => {
               const elem = $('<div>').html(content);
               if (rule.elementRemove) {
-                $(rule.elementRemove + ',script,style,iframe', elem).remove();
+                $(`${rule.elementRemove},script,style,iframe`, elem).remove();
               } else if (Config.useCommon) {
-                $(Rule.elementRemove + ',script,style,iframe', elem).remove();
+                $(`${Rule.elementRemove},script,style,iframe`, elem).remove();
               }
               return elem.html();
             }, [], '');
@@ -3415,12 +3418,12 @@
         }
 
         let chapterRelative = await getFromRule(ruleChapterRelative, { attr: 'href', allElement: true, document: new window.DOMParser().parseFromString(res.responseText, 'text/html') }, [res, request], []);
-        chapterRelative = [].concat(chapterRelative).map(i => new URL(i, res.finalUrl || window.location.href).href)
-          .filter(url => url && !url.match(/^(javascript:|#)/)).map(i => new URL(i, chapter.url).href)
-          .filter(url => {
-            if (rule !== Rule && rule.ignoreUrl.some(i => url.match(i))) return false;
-            if (rule !== Rule && rule.url.some(i => url.match(i))) return false;
-            if (rule !== Rule && rule.chapterUrl.length) return rule.chapterUrl.some(i => url.match(i));
+        chapterRelative = [].concat(chapterRelative).map((i) => new URL(i, res.finalUrl || window.location.href).href)
+          .filter((url) => url && !url.match(/^(javascript:|#)/)).map((i) => new URL(i, chapter.url).href)
+          .filter((url) => {
+            if (rule !== Rule && rule.ignoreUrl.some((i) => url.match(i))) return false;
+            if (rule !== Rule && rule.url.some((i) => url.match(i))) return false;
+            if (rule !== Rule && rule.chapterUrl.length) return rule.chapterUrl.some((i) => url.match(i));
             const pathurl = chapter.url.replace(/(.*\/).*/, '$1').replace(/.*?:\/\/(.*)/, '$1');
             const pathurlThis = url.replace(/(.*\/).*/, '$1');
             return pathurlThis !== url && pathurlThis.replace(/.*?:\/\/(.*)/, '$1') === pathurl;
@@ -3428,7 +3431,7 @@
         let anchor = chapter;
         for (const url of chapterRelative) {
           if (chaptersArr.includes(url) || vipChapters.includes(url)) continue;
-          const chapterNew = chaptersDownloaded.find(i => i.url === url) || { url };
+          const chapterNew = chaptersDownloaded.find((i) => i.url === url) || { url };
           if (chapter.volume) chapterNew.volume = chapter.volume;
           const index = Storage.book.chapters.indexOf(anchor);
           anchor = chapterNew;
@@ -3479,13 +3482,13 @@
             if (Storage.debug.content) debugger;
             if (rule === Rule) elems = elems.not(':emptyHuman'); // 移除空元素
             if (elems.length === 0) { // 没有找到内容
-              console.error('novelDownloader: 找不到内容元素\n选择器: ' + selector);
+              console.error(`novelDownloader: 找不到内容元素\n选择器: ${selector}`);
               elems = $('body', doc);
             } else if (elems.length > 1) {
               // 当a是b的祖辈元素时，移除a
-              elems = elems.filter((i, e) => !elems.not(e).toArray().find(j => $(e).find(j).length));
+              elems = elems.filter((i, e) => !elems.not(e).toArray().find((j) => $(e).find(j).length));
             }
-            return elems.toArray().map(i => $(i).html());
+            return elems.toArray().map((i) => $(i).html());
           }, [res, request], '');
           if (content instanceof Array) content = content.join('\n');
           chapter.content = content;
@@ -3500,7 +3503,7 @@
           chapter.contentRaw = '';
         }
 
-        const now = Storage.book.chapters.filter(i => i.contentRaw).length;
+        const now = Storage.book.chapters.filter((i) => i.contentRaw).length;
         const max = Storage.book.chapters.length;
         container.find('[name="progress"]>progress').val(now).attr('max', max);
         document.title = `[${now}/${max}]${Storage.title}`;
@@ -3511,7 +3514,7 @@
         iframe: [],
         popup: [],
         deal: [],
-        download: []
+        download: [],
       };
       for (const chapter of Storage.book.chapters) {
         const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
@@ -3530,7 +3533,7 @@
           }
         }
       }
-      if (Storage.book.chapters.every(i => i.contentRaw && i.document)) {
+      if (Storage.book.chapters.every((i) => i.contentRaw && i.document)) {
         await onComplete();
         return;
       }
@@ -3545,32 +3548,31 @@
           checkLoad: async (res) => {
             if ((res.status > 0 && res.status < 200) || res.status >= 300) { // TODO
               return false;
-            } else {
-              return true;
             }
-          }
+            return true;
+          },
         });
       }
 
-      while (Storage.book.chapters.some(i => !('contentRaw' in i))) {
-        if (chapterList.download.length && chapterList.download.find(i => !('contentRaw' in i))) {
+      while (Storage.book.chapters.some((i) => !('contentRaw' in i))) {
+        if (chapterList.download.length && chapterList.download.find((i) => !('contentRaw' in i))) {
           await new Promise((resolve, reject) => {
             xhr.storage.config.set('onComplete', async (list) => {
               resolve();
             });
-            xhr.list(chapterList.download.filter(i => !('contentRaw' in i)), requestOption);
+            xhr.list(chapterList.download.filter((i) => !('contentRaw' in i)), requestOption);
             xhr.showDialog();
             xhr.start();
           });
         }
 
-        if (chapterList.deal.length && chapterList.deal.find(i => !('contentRaw' in i))) {
+        if (chapterList.deal.length && chapterList.deal.find((i) => !('contentRaw' in i))) {
           await new Promise((resolve, reject) => {
             xhr.storage.config.set('onComplete', async (list) => {
-              if (chapterList.deal.find(i => !('contentRaw' in i))) return;
+              if (chapterList.deal.find((i) => !('contentRaw' in i))) return;
               resolve();
             });
-            for (const chapter of chapterList.deal.filter(i => !('contentRaw' in i))) {
+            for (const chapter of chapterList.deal.filter((i) => !('contentRaw' in i))) {
               try {
                 const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
                 rule.deal(chapter).then((result) => {
@@ -3588,11 +3590,11 @@
                     chapter.content = '';
                     chapter.document = '';
                   }
-                  const now = Storage.book.chapters.filter(i => i.contentRaw).length;
+                  const now = Storage.book.chapters.filter((i) => i.contentRaw).length;
                   const max = Storage.book.chapters.length;
                   container.find('[name="progress"]>progress').val(now).attr('max', max);
                   document.title = `[${now}/${max}]${Storage.title}`;
-                  if (!chapterList.deal.find(i => !('contentRaw' in i))) resolve();
+                  if (!chapterList.deal.find((i) => !('contentRaw' in i))) resolve();
                 }, (error) => {
                   console.error(error);
                   chapter.contentRaw = '';
@@ -3608,12 +3610,13 @@
           });
         }
 
-        if (chapterList.iframe.length && chapterList.iframe.find(i => !('contentRaw' in i))) {
-          for (const chapter of chapterList.iframe.filter(i => !('contentRaw' in i))) {
+        if (chapterList.iframe.length && chapterList.iframe.find((i) => !('contentRaw' in i))) {
+          for (const chapter of chapterList.iframe.filter((i) => !('contentRaw' in i))) {
             const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
             await new Promise((resolve, reject) => {
               $('<iframe>').on('load', async (e) => { // TODO 优化
-                let response, responseText;
+                let response; let
+                  responseText;
                 try {
                   if (typeof rule.iframe === 'function') await rule.iframe(e.target.contentWindow);
                   response = e.target.contentWindow.document;
@@ -3626,13 +3629,14 @@
                 await onChapterLoad({ response, responseText }, { raw: chapter });
                 $(e.target).remove();
                 resolve();
-              }).attr('src', chapter.url).css('visibility', 'hidden').appendTo('body');
+              }).attr('src', chapter.url).css('visibility', 'hidden')
+                .appendTo('body');
             });
           }
         }
 
-        if (chapterList.popup.length && chapterList.popup.find(i => !('contentRaw' in i))) {
-          for (const chapter of chapterList.popup.filter(i => !('contentRaw' in i))) {
+        if (chapterList.popup.length && chapterList.popup.find((i) => !('contentRaw' in i))) {
+          for (const chapter of chapterList.popup.filter((i) => !('contentRaw' in i))) {
             var popupWindow = window.open(chapter.url, '', 'resizable,scrollbars,width=300,height=350');
             window.localStorage.setItem('gm-nd-url', chapter.url);
             await waitFor(() => window.localStorage.getItem('gm-nd-html') || !popupWindow || popupWindow.closed);
@@ -3663,7 +3667,7 @@
     container.find('[name="config"]').find('button[name="toggle"]').on('click', (e) => {
       container.find('.useless[name="config"]').toggle();
     });
-    container.find('[name="info"]>input[type="text"]').on('change', e => (Storage.book[$(e.target).attr('name')] = e.target.value));
+    container.find('[name="info"]>input[type="text"]').on('change', (e) => (Storage.book[$(e.target).attr('name')] = e.target.value));
 
     // style
     const style = [
@@ -3692,7 +3696,7 @@
 
       '[novel-downloader-chapter]:before{content:attr(order)"-"!important;}',
       '[novel-downloader-chapter]:before{color:blue!important;}',
-      '[novel-downloader-chapter="vip"]:before{color:red!important;}'
+      '[novel-downloader-chapter="vip"]:before{color:red!important;}',
     ].join('');
     $('<style class="novel-downloader-style">').text(style).appendTo('head');
 
@@ -3734,9 +3738,9 @@
     intro = $('<div>').html(intro);
     if (Storage.rule.elementRemove || Config.useCommon) {
       if (Storage.rule.elementRemove) {
-        $(Storage.rule.elementRemove + ',script,style,iframe', intro).remove();
+        $(`${Storage.rule.elementRemove},script,style,iframe`, intro).remove();
       } else if (Config.useCommon) {
-        $(Rule.elementRemove + ',script,style,iframe', intro).remove();
+        $(`${Rule.elementRemove},script,style,iframe`, intro).remove();
       }
     }
     intro = intro.text();
@@ -3749,7 +3753,7 @@
     if (Storage.mode === 1) {
       container.find('[name="info"]>[name="mode"]').text('目录模式');
       const styleChapter = [
-        '[novel-downloader-chapter]:before{display:none;}'
+        '[novel-downloader-chapter]:before{display:none;}',
       ].join('');
       $('<style class="novel-downloader-style-chapter">').text(styleChapter).attr('media', 'max-width: 1px').appendTo('head');
 
@@ -3757,7 +3761,7 @@
 
       chapters = await getFromRule(Storage.rule.chapter, async (selector) => {
         let elems = $(Storage.rule.chapter);
-        if (Storage.rule !== Rule && Storage.rule.chapterUrl.length) elems = elems.filter((i, elem) => Storage.rule.chapterUrl.some(j => elem.href.match(j)));
+        if (Storage.rule !== Rule && Storage.rule.chapterUrl.length) elems = elems.filter((i, elem) => Storage.rule.chapterUrl.some((j) => elem.href.match(j)));
         let volumes;
         if (typeof Storage.rule.volume === 'string') {
           volumes = $(Storage.rule.volume);
@@ -3767,40 +3771,38 @@
         volumes = $(volumes).toArray();
         const all = $(elems).add(volumes);
         let order = 1;
-        return elems.attr('novel-downloader-chapter', '').toArray().map(i => {
+        return elems.attr('novel-downloader-chapter', '').toArray().map((i) => {
           $(i).attr('order', order++);
           const chapter = {
             title: i.textContent,
-            url: i.href
+            url: i.href,
           };
           if (volumes && volumes.length) {
-            const volume = all.slice(0, all.index(i)).toArray().reverse().find(i => volumes.includes(i));
+            const volume = all.slice(0, all.index(i)).toArray().reverse().find((i) => volumes.includes(i));
             if (volume) chapter.volume = html2Text(volume.textContent);
           }
           return chapter;
         });
       }, [], []);
-      vipChapters = await getFromRule(Storage.rule.vipChapter, (selector) => $(Storage.rule.vipChapter).attr('novel-downloader-chapter', 'vip').toArray().map(i => i.href), [], []);
+      vipChapters = await getFromRule(Storage.rule.vipChapter, (selector) => $(Storage.rule.vipChapter).attr('novel-downloader-chapter', 'vip').toArray().map((i) => i.href), [], []);
       if (typeof Storage.rule.volume === 'function' && Storage.rule.volume.length > 1) chapters = await Storage.rule.volume(document, chapters);
     } else if (Storage.mode === 2) {
       container.find('[name="info"]>[name="mode"]').text('章节模式');
       chapters = [window.location.href];
     }
     if (typeof Storage.rule.getChapters === 'function') chapters = await Storage.rule.getChapters(document);
-    chapters = chapters.map(i => typeof i === 'string' ? { url: i } : i);
-    vipChapters = vipChapters.concat(chapters.filter(i => i.vip).map(i => i.url));
+    chapters = chapters.map((i) => (typeof i === 'string' ? { url: i } : i));
+    vipChapters = vipChapters.concat(chapters.filter((i) => i.vip).map((i) => i.url));
     if (!Storage.rule.chapter && Storage.rule.chapterUrl.length) {
       let order = 1;
-      const elems = Array.from(document.links).filter(i =>
-        (chapters.length || vipChapters.length)
-          ? (chapters.map(i => i.url).includes(i.href) || vipChapters.includes(i.href))
-          : Storage.rule.chapterUrl.some(j => i.href.match(j))
-      );
-      const temp = $(elems).toArray().map(i => {
+      const elems = Array.from(document.links).filter((i) => ((chapters.length || vipChapters.length)
+        ? (chapters.map((i) => i.url).includes(i.href) || vipChapters.includes(i.href))
+        : Storage.rule.chapterUrl.some((j) => i.href.match(j))));
+      const temp = $(elems).toArray().map((i) => {
         $(i).attr('novel-downloader-chapter', vipChapters.includes(i.href) ? 'vip' : '').attr('order', order++);
         return {
           title: i.textContent,
-          url: i.href
+          url: i.href,
         };
       });
       if (!chapters.length) chapters = temp;
@@ -3813,16 +3815,16 @@
   }
 
   $('<div class="novel-downloader-trigger" style="position:fixed;top:0px;left:0px;width:1px;height:100%;z-index:999999;background:transparent;"></div>').on({
-    dblclick: function () {
+    dblclick() {
       init();
       showUI();
-    }
+    },
   }).appendTo('body');
-  GM_registerMenuCommand('Download Novel', function () {
+  GM_registerMenuCommand('Download Novel', () => {
     init();
     showUI();
   }, 'N');
-  GM_registerMenuCommand('Show Storage', function () {
+  GM_registerMenuCommand('Show Storage', () => {
     console.log({ Storage, xhr: xhr.storage.getSelf() });
   }, 'S');
 
@@ -3831,17 +3833,17 @@
       console.log(chapters);
     },
     text: async (chapters) => {
-      const length = String(chapters.length).length;
+      const { length } = String(chapters.length);
       const title = Storage.book.title || Storage.book.chapters[0].title;
       const writer = Storage.book.writer || 'novelDownloader';
 
-      var all = [
-        '本书名称: ' + title,
+      let all = [
+        `本书名称: ${title}`,
         Storage.book.writer ? `本书作者: ${writer}` : '',
         Storage.book.intro ? `本书简介: ${Storage.book.intro}` : '',
         Config.reference ? '阅读前说明：本书籍由用户脚本novelDownloader制作' : '',
-        Config.reference ? `来源地址: ${window.location.href}` : ''
-      ].filter(i => i);
+        Config.reference ? `来源地址: ${window.location.href}` : '',
+      ].filter((i) => i);
       all.push('');
 
       for (let i = 0; i < chapters.length; i++) {
@@ -3857,15 +3859,15 @@
       }
       all = all.join('\n');
       const blob = new window.Blob([all], {
-        type: 'text/plain;charset=utf-8'
+        type: 'text/plain;charset=utf-8',
       });
-      download(blob, title + '.txt');
+      download(blob, `${title}.txt`);
     },
     epub: async (chapters) => {
-      const length = String(chapters.length).length;
+      const { length } = String(chapters.length);
       const title = Storage.book.title || Storage.book.chapters[0].title;
       const writer = Storage.book.writer || 'novelDownloader';
-      const uuid = 'ndv3-' + window.location.href.match(/[a-z0-9-]+/ig).join('-') + $('.novel-downloader-v3').find('[name="limit"]>[name="range"]').val();
+      const uuid = `ndv3-${window.location.href.match(/[a-z0-9-]+/ig).join('-')}${$('.novel-downloader-v3').find('[name="limit"]>[name="range"]').val()}`;
       const href = $('<div>').text(window.location.href).html();
       const date = new Date().toISOString();
 
@@ -3874,10 +3876,10 @@
         try {
           const res = await xhr.sync(Storage.book.cover, null, {
             responseType: 'arraybuffer',
-            timeout: Config.timeout * 10
+            timeout: Config.timeout * 10,
           });
           Storage.book.coverBlob = new window.Blob([res.response], {
-            type: res.responseHeaders.match(/content-type:\s*(image.*)/i) ? res.responseHeaders.match(/content-type:\s*(image.*)/i)[1] : 'image/png'
+            type: res.responseHeaders.match(/content-type:\s*(image.*)/i) ? res.responseHeaders.match(/content-type:\s*(image.*)/i)[1] : 'image/png',
           });
           cover = Storage.book.coverBlob;
         } catch (error) {
@@ -3900,32 +3902,32 @@
           `<dc:source>${href}</dc:source>`,
           `<dc:identifier id="${uuid}">urn:uuid:${uuid}</dc:identifier>`,
           `<dc:language>${$('html').attr('xml:lang') || $('html').attr('lang') || 'zh-CN'}</dc:language>`,
-          '<meta name="cover" content="cover-image" /></metadata><manifest><item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="cover.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>'
+          '<meta name="cover" content="cover-image" /></metadata><manifest><item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="cover" href="cover.html" media-type="application/xhtml+xml"/><item id="css" href="stylesheet.css" media-type="text/css"/>',
         ].join(''),
         'OEBPS/toc.ncx': `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd"><ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="urn:uuid:${uuid}"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>${title}</text></docTitle><navMap><navPoint id="navpoint-1" playOrder="1"><navLabel><text>首页</text></navLabel><content src="cover.html"/></navPoint>`,
-        'OEBPS/cover.html': `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>${title}</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>` + [
+        'OEBPS/cover.html': `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>${title}</title><link type="text/css" rel="stylesheet" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body>${[
           `<h1>${title}</h1>`,
           Storage.book.writer ? `<h2>${Storage.book.writer}</h2>` : '',
           Storage.book.intro ? `<h2>简介: ${Storage.book.intro}</h2>` : '',
           Config.reference ? '<h3>阅读前说明：本书籍由用户脚本novelDownloader制作</h3>' : '',
-          Config.reference ? `<h3>来源地址: <a href="${href}" target="_blank">${href}</a></h3>` : ''
-        ].filter(i => i).join('') + '</body></html>'
+          Config.reference ? `<h3>来源地址: <a href="${href}" target="_blank">${href}</a></h3>` : '',
+        ].filter((i) => i).join('')}</body></html>`,
       };
 
       if (Config.image) {
         for (const chapter of Storage.book.chapters) {
           const contentDom = $('<div>').html(chapter.content);
-          for (const url of $('img', contentDom).toArray().map(i => $(i).attr('src'))) {
-            if (!Storage.book.image.find(i => i.raw === url)) {
+          for (const url of $('img', contentDom).toArray().map((i) => $(i).attr('src'))) {
+            if (!Storage.book.image.find((i) => i.raw === url)) {
               Storage.book.image.push({
                 raw: url,
-                url: new URL(url, chapter.url).href
+                url: new URL(url, chapter.url).href,
               });
             }
           }
         }
 
-        if (Storage.book.image.filter(i => !i.content).length) {
+        if (Storage.book.image.filter((i) => !i.content).length) {
           await new Promise((resolve, reject) => {
             xhr.init({
               retry: Config.retry,
@@ -3937,39 +3939,38 @@
               checkLoad: async (res) => {
                 if ((res.status > 0 && res.status < 200) || res.status >= 300) {
                   return false;
-                } else {
-                  return true;
                 }
-              }
+                return true;
+              },
             });
             xhr.showDialog();
-            xhr.list(Storage.book.image.filter(i => !i.content), {
+            xhr.list(Storage.book.image.filter((i) => !i.content), {
               responseType: 'arraybuffer',
               onload: (res, reuqest) => {
                 const index = Storage.book.image.indexOf(reuqest.raw);
                 Storage.book.image[index].content = res.response;
                 Storage.book.image[index].type = res.responseHeaders.match(/content-type:\s*image\/(.*)/i) ? res.responseHeaders.match(/content-type:\s*image\/(.*)/i)[1] : 'image/png';
-              }
+              },
             });
             xhr.start();
           });
         }
 
-        const length = String(Storage.book.image.length).length;
+        const { length } = String(Storage.book.image.length);
         for (let i = 0; i < Storage.book.image.length; i++) {
           const imgOrder = String(i + 1).padStart(length, '0');
           const type = Storage.book.image[i].type ? Storage.book.image[i].type.split(';')[0] : 'png';
           const imgName = `img/img-${imgOrder}.${type}`;
           Storage.book.image[i].name = imgName;
-          files['OEBPS/content.opf'] += `<item id="img-${imgOrder}" href="${imgName}" media-type="image/jpeg"/>`;
-          files['OEBPS/' + imgName] = Storage.book.image[i].content;
+          files['OEBPS/content.opf'] = `${files['OEBPS/content.opf']}<item id="img-${imgOrder}" href="${imgName}" media-type="image/jpeg"/>`;
+          files[`OEBPS/${imgName}`] = Storage.book.image[i].content;
         }
 
         for (const chapter of Storage.book.chapters) {
           const contentDom = $('<div>').html(chapter.content);
           for (const elem of $('img', contentDom).toArray()) {
-            if (Storage.book.image.find(i => i.raw === $(elem).attr('src'))) {
-              contentDom.find(elem).attr('src', Storage.book.image.find(i => i.raw === $(elem).attr('src')).name);
+            if (Storage.book.image.find((i) => i.raw === $(elem).attr('src'))) {
+              contentDom.find(elem).attr('src', Storage.book.image.find((i) => i.raw === $(elem).attr('src')).name);
             }
           }
           chapter.content = contentDom.html();
@@ -3988,28 +3989,28 @@
             const text = $('<a>').html(match).text();
             if (text.length > 1) return match;
             return `&#${text.charCodeAt(0)};`;
-          }]
+          }],
         ]);
 
         if (Config.tocIndent) {
           if (Config.volume && chapter.volume && chapter.volume !== volumeCurrent) {
-            if (volumeCurrent) files['OEBPS/toc.ncx'] += '</navPoint>';
+            if (volumeCurrent) files['OEBPS/toc.ncx'] = `${files['OEBPS/toc.ncx']}</navPoint>`;
             volumeCurrent = chapter.volume;
-            files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/>';
+            files['OEBPS/toc.ncx'] = `${files['OEBPS/toc.ncx']}<navPoint id="chapter${chapterOrder}" playOrder="${i + 2}"><navLabel><text>${chapterName}</text></navLabel><content src="${chapterOrder}.html"/>`;
           } else {
-            files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/></navPoint>';
+            files['OEBPS/toc.ncx'] = `${files['OEBPS/toc.ncx']}<navPoint id="chapter${chapterOrder}" playOrder="${i + 2}"><navLabel><text>${chapterName}</text></navLabel><content src="${chapterOrder}.html"/></navPoint>`;
           }
-          if (Config.volume && chapter.volume && i === chapters.length - 1) files['OEBPS/toc.ncx'] += '</navPoint>';
+          if (Config.volume && chapter.volume && i === chapters.length - 1) files['OEBPS/toc.ncx'] = `${files['OEBPS/toc.ncx']}</navPoint>`;
         } else {
-          files['OEBPS/toc.ncx'] += '<navPoint id="chapter' + chapterOrder + '" playOrder="' + (i + 2) + '"><navLabel><text>' + chapterName + '</text></navLabel><content src="' + chapterOrder + '.html"/></navPoint>';
+          files['OEBPS/toc.ncx'] = `${files['OEBPS/toc.ncx']}<navPoint id="chapter${chapterOrder}" playOrder="${i + 2}"><navLabel><text>${chapterName}</text></navLabel><content src="${chapterOrder}.html"/></navPoint>`;
         }
 
-        files['OEBPS/content.opf'] += '<item id="chapter' + chapterOrder + '" href="' + chapterOrder + '.html" media-type="application/xhtml+xml"/>';
-        itemref += '<itemref idref="chapter' + chapterOrder + '" linear="yes"/>';
-        files[`OEBPS/${chapterOrder}.html`] = '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>' + chapterName + '</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>' + chapterName + '</h3>' + '<div><p>' + chapterContent + '</p></div></body></html>';
+        files['OEBPS/content.opf'] = `${files['OEBPS/content.opf']}<item id="chapter${chapterOrder}" href="${chapterOrder}.html" media-type="application/xhtml+xml"/>`;
+        itemref = `${itemref}<itemref idref="chapter${chapterOrder}" linear="yes"/>`;
+        files[`OEBPS/${chapterOrder}.html`] = `<html xmlns="http://www.w3.org/1999/xhtml"><head><title>${chapterName}</title><link type="text/css" rel="stylesheet" media="all" href="stylesheet.css" /><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><h3>${chapterName}</h3>` + `<div><p>${chapterContent}</p></div></body></html>`;
       }
-      files['OEBPS/content.opf'] += `<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">${itemref}</spine><guide><reference href="cover.html" type="cover" title="Cover"/></guide></package>`;
-      files['OEBPS/toc.ncx'] += '</navMap></ncx>';
+      files['OEBPS/content.opf'] = `${files['OEBPS/content.opf']}<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/></manifest><spine toc="ncx">${itemref}</spine><guide><reference href="cover.html" type="cover" title="Cover"/></guide></package>`;
+      files['OEBPS/toc.ncx'] = `${files['OEBPS/toc.ncx']}</navMap></ncx>`;
 
       const zip = new JSZip();
       for (const file in files) {
@@ -4019,27 +4020,27 @@
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
-          level: 9
-        }
+          level: 9,
+        },
       });
-      download(file, title + '.epub');
+      download(file, `${title}.epub`);
     },
     zip: async (chapters) => {
-      const length = String(chapters.length).length;
+      const { length } = String(chapters.length);
       const title = Storage.book.title || Storage.book.chapters[0].title;
 
       const files = {};
-      files[String(0).padStart(length, '0') + '-说明文件.txt'] = [
-        '本书名称: ' + title,
+      files[`${String(0).padStart(length, '0')}-说明文件.txt`] = [
+        `本书名称: ${title}`,
         Storage.book.writer ? `本书作者: ${Storage.book.writer}` : '',
         Storage.book.intro ? `本书简介: ${Storage.book.intro}` : '',
         Config.reference ? '阅读前说明：本书籍由用户脚本novelDownloader制作' : '',
-        Config.reference ? `来源地址: ${window.location.href}` : ''
-      ].filter(i => i).join('\n');
+        Config.reference ? `来源地址: ${window.location.href}` : '',
+      ].filter((i) => i).join('\n');
 
       for (let i = 0; i < chapters.length; i++) {
         const { title, content } = chapters[i];
-        files[String(i + 1).padStart(length, '0') + '-' + title.replace(/[\\/:*?"<>|]/g, '-') + '.txt'] = content;
+        files[`${String(i + 1).padStart(length, '0')}-${title.replace(/[\\/:*?"<>|]/g, '-')}.txt`] = content;
       }
 
       const zip = new JSZip();
@@ -4050,11 +4051,11 @@
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
-          level: 9
-        }
+          level: 9,
+        },
       });
-      download(file, title + '.zip');
-    }
+      download(file, `${title}.zip`);
+    },
   };
 
   /** @name getFromRule
@@ -4062,16 +4063,17 @@
     * @param {object | function} argsString 当为function时，参数为value
     * @param {array} argsFunction
   */
-  async function getFromRule (value, argsString = {}, argsFunction = [], defaultValue) {
+  async function getFromRule(value, argsString = {}, argsFunction = [], defaultValue) {
     argsFunction = [].concat(argsFunction);
     let returnValue;
 
     if (typeof argsString !== 'function') {
-      argsString = Object.assign({
+      argsString = {
         attr: 'text',
         document,
-        allElement: false
-      }, argsString);
+        allElement: false,
+        ...argsString,
+      };
     }
     if (typeof argsString.document === 'string') {
       try {
@@ -4086,10 +4088,9 @@
       argsString = () => {
         const elem = $(value, args.document || document);
         if (args.allElement) {
-          return elem.toArray().map(i => args.attr === 'html' ? $(i).html() : args.attr === 'text' ? $(i).text() : $(i).attr(args.attr) || $(i).prop(args.attr));
-        } else {
-          return args.attr === 'html' ? elem.eq(0).html() : args.attr === 'text' ? elem.eq(0).text() : elem.eq(0).attr(args.attr) || elem.eq(0).prop(args.attr);
+          return elem.toArray().map((i) => (args.attr === 'html' ? $(i).html() : args.attr === 'text' ? $(i).text() : $(i).attr(args.attr) || $(i).prop(args.attr)));
         }
+        return args.attr === 'html' ? elem.eq(0).html() : args.attr === 'text' ? elem.eq(0).text() : elem.eq(0).attr(args.attr) || elem.eq(0).prop(args.attr);
       };
     }
     if (typeof value === 'string') {
@@ -4105,15 +4106,15 @@
     return returnValue;
   }
 
-  function html2Text (text = '', specialDict = []) { // TODO 需要优化
+  function html2Text(text = '', specialDict = []) { // TODO 需要优化
     const dict = (specialDict || []).concat([
       [/<\/p>(\s*)<p(\s+.*?)?>/gi, '\n'],
       [/<\/p>|<p(\s+.*?)?>/gi, '\n'],
       [/<br\s*\/?>/gi, '\n'],
       [/<(\w+)&nbsp;/g, '&lt;$1&nbsp;'],
       [/(\S)<(div)/g, '$1\n<$2'],
-      [/<\/(div)>(\S)/g, '</$1>\n$2']
-    ]).filter(i => typeof i === 'object' && i instanceof Array && i.length).map(i => {
+      [/<\/(div)>(\S)/g, '</$1>\n$2'],
+    ]).filter((i) => typeof i === 'object' && i instanceof Array && i.length).map((i) => {
       const arr = i;
       if (typeof arr[0] === 'string') arr[0] = new RegExp(arr[0], 'gi');
       if (typeof arr[1] === 'undefined') arr[1] = '';
@@ -4121,23 +4122,23 @@
     });
     return replaceWithDict(text, dict).trim();
   }
-  function replaceWithDict (text = '', dict = []) {
-    let replace = dict.find(i => text.match(i[0]));
+  function replaceWithDict(text = '', dict = []) {
+    let replace = dict.find((i) => text.match(i[0]));
     let replaceLast = null;
     let textLast = null;
     while (replace) {
       if (replace === replaceLast && textLast === text) {
-        console.error('novelDownloader: 替换文本陷入死循环\n替换规则: ' + replace);
+        console.error(`novelDownloader: 替换文本陷入死循环\n替换规则: ${replace}`);
         dict.splice(dict.indexOf(replace), 1);
       }
       textLast = text;
       text = text.replace(replace[0], replace[1] || '');
       replaceLast = replace;
-      replace = dict.find(i => text.match(i[0]));
+      replace = dict.find((i) => text.match(i[0]));
     }
     return text;
   }
-  function getCover (txt) {
+  function getCover(txt) {
     const fontSize = 20;
     const width = 180;
     const height = 240;
@@ -4145,7 +4146,7 @@
     const lineHeight = 10;
     /// ////////
     const maxlen = width / fontSize - 2;
-    const txtArray = txt.split(new RegExp('(.{' + maxlen + '})'));
+    const txtArray = txt.split(new RegExp(`(.{${maxlen}})`));
     let i = 1;
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -4153,9 +4154,10 @@
     const context = canvas.getContext('2d');
     context.fillStyle = color;
     context.strokeRect(0, 0, width, height);
-    context.font = fontSize + 'px sans-serif';
+    context.font = `${fontSize}px sans-serif`;
     context.textBaseline = 'top';
-    let fLeft, fTop;
+    let fLeft; let
+      fTop;
     for (let j = 0; j < txtArray.length; j++) {
       if (txtArray[j] === '') continue;
       fLeft = fontSize * ((maxlen - txtArray[j].length) / 2 + 1);
@@ -4165,19 +4167,19 @@
       i++;
     }
     return new Promise((resolve, reject) => {
-      canvas.toBlob(function (blob) {
+      canvas.toBlob((blob) => {
         resolve(blob);
       });
     });
   }
-  function waitInMs (time) {
+  function waitInMs(time) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve();
       }, time);
     });
   }
-  function waitFor (event, timeout) {
+  function waitFor(event, timeout) {
     return new Promise((resolve, reject) => {
       const now = new Date().getTime();
       let id;
@@ -4194,19 +4196,19 @@
       }, 200);
     });
   }
-  function download (content, name, force) {
+  function download(content, name, force) {
     const lastDownload = Storage.lastDownload || {};
     const time = new Date().getTime();
-    if (!force && time - lastDownload.time <= 5 * 1000 &&
-      lastDownload.size === content.size && lastDownload.type === content.type &&
-      lastDownload.name === name) { // 5秒内重复下载
+    if (!force && time - lastDownload.time <= 5 * 1000
+      && lastDownload.size === content.size && lastDownload.type === content.type
+      && lastDownload.name === name) { // 5秒内重复下载
       return;
     }
     Storage.lastDownload = {
       time,
       size: content.size,
       type: content.type,
-      name
+      name,
     };
     saveAs(content, name);
   }
@@ -4232,4 +4234,4 @@
   $.expr[':'].regexp = function (elem, index, meta, stack) {
     return !!(elem.textContent || elem.innerText || $(elem).text() || '').match(new RegExp(meta[3], 'i'));
   };
-})();
+}());

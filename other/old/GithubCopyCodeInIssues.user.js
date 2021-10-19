@@ -11,15 +11,15 @@
 // @grant       GM_setClipboard
 // @run-at      document-idle
 // ==/UserScript==
-var code = document.querySelectorAll('pre,code');
-//console.log(code);
-for (var i = 0; i < code.length; i++) {
-  var copy_div = document.createElement('button');
+const code = document.querySelectorAll('pre,code');
+// console.log(code);
+for (let i = 0; i < code.length; i++) {
+  const copy_div = document.createElement('button');
   copy_div.innerHTML = '复制';
   copy_div.onclick = function () {
-    var Code = this.nextElementSibling.innerText;
+    const Code = this.nextElementSibling.innerText;
     console.log(Code);
     GM_setClipboard(Code);
-  }
+  };
   code[i].parentNode.insertBefore(copy_div, code[i]);
 }

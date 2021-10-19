@@ -19,94 +19,94 @@
 // @grant       GM_getResourceText
 // @run-at      document-idle
 // ==/UserScript==
-const $ = e => document.querySelector(e);
-const $$ = e => document.querySelectorAll(e);
-const $_ = e => document.createElement(e);
+const $ = (e) => document.querySelector(e);
+const $$ = (e) => document.querySelectorAll(e);
+const $_ = (e) => document.createElement(e);
 const inArray = (key, array) => {
-  for (let i of array) {
+  for (const i of array) {
     if (i === key) return true;
   }
   return false;
-}
+};
 const CONFIG = {
   UNLIKE: {
     'females only': '只有女性',
     'males only': '只有男性',
-    'vore': '活吞',
-    'guro': '猎奇',
-    'bestiality': '兽奸',
-    'insect': '昆虫',
-    'worm': '虫子',
-    'furry': '毛皮',
-    'eggs': '产卵',
-    'parasite': '寄生',
+    vore: '活吞',
+    guro: '猎奇',
+    bestiality: '兽奸',
+    insect: '昆虫',
+    worm: '虫子',
+    furry: '毛皮',
+    eggs: '产卵',
+    parasite: '寄生',
     'brain fuck': '脑交',
-    'amputee': '残肢',
-    'futanari': '扶她',
+    amputee: '残肢',
+    futanari: '扶她',
     'dickgirl on dickgirl': '扶她上扶她',
     'male on dickgirl': '男的上扶她',
     'dickgirl on male': '扶她上男的',
-    'bisexual': '双性',
-    'monster': '怪物',
-    'giantess': '女巨人',
-    'novel': '小说',
-    'snuff': '杀害',
-    'necrophilia': '奸尸'
+    bisexual: '双性',
+    monster: '怪物',
+    giantess: '女巨人',
+    novel: '小说',
+    snuff: '杀害',
+    necrophilia: '奸尸',
   },
   ALERT: {
-    'tentacles': '触手',
-    'rape': '强奸',
-    'crossdressing': '异性装',
-    'yaoi': '男同',
-    'yuri': '女同',
-    'netorare': 'NTR',
-    'scat': '排泄',
-    'animated': 'Gif'
+    tentacles: '触手',
+    rape: '强奸',
+    crossdressing: '异性装',
+    yaoi: '男同',
+    yuri: '女同',
+    netorare: 'NTR',
+    scat: '排泄',
+    animated: 'Gif',
   },
   CHS: (() => {
-    var value = {};
+    const value = {};
     let data = GM_getResourceText('EHT');
     data = JSON.parse(data).dataset;
-    for (let i in data) {
-      let type = data[i].name;
+    for (const i in data) {
+      const type = data[i].name;
       value[type] = {};
-      for (let j in data[i].tags) {
+      for (const j in data[i].tags) {
         if (data[i].tags[j].type === 0) {
-          value[type][data[i].tags[j].name] = data[i].tags[j].cname.filter(k => k.type === 0)[0].text;
+          value[type][data[i].tags[j].name] = data[i].tags[j].cname.filter((k) => k.type === 0)[0].text;
         }
       }
     }
     return value;
-  })()
-}
-var TagsPreview = {
+  })(),
+};
+const TagsPreview = {
   dataArr: [],
-  checkData: function(data, i) {
-    var _ = this;
+  checkData(data, i) {
+    const _ = this;
     _.dataArr[i] = data;
-    var dataAll = [].concat.apply([], _.dataArr);
+    const dataAll = [].concat.apply([], _.dataArr);
     if (dataAll.length >= $$('.it5>a,.id3>a').length) {
       _.tagPreview(dataAll);
       _.hideGalleries(dataAll);
     }
   },
-  xhr: function(gidlist, i) {
-    var _ = this;
-    var now = new Date().getTime();
+  xhr(gidlist, i) {
+    const _ = this;
+    const now = new Date().getTime();
     if (gidlist.length > 25) {
       var _gidlist = gidlist.splice(25, gidlist.length - 25);
     }
-    var gdata = {
-      'method': 'gdata',
-      'gidlist': gidlist,
-      'namespace': 1
-    }
-    var xhr = 'xhr_' + Math.random().toString();
+    const gdata = {
+      method: 'gdata',
+      gidlist,
+      namespace: 1,
+    };
+    let xhr = `xhr_${Math.random().toString()}`;
     xhr = new XMLHttpRequest();
-    xhr.open('POST', location.origin + '/api.php', true);
+    xhr.open('POST', `${location.origin}/api.php`, true);
     xhr.responseType = 'json';
-    var _i = i;
-    xhr.onload = function() {
+    const _i = i;
+    xhr.onload = function () {
       _.checkData(xhr.response.gmetadata, _i);
     };
     xhr.send(JSON.stringify(gdata));
@@ -115,35 +115,36 @@ var TagsPreview = {
       _.xhr(_gidlist, i);
     }
   },
-  init: function() {
-    var _ = this;
+  init() {
+    const _ = this;
     _.notice();
     _.addStyle();
-    var gidlist = [];
-    var bars = $$('.it5>a,.id3>a');
-    $$('.it5>a,.id3>a').forEach(function(_bar, i) {
+    const gidlist = [];
+    const bars = $$('.it5>a,.id3>a');
+    $$('.it5>a,.id3>a').forEach((_bar, i) => {
       if (_bar.querySelector('img')) {
-        _bar.querySelector('img').className = 'TagPreview_' + i;
+        _bar.querySelector('img').className = `TagPreview_${i}`;
       } else {
-        _bar.className = 'TagPreview_' + i;
+        _bar.className = `TagPreview_${i}`;
       }
-      var url_array = _bar.href.split('/');
+      const url_array = _bar.href.split('/');
       gidlist.push([url_array[4],
-      url_array[5]]);
+        url_array[5]]);
       if (i === bars.length - 1) _.xhr(gidlist, 0);
     });
   },
-  tagPreview: function(data) {
-    var _ = this;
-    var CHS2 = {
+  tagPreview(data) {
+    const _ = this;
+    const CHS2 = {
       group: {},
       artist: {},
-      parody: {}
+      parody: {},
     };
-    data.forEach(function(_data, i) {
-      var _title = _data.title.toLowerCase().replace(/^\(.*?\)/, '').trim();
+    data.forEach((_data, i) => {
+      let _title = _data.title.toLowerCase().replace(/^\(.*?\)/, '').trim();
       if (_data.title_jpn) var _titleJpn = _data.title_jpn.replace(/^\(.*?\)/, '').trim();
-      let g, gc, a, ac, p, pc;
+      let g; let gc; let a; let ac; let p; let
+        pc;
       if (_title.match(/^\[.*?\]/)) {
         g = _title.match(/^\[(.*?)\]/)[1].trim();
         if (_titleJpn && _titleJpn.match(/^\[.*?\]/)) gc = _titleJpn.match(/^\[(.*?)\]/)[1].trim();
@@ -170,54 +171,54 @@ var TagsPreview = {
       CHS2.group[g] = gc;
       CHS2.parody[p] = pc;
     });
-    var box = $_('div');
+    const box = $_('div');
     box.id = 'TagPreview';
-    $('.ido').addEventListener('mousemove', function(e) {
+    $('.ido').addEventListener('mousemove', (e) => {
       if (e.target.className.indexOf('TagPreview_') >= 0) {
-        var id = e.target.className.replace('TagPreview_', '');
-        var tag;
+        const id = e.target.className.replace('TagPreview_', '');
+        let tag;
         if (data[id].tag) {
           tag = data[id].tag;
         } else {
           tag = [];
-          var tags = data[id].tags.slice();
-          var tagsObj = new _.tagsObj();
-          for (let i of tags) {
-            let arr = i.split(':');
-            let type = arr.length === 2 ? arr[0] : 'misc';
+          const tags = data[id].tags.slice();
+          const tagsObj = new _.tagsObj();
+          for (const i of tags) {
+            const arr = i.split(':');
+            const type = arr.length === 2 ? arr[0] : 'misc';
             let value = arr.length === 2 ? arr[1] : i;
             value = CONFIG.CHS[type][value] || (type in CHS2 && value in CHS2[type] ? CHS2[type][value] : value);
             tagsObj[type].push(value);
           }
-          for (let i in tagsObj) {
+          for (const i in tagsObj) {
             if (tagsObj[i].length > 0) tag.push(`<li class="${i}Tag"><span>${tagsObj[i].join('</span><span>')}</span></li>`);
           }
           tag = tag.join('');
           data[id].tag = tag;
         }
-        var title = (data[id].title_jpn) ? data[id].title_jpn : data[id].title;
+        const title = (data[id].title_jpn) ? data[id].title_jpn : data[id].title;
         box.style.display = 'block';
-        box.style.left = (e.clientX + 5) + 'px';
-        box.style.top = (e.clientY + 5) + 'px';
-        box.innerHTML = '<div>' + title + '</div><div style="color:#FF0000">[' + (parseInt(data[id].filesize / 1024 / 1024)) + 'M]' + data[id].filecount + 'P</div><div style="height:2px;background-color:#000000;"></div><div>' + tag + '</div>';
-        if (box.offsetHeight + e.clientY + 10 >= window.innerHeight) box.style.top = e.clientY - box.offsetHeight - 5 + 'px';
-        if (box.offsetWidth + e.clientX + 10 >= window.innerWidth) box.style.left = e.clientX - box.offsetWidth - 5 + 'px';
+        box.style.left = `${e.clientX + 5}px`;
+        box.style.top = `${e.clientY + 5}px`;
+        box.innerHTML = `<div>${title}</div><div style="color:#FF0000">[${parseInt(data[id].filesize / 1024 / 1024)}M]${data[id].filecount}P</div><div style="height:2px;background-color:#000000;"></div><div>${tag}</div>`;
+        if (box.offsetHeight + e.clientY + 10 >= window.innerHeight) box.style.top = `${e.clientY - box.offsetHeight - 5}px`;
+        if (box.offsetWidth + e.clientX + 10 >= window.innerWidth) box.style.left = `${e.clientX - box.offsetWidth - 5}px`;
       } else {
         box.style.display = 'none';
       }
     });
     $('body').appendChild(box);
   },
-  hideGalleries: function(data) {
-    var bars = $$('.it5>a,.id3>a');
-    var barHide = [];
-    var boxHide = [];
-    data.forEach(function(_data, i) {
-      _data.tags.forEach(function(_tag, k) {
-        let arr = _tag.split(':');
-        let value = arr.length === 2 ? arr[1] : i;
+  hideGalleries(data) {
+    const bars = $$('.it5>a,.id3>a');
+    const barHide = [];
+    const boxHide = [];
+    data.forEach((_data, i) => {
+      _data.tags.forEach((_tag, k) => {
+        const arr = _tag.split(':');
+        const value = arr.length === 2 ? arr[1] : i;
         if (value in CONFIG.UNLIKE || value in CONFIG.ALERT) {
-          var div = $_('span');
+          const div = $_('span');
           div.title = value;
           bars[i].parentNode.parentNode.insertBefore(div, bars[i].parentNode);
           if (value in CONFIG.UNLIKE) {
@@ -235,38 +236,38 @@ var TagsPreview = {
         }
       });
     });
-    $('p.ip').innerHTML += '  总共屏蔽' + (barHide.length + boxHide.length) + '本本子。';
-    var toggle = $_('button');
+    $('p.ip').innerHTML += `  总共屏蔽${barHide.length + boxHide.length}本本子。`;
+    const toggle = $_('button');
     toggle.id = 'toggleHide';
     toggle.className = 'stdbtn';
-    toggle.onclick = function() {
-      var isShow = this.id === 'toggleShow';
+    toggle.onclick = function () {
+      const isShow = this.id === 'toggleShow';
       this.id = isShow ? 'toggleHide' : 'toggleShow';
-      barHide.forEach(function(i) {
+      barHide.forEach((i) => {
         i.parentNode.parentNode.parentNode.parentNode.style.display = isShow ? '' : 'none';
       });
-      barHide.forEach(function(i) {
+      barHide.forEach((i) => {
         i.parentNode.parentNode.style.display = isShow ? '' : 'none';
       });
-    }
+    };
     toggle.click();
     $('p.ip').appendChild(toggle);
   },
-  notice: function() {
-    let _ = CONFIG;
+  notice() {
+    const _ = CONFIG;
     let notice = '当前屏蔽的标签有：<span class="TAGS UNLIKE">';
-    for (let i in _.UNLIKE) {
-      notice += `<li title="${i}">${_.UNLIKE[i]}</li>`;
+    for (const i in _.UNLIKE) {
+      notice = `${notice}<li title="${i}">${_.UNLIKE[i]}</li>`;
     }
-    notice += '</span><br>当前警告的标签有：<span class="TAGS ALERT">';
-    for (let i in _.ALERT) {
-      notice += `<li title="${i}">${_.ALERT[i]}</li>`;
+    notice = `${notice}</span><br>当前警告的标签有：<span class="TAGS ALERT">`;
+    for (const i in _.ALERT) {
+      notice = `${notice}<li title="${i}">${_.ALERT[i]}</li>`;
     }
-    notice += '</span>';
+    notice = `${notice}</span>`;
     $('h1').innerHTML = notice;
   },
-  addStyle: function() {
-    var style = $_('style');
+  addStyle() {
+    const style = $_('style');
     style.textContent = [
       '.TAGS{font-size:10pt;}',
       '.TAGS>li{display:inline;margin:0 2px;cursor:pointer;}',
@@ -291,11 +292,11 @@ var TagsPreview = {
       '.unlikeTag{float:left;color:#FF0000;background-color:#0000FF;margin:0 1px;}',
       '.alertTag{float:left;color:#FFFF00;background-color:#008000;margin:0 1px;}',
       '#toggleShow::before{content:"显示"}',
-      '#toggleHide::before{content:"隐藏"}'
+      '#toggleHide::before{content:"隐藏"}',
     ].join('');
     $('body').appendChild(style);
   },
-  tagsObj: function() {
+  tagsObj() {
     this.language = [];
     this.reclass = [];
     this.artist = [];
@@ -306,6 +307,6 @@ var TagsPreview = {
     this.male = [];
     this.misc = [];
     this.other = [];
-  }
-}
+  },
+};
 TagsPreview.init();

@@ -17,40 +17,39 @@
 // @noframes
 // @run-at      document-start
 // ==/UserScript==
-(function total () {
-  'use strict'
-  let blacklist = GM_getValue('blacklist', [])
-  let host = window.location.host
+(function total() {
+  const blacklist = GM_getValue('blacklist', []);
+  const { host } = window.location;
   if (blacklist.includes(host)) {
-    let id
-    id = GM_registerMenuCommand('S: Effect ' + host, function () {
-      let blacklist = GM_getValue('blacklist', [])
+    let id;
+    id = GM_registerMenuCommand(`S: Effect ${host}`, () => {
+      const blacklist = GM_getValue('blacklist', []);
       if (blacklist.includes(host)) {
-        blacklist.splice(blacklist.indexOf(host), 1)
-        GM_setValue('blacklist', blacklist)
-        GM_unregisterMenuCommand(id)
-        total()
+        blacklist.splice(blacklist.indexOf(host), 1);
+        GM_setValue('blacklist', blacklist);
+        GM_unregisterMenuCommand(id);
+        total();
       }
-    }, 's')
+    }, 's');
   } else {
     if (window.location.protocol === 'http:') {
-      let url = window.location.href.replace(/^http:/, 'https:')
+      const url = window.location.href.replace(/^http:/, 'https:');
       GM_xmlhttpRequest({
-        url: url,
+        url,
         method: 'HEAD',
         timeout: 5 * 1000,
-        onload: function (res) {
-          if (new URL(res.finalUrl).protocol === 'https:' && res.status === 200) window.location.href = res.finalUrl
-        }
-      })
+        onload(res) {
+          if (new URL(res.finalUrl).protocol === 'https:' && res.status === 200) window.location.href = res.finalUrl;
+        },
+      });
     }
-    GM_registerMenuCommand('S: DO NOT Effect ' + host, function () {
-      let blacklist = GM_getValue('blacklist', [])
+    GM_registerMenuCommand(`S: DO NOT Effect ${host}`, () => {
+      const blacklist = GM_getValue('blacklist', []);
       if (!(blacklist.includes(host))) {
-        blacklist.push(host)
-        GM_setValue('blacklist', blacklist)
-        window.location.href = window.location.href.replace(/^https:/, 'http:')
+        blacklist.push(host);
+        GM_setValue('blacklist', blacklist);
+        window.location.href = window.location.href.replace(/^https:/, 'http:');
       }
-    }, 's')
+    }, 's');
   }
-})()
+}());
