@@ -2,9 +2,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.419
+// @version     3.5.421
 // @created     2020-03-16 16:59:04
-// @modified    2021-10-10 15:15:24
+// @modified    2021-10-21 19:52:02
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -41,8 +41,6 @@
 /* eslint-disable no-debugger  */
 /* global $ xhr tranStr JSZip saveAs CryptoJS opentype */
 ; (function () { // eslint-disable-line no-extra-semi
-'use strict';
-
   let fontLib;
 
   /*
@@ -403,8 +401,8 @@
       writer: '.writer',
       intro: '.book-intro',
       cover: '.J-getJumpUrl>img',
-      chapter: '.volume>.cf>li>a',
-      vipChapter: '.volume>.cf>li:has(.iconfont)>a',
+      chapter: '.volume>.cf>li a',
+      vipChapter: '.volume>.cf>li:has(.iconfont) a',
       volume: () => $('.volume>h3').toArray().map((i) => i.childNodes[2]),
       deal: async (chapter) => {
         const content = {};
@@ -3095,7 +3093,7 @@
       return;
     }
 
-    let chapters; let
+    let chapters,
       chaptersArr;
     let vipChapters = [];
     const chaptersDownloaded = [];
@@ -3616,7 +3614,7 @@
             const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
             await new Promise((resolve, reject) => {
               $('<iframe>').on('load', async (e) => { // TODO 优化
-                let response; let
+                let response,
                   responseText;
                 try {
                   if (typeof rule.iframe === 'function') await rule.iframe(e.target.contentWindow);
@@ -4157,7 +4155,7 @@
     context.strokeRect(0, 0, width, height);
     context.font = `${fontSize}px sans-serif`;
     context.textBaseline = 'top';
-    let fLeft; let
+    let fLeft,
       fTop;
     for (let j = 0; j < txtArray.length; j++) {
       if (txtArray[j] === '') continue;
