@@ -2,9 +2,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.421
+// @version     3.5.422
 // @created     2020-03-16 16:59:04
-// @modified    2021-10-21 19:52:02
+// @modified    2021-12-05 15:37:02
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -226,7 +226,6 @@
     //  可用key: chapterTitle,iframe,deal,content,contentCheck,elementRemove,contentReplace,chapterPrev,chapterNext
   };
 
-  /* eslint-disable comma-dangle  */
   Rule.special = [
     // 漫画
     { // https://manhua.dmzj.com/
@@ -243,8 +242,8 @@
       content: '#center_box',
       iframe: true,
       contentReplace: [
-        [/<img id="img_\d+" style=".*?" data-original="(.*?)" src=".*?">/g, '<img src="$1">']
-      ]
+        [/<img id="img_\d+" style=".*?" data-original="(.*?)" src=".*?">/g, '<img src="$1">'],
+      ],
     },
     { // https://www.manhuabei.com/ https://www.manhuafen.com/
       siteName: '漫画堆',
@@ -261,8 +260,8 @@
       iframe: (win) => $('<div class="nd3-images">').html(win.chapterImages.map((item, index, arr) => `<img data-src="${win.SinMH.getChapterImage(index + 1)}" /><p class="img_info">(${index + 1}/${arr.length})</p>`).join('')).appendTo(win.document.body),
       content: '.nd3-images',
       contentReplace: [
-        [/<img data-src/g, '<img src']
-      ]
+        [/<img data-src/g, '<img src'],
+      ],
     },
     { // https://www.manhuagui.com/
       siteName: '漫画柜',
@@ -284,8 +283,8 @@
         return a.join('');
       },
       contentReplace: [
-        [/<img id="img_\d+" style=".*?" data-original="(.*?)" src=".*?">/g, '<img src="$1">']
-      ]
+        [/<img id="img_\d+" style=".*?" data-original="(.*?)" src=".*?">/g, '<img src="$1">'],
+      ],
     },
     // 文学
     { // http://gj.zdic.net
@@ -298,7 +297,7 @@
       content: '#snr2',
       elementRemove: '.pagenav1',
       chapterPrev: 'a:contains("上一篇")',
-      chapterNext: 'a:contains("下一篇")'
+      chapterNext: 'a:contains("下一篇")',
     },
     { // https://www.99csw.com
       siteName: '九九藏书网',
@@ -315,7 +314,7 @@
           await waitInMs(200);
         }
       },
-      content: '#content>div:visible'
+      content: '#content>div:visible',
       // content: function (doc, res, request) {
       //   const content = [];
       //   const box = $('#content', doc).get(0);
@@ -346,7 +345,7 @@
       chapter: '.book>dl>dd>a',
       volume: '.book>dl>dt',
       content: '#Article>.text',
-      elementRemove: 'table,a'
+      elementRemove: 'table,a',
     },
     { // https://www.kanunu8.com
       siteName: '努努书坊',
@@ -356,7 +355,7 @@
       intro: '[align="left"]>[class^="p"]',
       cover: 'img[height="160"]',
       chapter: ['body>div:nth-child(1)>table:nth-child(10)>tbody>tr:nth-child(4)>td>table:nth-child(2)>tbody>tr>td>a', 'body>div>table>tbody>tr>td>table>tbody>tr>td>table:not(:has([class^="p"])) a'].join(','),
-      content: 'body > div:nth-child(1) > table:nth-child(5) > tbody > tr > td:nth-child(2) > p'
+      content: 'body > div:nth-child(1) > table:nth-child(5) > tbody > tr > td:nth-child(2) > p',
     },
     { // http://www.my2852.com
       siteName: '梦远书城',
@@ -367,7 +366,7 @@
       intro: '.zhj,body > div:nth-child(4) > table > tbody > tr > td.td6 > div > table > tbody > tr > td:nth-child(1) > div > table > tbody > tr:nth-child(1) > td',
       cover: 'img[alt="封面"]',
       chapter: () => $('a[href]').toArray().filter((i) => $(i).attr('href').match(/^\d+\.htm/)).map((i) => ({ url: $(i).attr('href'), title: $(i).text().trim() })),
-      content: 'td:has(br)'
+      content: 'td:has(br)',
     },
     { // https://www.tianyabooks.com
       siteName: '天涯书库',
@@ -379,7 +378,7 @@
       chapter: '.book>dl>dd>a',
       volume: '.book>dl>dt',
       chapterTitle: 'h1',
-      content: '[align="center"]+p'
+      content: '[align="center"]+p',
     },
     { // https://www.51xs.com/
       siteName: '我要小说网',
@@ -390,7 +389,7 @@
       chapter: '[style="FONT-FAMILY: 宋体; FONT-SIZE:12pt"]+center a',
       volume: '[bgcolor="#D9DDE8"]',
       chapterTitle: '.tt2>center>b',
-      content: '.tt2'
+      content: '.tt2',
     },
     // 正版
     { // https://www.qidian.com https://www.hongxiu.com https://www.readnovel.com https://www.xs8.cn // TODO 是否还有自定义字体
@@ -443,7 +442,7 @@
                   console.error(error);
                   resolve();
                 }
-              }
+              },
             }, null, 0, true);
           });
         } else {
@@ -457,17 +456,17 @@
                 content.title = $('.j_chapterName', res.response).text();
                 content.content = $('.j_readContent', res.response).html();
                 resolve();
-              }
+              },
             }, null, 0, true);
           });
         }
         return content;
       },
       contentReplace: [
-        [/<p>\s+.<\/p>/g, '']
+        [/<p>\s+.<\/p>/g, ''],
       ],
       chapterPrev: (doc) => [$('[id^="chapter-"]', doc).attr('data-purl')],
-      chapterNext: (doc) => [$('[id^="chapter-"]', doc).attr('data-nurl')]
+      chapterNext: (doc) => [$('[id^="chapter-"]', doc).attr('data-nurl')],
     },
     { // https://www.ciweimao.com
       siteName: '刺猬猫',
@@ -487,7 +486,7 @@
           const result = await Promise.all([
             '/resources/js/enjs.min.js',
             '/resources/js/myEncrytExtend-min.js',
-            '/resources/js/jquery-plugins/jquery.base64.min.js'
+            '/resources/js/jquery-plugins/jquery.base64.min.js',
           ].map((i) => `https://www.ciweimao.com${i}`).map((i) => xhr.sync(i, null, { cache: true })));
           for (const res of result) unsafeWindow.eval(res.responseText);
         }
@@ -501,13 +500,13 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             data: `chapter_id=${chapterId}`,
             responseType: 'json',
             onload(res) {
               resolve(res);
-            }
+            },
           }, null, 0, true);
         });
         const accessKey = res1.response.chapter_access_key;
@@ -520,7 +519,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             data: `chapter_id=${chapterId}&chapter_access_key=${accessKey}`,
             // responseType: 'json',
@@ -530,14 +529,14 @@
                 const content = unsafeWindow.$.myDecrypt({
                   content: json.chapter_content,
                   keys: json.encryt_keys,
-                  accessKey
+                  accessKey,
                 });
                 resolve(content);
               } catch (error) {
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
@@ -578,8 +577,8 @@
           });
         },
         content: '#J_BookImage',
-        elementRemove: 'i'
-      }
+        elementRemove: 'i',
+      },
     },
     { // https://www.shubl.com/
       siteName: '书耽',
@@ -596,7 +595,7 @@
       elementRemove: 'span',
       chapterPrev: '#J_BtnPagePrev',
       chapterNext: '#J_BtnPageNext',
-      thread: 1
+      thread: 1,
     },
     { // http://chuangshi.qq.com http://yunqi.qq.com
       siteName: '创世中文网',
@@ -620,7 +619,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -661,11 +660,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // http://dushu.qq.com 待测试:http://book.qq.com
       siteName: 'QQ阅读',
@@ -687,7 +686,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -699,11 +698,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://www.webnovel.com
       siteName: '起点国际',
@@ -716,7 +715,7 @@
       chapter: '.content-list a',
       volume: '.volume-item>h4',
       content: '.cha-words',
-      elementRemove: 'pirate'
+      elementRemove: 'pirate',
     },
     { // https://book.tianya.cn/
       siteName: '天涯文学',
@@ -740,7 +739,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: 'https://app3g.tianya.cn/webservice/web/proxy.html',
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -752,11 +751,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return result;
-      }
+      },
     },
     { // http://www.3gsc.com.cn
       siteName: '3G书城',
@@ -771,7 +770,7 @@
       vipChapter: '.menu-area>p>a:has(span.vip)',
       volume: '.menu-area>h2',
       chapterTitle: 'h1',
-      content: '.menu-area'
+      content: '.menu-area',
     },
     { // http://book.zongheng.com/ http://huayu.zongheng.com/
       siteName: '纵横',
@@ -786,7 +785,7 @@
       vipChapter: '.chapter-list .vip>a',
       volume: () => $('.volume').toArray().map((i) => i.childNodes[6]),
       chapterTitle: '.title_txtbox',
-      content: '.content'
+      content: '.content',
     },
     { // https://www.17k.com/
       siteName: '17K',
@@ -802,7 +801,7 @@
       volume: '.Volume>dt>.tit',
       chapterTitle: 'h1',
       content: '.p',
-      elementRemove: '.copy,.qrcode'
+      elementRemove: '.copy,.qrcode',
     },
     { // https://www.8kana.com/
       siteName: '不可能的世界',
@@ -817,7 +816,7 @@
       volume: '[flag="volumes"] span',
       chapterTitle: 'h2',
       content: '.myContent',
-      elementRemove: '[id="-2"]'
+      elementRemove: '[id="-2"]',
     },
     { // https://www.heiyan.com https://www.ruochu.com
       siteName: '黑岩',
@@ -846,11 +845,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://b.faloo.com
       siteName: '飞卢',
@@ -890,8 +889,8 @@
           const elem = $('.noveContent', doc1);
           elem.find('.con_img').replaceWith(`<img src="${image}">`);
           return elem.html();
-        }
-      }
+        },
+      },
     },
     { // https://www.jjwxc.net // TODO vip自定义字体
       siteName: '晋江文学城',
@@ -916,7 +915,7 @@
       volume: '.volumnfont',
       chapterTitle: 'h2',
       content: '.noveltext',
-      elementRemove: 'div'
+      elementRemove: 'div',
       // vip
       // http://static.jjwxc.net/tmp/fonts/jjwxcfont_00147.ttf
       // http://static.jjwxc.net/tmp/fonts/jjwxcfont_000bl.ttf
@@ -934,7 +933,7 @@
       vipChapter: '.catalog-list>li.vip>a',
       volume: () => $('.catalog-main>dt').toArray().map((i) => i.childNodes[2]),
       chapterTitle: '.chapter-title',
-      content: '.chapter-main'
+      content: '.chapter-main',
     },
     { // http://www.zhulang.com http://www.xxs8.com/
       siteName: '逐浪',
@@ -950,7 +949,7 @@
       volume: '.catalog-tit>h2',
       chapterTitle: 'h2>span',
       content: '#read-content',
-      elementRemove: 'h2,div,style,p:has(cite)'
+      elementRemove: 'h2,div,style,p:has(cite)',
     },
     { // https://www.kanshu.com
       siteName: '看书网',
@@ -962,7 +961,7 @@
       chapter: '.list>a',
       vipChapter: '.list>a.isvip',
       chapterTitle: '.contentBox .title',
-      content: '.contentBox .tempcontentBox'
+      content: '.contentBox .tempcontentBox',
     },
     { // http://vip.book.sina.com.cn
       siteName: '微博读书-书城',
@@ -975,7 +974,7 @@
       chapter: '.chapter>span>a',
       vipChapter: '.chapter>span:has(i)>a',
       chapterTitle: '.sr-play-box-scroll-t-path>span',
-      content: (doc, res, request) => window.eval(res.responseText.match(/var chapterContent = (".*")/)[1]) // eslint-disable-line no-eval
+      content: (doc, res, request) => window.eval(res.responseText.match(/var chapterContent = (".*")/)[1]), // eslint-disable-line no-eval
     },
     { // http://www.lcread.com
       siteName: '连城读书',
@@ -989,7 +988,7 @@
       vipChapter: '#abl4>table>tbody>tr>td>a[href^="http://my.lc1001.com/vipchapters"]',
       volume: '#cul>.dsh',
       chapterTitle: 'h2',
-      content: '#ccon'
+      content: '#ccon',
     },
     { // https://www.motie.com
       siteName: '磨铁中文网',
@@ -1010,7 +1009,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1022,11 +1021,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // http://www.shuhai.com
       siteName: '书海小说网',
@@ -1041,7 +1040,7 @@
       volume: 'span.chapter-item',
       chapterTitle: '.chapter-name',
       content: '.chapter-item:has(.chaper-info)',
-      elementRemove: 'div'
+      elementRemove: 'div',
     },
     { // http://www.xiang5.com
       siteName: '香网',
@@ -1056,7 +1055,7 @@
       volume: '.lb>h2',
       chapterTitle: '.pos>h1',
       content: '.xsDetail',
-      elementRemove: 'p[style],p>*'
+      elementRemove: 'p[style],p>*',
     },
     { // https://www.fmx.cn/
       siteName: '凤鸣轩小说网',
@@ -1071,7 +1070,7 @@
       vipChapter: '.art_fnlistbox_vip>ul>li>span>a:visible',
       chapterTitle: 'h1',
       content: '#content',
-      elementRemove: 'div,p:last'
+      elementRemove: 'div,p:last',
     },
     { // https://www.kujiang.com
       siteName: '酷匠网',
@@ -1088,8 +1087,8 @@
       content: '.content',
       elementRemove: 'span',
       contentReplace: [
-        ['.*酷.*匠.*网.*']
-      ]
+        ['.*酷.*匠.*网.*'],
+      ],
     },
     { // http://www.tadu.com
       siteName: '塔读文学',
@@ -1111,7 +1110,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: request.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1121,11 +1120,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://yuedu.163.com
       siteName: '网易云阅读',
@@ -1147,7 +1146,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1159,11 +1158,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://guofeng.yuedu.163.com/ https://caiwei.yuedu.163.com/
       siteName: '网易旗下',
@@ -1177,7 +1176,7 @@
       chapter: '.item>a',
       vipChapter: '.vip>a',
       volume: '.title-1',
-      deal: async (chapter) => Rule.special.find((i) => i.siteName === '网易云阅读').deal(chapter)
+      deal: async (chapter) => Rule.special.find((i) => i.siteName === '网易云阅读').deal(chapter),
     },
     { // https://www.yueduyun.com/
       siteName: '阅路小说网',
@@ -1199,7 +1198,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1213,11 +1212,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // http://www.ycsd.cn
       siteName: '原创书殿',
@@ -1231,7 +1230,7 @@
       chapter: '.directory-item>a',
       vipChapter: '.directory-item>a:has(img)',
       chapterTitle: '.chapter-wrap>h1',
-      content: '.content'
+      content: '.content',
     },
     { // http://www.longruo.com
       siteName: '龙若中文网',
@@ -1245,7 +1244,7 @@
       chapter: '.catalog>li>a',
       vipChapter: '.catalog>li>a:has(span.mark)',
       chapterTitle: 'h1',
-      content: '.article'
+      content: '.article',
     },
     { // http://www.hxtk.com
       siteName: '华夏天空',
@@ -1259,7 +1258,7 @@
       chapter: '.volume-item a',
       vipChapter: '.volume-item:has(i) a',
       chapterTitle: 'h2',
-      content: '#chapter-content-str'
+      content: '#chapter-content-str',
     },
     { // https://www.hongshu.com
       siteName: '红薯中文网',
@@ -1283,7 +1282,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1293,7 +1292,7 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         const content = await new Promise((resolve, reject) => {
@@ -1305,7 +1304,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1318,11 +1317,11 @@
               } catch (error) {
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // http://www.qwsy.com
       siteName: '蔷薇书院',
@@ -1343,7 +1342,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1353,12 +1352,12 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
       },
-      elementRemove: 'font,br'
+      elementRemove: 'font,br',
     },
     { // http://www.shulink.com
       siteName: '书连',
@@ -1375,8 +1374,8 @@
       content: '#acontent',
       elementRemove: 'div',
       contentReplace: [
-        [/作者.*?提醒.*/, '']
-      ]
+        [/作者.*?提醒.*/, ''],
+      ],
     },
     { // http://www.soudu.net http://www.wjsw.com/
       siteName: '搜读网',
@@ -1391,7 +1390,7 @@
       vipChapter: '.list>li:has(span.r_red)>a',
       chapterTitle: 'h1',
       content: '#content',
-      elementRemove: 'div'
+      elementRemove: 'div',
     },
     { // http://www.fbook.net
       siteName: '天下书盟',
@@ -1405,7 +1404,7 @@
       vipChapter: '.mb_content a:has(span:contains("VIP"))',
       volume: '.mb_content>li[style]',
       chapterTitle: '[itemprop="headline"]',
-      content: '[itemprop="acticleBody"]'
+      content: '[itemprop="acticleBody"]',
     },
     { // https://book.tiexue.net
       siteName: '铁血读书',
@@ -1420,7 +1419,7 @@
       vipChapter: '.list01>li>p>span>a',
       volume: '.dictry>h2',
       chapterTitle: '#contents>h1',
-      content: '#mouseRight'
+      content: '#mouseRight',
     },
     { // https://www.yokong.com
       siteName: '悠空网',
@@ -1438,8 +1437,8 @@
       content: '.article-con',
       contentReplace: [
         ['请记住本站：.*'],
-        ['微信公众号：.*']
-      ]
+        ['微信公众号：.*'],
+      ],
     },
     { // https://www.chuangbie.com
       siteName: '创别书城',
@@ -1459,7 +1458,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1475,11 +1474,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://www.msxf.cn/
       siteName: '陌上香坊',
@@ -1494,7 +1493,7 @@
       vipChapter: '.chapter-list li:has(.vipico)>a',
       chapterTitle: '.article-title',
       content: '#article-content-body',
-      elementRemove: 'p:contains("www.msxf.cn")'
+      elementRemove: 'p:contains("www.msxf.cn")',
     },
     { // https://www.lajixs.com/
       siteName: '辣鸡小说',
@@ -1517,7 +1516,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1529,12 +1528,12 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
       },
-      elementRemove: 'lg'
+      elementRemove: 'lg',
     },
     { // https://www.popo.tw
       siteName: 'POPO原創市集',
@@ -1548,7 +1547,7 @@
       chapterTitle: '.read-txt>h2',
       content: '.read-txt',
       getChapters: (doc) => Rule.special.find((i) => i.siteName === 'PO18臉紅心跳').getChapters(doc),
-      elementRemove: 'blockquote'
+      elementRemove: 'blockquote',
     },
     { // https://www.po18.tw/
       siteName: 'PO18臉紅心跳',
@@ -1567,7 +1566,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1576,7 +1575,7 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
@@ -1587,17 +1586,17 @@
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
             Referer: window.location.href,
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
           },
-          responseType: 'document'
+          responseType: 'document',
         });
         return $('a', res.response).toArray().map((i) => ({
           title: $(i).text(),
           url: $(i).prop('href'),
-          vip: $(i).is(':has(img)')
+          vip: $(i).is(':has(img)'),
         }));
       },
-      elementRemove: 'blockquote'
+      elementRemove: 'blockquote',
     },
     { // https://www.qidian.com.tw/
       siteName: '起点台湾',
@@ -1612,7 +1611,7 @@
       vipChapter: '.chapter.pay>a',
       volume: '.chapter-list-all>ul>li.TITLE',
       chapterTitle: 'h1',
-      content: '.box-text dd'
+      content: '.box-text dd',
     },
     { // https://www.linovel.net/
       siteName: '轻之文库',
@@ -1625,7 +1624,7 @@
       chapter: '.chapter a',
       volume: '.volume-title>a',
       chapterTitle: '.article-title',
-      content: '.article-text'
+      content: '.article-text',
     },
     { // https://www.gongzicp.com/
       siteName: '长佩文学网',
@@ -1654,12 +1653,12 @@
               title: json.data.chapterList[i].name,
               url: `https://www.gongzicp.com/read-${json.data.chapterList[i].id}.html`,
               vip: json.data.chapterList[i].pay,
-              volume
+              volume,
             });
           }
         }
         return chapters;
-      }
+      },
     },
     { // https://sosad.fun/
       siteName: 'SosadFun|废文',
@@ -1671,7 +1670,7 @@
       chapter: '.panel-body .table th:nth-child(1)>a[href*="/posts/"]',
       chapterTitle: 'strong.h3',
       content: '.post-body>.main-text:nth-child(1)',
-      elementRemove: 'div:last-child,.hidden'
+      elementRemove: 'div:last-child,.hidden',
     },
     { // https://www.myhtlmebook.com/ https://www.myhtebooks.com/ https://www.haitbook.com/
       siteName: '海棠文化线上文学城',
@@ -1707,12 +1706,12 @@
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 Referer: request.raw.url,
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
               },
               data: `paperid=${paperid}&bookwritercode=${bookwritercode}&bookid=${bookid}&repapergbookid=0&papergbookpage=1&repostmsgtxt=${msgs[Math.floor(Math.random() * msgs.length)]}&postmode=1&giftid=0`,
               onload(res) {
                 resolve(res);
-              }
+              },
             }, null, 0, true);
           });
 
@@ -1723,12 +1722,12 @@
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 Referer: request.raw.url,
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
               },
               data: `paperid=${paperid}&bookwritercode=${bookwritercode}`,
               onload(res) {
                 resolve(res);
-              }
+              },
             }, null, 0, true);
           });
           egg = res2.responseText;
@@ -1748,7 +1747,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: request.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             data: `paperid=${paperid}&vercodechk=${vercodechk}`,
             onload(res, request) {
@@ -1759,7 +1758,7 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content + (writersay ? `${writersay}<br>---<br>以下正文` : '') + (egg ? `<br>---<br>彩蛋內容：<br>${egg}` : '');
@@ -1773,16 +1772,16 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: window.location.href,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
-            responseType: 'document'
+            responseType: 'document',
           });
           chapters.push(...$('.uk-list>li>a[href^="/?act=showpaper&paperid="]', res.response).toArray().map((i) => ({
             title: $(i).text(),
             url: $(i).prop('href'),
             vip: $(i).is('.uk-list>li:not(:contains("免費"))>a[href^="/?act=showpaper&paperid="]'),
             volume: $(i).parent().prevAll('.uk-list>li:not(:has(a[href^="/?act=showpaper&paperid="])):has(b>font)').eq(0)
-              .text()
+              .text(),
           })));
           if ($('.uk-list>li:has([onclick^="showbooklistpage"])', res.response).length && $('.uk-list>li:has([onclick^="showbooklistpage"])', res.response).eq(0).find('font:has(b)').next('a').length) {
             pages++;
@@ -1814,7 +1813,7 @@
             method: 'POST',
             headers: {
               Referer: chapter.url,
-              'x-csrf-token': token
+              'x-csrf-token': token,
             },
             onload(res, request) {
               try {
@@ -1825,13 +1824,13 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
       },
       elementRemove: '.hidden',
-      thread: 1
+      thread: 1,
     },
     { // https://www.youdubook.com/ https://www.xrzww.com/
       siteName: '有毒小说网/息壤中文网',
@@ -1851,10 +1850,10 @@
           url: `${window.location.origin.replace('www', 'pre-api')}/api/readNew?nid=${urlArr[4]}&vid=${i.chapter_vid}&chapter_id=${i.chapter_id}&chapter_order=${i.chapter_order}&showpic=false`,
           title: i.chapter_name,
           vip: i.chapter_ispay,
-          volume: volumes.find((j) => j.volume_id === i.chapter_vid).volume_name
+          volume: volumes.find((j) => j.volume_id === i.chapter_vid).volume_name,
         }));
       },
-      content: (doc, res, request) => JSON.parse(res.response).data.content
+      content: (doc, res, request) => JSON.parse(res.response).data.content,
     },
     { // https://www.ireader.com/
       siteName: '掌阅书城',
@@ -1878,7 +1877,7 @@
             chapters.push({
               title: i.chapterName,
               url: `https://www.ireader.com/index.php?ca=Chapter.Index&pca=Chapter.Index&bid=${bid}&cid=${i.id}`,
-              vip: i.priceTag === '收费'
+              vip: i.priceTag === '收费',
             });
           }
           if (json.list[chapters.length - 1].priceTag === '收费') break;
@@ -1886,7 +1885,7 @@
           if (total >= json.page.total) break;
         }
         return chapters;
-      }
+      },
     },
     { // https://read.douban.com/
       siteName: '豆瓣阅读',
@@ -1906,7 +1905,7 @@
             chapters.push({
               title: item.title,
               url: `${window.location.origin}${item.links.reader}`,
-              vip: !item.isPurchased && item.price
+              vip: !item.isPurchased && item.price,
             });
           }
           if (chapters.length >= json.total) break;
@@ -1927,7 +1926,7 @@
           const f = new Uint8Array(i, 0, d);
           const g = {
             name: 'AES-CBC',
-            iv: p
+            iv: p,
           };
           return (function () {
             const t = unsafeWindow.Ark.user;
@@ -1935,7 +1934,7 @@
             const i = (new TextEncoder()).encode(e);
             return window.crypto.subtle.digest('SHA-256', i).then((t) => window.crypto.subtle.importKey('raw', t, 'AES-CBC', !0, ['decrypt']));
           }()).then((t) => window.crypto.subtle.decrypt(g, t, f)).then((t) => JSON.parse((new TextDecoder()).decode(t)));
-        }
+        },
 
       },
       deal: async (chapter) => {
@@ -1949,7 +1948,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -1959,7 +1958,7 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         if (content) {
@@ -1967,7 +1966,7 @@
           content = {
             content: chapter.url.match('read.douban.com/reader/column') ? json.posts[0].contents.filter((i) => i.data && i.data.text).map((i) => i.data.text).flat().map((i) => i.content)
               .join('\n') : json.posts[0].contents.filter((i) => i.data && i.data.text).map((i) => (i.type === 'headline' ? '\n' : '') + i.data.text).join('\n'),
-            title: json.posts[0].title
+            title: json.posts[0].title,
           };
         }
         return content;
@@ -1982,7 +1981,7 @@
       intro: '[itemprop="description"]>.info',
       cover: '.cover>[itemprop="image"]',
       chapter: '.btn-read',
-      deal: async (chapter) => Rule.special.find((i) => i.siteName === '豆瓣阅读').deal(chapter)
+      deal: async (chapter) => Rule.special.find((i) => i.siteName === '豆瓣阅读').deal(chapter),
     },
     // 轻小说
     { // https://www.wenku8.net
@@ -1997,7 +1996,7 @@
       chapter: '.css>tbody>tr>td>a',
       volume: '.vcss',
       chapterTitle: '#title',
-      content: '#content'
+      content: '#content',
     },
     { // https://book.sfacg.com
       siteName: 'SF轻小说',
@@ -2014,8 +2013,8 @@
       chapterTitle: '.article-title',
       content: '#ChapterBody',
       vip: {
-        deal: async (chapter) => `<img src="http://book.sfacg.com/ajax/ashx/common.ashx?op=getChapPic&tp=true&quick=true&cid=${chapter.url.split('/')[5]}&nid=${window.location.href.split('/')[4]}&font=16&lang=&w=728">`
-      }
+        deal: async (chapter) => `<img src="http://book.sfacg.com/ajax/ashx/common.ashx?op=getChapPic&tp=true&quick=true&cid=${chapter.url.split('/')[5]}&nid=${window.location.href.split('/')[4]}&font=16&lang=&w=728">`,
+      },
     },
     { // https://www.qinxiaoshuo.com/
       siteName: '亲小说网',
@@ -2028,7 +2027,7 @@
       chapter: '.chapter>a',
       volume: '.volume_title>span',
       chapterTitle: '.c_title+.c_title>h3',
-      content: '#chapter_content'
+      content: '#chapter_content',
     },
     { // https://www.linovelib.com/
       siteName: '轻小说文库(linovelib.com)',
@@ -2042,7 +2041,7 @@
       chapter: '.chapter-list a',
       volume: '.volume',
       chapterTitle: '#mlfy_main_text>h1',
-      content: '.read-content'
+      content: '.read-content',
     },
     { // https://www.esjzone.cc/
       siteName: 'ESJ Zone',
@@ -2054,7 +2053,7 @@
       cover: '.product-gallery img',
       chapter: '#chapterList a',
       chapterTitle: 'h2',
-      content: '.forum-content'
+      content: '.forum-content',
     },
     { // https://www.esjzone.cc/forum/ 论坛
       siteName: 'ESJ Zone 论坛',
@@ -2066,7 +2065,7 @@
       cover: '.product-gallery img',
       chapter: '.forum-list a',
       chapterTitle: 'h2',
-      content: '.forum-content'
+      content: '.forum-content',
     },
     { // http://www.shencou.com/
       siteName: '神凑小说网',
@@ -2081,7 +2080,7 @@
       volume: '.ttname>h2',
       chapterTitle: '>h1',
       content: 'body',
-      elementRemove: 'div,script,center'
+      elementRemove: 'div,script,center',
     },
     { // http://book.suixw.com
       siteName: '随想轻小说',
@@ -2097,8 +2096,8 @@
       chapterTitle: '#title',
       content: '#content',
       contentReplace: [
-        [/pic.wenku8.com/g, 'picture.wenku8.com']
-      ]
+        [/pic.wenku8.com/g, 'picture.wenku8.com'],
+      ],
     },
     { // https://colorful-fantasybooks.com/
       siteName: '繽紛幻想',
@@ -2111,7 +2110,7 @@
       chapter: '.works-chapter-item>a',
       volume: '.vloume',
       chapterTitle: '#content>h2',
-      content: '.content'
+      content: '.content',
     },
     { // https://www.lightnovel.us/
       siteName: '轻之国度',
@@ -2130,9 +2129,9 @@
           url: request.raw.url,
           content: item,
           contentRaw: item,
-          document: res.responseText
+          document: res.responseText,
         })));
-      }
+      },
     },
     { // https://www.lightnovel.us/
       siteName: '轻之国度',
@@ -2144,7 +2143,7 @@
       cover: () => unsafeWindow.__NUXT__.data[0].series.cover,
       getChapters: () => window.__NUXT__.data[0].series.articles.sort((a, b) => a.aid - b.aid).map((i) => ({ title: i.title, url: `https://www.lightnovel.us/detail/${i.aid}` })),
       chapterTitle: '.article-title',
-      content: (doc, res, request) => Rule.special.find((i) => i.siteName === '轻之国度').content(doc, res, request)
+      content: (doc, res, request) => Rule.special.find((i) => i.siteName === '轻之国度').content(doc, res, request),
     },
     { // https://ncode.syosetu.com/
       siteName: '小説家になろう',
@@ -2159,7 +2158,7 @@
         const content = $('#novel_honbun', res.responseText).html();
         const authorSays = $('#novel_a', res.responseText).html();
         return content + '-'.repeat(20) + authorSays;
-      }
+      },
     },
     { // https://www.wattpad.com/
       siteName: 'Wattpad',
@@ -2176,7 +2175,7 @@
         .map((i) => i.href)
         .reverse(),
       chapterNext: (doc, res, request) => $('.table-of-contents>li.active', res.responseText).nextAll().find('a').toArray()
-        .map((i) => i.href)
+        .map((i) => i.href),
     },
     { // http://xs.kdays.net/index
       siteName: '萌文库',
@@ -2190,7 +2189,7 @@
       chapter: '#vols>div>div>ul>li>a',
       volume: '#vols>div>div>h2',
       chapterTitle: '.chapterName',
-      content: 'article'
+      content: 'article',
     },
     { // https://www.biquge1000.com/
       siteName: '吾的轻小说',
@@ -2203,7 +2202,7 @@
       chapter: '#list-chapterAll>dl>dd>a',
       volume: '#list-chapterAll>dl>dt',
       chapterTitle: '.readTitle',
-      content: '#htmlContent'
+      content: '#htmlContent',
     },
     { // https://novel.crazyideal.com/
       siteName: '雷姆轻小说',
@@ -2215,7 +2214,7 @@
       cover: '.novel_info_main>img',
       chapter: '#ul_all_chapters>li>a',
       chapterTitle: '.style_h1',
-      content: '#article'
+      content: '#article',
     },
     // 盗贴
     { // https://www.xiaoshuokan.com
@@ -2237,15 +2236,15 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               resolve(res.responseText);
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://www.ggdtxt.com
       siteName: '格格党',
@@ -2265,7 +2264,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -2277,11 +2276,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://www.qiqint.com/
       siteName: '平板电子书网',
@@ -2294,7 +2293,7 @@
       chapter: '.list>dl>dd>a',
       chapterTitle: 'h1',
       content: '.content',
-      elementRemove: 'div'
+      elementRemove: 'div',
     },
     { // https://tw.hjwzw.com
       siteName: '黄金屋中文',
@@ -2307,8 +2306,8 @@
       content: '#AllySite+div',
       elementRemove: 'a,b',
       contentReplace: [
-        ['(请记|請記)住本站域名.*']
-      ]
+        ['(请记|請記)住本站域名.*'],
+      ],
     },
     { // http://www.5858xs.com
       siteName: '58小说网',
@@ -2322,7 +2321,7 @@
       chapter: 'td>a[href$=".html"]',
       chapterTitle: 'h1',
       content: '#content',
-      elementRemove: 'fieldset,table,div'
+      elementRemove: 'fieldset,table,div',
     },
     { // https://www.bookba8.com/
       siteName: '在线书吧',
@@ -2335,7 +2334,7 @@
       cover: '.detail-pic>img',
       chapter: '.content>.txt-list>li>a',
       chapterTitle: 'h1',
-      content: '.note'
+      content: '.note',
     },
     { // http://www.quanbensw.cn/
       siteName: '全本书屋(quanbensw)',
@@ -2347,7 +2346,7 @@
       cover: '[alt="avatar"]',
       // chapter: '[href^="/index.php?s=/Home/Index/info/id"]',
       chapterTitle: '.content-header h1',
-      content: '.article-story'
+      content: '.article-story',
     },
     { // https://www.yooread.net/
       siteName: '悠读文学网',
@@ -2360,7 +2359,7 @@
       chapter: '#booklist .bookchapter+table a[href^="/"]',
       chapterTitle: 'h1',
       content: '#TextContent',
-      elementRemove: 'div'
+      elementRemove: 'div',
     },
     { // https://www.wanbentxt.com/
       siteName: '完本神站',
@@ -2381,8 +2380,8 @@
         [/^<br>(&nbsp;)+《[完本神站]》.*/m],
         [/^<br>(&nbsp;)+喜欢神站记得收藏.*/m],
         [/^<br>(&nbsp;)+支持.*把本站分享那些需要的小伙伴.*/m], // eslint-disable-line no-control-regex
-        [/--&gt;&gt;本章未完，点击下一页继续阅读/]
-      ]
+        [/--&gt;&gt;本章未完，点击下一页继续阅读/],
+      ],
     },
     { // https://www.qiushubang.com/
       siteName: '求书帮',
@@ -2394,7 +2393,7 @@
       cover: '.bookImg>img',
       chapter: '.chapterCon>ul>li>a',
       chapterTitle: '.articleTitle>h2',
-      content: '.articleCon>p:nth-child(3)'
+      content: '.articleCon>p:nth-child(3)',
     },
     { // https://www.lhjypx.net/ // TODO
       siteName: '笔下看书阁',
@@ -2407,7 +2406,7 @@
       cover: '.info1>img',
       chapter: '.list-charts [href*="/book/"],.panel-chapterlist [href*="/book/"]',
       chapterTitle: '#chaptername',
-      content: '#txt'
+      content: '#txt',
     },
     { // http://m.yuzhaige.cc/
       siteName: '御书阁',
@@ -2431,7 +2430,7 @@
         }
         return arr.map((i) => i.textContent);
       },
-      chapterNext: '.chapterPages>a.curr~a,.p3>a'
+      chapterNext: '.chapterPages>a.curr~a,.p3>a',
     },
     { // https://www.ruth-tshirt.com/
       siteName: '老猫小说',
@@ -2445,7 +2444,7 @@
         const str = '的一是了我不人在他有这个上们来到时大地为子中你说生国年着就那和要她出也得里后自以会家可下而过天去能对小多然于心学么之都好看起发当没成只如事把还用第样道想作种开美总从无情己面最女但现前些所同日手又行意动';
         content = content.replace(/[\ue800-\ue863]/g, (matched) => str[matched.charCodeAt(0) - 0xe800]);
         return content;
-      }
+      },
     },
     { // https://www.19826.net/
       siteName: '19826文学',
@@ -2458,7 +2457,7 @@
       chapter: '#list-chapterAll .panel-chapterlist>dd>a',
       chapterTitle: '.readTitle',
       content: '.panel-readcontent>.panel-body>div[id]',
-      chapterNext: async (doc, res, request) => (res.responseText.match(/url = "(.*?)";/) ? res.responseText.match(/url = "(.*?)";/)[1] : [])
+      chapterNext: async (doc, res, request) => (res.responseText.match(/url = "(.*?)";/) ? res.responseText.match(/url = "(.*?)";/)[1] : []),
     },
     { // https://www.lewenn.com/
       siteName: '乐文小说网',
@@ -2472,7 +2471,7 @@
       chapterTitle: '.head_title>h2',
       iframe: true,
       content: '#content',
-      elementRemove: 'script,div'
+      elementRemove: 'script,div',
     },
     { // http://www.daomubiji.org/
       siteName: '盗墓笔记',
@@ -2482,7 +2481,7 @@
       chapter: '.panel>ul>li>span>a',
       volume: '.panel>h2',
       chapterTitle: '.bg>h1',
-      content: '.bg>.content'
+      content: '.bg>.content',
     },
     { // https://www.va-etong.com/
       siteName: '全本小说网',
@@ -2509,7 +2508,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: request.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -2519,11 +2518,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://www.shuquge.com/
       siteName: '书趣阁',
@@ -2538,7 +2537,7 @@
       chapterTitle: '.content>h1',
       content: '#content',
       thread: 1,
-      contentReplace: [['https://www.shuquge.com/.*'], ['请记住本书首发域名：www.shuquge.com。书趣阁_笔趣阁手机版阅读网址：m.shuquge.com']]
+      contentReplace: [['https://www.shuquge.com/.*'], ['请记住本书首发域名：www.shuquge.com。书趣阁_笔趣阁手机版阅读网址：m.shuquge.com']],
     },
     { // https://www.kuwx.net/
       siteName: '系统小说网',
@@ -2684,8 +2683,8 @@
         ['{you}', '诱'],
         ['{yu}', '欲'],
         ['{zhang}', '胀'],
-        ['{zuo}', '坐']
-      ]
+        ['{zuo}', '坐'],
+      ],
     },
     { // http://www.22lewen.com/
       siteName: '乐文小说网',
@@ -2694,7 +2693,7 @@
       title: '.book-title>h1',
       chapter: '.chapterlist>dd>a',
       chapterTitle: '#BookCon>h1',
-      content: '#BookText'
+      content: '#BookText',
     },
     { // http://www.shubao202.com/index.php http://lawen24.com/
       siteName: '书包网',
@@ -2703,7 +2702,7 @@
       title: 'h1',
       chapter: '.mulu a',
       chapterTitle: 'h1',
-      content: '.mcc'
+      content: '.mcc',
     },
     { // https://www.cool18.com/bbs4/index.php
       siteName: '禁忌书屋',
@@ -2715,7 +2714,7 @@
       content: '.show_content>pre',
       chapterPrev: '.show_content>p>a',
       chapterNext: 'body>table td>p:first+ul a:not(:contains("(无内容)")),.show_content>pre a',
-      elementRemove: 'font[color*="E6E6DD"],b:contains("评分完成")'
+      elementRemove: 'font[color*="E6E6DD"],b:contains("评分完成")',
     },
     { // http://www.7zxs.cc/
       siteName: '7z小说网',
@@ -2727,8 +2726,8 @@
       chapterTitle: '.nr_title>h3',
       content: '#htmlContent',
       contentReplace: [
-        ['登陆7z小说网.*']
-      ]
+        ['登陆7z小说网.*'],
+      ],
     },
     { // http://www.qdxiaoshuo.net/
       siteName: '青豆小说网',
@@ -2737,7 +2736,7 @@
       title: '.kui-left.kui-fs32',
       chapter: '.kui-item>a',
       chapterTitle: 'h1.kui-ac',
-      content: '#kui-page-read-txt'
+      content: '#kui-page-read-txt',
     },
     { // https://www.shushuwu8.com/
       siteName: '书书屋',
@@ -2747,7 +2746,7 @@
       writer: '.ml_title>h1+span',
       chapter: '.ml_main>dl>dd>a',
       chapterTitle: 'h2',
-      content: '.yd_text2'
+      content: '.yd_text2',
     },
     { // http://www.cuiweijux.com/
       siteName: '翠微居小说网',
@@ -2759,7 +2758,7 @@
       cover: 'img[onerror]',
       chapter: '.chapters:eq(1)>.chapter>a',
       chapterTitle: '.title',
-      content: '#content'
+      content: '#content',
     },
     { // http://www.4shubao.com/
       siteName: '4书包',
@@ -2768,7 +2767,7 @@
       title: 'h1',
       chapter: '.chapterlist a',
       chapterTitle: 'h1',
-      content: '#BookText'
+      content: '#BookText',
     },
     { // http://www.xitxt.net
       siteName: '喜书网',
@@ -2778,7 +2777,7 @@
       chapter: '.list a',
       chapterTitle: 'h1',
       content: '.chapter',
-      elementRemove: 'font'
+      elementRemove: 'font',
     },
     { // http://www.shenshuw.com
       siteName: '神书网',
@@ -2787,7 +2786,7 @@
       title: 'h1',
       chapter: '#chapterlist a',
       chapterTitle: 'h1',
-      content: '#book_text'
+      content: '#book_text',
     },
     { // https://www.quanshuwan.com/
       siteName: '全本书屋',
@@ -2800,7 +2799,7 @@
       chapter: '#readlist a',
       chapterTitle: 'h1',
       content: '#content',
-      elementRemove: 'div'
+      elementRemove: 'div',
     },
     { // https://www.dzwx520.com/
       siteName: '大众小说网',
@@ -2810,7 +2809,7 @@
       chapter: '.book_list a',
       chapterTitle: 'h1',
       content: '#htmlContent',
-      elementRemove: 'script,div'
+      elementRemove: 'script,div',
     },
     { // http://www.mlxiaoshuo.com
       siteName: '魔龙小说网',
@@ -2819,7 +2818,7 @@
       title: '.colorStyleTitle',
       chapter: '.zhangjieUl a',
       chapterTitle: '.colorStyleTitle',
-      content: '.textP'
+      content: '.textP',
     },
     { // https://www.123xiaoqiang.in/
       siteName: '小强小说网',
@@ -2828,7 +2827,7 @@
       title: 'h1',
       chapter: '.liebiao a',
       chapterTitle: 'h2',
-      content: '#content'
+      content: '#content',
     },
     { // http://www.haxxs8.com/
       siteName: '海岸线文学网',
@@ -2842,7 +2841,7 @@
       chapter: '.ccss a',
       chapterTitle: '#content h2',
       content: 'td[id^="content"]',
-      elementRemove: 'div,span,font'
+      elementRemove: 'div,span,font',
     },
     { // http://www.huaisu8.com
       siteName: '怀素吧小说',
@@ -2851,7 +2850,7 @@
       title: '.info>h2',
       chapter: '.index-body .newzjlist:nth-child(4) .dirlist a',
       chapterTitle: '.play-title>h1',
-      content: '.txt_tcontent'
+      content: '.txt_tcontent',
     },
     { // https://xxread.net/
       siteName: '肉肉阅读', // 与网易云阅读相同模板
@@ -2869,7 +2868,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -2882,7 +2881,7 @@
                 resolve('');
               }
             },
-            checkLoad: () => true
+            checkLoad: () => true,
           }, null, 0, true);
         });
         return content;
@@ -2896,11 +2895,11 @@
         for (let i = 1; i < json.portions.length; i++) {
           chapters.push({
             title: json.portions[i].title,
-            url: `https://xxread.net/book_reader.php?b=${info[0]}&c=${json.portions[i].id}`
+            url: `https://xxread.net/book_reader.php?b=${info[0]}&c=${json.portions[i].id}`,
           });
         }
         return chapters;
-      }
+      },
     },
     { // https://18h.mm-cg.com/novel/index.htm
       siteName: '18H',
@@ -2908,7 +2907,7 @@
       title: '.label>div',
       chapter: '.novel_leftright>span>a:visible',
       chapterTitle: 'h1',
-      content: '#novel_content_txtsize'
+      content: '#novel_content_txtsize',
     },
     { // https://hao.je51.com/ https://je51.com/
       siteName: 'je51',
@@ -2919,7 +2918,7 @@
       intro: '#module8>.story-cat-list .text',
       chapter: '.story-list .container>.autocol>a',
       chapterTitle: '#module8>.navlinks>.navtitle:last',
-      content: '#story-text'
+      content: '#story-text',
     },
     { // https://aastory.space/
       siteName: '疯情书库',
@@ -2939,7 +2938,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: request.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -2949,11 +2948,11 @@
                 console.error(error);
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
-      }
+      },
     },
     { // https://aaread.club/ 仿起点样式
       siteName: '疯情阅读',
@@ -2974,7 +2973,7 @@
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               Referer: chapter.url,
-              'X-Requested-With': 'XMLHttpRequest'
+              'X-Requested-With': 'XMLHttpRequest',
             },
             onload(res, request) {
               try {
@@ -2983,14 +2982,14 @@
               } catch (error) {
                 resolve('');
               }
-            }
+            },
           }, null, 0, true);
         });
         return content;
       },
       chapterPrev: (doc) => [$('[id^="chapter-"]', doc).attr('data-purl')],
-      chapterNext: (doc) => [$('[id^="chapter-"]', doc).attr('data-nurl')]
-    }
+      chapterNext: (doc) => [$('[id^="chapter-"]', doc).attr('data-nurl')],
+    },
   ];
   Rule.template = [ // 模板网站
     { // http://www.xbiquge.la/54/54439/
@@ -3003,7 +3002,7 @@
       chapter: '#list>dl>dd>a',
       chapterTitle: 'h1',
       content: '#content',
-      elementRemove: 'a,p:empty,script'
+      elementRemove: 'a,p:empty,script',
     },
     { // https://www.biqukan.com/57_57242/
       siteName: '模板网站-笔趣阁1',
@@ -3015,7 +3014,7 @@
       chapter: '.listmain>dl>dd+dt~dd>a',
       chapterTitle: 'h1',
       content: '#content',
-      elementRemove: 'a,p:empty,script'
+      elementRemove: 'a,p:empty,script',
     },
     { // https://www.x23qb.com/book/775/
       siteName: '模板网站-铅笔小说',
@@ -3027,10 +3026,9 @@
       chapter: '#chapterList>li>a',
       chapterTitle: 'h1',
       content: '.read-content',
-      elementRemove: 'dt,div'
-    }
+      elementRemove: 'dt,div',
+    },
   ];
-  /* eslint-enable comma-dangle  */
 
   if (Config.customize) {
     try {
