@@ -2,9 +2,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.422
+// @version     3.5.440
 // @created     2020-03-16 16:59:04
-// @modified    2021-12-05 15:37:02
+// @modified    2021-12-05 15:39:17
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -392,7 +392,7 @@
       content: '.tt2',
     },
     // 正版
-    { // https://www.qidian.com https://www.hongxiu.com https://www.readnovel.com https://www.xs8.cn // TODO 是否还有自定义字体
+    { // https://www.qidian.com https://www.hongxiu.com https://www.readnovel.com https://www.xs8.cn
       siteName: '起点中文网',
       url: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/(info|book)\/\d+/,
       chapterUrl: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/chapter/,
@@ -401,72 +401,16 @@
       intro: '.book-intro',
       cover: '.J-getJumpUrl>img',
       chapter: '.volume>.cf>li a',
-      vipChapter: '.volume>.cf>li:has(.iconfont) a',
+      vipChapter: '.volume>.cf>li a[href^="//vipreader.qidian.com"]',
       volume: () => $('.volume>h3').toArray().map((i) => i.childNodes[2]),
-      deal: async (chapter) => {
-        const content = {};
-        if (chapter.url.match(/vipreader.qidian.com/)) {
-          await new Promise((resolve, reject) => {
-            xhr.add({
-              chapter,
-              url: `https://vipreader.qidian.com/ajax/chapter/chapterInfo?_csrfToken=${document.cookie.match('_csrfToken=(.*?);')[1]}&bookId=${chapter.url.split('/')[4]}&chapterId=${chapter.url.split('/')[5]}&authorId=${$('.writer,.info>a[href*="/author/"]').attr('href').match(/\/author\/(\d+)\//)[1]}`,
-              method: 'GET',
-              onload(res, request) {
-                try {
-                  const json = JSON.parse(res.responseText);
-                  content.title = json.data.chapterInfo.chapterName;
-
-                  if (json.data.chapterInfo.fontsConf) {
-                    if (!fontLib) fontLib = JSON.parse(GM_getResourceText('fontLib')).reverse();
-                    const font = json.data.chapterInfo.fontsConf.ttf.base64Content;
-                    opentype.load(font, (err, font) => {
-                      if (err) resolve();
-                      const obj = {};
-                      const undefinedFont = [];
-                      for (const i in font.glyphs.glyphs) {
-                        const data = font.glyphs.glyphs[i].path.toPathData();
-
-                        const key = fontLib.find((i) => i.path === data);
-                        if (key) obj[font.glyphs.glyphs[i].unicode] = key.unicode;
-                        if (!key) undefinedFont.push(data);
-                      }
-                      if (undefinedFont.length) console.error('未确定字符', undefinedFont);
-                      content.content = json.data.chapterInfo.content.replace(/&#(\d+);/g, (matched, m1) => (m1 in obj ? obj[m1] : matched));
-                      resolve();
-                    });
-                  } else {
-                    content.content = json.data.chapterInfo.content;
-                    resolve();
-                  }
-                } catch (error) {
-                  console.error(error);
-                  resolve();
-                }
-              },
-            }, null, 0, true);
-          });
-        } else {
-          await new Promise((resolve, reject) => {
-            xhr.add({
-              chapter,
-              url: chapter.url,
-              method: 'GET',
-              responseType: 'document',
-              onload(res, request) {
-                content.title = $('.j_chapterName', res.response).text();
-                content.content = $('.j_readContent', res.response).html();
-                resolve();
-              },
-            }, null, 0, true);
-          });
-        }
-        return content;
-      },
-      contentReplace: [
-        [/<p>\s+.<\/p>/g, ''],
-      ],
+      chapterTitle: '.j_chapterName',
+      content: '.j_readContent',
+      elementRemove: '.review-count,span[style]',
       chapterPrev: (doc) => [$('[id^="chapter-"]', doc).attr('data-purl')],
       chapterNext: (doc) => [$('[id^="chapter-"]', doc).attr('data-nurl')],
+      vip: {
+        iframe: async (win) => waitFor(() => win.enContent === undefined && win.cuChapterId === undefined && win.fEnS === undefined),
+      },
     },
     { // https://www.ciweimao.com
       siteName: '刺猬猫',
