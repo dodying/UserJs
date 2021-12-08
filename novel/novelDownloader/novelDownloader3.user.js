@@ -2,13 +2,15 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.440
+// @version     3.5.445
 // @created     2020-03-16 16:59:04
-// @modified    2021-12-05 15:39:17
+// @modified    2021-12-08 19:55:48
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
+// @downloadURL https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
+// @updateURL   https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
 // @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=977735
@@ -20,7 +22,7 @@
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.0.0/jszip.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js
-// @require     https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js
+// @require     https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js
 
 // resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
 // @resource fontLib https://cdn.jsdelivr.net/gh/dodying/UserJs@master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
