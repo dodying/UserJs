@@ -50,5 +50,5 @@ main().then(async () => {
   //
 }, async (err) => {
   console.error(err);
-  process.exit();
+  process.exit(1);
 });

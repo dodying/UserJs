@@ -3,9 +3,9 @@
 // @name        小说阅读脚本增强
 // @description 移除鼠标双击事件，增加翻页按钮
 // @include     *
-// @version     1.0.320
+// @version     1.0.326
 // @created     2020-07-20 08:45:13
-// @modified    2020/12/11 13:15:00
+// @modified    2021-12-08 20:01:18
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -24,7 +24,22 @@
 (function () {
   let scrollElement = window.innerHeight === document.documentElement.clientHeight ? document.documentElement : document.body;
   let compareElement = scrollElement === document.documentElement ? $('*').toArray().map((i) => [i, i.clientHeight]).sort((a, b) => b[1] - a[1])[0][0] : document.documentElement;
-  // let compareElement = scrollElement === document.documentElement ? document.body : document.documentElement;
+
+  const blacklist = GM_getValue('blacklist', []);
+  const { host } = window.location;
+  if (blacklist.includes(host)) {
+    GM_registerMenuCommand(`newTab: Effect ${host}`, () => {
+      const blacklist = GM_getValue('blacklist', []);
+      if (blacklist.includes(host)) {
+        blacklist.splice(blacklist.indexOf(host), 1);
+        GM_setValue('blacklist', blacklist);
+        window.location.reload();
+      }
+    }, 'N');
+  } else {
+    // let compareElement = scrollElement === document.documentElement ? document.body : document.documentElement;
+    init();
+  }
 
   async function init() {
     window.cancelAnimationFrame = () => { };
@@ -60,8 +75,6 @@
       $(window).on(eventType, checkScrollBar);
     }
   }
-
-  init();
 
   function addScrollButton() {
     $('<scroll-button>').css({ all: 'initial' }).insertAfter('body');
