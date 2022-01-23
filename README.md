@@ -195,7 +195,7 @@ Name | Raw | Version | Last-Modified | Create-Time | Description
 
 * [PayPal.Me](http://paypal.me/dodying)
 
-* ![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)
+* ![donation](https://gitee.com/dodying/userJs/raw/master/donation.jpg)
 
 ###
 

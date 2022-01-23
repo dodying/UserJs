@@ -27,7 +27,7 @@
 
 ### Screenshots
 
-![hvAutoAttack_Setting](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
+![hvAutoAttack_Setting](https://gitee.com/dodying/userJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
 ***
 
@@ -89,7 +89,7 @@ Four drop down lists and one button are visible in the box
 
 #### Example
 
-![example](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
+![example](https://gitee.com/dodying/userJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
 
 In the picture, I set three big conditions (2 contains two small conditions)
 
@@ -103,7 +103,7 @@ It's TRUE, when any big condition is true (To judge big condition is true, all s
 
 The following is a schematic diagram of the circuit diagram
 
-![schematic diagram](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
+![schematic diagram](https://gitee.com/dodying/userJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
 
 #### Skill/Item ID Table
 
@@ -186,7 +186,7 @@ In this example, the script will attack enemy 1 next.
 
 * [PayPal.Me](http://paypal.me/dodying)
 
-* ![donation](https://cdn.jsdelivr.net/gh/dodying/UserJs@master/donation.jpg)
+* ![donation](https://gitee.com/dodying/userJs/raw/master/donation.jpg)
 
 ***
 

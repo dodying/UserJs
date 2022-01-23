@@ -10,7 +10,7 @@
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
-// @icon         https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
+// @icon         https://gitee.com/dodying/userJs/raw/master/Logo.png
 // @include      http*://hentaiverse.org/*
 // @include      http://alt.hentaiverse.org/*
 // @include      https://e-hentai.org/*
@@ -1219,7 +1219,7 @@ function setAudioAlarm(e) { // 发出音频警报
     audio = gE('body').appendChild(cE('audio'));
     audio.id = `hvAAAlert-${e}`;
     const fileType = '.ogg'; // var fileType = (/Chrome|Safari/.test(navigator.userAgent)) ? '.mp3' : '.wav';
-    audio.src = (g('option').audio && g('option').audio[e]) ? g('option').audio[e] : `https://cdn.jsdelivr.net/gh/dodying/UserJs@master/HentaiVerse/hvAutoAttack/${e}${fileType}`;
+    audio.src = (g('option').audio && g('option').audio[e]) ? g('option').audio[e] : `https://gitee.com/dodying/userJs/raw/master/HentaiVerse/hvAutoAttack/${e}${fileType}`;
     audio.controls = true;
     audio.loop = (e === 'Riddle');
   }

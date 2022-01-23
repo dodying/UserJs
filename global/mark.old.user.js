@@ -3,12 +3,12 @@
 // @name        []mark
 // @description mark
 // @include     *
-// @version     1.2.0
-// @modified    2020/9/5 20:19:21
+// @version     1.2.1
+// @modified    2021-11-28 13:19:20
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://cdn.jsdelivr.net/gh/dodying/UserJs@master/Logo.png
+// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_setValue
 // @grant       GM_getValue
