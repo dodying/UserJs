@@ -1372,7 +1372,7 @@ function checkCondition(parms) {
 
   for (i in parms) {
     for (j = 0; j < parms[i].length; j++) {
-      if (!(parms[i] instanceof Array)) continue;
+      if (!Array.isArray(parms[i])) continue;
       k = parms[i][j].split(',');
       k[0] = returnValue(k[0]);
       k[2] = returnValue(k[2]);
