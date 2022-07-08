@@ -105,7 +105,7 @@
     g('dateNow', time(2));
     if (g('option').quickSite) quickSite();
     if (g('option').encounter) encounterCheck();
-    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return;
+    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return;
     if (g('option').repair) {
       let json; let checkOnload; let
         checkLength;
@@ -1525,7 +1525,7 @@ function idleArena() { // 闲置竞技场
     return;
   }
   if (arena.isOk) return;
-  if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 < 85) {
+  if (g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 < 85) {
     post(window.location.href, goto, 'recover=stamina');
     return;
   }
@@ -1575,7 +1575,7 @@ function encounterCheck() { // encounter
     time: 0,
   };
   if (!encounter.lastTime || (timeNow - encounter.lastTime >= 30 * 60 * 1000 && encounter.time < 24)) {
-    if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
+    if (g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
       post(window.location.href, goto, 'recover=stamina');
       return;
     }
