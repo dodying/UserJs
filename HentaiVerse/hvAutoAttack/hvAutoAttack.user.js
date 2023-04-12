@@ -1931,7 +1931,7 @@ function battleInfo() { // 战斗战况
     `<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
     `<br><l0>战役模式</l0><l1>戰役模式</l1><l2>Type</l2>: ${battleInfoType(g('roundType'))}`, // 战役模式显示
   ].join('');
-  document.title = `${g('turn')}|| ${g('runSpeed')}|| ${g('roundNow')} /${g('roundAll')}||${g('monsterAlive')}/${g('monsterAll')} `;
+  document.title = `${g('turn')}||${g('runSpeed')}||${g('roundNow')}/${g('roundAll')}||${g('monsterAlive')}/${g('monsterAll')}`;
 }
 
 function countMonsterHP() { // 统计敌人血量
