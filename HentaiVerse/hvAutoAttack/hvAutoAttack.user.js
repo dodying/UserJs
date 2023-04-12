@@ -1900,27 +1900,38 @@ function newRound() { // New Round
 }
 
 function battleInfo() { // 战斗战况
-  if (!gE('.hvAALog')) {
-    const div = gE('#hvAABox2').appendChild(cE('div'));
-    div.className = 'hvAALog';
-  }
-  const status = [
-    '<l0>物理</l0><l1>物理</l1><l2>Physical</l2>',
-    '<l0>火</l0><l1>火</l1><l2>Fire</l2>',
-    '<l0>冰</l0><l1>冰</l1><l2>Cold</l2>',
-    '<l0>雷</l0><l1>雷</l1><l2>Elec</l2>',
-    '<l0>风</l0><l1>風</l1><l2>Wind</l2>',
-    '<l0>圣</l0><l1>聖</l1><l2>Divine</l2>',
-    '<l0>暗</l0><l1>暗</l1><l2>Forbidden</l2>',
-  ];
-  gE('.hvAALog').innerHTML = [
-    `Turns: ${g('turn')}`,
-    `<br>Speed: ${g('runSpeed')} t/s`,
-    `<br>Round: ${g('roundNow')}/${g('roundAll')}`,
-    `<br><l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ${status[g('attackStatus')]}`,
-    `<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
-  ].join('');
-  document.title = `${g('turn')}||${g('runSpeed')}||${g('roundNow')}/${g('roundAll')}||${g('monsterAlive')}/${g('monsterAll')}`;
+    if (!gE('.hvAALog')) {
+        const div = gE('#hvAABox2').appendChild(cE('div'));
+        div.className = 'hvAALog';
+    }
+    const status = [
+        '<l0>物理</l0><l1>物理</l1><l2>Physical</l2>',
+        '<l0>火</l0><l1>火</l1><l2>Fire</l2>',
+        '<l0>冰</l0><l1>冰</l1><l2>Cold</l2>',
+        '<l0>雷</l0><l1>雷</l1><l2>Elec</l2>',
+        '<l0>风</l0><l1>風</l1><l2>Wind</l2>',
+        '<l0>圣</l0><l1>聖</l1><l2>Divine</l2>',
+        '<l0>暗</l0><l1>暗</l1><l2>Forbidden</l2>',
+    ];
+    function battleInfoType(type) { // 战役模式显示
+        switch (type) {
+            case 'ar': return 'Arena';
+            case 'ba': return 'Random Encounter';
+            case 'rb': return 'Ring of Blood';
+            case 'tw': return 'The Tower';
+            case 'iw': return 'Item World';
+            case 'gf': return 'GrindFest';
+        }
+    }
+    gE('.hvAALog').innerHTML = [
+        `Turns: ${g('turn')}`,
+        `<br>Speed: ${g('runSpeed')} t/s`,
+        `<br>Round: ${g('roundNow')}/${g('roundAll')}`,
+        `<br><l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ${status[g('attackStatus')]}`,
+        `<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
+        `<br><l0>战役模式</l0><l1>戰役模式</l1><l2>Type</l2>: ${battleInfoType(g('roundType'))}`, // 战役模式显示
+    ].join('');
+    document.title = `${g('turn')}|| ${g('runSpeed')}|| ${g('roundNow')} /${g('roundAll')}||${g('monsterAlive')}/${g('monsterAll')} `;
 }
 
 function countMonsterHP() { // 统计敌人血量
