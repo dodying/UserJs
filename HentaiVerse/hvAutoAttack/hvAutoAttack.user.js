@@ -1818,7 +1818,7 @@ function newRound() { // New Round
     const temp = battleLog[battleLog.length - 1].textContent;
     if (!temp.match(/^Initializing/)) {
       roundType = '';
-    } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 <= 33) {
+    } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 <= 35) {
       roundType = 'ar';
     } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 >= 105) {
       roundType = 'rb';
@@ -1913,12 +1913,23 @@ function battleInfo() { // 战斗战况
     '<l0>圣</l0><l1>聖</l1><l2>Divine</l2>',
     '<l0>暗</l0><l1>暗</l1><l2>Forbidden</l2>',
   ];
+  function battleInfoType(type) { // 战役模式显示
+    switch (type) {
+      case 'ar': return 'Arena';
+      case 'ba': return 'Random Encounter';
+      case 'rb': return 'Ring of Blood';
+      case 'tw': return 'The Tower';
+      case 'iw': return 'Item World';
+      case 'gf': return 'GrindFest';
+    }
+  }
   gE('.hvAALog').innerHTML = [
     `Turns: ${g('turn')}`,
     `<br>Speed: ${g('runSpeed')} t/s`,
     `<br>Round: ${g('roundNow')}/${g('roundAll')}`,
     `<br><l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ${status[g('attackStatus')]}`,
     `<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
+    `<br><l0>战役模式</l0><l1>戰役模式</l1><l2>Type</l2>: ${battleInfoType(g('roundType'))}`, // 战役模式显示
   ].join('');
   document.title = `${g('turn')}||${g('runSpeed')}||${g('roundNow')}/${g('roundAll')}||${g('monsterAlive')}/${g('monsterAll')}`;
 }
