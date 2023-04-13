@@ -1818,7 +1818,7 @@ function newRound() { // New Round
     const temp = battleLog[battleLog.length - 1].textContent;
     if (!temp.match(/^Initializing/)) {
       roundType = '';
-    } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 <= 33) {
+    } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 <= 35) {
       roundType = 'ar';
     } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 >= 105) {
       roundType = 'rb';
