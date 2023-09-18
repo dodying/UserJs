@@ -382,6 +382,8 @@ function addStyle(lang) { // CSS
     // '#pane_monster{counter-reset:order;}',
     // '.btm2>div:nth-child(1):before{font-size:30px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
     // '.btm2>div:nth-child(1)>img{display:none;}'
+    '.tlbQRA{text-align:left;font-weight:bold;}', // 标记已检测的日志行
+    '.tlbWARN{text-align:left;font-weight:bold;color:red;font-size:20pt;}', // 标记检测出异常的日志行
   ].join('');
   globalStyle.textContent = cssContent;
   optionButton(lang);
@@ -940,9 +942,23 @@ function optionBox() { // 配置界面
     this.style.height = `${this.scrollHeight}px`;
     this.select();
   };
+  function rmListItem(code) { // 同步删除界面显示对应的项
+    const configs = gE('#hvAATab-About > * > ul[class="hvAABackupList"] > li', 'all');
+    for (const config of configs) {
+      if (config.textContent == code) {
+        config.remove();
+      }
+    }
+  }
   gE('.hvAABackup', optionBox).onclick = function () {
     const code = _alert(2, '请输入当前配置代号', '請輸入當前配置代號', 'Please put in a name for the current configuration') || time(3);
     const backups = getValue('backup', true) || {};
+    if (code in backups) { // 覆写同名配置
+      if (_alert(1, '是否覆盖已有的同名配置？', '是否覆蓋已有的同名配置？', 'Do you want to overwrite the configuration with the same name?')) {
+        delete backups[code];
+        rmListItem(code);
+      } else return;
+    }
     backups[code] = getValue('option');
     setValue('backup', backups);
     const li = gE('.hvAABackupList', optionBox).appendChild(cE('li'));
@@ -961,7 +977,8 @@ function optionBox() { // 配置界面
     if (!(code in backups) || !code) return;
     delete backups[code];
     setValue('backup', backups);
-    goto();
+    // goto();
+    rmListItem(code);
   };
   gE('.hvAAExport', optionBox).onclick = function () {
     const t = getValue('option');
@@ -1626,6 +1643,7 @@ function main() { // 主程序
     g('oc', gE('#dvrc').textContent);
   }
   battleInfo(); // 战斗战况
+  killBug(); // 解决 HentaiVerse 可能出现的 bug
   countMonsterHP(); // 统计敌人血量
   if (g('option').autoFlee && checkCondition(g('option').fleeCondition)) {
     gE('1001').click();
@@ -1897,6 +1915,21 @@ function newRound() { // New Round
     T2: 0,
     T1: 0,
   });
+}
+
+function killBug() { // 在 HentaiVerse 发生导致 turn 损失的 bug 时发出警告并移除问题元素: https://ehwiki.org/wiki/HentaiVerse_Bugs_%26_Errors#Combat
+  const bugLog = gE('#textlog > tbody > tr > td[class="tlb"]', 'all');
+  const isBug = /(Slot is currently not usable)|(Item does not exist)|(Inventory slot is empty)|(You do not have a powerup gem)/;
+  for (let i = 0; i < bugLog.length; i++) {
+    if (bugLog[i].textContent.match(isBug)) {
+      bugLog[i].className = 'tlbWARN';
+      setTimeout(() => { // 间隔时间以避免持续刷新
+        window.location.href = window.location;// 刷新移除问题元素
+      }, 700);
+    } else {
+      bugLog[i].className = 'tlbQRA';
+    }
+  }
 }
 
 function battleInfo() { // 战斗战况
