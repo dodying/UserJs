@@ -29,9 +29,3 @@
 ### 更新历史
 
 - 请看[这里](https://github.com/dodying/UserJs/commits/master/novel/novelDownloader/novelDownloader3.user.js)
-
-### 捐赠
-
-* [PayPal.Me](http://paypal.me/dodying)
-
-* ![donation](https://gitee.com/dodying/userJs/raw/master/donation.jpg)

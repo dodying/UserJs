@@ -3,13 +3,13 @@
 // @name        copyModify
 // @description copyModify
 // @include     *
-// @version     1.0.5
+// @version     1.0.6
 // @created     2020-12-05 15:44:53
-// @modified    2020/12/5 15:48:39
+// @modified    2022-03-26 20:15:40
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       none
 // @noframes

@@ -4,12 +4,12 @@
 // @name:zh-CN  【百度云】分享-答题专用V2
 // @description:zh-CN
 // @include     http://pan.baidu.com/disk/home*
-// @version     2.0
+// @version     2.1
 // @grant       GM_setClipboard
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @run-at      document-end
 // ==/UserScript==

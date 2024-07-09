@@ -4,12 +4,12 @@
 // @name:zh-CN  【Github】复制原始链接
 // @description:zh-CN
 // @include     https://github.com/*/tree/*
-// @version     1
+// @version     2
 // @grant       GM_setClipboard
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 setTimeout(() => {

@@ -1,30 +1,42 @@
+/* eslint-disable no-shadow */
+/* eslint-disable guard-for-in */
+/* eslint-disable no-empty */
+/* eslint-disable no-param-reassign */
 /* eslint-env browser */
 // ==UserScript==
 // @name        []mark
 // @description mark
 // @include     *
-// @version     1.3.0
-// @modified    2020/12/13 13:19:17
+// @version     1.3.3760
+// @modified    2022-07-03 12:38:37
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_openInTab
 // @grant       GM_xmlhttpRequest
 // @grant       GM_addValueChangeListener
+// @grant       GM_setClipboard
 // @grant       GM_getResourceText
+// @grant       unsafeWindow
+// @grant       window.close
 // @noframes
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/jquery-throttle-debounce/1.1/jquery.ba-throttle-debounce.min.js
+// @require     https://greasyfork.org/scripts/32483-base64/code/base64.js?version=213081
 // @resource jquery-confirm-style https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css
 // ==/UserScript==
-/* global GM_setValue GM_getValue GM_openInTab GM_xmlhttpRequest GM_addValueChangeListener GM_getResourceText */
-/* global $ */
+/* eslint-disable no-unused-vars */
+/* global GM_setValue GM_getValue GM_openInTab GM_xmlhttpRequest GM_addValueChangeListener GM_setClipboard GM_getResourceText unsafeWindow */
+/* global $ base64 */
+/* eslint-enable no-unused-vars */
 /* eslint-disable no-debugger  */
 (async function () {
+  let isActived;
   const prompt = async (message, defaultValue, autocompleteList = [], timeout) => {
     const root = $('<mark-confirm>').insertAfter('body');
     return new Promise((resolve, reject) => {
@@ -38,7 +50,7 @@
           ` <div>${message}</div>`,
           ' <input type="text" list="promptList" style="height:40px;width:400px;font-size:20px;" ondblclick="this.value=&quot;&quot;"/>',
           ' <datalist id="promptList">',
-          ...autocompleteList.map((i) => `<option value="${i}"></option>`),
+          ...Array.from(new Set([].concat(autocompleteList, 'null'))).map((i) => `<option value="${i}"></option>`),
           ' </datalist>',
           '</div>',
         ].join(''),
@@ -52,22 +64,30 @@
           cancel: {
             text: '取消',
             btnClass: 'btn-default',
-            keys: ['esc'],
           },
         },
         onContentReady() {
           const jc = this;
+          $(document).on({
+            'keydown.prompt': (e) => {
+              if (e.key === 'Escape') {
+                jc.$$cancel.trigger('click');
+              }
+            },
+          });
           this.$content.find('input').on('keyup', (e) => {
             e.preventDefault();
             if (e.key === 'Enter') {
               jc.$$formSubmit.trigger('click');
             }
-          }).val(defaultValue);
+          }).val(defaultValue).select();
         },
         onClose() {
+          $(document).off('keydown.prompt');
           resolve(null);
         },
         onAction(btn) {
+          $(document).off('keydown.prompt');
           resolve(btn === 'cancel' ? null : this.$content.find('input').val());
           root.remove();
         },
@@ -77,24 +97,59 @@
   };
   // prompt('测试message', '默认数值', ['可选数值a', '可选数值b'], 5000).then(e => { console.log(e); });
 
-  await new Promise((resolve, reject) => { // 仅在页面活动时开始运行
-    if (!document.hidden) {
-      resolve();
-      return;
-    }
-    $(window).on('visibilitychange focus mousemove mousedown keydown touchstart mousewheel'.split(' ').map((i) => `${i}.mark-start`).join(' '), () => {
-      if (!document.hidden) {
-        $(window).off('.mark-start');
-        resolve();
-      }
-    });
-  });
-
-  $.extend({
+  $.extend({ // TODO
     markFunction: {
       markDirect, xhrSync, waitFor, waitIn,
     },
   });
+  $.expr[':'].regexp = function (elem, index, meta, stack) {
+    return !!(elem.textContent || elem.innerText || $(elem).text() || '').match(new RegExp(meta[3], 'i'));
+  };
+
+  const autoMarkOnUnload = (mark = 'ignore', text = null, close = true) => {
+    $(window).on({
+      unload: () => {
+        let textToMark = text || ($('[data-mark]').length === 1 && $('[data-mark="null"]').length === 1 ? $('[data-mark="null"]').text().trim() : null);
+        if (textToMark instanceof HTMLElement) textToMark = $(textToMark).text().trim();
+
+        if (textToMark && $('[data-mark="null"]').filter((index, elem) => elem.textContent.trim() === textToMark).length) {
+          markDirect(textToMark, mark);
+          window.sessionStorage.setItem('mark-unload', '1');
+        }
+      },
+      focus: () => {
+        let textToMark = text || ($('[data-mark]').length === 1 && $(`[data-mark="${mark}"]`).length === 1 ? $(`[data-mark="${mark}"]`).text().trim() : null);
+        if (textToMark instanceof HTMLElement) textToMark = $(textToMark).text().trim();
+
+        if (textToMark && $(`[data-mark="${mark}"]`).filter((index, elem) => elem.textContent.trim() === textToMark).length) {
+          if ('mark-unload' in window.sessionStorage) {
+            markDirect(textToMark, 'null');
+          } else if (close) window.close();
+        }
+      },
+    });
+  };
+  const autoMarkDl = (event = 'click', elem, mark = 'dl', text = null, close = true) => {
+    $('body').on(event, elem, (e) => {
+      let textToMark = text || ($('[data-mark]').length === 1 && $('[data-mark="null"]').length === 1 ? $('[data-mark="null"]').text().trim() : null);
+      if (textToMark instanceof HTMLElement) textToMark = $(textToMark).text().trim();
+
+      if (textToMark) {
+        markDirect(textToMark, mark);
+        if (close) window.close();
+      }
+    });
+  };
+  const searchWithPost = (html, ...args) => {
+    if (!args.length) return [];
+
+    const iframe = $('<iframe src="about:blank" style="display:none;">').insertAfter('body');
+    const form = $(html).attr('target', '_blank').appendTo($(iframe).get(0).contentWindow.document.body);
+    for (let i = 0; i < args.length; i = i + 2) $(form).find('input').filter(args[i]).val(args[i + 1]);
+    $(form).submit();
+    $(iframe).remove();
+    return [];
+  };
   const server = $.markConfig && $.markConfig.libs ? $.markConfig.server : 'http://localhost:5556';
   const maxRetry = $.markConfig && $.markConfig.libs ? $.markConfig.maxRetry : 3;
   const libs = $.markConfig && $.markConfig.libs ? $.markConfig.libs : {
@@ -136,7 +191,7 @@
          * like elementDo: [function (elem) { elem.textContent = elem.textContent.replace(match, replace); }]
          * 循环替换
          */
-        textReplaceEvery: [[/^\s*作\s*者\s*[:：]/], [/\|/g, '']],
+        textReplaceEvery: [[/^\s*作\s*者\s*[:：]/], [/\|/g, ''], [/:/g, '：'], [/\?/g, '？'], [/!/g, '！']],
 
         /**
          * ?remakeHTML, remakeHTMLEvery
@@ -149,21 +204,21 @@
          */
 
         /**
-          * ?search
-          * string '名称|网址|图标' 包含%s
-          * Function 无参，返回[名称，网址，?图标]
-          * 注：名称为唯一值
-          */
-        // search: '书架|https://my.qidian.com/bookcase/search?kw=%s'
-
-        /**
          * ?do 仅在匹配页面生效
          * ?doEvery 即使不匹配，只要是这个lib都生效
          * ?doEveryArgs （作为doEvery的参数）当doEveryArgs为function时，返回值作参数，否则本值作参数
          * Async Function
          */
 
-        // 顺序： doEveryArgs/doEvery => do => elementDo => textReplace/textReplaceEvery => remakeHTML/remakeHTMLEvery
+        /**
+         * ?search
+         * string '名称|网址|图标|分割' 网址应包含%s
+         * Function 无参，返回[名称，网址，?图标, ?分割]
+         * 注：名称为唯一值
+         */
+        // search: '书架|https://my.qidian.com/bookcase/search?kw=%s'
+
+        // 运行顺序： elementDo => textReplace/textReplaceEvery => remakeHTML/remakeHTMLEvery => do => doEveryArgs/doEvery
       },
     ],
     manga: [
@@ -196,8 +251,8 @@
     return out;
   };
 
-  let libName; let lib; let
-    database;
+  let libName, lib, database;
+  let changeTime = 0;
   for (const i in libs) {
     libName = i;
     lib = libs[i];
@@ -219,13 +274,24 @@
   }
   console.log({ libName, lib });
 
+  const getChangeTime = () => GM_getValue(`changeTime_${libName}`);
+  const setChangeTime = (time) => GM_setValue(`changeTime_${libName}`, time);
   const getValue = () => JSON.parse(GM_getValue(`database_${libName}`) || '{}');
-  const setValue = (value) => (value || window.confirm('数据库错误，请仔细检查\n是否强制保存') ? GM_setValue(`database_${libName}`, JSON.stringify(value)) || true : false);
+  const setValue = (value) => {
+    if (value || window.confirm('数据库错误，请仔细检查\n是否强制保存')) {
+      GM_setValue(`database_${libName}`, JSON.stringify(value));
+      changeTime = new Date().getTime();
+      setChangeTime(changeTime);
+      return true;
+    }
+    return false;
+  };
   database = getValue();
-  GM_addValueChangeListener(`database_${libName}`, (name, valueOld, value, remote) => {
-    if (!remote) return;
+  GM_addValueChangeListener(`changeTime_${libName}`, (name, valueOld, value, remote) => {
+    if (!remote || value <= changeTime || !isActived) return;
     try {
-      database = JSON.parse(value || '{}');
+      changeTime = value;
+      database = getValue();
       updateHighlight();
     } catch (error) {
       console.error(error);
@@ -245,8 +311,8 @@
       return true;
     });
 
-    // 再从远程获取
-    if (server && list.length) {
+    // 最后从远程获取
+    if (isActived && server && list.length) {
       const search = new URLSearchParams();
       search.append('category', libName);
       for (const i of list) {
@@ -291,6 +357,7 @@
     if (date === database.date && !force) return;
     if (database.updating && !force) return;
     if (Object.keys(database.book || {}).length === 0) return;
+
     database.updating = true;
     setValue(database);
 
@@ -303,6 +370,11 @@
     let res;
     try {
       res = await xhrSync(`${server}/update`, search.toString(), {
+        headers: {
+          Connection: 'Keep-Alive',
+          'Keep-Alive': 'timeout=30, max=1000',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        },
         responseType: 'json',
         timeout: 120 * 1000,
       });
@@ -318,6 +390,7 @@
     setValue(database);
   };
   await updateMarkRemote();
+  window.addEventListener('beforeunload', () => { updateMarkRemote(true); });
 
   $('<style></style>').html([
     'mark-panel,mark-search-bar,mark-confirm{all:initial;}',
@@ -381,13 +454,6 @@
         function: (func) => func(),
       }).some((i) => i) : false;
       if (!filtered || excluded) continue;
-      if (firstRun) {
-        const args = typeof i.doEveryArgs === 'function' ? await i.doEveryArgs() : i.doEveryArgs;
-        for (const i of lib) {
-          if (typeof i.doEvery === 'function') await i.doEvery(args);
-        }
-        if (typeof i.do === 'function') await i.do();
-      }
 
       let elem = selectCalc(i.elems, {
         string: (text) => $(text).toArray(),
@@ -400,7 +466,11 @@
         const elems = $([].concat(elem, temp)).filter(':not([data-mark-do="true"])');
         for (const elem of elems) {
           for (const func of i.elementDo) {
-            await func(elem);
+            try {
+              await func(elem);
+            } catch (error) {
+              console.error(error);
+            }
           }
           $(elem).attr('data-mark-do', 'true');
         }
@@ -411,6 +481,7 @@
           const node = $(elem).find(':not(iframe)').addBack().contents()
             .toArray()
             .find((j) => j.nodeType === 3);
+          if (!node || !node.textContent || !node.textContent.trim()) continue;
           let text = node.textContent.trim();
 
           const dict = [].concat(i.textReplace || [], ...lib.filter((i) => i.textReplaceEvery instanceof Array).map((i) => i.textReplaceEvery));
@@ -454,6 +525,15 @@
           }
         }
       }
+
+      if (firstRun) {
+        if (typeof i.do === 'function') await i.do();
+        const args = typeof i.doEveryArgs === 'function' ? await i.doEveryArgs() : i.doEveryArgs;
+        for (const i of lib) {
+          if (typeof i.doEvery === 'function') await i.doEvery(args);
+        }
+      }
+
       temp = [].concat(temp, elem);
     }
     if (firstRun) {
@@ -492,12 +572,14 @@
       });
     }
     firstRun = false;
-    elems = temp;
-    $(elems).toArray().forEach((i) => (i.textContent = i.textContent.trim()));
+    elems = $(temp).toArray().filter((i) => i && i.textContent && i.textContent.trim());
+    elems.forEach((i) => (i.textContent = i.textContent.trim()));
     $(elems).not('[data-mark]').attr('data-mark', 'null');
     updatingElems = false;
   };
   const updateHighlight = async () => {
+    if (!elems || !elems.length) return;
+
     const matches = database.match || {};
 
     const list = elems.map((i) => i.textContent.trim());
@@ -529,9 +611,9 @@
   };
   const promptSetting = async (keyName) => {
     const obj = database[keyName] || {};
-    const answer = await ask(`<h3>已存在:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(obj).map((i) => `<li><span style="font-weight:bold;">${i}</span>: ${obj[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(obj).map((i) => `${i}:  ${obj[i]}`));
+    const answer = await ask(`<span>请设置${keyName}，请使用 <span style="font-weight:bold;">:/：</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除</span><hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(obj).map((i) => `<li><span style="font-weight:bold;">${i}</span>: ${obj[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(obj).map((i) => `${i}:  ${obj[i]}`));
     if (!answer) return;
-    const arr = answer.split(/:|：/);
+    const arr = answer.split(/[:：]/);
     if (arr.length > 1) {
       if (arr[0] === 'null') return;
       if (arr[1] === 'null') {
@@ -546,7 +628,7 @@
   };
   const markBatch = async (elems) => {
     const colors = database.color || {};
-    const type = await ask(`<h3>要标记的状态,值为null表示删除:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map((i) => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(colors));
+    const type = await ask(`<span>要标记的状态，值为 <span style="font-weight:bold;">null</span> 表示删除</span><hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map((i) => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(colors));
     if (!type) return;
 
     const list = elems.map((i) => i.textContent.trim());
@@ -555,17 +637,6 @@
   function markDirect(name, type) {
     if (name && (name = name.trim())) updateMark(Object.fromEntries([[name, type]]));
   }
-
-  const observer = new window.MutationObserver(async (mutationsList) => {
-    if (mutationsList.some((i) => i.addedNodes && [].concat(...i.addedNodes).some((j) => j.nodeType === 1))) {
-      await updateElems();
-      updateHighlight();
-    }
-  });
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
 
   class markPanel extends window.HTMLElement {
     constructor() {
@@ -598,9 +669,10 @@
         click: (e) => {
           $(e.target).toggleClass('mark-switch-disabled');
           if ($(e.target).is('.mark-switch-disabled')) {
-            $('style.mark-style').remove();
+            $('style.mark-style').attr('media', 'max-width: 1px');
           } else {
-            updateHighlight();
+            $('style.mark-style').attr('media', null);
+            // updateHighlight();
           }
         },
         contextmenu: (e) => {
@@ -608,24 +680,34 @@
           return false;
         },
       }).appendTo(container);
-      $('<button name="color" class="mark-color mark-less-hide"></button>').on({
-        click: () => promptSetting('color'),
+      $('<button name="color/match" class="mark-less-hide"></button>').on({
+        mousedown: (e) => promptSetting(e.button === 0 ? 'color' : 'match'),
+        contextmenu: () => false,
       }).appendTo(container);
-      $('<button name="match" class="mark-less-hide"></button>').on({
-        click: () => promptSetting('match'),
-      }).appendTo(container);
-      $('<button name="mark"></button>').on({
-        click: async (e) => {
-          $('body').off('click.markone');
-
-          $(e.target).toggleClass('mark-mark-on');
-          if ($(e.target).is('.mark-mark-on')) {
+      $('<button name="mark" title="左键: 标记\n右键: 标记1次"></button>').on({
+        mousedown: async (e) => {
+          if (e.button === 0) {
+            $('body').off('click.markone');
+            $(e.target).toggleClass('mark-mark-on');
+          }
+          if (e.button === 0 && !$(e.target).is('.mark-mark-on')) {
+            $('body').off('click.mark');
+            return;
+          }
+          let type = database.answer;
+          if (e.button === 0 || !type) {
             const colors = database.color || {};
-            const type = await ask(`<h3>要标记的状态,值为null表示删除:</h3>请使用 <span style="font-weight:bold;">:</span> 分割，值为 <span style="font-weight:bold;">null</span> 表示删除<hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map((i) => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(colors));
+            type = await ask(`<span>要标记的状态，值为 <span style="font-weight:bold;">null</span> 表示删除</span><hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map((i) => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, null, Object.keys(colors));
             if (!type) {
-              $(e.target).toggleClass('mark-mark-on');
+              if (e.button === 0) {
+                $(e.target).toggleClass('mark-mark-on');
+              } else {
+                window.alert('未指定标记');
+              }
               return;
             }
+          }
+          if (e.button === 0) {
             $('body').on('click.mark', (e) => {
               if (!$(e.target).is('[data-mark],[data-mark] *')) return;
               e.preventDefault();
@@ -635,130 +717,140 @@
               updateMark(Object.fromEntries([[name, type]]));
             });
           } else {
-            $('body').off('click.mark');
+            $('body').on('click.markone', (e) => {
+              if (!$(e.target).is('[data-mark],[data-mark] *')) return;
+              e.preventDefault();
+              e.stopPropagation();
+
+              const name = $(e.target).is('[data-mark]') ? $(e.target).text().trim() : $(e.target).parents('[data-mark]').text().trim();
+              updateMark(Object.fromEntries([[name, type]]));
+              $('body').off('click.markone');
+            });
           }
         },
+        contextmenu: () => false,
       }).appendTo(container);
-      $('<button name="mark-one" title="标记1次"></button>').on({
-        click: (e) => {
-          const type = database.answer;
-          $('body').on('click.markone', (e) => {
-            if (!$(e.target).is('[data-mark],[data-mark] *')) return;
-            e.preventDefault();
-            e.stopPropagation();
-
-            const name = $(e.target).is('[data-mark]') ? $(e.target).text().trim() : $(e.target).parents('[data-mark]').text().trim();
-            updateMark(Object.fromEntries([[name, type]]));
-            $('body').off('click.markone');
-          });
-        },
+      $('<button name="mark-all" title="左键: 标记所有可标记\n右键: 标记所有未标记" class="mark-less-hide"></button>').on({
+        mousedown: async (e) => markBatch($(e.button === 0 ? '[data-mark]' : '[data-mark="null"]').toArray()),
+        contextmenu: () => false,
       }).appendTo(container);
-      $('<button name="mark-all" title="标记本页所有可标记的" class="mark-less-hide"></button>').on({
-        click: () => markBatch($('[data-mark]').toArray()),
-      }).appendTo(container);
-      $('<button name="mark-null" title="标记本页所有未标记的"></button>').on({
-        click: () => markBatch($('[data-mark="null"]').toArray()),
-      }).appendTo(container);
-      $('<button name="hide-marked" class="mark-less-hide"></button>').on({
-        click: () => {
+      $('<button name="hide-marked" title="左键: 隐藏所有已标记\n中键: 只显示某种标记\n右键: 只隐藏某种标记"></button>').on({
+        mousedown: async (e) => {
+          if ($('[data-mark]').toArray().length <= 1) return;
           if ($('[data-mark-hide]').length) {
             $('[data-mark-hide]').attr('data-mark-hide', null).show();
           } else {
-            const marked = $('[data-mark]:not([data-mark=""]):not([data-mark="null"])').toArray();
+            let selector;
+            if (e.button === 0) {
+              selector = '[data-mark]:not([data-mark=""]):not([data-mark="null"])';
+            } else {
+              const colors = database.color || {};
+              const mark = await prompt(`<span>请指定标记，值为 <span style="font-weight:bold;">null</span> 表示删除</span><hr><ol style="text-align:justify;overflow:auto;max-height:calc(60vh - 160px);">${Object.keys(colors).map((i) => `<li><span style="background:${colors[i]}">测试文本</span> <span style="font-weight:bold;">${i}</span>: ${colors[i]}</li>`).join('')}</ol><hr>`, database.answer, Object.keys(colors));
+              if (mark === null) return;
+              selector = e.button === 1 ? `[data-mark]:not([data-mark="${mark}"])` : `[data-mark="${mark}"]`;
+            }
+            const marked = $(selector).toArray();
             for (const elem of marked) {
-              $(elem).parents().filter((index, e) => $(e).find('[data-mark]').length === 1).eq(-1)
+              if ($(elem).is('[data-mark-hide]')) continue;
+              const parent = $(elem).parents().filter((index, e) => $(e).find('[data-mark]').length === 1).eq(-1);
+              $(parent).siblings().addBack()
                 .attr('data-mark-hide', 'true')
+                .filter((index, e) => $(e).find(selector).length === 1)
+                .hide();
+              $($(elem).parents().addBack().toArray()
+                .map((i) => i.tagName.toLowerCase())
+                .join('>'))
+                .attr('data-mark-hide', 'true')
+                .filter((index, e) => $(e).find(selector).length === 1 || $(e).is(selector))
                 .hide();
             }
           }
         },
+        contextmenu: () => false,
       }).appendTo(container);
-      $('<button name="show" class="mark-less-hide"></button>').on({
-        click: async () => {
-          if ($('.mark-container[name="show"]').length) {
-            $('.mark-container[name="show"]').remove();
-            return;
-          }
-
-          const list = elems.map((i) => i.textContent.trim());
-          const books = await queryMark(list);
-          const types = Object.values(books).sort().filter((item, index, array) => array.indexOf(item) === index);
-
-          const elem = $('<div class="mark-container" name="show"><ul class="mark-show-nav"></ul><div class="mark-show-content"></div></div>');
-          for (const type of types) {
-            $('<li class="mark-show-nav-select"></li>').attr('name', type).appendTo($(elem).find('.mark-show-nav'));
-            let html = '<ol>';
-            const names = Object.keys(books).filter((i) => books[i] === type);
-            for (const name of names) {
-              html = `${html}<li><span class="mark-show-pre" data-mark data-mark-do="true" data-mark-html="true" data-mark-text="true">${name}</span></li>`;
+      $('<button name="search/show/edit" class="mark-less-hide"></button>').on({
+        mousedown: async (e) => {
+          if (e.button === 0) {
+            if ($('.mark-container[name="search"]').length) {
+              $('.mark-container[name="search"]').remove();
+              return;
             }
-            html = `${html}</ol>`;
-            $(html).attr('name', type).appendTo($(elem).find('.mark-show-content'));
-          }
-          elem.appendTo('body');
-          $('.mark-show-nav-select').on({
-            click: (e) => {
-              $('.mark-show-nav-select').removeClass('mark-show-nav-selected');
-              $(e.target).addClass('mark-show-nav-selected');
-              $('.mark-show-content>ol').hide();
-              $('.mark-show-content>ol').filter((order, i) => $(i).attr('name') === $(e.target).attr('name')).show();
-            },
-          });
-          $('.mark-show-nav-select:eq(0)').addClass('mark-show-nav-selected');
-          $('.mark-show-content>ol').hide();
-          $('.mark-show-content>ol:eq(0)').show();
-        },
-      }).appendTo(container);
-      $('<button name="edit" class="mark-less-hide"></button>').on({
-        click: () => {
-          if ($('.mark-container[name="edit"]').length) {
-            $('.mark-container[name="edit"]').remove();
-            return;
-          }
+            $('<div class="mark-container" name="search"></div>').html('<div style="text-align:center;margin:5px;"><input name="search" type="text" style="font-size:large;"></div><hr><div name="result"></div>').appendTo('body');
+            let typing = false;
+            $('.mark-container[name="search"] input[name="search"]').on({
+              compositionstart: (e) => {
+                typing = true;
+              },
+              compositionend: (e) => {
+                typing = false;
+                $(e.target).trigger('input');
+              },
+              input: async (e) => {
+                if (typing || !e.target.value) return;
+                let filter = Object.keys(database.book).filter((i) => i.match(e.target.value));
+                const res = await xhrSync(`${server}/search`, `category=${libName}&name=${encodeURIComponent(e.target.value)}`, {
+                  responseType: 'json',
+                  timeout: 120 * 1000,
+                });
+                if (res && res.status === 200 && res.response) filter = filter.concat(res.response);
+                $('.mark-container[name="search"] [name="result"]').html([...new Set(filter)].map((i) => `<span data-mark data-mark-do="true" data-mark-html="true" data-mark-text="true">${i}</span>`).join(''));
+              },
+            });
+          } else if (e.button === 1) {
+            if ($('.mark-container[name="show"]').length) {
+              $('.mark-container[name="show"]').remove();
+              return;
+            }
 
-          $('<div class="mark-container" name="edit"><textarea class="mark-edit-textarea"></textarea></div>').appendTo('body');
-          $('<button class="mark-edit-save">Save</button>').on({
-            click: () => {
-              try {
-                const obj = JSON.parse($('.mark-edit-textarea').val());
-                if (setValue(obj)) database = obj;
-              } catch (error) {
-                console.log(error);
-                window.alert('Save Failed');
+            const list = elems.map((i) => i.textContent.trim());
+            const books = await queryMark(list);
+            const types = Object.values(books).sort().filter((item, index, array) => array.indexOf(item) === index);
+
+            const elem = $('<div class="mark-container" name="show"><ul class="mark-show-nav"></ul><div class="mark-show-content"></div></div>');
+            for (const type of types) {
+              $('<li class="mark-show-nav-select"></li>').attr('name', type).appendTo($(elem).find('.mark-show-nav'));
+              let html = '<ol>';
+              const names = Object.keys(books).filter((i) => books[i] === type);
+              for (const name of names) {
+                html = `${html}<li><span class="mark-show-pre" data-mark data-mark-do="true" data-mark-html="true" data-mark-text="true">${name}</span></li>`;
               }
-            },
-          }).appendTo('.mark-container[name="edit"]');
-          $('.mark-edit-textarea').text(JSON.stringify(database, null, 2));
-        },
-      }).appendTo(container);
-      $('<button name="search" class="mark-less-hide"></button>').on({
-        click: async () => {
-          if ($('.mark-container[name="search"]').length) {
-            $('.mark-container[name="search"]').remove();
-            return;
+              html = `${html}</ol>`;
+              $(html).attr('name', type).appendTo($(elem).find('.mark-show-content'));
+            }
+            elem.appendTo('body');
+            $('.mark-show-nav-select').on({
+              click: (e) => {
+                $('.mark-show-nav-select').removeClass('mark-show-nav-selected');
+                $(e.target).addClass('mark-show-nav-selected');
+                $('.mark-show-content>ol').hide();
+                $('.mark-show-content>ol').filter((order, i) => $(i).attr('name') === $(e.target).attr('name')).show();
+              },
+            });
+            $('.mark-show-nav-select:eq(0)').addClass('mark-show-nav-selected');
+            $('.mark-show-content>ol').hide();
+            $('.mark-show-content>ol:eq(0)').show();
+          } else {
+            if ($('.mark-container[name="edit"]').length) {
+              $('.mark-container[name="edit"]').remove();
+              return;
+            }
+
+            $('<div class="mark-container" name="edit"><textarea class="mark-edit-textarea"></textarea></div>').appendTo('body');
+            $('<button class="mark-edit-save">Save</button>').on({
+              click: () => {
+                try {
+                  const obj = JSON.parse($('.mark-edit-textarea').val());
+                  if (setValue(obj)) database = obj;
+                } catch (error) {
+                  console.log(error);
+                  window.alert('Save Failed');
+                }
+              },
+            }).appendTo('.mark-container[name="edit"]');
+            $('.mark-edit-textarea').text(JSON.stringify(database, null, 2));
           }
-          $('<div class="mark-container" name="search"></div>').html('<div style="text-align:center;margin:5px;"><input name="search" type="text" style="font-size:large;"></div><hr><div name="result"></div>').appendTo('body');
-          let typing = false;
-          $('.mark-container[name="search"] input[name="search"]').on({
-            compositionstart: (e) => {
-              typing = true;
-            },
-            compositionend: (e) => {
-              typing = false;
-              $(e.target).trigger('input');
-            },
-            input: async (e) => {
-              if (typing || !e.target.value) return;
-              let filter = Object.keys(database.book).filter((i) => i.match(e.target.value));
-              const res = await xhrSync(`${server}/search`, `category=${libName}&name=${encodeURIComponent(e.target.value)}`, {
-                responseType: 'json',
-                timeout: 120 * 1000,
-              });
-              if (res && res.status === 200 && res.response) filter = filter.concat(res.response);
-              $('.mark-container[name="search"] [name="result"]').html([...new Set(filter)].map((i) => `<span data-mark data-mark-do="true" data-mark-html="true" data-mark-text="true">${i}</span>`).join(''));
-            },
-          });
         },
+        contextmenu: () => false,
       }).appendTo(container);
       $('<button name="sync" class="mark-less-hide"></button>').on({
         click: async (e) => {
@@ -820,16 +912,15 @@
       ].join('')).appendTo(shadow);
       const searchDict = {};
       let buttons = searchLib.map((lib, index) => {
-        let info; let url; let
-          favicon;
+        let info, url, favicon, separator;
         if (typeof lib.search === 'string') {
-          [info, url, favicon] = lib.search.split('|');
+          [info, url, favicon, separator] = lib.search.split('|');
         } else if (typeof lib.search === 'function') {
-          [info, url, favicon] = lib.search('');
+          [info, url, favicon, separator] = lib.search('');
           searchDict[info] = lib.search;
         }
         favicon = favicon || `https://favicon.yandex.net/favicon/${new URL(url).host}/`;
-        if (GM_getValue(`favicon_${favicon}`)) {
+        if (GM_getValue(`favicon_${favicon}`, '').startsWith('data:image')) {
           favicon = GM_getValue(`favicon_${favicon}`);
         } else {
           xhrSync(favicon, null, { responseType: 'arraybuffer' }).then((res) => {
@@ -839,7 +930,7 @@
             GM_setValue(`favicon_${favicon}`, `data:${type};base64,${base64}`);
           });
         }
-        return `<a data-url="${typeof lib.search === 'function' ? info : url}"><img src="${favicon}" /><span>${info}</span></a>${(index + 1) % 6 === 0 ? '<br>' : ''}`;
+        return `${separator ? '<hr>' : ''}<a data-url="${typeof lib.search === 'function' ? info : url}"><img src="${favicon}" /><span>${info}</span></a>${(index + 1) % 6 === 0 ? '<br>' : ''}`;
       });
       buttons = buttons.concat([
         '<a data-url name="more"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pg0KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPg0KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgNDkwLjY4OCA0OTAuNjg4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA0OTAuNjg4IDQ5MC42ODg7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxnPg0KCTxwYXRoIHN0eWxlPSJmaWxsOiM2MDdEOEI7IiBkPSJNNDcyLjMyOCwyMTYuNTI5TDI0NS4yMTMsNDQzLjY2NUwxOC4wOTgsMjE2LjUyOWMtNC4yMzctNC4wOTMtMTAuOTktMy45NzUtMTUuMDgzLDAuMjYyDQoJCWMtMy45OTIsNC4xMzQtMy45OTIsMTAuNjg3LDAsMTQuODJsMjM0LjY2NywyMzQuNjY3YzQuMTY1LDQuMTY0LDEwLjkxNyw0LjE2NCwxNS4wODMsMGwyMzQuNjY3LTIzNC42NjcNCgkJYzQuMDkzLTQuMjM3LDMuOTc1LTEwLjk5LTAuMjYyLTE1LjA4M2MtNC4xMzQtMy45OTMtMTAuNjg3LTMuOTkzLTE0LjgyMSwwTDQ3Mi4zMjgsMjE2LjUyOXoiLz4NCgk8cGF0aCBzdHlsZT0iZmlsbDojNjA3RDhCOyIgZD0iTTQ3Mi4zMjgsMjQuNTI5TDI0NS4yMTMsMjUxLjY2NUwxOC4wOTgsMjQuNTI5Yy00LjIzNy00LjA5My0xMC45OS0zLjk3NS0xNS4wODMsMC4yNjINCgkJYy0zLjk5Miw0LjEzNC0zLjk5MiwxMC42ODcsMCwxNC44MjFsMjM0LjY2NywyMzQuNjY3YzQuMTY1LDQuMTY0LDEwLjkxNyw0LjE2NCwxNS4wODMsMEw0ODcuNDMyLDM5LjYxMg0KCQljNC4yMzctNC4wOTMsNC4zNTQtMTAuODQ1LDAuMjYyLTE1LjA4M2MtNC4wOTMtNC4yMzctMTAuODQ1LTQuMzU0LTE1LjA4My0wLjI2MmMtMC4wODksMC4wODYtMC4xNzYsMC4xNzMtMC4yNjIsMC4yNjINCgkJTDQ3Mi4zMjgsMjQuNTI5eiIvPg0KPC9nPg0KPHBhdGggZD0iTTI0NS4yMTMsNDY5LjQxNWMtMi44MzEsMC4wMDUtNS41NDgtMS4xMTUtNy41NTItMy4xMTVMMi45OTQsMjMxLjYzM2MtNC4wOTMtNC4yMzctMy45NzUtMTAuOTksMC4yNjItMTUuMDgzDQoJYzQuMTM0LTMuOTkyLDEwLjY4Ny0zLjk5MiwxNC44MiwwbDIyNy4xMzYsMjI3LjExNWwyMjcuMTE1LTIyNy4xMzZjNC4yMzctNC4wOTMsMTAuOTktMy45NzUsMTUuMDgzLDAuMjYyDQoJYzMuOTkzLDQuMTM0LDMuOTkzLDEwLjY4NywwLDE0LjgyMUwyNTIuNzQ0LDQ2Ni4yNzlDMjUwLjc0OCw0NjguMjgsMjQ4LjA0LDQ2OS40MDgsMjQ1LjIxMyw0NjkuNDE1eiIvPg0KPHBhdGggZD0iTTI0NS4yMTMsMjc3LjQxNWMtMi44MzEsMC4wMDUtNS41NDgtMS4xMTUtNy41NTItMy4xMTVMMi45OTQsMzkuNjMzYy00LjA5My00LjIzNy0zLjk3NS0xMC45OSwwLjI2Mi0xNS4wODMNCgljNC4xMzQtMy45OTIsMTAuNjg3LTMuOTkyLDE0LjgyMSwwbDIyNy4xMzYsMjI3LjExNUw0NzIuMzI4LDI0LjUyOWM0LjA5My00LjIzNywxMC44NDUtNC4zNTQsMTUuMDgzLTAuMjYyDQoJczQuMzU0LDEwLjg0NSwwLjI2MiwxNS4wODNjLTAuMDg2LDAuMDg5LTAuMTczLDAuMTc2LTAuMjYyLDAuMjYyTDI1Mi43NDQsMjc0LjI3OUMyNTAuNzQ4LDI3Ni4yOCwyNDguMDQsMjc3LjQwOCwyNDUuMjEzLDI3Ny40MTV6Ig0KCS8+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8Zz4NCjwvZz4NCjxnPg0KPC9nPg0KPGc+DQo8L2c+DQo8L3N2Zz4NCg=="><span>更多</span></a>',
@@ -848,6 +939,7 @@
         '<a data-url="https://www.google.com/search?q=%s"><img src="https://www.google.com/favicon.ico" /><span>Google搜索</span></a>',
         '<a data-url="https://www.baidu.com/s?wd=%s"><img src="https://www.baidu.com/favicon.ico" /><span>百度搜索</span></a>',
         '<a data-url="https://www.so.com/s?q=%s"><img src="https://www.so.com/favicon.ico" /><span>360搜索</span></a>',
+        '<a data-url="https://cn.bing.com/search?q=%s"><img src="https://cn.bing.com/favicon.ico" /><span>必应搜索</span></a>',
         '<a data-url name="close"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIuMDAxIDUxMi4wMDEiPjxwYXRoIGQ9Ik0yODQuMjg2IDI1Ni4wMDJMNTA2LjE0MyAzNC4xNDRjNy44MTEtNy44MTEgNy44MTEtMjAuNDc1IDAtMjguMjg1LTcuODExLTcuODEtMjAuNDc1LTcuODExLTI4LjI4NSAwTDI1NiAyMjcuNzE3IDM0LjE0MyA1Ljg1OWMtNy44MTEtNy44MTEtMjAuNDc1LTcuODExLTI4LjI4NSAwLTcuODEgNy44MTEtNy44MTEgMjAuNDc1IDAgMjguMjg1bDIyMS44NTcgMjIxLjg1N0w1Ljg1OCA0NzcuODU5Yy03LjgxMSA3LjgxMS03LjgxMSAyMC40NzUgMCAyOC4yODVhMTkuOTM4IDE5LjkzOCAwIDAgMCAxNC4xNDMgNS44NTcgMTkuOTQgMTkuOTQgMCAwIDAgMTQuMTQzLTUuODU3TDI1NiAyODQuMjg3bDIyMS44NTcgMjIxLjg1N2MzLjkwNSAzLjkwNSA5LjAyNCA1Ljg1NyAxNC4xNDMgNS44NTdzMTAuMjM3LTEuOTUyIDE0LjE0My01Ljg1N2M3LjgxMS03LjgxMSA3LjgxMS0yMC40NzUgMC0yOC4yODVMMjg0LjI4NiAyNTYuMDAyeiIvPjwvc3ZnPg=="><span>禁止弹出</span></a>',
         '</div>',
       ]);
@@ -899,12 +991,45 @@
   window.customElements.define('mark-confirm', markConfirm);
 
   $('<mark-panel>').insertAfter('body');
-  await updateElems();
-  updateHighlight();
 
-  $(window).on('focus', (e) => {
-    updateHighlight();
+  const onAddedNodes = $.debounce(800, updateElems);
+  const observer = new window.MutationObserver(async (mutationsList) => {
+    if (mutationsList.some((i) => i.addedNodes && [].concat(...i.addedNodes).some((j) => j.nodeType === 1))) onAddedNodes();
   });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+  onAddedNodes();
+
+  const onEvent = $.throttle(800, (e) => {
+    if (!document.hidden) {
+      isActived = true;
+      if (getChangeTime() > changeTime) {
+        changeTime = getChangeTime();
+        database = getValue();
+      }
+      updateHighlight();
+    } else {
+      isActived = false;
+    }
+  });
+  $(window).on([
+    'resize', 'scroll', 'visibilitychange',
+    'blur', 'focus', 'focusin', 'focusout',
+
+    'keydown', 'keyup', 'keypress',
+    'compositionend', 'compositionstart', 'compositionupdate',
+
+    'click', 'auxclick', 'contextmenu', 'dblclick', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
+    'pointerlockchange', 'pointerlockerror', 'select', 'wheel', 'mousewheel',
+    'drag', 'dragend', 'dragenter', 'dragleave', 'dragover', 'dragstart', 'drop',
+
+    'touchcancel', 'touchend', 'touchenter', 'touchleave', 'touchmove', 'touchstart',
+
+    'fullscreenchange', 'fullscreenerror',
+    'copy', 'cut', 'paste',
+  ].join(' '), onEvent);
 
   // 通用函数
   function xhrSync(url, parm = null, opt = {}) {

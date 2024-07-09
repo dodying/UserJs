@@ -8,7 +8,7 @@
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @description 链接强制在新建标签中打开 Open a URL in a new tab
 // @raw-version 0.2.0.0
-// @version     0.0.113
+// @version     0.0.125
 
 // @include     http*://*/*
 
@@ -17,7 +17,7 @@
 // @exclude     http*://mail.*/*
 // @exclude     http*://*.mail.*/*
 
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @grant       GM_registerMenuCommand
 // @grant       GM_unregisterMenuCommand
 // @grant       GM_getValue
@@ -25,7 +25,7 @@
 // @run-at      document-end
 // ==/UserScript==
 /* global GM_registerMenuCommand GM_getValue GM_setValue */
-(function total() {
+(function () {
   if (document.title.match(/^Index of /) && document.querySelector('[href="../"]')) {
     return;
   }
@@ -35,6 +35,7 @@
 
   if (blacklist.includes(host)) {
     GM_registerMenuCommand(`newTab: Effect ${host}`, () => {
+      // eslint-disable-next-line no-shadow
       const blacklist = GM_getValue('blacklist', []);
       if (blacklist.includes(host)) {
         blacklist.splice(blacklist.indexOf(host), 1);
@@ -54,6 +55,7 @@
       subtree: true,
     });
     GM_registerMenuCommand(`newTab: DO NOT Effect ${host}`, () => {
+      // eslint-disable-next-line no-shadow
       const blacklist = GM_getValue('blacklist', []);
       if (!blacklist.includes(host)) {
         blacklist.push(host);
@@ -76,11 +78,13 @@
       if (!link[prop]) return;
       const url = new URL(link[prop]);
       const protocol = !url.protocol.match(/^(http.?|ftp):$/);
+      // eslint-disable-next-line no-shadow
       const host = url.href === window.location.origin || url.href === `${window.location.origin}/`;
       const hash = !!url.href.match('#') && url.pathname === window.location.pathname;
       const next = link.hasAttribute('rel') && !!link.getAttribute('rel').match(/^(prev|next)$/);
-      const text = !!link.textContent.trim().match(/^(\d+|<|>|<<|>>)$|(上|下|前|后|首|末|尾)一?(章|页|话|集|节|卷|篇|章|頁|話|集|節|卷|篇)|Prev(ious)?|Next/i);
-      if (protocol || host || hash || next || text) {
+      const text = !!link.textContent.trim().match(/^([\d.]+|\|?<+|>+\|?|◀|▶|◁|▷|◂|▸|◃|▹)$|最?(上|下|前|后|次|首|末|尾|初|後)[一二三四五六七八九十]?(章|页|话|集|节|卷|篇|章|頁|話|集|節|卷|篇)|Prev(ious)?|Next/i);
+      const class1 = ['prev', 'next'].some((i) => link.classList.contains(i));
+      if (protocol || host || hash || next || text || class1) {
         // raw.push({
         //   target: link,
         //   url: link[prop],

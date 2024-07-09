@@ -8,17 +8,17 @@
 // @include     http*://hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
 // @include     http*://hentaiverse.org/?s=Battle&ss=ba&encounter=*
-// @version     1.00a
+// @version     1.10a
 // @grant       none
 // @author      dodying
 // @namespace   https://github.com/dodying/
-// @supportURL  https://github.com/dodying//UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @supportURL  https://github.com/dodying/UserJs/issues
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 (function () {
   if (!document.querySelector('img[src="/y/character/inc.png"]')) return;
-  let plus; let grades; let points; let temp; let
+  let plus, grades, points, temp,
     min;
   while (document.querySelector('img[src="/y/character/inc.png"]')) {
     plus = document.querySelectorAll('#attr_table>tbody>tr>td:nth-child(7)>img');

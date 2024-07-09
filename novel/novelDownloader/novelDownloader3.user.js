@@ -2,19 +2,19 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.445
+// @version     3.5.447
 // @created     2020-03-16 16:59:04
-// @modified    2021-12-08 19:55:48
+// @modified    2022-09-10 20:12:04
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
-// @downloadURL https://gitee.com/dodying/userJs/raw/master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
-// @updateURL   https://gitee.com/dodying/userJs/raw/master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @downloadURL https://kgithub.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
+// @updateURL   https://kgithub.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
 // @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=977735
-// require     https://gitee.com/dodying/userJs/raw/master/lib/download.js
+// require     https://kgithub.com/dodying/UserJs/raw/master/lib/download.js
 // require     http://127.0.0.1:8082/download.js
 
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
@@ -24,8 +24,8 @@
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js
 // @require     https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js
 
-// resource fontLib https://gitee.com/dodying/userJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
-// @resource fontLib https://gitee.com/dodying/userJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// resource fontLib https://kgithub.com/dodying/UserJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// @resource fontLib https://kgithub.com/dodying/UserJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
 // resource fontLib file:///E:/Desktop/_/GitHub/UserJs/novel/novelDownloader/起点自定义字体/often.json?v=2
 
 // @grant       GM_xmlhttpRequest
@@ -398,20 +398,19 @@
       siteName: '起点中文网',
       url: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/(info|book)\/\d+/,
       chapterUrl: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/chapter/,
-      title: 'h1>em',
-      writer: '.writer',
-      intro: '.book-intro',
-      cover: '.J-getJumpUrl>img',
-      chapter: '.volume>.cf>li a',
-      vipChapter: '.volume>.cf>li a[href^="//vipreader.qidian.com"]',
-      volume: () => $('.volume>h3').toArray().map((i) => i.childNodes[2]),
-      chapterTitle: '.j_chapterName',
-      content: '.j_readContent',
-      elementRemove: '.review-count,span[style]',
-      chapterPrev: (doc) => [$('[id^="chapter-"]', doc).attr('data-purl')],
-      chapterNext: (doc) => [$('[id^="chapter-"]', doc).attr('data-nurl')],
+      title: '#bookName',
+      writer: '.author',
+      intro: '#book-intro-detail',
+      cover: '#bookImg>img',
+      chapter: '.catalog-volume li>a',
+      vipChapter: '.catalog-volume:has(.vip) li>a',
+      volume: () => $('.volume-name').toArray().map((i) => i.childNodes[0]),
+      chapterTitle: '.title',
+      content: '.content',
+      elementRemove: '.review',
       vip: {
-        iframe: async (win) => waitFor(() => win.enContent === undefined && win.cuChapterId === undefined && win.fEnS === undefined),
+        // iframe: async (win) => {  return $('.content',win.document).length},
+        popup: async () => { await waitFor(() => $('.content:visible').length, 5 * 1000); },
       },
     },
     { // https://www.ciweimao.com
@@ -2988,7 +2987,8 @@
   if (window.opener && window.opener !== window && !window.menubar.visible && window.localStorage.getItem('gm-nd-url') === window.location.href) {
     init();
     (async function () {
-      if (typeof Storage.rule.popup === 'function') await Storage.rule.popup();
+      const rule = window.localStorage.getItem('gm-nd-isvip') ? Storage.rule.vip : Storage.rule;
+      if (typeof rule.popup === 'function') await rule.popup();
       window.localStorage.setItem('gm-nd-html', window.document.documentElement.outerHTML);
     }());
   }
@@ -3011,6 +3011,7 @@
         } else if (Storage.rule.filter && typeof Storage.rule.filter === 'function') {
           Storage.mode = Storage.rule.filter();
         }
+        if (Storage.rule.vip) Storage.rule.vip = { ...Storage.rule, ...Storage.rule.vip || {} };
       } else {
         Storage.rule = Rule;
         if (Config.modeManual) {
@@ -3179,7 +3180,6 @@
       Storage.title = document.title;
 
       Storage.book.chapters = Config.vip ? chapters : chapters.filter((i) => !(vipChapters.includes(i.url)));
-      Storage.rule.vip = { ...Storage.rule, ...Storage.rule.vip || {} };
 
       // 限制下载范围
       if (container.find('[name="limit"]>[name="range"]').val()) {
@@ -3205,7 +3205,7 @@
         });
       }
       if (container.find('[name="limit"]>[name="batch"]').val()) {
-        Storage.book.chapters = container.find('[name="limit"]>[name="batch"]').val().split('\n').filter((i) => i)
+        Storage.book.chapters = container.find('[name="limit"]>[name="batch"]').val().split(/\r*\n/).filter((i) => i)
           .map((i) => {
             const url = new URL(i, window.location.href).href;
             return chaptersDownloaded.find((i) => i.url === url) || { url };
@@ -3271,18 +3271,6 @@
           const rule = vipChapters.includes(chapter.url) ? Storage.rule.vip : Storage.rule;
           let content = chapter.contentRaw;
           if (!content) continue;
-          if (rule.elementRemove || Config.useCommon) {
-            if (Storage.debug.content) debugger;
-            content = await getFromRule(content, (content) => {
-              const elem = $('<div>').html(content);
-              if (rule.elementRemove) {
-                $(`${rule.elementRemove},script,style,iframe`, elem).remove();
-              } else if (Config.useCommon) {
-                $(`${Rule.elementRemove},script,style,iframe`, elem).remove();
-              }
-              return elem.html();
-            }, [], '');
-          }
 
           if (Config.format) {
             content = html2Text(content, rule.contentReplace);
@@ -3409,6 +3397,14 @@
         const doc = typeof res.response === 'object' ? res.response : new window.DOMParser().parseFromString(res.responseText, 'text/html');
 
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
+
+        if (rule.elementRemove || Config.useCommon) {
+          if (rule.elementRemove) {
+            $(`${rule.elementRemove},script,style,iframe`, doc).remove();
+          } else if (Config.useCommon) {
+            $(`${Rule.elementRemove},script,style,iframe`, doc).remove();
+          }
+        }
 
         let chapterTitle = await getFromRule(rule.chapterTitle, { attr: 'text', document: doc }, [res, request], '');
         chapterTitle = chapterTitle || chapter.title || $('title', doc).eq(0).text();
@@ -3580,8 +3576,10 @@
 
         if (chapterList.popup.length && chapterList.popup.find((i) => !('contentRaw' in i))) {
           for (const chapter of chapterList.popup.filter((i) => !('contentRaw' in i))) {
+            const isVip = vipChapters.includes(chapter.url);
             var popupWindow = window.open(chapter.url, '', 'resizable,scrollbars,width=300,height=350');
             window.localStorage.setItem('gm-nd-url', chapter.url);
+            if (isVip) window.localStorage.setItem('gm-nd-isvip', '1');
             await waitFor(() => window.localStorage.getItem('gm-nd-html') || !popupWindow || popupWindow.closed);
             const html = window.localStorage.getItem('gm-nd-html');
             const doc = html;
@@ -3590,6 +3588,7 @@
             popupWindow.close();
             window.localStorage.removeItem('gm-nd-url');
             window.localStorage.removeItem('gm-nd-html');
+            window.localStorage.removeItem('gm-nd-isvip');
           }
         }
       }
@@ -3679,13 +3678,6 @@
     let intro = await getFromRule(Storage.rule.intro, { attr: 'html', document: infoPage || document }, [], '');
     intro = html2Text(intro, Storage.rule.contentReplace);
     intro = $('<div>').html(intro);
-    if (Storage.rule.elementRemove || Config.useCommon) {
-      if (Storage.rule.elementRemove) {
-        $(`${Storage.rule.elementRemove},script,style,iframe`, intro).remove();
-      } else if (Config.useCommon) {
-        $(`${Rule.elementRemove},script,style,iframe`, intro).remove();
-      }
-    }
     intro = intro.text();
     Storage.book.intro = intro;
     Storage.book.cover = await getFromRule(Storage.rule.cover, { attr: 'src', document: infoPage || document }, [], '');

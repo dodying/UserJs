@@ -19,7 +19,6 @@
   - [Buff Image Table](#buff-image-table)
 - [Attack Rule Example](#attack-rule-example)
 - [Question and Answer](#question-and-answer)
-- [Donation](#donation)
 - [Changelog](#changelog)
 
 <!-- /TOC -->
@@ -27,7 +26,7 @@
 
 ### Screenshots
 
-![hvAutoAttack_Setting](https://gitee.com/dodying/userJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
+![hvAutoAttack_Setting](https://kgithub.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_Setting.png)
 
 ***
 
@@ -89,7 +88,7 @@ Four drop down lists and one button are visible in the box
 
 #### Example
 
-![example](https://gitee.com/dodying/userJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
+![example](https://kgithub.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeCondition.png)
 
 In the picture, I set three big conditions (2 contains two small conditions)
 
@@ -103,7 +102,7 @@ It's TRUE, when any big condition is true (To judge big condition is true, all s
 
 The following is a schematic diagram of the circuit diagram
 
-![schematic diagram](https://gitee.com/dodying/userJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
+![schematic diagram](https://kgithub.com/dodying/UserJs/raw/master/HentaiVerse/hvAutoAttack/hvAutoAttack_CustomizeConditionCircuit.png)
 
 #### Skill/Item ID Table
 
@@ -179,14 +178,6 @@ In this example, the script will attack enemy 1 next.
 * Q: [Alarm not autoplaying on Chrome](https://github.com/dodying/UserJs/issues/31)
 
   A: Open `chrome://flags/#autoplay-policy` and select `No user gesture is required`
-
-***
-
-### Donation
-
-* [PayPal.Me](http://paypal.me/dodying)
-
-* ![donation](https://gitee.com/dodying/userJs/raw/master/donation.jpg)
 
 ***
 

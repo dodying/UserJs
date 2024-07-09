@@ -42,12 +42,6 @@
 
 {content}
 
-### 捐赠
-
-* [PayPal.Me](http://paypal.me/dodying)
-
-* ![donation](https://gitee.com/dodying/userJs/raw/master/donation.jpg)
-
 ###
 
 ```

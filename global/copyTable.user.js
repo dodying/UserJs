@@ -3,12 +3,12 @@
 // @name        []copyTable
 // @description copyTable
 // @include     *
-// @version     1.0.5
-// @modified    2020-2-7 11:11:26
+// @version     1.0.6
+// @modified    2022-03-26 20:15:47
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_setClipboard
 // require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js

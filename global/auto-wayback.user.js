@@ -5,13 +5,13 @@
 // @include     *
 // @exclude     https://web.archive.org/*
 // @exclude     https://duckduckgo.com/*
-// @version     1.0.65
+// @version     1.0.66
 // @created     2020-09-24 15:51:26
-// @modified    2020/9/24 16:28:14
+// @modified    2022-03-26 20:15:46
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_registerMenuCommand
 // @grant       GM_unregisterMenuCommand

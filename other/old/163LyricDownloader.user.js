@@ -2,12 +2,12 @@
 // @name        163LyricDownloader
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @include     http://music.163.com/*
-// @version     1.00
+// @version     1.10
 // @grant       GM_xmlhttpRequest
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @require     https://greasyfork.org/scripts/18532-filesaver/code/FileSaver.js?version=127839
 // @require     http://cdn.bootcss.com/jszip/3.0.0/jszip.min.js
 // @run-at      document-end

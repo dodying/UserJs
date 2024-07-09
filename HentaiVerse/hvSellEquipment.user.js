@@ -6,12 +6,12 @@
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
 // @include     http://alt.hentaiverse.org/
 // @include     http://alt.hentaiverse.org/?s=Character&ss=ch
-// @version     1.01a
+// @version     1.02a
 // @grant       none
 // @author      dodying
 // @namespace   https://github.com/dodying/
-// @supportURL  https://github.com/dodying//UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @supportURL  https://github.com/dodying/UserJs/issues
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 (function () {

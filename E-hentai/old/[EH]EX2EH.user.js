@@ -4,12 +4,12 @@
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @include     https://exhentai.org/g/*
 // @include     https://e-hentai.org/g/*
 // @exclude     https://exhentai.org/g/*/?p=*
 // @exclude     https://e-hentai.org/g/*/?p=*
-// @version     1.02
+// @version     1.03
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_deleteValue

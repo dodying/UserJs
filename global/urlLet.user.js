@@ -3,13 +3,13 @@
 // @name        []urlLet
 // @description urlLet
 // @include     *
-// @version     1.0.132
+// @version     1.0.133
 // @created     2020-10-13 10:44:15
-// @modified    2020/10/13 13:55:26
+// @modified    2022-03-26 20:15:36
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_registerMenuCommand
 // @grant       GM_getResourceText

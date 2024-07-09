@@ -3,22 +3,23 @@
 // @name        小说阅读脚本增强
 // @description 移除鼠标双击事件，增加翻页按钮
 // @include     *
-// @version     1.0.326
+// @version     1.0.331
 // @created     2020-07-20 08:45:13
-// @modified    2021-12-08 20:01:18
+// @modified    2022-09-24 18:12:20
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       unsafeWindow
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_registerMenuCommand
+// @grant       GM_unregisterMenuCommand
 // @noframes
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // ==/UserScript==
-/* global GM_setValue GM_getValue GM_registerMenuCommand */
+/* global GM_setValue GM_getValue GM_registerMenuCommand GM_unregisterMenuCommand */
 /* global $ */
 /* eslint-disable no-debugger  */
 (function () {
@@ -28,17 +29,29 @@
   const blacklist = GM_getValue('blacklist', []);
   const { host } = window.location;
   if (blacklist.includes(host)) {
-    GM_registerMenuCommand(`newTab: Effect ${host}`, () => {
+    GM_registerMenuCommand(`小说阅读脚本增强: Effect ${host}`, () => {
+      // eslint-disable-next-line no-shadow
       const blacklist = GM_getValue('blacklist', []);
       if (blacklist.includes(host)) {
         blacklist.splice(blacklist.indexOf(host), 1);
         GM_setValue('blacklist', blacklist);
-        window.location.reload();
+        GM_unregisterMenuCommand(`小说阅读脚本增强: Effect ${host}`);
+        init();
       }
     }, 'N');
   } else {
     // let compareElement = scrollElement === document.documentElement ? document.body : document.documentElement;
     init();
+
+    GM_registerMenuCommand(`小说阅读脚本增强: DO NOT Effect ${host}`, () => {
+      // eslint-disable-next-line no-shadow
+      const blacklist = GM_getValue('blacklist', []);
+      if (!blacklist.includes(host)) {
+        blacklist.push(host);
+        GM_setValue('blacklist', blacklist);
+        window.location.reload();
+      }
+    }, 'N');
   }
 
   async function init() {

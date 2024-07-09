@@ -1,11 +1,11 @@
 /* eslint-env browser */
 // ==UserScript==
 // @name        [H]ParkingLot
-// @version     1.11.439
+// @version     1.11.440
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 //
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue

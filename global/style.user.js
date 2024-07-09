@@ -1,12 +1,12 @@
 /* eslint-env browser */
 // ==UserScript==
 // @name        []style
-// @version     1.1.0
+// @version     1.1.1
 // @grant       none
 // @author      dodying
 // @namespace   https://github.com/dodying/
-// @supportURL  https://github.com/dodying//UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @supportURL  https://github.com/dodying/UserJs/issues
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @noframes
 // @include     *

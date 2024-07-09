@@ -2,14 +2,14 @@
 // ==UserScript==
 // @name        [google]Enhance
 // @description
-// @version     1.11
+// @version     1.12
 // @grant       GM_setValue
 // @grant       GM_getValue
 // @grant       GM_xmlhttpRequest
 // @author      dodying
 // @namespace   https://github.com/dodying/
-// @supportURL  https://github.com/dodying//UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @supportURL  https://github.com/dodying/UserJs/issues
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @run-at      document-end
 // @include     https://www.google.co.jp/search?*

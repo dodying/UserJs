@@ -3,13 +3,13 @@
 // @name        QQ阅读-列表
 // @description 自净网行动后，狗比起点/阅文不再在网页上显示所有书籍了
 // @include     http://ebook.qq.com/classify/index.html*
-// @version     1.0.533
+// @version     1.0.534
 // @created     2020-07-15 12:22:22
-// @modified    2020/9/28 18:04:07
+// @modified    2022-03-26 20:15:42
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue
@@ -17,7 +17,7 @@
 // @grant       unsafeWindow
 // @noframes
 // require     file:///E:/Desktop/_/GitHub/UserJs/lib/download.js
-// @require     https://gitee.com/dodying/userJs/raw/master/lib/download.js
+// @require     https://kgithub.com/dodying/UserJs/raw/master/lib/download.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // ==/UserScript==
 /* eslint-disable no-debugger  */

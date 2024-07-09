@@ -1,11 +1,11 @@
 /* eslint-env browser */
 // ==UserScript==
 // @name        [H]CopyInfo
-// @version     1.01.5
+// @version     1.01.6
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @include     http*://www.javlibrary.com/*
 // @include     http*://www.javbus.com/*
 // @include     http*://www.caribbeancom.com/moviepages/*

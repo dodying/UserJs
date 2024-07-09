@@ -4,12 +4,12 @@
 // @namespace   https://github.com/dodying/UserJs
 // @include     http://alt.hentaiverse.org/?s=Bazaar&ss=ml&slot=*
 // @include     http*://hentaiverse.org/?s=Bazaar&ss=ml&slot=*
-// @version     1.01
+// @version     1.02
 // @grant       none
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 (function () {

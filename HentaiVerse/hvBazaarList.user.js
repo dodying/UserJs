@@ -1,11 +1,11 @@
 /* eslint-env browser */
 // ==UserScript==
 // @name         [HV]BazaarList
-// @version      1.03
+// @version      1.04
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
-// @icon         https://gitee.com/dodying/userJs/raw/master/Logo.png
+// @icon         https://kgithub.com/dodying/UserJs/raw/master/Logo.png
 // @include      http*://hentaiverse.org/?s=Bazaar&ss=is*
 // @include      http://alt.hentaiverse.org/?s=Bazaar&ss=is*
 // @grant        GM_setValue
