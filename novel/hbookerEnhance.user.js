@@ -6,12 +6,12 @@
 // @description 阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 // @description:zh-CN  阅读高亮，吐槽楼层提醒、跳转，快速吐槽V2，查看头像
 // @include     http*://www.hbooker.com/chapter/book_chapter_detail/*
-// @version     1.040a
+// @version     1.041a
 // @grant       unsafeWindow
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 init();

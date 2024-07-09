@@ -2,19 +2,19 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.447
+// @version     3.5.450
 // @created     2020-03-16 16:59:04
-// @modified    2022-09-10 20:12:04
+// @modified    2024-07-09 21:14:37
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
-// @downloadURL https://kgithub.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
-// @updateURL   https://kgithub.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
+// @downloadURL https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
+// @updateURL   https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/novelDownloader3.user.js#bypass=true
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 
 // @require     https://greasyfork.org/scripts/398502-download/code/download.js?version=977735
-// require     https://kgithub.com/dodying/UserJs/raw/master/lib/download.js
+// require     https://github.com/dodying/UserJs/raw/master/lib/download.js
 // require     http://127.0.0.1:8082/download.js
 
 // @require     https://greasyfork.org/scripts/21541-chs2cht/code/chs2cht.js?version=605976
@@ -24,8 +24,8 @@
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js
 // @require     https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js
 
-// resource fontLib https://kgithub.com/dodying/UserJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
-// @resource fontLib https://kgithub.com/dodying/UserJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// resource fontLib https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
+// @resource fontLib https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
 // resource fontLib file:///E:/Desktop/_/GitHub/UserJs/novel/novelDownloader/起点自定义字体/often.json?v=2
 
 // @grant       GM_xmlhttpRequest

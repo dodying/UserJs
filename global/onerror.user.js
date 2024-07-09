@@ -3,13 +3,13 @@
 // @name        onerror
 // @description onerror
 // @include     *
-// @version     1.0.8
+// @version     1.0.9
 // @created     2020-12-13 14:09:27
-// @modified    2022-03-26 20:15:40
+// @modified    2024-07-09 21:13:37
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       none
 // @noframes

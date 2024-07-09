@@ -4,12 +4,12 @@
 // @name:zh-CN  【百度云】分享-答题专用
 // @description:zh-CN
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.03
+// @version     1.04
 // @grant       GM_setClipboard
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 var interval = setInterval(() => {

@@ -3,12 +3,12 @@
 // @name        []prettyJSON
 // @description prettyJSON
 // @include     *
-// @version     1.1.10
-// @modified    2022-03-26 20:15:40
+// @version     1.1.11
+// @modified    2024-07-09 21:13:38
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       none
 // @noframes

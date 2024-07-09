@@ -4,10 +4,10 @@
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
-// @version     1.03b
+// @version     1.04b
 // @grant       GM_registerMenuCommand
 // @run-at      document-end
 // ==/UserScript==

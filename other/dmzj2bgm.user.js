@@ -4,12 +4,12 @@
 // @description 请通过脚本命令来进行授权与数据同步
 // @include     https://i.dmzj.com/record
 // @include     https://i.dmzj.com/record#*
-// @version     1.0.8
-// @modified    2022-03-26 20:15:40
+// @version     1.0.9
+// @modified    2024-07-09 21:13:33
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_xmlhttpRequest
 // @grant       GM_registerMenuCommand

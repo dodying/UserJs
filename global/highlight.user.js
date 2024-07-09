@@ -2,11 +2,11 @@
 // ==UserScript==
 // @name        []highlight
 // @include     *
-// @version     1.0.3
+// @version     1.0.4
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       none
 // ==/UserScript==

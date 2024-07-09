@@ -5,11 +5,11 @@
 // @namespace    https://github.com/dodying/Dodying-UserJs
 // @description novelDownloaderHelper，press key "shift+d" to show up.
 // @description:zh-CN 按“Shift+D”来显示面板，现支持自定义规则
-// @version      0.0.5
+// @version      0.0.6
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
-// @icon         https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon         https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at       document-end
 // @noframes
 //

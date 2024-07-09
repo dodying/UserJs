@@ -8,12 +8,12 @@
 // @include     http*://hentaiverse.org/
 // @include     http*://hentaiverse.org/?s=Character&ss=ch
 // @include     http*://hentaiverse.org/?s=Battle&ss=ba&encounter=*
-// @version     1.10a
+// @version     1.11a
 // @grant       none
 // @author      dodying
 // @namespace   https://github.com/dodying/
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 (function () {

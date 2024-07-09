@@ -6,12 +6,12 @@
 /* eslint-env browser */
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.19.446
-// @modified    2024-01-11 18:31:43
+// @version     1.19.447
+// @modified    2024-07-09 21:13:40
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 //              里站
 // @include     https://exhentai.org/
 // @include     https://exhentai.org/favorites.php*

@@ -3,13 +3,13 @@
 // @name        [HV]Challenge
 // @description
 // @include
-// @version     1.02
+// @version     1.03
 // @include     http*://hentaiverse.org/*
 // @include     http://alt.hentaiverse.org/*
 // @author      dodying
 // @namespace   https://github.com/dodying/
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 (function () {

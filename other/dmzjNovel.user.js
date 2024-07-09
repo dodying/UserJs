@@ -3,12 +3,12 @@
 // @name        [dmzj]Novel
 // @description 在动漫之家上看小说
 // @include     http*://xs.dmzj.com/*
-// @version     1.0.4
-// @modified    2022-03-26 20:15:40
+// @version     1.0.5
+// @modified    2024-07-09 21:13:34
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_xmlhttpRequest
 // @grant       GM_setValue

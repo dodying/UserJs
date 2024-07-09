@@ -3,13 +3,13 @@
 // @name        小说阅读脚本辅助朗读
 // @description 小说阅读脚本辅助朗读
 // @include     *
-// @version     1.0.424
+// @version     1.0.425
 // @created     2020-12-11 13:05:42
-// @modified    2023-10-08 11:54:59
+// @modified    2024-07-09 21:13:34
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       GM_setValue
 // @grant       GM_getValue

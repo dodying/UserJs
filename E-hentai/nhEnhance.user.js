@@ -1,12 +1,12 @@
 /* eslint-env browser */
 // ==UserScript==
 // @name        [NH]Enhance
-// @version     1.0.5
-// @modified    2022-03-26 20:15:52
+// @version     1.0.6
+// @modified    2024-07-09 21:13:40
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @include     https://nhentai.net/*
 // @grant       GM_openInTab
 // @grant       GM_setClipboard
@@ -16,7 +16,7 @@
 // @grant       GM_xmlhttpRequest
 // @connect     *
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
-// @resource EHT https://kgithub.com/dodying/UserJs/raw/master/E-hentai/EHT.json?v=1522933172772
+// @resource EHT https://github.com/dodying/UserJs/raw/master/E-hentai/EHT.json?v=1522933172772
 // @run-at      document-end
 // @compatible  firefox 52+(ES2017)
 // @compatible  chrome 55+(ES2017)

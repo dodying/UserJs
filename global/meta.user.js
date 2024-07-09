@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name        []meta
 // @description
-// @version     1.12
+// @version     1.13
 // @grant       GM_xmlhttpRequest
 // @grant       GM_registerMenuCommand
 // @grant       GM_setValue
@@ -10,7 +10,7 @@
 // @author      dodying
 // @namespace   https://github.com/dodying/
 // @supportURL  https://github.com/dodying//UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @require     https://cdnjs.cloudflare.com/ajax/libs/psl/1.1.31/psl.min.js
 // @noframes

@@ -4,12 +4,12 @@
 // @name:zh-CN
 // @description:zh-CN
 // @include     *
-// @version     1.11
+// @version     1.12
 // @grant       GM_registerMenuCommand
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @require     https://greasyfork.org/scripts/21541/code/chs2cht.js?version=137286
 // @run-at      document-end

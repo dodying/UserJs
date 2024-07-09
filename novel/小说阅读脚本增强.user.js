@@ -3,13 +3,13 @@
 // @name        小说阅读脚本增强
 // @description 移除鼠标双击事件，增加翻页按钮
 // @include     *
-// @version     1.0.331
+// @version     1.0.332
 // @created     2020-07-20 08:45:13
-// @modified    2022-09-24 18:12:20
+// @modified    2024-07-09 21:13:34
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       unsafeWindow
 // @grant       GM_setValue

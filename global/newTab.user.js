@@ -8,7 +8,7 @@
 // @supportURL  https://github.com/dodying/UserJs/issues
 // @description 链接强制在新建标签中打开 Open a URL in a new tab
 // @raw-version 0.2.0.0
-// @version     0.0.125
+// @version     0.0.126
 
 // @include     http*://*/*
 
@@ -17,7 +17,7 @@
 // @exclude     http*://mail.*/*
 // @exclude     http*://*.mail.*/*
 
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @grant       GM_registerMenuCommand
 // @grant       GM_unregisterMenuCommand
 // @grant       GM_getValue

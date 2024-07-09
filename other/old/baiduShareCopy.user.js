@@ -4,12 +4,12 @@
 // @name:zh-CN  【百度云】分享页复制
 // @description:zh-CN  作者Firefox，常禁用Flash
 // @include     http://pan.baidu.com/share/manage
-// @version     1.03
+// @version     1.04
 // @grant       GM_setClipboard
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js
 // @run-at      document-end
 // ==/UserScript==

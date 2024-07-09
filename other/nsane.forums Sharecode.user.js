@@ -3,12 +3,12 @@
 // @name        nsane.forums Sharecode
 // @description nsane.forums Sharecode
 // @include     https://www.nsaneforums.com/topic/*
-// @version     1.0.49
-// @modified    2022-03-26 20:15:35
+// @version     1.0.50
+// @modified    2024-07-09 21:13:33
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // @grant       none
 // @noframes

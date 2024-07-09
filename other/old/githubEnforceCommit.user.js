@@ -4,12 +4,12 @@
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @description:zh-CN  养成好习惯
 // @include     https://github.com/*/edit/*
-// @version     2
+// @version     3
 // @grant       none
 // @author      dodying
 // @namespace   https://github.com/dodying/Dodying-UserJs
 // @supportURL  https://github.com/dodying/Dodying-UserJs/issues
-// @icon        https://kgithub.com/dodying/UserJs/raw/master/Logo.png
+// @icon        https://github.com/dodying/UserJs/raw/master/Logo.png
 // @run-at      document-end
 // ==/UserScript==
 document.getElementById('submit-file').onclick = function () {
