@@ -105,7 +105,7 @@
     g('dateNow', time(2));
     if (g('option').quickSite) quickSite();
     if (g('option').encounter) encounterCheck();
-    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return;
+    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return;
     if (g('option').repair) {
       let json; let checkOnload; let
         checkLength;
@@ -321,8 +321,9 @@ function addStyle(lang) { // CSS
   const cssContent = [
     // hvAA
     'l0,l1,l01,l2{display:none;}', // l0: 简体 l1: 繁体 l01:简繁体共用 l2: 英文
+    '#hvAABox2{position:absolute;left:1075px}',
     '.hvAALog{font-size:20px;}',
-    '.hvAAButton{top:4px;left:1238px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
+    '.hvAAButton{top:4px;left:1200px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
     '#hvAABox{left:calc(50% - 350px);top:50px;font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
     '.hvAATablist{position:relative;left:14px;}',
     '.hvAATabmenu{position:absolute;left:-9px;}',
@@ -381,6 +382,8 @@ function addStyle(lang) { // CSS
     // '#pane_monster{counter-reset:order;}',
     // '.btm2>div:nth-child(1):before{font-size:30px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
     // '.btm2>div:nth-child(1)>img{display:none;}'
+    '.tlbQRA{text-align:left;font-weight:bold;}', // 标记已检测的日志行
+    '.tlbWARN{text-align:left;font-weight:bold;color:red;font-size:20pt;}', // 标记检测出异常的日志行
   ].join('');
   globalStyle.textContent = cssContent;
   optionButton(lang);
@@ -534,8 +537,8 @@ function optionBox() { // 配置界面
     '    <input name="debuffSkillOrderValue" style="width:80%;" type="text" disabled="true"><br>',
     '    <input id="debuffSkillOrder_Sle" type="checkbox"><label for="debuffSkillOrder_Sle">Sleep</label><input id="debuffSkillOrder_Bl" type="checkbox"><label for="debuffSkillOrder_Bl">Blind</label><input id="debuffSkillOrder_Slo" type="checkbox"><label for="debuffSkillOrder_Slo">Slow</label><br>',
     '    <input id="debuffSkillOrder_Im" type="checkbox"><label for="debuffSkillOrder_Im">Imperil</label><input id="debuffSkillOrder_MN" type="checkbox"><label for="debuffSkillOrder_MN">MagNet</label><input id="debuffSkillOrder_Si" type="checkbox"><label for="debuffSkillOrder_Si">Silence</label><input id="debuffSkillOrder_Dr" type="checkbox"><label for="debuffSkillOrder_Dr">Drain</label><input id="debuffSkillOrder_We" type="checkbox"><label for="debuffSkillOrder_We">Weaken</label><input id="debuffSkillOrder_Co" type="checkbox"><label for="debuffSkillOrder_Co">Confuse</label></div>',
-    '  <div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillAllIm" type="checkbox"><label for="debuffSkillAllIm"><l0>给所有敌人上Imperil</l0><l1>給所有敵人上Imperil</l1><l2>Imperiled all enemies.</l2></label></div>{{debuffSkillCondition}}',
-    '  <div>',
+    '  <div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillAllIm" type="checkbox"><label for="debuffSkillAllIm"><l0>给所有敌人上Imperil</l0><l1>給所有敵人上Imperil</l1><l2>Imperiled all enemies.</l2></label></div>{{debuffSkillImpCondition}}',
+    '  <div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillAllWk" type="checkbox"><label for="debuffSkillAllWk"><l0>给所有敌人上Weaken</l0><l1>給所有敵人上Weaken</l1><l2>Weakened all enemies.</l2></label></div>{{debuffSkillWkCondition}}',
     '    <div><input id="debuffSkill_Sle" type="checkbox"><label for="debuffSkill_Sle">Sleep</label>{{debuffSkillSleCondition}}</div>',
     '    <div><input id="debuffSkill_Bl" type="checkbox"><label for="debuffSkill_Bl">Blind</label>{{debuffSkillBlCondition}}</div>',
     '    <div><input id="debuffSkill_Slo" type="checkbox"><label for="debuffSkill_Slo">Slow</label>{{debuffSkillSloCondition}}</div>',
@@ -544,7 +547,7 @@ function optionBox() { // 配置界面
     '    <div><input id="debuffSkill_Si" type="checkbox"><label for="debuffSkill_Si">Silence</label>{{debuffSkillSiCondition}}</div>',
     '    <div><input id="debuffSkill_Dr" type="checkbox"><label for="debuffSkill_Dr">Drain</label>{{debuffSkillDrCondition}}</div>',
     '    <div><input id="debuffSkill_We" type="checkbox"><label for="debuffSkill_We">Weaken</label>{{debuffSkillWeCondition}}</div>',
-    '    <div><input id="debuffSkill_Co" type="checkbox"><label for="debuffSkill_Co">Confuse</label>{{debuffSkillCoCondition}}</div></div>',
+    '    <div><input id="debuffSkill_Co" type="checkbox"><label for="debuffSkill_Co">Confuse</label>{{debuffSkillCoCondition}}</div>',
     '  <div><l0>持续</l0><l1>持續</l1><l2>Expire</l2> Turns: <input id="debuffSkillTurnAlert" type="checkbox"><label for="debuffSkillTurnAlert"><l0>无法正常施放DEBUFF技能时，警报</l0><l1>無法正常施放DEBUFF技能時，警報</l1><l2>If it can not cast de-skills normally, alert.</l2></label><br>',
     '    Sleep: <input class="hvAANumber" name="debuffSkillTurn_Sle" type="text"> Blind: <input class="hvAANumber" name="debuffSkillTurn_Bl" type="text"> Slow: <input class="hvAANumber" name="debuffSkillTurn_Slo" type="text"><br>',
     '    Imperil: <input class="hvAANumber" name="debuffSkillTurn_Im" type="text"> MagNet: <input class="hvAANumber" name="debuffSkillTurn_MN" type="text"> Silence: <input class="hvAANumber" name="debuffSkillTurn_Si" type="text"><br>',
@@ -562,7 +565,7 @@ function optionBox() { // 配置界面
     '  <div><input id="skill_T1" type="checkbox"><label for="skill_T1"><l0>1阶</l0><l1>1階</l1><l2>T1</l2></label>: <input id="skillOTOS_T1" type="checkbox"><label for="skillOTOS_T1"><l01>一回合只使用一次</l01><l2>One round only spell one time</l2></label>{{skillT1Condition}}</div></div>',
     '<div class="hvAATab" id="hvAATab-Scroll">',
     '  <l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: ',
-    '  <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Encounter</label>{{scrollCondition}}',
+    '  <input id="scrollRoundType_ar" type="checkbox"><label for="scrollRoundType_ar">The Arena</label><input id="scrollRoundType_rb" type="checkbox"><label for="scrollRoundType_rb">Ring of Blood</label><input id="scrollRoundType_gr" type="checkbox"><label for="scrollRoundType_gr">GrindFest</label><input id="scrollRoundType_iw" type="checkbox"><label for="scrollRoundType_iw">Item World</label><input id="scrollRoundType_ba" type="checkbox"><label for="scrollRoundType_ba">Encounter</label><input id="scrollRoundType_tw" type="checkbox"><label for="scrollRoundType_tw">The Tower</label>{{scrollCondition}}',
     '  <input id="scrollFirst" type="checkbox"><label for="scrollFirst"><l0>存在技能生成的Buff时，仍然使用卷轴</l0><l1>存在技能生成的Buff時，仍然使用捲軸</l1><l2>Use Scrolls even when there are effects from spells</l2>.</label>',
     '  <div><input id="scroll_Go" type="checkbox"><label for="scroll_Go">Scroll of the Gods</label>{{scrollGoCondition}}</div>',
     '  <div><input id="scroll_Av" type="checkbox"><label for="scroll_Av">Scroll of the Avatar</label>{{scrollAvCondition}}</div>',
@@ -598,7 +601,7 @@ function optionBox() { // 配置界面
     '<div class="hvAATab hvAACenter" id="hvAATab-About">',
     '  <div><span class="hvAATitle"><l0>当前状况</l0><l1>當前狀況</l1><l2>Current status</l2></span>: ',
     '    <l0>如果脚本长期暂停且网络无问题，请点击</l0><l1>如果腳本長期暫停且網絡無問題，請點擊</l1><l2>If the script does not work and you are sure that it\'s not because of your internet, click</l2><button class="hvAAFix"><l0>尝试修复</l0><l1>嘗試修復</l1><l2>Try to fix</l2></button><br>',
-    '    <l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Encounter</option></select> <l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug hvAANumber" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug hvAANumber" placeholder="1" type="text"></div>',
+    '    <l0>战役模式</l0><l1>戰役模式</l1><l2>Battle type</l2>: <select class="hvAADebug" name="roundType"><option></option><option value="ar">The Arena</option><option value="rb">Ring of Blood</option><option value="gr">GrindFest</option><option value="iw">Item World</option><option value="ba">Encounter</option><option value="tw">The Tower</option></select> <l0>当前回合</l0><l1>當前回合</l1><l2>Current round</l2>: <input name="roundNow" class="hvAADebug hvAANumber" placeholder="1" type="text"> <l0>总回合</l0><l1>總回合</l1><l2>Total rounds</l2>: <input name="roundAll" class="hvAADebug hvAANumber" placeholder="1" type="text"></div>',
     '  <div class="hvAAQuickSite"><span class="hvAATitle"><l0>快捷站点</l0><l1>快捷站點</l1><l2>Quick Site</l2></span><button class="quickSiteAdd"><l01>新增</l01><l2>Add</l2></button><br>',
     '    <l0>注意: 留空“姓名”一栏则表示删除该行，修改后请保存</l0><l1>注意: 留空“姓名”一欄則表示刪除該行，修改後請保存</l1><l2>Note: The "name" input box left blank will be deleted, after change please save in time.</l2>',
     '    <table><tbody><tr class="hvAATh"><td><l0>图标</l0><l1>圖標</l1><l2>ICON</l2></td><td><l0>名称</l0><l1>名稱</l1><l2>Name</l2></td><td><l0>链接</l0><l1>鏈接</l1><l2>Link</l2></td></tr></tbody></table></div>',
@@ -939,9 +942,23 @@ function optionBox() { // 配置界面
     this.style.height = `${this.scrollHeight}px`;
     this.select();
   };
+  function rmListItem(code) { // 同步删除界面显示对应的项
+    const configs = gE('#hvAATab-About > * > ul[class="hvAABackupList"] > li', 'all');
+    for (const config of configs) {
+      if (config.textContent == code) {
+        config.remove();
+      }
+    }
+  }
   gE('.hvAABackup', optionBox).onclick = function () {
     const code = _alert(2, '请输入当前配置代号', '請輸入當前配置代號', 'Please put in a name for the current configuration') || time(3);
     const backups = getValue('backup', true) || {};
+    if (code in backups) { // 覆写同名配置
+      if (_alert(1, '是否覆盖已有的同名配置？', '是否覆蓋已有的同名配置？', 'Do you want to overwrite the configuration with the same name?')) {
+        delete backups[code];
+        rmListItem(code);
+      } else return;
+    }
     backups[code] = getValue('option');
     setValue('backup', backups);
     const li = gE('.hvAABackupList', optionBox).appendChild(cE('li'));
@@ -960,7 +977,8 @@ function optionBox() { // 配置界面
     if (!(code in backups) || !code) return;
     delete backups[code];
     setValue('backup', backups);
-    goto();
+    // goto();
+    rmListItem(code);
   };
   gE('.hvAAExport', optionBox).onclick = function () {
     const t = getValue('option');
@@ -1372,7 +1390,7 @@ function checkCondition(parms) {
 
   for (i in parms) {
     for (j = 0; j < parms[i].length; j++) {
-      if (!(parms[i] instanceof Array)) continue;
+      if (!Array.isArray(parms[i])) continue;
       k = parms[i][j].split(',');
       k[0] = returnValue(k[0]);
       k[2] = returnValue(k[2]);
@@ -1524,7 +1542,7 @@ function idleArena() { // 闲置竞技场
     return;
   }
   if (arena.isOk) return;
-  if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 < 85) {
+  if (g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 < 85) {
     post(window.location.href, goto, 'recover=stamina');
     return;
   }
@@ -1574,7 +1592,7 @@ function encounterCheck() { // encounter
     time: 0,
   };
   if (!encounter.lastTime || (timeNow - encounter.lastTime >= 30 * 60 * 1000 && encounter.time < 24)) {
-    if (g('option').restoreStamina && gE('#stamina_readout .fc4.far.fcb>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
+    if (g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
       post(window.location.href, goto, 'recover=stamina');
       return;
     }
@@ -1624,6 +1642,7 @@ function main() { // 主程序
     g('oc', gE('#dvrc').textContent);
   }
   battleInfo(); // 战斗战况
+  killBug(); // 解决 HentaiVerse 可能出现的 bug
   countMonsterHP(); // 统计敌人血量
   if (g('option').autoFlee && checkCondition(g('option').fleeCondition)) {
     gE('1001').click();
@@ -1650,7 +1669,8 @@ function main() { // 主程序
   if (g('end')) return;
   if (g('attackStatus') !== 0 && g('option').infusionSwitch && checkCondition(g('option').infusionCondition)) useInfusions(); // 自动使用魔药
   if (g('end')) return;
-  if (g('option').debuffSkillSwitch && g('option').debuffSkillAllIm && gE('div.btm6 img[src*="imperil"]', 'all').length < g('monsterAlive')) allImperiled(); // 给所有敌人上Imperil
+  if (g('option').debuffSkillSwitch && g('option').debuffSkillAllWk && gE('div.btm6 img[src*="weaken"]', 'all').length < g('monsterAlive') && checkCondition(g('option').debuffSkillWkCondition)) allWeakened(); // 给所有敌人上Weaken
+  if (g('option').debuffSkillSwitch && g('option').debuffSkillAllIm && gE('div.btm6 img[src*="imperil"]', 'all').length < g('monsterAlive') && checkCondition(g('option').debuffSkillImpCondition)) allImperiled(); // 给所有敌人上Imperil
   if (g('end')) return;
   if (g('option').debuffSkillSwitch && g('option').debuffSkill && checkCondition(g('option').debuffSkillCondition)) useDeSkill(); // 自动施法DEBUFF技能
   if (g('end')) return;
@@ -1815,7 +1835,7 @@ function newRound() { // New Round
     const temp = battleLog[battleLog.length - 1].textContent;
     if (!temp.match(/^Initializing/)) {
       roundType = '';
-    } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 <= 33) {
+    } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 <= 35) {
       roundType = 'ar';
     } else if (temp.match(/^Initializing arena challenge/) && temp.match(/\d+/)[0] * 1 >= 105) {
       roundType = 'rb';
@@ -1831,6 +1851,8 @@ function newRound() { // New Round
       roundType = 'iw';
     } else if (temp.match(/^Initializing Grindfest/)) {
       roundType = 'gr';
+    } else if (temp.match(/^Initializing The Tower/)) {
+      roundType = 'tw';
     } else {
       roundType = '';
     }
@@ -1894,6 +1916,21 @@ function newRound() { // New Round
   });
 }
 
+function killBug() { // 在 HentaiVerse 发生导致 turn 损失的 bug 时发出警告并移除问题元素: https://ehwiki.org/wiki/HentaiVerse_Bugs_%26_Errors#Combat
+  const bugLog = gE('#textlog > tbody > tr > td[class="tlb"]', 'all');
+  const isBug = /(Slot is currently not usable)|(Item does not exist)|(Inventory slot is empty)|(You do not have a powerup gem)/;
+  for (let i = 0; i < bugLog.length; i++) {
+    if (bugLog[i].textContent.match(isBug)) {
+      bugLog[i].className = 'tlbWARN';
+      setTimeout(() => { // 间隔时间以避免持续刷新
+        window.location.href = window.location;// 刷新移除问题元素
+      }, 700);
+    } else {
+      bugLog[i].className = 'tlbQRA';
+    }
+  }
+}
+
 function battleInfo() { // 战斗战况
   if (!gE('.hvAALog')) {
     const div = gE('#hvAABox2').appendChild(cE('div'));
@@ -1908,12 +1945,23 @@ function battleInfo() { // 战斗战况
     '<l0>圣</l0><l1>聖</l1><l2>Divine</l2>',
     '<l0>暗</l0><l1>暗</l1><l2>Forbidden</l2>',
   ];
+  function battleInfoType(type) { // 战役模式显示
+    switch (type) {
+      case 'ar': return 'Arena';
+      case 'ba': return 'Random Encounter';
+      case 'rb': return 'Ring of Blood';
+      case 'tw': return 'The Tower';
+      case 'iw': return 'Item World';
+      case 'gf': return 'GrindFest';
+    }
+  }
   gE('.hvAALog').innerHTML = [
     `Turns: ${g('turn')}`,
     `<br>Speed: ${g('runSpeed')} t/s`,
     `<br>Round: ${g('roundNow')}/${g('roundAll')}`,
     `<br><l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ${status[g('attackStatus')]}`,
     `<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
+    `<br><l0>战役模式</l0><l1>戰役模式</l1><l2>Type</l2>: ${battleInfoType(g('roundType'))}`, // 战役模式显示
   ].join('');
   document.title = `${g('turn')}||${g('runSpeed')}||${g('roundNow')}/${g('roundAll')}||${g('monsterAlive')}/${g('monsterAll')}`;
 }
@@ -2299,21 +2347,21 @@ function useInfusions() { // 自动使用魔药
     id: 12101,
     img: 'fireinfusion',
   }, {
-    id: 12201,
-    img: 'coldinfusion',
-  }, {
-    id: 12301,
-    img: 'elecinfusion',
-  }, {
-    id: 12401,
-    img: 'windinfusion',
-  }, {
-    id: 12501,
-    img: 'holyinfusion',
-  }, {
-    id: 12601,
-    img: 'darkinfusion',
-  }];
+      id: 12201,
+      img: 'coldinfusion',
+    }, {
+      id: 12301,
+      img: 'elecinfusion',
+    }, {
+      id: 12401,
+      img: 'windinfusion',
+    }, {
+      id: 12501,
+      img: 'holyinfusion',
+    }, {
+      id: 12601,
+      img: 'darkinfusion',
+    }];
   if (gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`) && !gE(`#pane_effects>img[src*="${infusionLib[[g('attackStatus')]].img}"]`)) {
     gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`).click();
     g('end', true);
@@ -2719,4 +2767,41 @@ function recordUsage2() {
   } else {
     setValue('stats', stats);
   }
+}
+
+function allWeakened() { // 给所有敌人施放Weaken
+  g('monsterStatus').sort(objArrSort('order'));
+  const monsterBuff = gE('div.btm6', 'all');
+  let j;
+  for (let i = -3; ;) {
+    if (!j && i >= monsterBuff.length) {
+      j = true;
+      i = 0;
+    } else if (j && i >= monsterBuff.length) {
+      break;
+    } else if (!j) {
+      i = i + 3;
+    } else if (j) {
+      i = i + 1;
+    }
+    if (i >= monsterBuff.length) continue;
+    const imgs = gE('img', 'all', monsterBuff[i]);
+    if (!gE('img[src*="weaken"]', monsterBuff[i]) && isOn('212') && !g('monsterStatus')[i].isDead) {
+      if (imgs.length < 6 || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn.Im) || !g('option').debuffSkillTurnAlert) {
+        gE('212').click();
+        if (i + 1 < monsterBuff.length && !g('monsterStatus')[i + 1].isDead) {
+          gE(`#mkey_${g('monsterStatus')[i + 1].id}`).click();
+        } else {
+          gE(`#mkey_${g('monsterStatus')[i].id}`).click();
+        }
+        g('end', true);
+        return;
+      }
+      _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
+      pauseChange();
+      g('end', true);
+      return;
+    }
+  }
+  g('monsterStatus').sort(objArrSort('finWeight'));
 }
