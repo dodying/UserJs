@@ -2,9 +2,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.450
+// @version     3.5.451
 // @created     2020-03-16 16:59:04
-// @modified    2024-07-09 21:14:37
+// @modified    2024-07-27 18:27:11
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -23,6 +23,7 @@
 // @require     https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js
 // @require     https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js
+// @require     https://cdn.jsdelivr.net/npm/async@3.2.5/dist/async.min.js
 
 // resource fontLib https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
 // @resource fontLib https://github.com/dodying/UserJs/raw/master/novel/novelDownloader/SourceHanSansCN-Regular-Often.json?v=2
@@ -32,6 +33,8 @@
 // @grant       unsafeWindow
 // @grant       GM_setValue
 // @grant       GM_getValue
+// @grant       GM_deleteValue
+// @grant       GM_addValueChangeListener
 // @grant       GM_registerMenuCommand
 // @grant       GM_getResourceText
 // @run-at      document-end
@@ -39,9 +42,9 @@
 // @include     *
 // @noframes
 // ==/UserScript==
-/* global unsafeWindow GM_info GM_setValue GM_getValue GM_registerMenuCommand GM_getResourceText */
+/* global unsafeWindow GM_info GM_setValue GM_getValue GM_deleteValue GM_addValueChangeListener GM_registerMenuCommand GM_getResourceText */
 /* eslint-disable no-debugger  */
-/* global $ xhr tranStr JSZip saveAs CryptoJS opentype */
+/* global $ xhr tranStr JSZip saveAs CryptoJS opentype async */
 ; (function () { // eslint-disable-line no-extra-semi
   let fontLib;
 
@@ -396,7 +399,7 @@
     // 正版
     { // https://www.qidian.com https://www.hongxiu.com https://www.readnovel.com https://www.xs8.cn
       siteName: '起点中文网',
-      url: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/(info|book)\/\d+/,
+      url: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/book\/\d+/,
       chapterUrl: /(qidian.com|hongxiu.com|readnovel.com|xs8.cn)\/chapter/,
       title: '#bookName',
       writer: '.author',
@@ -717,10 +720,24 @@
       chapterTitle: 'h1',
       content: '.menu-area',
     },
-    { // http://book.zongheng.com/ http://huayu.zongheng.com/
+    { // http://www.zongheng.com/
       siteName: '纵横',
-      url: /(book|huayu).zongheng.com\/showchapter\/\d+.html/,
-      chapterUrl: /(book|huayu).zongheng.com\/chapter\/\d+\/\d+.html/,
+      url: /www\.zongheng\.com\/detail\/\d+/,
+      chapterUrl: /(read|book)\.zongheng\.com\/chapter\/\d+\/\d+\.html/,
+      title: '.book-info--title>span',
+      writer: '.author-info--name',
+      intro: '.detail-work-info--introduction',
+      cover: '.book-info--coverImage-img',
+      chapter: '.chapter-list--item',
+      vipChapter: '.chapter-list--item:has(.chapter-list--item-vip)',
+      chapterTitle: '.title_txtbox',
+      content: '.content',
+      elementRemove: '',
+    },
+    { // http://huayu.zongheng.com/
+      siteName: '纵横女生网',
+      url: /huayu.zongheng.com\/showchapter\/\d+.html/,
+      chapterUrl: /(read|book)\.zongheng\.com\/chapter\/\d+\/\d+\.html/,
       infoPage: '[class$="crumb"]>a:nth-child(3)',
       title: '.book-name',
       writer: '.au-name',
@@ -731,6 +748,21 @@
       volume: () => $('.volume').toArray().map((i) => i.childNodes[6]),
       chapterTitle: '.title_txtbox',
       content: '.content',
+      elementRemove: '',
+    },
+    { // http://naodong.zongheng.com/
+      siteName: '纵横脑洞',
+      url: /naodong\.zongheng\.com\/detail\/\d+/,
+      chapterUrl: /(read|book)\.zongheng\.com\/chapter\/\d+\/\d+\.html/,
+      title: '.bookname',
+      writer: '.au-name',
+      intro: '.intro-tip-p',
+      cover: '.book_img>img',
+      chapter: '.cata-item a',
+      vipChapter: '.cata-item:has(.cata-item-vip) a',
+      chapterTitle: '.title_txtbox',
+      content: '.content',
+      elementRemove: '',
     },
     { // https://www.17k.com/
       siteName: '17K',
@@ -2984,12 +3016,14 @@
     }
   }
 
-  if (window.opener && window.opener !== window && !window.menubar.visible && window.localStorage.getItem('gm-nd-url') === window.location.href) {
+  if (window.opener && window.opener !== window && !window.menubar.visible && Object.keys(GM_getValue('popup-list', {})).includes(window.location.href)) {
     init();
     (async function () {
-      const rule = window.localStorage.getItem('gm-nd-isvip') ? Storage.rule.vip : Storage.rule;
+      const rule = GM_getValue('vip-chapter', []).includes(window.location.href) ? Storage.rule.vip : Storage.rule;
       if (typeof rule.popup === 'function') await rule.popup();
-      window.localStorage.setItem('gm-nd-html', window.document.documentElement.outerHTML);
+      let list = GM_getValue('popup-list', {});
+      list[window.location.href] = window.document.documentElement.outerHTML;
+      GM_setValue('popup-list', list);
     }());
   }
 
@@ -3398,12 +3432,10 @@
 
         if (!chaptersDownloaded.includes(chapter)) chaptersDownloaded.push(chapter);
 
-        if (rule.elementRemove || Config.useCommon) {
-          if (rule.elementRemove) {
-            $(`${rule.elementRemove},script,style,iframe`, doc).remove();
-          } else if (Config.useCommon) {
-            $(`${Rule.elementRemove},script,style,iframe`, doc).remove();
-          }
+        if ('elementRemove' in rule) {
+          if (rule.elementRemove) $(`${rule.elementRemove},script,style,iframe`, doc).remove();
+        } else if (Config.useCommon) {
+          $(`${Rule.elementRemove},script,style,iframe`, doc).remove();
         }
 
         let chapterTitle = await getFromRule(rule.chapterTitle, { attr: 'text', document: doc }, [res, request], '');
@@ -3575,21 +3607,22 @@
         }
 
         if (chapterList.popup.length && chapterList.popup.find((i) => !('contentRaw' in i))) {
-          for (const chapter of chapterList.popup.filter((i) => !('contentRaw' in i))) {
-            const isVip = vipChapters.includes(chapter.url);
+          GM_setValue('vip-chapter', vipChapters);
+          GM_setValue('popup-list', Object.fromEntries(chapterList.popup.filter((i) => !('contentRaw' in i)).map(i => [i.url, null])));
+          let completed = [];
+          GM_addValueChangeListener('popup-list', async (name, objOld, obj, remote) => {
+            completed = Object.entries(obj).filter(i => i[1] !== null).map(i => i[0]);
+          });
+          await async.mapLimit(chapterList.popup.filter((i) => !('contentRaw' in i)), Storage.rule.thread && Storage.rule.thread < Config.thread ? Storage.rule.thread : Config.thread, async function (chapter, callback) {
             var popupWindow = window.open(chapter.url, '', 'resizable,scrollbars,width=300,height=350');
-            window.localStorage.setItem('gm-nd-url', chapter.url);
-            if (isVip) window.localStorage.setItem('gm-nd-isvip', '1');
-            await waitFor(() => window.localStorage.getItem('gm-nd-html') || !popupWindow || popupWindow.closed);
-            const html = window.localStorage.getItem('gm-nd-html');
+            await waitFor(() => completed.includes(chapter.url) || !popupWindow || popupWindow.closed, 30 * 1000);
+            const html = completed.includes(chapter.url) ? GM_getValue('popup-list', {})[chapter.url] : '';
             const doc = html;
-            // const doc = new window.DOMParser().parseFromString(html, 'text/html');
             await onChapterLoad({ response: doc, responseText: html }, { raw: chapter });
             popupWindow.close();
-            window.localStorage.removeItem('gm-nd-url');
-            window.localStorage.removeItem('gm-nd-html');
-            window.localStorage.removeItem('gm-nd-isvip');
-          }
+          });
+          GM_deleteValue('vip-chapter');
+          GM_deleteValue('popup-list');
         }
       }
 

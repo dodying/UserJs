@@ -6,8 +6,8 @@
 /* eslint-env browser */
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.19.447
-// @modified    2024-07-09 21:13:40
+// @version     1.19.453
+// @modified    2024-07-18 19:11:20
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -61,8 +61,8 @@ const SEL = {
       displayMode: '.searchnav>div>select[onchange]', // 显示模式，Minimal,Minimal+,Compact,Extended,Thumbnail
 
       pagesContainerBottom: '.searchnav',
-      pagePrev: '.searchnav>div>a#unext',
-      pageNext: '.searchnav>div>a#unext',
+      pagePrev: '.searchnav>div>#uprev',
+      pageNext: '.searchnav>div>#unext',
 
       mainDiv: '.ido',
 
@@ -1358,8 +1358,8 @@ function changeName(e) { // 修改本子标题（删除集会名、替换其中�
       .replace(/\s+/g, ' ');
     title = title.replace(/[\000-\037\177]+/g, ''); // https://en.wikipedia.org/wiki/ASCII#End_of_File/Stream
     // if (G.config.checkExist === 'everything')
-    title = title.replace(/[\\/:*?"<>]/g, '-');
-    i.textContent = title;
+    title = title.replace(/[\\/:*?"<>|\n]/g, '-'); // 修改路径不支持的字符
+    i.textContent = title.trim();
 
     // 去除标题中首尾的信息，如作者，组织，原作，语言，翻译组
     const titleJp = G.infoPage ? $(SEL.EH.info.titleJp).text() : G.gmetadata.filter((j) => j.gid === i.href.match(/g\/(\d+)\//)[1] * 1)[0].title_jpn;
