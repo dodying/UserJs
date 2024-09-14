@@ -44,6 +44,7 @@
   }
   g('version', GM_info ? GM_info.script.version.substr(0, 4) : '2.89');
   if (getValue('option')) {
+    switchIsekaiOption();
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
     addStyle(g('lang'));
@@ -103,7 +104,10 @@
     g('dateNow', time(2));
     if (g('option').quickSite) quickSite();
     if (g('option').encounter) encounterCheck();
-    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return;
+    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
+      setTimeout(autoSwitchIsekai, (g('option').isekaiTime * (Math.random() * 20 + 90) / 100) * 1000);
+      return;
+    }
     if (g('option').repair) {
       repairCheck();
       return;
@@ -400,6 +404,12 @@ function optionBox() { // 配置界面
     '  <span name="About"><l0>关于本脚本</l0><l1>關於本腳本</l1><l2>About This</l2></span>',
     '  <span name="Feedback"><l01>反馈</l01><l2>Feedback</l2></span></div>',
     '<div class="hvAATab" id="hvAATab-Main">',
+
+    '  <div><b><l0>异世界相关</l0><l1>異世界相關</l1><l2>Isekai</l2></b>: ',
+    '    <input id="isekai" type="checkbox"><label for="isekai"><l0>自动切换恒定世界和异世界;</l0><l1>自動切換恆定世界和異世界;</l1><l2>Auto switch between Isekai and Persistent;</l2></label>',
+    '<input id="optionStandalone" type="checkbox"><label for="optionStandalone"><l0>两个世界使用不同的配置</l0><l1>兩個世界使用不同的配置</l1><l2>Use standalone options.</l2></label>; ',
+    '    <l0><br>在任意页面停留</l0><l1><br>在任意頁面停留</l1><l2><br>Idle in any page for </l2><input class="hvAANumber" name="isekaiTime" type="text"><l0>秒后，进行跳转</l0><l1>秒後，進行跳轉</l1><l2>s, start switch check</l2></label></div>',
+
     '  <div class="hvAACenter">',
     '    Gem: Health.<input class="hvAANumber" name="hp1" placeholder="50" type="text">%',
     '    Mana.<input class="hvAANumber" name="mp1" placeholder="70" type="text">%%',
@@ -1510,6 +1520,59 @@ function quickSite() { // 快捷站点
   };
 }
 
+function autoSwitchIsekai() {
+  const herf = window.location.href;
+  let isIsekai = herf.indexOf('isekai') !== -1;
+  let domain = herf.slice(0, herf.indexOf('.org') + 4);
+  if (!g('option').isekai) {
+    // 若不启用自动跳转
+    return;
+  }
+  if (isIsekai) {
+    window.location.href = domain;
+    return;
+  }
+  window.location.href = `${domain}/isekai/`;
+}
+
+function switchIsekaiOption() {
+  const standalone = ['option', 'arena', 'drop', 'stats', 'roundType', 'staminaLostLog', 'monsterStatus', 'battleCode', 'roundAll', 'roundAll'];
+  let previous = getValue('world');
+  let isIsekai = window.location.href.indexOf('isekai') !== -1;
+  let current = isIsekai ? 'isekai' : 'persistent';
+  if (!previous) {
+    // 运行脚本一来第一次记录world并缓存配置
+    setValue('world', current);
+    return;
+  }
+  if (current === previous) { // 没有切换过世界则返回
+    return;
+  }
+  setValue('world', current);
+  // 若和上一次发生了切换.
+  // 将当前的配置、统计数据保存到前一个世界的配置缓存中
+  let standalones = {};
+  for (let i in standalone) {
+    standalones[standalone[i]] = getValue(standalone[i]);
+  }
+  setValue(previous, standalones);
+
+  // 若不使用单独配置 或 当前新的世界没有进行过缓存
+  if (!standalones.option['optionStandalone'] || !getValue(current)) {
+    let currentStanalones = {};
+    currentStanalones.option = standalones.option; // 不同世界间仅同步配置
+    setValue(current, currentStanalones); // 则同时缓存到两个配置中(同步到当前世界)
+    return
+  }
+  // 若两个世界都已有缓存，则替换为之前保存的当前世界
+  for (let i in standalone) {
+    setValue(standalone[i], getValue(current)[standalone[i]]);
+  }
+  let option = getValue('option');
+  option.optionStandalone = true; // 同步单独配置开启状态
+  setValue('option', option);
+}
+
 function idleArena() { // 闲置竞技场
   let arena = getValue('arena', true) || {};
   if (arena.date !== g('dateNow')) {
@@ -1548,7 +1611,10 @@ function idleArena() { // 闲置竞技场
     checkOnload();
     return;
   }
-  if (arena.isOk) return;
+  if (arena.isOk) {
+    setTimeout(autoSwitchIsekai, (g('option').isekaiTime * (Math.random() * 20 + 90) / 100) * 1000)
+    return;
+  }
   if (g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 < 85) {
     post(window.location.href, goto, 'recover=stamina');
     return;
