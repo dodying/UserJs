@@ -218,6 +218,7 @@ function g(key, value) { // 全局变量
   }
   hvAA[key] = value;
   window.hvAA = hvAA;
+  return window.hvAA[key];
 }
 
 function post(href, func, parm, type) { // post
@@ -1469,6 +1470,11 @@ function repairCheck() {
         gE('.eqp>[id]', 'all', data).forEach((i) => {
           eqps.push(i.id.match(/\d+/)[0]);
         });
+        len = 0;
+        if (eqps.length === 0) {
+          checkLength();
+          return;
+        }
         eqps.forEach((id) => {
           if (json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1] <= g('option').repairValue) {
             post('?s=Forge&ss=re', checkLength, `select_item=${id}`);
@@ -1481,7 +1487,7 @@ function repairCheck() {
   };
   checkLength = function () {
     len++;
-    if (len === eqps.length && g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
+    if (len >= eqps.length && g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
   };
   checkOnload();
 }
@@ -1654,7 +1660,6 @@ function main() { // 主程序
   var taskList = [useGem, deadSoon, autoPause, autoDefend, useScroll, useChannelSkill, useBuffSkill, useInfusions, useDeSkill, autoFocus, autoSS, autoSkill, attack]
 
   for (let i in taskList) {
-    battleInfo();
     const task = taskList[i];
     if (g('end', task())) return;
   }
