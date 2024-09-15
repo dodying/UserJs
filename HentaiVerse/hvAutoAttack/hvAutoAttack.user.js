@@ -2644,7 +2644,7 @@ function useDeSkill() { // 自动施法DEBUFF技能
 
   // 先处理特殊的 “先给全体上buff”
   let skillPack = ['Im', 'We'];
-  for (let i in skillPack) {
+  for (let i=0;i<skillPack.length;i++) {
     if (g('option')[`debuffSkill${skillPack[i]}All`]) { // 是否启用
       continue;
     }
