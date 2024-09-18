@@ -27,7 +27,7 @@
 // ==/UserScript==
 /* eslint-disable camelcase */
 
-const standalone = ['option', 'arena', 'drop', 'stats', 'roundType', 'staminaLostLog', 'monsterStatus', 'battleCode', 'roundAll', 'roundAll', 'roundNow'];
+const standalone = ['option', 'arena', 'drop', 'stats', 'roundType', 'staminaLostLog', 'monsterStatus', 'battleCode', 'roundAll', 'roundAll', 'roundNow', 'disabled'];
 const sharable = ['option'];
 const excludeStandalone = { 'option': ['optionStandalone', 'version', 'lang'] };
 let isIsekai = window.location.href.indexOf('isekai') !== -1;
