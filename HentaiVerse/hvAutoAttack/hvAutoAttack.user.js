@@ -26,6 +26,14 @@
 // @run-at       document-end
 // ==/UserScript==
 /* eslint-disable camelcase */
+
+const standalone = ['option', 'arena', 'drop', 'stats', 'roundType', 'staminaLostLog', 'monsterStatus', 'battleCode', 'roundAll', 'roundAll', 'roundNow'];
+const sharable = ['option'];
+const excludeStandalone = { 'option': ['optionStandalone', 'version', 'lang'] };
+let isIsekai = window.location.href.indexOf('isekai') !== -1;
+let current = isIsekai ? 'isekai' : 'persistent';
+let other = isIsekai ? 'persistent' : 'isekai';
+
 (function init() {
   if (window.location.host === 'e-hentai.org') {
     let href = getValue('url') || (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
@@ -44,7 +52,6 @@
   }
   g('version', GM_info ? GM_info.script.version.substr(0, 4) : '2.89');
   if (getValue('option')) {
-    switchIsekaiOption();
     g('option', getValue('option', true));
     g('lang', g('option').lang || '0');
     addStyle(g('lang'));
@@ -169,7 +176,7 @@ function isOn(id) { // 是否可以施放技能/使用物品
   return (gE(id) && gE(id).style.opacity !== '0.5') ? gE(id) : false;
 }
 
-function setValue(item, value) { // 储存数据
+function setLocal(item, value) {
   if (typeof GM_setValue === 'undefined') {
     window.localStorage[`hvAA-${item}`] = (typeof value === 'string') ? value : JSON.stringify(value);
   } else {
@@ -177,7 +184,18 @@ function setValue(item, value) { // 储存数据
   }
 }
 
-function getValue(item, toJSON) { // 读取数据
+function setValue(item, value) { // 储存数据
+  if (!standalone.includes(item)) {
+    setLocal(item, value);
+    return;
+  }
+  setLocal(`${current}_${item}`, value);
+  if (sharable.includes(item) && !getValue('option').optionStandalone) {
+    setLocal(`${other}_${item}`, value);
+  }
+}
+
+function getLocal(item, toJSON) {
   if (typeof GM_getValue === 'undefined' || !GM_getValue(item, null)) {
     item = `hvAA-${item}`;
     return (item in window.localStorage) ? ((toJSON) ? JSON.parse(window.localStorage[item]) : window.localStorage[item]) : null;
@@ -185,13 +203,54 @@ function getValue(item, toJSON) { // 读取数据
   return GM_getValue(item, null);
 }
 
-function delValue(item) { // 删除数据
-  if (typeof item === 'string') {
-    if (typeof GM_deleteValue === 'undefined') {
-      window.localStorage.removeItem(`hvAA-${item}`);
-    } else {
-      GM_deleteValue(item);
+function getValue(item, toJSON) { // 读取数据
+  if (!standalone.includes(item)) {
+    return getLocal(item, toJSON);
+  }
+  let otherWorldItem = getLocal(`${other}_${item}`);
+  // 将旧的数据迁移到新的数据
+  if (!getLocal(`${current}_${item}`)) {
+    let itemExisted = getLocal(item);
+    if (!itemExisted && sharable.includes(item)) {
+      itemExisted = otherWorldItem;
     }
+    if (!itemExisted) {
+      return null; // 若都没有该数据
+    }
+    itemExisted = JSON.parse(JSON.stringify(itemExisted));
+    setLocal(`${current}_${item}`, itemExisted);
+    delLocal(item);
+  }
+  if (Object.keys(excludeStandalone).includes(item)) {
+    if (!otherWorldItem) {
+      otherWorldItem = getLocal(`${current}_${item}`)
+    }
+    if (!otherWorldItem) {
+      otherWorldItem = {}
+    }
+    for (let i in excludeStandalone[item]) {
+      const key = excludeStandalone[item][i];
+      otherWorldItem[key] = getLocal(`${current}_${item}`)[key];
+    }
+  }
+  setLocal(`${other}_${item}`, otherWorldItem)
+  return getLocal(`${current}_${item}`);
+}
+
+function delLocal(item) {
+  if (typeof GM_deleteValue === 'undefined') {
+    window.localStorage.removeItem(`hvAA-${item}`);
+  } else {
+    GM_deleteValue(item);
+  }
+}
+
+function delValue(item) { // 删除数据
+  if (standalone.includes(item)) {
+    item = `${current}_${item}`;
+  }
+  if (typeof item === 'string') {
+    delLocal(item);
   } else if (typeof item === 'number') {
     if (item === 0) {
       delValue('disabled');
@@ -297,7 +356,7 @@ function addStyle(lang) { // CSS
     'l0,l1,l01,l2{display:none;}', // l0: 简体 l1: 繁体 l01:简繁体共用 l2: 英文
     '#hvAABox2{position:absolute;left:1075px}',
     '.hvAALog{font-size:20px;}',
-    '.hvAAButton{top:4px;left:1200px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
+    '.hvAAButton{top:4px;left:1250px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
     '#hvAABox{left:calc(619px - 350px);top:calc(min(100%, 1094px)*0.5 - 269px);font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
     '.hvAATablist{position:relative;left:14px;}',
     '.hvAATabmenu{position:absolute;left:-9px;}',
@@ -329,8 +388,8 @@ function addStyle(lang) { // CSS
     '.hvAAArenaLevels{display:none;}',
     '.hvAAConfig{width:100%;height:16px;}',
     '.hvAAButtonBox{position:relative;top:468px;}',
-    '.lastEncounter{font-weight:bold;font-size:large;position:absolute;top:32px;left:1240px;text-decoration:none;}',
-    '.quickSiteBar{position:absolute;top:0px;left:1250px;font-size:18px;text-align:left;width:165px;height:calc(100% - 10px);display:flex;flex-direction:column;flex-wrap:wrap;}',
+    '.lastEncounter{font-weight:bold;font-size:large;position:absolute;top:32px;left:1253px;text-decoration:none;}',
+    '.quickSiteBar{position:absolute;top:0px;left:1280px;font-size:18px;text-align:left;width:165px;height:calc(100% - 10px);display:flex;flex-direction:column;flex-wrap:wrap;}',
     '.quickSiteBar>span{display:block;max-height:24px;overflow:hidden;text-overflow:ellipsis;}',
     '.quickSiteBar>span>a{text-decoration:none;}',
     '.customize{border: 2px dashed red!important;min-height:21px;}',
@@ -1468,6 +1527,7 @@ function riddleAlert() { // 答题警报
 function repairCheck() {
   let json; let checkOnload; let checkLength;
   let len = 0;
+  let lastID;
   const eqps = [];
   checkOnload = function () {
     if (json) {
@@ -1485,13 +1545,18 @@ function repairCheck() {
           checkLength();
           return;
         }
-        eqps.forEach((id) => {
+        for (let i in eqps) {
+          const id = eqps[i];
           if (json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1] <= g('option').repairValue) {
-            post('?s=Forge&ss=re', checkLength, `select_item=${id}`);
+            if (id === lastID) {
+              return;
+            }
+            lastID = id; // 记录最后一次需要修理的装备id，然后再次检测是否修理成功
+            post('?s=Forge&ss=re', checkOnload, `select_item=${id}`);
           } else {
             checkLength();
           }
-        });
+        }
       }, null, 'text');
     });
   };
@@ -1533,44 +1598,6 @@ function autoSwitchIsekai() {
     return;
   }
   window.location.href = `${domain}/isekai/`;
-}
-
-function switchIsekaiOption() {
-  const standalone = ['option', 'arena', 'drop', 'stats', 'roundType', 'staminaLostLog', 'monsterStatus', 'battleCode', 'roundAll', 'roundAll'];
-  let previous = getValue('world');
-  let isIsekai = window.location.href.indexOf('isekai') !== -1;
-  let current = isIsekai ? 'isekai' : 'persistent';
-  if (!previous) {
-    // 运行脚本一来第一次记录world并缓存配置
-    setValue('world', current);
-    return;
-  }
-  if (current === previous) { // 没有切换过世界则返回
-    return;
-  }
-  setValue('world', current);
-  // 若和上一次发生了切换.
-  // 将当前的配置、统计数据保存到前一个世界的配置缓存中
-  let standalones = {};
-  for (let i in standalone) {
-    standalones[standalone[i]] = getValue(standalone[i]);
-  }
-  setValue(previous, standalones);
-
-  // 若不使用单独配置 或 当前新的世界没有进行过缓存
-  if (!standalones.option['optionStandalone'] || !getValue(current)) {
-    let currentStanalones = {};
-    currentStanalones.option = standalones.option; // 不同世界间仅同步配置
-    setValue(current, currentStanalones); // 则同时缓存到两个配置中(同步到当前世界)
-    return
-  }
-  // 若两个世界都已有缓存，则替换为之前保存的当前世界
-  for (let i in standalone) {
-    setValue(standalone[i], getValue(current)[standalone[i]]);
-  }
-  let option = getValue('option');
-  option.optionStandalone = true; // 同步单独配置开启状态
-  setValue('option', option);
 }
 
 function idleArena() { // 闲置竞技场
@@ -2641,10 +2668,9 @@ function useDeSkill() { // 自动施法DEBUFF技能
   if (!g('option').debuffSkillSwitch) { // 总开关是否开启
     return false;
   }
-
   // 先处理特殊的 “先给全体上buff”
   let skillPack = ['Im', 'We'];
-  for (let i=0;i<skillPack.length;i++) {
+  for (let i = 0; i < skillPack.length; i++) {
     if (g('option')[`debuffSkill${skillPack[i]}All`]) { // 是否启用
       continue;
     }
