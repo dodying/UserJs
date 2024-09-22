@@ -6,16 +6,14 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.19
+// @version      2.90.19a
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
 // @icon         https://github.com/dodying/UserJs/raw/master/Logo.png
 // @include      http*://hentaiverse.org/*
-// @include      http://alt.hentaiverse.org/*
+// @include      http*://alt.hentaiverse.org/*
 // @include      https://e-hentai.org/*
-// @exclude      http*://hentaiverse.org/pages/showequip.php?*
-// @exclude      http://alt.hentaiverse.org/pages/showequip.php?*
 // @compatible   Firefox + Greasemonkey
 // @compatible   Chrome/Chromium + Tampermonkey
 // @compatible   Android + Firefox + Usi/Tampermonkey
@@ -28,6 +26,14 @@
 // @run-at       document-end
 // ==/UserScript==
 /* eslint-disable camelcase */
+
+const standalone = ['option', 'arena', 'drop', 'stats', 'roundType', 'staminaLostLog', 'monsterStatus', 'battleCode', 'roundAll', 'roundAll', 'roundNow', 'disabled'];
+const sharable = ['option'];
+const excludeStandalone = { 'option': ['optionStandalone', 'version', 'lang'] };
+let isIsekai = window.location.href.indexOf('isekai') !== -1;
+let current = isIsekai ? 'isekai' : 'persistent';
+let other = isIsekai ? 'persistent' : 'isekai';
+
 (function init() {
   if (window.location.host === 'e-hentai.org') {
     let href = getValue('url') || (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
@@ -105,38 +111,12 @@
     g('dateNow', time(2));
     if (g('option').quickSite) quickSite();
     if (g('option').encounter) encounterCheck();
-    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) return;
+    if (!g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow) {
+      setTimeout(autoSwitchIsekai, (g('option').isekaiTime * (Math.random() * 20 + 90) / 100) * 1000);
+      return;
+    }
     if (g('option').repair) {
-      let json; let checkOnload; let
-        checkLength;
-      let len = 0;
-      const eqps = [];
-      checkOnload = function () {
-        if (json) {
-          setTimeout(checkOnload, 200);
-        } else {
-          post('?s=Forge&ss=re', (data) => {
-            post(gE('#mainpane>script[src]', data).src, (data1) => {
-              json = JSON.parse(data1.match(/{.*}/)[0]);
-              gE('.eqp>[id]', 'all', data).forEach((i) => {
-                eqps.push(i.id.match(/\d+/)[0]);
-              });
-              eqps.forEach((id) => {
-                if (json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1] <= g('option').repairValue) {
-                  post('?s=Forge&ss=re', checkLength, `select_item=${id}`);
-                } else {
-                  checkLength();
-                }
-              });
-            }, null, 'text');
-          });
-        }
-      };
-      checkLength = function () {
-        len++;
-        if (len === eqps.length && g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
-      };
-      checkOnload();
+      repairCheck();
       return;
     }
     if (g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
@@ -196,7 +176,7 @@ function isOn(id) { // 是否可以施放技能/使用物品
   return (gE(id) && gE(id).style.opacity !== '0.5') ? gE(id) : false;
 }
 
-function setValue(item, value) { // 储存数据
+function setLocal(item, value) {
   if (typeof GM_setValue === 'undefined') {
     window.localStorage[`hvAA-${item}`] = (typeof value === 'string') ? value : JSON.stringify(value);
   } else {
@@ -204,7 +184,18 @@ function setValue(item, value) { // 储存数据
   }
 }
 
-function getValue(item, toJSON) { // 读取数据
+function setValue(item, value) { // 储存数据
+  if (!standalone.includes(item)) {
+    setLocal(item, value);
+    return;
+  }
+  setLocal(`${current}_${item}`, value);
+  if (sharable.includes(item) && !getValue('option').optionStandalone) {
+    setLocal(`${other}_${item}`, value);
+  }
+}
+
+function getLocal(item, toJSON) {
   if (typeof GM_getValue === 'undefined' || !GM_getValue(item, null)) {
     item = `hvAA-${item}`;
     return (item in window.localStorage) ? ((toJSON) ? JSON.parse(window.localStorage[item]) : window.localStorage[item]) : null;
@@ -212,13 +203,54 @@ function getValue(item, toJSON) { // 读取数据
   return GM_getValue(item, null);
 }
 
-function delValue(item) { // 删除数据
-  if (typeof item === 'string') {
-    if (typeof GM_deleteValue === 'undefined') {
-      window.localStorage.removeItem(`hvAA-${item}`);
-    } else {
-      GM_deleteValue(item);
+function getValue(item, toJSON) { // 读取数据
+  if (!standalone.includes(item)) {
+    return getLocal(item, toJSON);
+  }
+  let otherWorldItem = getLocal(`${other}_${item}`);
+  // 将旧的数据迁移到新的数据
+  if (!getLocal(`${current}_${item}`)) {
+    let itemExisted = getLocal(item);
+    if (!itemExisted && sharable.includes(item)) {
+      itemExisted = otherWorldItem;
     }
+    if (!itemExisted) {
+      return null; // 若都没有该数据
+    }
+    itemExisted = JSON.parse(JSON.stringify(itemExisted));
+    setLocal(`${current}_${item}`, itemExisted);
+    delLocal(item);
+  }
+  if (Object.keys(excludeStandalone).includes(item)) {
+    if (!otherWorldItem) {
+      otherWorldItem = getLocal(`${current}_${item}`)
+    }
+    if (!otherWorldItem) {
+      otherWorldItem = {}
+    }
+    for (let i in excludeStandalone[item]) {
+      const key = excludeStandalone[item][i];
+      otherWorldItem[key] = getLocal(`${current}_${item}`)[key];
+    }
+  }
+  setLocal(`${other}_${item}`, otherWorldItem)
+  return getLocal(`${current}_${item}`);
+}
+
+function delLocal(item) {
+  if (typeof GM_deleteValue === 'undefined') {
+    window.localStorage.removeItem(`hvAA-${item}`);
+  } else {
+    GM_deleteValue(item);
+  }
+}
+
+function delValue(item) { // 删除数据
+  if (standalone.includes(item)) {
+    item = `${current}_${item}`;
+  }
+  if (typeof item === 'string') {
+    delLocal(item);
   } else if (typeof item === 'number') {
     if (item === 0) {
       delValue('disabled');
@@ -249,6 +281,7 @@ function g(key, value) { // 全局变量
   }
   hvAA[key] = value;
   window.hvAA = hvAA;
+  return window.hvAA[key];
 }
 
 function post(href, func, parm, type) { // post
@@ -323,8 +356,8 @@ function addStyle(lang) { // CSS
     'l0,l1,l01,l2{display:none;}', // l0: 简体 l1: 繁体 l01:简繁体共用 l2: 英文
     '#hvAABox2{position:absolute;left:1075px}',
     '.hvAALog{font-size:20px;}',
-    '.hvAAButton{top:4px;left:1200px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
-    '#hvAABox{left:calc(50% - 350px);top:50px;font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
+    '.hvAAButton{top:4px;left:1250px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
+    '#hvAABox{left:calc(619px - 350px);top:calc(min(100%, 1094px)*0.5 - 269px);font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
     '.hvAATablist{position:relative;left:14px;}',
     '.hvAATabmenu{position:absolute;left:-9px;}',
     '.hvAATabmenu>span{display:block;padding:5px 10px;margin:0 10px 0 0;border:1px solid #91a7b4;border-radius:5px;background-color:#E3F1F8;color:#000;text-decoration:none;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;cursor:pointer;}',
@@ -355,8 +388,8 @@ function addStyle(lang) { // CSS
     '.hvAAArenaLevels{display:none;}',
     '.hvAAConfig{width:100%;height:16px;}',
     '.hvAAButtonBox{position:relative;top:468px;}',
-    '.lastEncounter{font-weight:bold;font-size:large;position:absolute;top:32px;left:1240px;text-decoration:none;}',
-    '.quickSiteBar{position:absolute;top:55px;left:1240px;font-size:18px;text-align:left;width:calc(99% - 1236px);}',
+    '.lastEncounter{font-weight:bold;font-size:large;position:absolute;top:32px;left:1253px;text-decoration:none;}',
+    '.quickSiteBar{position:absolute;top:0px;left:1280px;font-size:18px;text-align:left;width:165px;height:calc(100% - 10px);display:flex;flex-direction:column;flex-wrap:wrap;}',
     '.quickSiteBar>span{display:block;max-height:24px;overflow:hidden;text-overflow:ellipsis;}',
     '.quickSiteBar>span>a{text-decoration:none;}',
     '.customize{border: 2px dashed red!important;min-height:21px;}',
@@ -430,6 +463,12 @@ function optionBox() { // 配置界面
     '  <span name="About"><l0>关于本脚本</l0><l1>關於本腳本</l1><l2>About This</l2></span>',
     '  <span name="Feedback"><l01>反馈</l01><l2>Feedback</l2></span></div>',
     '<div class="hvAATab" id="hvAATab-Main">',
+
+    '  <div><b><l0>异世界相关</l0><l1>異世界相關</l1><l2>Isekai</l2></b>: ',
+    '    <input id="isekai" type="checkbox"><label for="isekai"><l0>自动切换恒定世界和异世界;</l0><l1>自動切換恆定世界和異世界;</l1><l2>Auto switch between Isekai and Persistent;</l2></label>',
+    '<input id="optionStandalone" type="checkbox"><label for="optionStandalone"><l0>两个世界使用不同的配置</l0><l1>兩個世界使用不同的配置</l1><l2>Use standalone options.</l2></label>; ',
+    '    <l0><br>在任意页面停留</l0><l1><br>在任意頁面停留</l1><l2><br>Idle in any page for </l2><input class="hvAANumber" name="isekaiTime" type="text"><l0>秒后，进行跳转</l0><l1>秒後，進行跳轉</l1><l2>s, start switch check</l2></label></div>',
+
     '  <div class="hvAACenter">',
     '    Gem: Health.<input class="hvAANumber" name="hp1" placeholder="50" type="text">%',
     '    Mana.<input class="hvAANumber" name="mp1" placeholder="70" type="text">%%',
@@ -537,8 +576,8 @@ function optionBox() { // 配置界面
     '    <input name="debuffSkillOrderValue" style="width:80%;" type="text" disabled="true"><br>',
     '    <input id="debuffSkillOrder_Sle" type="checkbox"><label for="debuffSkillOrder_Sle">Sleep</label><input id="debuffSkillOrder_Bl" type="checkbox"><label for="debuffSkillOrder_Bl">Blind</label><input id="debuffSkillOrder_Slo" type="checkbox"><label for="debuffSkillOrder_Slo">Slow</label><br>',
     '    <input id="debuffSkillOrder_Im" type="checkbox"><label for="debuffSkillOrder_Im">Imperil</label><input id="debuffSkillOrder_MN" type="checkbox"><label for="debuffSkillOrder_MN">MagNet</label><input id="debuffSkillOrder_Si" type="checkbox"><label for="debuffSkillOrder_Si">Silence</label><input id="debuffSkillOrder_Dr" type="checkbox"><label for="debuffSkillOrder_Dr">Drain</label><input id="debuffSkillOrder_We" type="checkbox"><label for="debuffSkillOrder_We">Weaken</label><input id="debuffSkillOrder_Co" type="checkbox"><label for="debuffSkillOrder_Co">Confuse</label></div>',
-    '  <div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillAllIm" type="checkbox"><label for="debuffSkillAllIm"><l0>给所有敌人上Imperil</l0><l1>給所有敵人上Imperil</l1><l2>Imperiled all enemies.</l2></label></div>{{debuffSkillImpCondition}}',
-    '  <div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillAllWk" type="checkbox"><label for="debuffSkillAllWk"><l0>给所有敌人上Weaken</l0><l1>給所有敵人上Weaken</l1><l2>Weakened all enemies.</l2></label></div>{{debuffSkillWkCondition}}',
+    '  <div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillImAll" type="checkbox"><label for="debuffSkillImAll"><l0>先给所有敌人上Imperil</l0><l1>先給所有敵人上Imperil</l1><l2>Imperiled all enemies first.</l2></label></div>{{debuffSkillImAllCondition}}',
+    '  <div><l01>特殊</l01><l2>Special</l2><input id="debuffSkillWeAll" type="checkbox"><label for="debuffSkillWeAll"><l0>先给所有敌人上Weaken</l0><l1>先給所有敵人上Weaken</l1><l2>Weakened all enemies first.</l2></label></div>{{debuffSkillWeAllCondition}}',
     '    <div><input id="debuffSkill_Sle" type="checkbox"><label for="debuffSkill_Sle">Sleep</label>{{debuffSkillSleCondition}}</div>',
     '    <div><input id="debuffSkill_Bl" type="checkbox"><label for="debuffSkill_Bl">Blind</label>{{debuffSkillBlCondition}}</div>',
     '    <div><input id="debuffSkill_Slo" type="checkbox"><label for="debuffSkill_Slo">Slow</label>{{debuffSkillSloCondition}}</div>',
@@ -1485,13 +1524,56 @@ function riddleAlert() { // 答题警报
   }
 }
 // 战斗外//
+function repairCheck() {
+  let json; let checkOnload; let checkLength;
+  let len = 0;
+  let lastID;
+  const eqps = [];
+  checkOnload = function () {
+    if (json) {
+      setTimeout(checkOnload, 200);
+      return;
+    }
+    post('?s=Forge&ss=re', (data) => {
+      post(gE('#mainpane>script[src]', data).src, (data1) => {
+        json = JSON.parse(data1.match(/{.*}/)[0]);
+        gE('.eqp>[id]', 'all', data).forEach((i) => {
+          eqps.push(i.id.match(/\d+/)[0]);
+        });
+        len = 0;
+        if (eqps.length === 0) {
+          checkLength();
+          return;
+        }
+        for (let i in eqps) {
+          const id = eqps[i];
+          if (json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1] <= g('option').repairValue) {
+            if (id === lastID) {
+              return;
+            }
+            lastID = id; // 记录最后一次需要修理的装备id，然后再次检测是否修理成功
+            post('?s=Forge&ss=re', checkOnload, `select_item=${id}`);
+          } else {
+            checkLength();
+          }
+        }
+      }, null, 'text');
+    });
+  };
+  checkLength = function () {
+    len++;
+    if (len >= eqps.length && g('option').idleArena) setTimeout(idleArena, (g('option').idleArenaTime * (Math.random() * 20 + 90) / 100) * 1000);
+  };
+  checkOnload();
+}
+
 function quickSite() { // 快捷站点
   const quickSiteBar = gE('body').appendChild(cE('div'));
   quickSiteBar.className = 'quickSiteBar';
   quickSiteBar.innerHTML = '<span><a href="javascript:void(0);"class="quickSiteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
   if (g('option').quickSite) {
     g('option').quickSite.forEach((site) => {
-      quickSiteBar.innerHTML = `${quickSiteBar.innerHTML}<span title="${site.name}"><a href="${site.url}"target="_blank">${(site.fav) ? `<img src="${site.fav}"class="favicon"></img>` : ''}${site.name}</a></span>`;
+      quickSiteBar.innerHTML = `${quickSiteBar.innerHTML}<span title="${site.name}"><a href="${site.url}"target="_self">${(site.fav) ? `<img src="${site.fav}"class="favicon"></img>` : ''}${site.name}</a></span>`;
     });
   }
   gE('.quickSiteBarToggle', quickSiteBar).onclick = function () {
@@ -1501,6 +1583,21 @@ function quickSite() { // 快捷站点
     }
     this.textContent = (this.textContent === '<<') ? '>>' : '<<';
   };
+}
+
+function autoSwitchIsekai() {
+  const herf = window.location.href;
+  let isIsekai = herf.indexOf('isekai') !== -1;
+  let domain = herf.slice(0, herf.indexOf('.org') + 4);
+  if (!g('option').isekai) {
+    // 若不启用自动跳转
+    return;
+  }
+  if (isIsekai) {
+    window.location.href = domain;
+    return;
+  }
+  window.location.href = `${domain}/isekai/`;
 }
 
 function idleArena() { // 闲置竞技场
@@ -1541,7 +1638,10 @@ function idleArena() { // 闲置竞技场
     checkOnload();
     return;
   }
-  if (arena.isOk) return;
+  if (arena.isOk) {
+    setTimeout(autoSwitchIsekai, (g('option').isekaiTime * (Math.random() * 20 + 90) / 100) * 1000)
+    return;
+  }
   if (g('option').restoreStamina && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 <= g('option').staminaLow && gE('#stamina_readout .fc4.far>div').textContent.match(/\d+/)[0] * 1 < 85) {
     post(window.location.href, goto, 'recover=stamina');
     return;
@@ -1623,7 +1723,6 @@ function main() { // 主程序
     gE('#hvAABox2>button').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
     return;
   }
-  g('end', false);
   if (getValue('monsterStatus') && getValue('monsterStatus', true).length === g('monsterAll')) {
     g('monsterStatus', getValue('monsterStatus', true));
   } else {
@@ -1649,33 +1748,89 @@ function main() { // 主程序
     setTimeout(goto, 3 * 1000);
     return;
   }
+
+  g('end', false);
+  var taskList = [useGem, deadSoon, autoPause, autoDefend, useScroll, useChannelSkill, useBuffSkill, useInfusions, useDeSkill, autoFocus, autoSS, autoSkill, attack]
+
+  for (let i in taskList) {
+    const task = taskList[i];
+    if (g('end', task())) return;
+  }
+}
+
+/**
+ * 按照技能范围，获取包含原目标且范围内最终权重(finweight)之和最低的范围的中心目标
+ * @param {int} id id from g('monsterStatus').sort(objArrSort('finWeight'));
+ * @param {int} range radius, 0 for single-target and all-targets, 1 for treble-targets, ..., n for (2n+1) targets
+ * @param {(target) => bool} excludeCondition target with id
+ * @returns 
+ */
+function getRangeCenter(target, range = 0, excludeCondition = undefined) {
+  if (range === 0) {
+    return target;
+  }
+  let minRank, maxWeight;
+  let order = target.order;
+  let newOrder = order;
+  // sort by order to fix id
+  g('monsterStatus').sort(objArrSort('order'));
+  for (let i = order - 2 * range; i <= order + 2 * range; i++) {
+    if (i < 0 || i >= g('monsterStatus').length) {
+      continue;
+    }
+    let weight = g('monsterStatus')[i].finWeight;
+    weight = (weight == Infinity) ? 0 : weight
+    maxWeight = maxWeight > weight ? maxWeight : weight;
+  }
+  maxWeight *= ((range === 0) ? 1 : (range * 2))
+  for (let i = order - range; i <= order + range; i++) {
+    let rank = 0;
+    if (i < 0 || i >= g('monsterStatus').length) {
+      continue;
+    }
+    if (g('monsterStatus')[i].isDead) {
+      continue;
+    }
+    for (let j = i - range; j <= (i + range); j++) {
+      if (j < 0 || j >= g('monsterStatus').length) {
+        rank += maxWeight
+        continue;
+      }
+      let mon = g('monsterStatus')[j]
+      if (mon.isDead) {
+        rank += maxWeight
+        continue;
+      }
+      if (excludeCondition && excludeCondition(mon)) {
+        rank += maxWeight
+        continue;
+      }
+      rank += mon.finWeight
+    }
+    if (rank < minRank) {
+      newOrder = i;
+    }
+  }
+  target = g('monsterStatus')[newOrder]
+  // reset to sorted by finWeight
+  g('monsterStatus').sort(objArrSort('finWeight'));
+  return target
+}
+
+function autoPause() {
   if (g('option').autoPause && checkCondition(g('option').pauseCondition)) {
     pauseChange();
-    return;
+    return true;
   }
-  if (gE('#ikey_p')) useGem(); // 自动使用宝石
-  if (g('end')) return;
-  if (g('option').item && g('option').itemOrderValue) deadSoon(); // 自动回血回魔
-  if (g('end')) return;
+  return false;
+}
+
+function autoDefend() {
   if (g('option').defend && checkCondition(g('option').defendCondition)) {
     gE('#ckey_defend').click();
-    return;
+    return true;
   }
-  if (g('option').scrollSwitch && g('option').scroll && checkCondition(g('option').scrollCondition) && g('option').scrollRoundType && g('option').scrollRoundType[g('roundType')]) useScroll(); // 自动使用卷轴
-  if (g('end')) return;
-  if (g('option').channelSkillSwitch && g('option').channelSkill && gE('#pane_effects>img[src*="channeling"]')) useChannelSkill(); // 自动施法Channel技能
-  if (g('end')) return;
-  if (g('option').buffSkillSwitch && g('option').buffSkill && checkCondition(g('option').buffSkillCondition)) useBuffSkill(); // 自动施法BUFF技能
-  if (g('end')) return;
-  if (g('attackStatus') !== 0 && g('option').infusionSwitch && checkCondition(g('option').infusionCondition)) useInfusions(); // 自动使用魔药
-  if (g('end')) return;
-  if (g('option').debuffSkillSwitch && g('option').debuffSkillAllWk && gE('div.btm6 img[src*="weaken"]', 'all').length < g('monsterAlive') && checkCondition(g('option').debuffSkillWkCondition)) allWeakened(); // 给所有敌人上Weaken
-  if (g('option').debuffSkillSwitch && g('option').debuffSkillAllIm && gE('div.btm6 img[src*="imperil"]', 'all').length < g('monsterAlive') && checkCondition(g('option').debuffSkillImpCondition)) allImperiled(); // 给所有敌人上Imperil
-  if (g('end')) return;
-  if (g('option').debuffSkillSwitch && g('option').debuffSkill && checkCondition(g('option').debuffSkillCondition)) useDeSkill(); // 自动施法DEBUFF技能
-  if (g('end')) return;
-  attack(); // 自动打怪
-  // if (g('end')) return
+  return false;
 }
 
 function pauseChange() { // 暂停状态更改
@@ -1686,7 +1841,6 @@ function pauseChange() { // 暂停状态更改
   } else {
     if (gE('.pauseChange')) gE('.pauseChange').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
     setValue('disabled', true);
-    g('end', true);
   }
 }
 
@@ -1985,8 +2139,9 @@ function countMonsterHP() { // 统计敌人血量
   setValue('monsterStatus', monsterStatus);
   const hpLowest = Math.min.apply(null, hpArray);
   const hpMost = Math.max.apply(null, hpArray);
+  const deadWeight = g('option').ruleReverse ? -Infinity : Infinity
   for (i = 0; i < monsterStatus.length; i++) {
-    monsterStatus[i].finWeight = (monsterStatus[i].isDead) ? Infinity : ((g('option').ruleReverse) ? hpMost / monsterStatus[i].hpNow * 10 : monsterStatus[i].hpNow / hpLowest * 10);
+    monsterStatus[i].finWeight = (monsterStatus[i].isDead) ? deadWeight : ((g('option').ruleReverse) ? hpMost / monsterStatus[i].hpNow * 10 : monsterStatus[i].hpNow / hpLowest * 10);
   }
   const skillLib = {
     Sle: {
@@ -2053,35 +2208,60 @@ function countMonsterHP() { // 统计敌人血量
 }
 
 function useGem() { // 自动使用宝石
+  if (!gE('#ikey_p')) {
+    return false;
+  }
   const Gem = gE('#ikey_p').textContent;
   if (Gem === 'Health Gem' && g('hp') <= g('option').hp1) {
     gE('#ikey_p').click();
-    g('end', true);
+    return true;
   } else if (Gem === 'Mana Gem' && g('mp') <= g('option').mp1) {
     gE('#ikey_p').click();
-    g('end', true);
+    return true;
   } else if (Gem === 'Spirit Gem' && g('sp') <= g('option').sp1) {
     gE('#ikey_p').click();
-    g('end', true);
+    return true;
   } else if (Gem === 'Mystic Gem') {
     gE('#ikey_p').click();
-    g('end', true);
+    return true;
   }
+  return false;
 }
 
 function deadSoon() { // 自动回血回魔
+  if (!g('option').item) {
+    return false;
+  }
+  if (!g('option').itemOrderValue) {
+    return false;
+  }
   const name = g('option').itemOrderName.split(',');
   const order = g('option').itemOrderValue.split(',');
   for (let i = 0; i < name.length; i++) {
     if (g('option').item[name[i]] && checkCondition(g('option')[`item${name[i]}Condition`]) && isOn(order[i])) {
       isOn(order[i]).click();
-      g('end', true);
-      return;
+      return true;
     }
   }
+  return false;
 }
 
 function useScroll() { // 自动使用卷轴
+  if (!g('option').scrollSwitch) {
+    return false;
+  }
+  if (!g('option').scroll) {
+    return false;
+  }
+  if (!checkCondition(g('option').scrollCondition)) {
+    return false;
+  }
+  if (!g('option').scrollRoundType) {
+    return false;
+  }
+  if (!g('option').scrollRoundType[g('roundType')]) {
+    return false;
+  }
   const scrollLib = {
     Go: {
       name: 'Scroll of the Gods',
@@ -2142,14 +2322,23 @@ function useScroll() { // 自动使用卷轴
       }
       if (!isUsed) {
         gE(`.bti3>div[onmouseover*="${scrollLib[i].id}"]`).click();
-        g('end', true);
-        return;
+        return true;
       }
     }
   }
+  return false;
 }
 
 function useChannelSkill() { // 自动施法Channel技能
+  if (!g('option').channelSkillSwitch) {
+    return false;
+  }
+  if (!g('option').channelSkill) {
+    return false;
+  }
+  if (!gE('#pane_effects>img[src*="channeling"]')) {
+    return false;
+  }
   const skillLib = {
     Pr: {
       name: 'Protection',
@@ -2205,8 +2394,7 @@ function useChannelSkill() { // 自动施法Channel技能
       j = skillPack[i];
       if (g('option').channelSkill[j] && !gE(`#pane_effects>img[src*="${skillLib[j].img}"]`) && isOn(skillLib[j].id)) {
         gE(skillLib[j].id).click();
-        g('end', true);
-        return;
+        return true;
       }
     }
   }
@@ -2215,8 +2403,7 @@ function useChannelSkill() { // 自动施法Channel技能
     for (i = 0; i < order.length; i++) {
       if (isOn(order[i])) {
         gE(order[i]).click();
-        g('end', true);
-        return;
+        return true;
       }
     }
   }
@@ -2240,16 +2427,15 @@ function useChannelSkill() { // 自动施法Channel技能
       } else {
         if (spellName === 'Cloak of the Fallen' && !gE('#pane_effects>img[src*="sparklife"]') && isOn('422')) {
           gE('422').click();
-          g('end', true);
-          return;
+          return true;
         } if (spellName in name2Skill && isOn(skillLib[name2Skill[spellName]].id)) {
           gE(skillLib[name2Skill[spellName]].id).click();
-          g('end', true);
-          return;
+          return true;
         }
       }
     }
   }
+  return false;
 }
 
 function useBuffSkill() { // 自动施法BUFF技能
@@ -2300,15 +2486,22 @@ function useBuffSkill() { // 自动施法BUFF技能
       img: 'absorb',
     },
   };
-  let i; let
-    j;
+  if (!g('option').buffSkillSwitch) {
+    return false;
+  }
+  if (!g('option').buffSkill) {
+    return false;
+  }
+  if (!checkCondition(g('option').buffSkillCondition)) {
+    return false;
+  }
+
   const skillPack = g('option').buffSkillOrderValue.split(',');
-  for (i = 0; i < skillPack.length; i++) {
-    j = skillPack[i];
-    if (g('option').buffSkill[j] && checkCondition(g('option')[`buffSkill${j}Condition`]) && !gE(`#pane_effects>img[src*="${skillLib[j].img}"]`) && isOn(skillLib[j].id)) {
-      gE(skillLib[j].id).click();
-      g('end', true);
-      return;
+  for (let i = 0; i < skillPack.length; i++) {
+    let buff = skillPack[i];
+    if (g('option').buffSkill[buff] && checkCondition(g('option')[`buffSkill${buff}Condition`]) && !gE(`#pane_effects>img[src*="${skillLib[buff].img}"]`) && isOn(skillLib[buff].id)) {
+      gE(skillLib[buff].id).click();
+      return true;
     }
   }
   const draughtPack = {
@@ -2336,13 +2529,23 @@ function useBuffSkill() { // 自动施法BUFF技能
   for (i in draughtPack) {
     if (!gE(`#pane_effects>img[src*="${draughtPack[i].img}"]`) && g('option').buffSkill && g('option').buffSkill[i] && checkCondition(g('option')[`buffSkill${i}Condition`]) && gE(`.bti3>div[onmouseover*="${draughtPack[i].id}"]`)) {
       gE(`.bti3>div[onmouseover*="${draughtPack[i].id}"]`).click();
-      g('end', true);
-      return;
+      return true;
     }
   }
+  return false;
 }
 
 function useInfusions() { // 自动使用魔药
+  if (g('attackStatus') === 0) {
+    return false;
+  }
+  if (!g('option').infusionSwitch) {
+    return false;
+  }
+  if (!checkCondition(g('option').infusionCondition)) {
+    return false;
+  }
+
   const infusionLib = [null, {
     id: 12101,
     img: 'fireinfusion',
@@ -2364,48 +2567,140 @@ function useInfusions() { // 自动使用魔药
     }];
   if (gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`) && !gE(`#pane_effects>img[src*="${infusionLib[[g('attackStatus')]].img}"]`)) {
     gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`).click();
-    g('end', true);
+    return true;
   }
+  return false;
 }
 
-function allImperiled() { // 给所有敌人施放Imperil
-  g('monsterStatus').sort(objArrSort('order'));
-  const monsterBuff = gE('div.btm6', 'all');
-  let j;
-  for (let i = -3; ;) {
-    if (!j && i >= monsterBuff.length) {
-      j = true;
-      i = 0;
-    } else if (j && i >= monsterBuff.length) {
-      break;
-    } else if (!j) {
-      i = i + 3;
-    } else if (j) {
-      i = i + 1;
+function autoFocus() {
+  if (g('option').focus && checkCondition(g('option').focusCondition)) {
+    gE('#ckey_focus').click();
+    return true;
+  }
+  return false;
+}
+function autoSS() {
+  if ((g('option').turnOnSS && checkCondition(g('option').turnOnSSCondition) && !gE('#ckey_spirit[src*="spirit_a"]')) || (g('option').turnOffSS && checkCondition(g('option').turnOffSSCondition) && gE('#ckey_spirit[src*="spirit_a"]'))) {
+    gE('#ckey_spirit').click();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * INNAT / WEAPON SKILLS
+ * 
+ * 优先释放先天和武器技能
+ */
+function autoSkill() {
+  if (!g('option').skillSwitch) {
+    return false;
+  }
+  if (!gE('#ckey_spirit[src*="spirit_a"]')) {
+    return false;
+  }
+
+  const skillOrder = (g('option').skillOrderValue || 'OFC,FRD,T3,T2,T1').split(',');
+  const skillLib = {
+    OFC: {
+      id: '1111',
+      oc: 8,
+    },
+    FRD: {
+      id: '1101',
+      oc: 4,
+    },
+    T3: {
+      id: `2${g('option').fightingStyle}03`,
+      oc: 2,
+    },
+    T2: {
+      id: `2${g('option').fightingStyle}02`,
+      oc: 2,
+    },
+    T1: {
+      id: `2${g('option').fightingStyle}01`,
+      oc: 2,
+    },
+  };
+  const rangeSkills = {
+    2101: 2,
+    2403: 2,
+    1111: 4,
+  }
+
+  for (let i in skillOrder) {
+    let skill = skillOrder[i];
+    let range = 0;
+    if (!checkCondition(g('option')[`skill${skill}Condition`])) {
+      continue;
     }
-    if (i >= monsterBuff.length) continue;
-    const imgs = gE('img', 'all', monsterBuff[i]);
-    if (!gE('img[src*="imperil"]', monsterBuff[i]) && isOn('213') && !g('monsterStatus')[i].isDead) {
-      if (imgs.length < 6 || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn.Im) || !g('option').debuffSkillTurnAlert) {
-        gE('213').click();
-        if (i + 1 < monsterBuff.length && !g('monsterStatus')[i + 1].isDead) {
-          gE(`#mkey_${g('monsterStatus')[i + 1].id}`).click();
-        } else {
-          gE(`#mkey_${g('monsterStatus')[i].id}`).click();
-        }
-        g('end', true);
-        return;
+    if (!isOn(skillLib[skill].id)) {
+      continue;
+    }
+    if (g('oc') < skillLib[skill].oc) {
+      continue;
+    }
+    if (g('option').skillOTOS && g('option').skillOTOS[skill] && g('skillOTOS')[skill] >= 1) {
+      continue;
+    }
+    g('skillOTOS')[skill]++;
+    gE(skillLib[skill].id).click();
+    if (skillLib[skill].id in rangeSkills) {
+      range = rangeSkills[skillLib[skill].id];
+    }
+    if (!g('option').mercifulBlow || g('option').fightingStyle !== '2' || skill !== 'T3') {
+      continue;
+    }
+    // Merciful Blow
+    for (let j = 0; j < g('monsterStatus').length; j++) {
+      if (g('monsterStatus')[j].hpNow / g('monsterStatus')[j].hp < 0.25 && gE(`#mkey_${g('monsterStatus')[j].id} img[src*="wpn_bleed"]`)) {
+        gE(`#mkey_${getRangeCenter(g('monsterStatus')[j]).id}`).click();
+        return true;
       }
-      _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
-      pauseChange();
-      g('end', true);
-      return;
     }
   }
-  g('monsterStatus').sort(objArrSort('finWeight'));
+  gE(`#mkey_${getRangeCenter(g('monsterStatus')[0]).id}`).click();
+  return true;
 }
 
 function useDeSkill() { // 自动施法DEBUFF技能
+  if (!g('option').debuffSkillSwitch) { // 总开关是否开启
+    return false;
+  }
+  // 先处理特殊的 “先给全体上buff”
+  let skillPack = ['Im', 'We'];
+  for (let i = 0; i < skillPack.length; i++) {
+    if (g('option')[`debuffSkill${skillPack[i]}All`]) { // 是否启用
+      continue;
+    }
+    if (!checkCondition(g('option')[`debuffSkill${skillPack[i]}AllCondition`])) { // 检查条件
+      continue;
+    }
+    skillPack.splice(i, 1);
+    i--;
+  }
+  let toAllCount = skillPack.length;
+  if (g('option').debuffSkill) { // 是否有启用的buff(不算两个特殊的)
+    skillPack = skillPack.concat(g('option').debuffSkillOrderValue.split(','));
+  }
+  for (let i in skillPack) {
+    let buff = skillPack[i];
+    if (!g('option').debuffSkill[buff] && i >= toAllCount) { // 检查buff是否启用
+      continue;
+    }
+    if (!checkCondition(g('option')[`debuffSkill${buff}Condition`])) { // 检查条件
+      continue;
+    }
+    // 前 toAllCount 个都是先给全体上的
+    if (useDebuffSkill(skillPack[i], i < toAllCount)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function useDebuffSkill(buff, isAll = false) {
   const skillLib = {
     Sle: {
       name: 'Sleep',
@@ -2426,6 +2721,7 @@ function useDeSkill() { // 自动施法DEBUFF技能
       name: 'Imperil',
       id: '213',
       img: 'imperil',
+      range: 1,
     },
     MN: {
       name: 'MagNet',
@@ -2446,6 +2742,7 @@ function useDeSkill() { // 自动施法DEBUFF技能
       name: 'Weaken',
       id: '212',
       img: 'weaken',
+      range: 1,
     },
     Co: {
       name: 'Confuse',
@@ -2453,105 +2750,81 @@ function useDeSkill() { // 自动施法DEBUFF技能
       img: 'confuse',
     },
   };
-  let i; let
-    j;
-  const skillPack = g('option').debuffSkillOrderValue.split(',');
-  const monsterBuff = gE(`#mkey_${g('monsterStatus')[0].id}>.btm6`);
-  for (i = 0; i < skillPack.length; i++) {
-    j = skillPack[i];
-    if (g('option').debuffSkill[j] && isOn(skillLib[j].id) && checkCondition(g('option')[`debuffSkill${j}Condition`]) && !gE(`img[src*="${skillLib[j].img}"]`, monsterBuff)) {
-      const imgs = gE('img', 'all', monsterBuff);
-      if (imgs.length < 6 || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn[j]) || !g('option').debuffSkillTurnAlert) {
-        gE(skillLib[j].id).click();
-        if (i + 1 < monsterBuff.length && !g('monsterStatus')[i + 1].isDead) {
-          gE(`#mkey_${g('monsterStatus')[i + 1].id}`).click();
-        } else {
-          gE(`#mkey_${g('monsterStatus')[0].id}`).click();
-        }
-        g('end', true);
-        return;
-      }
-      _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
-      pauseChange();
-      g('end', true);
-      return;
-    }
+  if (!isOn(skillLib[buff].id)) { // 技能不可用
+    return false;
   }
+
+  let isDebuffed = (target) => gE(`img[src*="${skillLib[buff].img}"]`, gE(`#mkey_${target.id}>.btm6`))
+
+  g('monsterStatus').sort(objArrSort('finWeight'));
+  let primaryTarget;
+  let max = isAll ? g('monsterStatus').length : 1;
+  for (let i = 0; i < max; i++) {
+    if (g('monsterStatus')[i].isDead) {
+      continue;
+    }
+    let target = g('monsterStatus')[i];
+    if (isDebuffed(target)) { // 检查是否已有该buff
+      continue;
+    }
+    primaryTarget = target;
+    break;
+  }
+  if (primaryTarget === undefined) {
+    return false;
+  }
+
+  let id = getRangeCenter(primaryTarget, skillLib[buff].range, isDebuffed).id;
+  const imgs = gE('img', 'all', gE(`#mkey_${id}>.btm6`));
+  if (imgs.length < 6 || !g('option').debuffSkillTurnAlert || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn[buff])) {
+    gE(skillLib[buff].id).click();
+    gE(`#mkey_${id}`).click();
+    return true;
+  }
+
+  // 已有buff小于6个
+  // 未开启debuff失败警告
+  // buff剩余持续时间大于等于警报时间
+  _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
+  pauseChange();
+  return true;
 }
 
 function attack() { // 自动打怪
-  if (g('option').focus && checkCondition(g('option').focusCondition)) {
-    gE('#ckey_focus').click();
-    return;
-  }
-  if ((g('option').turnOnSS && checkCondition(g('option').turnOnSSCondition) && !gE('#ckey_spirit[src*="spirit_a"]')) || (g('option').turnOffSS && checkCondition(g('option').turnOffSSCondition) && gE('#ckey_spirit[src*="spirit_a"]'))) {
-    gE('#ckey_spirit').click();
-    g('end', true);
-    return;
-  }
-  if (g('option').etherTap && gE(`#mkey_${g('monsterStatus')[0].id}>div.btm6>img[src*="coalescemana"]`) && (!gE('#pane_effects>img[onmouseover*="Ether Tap (x2)"]') || gE('#pane_effects>img[src*="wpn_et"][id*="effect_expire"]')) && checkCondition(g('option').etherTapCondition)) {
-    // nothing;
-  } else if (g('attackStatus') !== 0) {
-    if (checkCondition(g('option').highSkillCondition) && isOn(`1${g('attackStatus')}3`)) {
-      gE(`1${g('attackStatus')}3`).click();
-    } else if (checkCondition(g('option').middleSkillCondition) && isOn(`1${g('attackStatus')}2`)) {
-      gE(`1${g('attackStatus')}2`).click();
-    } else if (isOn(`1${g('attackStatus')}1`)) {
-      gE(`1${g('attackStatus')}1`).click();
+  // 如果
+  // 1. 开启了自动以太水龙头
+  // 2. 目标怪在魔力合流状态中
+  // 3. 未获得以太水龙头*2 或 *1
+  // 4. 满足条件
+  // 使用物理普通攻击，跳过Offensive Magic
+  // 否则按照属性攻击模式释放Spell > Offensive Magic
+
+  let range = 0;
+  // Spell > Offensive Magic
+  if (g('attackStatus') === 0) {
+    if (g('option').fightingStyle === 0) {
+      range = 2;
     }
-  }
-  if (g('option').skillSwitch) {
-    let i; let spiritOn; let condition; let
-      skill;
-    const skillOrder = (g('option').skillOrderValue || 'OFC,FRD,T3,T2,T1').split(',');
-    const skillLib = {
-      OFC: {
-        id: '1111',
-        oc: 8,
-      },
-      FRD: {
-        id: '1101',
-        oc: 4,
-      },
-      T3: {
-        id: `2${g('option').fightingStyle}03`,
-        oc: 2,
-      },
-      T2: {
-        id: `2${g('option').fightingStyle}02`,
-        oc: 2,
-      },
-      T1: {
-        id: `2${g('option').fightingStyle}01`,
-        oc: 2,
-      },
-    };
-    for (i = 0; i < skillOrder.length; i++) {
-      skill = skillOrder[i];
-      spiritOn = gE('#ckey_spirit[src*="spirit_a"]');
-      condition = checkCondition(g('option')[`skill${skill}Condition`]) && isOn(skillLib[skill].id) && g('oc') >= skillLib[skill].oc;
-      if (spiritOn && condition) {
-        if (g('option').skillOTOS && g('option').skillOTOS[skill] && g('skillOTOS')[skill] >= 1) {
-          // nothing;
-        } else {
-          g('skillOTOS')[skill]++;
-          gE(skillLib[skill].id).click();
-          if (g('option').mercifulBlow && g('option').fightingStyle === '2' && skill === 'T3') { // Merciful Blow
-            for (let j = 0; j < g('monsterStatus').length; j++) {
-              if (g('monsterStatus')[j].hpNow / g('monsterStatus')[j].hp < 0.25 && gE(`#mkey_${g('monsterStatus')[j].id} img[src*="wpn_bleed"]`)) {
-                gE(`#mkey_${g('monsterStatus')[j].id}`).click();
-                g('end', true);
-                return;
-              }
-            }
-          }
-          break;
-        }
+  } else {
+    if (g('option').etherTap && gE(`#mkey_${g('monsterStatus')[0].id}>div.btm6>img[src*="coalescemana"]`) && (!gE('#pane_effects>img[onmouseover*="Ether Tap (x2)"]') || gE('#pane_effects>img[src*="wpn_et"][id*="effect_expire"]')) && checkCondition(g('option').etherTapCondition)) {
+      `pass`
+    }
+    else {
+      if (checkCondition(g('option').highSkillCondition) && isOn(`1${g('attackStatus')}3`)) {
+        gE(`1${g('attackStatus')}3`).click();
+        range = 3; // 7~10
+      } else if (checkCondition(g('option').middleSkillCondition) && isOn(`1${g('attackStatus')}2`)) {
+        gE(`1${g('attackStatus')}2`).click();
+        range = 2; // 5/7
+      } else if (isOn(`1${g('attackStatus')}1`)) {
+        gE(`1${g('attackStatus')}1`).click();
+        range = 1; // 3/5
       }
     }
   }
-  gE(`#mkey_${g('monsterStatus')[0].id}`).click();
-  g('end', true);
+  // else Weapon Attack
+  gE(`#mkey_${getRangeCenter(g('monsterStatus')[0], range).id}`).click();
+  return true;
 }
 
 function fixMonsterStatus() { // 修复monsterStatus
@@ -2767,41 +3040,4 @@ function recordUsage2() {
   } else {
     setValue('stats', stats);
   }
-}
-
-function allWeakened() { // 给所有敌人施放Weaken
-  g('monsterStatus').sort(objArrSort('order'));
-  const monsterBuff = gE('div.btm6', 'all');
-  let j;
-  for (let i = -3; ;) {
-    if (!j && i >= monsterBuff.length) {
-      j = true;
-      i = 0;
-    } else if (j && i >= monsterBuff.length) {
-      break;
-    } else if (!j) {
-      i = i + 3;
-    } else if (j) {
-      i = i + 1;
-    }
-    if (i >= monsterBuff.length) continue;
-    const imgs = gE('img', 'all', monsterBuff[i]);
-    if (!gE('img[src*="weaken"]', monsterBuff[i]) && isOn('212') && !g('monsterStatus')[i].isDead) {
-      if (imgs.length < 6 || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn.Im) || !g('option').debuffSkillTurnAlert) {
-        gE('212').click();
-        if (i + 1 < monsterBuff.length && !g('monsterStatus')[i + 1].isDead) {
-          gE(`#mkey_${g('monsterStatus')[i + 1].id}`).click();
-        } else {
-          gE(`#mkey_${g('monsterStatus')[i].id}`).click();
-        }
-        g('end', true);
-        return;
-      }
-      _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
-      pauseChange();
-      g('end', true);
-      return;
-    }
-  }
-  g('monsterStatus').sort(objArrSort('finWeight'));
 }
