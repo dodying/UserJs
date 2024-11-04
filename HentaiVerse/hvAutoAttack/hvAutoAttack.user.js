@@ -2139,7 +2139,7 @@ function countMonsterHP() { // 统计敌人血量
   setValue('monsterStatus', monsterStatus);
   const hpLowest = Math.min.apply(null, hpArray);
   const hpMost = Math.max.apply(null, hpArray);
-  const deadWeight = g('option').ruleReverse ? -Infinity : Infinity
+  const deadWeight = Infinity
   for (i = 0; i < monsterStatus.length; i++) {
     monsterStatus[i].finWeight = (monsterStatus[i].isDead) ? deadWeight : ((g('option').ruleReverse) ? hpMost / monsterStatus[i].hpNow * 10 : monsterStatus[i].hpNow / hpLowest * 10);
   }
