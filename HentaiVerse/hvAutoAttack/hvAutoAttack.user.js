@@ -1967,6 +1967,7 @@ try {
         {
           dateNow: g('dateNow'),
           count: 0,
+          lastTime: time(0),
         }
     );
     const now = new Date().getTime();
@@ -2216,7 +2217,6 @@ try {
     var taskList = [autoRecover, autoPause, autoSS, autoDefend, useScroll, useChannelSkill, useBuffSkill, useInfusions, useDeSkill, autoFocus, autoSkill, attack];
 
     for (let i in taskList) {
-      console.log(taskList[i]);
       if (taskList[i]()) return;
     }
   }
@@ -2651,7 +2651,6 @@ try {
     const yggdrasilExtraWeight = g('option').YggdrasilExtraWeight;
     const unreachableWeight = g('option').unreachableWeight;
     const baseHpRatio = g('option').baseHpRatio ?? 1;
-    console.log(baseHpRatio);
     // 权重越小，优先级越高
     for (i = 0; i < monsterStatus.length; i++) { // 死亡的排在最后（优先级最低）
       if (monsterStatus[i].isDead) {
