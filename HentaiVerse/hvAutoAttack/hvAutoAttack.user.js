@@ -229,6 +229,7 @@ try {
       g('runSpeed', 1);
       newRound(false);
       if (g('option').recordEach && !getValue('battleCode')) setValue('battleCode', `${time(1)}: ${g('battle').roundType.toUpperCase()}-${g('battle').roundAll}`);
+      // console.log('____',getValue('battle', true));
       onBattle();
       updateEncounter(false);
       return;
@@ -249,12 +250,14 @@ try {
         asyncSetStamina(),
         asyncSetEnergyDrinkHathperk(),
         asyncSetAbilityData(),
-        (async () => { notBattleReady |= await asyncCheckRepair() })(),
-        updateEncounter(g('option').encounter)
+        updateArena(),
+        updateEncounter(g('option').encounter),
+        (async () => { notBattleReady |= !(await asyncCheckRepair()) })(),
       ]);
-      notBattleReady |= await asyncCheckSupply();
-      if (!notBattleReady) return;
-      if (g('option').idleArena && g('option').idleArenaValue) updateArena();
+      notBattleReady |= !(await asyncCheckSupply());
+      if (notBattleReady) return;
+      if (!g('option').idleArena || !g('option').idleArenaValue) return;
+      startUpdateArena();
     })();
   }());
 
@@ -1899,7 +1902,7 @@ try {
 
   async function asyncCheckSupply() {
     if (!g('option').checkSupply) {
-      return;
+      return true;
     }
     logSwitchAsyncTask(arguments);
     const items = g('items');
@@ -1916,10 +1919,11 @@ try {
       console.log(`Needs supply:${needs}`);
     }
     logSwitchAsyncTask(arguments);
+    return false;
   }
 
   async function asyncCheckRepair() {
-    if (!g('option').repair) return;
+    if (!g('option').repair) return true;
     logSwitchAsyncTask(arguments);
     const doc = $doc(await $ajax.fetch('?s=Forge&ss=re'));
     const json = JSON.parse((await $ajax.fetch(gE('#mainpane>script[src]', doc).src)).match(/{.*}/)[0]);
@@ -2012,11 +2016,16 @@ try {
     openUrl('https://e-hentai.org/news.php?encounter');
   }
 
-  async function updateArena(updateOnly = false) {
+  async function startUpdateArena(isInit=false){
+    if(!isInit) await updateArena();
+    setTimeout(idleArena, g('option').idleArenaTime * _1s);
+    setTimeout(startUpdateArena, _1d - (time(0) % _1d));
+  }
+
+  async function updateArena(forceUpdateToken = false) {
     let arena = getValue('arena', true) ?? {};
-    if (!updateOnly && arena && arena.date === g('dateNow')) {
-      setTimeout(idleArena, g('option').idleArenaTime * _1s);
-      return;
+    if (!forceUpdateToken && arena && arena.date === g('dateNow')) {
+      return arena;
     }
     arena.token = {};
     arena.sites = arena.sites ?? [
@@ -2036,17 +2045,14 @@ try {
         arena.token[temp[1]] = temp[2];
       });
     }));
-    if (updateOnly) {
-      setValue('arena', arena);
-      return;
+    if (forceUpdateToken) {
+      return setValue('arena', arena);
     }
     arena.date = g('dateNow');
     arena.gr = g('option').idleArenaGrTime;
     arena.array = g('option').idleArenaValue.split(',') ?? [];
     arena.array.reverse();
-    setValue('arena', arena);
-    setTimeout(idleArena, g('option').idleArenaTime * _1s);
-    setTimeout(updateArena, _1d - (time(0) % _1d));
+    return setValue('arena', arena);
   }
 
   function checkBattleReady(method, condition = {}) {
@@ -2065,6 +2071,7 @@ try {
   }
 
   async function idleArena() { // 闲置竞技场
+    console.log('idleArena');
     let arena = getValue('arena', true);
     console.log('arena:', getValue('arena', true));
     if (arena.array.length === 0) {
@@ -2077,16 +2084,11 @@ try {
     while (arena.array.length > 0) {
       id = arena.array.pop() * 1;
       id = isNaN(id) ? 'gr' : id;
-      if (id in arena.token) {
-        break;
-      }
+      if (id in arena.token) break;
       if (id >= 105) {
-        await updateArena(true);
-        if (id in arena.token) {
-          break;
-        }
+        arena.token = await updateArena(true).token;
+        if (id in arena.token) break;
         RBundone.unshift(id);
-        id = undefined;
       }
       id = undefined;
     }
@@ -2146,6 +2148,7 @@ try {
   // 战斗中//
   function onBattle() { // 主程序
     let battle = setValue('battle', getValue('battle', true) ?? {});
+    // console.log(battle)
     if (gE('#vbh')) {
       g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
       g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100);
@@ -2180,8 +2183,10 @@ try {
         case 'tw': return '塔楼(TW)';
         case 'iw': return '道具(IW)';
         case 'gf': return '压榨(GF)';
+        case undefined: return '未知';
       }
     }
+
     gE('.hvAALog').innerHTML = [
       `Turns: ${battle.turn ?? 0}`,
       `<br>Speed: ${g('runSpeed')} t/s`,
@@ -2190,7 +2195,7 @@ try {
       `<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
       `<br><l0>战役</l0><l1>戰役</l1><l2>Type</l2>: ${battleInfoType(battle.roundType)}`, // 战役模式显示
     ].join('');
-    document.title = `${battle.turn}||${g('runSpeed')}||${g('monsterAlive')}/${g('monsterAll')}||${battle.roundNow}/${battle.roundAll}||${battleInfoType(battle.roundType)}`;
+    document.title = `${battle.turn ?? 0}||${g('runSpeed')}||${g('monsterAlive')}/${g('monsterAll')}||${battle.roundNow ?? 0}/${battle.roundAll ?? 0}||${battleInfoType(battle.roundType)}`;
 
     if (battle.monsterStatus && battle.monsterStatus.length === g('monsterAll')) {
       countMonsterHP();
