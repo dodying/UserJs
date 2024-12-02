@@ -987,18 +987,18 @@ try {
       '  <div>4. <l0>优先选择权重最低的目标</l0><l1>優先選擇權重最低的目標</l1><l2>Choose target with lowest rank first</l2><br><l0>BOSS:Yggdrasil额外权重</l0><l1>BOSS:Yggdrasil額外權重</l1><l2>BOSS:Yggdrasil Extra Weight</l2><input class="hvAANumber" name="YggdrasilExtraWeight" placeholder="-1000" type="text" style="width:40px"></div>',
       '  <div>PS. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a class="hvAAGoto" name="hvAATab-Feedback"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.<br><l0>参考公式为：</l0><l1>參考公式為：</l1><l2>Basic Weight Calculation as: </l2>PW(X) = Log10(<br>  (HP/MaxHPOnField/(1+CentralAttackDamageExtraRatio)<br>  *[HPActualEffectivenessRate:∏(1-debuff),debuff=Im|PA|Bl|Co|Dr|MN|St]<br>  /[DMGActualEffectivenessRate:∏(1-debuff),debuff=We|Bl|Slo|Si|Sl|Co|Dr|MN|St])<br>)</div>',
       '  <div><l0>显示权重及顺序</l0><l1>顯示權重及順序</l1><l2>DIsplay Weight and order</l2><input id="displayWeight" type="checkbox">',
-      '  <l0>显示背景色</l0><l1>顯示背景色</l1><l2>DIsplay Background Color</l2><input id="displayWeightBackground" type="checkbox"></div>',
-      '  <l0>CSS格式或可eval执行的公式（可用rank, all指代优先级和总优先级数量），例如：</l0><l1>CSS格式或可eval執行的公式（可用rank, all指代優先級和總優先級數量）：例如</l1><l2>In CSS or eval executable formula(use <rank> and <all> to refer priority rank and total rank count)Such as: </l2><br>`hsl(${Math.round(240*rank/Math.max(1,all-1))}deg 50% 50%)`<br>',
-      '  0. <input class="customizeInput" name="weightBackground_0" type="text"><br>',
-      '  1. <input class="customizeInput" name="weightBackground_1" type="text">',
-      '  2. <input class="customizeInput" name="weightBackground_2" type="text">',
-      '  3. <input class="customizeInput" name="weightBackground_3" type="text"><br>',
-      '  4. <input class="customizeInput" name="weightBackground_4" type="text">',
-      '  5. <input class="customizeInput" name="weightBackground_5" type="text">',
-      '  6. <input class="customizeInput" name="weightBackground_6" type="text"><br>',
-      '  7. <input class="customizeInput" name="weightBackground_7" type="text">',
-      '  8. <input class="customizeInput" name="weightBackground_8" type="text">',
-      '  9. <input class="customizeInput" name="weightBackground_9" type="text">',
+      '  <l0>显示优先级背景色</l0><l1>顯示優先級背景色</l1><l2>DIsplay Priority Background Color</l2><input id="displayWeightBackground" type="checkbox"></div>',
+      '  <l0>CSS格式或可eval执行的公式（可用<rank>, <all>指代优先级和总优先级数量），例如：</l0><l1>CSS格式或可eval執行的公式（可用<rank>, <all>指代優先級和總優先級數量）：例如</l1><l2>In CSS or eval executable formula(use <rank> and <all> to refer priority rank and total rank count)Such as: </l2><br>`hsl(${Math.round(240*<rank>/Math.max(1,<all>-1))}deg 50% 50%)`<br>',
+      '   1. <input class="customizeInput" name="weightBackground_1" type="text"><br>',
+      '   2. <input class="customizeInput" name="weightBackground_2" type="text">',
+      '   3. <input class="customizeInput" name="weightBackground_3" type="text">',
+      '   4. <input class="customizeInput" name="weightBackground_4" type="text"><br>',
+      '   5. <input class="customizeInput" name="weightBackground_5" type="text">',
+      '   6. <input class="customizeInput" name="weightBackground_6" type="text">',
+      '   7. <input class="customizeInput" name="weightBackground_7" type="text"><br>',
+      '   8. <input class="customizeInput" name="weightBackground_8" type="text">',
+      '   9. <input class="customizeInput" name="weightBackground_9" type="text">',
+      '  10. <input class="customizeInput" name="weightBackground_0" type="text">',
       '</div>',
       '<div class="hvAATab hvAACenter" id="hvAATab-Drop">',
       '  <span class="hvAATitle"><l0>掉落监测</l0><l1>掉落監測</l1><l2>Drops Tracking</l2></span><button class="reDropMonitor"><l01>重置</l01><l2>Reset</l2></button>',
@@ -3831,9 +3831,7 @@ try {
   }
 
   function displayMonsterWeight() {
-    if(!g('option').displayWeight) {
-      return;
-    }
+
     const status = g('battle').monsterStatus.filter(m => !m.isDead);
     let rank = 0;
 
@@ -3854,9 +3852,9 @@ try {
       }
       if(g('option').displayWeightBackground) {
         if(g('option').weightBackground) {
-          let colorText = (g('option').weightBackground[rank] ?? [])[0];
+          let colorText = (g('option').weightBackground[rank+1] ?? [])[0];
           try {
-            colorText = eval(colorText.replace('rank', rank).replace('all', weights.length));
+            colorText = eval(colorText.replace('<rank>', rank).replace('<all>', weights.length));
           }
           catch {
           }
@@ -3865,7 +3863,9 @@ try {
         // gE(`#mkey_${id}`).style.cssText += `background: hsl(${Math.round(max * rank / sec)}deg 50% 50%);`;
       }
       gE(`#mkey_${id}>.btm3`).style.cssText += 'display: flex; flex-direction: row;'
-      gE(`#mkey_${id}>.btm3`).innerHTML += `<div style='font-weight: bolder; right:0px; position: absolute;'>[${rank}|-${-rank + weights.length - 1}|${s.finWeight.toPrecision(s.finWeight >= 1 ? 5 : 4)}]</div>`;
+      if(g('option').displayWeight) {
+        gE(`#mkey_${id}>.btm3`).innerHTML += `<div style='font-weight: bolder; right:0px; position: absolute;'>[${rank}|-${-rank + weights.length - 1}|${s.finWeight.toPrecision(s.finWeight >= 1 ? 5 : 4)}]</div>`;
+      }
     });
   }
 
