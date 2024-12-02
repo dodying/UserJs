@@ -3810,7 +3810,7 @@ try {
 
   function getHPFromMonsterDB(mdb, name, lv) {
     /////////////////// TODO: 根据lv模糊推测
-    return mdb[name] ? mdb[name][lv] : undefined;
+    return mdb ? mdb[name] ? mdb[name][lv] : undefined : undefined;
   }
 
   function fixMonsterStatus() { // 修复monsterStatus
