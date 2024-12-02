@@ -24,7 +24,7 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_notification
-// @grant          GM_xmlhttpRequest
+// @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 // @run-at       document-end
 // ==/UserScript==
@@ -38,6 +38,46 @@ try {
     return;
   }
 
+  const Debug = {
+    Stack: class extends Error {
+      constructor(description, ...params) {
+        super(...params);
+        this.name = 'Debug.Stack';
+      }
+    },
+    realtime: false,
+    logList: [],
+    maxLogCache: 100,
+    switchRealtimeLog: function () {
+      Debug.enableRealtimeLog(Debug.realtime);
+    },
+    enableRealtimeLog: function (enabled) {
+      Debug.realtime = enabled;
+      if (enabled) {
+        Debug.shiftLog();
+      }
+    },
+    log: function () {
+      if (Debug.realtime) {
+        console.log(...arguments, `\n`, (new Debug.Stack()).stack);
+        return;
+      }
+      Debug.logList.push({
+        args: arguments,
+        stack: (new Debug.Stack()).stack
+      });
+      if (Debug.logList.length > Debug.maxLogCache) {
+        Debug.logList.shift();
+      }
+    },
+    shiftLog: function (){
+      while (Debug.logList.length) {
+        const log = Debug.logList.shift();
+        console.log(...log.args, `\n`, log.stack);
+      }
+    }
+  }
+
   const standalone = ['option', 'arena', 'drop', 'stats', 'staminaLostLog', 'battleCode', 'disabled', 'stamina', 'staminaTime', 'lastHref', 'battle', 'monsterDB', 'monsterMID', 'ability'];
   const sharable = ['option'];
   const excludeStandalone = { 'option': ['optionStandalone', 'version', 'lang'] };
@@ -45,6 +85,7 @@ try {
   const isIsekai = href.indexOf('isekai') !== -1;
   const current = isIsekai ? 'isekai' : 'persistent';
   const other = isIsekai ? 'persistent' : 'isekai';
+  let GM_cache;
 
   const _1s = 1000;
   const _1m = 60 * _1s;
@@ -53,21 +94,23 @@ try {
 
   const asyncList = [];
   function consoleAsyncTasks(name, state) {
-    // asyncList[name] = state;
     if (!state) {
       asyncList.splice(asyncList.indexOf(name), 1);
     } else {
       asyncList.push(name);
     }
-    console.log(`${state ? 'Start' : 'End'} ${name}`, JSON.parse(JSON.stringify(asyncList)));
+    console.log(`${state ? 'Start' : 'End'} ${name}\n`, JSON.parse(JSON.stringify(asyncList)));
   }
   function logSwitchAsyncTask(args) {
-    const name = `${args.callee.name}(${Array.from(args).join(',')})`;
+    const argsStr = Array.from(args).join(',');
+    const name = `${args.callee.name}${argsStr === '' ? argsStr : `(${argsStr})`}`;
     consoleAsyncTasks(name, asyncList.indexOf(name) === -1);
   }
 
   //ajax
-  function $doc(h) { const d = document.implementation.createHTMLDocument(''); d.documentElement.innerHTML = h; return d; }
+  function $doc(h) {
+    const d = document.implementation.createHTMLDocument(''); d.documentElement.innerHTML = h; return d;
+  }
   var $ajax = {
 
     interval: 300, // DO NOT DECREASE THIS NUMBER, OR IT MAY TRIGGER THE SERVER'S LIMITER AND YOU WILL GET BANNED
@@ -96,17 +139,13 @@ try {
         method = 'POST';
       }
       if (method === 'POST') {
-        if (!headers['Content-Type']) {
-          headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        }
+        headers['Content-Type'] ??= 'application/x-www-form-urlencoded';
         if (data && typeof data === 'object') {
           data = Object.entries(data).map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
         }
       } else if (method === 'JSON') {
         method = 'POST';
-        if (!headers['Content-Type']) {
-          headers['Content-Type'] = 'application/json';
-        }
+        headers['Content-Type'] ??= 'application/json';
         if (data && typeof data === 'object') {
           data = JSON.stringify(data);
         }
@@ -134,10 +173,21 @@ try {
       }
     },
     timer: function () {
-      $ajax.tid = setTimeout(() => {
+      var _ns = isIsekai ? 'hvuti' : 'hvut';
+      function getValue(k, d, p = _ns + '_') { const v = localStorage.getItem(p + k); return v === null ? d : JSON.parse(v); }
+      function setValue(k, v, p = _ns + '_', r) { localStorage.setItem(p + k, JSON.stringify(v, r)); }
+      function ontimer() {
+        const now = new Date().getTime();
+        const last = getValue('last_post');
+        if (last && last-now < $ajax.interval) {
+          $ajax.next();
+          return;
+        }
+        setValue('last_post', now);
         $ajax.tid = null;
         $ajax.next();
-      }, $ajax.interval);
+      };
+      $ajax.tid = setTimeout( ontimer, $ajax.interval);
     },
     send: function () {
       GM_xmlhttpRequest($ajax.queue[$ajax.index]);
@@ -152,7 +202,8 @@ try {
         r.context.onerror?.();
       } else if (text === 'state lock limiter in effect') {
         if ($ajax.error !== text) {
-          popup(`<p style="color: #f00; font-weight: bold;">${text}</p><p>Your connection speed is so fast that <br>you have reached the maximum connection limit.</p><p>Try again later.</p>`);
+          // popup(`<p style="color: #f00; font-weight: bold;">${text}</p><p>Your connection speed is so fast that <br>you have reached the maximum connection limit.</p><p>Try again later.</p>`);
+          console.error(`${text}\nYour connection speed is so fast that you have reached the maximum connection limit. Try again later.`)
         }
         $ajax.error = text;
         r.context.onerror?.();
@@ -167,15 +218,17 @@ try {
       r.context.onerror?.();
       $ajax.next();
     },
-
   };
 
-  window.addEventListener('unhandledrejection', (e) => { console.log($ajax.error || e); });
+  window.addEventListener('unhandledrejection', (e) => {
+    console.log($ajax.error || e);
+  });
 
   (function init() {
-    if (onEhorg()) return;
+    if (!checkIsHV()) {
+      return;
+    }
 
-    setValue('url', window.location.origin);
     if (!gE('#navbar,#riddlecounter,#textlog')) {
       setTimeout(goto, 5 * _1m);
       return;
@@ -208,14 +261,13 @@ try {
     }
 
     unsafeWindow = typeof unsafeWindow === 'undefined' ? window : unsafeWindow;
-    g('dateNow', time(2));
 
     if (gE('#riddlecounter')) { // 需要答题
-      if (g('option').riddlePopup && !window.opener) {
-        window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
-      } else {
+      if (!g('option').riddlePopup || window.opener) {
         riddleAlert(); // 答题警报
+        return;
       }
+      window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
       return;
     }
 
@@ -227,66 +279,103 @@ try {
       g('attackStatus', g('option').attackStatus);
       g('timeNow', time(0));
       g('runSpeed', 1);
+      Debug.log('______________newRound', false);
       newRound(false);
-      if (g('option').recordEach && !getValue('battleCode')) setValue('battleCode', `${time(1)}: ${g('battle').roundType.toUpperCase()}-${g('battle').roundAll}`);
-      // console.log('____',getValue('battle', true));
+      if (g('option').recordEach && !getValue('battleCode')) {
+        setValue('battleCode', `${time(1)}: ${g('battle').roundType.toUpperCase()}-${g('battle').roundAll}`);
+      }
       onBattle();
       updateEncounter(false);
       return;
     }
 
     // 战斗外
-    setValue('lastHref', window.location.href); // 缓存进入战斗前的页面地址
-    delValue(2);
-    if (g('option').showQuickSite && g('option').quickSite) quickSite();
+    if (window.location.href.indexOf(`?s=Battle&ss=ba`) === -1) { // 不缓存encounter
+      setValue('lastHref', window.location.href); // 缓存进入战斗前的页面地址
+    } else {
+      // 补充记录（因写入冲突、网络卡顿等）未被记录的encounter链接
+      const encounterURL = window.location.href?.href.split('/')[3];
+      const encounter = getEncounter();
+      if(!encounter.filter(e=>e.href===encounterURL).length) {
+        encounter.unshift({ href: encounterURL, time: time(0), encountered:time(0)});
+      }
+      setEncounter(encounter);
+    }
+    delValue(1);
+    if (g('option').showQuickSite && g('option').quickSite) {
+      quickSite();
+    }
     const hvAAPauseUI = document.body.appendChild(cE('div'));
     hvAAPauseUI.classList.add('hvAAPauseUI');
     setPauseUI(hvAAPauseUI);
-
-    let notBattleReady, encounter;
-    (async () => {
-      await Promise.all([
-        asyncGetItems(),
-        asyncSetStamina(),
-        asyncSetEnergyDrinkHathperk(),
-        asyncSetAbilityData(),
-        updateArena(),
-        updateEncounter(g('option').encounter),
-        (async () => { notBattleReady |= !(await asyncCheckRepair()) })(),
-      ]);
-      notBattleReady |= !(await asyncCheckSupply());
-      if (notBattleReady) return;
-      if (!g('option').idleArena || !g('option').idleArenaValue) return;
-      startUpdateArena();
-    })();
+    asyncOnIdle();
   }());
+
+  async function asyncOnIdle() {
+    let notBattleReady = false;
+    const idleStart = time(0);
+    await Promise.all([
+      (async () => {
+        await asyncGetItems();
+        const checked = await asyncCheckSupply();
+        notBattleReady ||= !checked;
+      })(),
+      asyncSetStamina(),
+      asyncSetEnergyDrinkHathperk(),
+      asyncSetAbilityData(),
+      updateArena(),
+      updateEncounter(g('option').encounter),
+      (async () => {
+        const checked = await asyncCheckRepair();
+        notBattleReady ||= !checked;
+      })(),
+    ]);
+    if (notBattleReady) {
+      return;
+    }
+    if (!g('option').idleArena || !g('option').idleArenaValue) {
+      return;
+    }
+    startUpdateArena(idleStart);
+  }
 
   // 通用//
   function setPauseUI(parent) {
-    if (g('option').pauseButton) {
-      const button = parent.appendChild(cE('button'));
-      button.innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
-      button.className = 'pauseChange';
-      button.onclick = function () {
+    setPauseButton(parent);
+    setPauseHotkey();
+  }
+
+  function setPauseButton(parent) {
+    if (!g('option').pauseButton) {
+      return;
+    }
+    const button = parent.appendChild(cE('button'));
+    button.innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
+    button.className = 'pauseChange';
+    button.onclick = pauseChange;
+  }
+  function setPauseHotkey() {
+    if (!g('option').pauseHotkey) {
+      return;
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
+      if (e.keyCode === g('option').pauseHotkeyCode) {
         pauseChange();
-      };
-    }
-    if (g('option').pauseHotkey) {
-      document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        if (e.keyCode === g('option').pauseHotkeyCode) {
-          pauseChange();
-          // document.removeEventListener('keydown', pause, false);
-        }
-      }, false);
-    }
+        // document.removeEventListener('keydown', pause, false);
+      }
+    }, false);
   }
 
   function formatTime(t, size = 2) {
     t = [t / _1h, (t / _1m) % 60, (t / _1s) % 60, (t % _1s) / 10].map(cdi => Math.floor(cdi));
     while (t.length > size) { // remove zero front
       const front = t.shift();
-      if (!front) continue;
+      if (!front) {
+        continue;
+      }
       t.unshift(front);
       break;
     }
@@ -314,7 +403,8 @@ try {
       return date.getTime();
     } if (e === 1) {
       return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
-    } if (e === 2) { // date.toLocaleDateString(lang,option);
+    } if (e === 2) {
+      // date.toLocaleDateString(lang,option);
       return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
     } if (e === 3) {
       return date.toLocaleString(navigator.language, {
@@ -374,65 +464,59 @@ try {
     return GM_getValue(item, null);
   }
 
-  function getValue(item, toJSON) { // 读取数据
-    if (!standalone.includes(item)) {
-      return getLocal(item, toJSON);
+  function getValue(key, toJSON) { // 读取数据
+    if (!standalone.includes(key)) {
+      return getLocal(key, toJSON);
     }
-    let otherWorldItem = getLocal(`${other}_${item}`);
+    let otherWorldItem = getLocal(`${other}_${key}`);
     // 将旧的数据迁移到新的数据
-    if (!getLocal(`${current}_${item}`)) {
-      let itemExisted = getLocal(item);
-      if (!itemExisted && sharable.includes(item)) {
+    if (!getLocal(`${current}_${key}`)) {
+      let itemExisted = getLocal(key);
+      if (!itemExisted && sharable.includes(key)) {
         itemExisted = otherWorldItem;
       }
       if (!itemExisted) {
         return null; // 若都没有该数据
       }
       itemExisted = JSON.parse(JSON.stringify(itemExisted));
-      setLocal(`${current}_${item}`, itemExisted);
-      delLocal(item);
+      setLocal(`${current}_${key}`, itemExisted);
+      delLocal(key);
     }
-    if (Object.keys(excludeStandalone).includes(item)) {
-      if (!otherWorldItem) {
-        otherWorldItem = getLocal(`${current}_${item}`);
-      }
-      if (!otherWorldItem) {
-        otherWorldItem = {}
-      }
-      for (let i in excludeStandalone[item]) {
-        const key = excludeStandalone[item][i];
-        otherWorldItem[key] = getLocal(`${current}_${item}`)[key];
+    if (Object.keys(excludeStandalone).includes(key)) {
+      otherWorldItem ??= getLocal(`${current}_${key}`) ?? {};
+      for (let i of excludeStandalone[key]) {
+        otherWorldItem[i] = getLocal(`${current}_${key}`)[i];
       }
     }
-    setLocal(`${other}_${item}`, otherWorldItem);
-    return getLocal(`${current}_${item}`);
+    setLocal(`${other}_${key}`, otherWorldItem);
+    return getLocal(`${current}_${key}`);
   }
 
-  function delLocal(item) {
+  function delLocal(key) {
     if (typeof GM_deleteValue === 'undefined') {
-      window.localStorage.removeItem(`hvAA-${item}`);
-    } else {
-      GM_deleteValue(item);
+      window.localStorage.removeItem(`hvAA-${key}`);
+      return;
     }
+    GM_deleteValue(key);
   }
 
-  function delValue(item) { // 删除数据
-    if (standalone.includes(item)) {
-      item = `${current}_${item}`;
+  function delValue(key) { // 删除数据
+    if (standalone.includes(key)) {
+      key = `${current}_${key}`;
     }
-    if (typeof item === 'string') {
-      delLocal(item);
-    } else if (typeof item === 'number') {
-      if (item === 0) {
-        delValue('disabled');
-      } else if (item === 1) {
-        // delValue('monsterStatus');
-      } else if (item === 2) {
-        delValue('battle');
-        delValue('battleCode');
-        delValue(0);
-        // delValue(1);
-      }
+    if (typeof key === 'string') {
+      delLocal(key);
+      return;
+    }
+    if (typeof key !== 'number') {
+      return;
+    }
+    const itemMap = {
+      0: ['disabled'],
+      1: ['battle', 'battleCode', 0],
+    }
+    for(let item of itemMap[key]) {
+      delValue(item);
     }
   }
 
@@ -440,7 +524,6 @@ try {
     window.location.href = window.location;
     setTimeout(goto, 5000);
   }
-
   function g(key, value) { // 全局变量
     const hvAA = window.hvAA || {};
     if (key === undefined && value === undefined) {
@@ -453,31 +536,31 @@ try {
     return window.hvAA[key];
   }
 
-  function post(href, func, parm, type) { // post
-    let xhr = new window.XMLHttpRequest();
-    xhr.open(parm ? 'POST' : 'GET', href);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-    xhr.responseType = type || 'document';
-    xhr.onerror = function () {
-      xhr = null;
-      post(href, func, parm, type);
-    };
-    xhr.onload = function (e) {
-      if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
-        const data = e.target.response;
-        if (xhr.responseType === 'document' && gE('#messagebox', data)) {
-          if (gE('#messagebox')) {
-            gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
-          } else {
-            gE('#csp').appendChild(gE('#messagebox', data));
-          }
-        }
-        func(data, e);
-      }
-      xhr = null;
-    };
-    xhr.send(parm);
-  }
+  // function post(href, func, parm, type) { // post
+  //   let xhr = new window.XMLHttpRequest();
+  //   xhr.open(parm ? 'POST' : 'GET', href);
+  //   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+  //   xhr.responseType = type || 'document';
+  //   xhr.onerror = function () {
+  //     xhr = null;
+  //     post(href, func, parm, type);
+  //   };
+  //   xhr.onload = function (e) {
+  //     if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
+  //       const data = e.target.response;
+  //       if (xhr.responseType === 'document' && gE('#messagebox', data)) {
+  //         if (gE('#messagebox')) {
+  //           gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
+  //         } else {
+  //           gE('#csp').appendChild(gE('#messagebox', data));
+  //         }
+  //       }
+  //       func(data, e);
+  //     }
+  //     xhr = null;
+  //   };
+  //   xhr.send(parm);
+  // }
 
   function objArrSort(key) { // 对象数组排序函数，从小到大排序
     return function (obj1, obj2) {
@@ -518,7 +601,9 @@ try {
     const langStyle = gE('head').appendChild(cE('style'));
     langStyle.className = 'hvAA-LangStyle';
     langStyle.textContent = `l${lang}{display:inline!important;}`;
-    if (/^[01]$/.test(lang)) langStyle.textContent = `${langStyle.textContent}l01{display:inline!important;}`;
+    if (/^[01]$/.test(lang)) {
+      langStyle.textContent = `${langStyle.textContent}l01{display:inline!important;}`;
+    }
     const globalStyle = gE('head').appendChild(cE('style'));
     const cssContent = [
       // hvAA
@@ -527,7 +612,7 @@ try {
       '.hvAALog{font-size:20px;}',
       '.hvAAPauseUI{top:30px;left:1246px;position:absolute;z-index:9999}',
       '.hvAAButton{top:4px;left:1250px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
-      '#hvAABox{left:calc(619px - 350px);top:calc(min(100%, 1094px)*0.5 - 269px);font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
+      '#hvAABox{left:calc(50vw - 350px);top:calc(min(100%, 1094px)*0.5 - 269px);font-size:16px!important;z-index:4;width:700px;height:538px;position:fixed;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
       '.hvAATablist{position:relative;left:14px;}',
       '.hvAATabmenu{position:absolute;left:-9px;}',
       '.hvAATabmenu>span{display:block;padding:5px 10px;margin:0 10px 0 0;border:1px solid #91a7b4;border-radius:5px;background-color:#E3F1F8;color:#000;text-decoration:none;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;cursor:pointer;}',
@@ -556,7 +641,7 @@ try {
       '#hvAATab-Alarm input[type="text"]{width:512px;}',
       '.testAlarms>div{border:2px solid #000;}',
       '.hvAAArenaLevels{display:none;}',
-      '.hvAAcheckItems{display:grid; grid-template-columns:repeat(3, 1fr 0.3fr)}',
+      '.hvAAcheckItems{display:grid; grid-template-columns:repeat(3, 1fr 0.1fr 0.3fr)}',
       '.hvAAcheckItems>input.hvAANumber{width:32px}',
       '.hvAAConfig{width:100%;height:16px;}',
       '.hvAAButtonBox{position:relative;top:468px;}',
@@ -664,16 +749,20 @@ try {
       '  <div><l0>当<b>小马答题</b>时间</l0><l1>當<b>小馬答題</b>時間</l1><l2>If <b>RIDDLE</b> ETR</l2><l0></l0><l1></l1><l2></l2> ≤ <input class="hvAANumber" name="riddleAnswerTime" placeholder="3" type="text"><l0>秒，如果输入框为空则随机生成答案并提交</l0><l1>秒，如果輸入框為空則隨機生成答案並提交</l1><l2>s and no answer has been chosen yet, a random answer will be generated and submitted</l2></div>',
       '  <div><l0>当<b>小马答题</b>时</l0><l1>當<b>小馬答題</b>時</l1><l2>If <b>RIDDLE</b></l2>: ',
       '    <input id="riddlePopup" type="checkbox"><label for="riddlePopup"><l0>弹窗答题</l0><l1>弹窗答题</l1><l2>POPUP a window to answer</l2></label>; <button class="testPopup"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div>',
-      '  <div><b><l0>精力</l0><l1>精力</l1><l2>Stamina</l2></b>: <l0>当损失精力</l0><l1>當損失精力</l1><l2>If it lost Stamina</l2> ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text">: ',
-      '    <input id="staminaPause" type="checkbox"><label for="staminaPause"><l0>脚本暂停</l0><l1>腳本暫停</l1><l2>pause script</l2></label>; ',
-      '    <input id="staminaWarn" type="checkbox"><label for="staminaWarn"><l01>警告</l01><l2>warn</l2></label>; ',
-      '    <input id="staminaFlee" type="checkbox"><label for="staminaFlee"><l01>逃跑</l01><l2>flee</l2></label>',
-      '  <div><b><l0>保证最低精力</l0><l1>保證最低精力</l1><l2>Ensure Min Stamina</l2></b>: ',
-      '    <l0>精力阈值</l0><l1>精力閾值</l1><l2><b></b>Stamina threshold</l2>: Min(85, <input class="hvAANumber" name="staminaLow" placeholder="61" type="text">)',
-      '    <l0>含自然恢复的阈值<l1>含自然恢復的閾值</l1><l2><b></b>Stamina threshold with naturally recovers.</l2>: <input class="hvAANumber" name="staminaLowWithReNat" placeholder="0" type="text"></label>',
-      '    <input id="restoreStamina" type="checkbox"><label for="restoreStamina"><l0>战前恢复</l0><l1>戰前恢復</l1><l2>Restore stamina</l2></div>',
-      '    <button class="staminaLostLog"><l0>精力损失日志</l0><l1>精力損失日誌</l1><l2>staminaLostLog</l2></button></div>',
-      '  <div><input id="idleArena" type="checkbox"><label for="idleArena"><b><l0>闲置竞技场</l0><l1>閒置競技場</l1><l2>Idle Arena</l2></b>: ',
+      '  <div><b><l0>精力</l0><l1>精力</l1><l2>Stamina</l2>: </b>',
+      '    <div style="display: flex; flex-flow: wrap;">',
+      '      <div><l0>当损失精力</l0><l1>當損失精力</l1><l2>If it lost Stamina</l2> ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text">: ',
+      '      <input id="staminaPause" type="checkbox"><label for="staminaPause"><l0>脚本暂停</l0><l1>腳本暫停</l1><l2>pause script</l2></label>;',
+      '      <input id="staminaWarn" type="checkbox"><label for="staminaWarn"><l01>警告</l01><l2>warn</l2></label>; ',
+      '      <input id="staminaFlee" type="checkbox"><label for="staminaFlee"><l01>逃跑</l01><l2>flee</l2></label></div>;',
+      '      <button class="staminaLostLog"><l0>精力损失日志</l0><l1>精力損失日誌</l1><l2>staminaLostLog</l2></button>',
+      '      <div><l0>精力阈值</l0><l1>精力閾值</l1><l2><b></b>Stamina threshold</l2>: Min(85, <input class="hvAANumber" name="staminaLow" placeholder="60" type="text">); </div>',
+      '      <div><l0>含本日自然恢复的阈值<l1>含本日自然恢復的閾值</l1><l2><b></b>Stamina threshold with naturally recovers today.</l2>: <input class="hvAANumber" name="staminaLowWithReNat" placeholder="0" type="text">; </div>',
+      '      <div><input id="restoreStamina" type="checkbox"><label for="restoreStamina"><l0>战前恢复</l0><l1>戰前恢復</l1><l2>Restore stamina</l2>; </div>',
+      '      <div><l0>进入遭遇战的最低精力<l1>進入遭遇戰的最低精力</l1><l2><b></b>Minimum stamina to engage encounter</l2>: <input class="hvAANumber" name="staminaEncounter" placeholder="60" type="text"></div>',
+      '    </div>',
+      '  </div>',
+      '  <div><input id="idleArena" type="checkbox"><label for="idleArena"><b><l0>闲置竞技场</l0><l1>閒置競技場</l1><l2>Idle Arena</l2>: </b>',
       '    <l0>在任意页面停留</l0><l1>在任意頁面停留</l1><l2>Idle in any page for </l2><input class="hvAANumber" name="idleArenaTime" type="text"><l0>秒后，开始竞技场</l0><l1>秒後，開始競技場</l1><l2>s, start Arena</l2></label> <button class="idleArenaReset"><l01>重置</l01><l2>Reset</l2></button>;<br>',
       '    <l0>进行的竞技场相对应等级</l0><l1>進行的競技場相對應等級</l1><l2>The levels of the Arena you want to complete</l2>:  ',
       '      <button class="hvAAShowLevels"><l0>显示更多</l0><l1>顯示更多</l1><l2>Show more</l2></button><button class="hvAALevelsClear"><l01>清空</l01><l2>Clear</l2></button><br>',
@@ -684,35 +773,35 @@ try {
       '        <input id="arLevel_RB50" value="RB50,105" type="checkbox"><label for="arLevel_RB50">RB50</label> <input id="arLevel_RB75A" value="RB75A,106" type="checkbox"><label for="arLevel_RB75A">RB75A</label> <input id="arLevel_RB75B" value="RB75B,107" type="checkbox"><label for="arLevel_RB75B">RB75B</label> <input id="arLevel_RB75C" value="RB75C,108" type="checkbox"><label for="arLevel_RB75C">RB75C</label><br>',
       '        <input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,gr" type="checkbox"><label for="arLevel_GF">GrindFest <input class="hvAANumber" name="idleArenaGrTime" placeholder="1" type="text"></label></div></div>',
 
-      '  <div class="hvAACenter"><input id="checkSupply" type="checkbox"><l0>检查物品库存(0为不检查)</l0><l1>檢查物品庫存(0為不檢查)</l1><l2>Check is item needs supply(input 0 to not check)</l2>: ',
+      '  <div class="hvAACenter"><input id="checkSupply" type="checkbox"><l0>检查物品库存</l0><l1>檢查物品庫存</l1><l2>Check is item needs supply</l2>: ',
       '  <div class="hvAAcheckItems">',
-      '  <l0>体力药水</l0><l1>體力藥水</l1><l2>Health Potion</l2><input class="hvAANumber" name="checkItem_11191" placeholder="0" type="text">',
-      '  <l0>体力长效药</l0><l1>體力長效藥</l1><l2>Health Draught</l2><input class="hvAANumber" name="checkItem_11195" placeholder="0" type="text">',
-      '  <l0>体力秘药</l0><l1>體力秘藥</l1><l2>Health Elixir</l2><input class="hvAANumber" name="checkItem_11199" placeholder="0" type="text">',
-      '  <l0>魔力药水</l0><l1>魔力藥水</l1><l2>Mana Potion</l2><input class="hvAANumber" name="checkItem_11291" placeholder="0" type="text">',
-      '  <l0>魔力长效药</l0><l1>魔力長效藥</l1><l2>Mana Draught</l2><input class="hvAANumber" name="checkItem_11295" placeholder="0" type="text">',
-      '  <l0>魔力秘药</l0><l1>魔力秘藥</l1><l2>Mana Elixir</l2><input class="hvAANumber" name="checkItem_11299" placeholder="0" type="text">',
-      '  <l0>灵力药水</l0><l1>靈力藥水</l1><l2>Spirit Potion</l2><input class="hvAANumber" name="checkItem_11391" placeholder="0" type="text">',
-      '  <l0>灵力长效药</l0><l1>靈力長效藥</l1><l2>Spirit Draught</l2><input class="hvAANumber" name="checkItem_11395" placeholder="0" type="text">',
-      '  <l0>灵力秘药</l0><l1>靈力秘藥</l1><l2>Spirit Elixir</l2><input class="hvAANumber" name="checkItem_11399" placeholder="0" type="text">',
-      '  <l0>终极秘药</l0><l1>終極秘藥</l1><l2>Last Elixir</l2><input class="hvAANumber" name="checkItem_11501" placeholder="0" type="text">',
-      '  <l0>花瓶</l0><l1>花瓶</l1><l2>Flower Vase</l2><input class="hvAANumber" name="checkItem_19111" placeholder="0" type="text">',
-      '  <l0>泡泡糖</l0><l1>泡泡糖</l1><l2>Bubble-Gum</l2><input class="hvAANumber" name="checkItem_19131" placeholder="0" type="text">',
-      '  <l0>能量饮料</l0><l1>能量飲料</l1><l2>Energy Drink</l2><input class="hvAANumber" name="checkItem_11401" placeholder="0" type="text">',
-      '  <l0>咖啡因糖果</l0><l1>咖啡因糖果</l1><l2>Caffeinated Candy</l2><input class="hvAANumber" name="checkItem_11402" placeholder="0" type="text">',
-      '  <l0>火焰魔药</l0><l1>火焰魔藥</l1><l2>Infusion of Flames</l2><input class="hvAANumber" name="checkItem_12101" placeholder="0" type="text">',
-      '  <l0>冰冷魔药</l0><l1>冰冷魔藥</l1><l2>Infusion of Frost</l2><input class="hvAANumber" name="checkItem_12201" placeholder="0" type="text">',
-      '  <l0>闪电魔药</l0><l1>閃電魔藥</l1><l2>Infusion of Lightning</l2><input class="hvAANumber" name="checkItem_12301" placeholder="0" type="text">',
-      '  <l0>风暴魔药</l0><l1>風暴魔藥</l1><l2>Infusion of Storms</l2><input class="hvAANumber" name="checkItem_12401" placeholder="0" type="text">',
-      '  <l0>神圣魔药</l0><l1>神聖魔藥</l1><l2>Infusion of Divinity</l2><input class="hvAANumber" name="checkItem_12501" placeholder="0" type="text">',
-      '  <l0>黑暗魔药</l0><l1>黑暗魔藥</l1><l2>Infusion of Darkness</l2><input class="hvAANumber" name="checkItem_12601" placeholder="0" type="text">',
-      '  <l0>加速卷轴</l0><l1>加速捲軸</l1><l2>Scroll of Swiftness</l2><input class="hvAANumber" name="checkItem_13101" placeholder="0" type="text">',
-      '  <l0>守护卷轴</l0><l1>守護捲軸</l1><l2>Scroll of Protection</l2><input class="hvAANumber" name="checkItem_13111" placeholder="0" type="text">',
-      '  <l0>化身卷轴</l0><l1>化身捲軸</l1><l2>Scroll of the Avatar</l2><input class="hvAANumber" name="checkItem_13199" placeholder="0" type="text">',
-      '  <l0>吸收卷轴</l0><l1>吸收捲軸</l1><l2>Scroll of Absorption</l2><input class="hvAANumber" name="checkItem_13201" placeholder="0" type="text">',
-      '  <l0>幻影卷轴</l0><l1>幻影捲軸</l1><l2>Scroll of Shadows</l2><input class="hvAANumber" name="checkItem_13211" placeholder="0" type="text">',
-      '  <l0>生命卷轴</l0><l1>生命捲軸</l1><l2>Scroll of Life</l2><input class="hvAANumber" name="checkItem_13221" placeholder="0" type="text">',
-      '  <l0>众神卷轴</l0><l1>眾神捲軸</l1><l2>Scroll of the Gods</l2><input class="hvAANumber" name="checkItem_13299" placeholder="0" type="text">',
+      '  <l0>体力药水</l0><l1>體力藥水</l1><l2>Health Potion</l2><input id="isCheck_11191" type="checkbox"><input class="hvAANumber" name="checkItem_11191" placeholder="0" type="text">',
+      '  <l0>体力长效药</l0><l1>體力長效藥</l1><l2>Health Draught</l2><input id="isCheck_11195" type="checkbox"><input class="hvAANumber" name="checkItem_11195" placeholder="0" type="text">',
+      '  <l0>体力秘药</l0><l1>體力秘藥</l1><l2>Health Elixir</l2><input id="isCheck_11199" type="checkbox"><input class="hvAANumber" name="checkItem_11199" placeholder="0" type="text">',
+      '  <l0>魔力药水</l0><l1>魔力藥水</l1><l2>Mana Potion</l2><input id="isCheck_11291" type="checkbox"><input class="hvAANumber" name="checkItem_11291" placeholder="0" type="text">',
+      '  <l0>魔力长效药</l0><l1>魔力長效藥</l1><l2>Mana Draught</l2><input id="isCheck_11295" type="checkbox"><input class="hvAANumber" name="checkItem_11295" placeholder="0" type="text">',
+      '  <l0>魔力秘药</l0><l1>魔力秘藥</l1><l2>Mana Elixir</l2><input id="isCheck_11299" type="checkbox"><input class="hvAANumber" name="checkItem_11299" placeholder="0" type="text">',
+      '  <l0>灵力药水</l0><l1>靈力藥水</l1><l2>Spirit Potion</l2><input id="isCheck_11391" type="checkbox"><input class="hvAANumber" name="checkItem_11391" placeholder="0" type="text">',
+      '  <l0>灵力长效药</l0><l1>靈力長效藥</l1><l2>Spirit Draught</l2><input id="isCheck_11395" type="checkbox"><input class="hvAANumber" name="checkItem_11395" placeholder="0" type="text">',
+      '  <l0>灵力秘药</l0><l1>靈力秘藥</l1><l2>Spirit Elixir</l2><input id="isCheck_11399" type="checkbox"><input class="hvAANumber" name="checkItem_11399" placeholder="0" type="text">',
+      '  <l0>终极秘药</l0><l1>終極秘藥</l1><l2>Last Elixir</l2><input id="isCheck_11501" type="checkbox"><input class="hvAANumber" name="checkItem_11501" placeholder="0" type="text">',
+      '  <l0>花瓶</l0><l1>花瓶</l1><l2>Flower Vase</l2><input id="isCheck_19111" type="checkbox"><input class="hvAANumber" name="checkItem_19111" placeholder="0" type="text">',
+      '  <l0>泡泡糖</l0><l1>泡泡糖</l1><l2>Bubble-Gum</l2><input id="isCheck_19131" type="checkbox"><input class="hvAANumber" name="checkItem_19131" placeholder="0" type="text">',
+      '  <l0>能量饮料</l0><l1>能量飲料</l1><l2>Energy Drink</l2><input id="isCheck_11401" type="checkbox"><input class="hvAANumber" name="checkItem_11401" placeholder="0" type="text">',
+      '  <l0>咖啡因糖果</l0><l1>咖啡因糖果</l1><l2>Caffeinated Candy</l2><input id="isCheck_11402" type="checkbox"><input class="hvAANumber" name="checkItem_11402" placeholder="0" type="text">',
+      '  <l0>火焰魔药</l0><l1>火焰魔藥</l1><l2>Infusion of Flames</l2><input id="isCheck_12101" type="checkbox"><input class="hvAANumber" name="checkItem_12101" placeholder="0" type="text">',
+      '  <l0>冰冷魔药</l0><l1>冰冷魔藥</l1><l2>Infusion of Frost</l2><input id="isCheck_12201" type="checkbox"><input class="hvAANumber" name="checkItem_12201" placeholder="0" type="text">',
+      '  <l0>闪电魔药</l0><l1>閃電魔藥</l1><l2>Infusion of Lightning</l2><input id="isCheck_12301" type="checkbox"><input class="hvAANumber" name="checkItem_12301" placeholder="0" type="text">',
+      '  <l0>风暴魔药</l0><l1>風暴魔藥</l1><l2>Infusion of Storms</l2><input id="isCheck_12401" type="checkbox"><input class="hvAANumber" name="checkItem_12401" placeholder="0" type="text">',
+      '  <l0>神圣魔药</l0><l1>神聖魔藥</l1><l2>Infusion of Divinity</l2><input id="isCheck_12501" type="checkbox"><input class="hvAANumber" name="checkItem_12501" placeholder="0" type="text">',
+      '  <l0>黑暗魔药</l0><l1>黑暗魔藥</l1><l2>Infusion of Darkness</l2><input id="isCheck_12601" type="checkbox"><input class="hvAANumber" name="checkItem_12601" placeholder="0" type="text">',
+      '  <l0>加速卷轴</l0><l1>加速捲軸</l1><l2>Scroll of Swiftness</l2><input id="isCheck_13101" type="checkbox"><input class="hvAANumber" name="checkItem_13101" placeholder="0" type="text">',
+      '  <l0>守护卷轴</l0><l1>守護捲軸</l1><l2>Scroll of Protection</l2><input id="isCheck_13111" type="checkbox"><input class="hvAANumber" name="checkItem_13111" placeholder="0" type="text">',
+      '  <l0>化身卷轴</l0><l1>化身捲軸</l1><l2>Scroll of the Avatar</l2><input id="isCheck_13199" type="checkbox"><input class="hvAANumber" name="checkItem_13199" placeholder="0" type="text">',
+      '  <l0>吸收卷轴</l0><l1>吸收捲軸</l1><l2>Scroll of Absorption</l2><input id="isCheck_13201" type="checkbox"><input class="hvAANumber" name="checkItem_13201" placeholder="0" type="text">',
+      '  <l0>幻影卷轴</l0><l1>幻影捲軸</l1><l2>Scroll of Shadows</l2><input id="isCheck_13211" type="checkbox"><input class="hvAANumber" name="checkItem_13211" placeholder="0" type="text">',
+      '  <l0>生命卷轴</l0><l1>生命捲軸</l1><l2>Scroll of Life</l2><input id="isCheck_13221" type="checkbox"><input class="hvAANumber" name="checkItem_13221" placeholder="0" type="text">',
+      '  <l0>众神卷轴</l0><l1>眾神捲軸</l1><l2>Scroll of the Gods</l2><input id="isCheck_13299" type="checkbox"><input class="hvAANumber" name="checkItem_13299" placeholder="0" type="text">',
       '</div></div>',
       '  <div><input id="repair" type="checkbox"><label for="repair"><b><l0>修复装备</l0><l1>修復裝備</l1><l2>Repair Equipment</l2></b></label>: ',
       '    <l0>耐久度</l0><l1>耐久度</l1><l2>Durability</l2> ≤ <input class="hvAANumber" name="repairValue" type="text">%</div>',
@@ -927,22 +1016,28 @@ try {
     // 绑定事件
     gE('select[name="lang"]', optionBox).onchange = function () { // 选择语言
       gE('.hvAA-LangStyle').textContent = `l${this.value}{display:inline!important;}`;
-      if (/^[01]$/.test(this.value)) gE('.hvAA-LangStyle').textContent += 'l01{display:inline!important;}';
+      if (/^[01]$/.test(this.value)) {
+        gE('.hvAA-LangStyle').textContent += 'l01{display:inline!important;}';
+      }
       g('lang', this.value);
     };
     gE('.hvAATabmenu', optionBox).onclick = function (e) { // 标签页事件
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.tagName === 'INPUT') {
+        return;
+      }
       const target = (e.target.tagName === 'SPAN') ? e.target : e.target.parentNode;
       const name = target.getAttribute('name');
       let i; let
-        _html;
+      _html;
       if (name === 'Drop') { // 掉落监测
         let drop = getValue('drop', true) || {};
         const dropOld = getValue('dropOld', true) || [];
         drop = objSort(drop);
         _html = '<tbody>';
         if (dropOld.length === 0 || (dropOld.length === 1 && !getValue('drop', true))) {
-          if (dropOld.length === 1) drop = dropOld[0];
+          if (dropOld.length === 1) {
+            drop = dropOld[0];
+          }
           _html = `${_html}<tr class="hvAATh"><td></td><td><l0>数量</l0><l1>數量</l1><l2>Amount</l2></td></tr>`;
           for (i in drop) {
             _html = `${_html}<tr><td>${i}</td><td>${drop[i]}</td></tr>`;
@@ -959,7 +1054,9 @@ try {
           });
           _html = `${_html}</tr>`;
           getKeys(dropOld).forEach((key) => {
-            if (key === '__name') return;
+            if (key === '__name') {
+              return;
+            }
             _html = `${_html}<tr><td>${key}</td>`;
             dropOld.forEach((_dropOld) => {
               if (key in _dropOld) {
@@ -987,7 +1084,9 @@ try {
         };
         _html = '<tbody>';
         if (statsOld.length === 0 || (statsOld.length === 1 && !getValue('stats', true))) {
-          if (statsOld.length === 1) stats = statsOld[0];
+          if (statsOld.length === 1) {
+            stats = statsOld[0];
+          }
           for (i in stats) {
             _html = `${_html}<tr class="hvAATh"><td>${translation[i]}</td><td><l01>值</l01><l2>Value</l2></td></tr>`;
             stats[i] = objSort(stats[i]);
@@ -1007,7 +1106,9 @@ try {
           });
           _html = `${_html}</tr>`;
           Object.keys(translation).forEach((i) => {
-            if (i === '__name') return;
+            if (i === '__name') {
+              return;
+            }
             _html = `${_html}<tr class="hvAATh"><td colspan="${statsOld.length + 1}">${translation[i]}</td></tr>`;
             getKeys(statsOld, i).forEach((key) => {
               _html = `${_html}<tr><td>${key}</td>`;
@@ -1025,7 +1126,9 @@ try {
         gE('#hvAATab-Usage>table').innerHTML = _html;
       } else if (name === 'About') { // 关于本脚本
         gE('.hvAADebug', 'all', optionBox).forEach((input) => {
-          if (getValue(input.name)) input.value = getValue(input.name);
+          if (getValue(input.name)) {
+            input.value = getValue(input.name);
+          }
         });
       }
       if (name === 'Drop' || name === 'Usage') {
@@ -1053,7 +1156,9 @@ try {
     function updateGroup() {
       const group = gE('.customizeGroup', 'all', g('customizeTarget'));
       const customizeBox = gE('.customizeBox');
-      if (group.length + 1 === gE('select[name="groupChoose"]>option', 'all', customizeBox).length) return;
+      if (group.length + 1 === gE('select[name="groupChoose"]>option', 'all', customizeBox).length) {
+        return;
+      }
       gE('select[name="groupChoose"]', customizeBox).textContent = '';
       for (let i = 0; i <= group.length; i++) {
         const option = gE('select[name="groupChoose"]', customizeBox).appendChild(cE('option'));
@@ -1068,10 +1173,14 @@ try {
     }
     optionBox.onmousemove = function (e) { // 自定义条件相关事件
       const target = (e.target.className === 'customize') ? e.target : (e.target.parentNode.className === 'customize') ? e.target.parentNode : e.target.parentNode.parentNode;
-      if (!gE('.customizeBox')) customizeBox();
+      if (!gE('.customizeBox')) {
+        customizeBox();
+      }
       updateGroup();
       if (target.className !== 'customize' && target.parentNode.className !== 'customize') {
-        if (!target.className.match('customize')) gE('.customizeBox').style.zIndex = -1;
+        if (!target.className.match('customize')) {
+          gE('.customizeBox').style.zIndex = -1;
+        }
         return;
       }
       g('customizeTarget', target);
@@ -1106,10 +1215,14 @@ try {
       for (const i in staminaLostLog) {
         out.push(`${i}: ${staminaLostLog[i]}`);
       }
-      if (window.confirm(`总共${out.length}条记录 (There are ${out.length} logs): \n${out.reverse().join('\n')}\n是否重置 (Whether to reset)?`)) setValue('staminaLostLog', {});
+      if (window.confirm(`总共${out.length}条记录 (There are ${out.length} logs): \n${out.reverse().join('\n')}\n是否重置 (Whether to reset)?`)) {
+        setValue('staminaLostLog', {});
+      }
     };
     gE('.idleArenaReset', optionBox).onclick = function () {
-      if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('arena');
+      if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
+        delValue('arena');
+      }
     };
     gE('.hvAAShowLevels', optionBox).onclick = function () {
       gE('.hvAAArenaLevels').style.display = (gE('.hvAAArenaLevels').style.display === 'block') ? 'none' : 'block';
@@ -1122,7 +1235,9 @@ try {
       });
     };
     gE('.hvAAArenaLevels', optionBox).onclick = function (e) {
-      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') {
+        return;
+      }
       const valueArray = e.target.value.split(',');
       let levels = gE('input[name="idleArenaLevels"]').value;
       let { value } = gE('input[name="idleArenaValue"]');
@@ -1138,7 +1253,9 @@ try {
     };
     // 标签页-物品
     gE('.itemOrder', optionBox).onclick = function (e) {
-      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') {
+        return;
+      }
       const valueArray = e.target.value.split(',');
       let name = gE('input[name="itemOrderName"]').value;
       let { value } = gE('input[name="itemOrderValue"]');
@@ -1154,7 +1271,9 @@ try {
     };
     // 标签页-Channel技能
     gE('.channelSkill2Order', optionBox).onclick = function (e) {
-      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') {
+        return;
+      }
       const valueArray = e.target.value.split(',');
       let name = gE('input[name="channelSkill2OrderName"]').value;
       let { value } = gE('input[name="channelSkill2OrderValue"]');
@@ -1170,7 +1289,9 @@ try {
     };
     // 标签页-BUFF技能
     gE('.buffSkillOrder', optionBox).onclick = function (e) {
-      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') {
+        return;
+      }
       const name = e.target.id.match(/_(.*)/)[1];
       let { value } = gE('input[name="buffSkillOrderValue"]');
       if (e.target.checked) {
@@ -1182,7 +1303,9 @@ try {
     };
     // 标签页-DEBUFF技能
     gE('.debuffSkillOrder', optionBox).onclick = function (e) {
-      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') {
+        return;
+      }
       const name = e.target.id.match(/_(.*)/)[1];
       let { value } = gE('input[name="debuffSkillOrderValue"]');
       if (e.target.checked) {
@@ -1194,7 +1317,9 @@ try {
     };
     // 标签页-其他技能
     gE('.skillOrder', optionBox).onclick = function (e) {
-      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') return;
+      if (e.target.tagName !== 'INPUT' && e.target.type !== 'checkbox') {
+        return;
+      }
       const name = e.target.id.match(/_(.*)/)[1];
       let { value } = gE('input[name="skillOrderValue"]');
       if (e.target.checked) {
@@ -1206,7 +1331,9 @@ try {
     };
     // 标签页-警报
     gE('input[name="audio_Text"]', optionBox).onchange = function () {
-      if (this.value === '') return;
+      if (this.value === '') {
+        return;
+      }
       if (!/^http(s)?:|^ftp:|^data:audio/.test(this.value)) {
         _alert(0, '地址必须以"http:","https:","ftp:","data:audio"开头', '地址必須以"http:","https:","ftp:","data:audio"開頭', 'The address must start with "http:", "https:", "ftp:", and "data:audio"');
         return;
@@ -1273,14 +1400,18 @@ try {
     gE('.hvAARestore', optionBox).onclick = function () {
       const code = _alert(2, '请输入配置代号', '請輸入配置代號', 'Please put in a name for a configuration');
       const backups = getValue('backup', true) || {};
-      if (!(code in backups) || !code) return;
+      if (!(code in backups) || !code) {
+        return;
+      }
       setValue('option', backups[code]);
       goto();
     };
     gE('.hvAADelete', optionBox).onclick = function () {
       const code = _alert(2, '请输入配置代号', '請輸入配置代號', 'Please put in a name for a configuration');
       const backups = getValue('backup', true) || {};
-      if (!(code in backups) || !code) return;
+      if (!(code in backups) || !code) {
+        return;
+      }
       delete backups[code];
       setValue('backup', backups);
       // goto();
@@ -1292,7 +1423,9 @@ try {
     };
     gE('.hvAAImport', optionBox).onclick = function () {
       const option = JSON.parse(gE('.hvAAConfig').value);
-      if (!option) return;
+      if (!option) {
+        return;
+      }
       if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
         setValue('option', option);
         goto();
@@ -1300,7 +1433,9 @@ try {
     };
     //
     gE('.hvAAReset', optionBox).onclick = function () {
-      if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('option');
+      if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
+        delValue('option');
+      }
     };
     gE('.hvAAApply', optionBox).onclick = function () {
       if (gE('select[name="attackStatus"] option[value="-1"]:checked', optionBox)) {
@@ -1317,22 +1452,28 @@ try {
       };
       let inputs = gE('input,select', 'all', optionBox);
       let itemName; let itemArray; let itemValue; let
-        i;
+      i;
       for (i = 0; i < inputs.length; i++) {
         if (inputs[i].className === 'hvAADebug') {
           continue;
         } else if (inputs[i].className === 'hvAANumber') {
           itemName = inputs[i].name;
           itemValue = (inputs[i].value || inputs[i].placeholder) * 1;
-          if (isNaN(itemValue)) continue;
+          if (isNaN(itemValue)) {
+            continue;
+          }
         } else if (inputs[i].type === 'text' || inputs[i].type === 'hidden') {
           itemName = inputs[i].name;
           itemValue = inputs[i].value || inputs[i].placeholder;
-          if (itemValue === '') continue;
+          if (itemValue === '') {
+            continue;
+          }
         } else if (inputs[i].type === 'checkbox') {
           itemName = inputs[i].id;
           itemValue = inputs[i].checked;
-          if (itemValue === false) continue;
+          if (itemValue === false) {
+            continue;
+          }
         } else if (inputs[i].type === 'select-one') {
           itemName = inputs[i].name;
           itemValue = inputs[i].value;
@@ -1341,9 +1482,13 @@ try {
         if (itemArray.length === 1) {
           _option[itemName] = itemValue;
         } else {
-          if (!(itemArray[0] in _option)) _option[itemArray[0]] = {};
+          if (!(itemArray[0] in _option)) {
+            _option[itemArray[0]] = {};
+          }
           if (inputs[i].className === 'customizeInput') {
-            if (typeof _option[itemArray[0]][itemArray[1]] === 'undefined') _option[itemArray[0]][itemArray[1]] = [];
+            if (typeof _option[itemArray[0]][itemArray[1]] === 'undefined') {
+              _option[itemArray[0]][itemArray[1]] = [];
+            }
             _option[itemArray[0]][itemArray[1]].push(itemValue);
           } else {
             _option[itemArray[0]][itemArray[1]] = itemValue;
@@ -1352,8 +1497,12 @@ try {
       }
       inputs = gE('.hvAAQuickSite input[type="text"]', 'all', optionBox);
       for (i = 0; 3 * i < inputs.length; i++) {
-        if (i === 0 && inputs.length !== 0) _option.quickSite = [];
-        if (inputs[3 * i + 1].value === '') continue;
+        if (i === 0 && inputs.length !== 0) {
+          _option.quickSite = [];
+        }
+        if (inputs[3 * i + 1].value === '') {
+          continue;
+        }
         _option.quickSite.push({
           fav: inputs[3 * i].value,
           name: inputs[3 * i + 1].value,
@@ -1369,13 +1518,15 @@ try {
     };
     if (g('option')) {
       let i; let j; let
-        k;
+      k;
       const _option = g('option');
       const inputs = gE('input,select', 'all', optionBox);
       let itemName; let itemArray; let itemValue; let
-        _html;
+      _html;
       for (i = 0; i < inputs.length; i++) {
-        if (inputs[i].className === 'hvAADebug') continue;
+        if (inputs[i].className === 'hvAADebug') {
+          continue;
+        }
         itemName = inputs[i].name || inputs[i].id;
         if (typeof _option[itemName] !== 'undefined') {
           itemValue = _option[itemName];
@@ -1531,8 +1682,12 @@ try {
 
   function setAlarm(e) { // 发出警报
     e = e || 'Common';
-    if (g('option').notification) setNotification(e);
-    if (g('option').alert && g('option').audioEnable && g('option').audioEnable[e]) setAudioAlarm(e);
+    if (g('option').notification) {
+      setNotification(e);
+    }
+    if (g('option').alert && g('option').audioEnable && g('option').audioEnable[e]) {
+      setAudioAlarm(e);
+    }
   }
 
   function setAudioAlarm(e) { // 发出音频警报
@@ -1650,11 +1805,15 @@ try {
             icon: '/y/hentaiverse.png',
           });
           setTimeout(() => {
-            if (n) n.close();
+            if (n) {
+              n.close();
+            }
           }, 1000 * notification.time);
 
           var nClose = function (e) {
-            if (n) n.close();
+            if (n) {
+              n.close();
+            }
             document.removeEventListener(e.type, nClose, true);
           };
           document.addEventListener('mousemove', nClose, true);
@@ -1665,9 +1824,11 @@ try {
   }
 
   function checkCondition(parms) {
-    if (typeof parms === 'undefined') return true;
+    if (typeof parms === 'undefined') {
+      return true;
+    }
     let i; let j; let
-      k;
+    k;
     const result = [];
     const returnValue = function (str) {
       if (str.match(/^_/)) {
@@ -1705,10 +1866,21 @@ try {
 
     for (i in parms) {
       for (j = 0; j < parms[i].length; j++) {
-        if (!Array.isArray(parms[i])) continue;
+        if (!Array.isArray(parms[i])) {
+          continue;
+        }
         k = parms[i][j].split(',');
+        const kk = k.toString();
         k[0] = returnValue(k[0]);
         k[2] = returnValue(k[2]);
+
+        if (k[0] === undefined || k[0] === null || (typeof k[0] !== "string" && isNaN(k[0]))) {
+          Debug.log(kk[0], k[0]);
+        }
+        if (k[2] === undefined || k[2] === null || (typeof k[2] !== "string" && isNaN(k[2]))) {
+          Debug.log(kk[2], k[2]);
+        }
+
         switch (k[1]) {
           case '1':
             result[i] = k[0] > k[2];
@@ -1729,9 +1901,13 @@ try {
             result[i] = k[0] !== k[2];
             break;
         }
-        if (result[i] === false) j = parms[i].length;
+        if (result[i] === false) {
+          j = parms[i].length;
+        }
       }
-      if (result[i] === true) return true;
+      if (result[i] === true) {
+        return true;
+      }
     }
     return false;
   }
@@ -1746,7 +1922,7 @@ try {
     setAlarm('Riddle');
     const answers = ['A', 'B', 'C'];
     document.onkeydown = function (e) {
-      gE('#hvAAAlert-Riddle').pause();
+      gE('#hvAAAlert-Riddle')?.pause();
       if (/^[abc]$/i.test(e.key)) {
         riddleSubmit(e.key.toUpperCase());
         this.onkeydown = null;
@@ -1770,7 +1946,9 @@ try {
       let time;
       if (typeof g('time') === 'undefined') {
         const timeDiv = gE('#riddlecounter>div>div', 'all');
-        if (timeDiv.length === 0) return;
+        if (timeDiv.length === 0) {
+          return;
+        }
         time = '';
         for (let j = 0; j < timeDiv.length; j++) {
           time = (timeDiv[j].style.backgroundPosition.match(/(\d+)px$/)[1] / 12).toString() + time;
@@ -1782,7 +1960,9 @@ try {
         g('time', time);
       }
       document.title = time;
-      if (time <= g('option').riddleAnswerTime) riddleSubmit(gE('#riddleanswer').value || answers[parseInt(Math.random() * 3)]);
+      if (time <= g('option').riddleAnswerTime) {
+        riddleSubmit(gE('#riddleanswer').value || answers[parseInt(Math.random() * 3)]);
+      }
     };
     for (let i = 0; i < 30; i++) {
       setTimeout(checkTime, i * _1s);
@@ -1793,29 +1973,97 @@ try {
         gE('#riddleanswer').value = answer;
         gE('#riddleanswer+img').click();
       } else {
-        post(window.location.href, () => { // 待续
+        $ajax.fetch(window.location.href, `riddleanswer=${answer}`).then(() => { // 待续
           window.opener.document.location.href = window.location.href;
           window.close();
-        }, `riddleanswer=${answer}`);
+        });
+        // post(window.location.href, () => { // 待续
+        //   window.opener.document.location.href = window.location.href;
+        //   window.close();
+        // }, `riddleanswer=${answer}`);
       }
     }
   }
 
   // 战斗外//
-  function onEhorg() {
-    if (window.location.host !== 'e-hentai.org') {
-      return;
-    }
-    let href = getValue('url') || (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
-    href = gE('#eventpane>div>a') ? `${href}/${gE('#eventpane>div>a').href.split('/')[3]}` : getValue('lastEncounter') || href;
-    if (window.location.href === 'https://e-hentai.org/news.php?encounter') {
-      openUrl(href);
+  function checkIsHV() {
+    if (window.location.host !== 'e-hentai.org') { // is in HV
+      setValue('url', window.location.origin);
       return true;
     }
-    if (gE('#eventpane>div>a')) {
-      setValue('lastEncounter', href);
+    const isEngage = window.location.href === 'https://e-hentai.org/news.php?encounter';
+    const encounter = getEncounter();
+    let href = getValue('url') ?? (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
+    const eventpane = gE('#eventpane');
+    const now = time(0);
+    let url;
+    // if(!encounter.length){
+    //   console.log(url, now, eventpane);
+    //   return;
+    // }
+    if (eventpane) { // 新一天或遭遇战
+      url = gE('#eventpane>div>a')?.href.split('/')[3];
+      encounter.unshift({ href: url, time: now});
+      setEncounter(encounter);
+    } else {
+      if(encounter.length) {
+        if(now - encounter[0]?.time > 0.5*_1h) { // 延长最新一次的time, 避免因漏记录导致连续来回跳转
+          encounter[0].time = now;
+          setEncounter(encounter);
+        }
+        for(let e of encounter) {
+          if (e.encountered) {
+            continue;
+          }
+          url = e.href;
+          break;
+        }
+      }
     }
-    return true;
+
+    if (!url) {
+      if (isEngage && !getValue('battle')) {
+        // 自动跳转，同时先刷新遭遇时间，延长下一次遭遇
+        openUrl(getValue('lastHref'));
+      }
+      return;
+    }
+
+    // 减少因在恒定世界处于战斗中时打开eh触发了遭遇而导致的错失
+    // 缓存当前链接，等战斗结束时再自动打开，下次打开链接时：
+    // 1. 若新的遭遇未出现，进入已缓存的战斗链接
+    // 2. 若新的遭遇已出现，则前一次已超时失效错过，重新获取新的一次
+    if (!isEngage) { // 战斗外，非自动跳转
+      eventpane.style.cssText += 'color:red;' // 链接标红提醒
+    } else if (getValue('battle')) { //战斗中
+      eventpane.style.cssText += 'color:gray;' // 链接置灰提醒
+    } else { // 战斗外，自动跳转
+      openUrl(`${href}/${url}`);
+    }
+  }
+
+  function setEncounter(encounter) {
+    return g('encounter', setValue('encounter', encounter));
+  }
+
+  function getEncounter() {
+    const getToday = (encounter)=>encounter.filter(e => time(2, e.time) === time(2));
+    const current = g('encounter') ?? [];
+    let encounter = getValue('encounter', true) ?? [];
+    if(JSON.stringify(current) === JSON.stringify(encounter)) {
+      return getToday(encounter);
+    }
+    let dict = {};
+    for(let e of current) {
+      dict[e.href ?? `newDawn`] = e;
+    }
+    for(let e of encounter) {
+      const key = e.href ?? `newDawn`;
+      dict[key] ??= e;
+      dict[key].time = Math.max(dict[key].time, e.time);
+      dict[key].encountered = (e.encountered||dict[key].encountered) ? Math.max(dict[key].encountered??0, e.encountered??0) : undefined;
+    }
+    return getToday(Object.values(dict)).sort((x, y)=>x.time<y.time?1:x.time>y.time?-1:0);
   }
 
   function quickSite() { // 快捷站点
@@ -1873,7 +2121,9 @@ try {
     const html = await $ajax.fetch('https://e-hentai.org/hathperks.php');
     const doc = $doc(html);
     const perks = gE('.stuffbox>table>tbody>tr', 'all', doc);
-    if (!perks) return;
+    if (!perks) {
+      return;
+    }
     setValue('staminaHathperk', perks[25].innerHTML.includes('Obtained'));
     logSwitchAsyncTask(arguments);
   }
@@ -1906,129 +2156,160 @@ try {
     }
     logSwitchAsyncTask(arguments);
     const items = g('items');
-    const checkList = g('option').checkItem;
+    const thresholdList = g('option').checkItem;
+    const checkList = g('option').isCheck;
     const needs = [];
     for (let id in checkList) {
-      const [name, count] = items[id] ? items[id] : [undefined, 0];
-      if ((count ? count : 0) < checkList[id]) {
-        needs.push(`\n${name}(${count}<${checkList[id]})`);
+      const item = items[id];
+      if (!item) {
+        continue;
       }
+      const [name, count] = item;
+      const threshold = thresholdList[id] ?? 0;
+      if ((count ?? 0) >= threshold) {
+        continue;
+      }
+      needs.push(`\n${name}(${count}<${threshold})`);
     }
-    const checked = !needs.length;
-    if (!checked) {
+    if (needs.length) {
       console.log(`Needs supply:${needs}`);
     }
     logSwitchAsyncTask(arguments);
-    return false;
+    return !needs.length;
   }
 
   async function asyncCheckRepair() {
-    if (!g('option').repair) return true;
+    if (!g('option').repair) {
+      return true;
+    }
     logSwitchAsyncTask(arguments);
     const doc = $doc(await $ajax.fetch('?s=Forge&ss=re'));
     const json = JSON.parse((await $ajax.fetch(gE('#mainpane>script[src]', doc).src)).match(/{.*}/)[0]);
     const eqps = (await Promise.all(Array.from(gE('.eqp>[id]', 'all', doc)).map(async eqp => {
       const id = eqp.id.match(/\d+/)[0];
       const condition = 1 * json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1];
-      if (condition > g('option').repairValue) return;
+      if (condition > g('option').repairValue) {
+        return;
+      }
       return gE('.messagebox_error', $doc(await $ajax.fetch(`?s=Forge&ss=re`, `select_item=${id}`)))?.innerText ? undefined : id;
     }))).filter(e => e);
-    if (eqps.length) console.log('eqps need repair: ', eqps);
+    if (eqps.length) {
+      console.log('eqps need repair: ', eqps);
+    }
     logSwitchAsyncTask(arguments);
     return !eqps.length;
   }
 
   function checkStamina(low, cost) {
     let stamina = getValue('stamina');
-    if (!stamina) return;
     const lastTime = getValue('staminaTime');
-    let timeNow = Math.floor(time(0) / 1000 / 60 / 60);
+    let timeNow = Math.floor(time(0) / _1h);
     stamina += lastTime ? timeNow - lastTime : 0;
     const stmNR = stamina + 24 - (timeNow % 24);
-    cost = cost ?? 0;
-    const stmNRChecked = stmNR - cost > g('option').staminaLowWithReNat;
-    if (stamina - cost > (low ?? g('option').staminaLow) && stmNRChecked) {
-      return true;
+    cost ??= 0;
+    const stmNRChecked = stmNR - cost >= g('option').staminaLowWithReNat;
+    console.log('stamina with nature recover:', stmNR, '\nnext arena stamina cost: ', cost.toString());
+    if (stamina - cost >= (low ?? g('option').staminaLow) && stmNRChecked) {
+      return 1;
     }
+    let checked = 0;
     if (!stmNRChecked) {
-      console.log('stamina with nature recover:', stmNR, '\nnext arena stamina cost: ', cost);
+      checked = -1;
     }
-    if (isIsekai || !g('option').restoreStamina) return;
+    if (isIsekai || !g('option').restoreStamina) {
+      return checked;
+    }
     const items = g('items');
-    if (!items) return;
+    if (!items) {
+      return checked;
+    }
     const recover = items[11402] ? 5 : items[11401] ? getValue('staminaHathperk') ? 20 : 10 : 0;
     if (recover && stamina <= (100 - recover)) {
-      post(window.location.href, goto, 'recover=stamina');
-      return;
+      $ajax.fetch(window.location.href, 'recover=stamina').then(goto);
+      // post(window.location.href, goto, 'recover=stamina');
+      return checked;
     }
   }
 
-  function updateEncounter(engage) {
-    const encounter = setValue(
-      'encounter',
-      (getValue('encounter', true)?.dateNow === g('dateNow')) ?
-        getValue('encounter', true) :
-        {
-          dateNow: g('dateNow'),
-          count: 0,
-          lastTime: time(0),
-        }
-    );
-    const now = new Date().getTime();
-    const last = encounter.lastTime;
-    const count = encounter.count;
+  async function updateEncounter(engage) {
+    const encounter = getEncounter();
+    const encountered = encounter.filter(e => e.encountered && e.href);
+    const count = encounter.filter(e => e.href).length;
 
-    const cd = last ? Math.max(0, count === 24 ? _1d - now % (_1d) : _1h / 2 - (now - last)) : 0;
-    const co = cd > _1h ? _1m : cd > _1m ? _1s : 10;
+    const now = time(0);
+    const last = encounter[0];
+    let cd;
+    if(encountered.length >= 24) {
+      cd = Math.floor(encounter[0].time / _1d +1) * _1d - now;
+    } else if (!last) {
+      cd = 0;
+    } else {
+      cd = _1h / 2 + last.time - now;
+    }
+    cd = Math.max(0, cd);
     if (!cd && engage) {
       onEncounter();
       return true;
     }
-
-    setTimeout(() => updateEncounter(engage), co - cd % co);
+    let interval = cd > _1h ? _1m : cd > _1m ? _1s : 10;
+    interval = (interval - cd % interval)/4; // 让倒计时显示更平滑
+    setTimeout(() => updateEncounter(engage), interval);
 
     const ui = gE('.encounterUI') ?? (() => {
       const ui = gE('body').appendChild(cE('a'));
       ui.className = 'encounterUI';
-      ui.title = `${time(3, last)}\nEncounter Time: ${count}`;
+      ui.title = `${time(3, last?.time)}\nEncounter Time: ${count}`;
       ui.href = 'https://e-hentai.org/news.php?encounter';
-      ui.onclick = function () {
-        if (count >= 24 && _alert(1, '是否重置', '是否重置', 'Whether to reset')) delValue('encounter');
-      };
+      // ui.onclick = function () {
+      //   if (count >= 24 && _alert(1, '是否重置', '是否重置', 'Whether to reset')) {
+      //     setEncounter(undefined);
+      //   }
+      // };
       return ui;
     })();
 
+    const missed = count - encountered.length;
     if (count === 24) {
       ui.style.cssText += 'color:orange!important;';
-    } else if (!cd) { // ss.xxx
+    } else if (!cd) {
       ui.style.cssText += 'color:red!important;';
+    } else {
+      ui.style.cssText += 'color:unset!important;';
     }
-    ui.innerHTML = `${formatTime(cd).slice(0, 2).map(cdi => cdi.toString().padStart(2, '0')).join(`:`)}[${count}]`;
+    ui.innerHTML = `${formatTime(cd).slice(0, 2).map(cdi => cdi.toString().padStart(2, '0')).join(`:`)}[${encounter.length ? (count >= 24 ? `☯` : count) : `✪`}${missed ? `-${missed}` : ``}]`;
   }
 
   function onEncounter() {
-    if (!checkBattleReady(onEncounter, { staminaLow: 60 })) {
+    if (getValue('battle') || !checkBattleReady(onEncounter, { staminaLow: g('option').staminaEncounter })) {
       return;
     }
-    const encounter = getValue('encounter', true);
-    encounter.lastTime = time(0);
-    setValue('encounter', encounter);
+    setEncounter(getEncounter()); // 离开页面前保存
+    setValue('lastHref', window.location.href);
     openUrl('https://e-hentai.org/news.php?encounter');
   }
 
-  async function startUpdateArena(isInit=false){
-    if(!isInit) await updateArena();
-    setTimeout(idleArena, g('option').idleArenaTime * _1s);
-    setTimeout(startUpdateArena, _1d - (time(0) % _1d));
+  async function startUpdateArena(idleStart) {
+    const now = time(0);
+    console.log('startUpdateArena now', now, idleStart);
+    if (!idleStart) {
+      await updateArena();
+    }
+    let timeout = g('option').idleArenaTime * _1s;
+    console.log('startUpdateArena timeout', timeout);
+    if (idleStart) {
+      timeout -= time(0) - idleStart;
+    }
+    setTimeout(idleArena, timeout);
+    setTimeout(startUpdateArena, Math.max(0, Math.floor(now / _1d +1) * _1d - now));
   }
 
   async function updateArena(forceUpdateToken = false) {
     let arena = getValue('arena', true) ?? {};
-    if (!forceUpdateToken && arena && arena.date === g('dateNow')) {
+    if (!forceUpdateToken && arena && arena.date === time(2)) {
       return arena;
     }
     arena.token = {};
-    arena.sites = arena.sites ?? [
+    arena.sites ??= [
       '?s=Battle&ss=gr',
       '?s=Battle&ss=ar',
       '?s=Battle&ss=ar&page=2',
@@ -2048,7 +2329,7 @@ try {
     if (forceUpdateToken) {
       return setValue('arena', arena);
     }
-    arena.date = g('dateNow');
+    arena.date = time(2);
     arena.gr = g('option').idleArenaGrTime;
     arena.array = g('option').idleArenaValue.split(',') ?? [];
     arena.array.reverse();
@@ -2060,18 +2341,18 @@ try {
       setTimeout(method, 1000);
       return;
     }
-    condition.condition = condition.condition ?? [];
-    for (let c of condition.condition) {
-      if (!g(c)) return;
+    if(condition.checkEncounter && getEncounter()[0]?.href && !getEncounter()[0]?.encountered) {
+      Debug.log(getEncounter());
+      return;
     }
-    if (checkStamina(condition.staminaLow, condition.staminaCost)) {
-      return true;
+    const staminaChecked = checkStamina(condition.staminaLow, condition.staminaCost);
+    if (staminaChecked) { // 1: succeed, -1: failed with nature recover
+      return staminaChecked === 1;
     }
-    setTimeout(method, _1m);
+    setTimeout(method, Math.floor(time(0)/_1h + 1) * _1h - time(0));
   }
 
   async function idleArena() { // 闲置竞技场
-    console.log('idleArena');
     let arena = getValue('arena', true);
     console.log('arena:', getValue('arena', true));
     if (arena.array.length === 0) {
@@ -2084,10 +2365,14 @@ try {
     while (arena.array.length > 0) {
       id = arena.array.pop() * 1;
       id = isNaN(id) ? 'gr' : id;
-      if (id in arena.token) break;
+      if (id in arena.token) {
+        break;
+      }
       if (id >= 105) {
-        arena.token = await updateArena(true).token;
-        if (id in arena.token) break;
+        arena.token = (await updateArena(true)).token;
+        if (id in arena.token) {
+          break;
+        }
         RBundone.unshift(id);
       }
       id = undefined;
@@ -2135,20 +2420,33 @@ try {
     } else {
       href = 'ar';
     }
-    cost = cost ?? staminaCost[id];
-    if (!checkBattleReady(idleArena, { staminaCost: cost })) {
+    cost ??= staminaCost[id];
+    if (!checkBattleReady(idleArena, { staminaCost: cost, checkEncounter:true })) {
+      logSwitchAsyncTask(arguments);
       return;
     }
     document.title = _alert(-1, '闲置竞技场开始', '閒置競技場開始', 'Idle Arena start');
     setValue('arena', arena);
-    post(`?s=Battle&ss=${href}`, goto, `initid=${String(id)}&inittoken=${arena.token[id]}`);
+    $ajax.fetch(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${arena.token[id]}`).then(goto);
+
+    // post(`?s=Battle&ss=${href}`, goto, `initid=${String(id)}&inittoken=${arena.token[id]}`);
     logSwitchAsyncTask(arguments);
   }
 
   // 战斗中//
   function onBattle() { // 主程序
-    let battle = setValue('battle', getValue('battle', true) ?? {});
-    // console.log(battle)
+    let battle = getValue('battle', true);
+    if (!battle || !battle.roundAll) { // 修复因多个页面/世界同时读写造成缓存数据异常的情况
+      battle = JSON.parse(JSON.stringify(g('battle')));
+      battle.monsterStatus = battle.monsterStatus.map(ms => {
+        return {
+          order: ms.order,
+          hp: ms.hp
+        }
+      })
+      battle.monsterStatus.sort(objArrSort('order'));
+    };
+    Debug.log('onBattle', `\n`, JSON.stringify(battle, null, 4));
     if (gE('#vbh')) {
       g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
       g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100);
@@ -2158,7 +2456,7 @@ try {
       g('hp', gE('#dvbh>div>img').offsetWidth / 418 * 100);
       g('mp', gE('#dvbm>div>img').offsetWidth / 418 * 100);
       g('sp', gE('#dvbs>div>img').offsetWidth / 418 * 100);
-      g('oc', gE('#dvrc').textContent);
+      g('oc', gE('#dvrc').childNodes[0].textContent * 1);
     }
 
     // 战斗战况
@@ -2175,40 +2473,147 @@ try {
       '<l0>圣</l0><l1>聖</l1><l2>Divine</l2>',
       '<l0>暗</l0><l1>暗</l1><l2>Forbidden</l2>',
     ];
-    function battleInfoType(type) { // 战役模式显示
-      switch (type) {
-        case 'ar': return '竞技(AR)';
-        case 'ba': return '遭遇(BA)';
-        case 'rb': return '浴血(RB)';
-        case 'tw': return '塔楼(TW)';
-        case 'iw': return '道具(IW)';
-        case 'gf': return '压榨(GF)';
-        case undefined: return '未知';
+    function getBattleTypeDisplay(isTitle) {
+      const battleInfoList = {
+        'gr': {
+          name: ['压榨', '壓榨', 'Grindfest'],
+          title: 'GF',
+        },
+        'iw': {
+          name: ['道具', '道具', 'Item World'],
+          title: 'IW',
+        },
+        'ar': {
+          name: ['竞技', '競技', 'Arena'],
+          title: 'AR',
+          list: [
+            ['第一滴血', '第一滴血', 'First Blood', 1, 2],
+            ['经验曲线', '經驗曲綫', 'Learning Curves', 10, 4],
+            ['毕业典礼', '畢業典禮', 'Graduation', 20, 6],
+            ['荒凉之路', '荒涼之路', 'Road Less Traveled', 30, 8],
+            ['浪迹天涯', '浪跡天涯', 'A Rolling Stone', 40, 10],
+            ['鲜肉一族', '鮮肉一族', 'Fresh Meat', 50, 12],
+            ['乌云密布', '烏雲密佈', 'Dark Skies', 60, 15],
+            ['风暴成形', '風暴成形', 'Growing Storm', 70, 20],
+            ['力量流失', '力量流失', 'Power Flux', 80, 25],
+            ['杀戮地带', '殺戮地帶', 'Killzone', 90, 30],
+            ['最终阶段', '最終階段', 'Endgame', 100, 35],
+            ['无尽旅程', '無盡旅程', 'Longest Journey', 110, 40],
+            ['梦陨之时', '夢隕之時', 'Dreamfall', 120, 45],
+            ['流亡之途', '流亡之途', 'Exile', 130, 50],
+            ['封印之力', '封印之力', 'Sealed Power', 140, 55],
+            ['崭新之翼', '嶄新之翼', 'New Wings', 150, 60],
+            ['弑神之路', '弑神之路', 'To Kill a God', 165, 65],
+            ['死亡前夜', '死亡前夜', 'Eve of Death', 180, 70],
+            ['命运三女神与树', '命運三女神與樹', 'The Trio and the Tree', 200, 75],
+            ['世界末日', '世界末日', 'End of Days', 225, 80],
+            ['永恒黑暗', '永恆黑暗', 'Eternal Darkness', 250, 85],
+            ['与龙共舞', '與龍之舞', 'A Dance with Dragons', 300, 90],
+            ['额外游戏内容', '額外游戲内容', 'Post Game Content', 400, 95],
+            ['神秘小马领域', '神秘小馬領域', 'Secret Pony Level', 500, 100],
+          ],
+          condition: (bt) => bt[4] === battle.roundAll,
+          content: (bt) => bt[3],
+        },
+        'rb': {
+          name: ['浴血', '浴血', 'Ring of Blood'],
+          title: 'RB',
+          list: [
+            ['九死一树', '九死一樹', 'Triple Trio and the Tree', 250, 'Yggdrasil'],
+            ['飞天意面怪', '飛行義大利麵怪物', 'Flying Spaghetti Monster', 200],
+            ['隐形粉红独角兽', '隱形粉紅獨角獸', 'Invisible Pink Unicorn', 150],
+            ['现实生活', '現實生活', 'Real Life', 100],
+            ['长门有希', '長門有希', 'Yuki Nagato', 75],
+            ['朝仓凉子', '朝倉涼子', 'Ryouko Asakura', 75],
+            ['朝比奈实玖瑠', '朝比奈實玖瑠', 'Mikuru Asahina', 75],
+            ['泉此方', '泉此方', 'Konata', 75],
+          ],
+          condition: (bt) => monsterNames.indexOf(bt[4] ?? bt[2]) !== -1,
+          content: (bt) => bt[3],
+        },
+        'ba': {
+          name: ['遭遇', '遭遇', 'Random Encounter'],
+          title: 'BA',
+          content: (_) => getEncounter().filter(e => e.encountered).length,
+        },
+        'tw': {
+          name: ['塔楼', '塔樓', 'The Tower'],
+          title: 'TW',
+          list: [
+            ['PFUDOR×20', 'PFUDOR×20', 'PFUDOR×20', 40],
+            ['IWBTH×15', 'IWBTH×15', 'IWBTH×15', 34],
+            ['任天堂×10', '任天堂×10', 'Nintendo×10', 27],
+            ['地狱×7', '地獄×7', 'Hell×7', 20],
+            ['噩梦×4', '噩夢×4', 'Nightmare×4', 14],
+            ['困难×2', '困難×2', 'Hard×2', 7],
+            ['普通×1', '普通×1', 'Normal×1', 1],
+          ],
+          condition: (bt) => bt[3] && bt[3] <= battle.tower,
+          content: (_) => battle.tower,
+          end: battle.tower > 40 ? `+${(battle.tower - 40) * 5}%DMG&HP` : '',
+        }
       }
+      const type = battle.roundType;
+      let subtype, title;
+      const monsterNames = Array.from(gE('div.btm3>div>div', 'all')).map(monster => monster.innerHTML);
+      const lang = g('lang') * 1;
+      const info = battleInfoList[type];
+      switch (type) {
+        case 'ar':
+        case 'rb':
+        case 'tw':
+        case 'ba':
+          for (let sub of (info.list ?? [[]])) {
+            if (info.condition && !info.condition(sub)) {
+              continue;
+            }
+            title = `${info.title}${info.content(sub)}`;
+            if (!sub[lang]) {
+              break;
+            }
+            subtype = `${sub[lang] ? `<br>${sub[lang]}` : ``}${info.end ? `<br>${info.end}` : ``}`;
+            break;
+          }
+          break;
+        case 'iw':
+        case 'gr':
+          title = `${info.title}`;
+          break;
+        default:
+          break;
+      }
+      return isTitle ? title : `${(info?.name ?? ['未知', '未知', 'Unknown'])[lang]}:[${title}]${subtype ?? ''}`;
     }
+    const currentTurn = (battle.turn ?? 0) + 1;
 
     gE('.hvAALog').innerHTML = [
-      `Turns: ${battle.turn ?? 0}`,
-      `<br>Speed: ${g('runSpeed')} t/s`,
-      `<br>Round: ${battle.roundNow ?? 0}/${battle.roundAll ?? 0}`,
-      `<br><l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ${status[g('attackStatus')]}`,
-      `<br><l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
-      `<br><l0>战役</l0><l1>戰役</l1><l2>Type</l2>: ${battleInfoType(battle.roundType)}`, // 战役模式显示
-    ].join('');
-    document.title = `${battle.turn ?? 0}||${g('runSpeed')}||${g('monsterAlive')}/${g('monsterAll')}||${battle.roundNow ?? 0}/${battle.roundAll ?? 0}||${battleInfoType(battle.roundType)}`;
-
-    if (battle.monsterStatus && battle.monsterStatus.length === g('monsterAll')) {
-      countMonsterHP();
-    } else {
+      `<l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ${status[g('attackStatus')]}`,
+      `${getBattleTypeDisplay()}`, // 战役模式显示
+      `R${battle.roundNow}/${battle.roundAll}:T${currentTurn}`,
+      `TPS: ${g('runSpeed')}`,
+      `<l0>敌人</l0><l1>敌人</l1><l2>Monsters</l2>: ${g('monsterAlive')}/${g('monsterAll')}`,
+    ].join(`<br>`);
+    if (!battle.roundAll) {
+      pauseChange();
+      Debug.shiftLog();
+    }
+    document.title = `${getBattleTypeDisplay(true)}:R${battle.roundNow}/${battle.roundAll}:T${currentTurn}@${g('runSpeed')}tps,${g('monsterAlive')}/${g('monsterAll')}`;
+    setValue('battle', battle);
+    if (!battle.monsterStatus || battle.monsterStatus.length !== g('monsterAll')) {
       fixMonsterStatus();
     }
+    countMonsterHP();
     displayMonsterWeight();
+    displayPlayStatePercentage();
+
     if (getValue('disabled')) { // 如果禁用
       document.title = _alert(-1, 'hvAutoAttack暂停中', 'hvAutoAttack暫停中', 'hvAutoAttack Paused');
       gE('#hvAABox2>button').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
       return;
     }
-    battle.turn = battle.turn ? battle.turn + 1 : 1;
+    battle = getValue('battle', true);
+    g('battle').turn = currentTurn;
+    battle.turn = currentTurn;
     setValue('battle', battle);
 
     killBug(); // 解决 HentaiVerse 可能出现的 bug
@@ -2220,21 +2625,31 @@ try {
       return;
     }
     var taskList = [autoRecover, autoPause, autoSS, autoDefend, useScroll, useChannelSkill, useBuffSkill, useInfusions, useDeSkill, autoFocus, autoSkill, attack];
-
     for (let i in taskList) {
-      if (taskList[i]()) return;
+      if (taskList[i]()) {
+        return;
+      }
     }
   }
 
+  function getMonsterID(s) {
+    if (s.order !== undefined) {
+      return (s.order + 1) % 10;
+    } // case is monsterStatus
+    return (s + 1) % 10; // case is order
+  }
+
   /**
-   * 按照技能范围，获取包含原目标且范围内最终权重(finweight)之和最低的范围的中心目标
-   * @param {int} id id from g('battle').monsterStatus.sort(objArrSort('finWeight'));
-   * @param {int} range radius, 0 for single-target and all-targets, 1 for treble-targets, ..., n for (2n+1) targets
-   * @param {(target) => bool} excludeCondition target with id
-   * @returns
-   */
-  function getRangeCenter(target, range = undefined, isWeaponAttack = false, excludeCondition = undefined) {
-    if (!range) return target;
+       * 按照技能范围，获取包含原目标且范围内最终权重(finweight)之和最低的范围的中心目标
+       * @param {int} id id from g('battle').monsterStatus.sort(objArrSort('finWeight'));
+       * @param {int} range radius, 0 for single-target and all-targets, 1 for treble-targets, ..., n for (2n+1) targets
+       * @param {(target) => bool} excludeCondition target with id
+       * @returns
+       */
+  function getRangeCenterID(target, range = undefined, isWeaponAttack = false, excludeCondition = undefined) {
+    if (!range) {
+      return getMonsterID(target);
+    }
     const centralExtraWeight = -1 * Math.log10(1 + (isWeaponAttack ? (g('option').centralExtraRatio / 100) ?? 0 : 0));
     let order = target.order;
     let newOrder = order;
@@ -2253,8 +2668,8 @@ try {
         let cew = j === i ? centralExtraWeight : 0; // cew <= 0, 增加未命中权重，降低命中权重
         let mon = msTemp[j];
         if (j < 0 || j >= msTemp.length // 超出范围
-          || mon.isDead // 死亡目标
-          || (excludeCondition && excludeCondition(mon))) { // 特殊排除判定
+            || mon.isDead // 死亡目标
+            || (excludeCondition && excludeCondition(mon))) { // 特殊排除判定
           rank += unreachableWeight - cew;
           continue;
         }
@@ -2264,7 +2679,7 @@ try {
         newOrder = i;
       }
     }
-    return msTemp[newOrder];
+    return getMonsterID(newOrder);
   }
 
   function autoPause() {
@@ -2285,13 +2700,17 @@ try {
 
   function pauseChange() { // 暂停状态更改
     if (getValue('disabled')) {
-      if (gE('.pauseChange')) gE('.pauseChange').innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
+      if (gE('.pauseChange')) {
+        gE('.pauseChange').innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
+      }
       delValue(0);
       if (!gE('#navbar')) { // in battle
         onBattle();
       }
     } else {
-      if (gE('.pauseChange')) gE('.pauseChange').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
+      if (gE('.pauseChange')) {
+        gE('.pauseChange').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
+      }
       setValue('disabled', true);
       document.title = _alert(-1, 'hvAutoAttack暂停中', 'hvAutoAttack暫停中', 'hvAutoAttack Paused');
     }
@@ -2299,13 +2718,17 @@ try {
 
   function reloader() {
     let delayAlert; let delayReload; let obj; let a; let
-      cost;
+    cost;
     const eventStart = cE('a');
     eventStart.id = 'eventStart';
     eventStart.onclick = function () {
       a = unsafeWindow.info;
-      if (g('option').delayAlert) delayAlert = setTimeout(setAlarm, g('option').delayAlertTime * _1s);
-      if (g('option').delayReload) delayReload = setTimeout(goto, g('option').delayReloadTime * _1s);
+      if (g('option').delayAlert) {
+        delayAlert = setTimeout(setAlarm, g('option').delayAlertTime * _1s);
+      }
+      if (g('option').delayReload) {
+        delayReload = setTimeout(goto, g('option').delayReloadTime * _1s);
+      }
       if (g('option').recordUsage) {
         obj = {
           mode: a.mode,
@@ -2327,8 +2750,12 @@ try {
       const timeNow = time(0);
       g('runSpeed', (1000 / (timeNow - g('timeNow'))).toFixed(2));
       g('timeNow', timeNow);
-      if (g('option').delayAlert) clearTimeout(delayAlert);
-      if (g('option').delayReload) clearTimeout(delayReload);
+      if (g('option').delayAlert) {
+        clearTimeout(delayAlert);
+      }
+      if (g('option').delayReload) {
+        clearTimeout(delayReload);
+      }
       const monsterDead = gE('img[src*="nbardead"]', 'all').length;
       g('monsterAlive', g('monsterAll') - monsterDead);
       const bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
@@ -2339,15 +2766,20 @@ try {
         recordUsage(obj);
       }
       if (gE('#btcp')) {
-        if (g('option').dropMonitor) dropMonitor(battleLog);
-        if (g('option').recordUsage) recordUsage2();
+        if (g('option').dropMonitor) {
+          dropMonitor(battleLog);
+        }
+        if (g('option').recordUsage) {
+          recordUsage2();
+        }
         if (g('monsterAlive') > 0) { // Defeat
           setAlarm('Defeat');
-          delValue(2);
+          delValue(1);
         } else if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
           gE('#pane_completion').removeChild(gE('#btcp'));
-          post(window.location.href, (data) => {
-            if (gE('#riddlecounter', data)) {
+          $ajax.fetch(window.location.href).then((html) => {
+            const doc = $doc(html)
+            if (gE('#riddlecounter', doc)) {
               if (g('option').riddlePopup && !window.opener) {
                 window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
                 return;
@@ -2355,16 +2787,35 @@ try {
               goto();
               return;
             }
-            gE('#battle_main').replaceChild(gE('#battle_right', data), gE('#battle_right'));
-            gE('#battle_main').replaceChild(gE('#battle_left', data), gE('#battle_left'));
+            gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
+            gE('#battle_main').replaceChild(gE('#battle_left', doc), gE('#battle_left'));
             unsafeWindow.battle = new unsafeWindow.Battle();
             unsafeWindow.battle.clear_infopane();
+            Debug.log('______________newRound', true);
             newRound(true);
             onBattle();
           });
+
+          // post(window.location.href, (data) => {
+          //   if (gE('#riddlecounter', data)) {
+          //     if (g('option').riddlePopup && !window.opener) {
+          //       window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
+          //       return;
+          //     }
+          //     goto();
+          //     return;
+          //   }
+          //   gE('#battle_main').replaceChild(gE('#battle_right', data), gE('#battle_right'));
+          //   gE('#battle_main').replaceChild(gE('#battle_left', data), gE('#battle_left'));
+          //   unsafeWindow.battle = new unsafeWindow.Battle();
+          //   unsafeWindow.battle.clear_infopane();
+          //   Debug.log('______________newRound', true);
+          //   newRound(true);
+          //   onBattle();
+          // });
         } else if (g('battle').roundNow === g('battle').roundAll) { // Victory
           setAlarm('Victory');
-          delValue(2);
+          delValue(1);
           setTimeout(() => {
             window.location.href = getValue('lastHref');
           }, 3 * _1s);
@@ -2414,7 +2865,9 @@ try {
           if (a.login !== undefined) {
             top.window.location.href = login_url;
           } else {
-            if (a.error || a.reload) window.location.href = window.location.search;
+            if (a.error || a.reload) {
+              window.location.href = window.location.search;
+            }
             return a;
           }
         } else {
@@ -2427,12 +2880,15 @@ try {
   }
 
   function newRound(isNew) { // New Round
-    let battle = getValue('battle', true);
-    if (isNew || !battle) {
-      battle = {}
-    }
+    let battle = isNew ? {} : getValue('battle', true);
+    if (!battle) {
+      battle = JSON.parse(JSON.stringify(g('battle') ?? {}));
+      battle.monsterStatus?.sort(objArrSort('order'));
+    };
     setValue('battle', battle);
-    if (window.location.hash !== '') goto();
+    if (window.location.hash !== '') {
+      goto();
+    }
     g('monsterAll', gE('div.btm1', 'all').length);
     const monsterDead = gE('img[src*="nbardead"]', 'all').length;
     g('monsterAlive', g('monsterAll') - monsterDead);
@@ -2452,30 +2908,32 @@ try {
           extra: (i) => i >= 105,
         },
         'iw': { reg: /^Initializing Item World/ },
-        'gf': { reg: /^Initializing Grindfest/ },
+        'gr': { reg: /^Initializing Grindfest/ },
         'tw': { reg: /^Initializing The Tower/ },
-        'rb': { reg: /^Initializing arena challenge/ },
         'ba': {
           reg: /^Initializing random encounter/,
-          extra: (i) => {
-            if (g('option').encounter) {
-              const encounter = getValue('encounter', true);
-              encounter.lastTime = time(0);
-              encounter.count++;
-              setValue('encounter', encounter);
+          extra: (_) => {
+            const encounter = getEncounter();
+            if (encounter[0].time >= time(0) - 0.5*_1h) {
+              encounter[0].encountered = time(0);
+              setEncounter(encounter);
             }
             return true;
-          },
-        }
+          }
+        },
       }
-      const id = temp.match(/\d+/) ? temp.match(/\d+/)[0] * 1 : null;
+      battle.tower = (temp.match(/\(Floor (\d+)\)/) ?? [null])[1] * 1;
+      const id = (temp.match(/\d+/) ?? [null])[0] * 1;
       battle.roundType = undefined;
       for (let name in types) {
         const type = types[name];
-        if (!temp.match(type.reg)) continue;
-        if (type.extra && !type.extra(id)) continue;
+        if (!temp.match(type.reg)) {
+          continue;
+        }
+        if (type.extra && !type.extra(id)) {
+          continue;
+        }
         battle.roundType = name;
-        setValue('battle', battle);
         break;
       }
     }
@@ -2495,8 +2953,8 @@ try {
     if (battleLog[battleLog.length - 1].textContent.match('Initializing')) {
       const monsterStatus = [];
       let order = 0;
-      const monsterNames = Array.from(gE('div.btm3>div>div', 'all')).map(monster => monster.innerHTML);
-      const monsterLvs = Array.from(gE('div.btm2>div>div', 'all')).map(monster => monster.innerHTML);
+      const monsterNames = Array.from(gE('div.btm3>div>div', 'all')).map(monster => monster.innerText);
+      const monsterLvs = Array.from(gE('div.btm2>div>div', 'all')).map(monster => monster.innerText);
       const monsterDB = getValue('monsterDB', true) ?? {};
       const monsterMID = getValue('monsterMID', true) ?? {};
       const oldDB = JSON.stringify(monsterDB);
@@ -2510,7 +2968,7 @@ try {
           hp = getHPFromMonsterDB(monsterDB, monsterNames[order], monsterLvs[order]) ?? monsterStatus[monsterStatus.length - 1].hp;
         }
         if (name && lv && mid) {
-          monsterDB[name] = monsterDB[name] ?? {};
+          monsterDB[name] ??= {};
           if (monsterDB[name].mid && monsterDB[name].mid !== mid) { // 名称被其他mid被占用
             monsterMID[monsterDB[name].mid] = JSON.parse(JSON.stringify(monsterDB[name])); // 将之前mid的数据进行另外备份
             monsterDB[name] = {}; // 重置该名称的数据
@@ -2524,7 +2982,6 @@ try {
         }
         monsterStatus[order] = {
           order: order,
-          id: (order === 9) ? 0 : order + 1,
           hp,
         };
         order++;
@@ -2535,12 +2992,10 @@ try {
       if (oldMID !== JSON.stringify(monsterMID)) {
         setValue('monsterMID', monsterMID);
       }
-
       battle.monsterStatus = monsterStatus;
-      g('battle', setValue('battle', battle));
-      countMonsterHP();
+
       const round = battleLog[battleLog.length - 1].textContent.match(/\(Round (\d+) \/ (\d+)\)/);
-      if (battle.roundType !== 'ba' && round !== null) {
+      if (round && battle.roundType !== 'ba') {
         battle.roundNow = round[1] * 1;
         battle.roundAll = round[2] * 1;
       } else {
@@ -2551,7 +3006,7 @@ try {
       battle.roundNow = 1;
       battle.roundAll = 1;
     }
-    g('battle', setValue('battle', battle));
+    setValue('battle', battle);
 
     g('roundLeft', battle.roundAll - battle.roundNow);
     g('skillOTOS', {
@@ -2579,9 +3034,9 @@ try {
   }
 
   function countMonsterHP() { // 统计敌人血量
-    const battle = getValue('battle', true);
     let i, j;
     const monsterHp = gE('div.btm4>div.btm5:nth-child(1)', 'all');
+    let battle = getValue('battle', true);
     const monsterStatus = battle.monsterStatus;
     const hpArray = [];
     for (i = 0; i < monsterHp.length; i++) {
@@ -2590,12 +3045,11 @@ try {
         monsterStatus[i].hpNow = Infinity;
       } else {
         monsterStatus[i].isDead = false;
-        monsterStatus[i].hpNow = Math.floor(monsterStatus[i].hp * parseFloat(gE('img', monsterHp[i]).style.width) / 120) + 1;
+        monsterStatus[i].hpNow = Math.floor(monsterStatus[i].hp * parseFloat(gE('img', monsterHp[i]).style.width) / 120 + 1);
         hpArray.push(monsterStatus[i].hpNow);
       }
     }
     battle.monsterStatus = monsterStatus;
-    setValue('battle', battle);
 
     const skillLib = {
       Sle: {
@@ -2838,7 +3292,7 @@ try {
       },
     };
     let i; let
-      j;
+    j;
     const skillPack = g('option').buffSkillOrderValue.split(',');
     if (g('option').channelSkill) {
       for (i = 0; i < skillPack.length; i++) {
@@ -3001,21 +3455,21 @@ try {
       id: 12101,
       img: 'fireinfusion',
     }, {
-        id: 12201,
-        img: 'coldinfusion',
-      }, {
-        id: 12301,
-        img: 'elecinfusion',
-      }, {
-        id: 12401,
-        img: 'windinfusion',
-      }, {
-        id: 12501,
-        img: 'holyinfusion',
-      }, {
-        id: 12601,
-        img: 'darkinfusion',
-      }];
+      id: 12201,
+      img: 'coldinfusion',
+    }, {
+      id: 12301,
+      img: 'elecinfusion',
+    }, {
+      id: 12401,
+      img: 'windinfusion',
+    }, {
+      id: 12501,
+      img: 'holyinfusion',
+    }, {
+      id: 12601,
+      img: 'darkinfusion',
+    }];
     if (gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`) && !gE(`#pane_effects>img[src*="${infusionLib[[g('attackStatus')]].img}"]`)) {
       gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`).click();
       return true;
@@ -3040,10 +3494,10 @@ try {
   }
 
   /**
-   * INNAT / WEAPON SKILLS
-   *
-   * 优先释放先天和武器技能
-   */
+       * INNAT / WEAPON SKILLS
+       *
+       * 优先释放先天和武器技能
+       */
   function autoSkill() {
     if (!g('option').skillSwitch) {
       return false;
@@ -3106,13 +3560,13 @@ try {
       }
       // Merciful Blow
       for (let j = 0; j < monsterStatus.length; j++) {
-        if (monsterStatus[j].hpNow / monsterStatus[j].hp < 0.25 && gE(`#mkey_${monsterStatus[j].id} img[src*="wpn_bleed"]`)) {
-          gE(`#mkey_${getRangeCenter(monsterStatus[j]).id}`).click();
+        if (monsterStatus[j].hpNow / monsterStatus[j].hp < 0.25 && gE(`#mkey_${getMonsterID(monsterStatus[j])} img[src*="wpn_bleed"]`)) {
+          gE(`#mkey_${getRangeCenterID(monsterStatus[j])}`).click();
           return true;
         }
       }
     }
-    gE(`#mkey_${getRangeCenter(monsterStatus[0]).id}`).click();
+    gE(`#mkey_${getRangeCenterID(monsterStatus[0])}`).click();
     return true;
   }
 
@@ -3134,7 +3588,7 @@ try {
     }
     skillPack.sort((x, y) => g('option').debuffSkillOrderValue.indexOf(x) - g('option').debuffSkillOrderValue.indexOf(y))
     let toAllCount = skillPack.length;
-    if (g('option').debuffSkill) { // 是否有启用的buff(不算两个特殊的);
+    if (g('option').debuffSkill) { // 是否有启用的buff(不算两个特殊的)
       skillPack = skillPack.concat(g('option').debuffSkillOrderValue.split(','));
     }
     for (let i in skillPack) {
@@ -3209,7 +3663,7 @@ try {
       return false;
     }
     const monsterStatus = g('battle').monsterStatus;
-    let isDebuffed = (target) => gE(`img[src*="${skillLib[buff].img}"]`, gE(`#mkey_${target.id}>.btm6`));
+    let isDebuffed = (target) => gE(`img[src*="${skillLib[buff].img}"]`, gE(`#mkey_${getMonsterID(target)}>.btm6`));
     let primaryTarget;
     let max = isAll ? monsterStatus.length : 1;
     for (let i = 0; i < max; i++) {
@@ -3231,11 +3685,13 @@ try {
     let ab;
     for (ab in skillLib[buff].range) {
       const ranges = skillLib[buff].range[ab][skillLib[buff].skill * 1];
-      if (!ranges) continue;
+      if (!ranges) {
+        continue;
+      }
       range = ranges[getValue('ability', true)[ab].level];
       break;
     }
-    let id = getRangeCenter(primaryTarget, range, isDebuffed).id;
+    let id = getRangeCenterID(primaryTarget, range, isDebuffed);
     const imgs = gE('img', 'all', gE(`#mkey_${id}>.btm6`));
     if (imgs.length < 6 || !g('option').debuffSkillTurnAlert || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn[buff])) {
       gE(skillLib[buff].id).click();
@@ -3300,7 +3756,7 @@ try {
         range = 1;
       }
     } else {
-      if (g('option').etherTap && gE(`#mkey_${monsterStatus[0].id}>div.btm6>img[src*="coalescemana"]`) && (!gE('#pane_effects>img[onmouseover*="Ether Tap (x2)"]') || gE('#pane_effects>img[src*="wpn_et"][id*="effect_expire"]')) && checkCondition(g('option').etherTapCondition)) {
+      if (g('option').etherTap && gE(`#mkey_${getMonsterID(monsterStatus[0])}>div.btm6>img[src*="coalescemana"]`) && (!gE('#pane_effects>img[onmouseover*="Ether Tap (x2)"]') || gE('#pane_effects>img[src*="wpn_et"][id*="effect_expire"]')) && checkCondition(g('option').etherTapCondition)) {
         `pass`
       }
       else {
@@ -3323,38 +3779,38 @@ try {
         gE(skill)?.click();
         for (let ab in updateAbility) {
           const ranges = updateAbility[ab][skill];
-          if (!ranges) continue;
+          if (!ranges) {
+            continue;
+          }
           range = ranges[getValue('ability', true)[ab].level];
           break;
         }
       }
     }
-    gE(`#mkey_${getRangeCenter(monsterStatus[0], range, !attackStatus).id}`).click();
+    gE(`#mkey_${getRangeCenterID(monsterStatus[0], range, !attackStatus)}`).click();
     return true;
   }
 
   function getHPFromMonsterDB(mdb, name, lv) {
     /////////////////// TODO: 根据lv模糊推测
-    return mdb[name][lv];
+    return mdb[name] ? mdb[name][lv] : undefined;
   }
 
   function fixMonsterStatus() { // 修复monsterStatus
     // document.title = _alert(-1, 'monsterStatus错误，正在尝试修复', 'monsterStatus錯誤，正在嘗試修復', 'monsterStatus Error, trying to fix');
     const monsterStatus = [];
-    const monsterNames = Array.from(gE('div.btm3>div>div', 'all')).map(monster => monster.innerHTML);
-    const monsterLvs = Array.from(gE('div.btm2>div>div', 'all')).map(monster => monster.innerHTML);
+    const monsterNames = Array.from(gE('div.btm3>div>div', 'all')).map(monster => monster.innerText);
+    const monsterLvs = Array.from(gE('div.btm2>div>div', 'all')).map(monster => monster.innerText);
     const monsterDB = getValue('monsterDB', true);
     gE('div.btm2', 'all').forEach((monster, order) => {
       monsterStatus.push({
         order: order,
-        id: (order === 9) ? 0 : order + 1,
         hp: getHPFromMonsterDB(monsterDB, monsterNames[order], monsterLvs[order]) ?? ((monster.style.background === '') ? 1000 : 100000),
       });
     });
     const battle = getValue('battle', true);
     battle.monsterStatus = monsterStatus;
-    g('battle', setValue('battle', battle));
-    countMonsterHP();
+    setValue('battle', battle);
   }
 
   function displayMonsterWeight() {
@@ -3363,17 +3819,53 @@ try {
 
     const weights = [];
     status.forEach(s => {
-      if (weights.indexOf(s.finWeight) !== -1) return;
+      if (weights.indexOf(s.finWeight) !== -1) {
+        return;
+      }
       weights.push(s.finWeight);
     })
     const sec = Math.max(1, weights.length - 1);
     const max = 360 * 2 / 3;
     status.forEach(s => {
       const rank = weights.indexOf(s.finWeight);
-      if (!gE(`#mkey_${s.id}`) || !gE(`#mkey_${s.id}>.btm3`)) return;
-      gE(`#mkey_${s.id}`).style.cssText += `background: hsl(${Math.round(max * rank / sec)}deg 50% 50%);`;
-      gE(`#mkey_${s.id}>.btm3`).style.cssText += 'display: flex; flex-direction: row;'
-      gE(`#mkey_${s.id}>.btm3`).innerHTML += `<div style='font-weight: bolder; right:0px; position: absolute;'>[${rank}|-${-rank + weights.length - 1}|${s.finWeight.toPrecision(s.finWeight >= 1 ? 5 : 4)}]</div>`;
+      const id = getMonsterID(s);
+      if (!gE(`#mkey_${id}`) || !gE(`#mkey_${id}>.btm3`)) {
+        return;
+      }
+      gE(`#mkey_${id}`).style.cssText += `background: hsl(${Math.round(max * rank / sec)}deg 50% 50%);`;
+      gE(`#mkey_${id}>.btm3`).style.cssText += 'display: flex; flex-direction: row;'
+      gE(`#mkey_${id}>.btm3`).innerHTML += `<div style='font-weight: bolder; right:0px; position: absolute;'>[${rank}|-${-rank + weights.length - 1}|${s.finWeight.toPrecision(s.finWeight >= 1 ? 5 : 4)}]</div>`;
+    });
+  }
+
+  function displayPlayStatePercentage() {
+    // const ocPoints = gE('#vcp');
+    const barHP = gE('#vbh') ?? gE('#dvbh');
+    const barMP = gE('#vbm') ?? gE('#dvbm');
+    const barSP = gE('#vbs') ?? gE('#dvbs');
+    const barOC = gE('#dvbc');
+    const textHP = gE('#vrhd') ?? gE('#dvrhd');
+    const textMP = gE('#vrm') ?? gE('#dvrm');
+    const textSP = gE('#vrs') ?? gE('#dvrs');
+    const textOC = gE('#dvrc');
+
+    const percentages = [barHP, barMP, barSP, barOC].filter(bar => bar).map(bar => Math.floor((gE('div>img', bar).offsetWidth / bar.offsetWidth) * 100));
+    [textHP, textMP, textSP, textOC].filter(bar => bar).forEach((text, i) => {
+      const value = text.innerHTML * 1;
+      const percentage = value ? percentages[i] : 0;
+      const inner = `[${percentage.toString()}%]`;
+      const percentageDiv = gE('div', text);
+      if (percentageDiv) {
+        percentageDiv.innerHTML = inner;
+        return;
+      }
+      text.innerHTML += `<div style="
+        position: relative;
+        top: ${textOC ? -15 : text === textHP ? -16.67 : -16}px;
+        right: ${textOC ? -70 : text === textMP ? -60 : text === textSP ? 40 : -100}px;
+        filter: brightness(0.2);
+        text-align: left;
+        ">${inner}</div>`
     });
   }
 
@@ -3384,11 +3876,13 @@ try {
       '#Credit': 0,
     };
     let item; let name; let amount; let
-      regexp;
+    regexp;
     for (let i = 0; i < battleLog.length; i++) {
       if (/^You gain \d+ (EXP|Credit)/.test(battleLog[i].textContent)) {
         regexp = battleLog[i].textContent.match(/^You gain (\d+) (EXP|Credit)/);
-        if (regexp) drop[`#${regexp[2]}`] += regexp[1] * 1;
+        if (regexp) {
+          drop[`#${regexp[2]}`] += regexp[1] * 1;
+        }
       } else if (gE('span', battleLog[i])) {
         item = gE('span', battleLog[i]);
         name = item.textContent.match(/^\[(.*?)\]$/)[1];
@@ -3471,12 +3965,14 @@ try {
       },
     };
     let text; let magic; let point; let
-      reg;
+    reg;
     const battle = g('battle');
     if (g('monsterAlive') === 0) {
       stats.self._turn += battle.turn;
       stats.self._round += 1;
-      if (battle.roundNow === battle.roundAll) stats.self._battle += 1;
+      if (battle.roundNow === battle.roundAll) {
+        stats.self._battle += 1;
+      }
     }
     if (parm.mode === 'magic') {
       magic = parm.magic;
@@ -3491,9 +3987,13 @@ try {
     const debug = false;
     let log = false;
     for (let i = 0; i < parm.log.length; i++) {
-      if (parm.log[i].className === 'tls') break;
+      if (parm.log[i].className === 'tls') {
+        break;
+      }
       text = parm.log[i].textContent;
-      if (debug) console.log(text);
+      if (debug) {
+        console.log(text);
+      }
       if (text.match(/you for \d+ \w+ damage/)) {
         reg = text.match(/you for (\d+) (\w+) damage/);
         magic = reg[2].replace('ing', '');
@@ -3511,7 +4011,8 @@ try {
           stats.hurt._mtotal += point;
           stats.hurt._mavg = Math.round(stats.hurt._mtotal / stats.hurt._mcount);
         }
-      } else if (text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for \d+( .*)? damage/) || text.match(/^You .* for \d+ .* damage/)) { // text.match(/for \d+ .* damage/);
+      } else if (text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for \d+( .*)? damage/) || text.match(/^You .* for \d+ .* damage/)) {
+        // text.match(/for \d+ .* damage/);
         reg = text.match(/for (\d+)( .*)? damage/);
         magic = text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ -]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1];
         point = reg[1] * 1;
@@ -3580,7 +4081,6 @@ try {
       setValue('stats', stats);
     }
   }
-
 } catch (e) {
   console.log(e);
   document.title = e;
