@@ -70,7 +70,7 @@ try {
         Debug.logList.shift();
       }
     },
-    shiftLog: function (){
+    shiftLog: function () {
       while (Debug.logList.length) {
         const log = Debug.logList.shift();
         console.log(...log.args, `\n`, log.stack);
@@ -179,7 +179,7 @@ try {
       function ontimer() {
         const now = new Date().getTime();
         const last = getValue('last_post');
-        if (last && last-now < $ajax.interval) {
+        if (last && last - now < $ajax.interval) {
           $ajax.next();
           return;
         }
@@ -187,7 +187,7 @@ try {
         $ajax.tid = null;
         $ajax.next();
       };
-      $ajax.tid = setTimeout( ontimer, $ajax.interval);
+      $ajax.tid = setTimeout(ontimer, $ajax.interval);
     },
     send: function () {
       GM_xmlhttpRequest($ajax.queue[$ajax.index]);
@@ -296,8 +296,8 @@ try {
       // 补充记录（因写入冲突、网络卡顿等）未被记录的encounter链接
       const encounterURL = window.location.href?.href.split('/')[3];
       const encounter = getEncounter();
-      if(!encounter.filter(e=>e.href===encounterURL).length) {
-        encounter.unshift({ href: encounterURL, time: time(0), encountered:time(0)});
+      if (!encounter.filter(e => e.href === encounterURL).length) {
+        encounter.unshift({ href: encounterURL, time: time(0), encountered: time(0) });
       }
       setEncounter(encounter);
     }
@@ -515,7 +515,7 @@ try {
       0: ['disabled'],
       1: ['battle', 'battleCode', 0],
     }
-    for(let item of itemMap[key]) {
+    for (let item of itemMap[key]) {
       delValue(item);
     }
   }
@@ -1042,7 +1042,7 @@ try {
       const target = (e.target.tagName === 'SPAN') ? e.target : e.target.parentNode;
       const name = target.getAttribute('name');
       let i; let
-      _html;
+        _html;
       if (name === 'Drop') { // 掉落监测
         let drop = getValue('drop', true) || {};
         const dropOld = getValue('dropOld', true) || [];
@@ -1466,7 +1466,7 @@ try {
       };
       let inputs = gE('input,select', 'all', optionBox);
       let itemName; let itemArray; let itemValue; let
-      i;
+        i;
       for (i = 0; i < inputs.length; i++) {
         if (inputs[i].className === 'hvAADebug') {
           continue;
@@ -1532,11 +1532,11 @@ try {
     };
     if (g('option')) {
       let i; let j; let
-      k;
+        k;
       const _option = g('option');
       const inputs = gE('input,select', 'all', optionBox);
       let itemName; let itemArray; let itemValue; let
-      _html;
+        _html;
       for (i = 0; i < inputs.length; i++) {
         if (inputs[i].className === 'hvAADebug') {
           continue;
@@ -1842,7 +1842,7 @@ try {
       return true;
     }
     let i; let j; let
-    k;
+      k;
     const result = [];
     const returnValue = function (str) {
       if (str.match(/^_/)) {
@@ -2017,15 +2017,15 @@ try {
     // }
     if (eventpane) { // 新一天或遭遇战
       url = gE('#eventpane>div>a')?.href.split('/')[3];
-      encounter.unshift({ href: url, time: now});
+      encounter.unshift({ href: url, time: now });
       setEncounter(encounter);
     } else {
-      if(encounter.length) {
-        if(now - encounter[0]?.time > 0.5*_1h) { // 延长最新一次的time, 避免因漏记录导致连续来回跳转
+      if (encounter.length) {
+        if (now - encounter[0]?.time > 0.5 * _1h) { // 延长最新一次的time, 避免因漏记录导致连续来回跳转
           encounter[0].time = now;
           setEncounter(encounter);
         }
-        for(let e of encounter) {
+        for (let e of encounter) {
           if (e.encountered) {
             continue;
           }
@@ -2061,23 +2061,23 @@ try {
   }
 
   function getEncounter() {
-    const getToday = (encounter)=>encounter.filter(e => time(2, e.time) === time(2));
+    const getToday = (encounter) => encounter.filter(e => time(2, e.time) === time(2));
     const current = g('encounter') ?? [];
     let encounter = getValue('encounter', true) ?? [];
-    if(JSON.stringify(current) === JSON.stringify(encounter)) {
+    if (JSON.stringify(current) === JSON.stringify(encounter)) {
       return getToday(encounter);
     }
     let dict = {};
-    for(let e of current) {
+    for (let e of current) {
       dict[e.href ?? `newDawn`] = e;
     }
-    for(let e of encounter) {
+    for (let e of encounter) {
       const key = e.href ?? `newDawn`;
       dict[key] ??= e;
       dict[key].time = Math.max(dict[key].time, e.time);
-      dict[key].encountered = (e.encountered||dict[key].encountered) ? Math.max(dict[key].encountered??0, e.encountered??0) : undefined;
+      dict[key].encountered = (e.encountered || dict[key].encountered) ? Math.max(dict[key].encountered ?? 0, e.encountered ?? 0) : undefined;
     }
-    return getToday(Object.values(dict)).sort((x, y)=>x.time<y.time?1:x.time>y.time?-1:0);
+    return getToday(Object.values(dict)).sort((x, y) => x.time < y.time ? 1 : x.time > y.time ? -1 : 0);
   }
 
   function quickSite() { // 快捷站点
@@ -2103,7 +2103,7 @@ try {
       // 若不启用自动跳转
       return;
     }
-    window.location.href = `${href.slice(0, href.indexOf('.org') + 4)}/${isIsekai ? '' : 'isekai/' }`;
+    window.location.href = `${href.slice(0, href.indexOf('.org') + 4)}/${isIsekai ? '' : 'isekai/'}`;
   }
 
   async function asyncSetAbilityData() {
@@ -2253,8 +2253,8 @@ try {
     const now = time(0);
     const last = encounter[0];
     let cd;
-    if(encountered.length >= 24) {
-      cd = Math.floor(encounter[0].time / _1d +1) * _1d - now;
+    if (encountered.length >= 24) {
+      cd = Math.floor(encounter[0].time / _1d + 1) * _1d - now;
     } else if (!last) {
       cd = 0;
     } else {
@@ -2266,14 +2266,14 @@ try {
       return true;
     }
     let interval = cd > _1h ? _1m : cd > _1m ? _1s : 10;
-    interval = (interval - cd % interval)/4; // 让倒计时显示更平滑
+    interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
     setTimeout(() => updateEncounter(engage), interval);
 
     const ui = gE('.encounterUI') ?? (() => {
       const ui = gE('body').appendChild(cE('a'));
       ui.className = 'encounterUI';
       ui.title = `${time(3, last?.time)}\nEncounter Time: ${count}`;
-      if(!isInBattle) {
+      if (!isInBattle) {
         ui.href = 'https://e-hentai.org/news.php?encounter';
       }
       // ui.onclick = function () {
@@ -2316,7 +2316,7 @@ try {
       timeout -= time(0) - idleStart;
     }
     setTimeout(idleArena, timeout);
-    setTimeout(startUpdateArena, Math.max(0, Math.floor(now / _1d +1) * _1d - now));
+    setTimeout(startUpdateArena, Math.max(0, Math.floor(now / _1d + 1) * _1d - now));
   }
 
   async function updateArena(forceUpdateToken = false) {
@@ -2357,7 +2357,7 @@ try {
       setTimeout(method, 1000);
       return;
     }
-    if(condition.checkEncounter && getEncounter()[0]?.href && !getEncounter()[0]?.encountered) {
+    if (condition.checkEncounter && getEncounter()[0]?.href && !getEncounter()[0]?.encountered) {
       Debug.log(getEncounter());
       return;
     }
@@ -2365,7 +2365,7 @@ try {
     if (staminaChecked) { // 1: succeed, -1: failed with nature recover
       return staminaChecked === 1;
     }
-    setTimeout(method, Math.floor(time(0)/_1h + 1) * _1h - time(0));
+    setTimeout(method, Math.floor(time(0) / _1h + 1) * _1h - time(0));
   }
 
   async function idleArena() { // 闲置竞技场
@@ -2437,7 +2437,7 @@ try {
       href = 'ar';
     }
     cost ??= staminaCost[id];
-    if (!checkBattleReady(idleArena, { staminaCost: cost, checkEncounter:true })) {
+    if (!checkBattleReady(idleArena, { staminaCost: cost, checkEncounter: true })) {
       logSwitchAsyncTask(arguments);
       return;
     }
@@ -2685,8 +2685,8 @@ try {
         let cew = j === i ? centralExtraWeight : 0; // cew <= 0, 增加未命中权重，降低命中权重
         let mon = msTemp[j];
         if (j < 0 || j >= msTemp.length // 超出范围
-            || mon.isDead // 死亡目标
-            || (excludeCondition && excludeCondition(mon))) { // 特殊排除判定
+          || mon.isDead // 死亡目标
+          || (excludeCondition && excludeCondition(mon))) { // 特殊排除判定
           rank += unreachableWeight - cew;
           continue;
         }
@@ -2735,7 +2735,7 @@ try {
 
   function reloader() {
     let delayAlert; let delayReload; let obj; let a; let
-    cost;
+      cost;
     const eventStart = cE('a');
     eventStart.id = 'eventStart';
     eventStart.onclick = function () {
@@ -2931,7 +2931,7 @@ try {
           reg: /^Initializing random encounter/,
           extra: (_) => {
             const encounter = getEncounter();
-            if (encounter[0].time >= time(0) - 0.5*_1h) {
+            if (encounter[0].time >= time(0) - 0.5 * _1h) {
               encounter[0].encountered = time(0);
               setEncounter(encounter);
             }
@@ -3309,7 +3309,7 @@ try {
       },
     };
     let i; let
-    j;
+      j;
     const skillPack = g('option').buffSkillOrderValue.split(',');
     if (g('option').channelSkill) {
       for (i = 0; i < skillPack.length; i++) {
@@ -3472,21 +3472,21 @@ try {
       id: 12101,
       img: 'fireinfusion',
     }, {
-      id: 12201,
-      img: 'coldinfusion',
-    }, {
-      id: 12301,
-      img: 'elecinfusion',
-    }, {
-      id: 12401,
-      img: 'windinfusion',
-    }, {
-      id: 12501,
-      img: 'holyinfusion',
-    }, {
-      id: 12601,
-      img: 'darkinfusion',
-    }];
+        id: 12201,
+        img: 'coldinfusion',
+      }, {
+        id: 12301,
+        img: 'elecinfusion',
+      }, {
+        id: 12401,
+        img: 'windinfusion',
+      }, {
+        id: 12501,
+        img: 'holyinfusion',
+      }, {
+        id: 12601,
+        img: 'darkinfusion',
+      }];
     if (gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`) && !gE(`#pane_effects>img[src*="${infusionLib[[g('attackStatus')]].img}"]`)) {
       gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`).click();
       return true;
@@ -3850,9 +3850,9 @@ try {
       if (!gE(`#mkey_${id}`) || !gE(`#mkey_${id}>.btm3`)) {
         return;
       }
-      if(g('option').displayWeightBackground) {
-        if(g('option').weightBackground) {
-          let colorText = (g('option').weightBackground[rank+1] ?? [])[0];
+      if (g('option').displayWeightBackground) {
+        if (g('option').weightBackground) {
+          let colorText = (g('option').weightBackground[rank + 1] ?? [])[0];
           try {
             colorText = eval(colorText.replace('<rank>', rank).replace('<all>', weights.length));
           }
@@ -3863,7 +3863,7 @@ try {
         // gE(`#mkey_${id}`).style.cssText += `background: hsl(${Math.round(max * rank / sec)}deg 50% 50%);`;
       }
       gE(`#mkey_${id}>.btm3`).style.cssText += 'display: flex; flex-direction: row;'
-      if(g('option').displayWeight) {
+      if (g('option').displayWeight) {
         gE(`#mkey_${id}>.btm3`).innerHTML += `<div style='font-weight: bolder; right:0px; position: absolute;'>[${rank}|-${-rank + weights.length - 1}|${s.finWeight.toPrecision(s.finWeight >= 1 ? 5 : 4)}]</div>`;
       }
     });
@@ -3907,7 +3907,7 @@ try {
       '#Credit': 0,
     };
     let item; let name; let amount; let
-    regexp;
+      regexp;
     for (let i = 0; i < battleLog.length; i++) {
       if (/^You gain \d+ (EXP|Credit)/.test(battleLog[i].textContent)) {
         regexp = battleLog[i].textContent.match(/^You gain (\d+) (EXP|Credit)/);
@@ -3996,7 +3996,7 @@ try {
       },
     };
     let text; let magic; let point; let
-    reg;
+      reg;
     const battle = g('battle');
     if (g('monsterAlive') === 0) {
       stats.self._turn += battle.turn;
