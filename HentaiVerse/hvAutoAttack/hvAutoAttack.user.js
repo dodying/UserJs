@@ -285,7 +285,7 @@ try {
         setValue('battleCode', `${time(1)}: ${g('battle').roundType.toUpperCase()}-${g('battle').roundAll}`);
       }
       onBattle();
-      updateEncounter(false);
+      updateEncounter(false, true);
       return;
     }
 
@@ -333,10 +333,10 @@ try {
     if (notBattleReady) {
       return;
     }
-    if (!g('option').idleArena || !g('option').idleArenaValue) {
-      return;
+    if (g('option').idleArena && g('option').idleArenaValue) {
+      startUpdateArena(idleStart);
     }
-    startUpdateArena(idleStart);
+    setTimeout(autoSwitchIsekai, (g('option').isekaiTime * (Math.random() * 20 + 90) / 100) * _1s - (time(0) - idleStart));
   }
 
   // 通用//
@@ -612,7 +612,7 @@ try {
       '.hvAALog{font-size:20px;}',
       '.hvAAPauseUI{top:30px;left:1246px;position:absolute;z-index:9999}',
       '.hvAAButton{top:4px;left:1250px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
-      '#hvAABox{left:calc(50vw - 350px);top:calc(min(100%, 1094px)*0.5 - 269px);font-size:16px!important;z-index:4;width:700px;height:538px;position:fixed;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
+      '#hvAABox{left:310px;top:88px;font-size:16px!important;z-index:4;width:700px;height:538px;position:fixed;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
       '.hvAATablist{position:relative;left:14px;}',
       '.hvAATabmenu{position:absolute;left:-9px;}',
       '.hvAATabmenu>span{display:block;padding:5px 10px;margin:0 10px 0 0;border:1px solid #91a7b4;border-radius:5px;background-color:#E3F1F8;color:#000;text-decoration:none;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;cursor:pointer;}',
@@ -985,7 +985,21 @@ try {
       '  </div>',
       '  <div>3. PW(X) += Log10(1 + <l0>武器攻击中央目标伤害倍率(副手及冲击技能)</l0><l1>乘以武器攻擊中央目標傷害倍率(副手及衝擊技能)</l1><l2>Weapon Attack Central Target Damage Ratio (Offhand & Strike)</l2>)<br><l0>额外伤害比例：</l0><l1>額外傷害比例：</l1><l2>Extra DMG Ratio: </l2><input class="hvAANumber" name="centralExtraRatio" placeholder="0" type="text">%</div>',
       '  <div>4. <l0>优先选择权重最低的目标</l0><l1>優先選擇權重最低的目標</l1><l2>Choose target with lowest rank first</l2><br><l0>BOSS:Yggdrasil额外权重</l0><l1>BOSS:Yggdrasil額外權重</l1><l2>BOSS:Yggdrasil Extra Weight</l2><input class="hvAANumber" name="YggdrasilExtraWeight" placeholder="-1000" type="text" style="width:40px"></div>',
-      '  <div>PS. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a class="hvAAGoto" name="hvAATab-Feedback"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.<br><l0>参考公式为：</l0><l1>參考公式為：</l1><l2>Basic Weight Calculation as: </l2>PW(X) = Log10(<br>  (HP/MaxHPOnField/(1+CentralAttackDamageExtraRatio)<br>  *[HPActualEffectivenessRate:∏(1-debuff),debuff=Im|PA|Bl|Co|Dr|MN|St]<br>  /[DMGActualEffectivenessRate:∏(1-debuff),debuff=We|Bl|Slo|Si|Sl|Co|Dr|MN|St])<br>)</div></div>',
+      '  <div>PS. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a class="hvAAGoto" name="hvAATab-Feedback"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.<br><l0>参考公式为：</l0><l1>參考公式為：</l1><l2>Basic Weight Calculation as: </l2>PW(X) = Log10(<br>  (HP/MaxHPOnField/(1+CentralAttackDamageExtraRatio)<br>  *[HPActualEffectivenessRate:∏(1-debuff),debuff=Im|PA|Bl|Co|Dr|MN|St]<br>  /[DMGActualEffectivenessRate:∏(1-debuff),debuff=We|Bl|Slo|Si|Sl|Co|Dr|MN|St])<br>)</div>',
+      '  <div><l0>显示权重及顺序</l0><l1>顯示權重及順序</l1><l2>DIsplay Weight and order</l2><input id="displayWeight" type="checkbox">',
+      '  <l0>显示背景色</l0><l1>顯示背景色</l1><l2>DIsplay Background Color</l2><input id="displayWeightBackground" type="checkbox"></div>',
+      '  <l0>CSS格式或可eval执行的公式（可用rank, all指代优先级和总优先级数量），例如：</l0><l1>CSS格式或可eval執行的公式（可用rank, all指代優先級和總優先級數量）：例如</l1><l2>In CSS or eval executable formula(use <rank> and <all> to refer priority rank and total rank count)Such as: </l2><br>`hsl(${Math.round(240*rank/Math.max(1,all-1))}deg 50% 50%)`<br>',
+      '  0. <input class="customizeInput" name="weightBackground_0" type="text"><br>',
+      '  1. <input class="customizeInput" name="weightBackground_1" type="text">',
+      '  2. <input class="customizeInput" name="weightBackground_2" type="text">',
+      '  3. <input class="customizeInput" name="weightBackground_3" type="text"><br>',
+      '  4. <input class="customizeInput" name="weightBackground_4" type="text">',
+      '  5. <input class="customizeInput" name="weightBackground_5" type="text">',
+      '  6. <input class="customizeInput" name="weightBackground_6" type="text"><br>',
+      '  7. <input class="customizeInput" name="weightBackground_7" type="text">',
+      '  8. <input class="customizeInput" name="weightBackground_8" type="text">',
+      '  9. <input class="customizeInput" name="weightBackground_9" type="text">',
+      '</div>',
       '<div class="hvAATab hvAACenter" id="hvAATab-Drop">',
       '  <span class="hvAATitle"><l0>掉落监测</l0><l1>掉落監測</l1><l2>Drops Tracking</l2></span><button class="reDropMonitor"><l01>重置</l01><l2>Reset</l2></button>',
       '  <div><l0>记录装备的最低品质</l0><l1>記錄裝備的最低品質</l1><l2>Minimum drop quality</l2>: <select name="dropQuality"><option value="0">Crude</option><option value="1">Fair</option><option value="2">Average</option><option value="3">Superior</option><option value="4">Exquisite</option><option value="5">Magnificent</option><option value="6">Legendary</option><option value="7">Peerless</option></select></div>',
@@ -2089,7 +2103,7 @@ try {
       // 若不启用自动跳转
       return;
     }
-    window.location.href = `${href.slice(0, href.indexOf('.org') + 4)}/${isIsekai ? 'isekai' : ''}/`;
+    window.location.href = `${href.slice(0, href.indexOf('.org') + 4)}/${isIsekai ? '' : 'isekai/' }`;
   }
 
   async function asyncSetAbilityData() {
@@ -2231,7 +2245,7 @@ try {
     }
   }
 
-  async function updateEncounter(engage) {
+  async function updateEncounter(engage, isInBattle) {
     const encounter = getEncounter();
     const encountered = encounter.filter(e => e.encountered && e.href);
     const count = encounter.filter(e => e.href).length;
@@ -2259,7 +2273,9 @@ try {
       const ui = gE('body').appendChild(cE('a'));
       ui.className = 'encounterUI';
       ui.title = `${time(3, last?.time)}\nEncounter Time: ${count}`;
-      ui.href = 'https://e-hentai.org/news.php?encounter';
+      if(!isInBattle) {
+        ui.href = 'https://e-hentai.org/news.php?encounter';
+      }
       // ui.onclick = function () {
       //   if (count >= 24 && _alert(1, '是否重置', '是否重置', 'Whether to reset')) {
       //     setEncounter(undefined);
@@ -2588,6 +2604,7 @@ try {
 
     gE('.hvAALog').innerHTML = [
       `<l0>攻击模式</l0><l1>攻擊模式</l1><l2>Attack Mode</l2>: ${status[g('attackStatus')]}`,
+      `${isIsekai ? '<l0>异世界</l0><l1>異世界</l1><l2>Isekai</l2>' : '<l0>恒定世界</l0><l1>恆定世界</l1><l2>Persistent</l2>'}`, // 战役模式显示
       `${getBattleTypeDisplay()}`, // 战役模式显示
       `R${battle.roundNow}/${battle.roundAll}:T${currentTurn}`,
       `TPS: ${g('runSpeed')}`,
@@ -3814,6 +3831,9 @@ try {
   }
 
   function displayMonsterWeight() {
+    if(!g('option').displayWeight) {
+      return;
+    }
     const status = g('battle').monsterStatus.filter(m => !m.isDead);
     let rank = 0;
 
@@ -3832,7 +3852,18 @@ try {
       if (!gE(`#mkey_${id}`) || !gE(`#mkey_${id}>.btm3`)) {
         return;
       }
-      gE(`#mkey_${id}`).style.cssText += `background: hsl(${Math.round(max * rank / sec)}deg 50% 50%);`;
+      if(g('option').displayWeightBackground) {
+        if(g('option').weightBackground) {
+          let colorText = (g('option').weightBackground[rank] ?? [])[0];
+          try {
+            colorText = eval(colorText.replace('rank', rank).replace('all', weights.length));
+          }
+          catch {
+          }
+          gE(`#mkey_${id}`).style.cssText += `background: ${colorText};`;
+        }
+        // gE(`#mkey_${id}`).style.cssText += `background: hsl(${Math.round(max * rank / sec)}deg 50% 50%);`;
+      }
       gE(`#mkey_${id}>.btm3`).style.cssText += 'display: flex; flex-direction: row;'
       gE(`#mkey_${id}>.btm3`).innerHTML += `<div style='font-weight: bolder; right:0px; position: absolute;'>[${rank}|-${-rank + weights.length - 1}|${s.finWeight.toPrecision(s.finWeight >= 1 ? 5 : 4)}]</div>`;
     });
