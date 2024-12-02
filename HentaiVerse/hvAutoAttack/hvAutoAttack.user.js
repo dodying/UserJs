@@ -988,7 +988,7 @@ try {
       '  <div>PS. <l0>如果你对各Buff权重有特别见解，请务必</l0><l1>如果你對各Buff權重有特別見解，請務必</l1><l2>If you have any suggestions, please </l2><a class="hvAAGoto" name="hvAATab-Feedback"><l0>告诉我</l0><l1>告訴我</l1><l2>let me know</l2></a>.<br><l0>参考公式为：</l0><l1>參考公式為：</l1><l2>Basic Weight Calculation as: </l2>PW(X) = Log10(<br>  (HP/MaxHPOnField/(1+CentralAttackDamageExtraRatio)<br>  *[HPActualEffectivenessRate:∏(1-debuff),debuff=Im|PA|Bl|Co|Dr|MN|St]<br>  /[DMGActualEffectivenessRate:∏(1-debuff),debuff=We|Bl|Slo|Si|Sl|Co|Dr|MN|St])<br>)</div>',
       '  <div><l0>显示权重及顺序</l0><l1>顯示權重及順序</l1><l2>DIsplay Weight and order</l2><input id="displayWeight" type="checkbox">',
       '  <l0>显示优先级背景色</l0><l1>顯示優先級背景色</l1><l2>DIsplay Priority Background Color</l2><input id="displayWeightBackground" type="checkbox"></div>',
-      '  <l0>CSS格式或可eval执行的公式（可用<rank>, <all>指代优先级和总优先级数量），例如：</l0><l1>CSS格式或可eval執行的公式（可用<rank>, <all>指代優先級和總優先級數量）：例如</l1><l2>In CSS or eval executable formula(use <rank> and <all> to refer priority rank and total rank count)Such as: </l2><br>`hsl(${Math.round(240*<rank>/Math.max(1,<all>-1))}deg 50% 50%)`<br>',
+      '  <l0>CSS格式或可eval执行的公式（可用&lt;rank&gt;, &lt;all&gt;指代优先级和总优先级数量, &lt;style_x&gt;指代第x个的相同配置值），例如：</l0><l1>CSS格式或可eval執行的公式（可用&lt;rank&gt;, &lt;all&gt;指代優先級和總優先級數量, &lt;style_x&gt;指代第x個的相同配置值）：例如</l1><l2>CSS or eval executable formula(use &lt;rank&gt; and &lt;all&gt; to refer to priority rank and total rank count, &lt;style_x&gt; to refer to the same option value of option No.x)Such as: </l2><br>`hsl(${Math.round(240*&lt;rank&gt;/Math.max(1,&lt;all&gt;-1))}deg 50% 50%)`<br>',
       '   1. <input class="customizeInput" name="weightBackground_1" type="text"><br>',
       '   2. <input class="customizeInput" name="weightBackground_2" type="text">',
       '   3. <input class="customizeInput" name="weightBackground_3" type="text">',
@@ -3844,6 +3844,14 @@ try {
     })
     const sec = Math.max(1, weights.length - 1);
     const max = 360 * 2 / 3;
+    const colorTextList = [];
+    if (g('option').weightBackground) {
+      status.forEach(s => {
+        const rank = weights.indexOf(s.finWeight);
+        let colorText = (g('option').weightBackground[rank + 1] ?? [])[0];
+        colorTextList[rank] = colorText;
+      });
+    }
     status.forEach(s => {
       const rank = weights.indexOf(s.finWeight);
       const id = getMonsterID(s);
@@ -3852,7 +3860,14 @@ try {
       }
       if (g('option').displayWeightBackground) {
         if (g('option').weightBackground) {
-          let colorText = (g('option').weightBackground[rank + 1] ?? [])[0];
+          let colorText = colorTextList[rank];
+          let remainAttemp = 10; // 避免无穷递归
+          while(remainAttemp > 0 && colorText.indexOf(`<style_`) !== -1){
+            for(let i = 0; i<colorTextList.length; i++) {
+              colorText = colorText.replace(`<style_${i+1}>`, colorTextList[i]);
+            }
+            remainAttemp--;
+          }
           try {
             colorText = eval(colorText.replace('<rank>', rank).replace('<all>', weights.length));
           }
