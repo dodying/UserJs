@@ -3862,7 +3862,7 @@ try {
         if (g('option').weightBackground) {
           let colorText = colorTextList[rank];
           let remainAttemp = 10; // 避免无穷递归
-          while(remainAttemp > 0 && colorText.indexOf(`<style_`) !== -1){
+          while(remainAttemp > 0 && colorText && colorText.indexOf(`<style_`) !== -1){
             for(let i = 0; i<colorTextList.length; i++) {
               colorText = colorText.replace(`<style_${i+1}>`, colorTextList[i]);
             }
