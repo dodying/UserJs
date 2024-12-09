@@ -242,8 +242,7 @@ try {
       gE('.hvAAButton').click();
       return;
     }
-
-    g('option', getValue('option', true));
+    loadOption();
     g('lang', g('option').lang || '0');
     addStyle(g('lang'));
     if (g('option').version !== g('version')) {
@@ -311,6 +310,21 @@ try {
     asyncOnIdle();
   }());
 
+  function loadOption() {
+    let option = getValue('option', true);
+    const aliasDict = {
+      'debuffSkillImAll': 'debuffSkillAllIm',
+      'debuffSkillWeAll': 'debuffSkillAllWk',
+      'debuffSkillAllImCondition': 'debuffSkillImpCondition',
+      'debuffSkillAllWeCondition': 'debuffSkillWkCondition',
+    }
+    for (let key in aliasDict) {
+      option[key] ??= option[aliasDict[key]];
+      option[aliasDict[key]] = undefined;
+    }
+    g('option', setValue('option', option));
+  }
+
   async function asyncOnIdle() {
     let notBattleReady = false;
     const idleStart = time(0);
@@ -351,6 +365,10 @@ try {
     }
     const button = parent.appendChild(cE('button'));
     button.innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
+    if (getValue('disabled')) { // 如果禁用
+      document.title = _alert(-1, 'hvAutoAttack暂停中', 'hvAutoAttack暫停中', 'hvAutoAttack Paused');
+      button.innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
+    }
     button.className = 'pauseChange';
     button.onclick = pauseChange;
   }
@@ -2011,10 +2029,6 @@ try {
     const eventpane = gE('#eventpane');
     const now = time(0);
     let url;
-    // if(!encounter.length){
-    //   console.log(url, now, eventpane);
-    //   return;
-    // }
     if (eventpane) { // 新一天或遭遇战
       url = gE('#eventpane>div>a')?.href.split('/')[3];
       encounter.unshift({ href: url, time: now });
@@ -2804,6 +2818,7 @@ try {
               goto();
               return;
             }
+            console.log(doc, gE('#battle_right', doc), gE('#battle_left', doc));
             gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
             gE('#battle_main').replaceChild(gE('#battle_left', doc), gE('#battle_left'));
             unsafeWindow.battle = new unsafeWindow.Battle();
@@ -2813,23 +2828,6 @@ try {
             onBattle();
           });
 
-          // post(window.location.href, (data) => {
-          //   if (gE('#riddlecounter', data)) {
-          //     if (g('option').riddlePopup && !window.opener) {
-          //       window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
-          //       return;
-          //     }
-          //     goto();
-          //     return;
-          //   }
-          //   gE('#battle_main').replaceChild(gE('#battle_right', data), gE('#battle_right'));
-          //   gE('#battle_main').replaceChild(gE('#battle_left', data), gE('#battle_left'));
-          //   unsafeWindow.battle = new unsafeWindow.Battle();
-          //   unsafeWindow.battle.clear_infopane();
-          //   Debug.log('______________newRound', true);
-          //   newRound(true);
-          //   onBattle();
-          // });
         } else if (g('battle').roundNow === g('battle').roundAll) { // Victory
           setAlarm('Victory');
           delValue(1);
