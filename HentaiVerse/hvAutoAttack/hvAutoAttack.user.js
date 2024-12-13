@@ -2289,7 +2289,7 @@ try {
     const ui = gE('.encounterUI') ?? (() => {
       const ui = gE('body').appendChild(cE('a'));
       ui.className = 'encounterUI';
-      ui.title = `${time(3, last?.time)}\nEncounter Time: ${count}`;
+      ui.title = `${time(3, last?.time ?? 0)}\nEncounter Time: ${count}`;
       if (!isInBattle) {
         ui.href = 'https://e-hentai.org/news.php?encounter';
       }
