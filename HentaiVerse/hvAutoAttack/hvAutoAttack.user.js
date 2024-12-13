@@ -31,7 +31,7 @@
 /* eslint-disable camelcase */
 try {
   if (window.self !== window.top) {
-    if (gE('#riddlecounter') || !gE('#navbar')) {
+    if (!window.top.location.href.match(`/equip/`) && (gE('#riddlecounter') || !gE('#navbar'))) {
       setValue('lastHref', window.top.location.href);
       window.top.location.href = window.self.location.href;
     }
@@ -2023,6 +2023,7 @@ try {
       setValue('url', window.location.origin);
       return true;
     }
+    setValue('lastHV', time(0));
     const isEngage = window.location.href === 'https://e-hentai.org/news.php?encounter';
     const encounter = getEncounter();
     let href = getValue('url') ?? (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
@@ -2276,8 +2277,10 @@ try {
     }
     cd = Math.max(0, cd);
     if (!cd && engage) {
-      onEncounter();
-      return true;
+      if (getValue('lastHV', true) + Math.max(g('option').idleArenaValue, g('option').isekaiTime) <= time(0)) {
+        onEncounter();
+        return true;
+      }
     }
     let interval = cd > _1h ? _1m : cd > _1m ? _1s : 10;
     interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
@@ -2818,9 +2821,13 @@ try {
               goto();
               return;
             }
-            console.log(doc, gE('#battle_right', doc), gE('#battle_left', doc));
-            gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
-            gE('#battle_main').replaceChild(gE('#battle_left', doc), gE('#battle_left'));
+            console.log(window.location.href, doc, gE('#battle_right', doc), gE('#battle_left', doc));
+            // if(gE('#battle_right', doc)) {
+              gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
+            // }
+            // if(gE('#battle_left', doc)) {
+              gE('#battle_main').replaceChild(gE('#battle_left', doc), gE('#battle_left'));
+            // }
             unsafeWindow.battle = new unsafeWindow.Battle();
             unsafeWindow.battle.clear_infopane();
             Debug.log('______________newRound', true);
@@ -3797,7 +3804,7 @@ try {
           if (!ranges) {
             continue;
           }
-          range = ranges[getValue('ability', true)[ab].level];
+          range = ranges[getValue('ability', true)[ab]?.level ?? 0];
           break;
         }
       }
