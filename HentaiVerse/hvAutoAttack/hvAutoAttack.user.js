@@ -2277,7 +2277,7 @@ try {
     }
     cd = Math.max(0, cd);
     if (!cd && engage) {
-      if (getValue('lastHV', true) + Math.max(g('option').idleArenaValue, g('option').isekaiTime) <= time(0)) {
+      if (getValue('lastHV', true) + Math.max(_1m, g('option').idleArenaValue, g('option').isekaiTime) <= time(0)) {
         onEncounter();
         return true;
       }
