@@ -2023,7 +2023,7 @@ try {
       setValue('url', window.location.origin);
       return true;
     }
-    setValue('lastHV', time(0));
+    setValue('lastEH', time(0));
     const isEngage = window.location.href === 'https://e-hentai.org/news.php?encounter';
     const encounter = getEncounter();
     let href = getValue('url') ?? (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
@@ -2266,21 +2266,19 @@ try {
     const count = encounter.filter(e => e.href).length;
 
     const now = time(0);
-    const last = encounter[0];
+    const last = encounter[0]?.time ?? getValue('lastEH', true) ?? 0; // 上次遭遇 或 上次打开EH 或 0
     let cd;
     if (encountered.length >= 24) {
       cd = Math.floor(encounter[0].time / _1d + 1) * _1d - now;
     } else if (!last) {
       cd = 0;
     } else {
-      cd = _1h / 2 + last.time - now;
+      cd = _1h / 2 + last - now;
     }
     cd = Math.max(0, cd);
     if (!cd && engage) {
-      if ((getValue('lastHV', true) ?? 0) + Math.max(_1m, g('option').idleArenaValue, g('option').isekaiTime) <= time(0)) {
-        onEncounter();
-        return true;
-      }
+      onEncounter();
+      return true;
     }
     let interval = cd > _1h ? _1m : cd > _1m ? _1s : 10;
     interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
@@ -2289,7 +2287,7 @@ try {
     const ui = gE('.encounterUI') ?? (() => {
       const ui = gE('body').appendChild(cE('a'));
       ui.className = 'encounterUI';
-      ui.title = `${time(3, last?.time ?? 0)}\nEncounter Time: ${count}`;
+      ui.title = `${time(3, last)}\nEncounter Time: ${count}`;
       if (!isInBattle) {
         ui.href = 'https://e-hentai.org/news.php?encounter';
       }
