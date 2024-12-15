@@ -2311,7 +2311,7 @@ try {
   }
 
   function onEncounter() {
-    if (getValue('battle') || !checkBattleReady(onEncounter, { staminaLow: g('option').staminaEncounter })) {
+    if (getValue('disabled') || getValue('battle') || !checkBattleReady(onEncounter, { staminaLow: g('option').staminaEncounter })) {
       return;
     }
     setEncounter(getEncounter()); // 离开页面前保存
