@@ -2331,12 +2331,13 @@ try {
       timeout -= time(0) - idleStart;
     }
     setTimeout(idleArena, timeout);
-    setTimeout(startUpdateArena, Math.max(0, Math.floor(now / _1d + 1) * _1d - now));
+    const last = getValue('arena', true)?.date ?? now;
+    setTimeout(startUpdateArena, Math.max(0, Math.floor(last / _1d + 1) * _1d - now));
   }
 
   async function updateArena(forceUpdateToken = false) {
     let arena = getValue('arena', true) ?? {};
-    if (!forceUpdateToken && arena && arena.date === time(2)) {
+    if (!forceUpdateToken && arena && time(2, arena.date) === time(2)) {
       return arena;
     }
     arena.token = {};
@@ -2360,7 +2361,7 @@ try {
     if (forceUpdateToken) {
       return setValue('arena', arena);
     }
-    arena.date = time(2);
+    arena.date = time(0);
     arena.gr = g('option').idleArenaGrTime;
     arena.array = g('option').idleArenaValue.split(',') ?? [];
     arena.array.reverse();
