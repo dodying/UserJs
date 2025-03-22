@@ -281,7 +281,7 @@ try {
       Debug.log('______________newRound', false);
       newRound(false);
       if (g('option').recordEach && !getValue('battleCode')) {
-        setValue('battleCode', `${time(1)}: ${g('battle').roundType.toUpperCase()}-${g('battle').roundAll}`);
+        setValue('battleCode', `${time(1)}: ${g('battle')?.roundType?.toUpperCase()}-${g('battle')?.roundAll}`);
       }
       onBattle();
       updateEncounter(false, true);
@@ -753,7 +753,7 @@ try {
       '    <button class="testNotification"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div>',
       '  <div><b><l01>内置插件</l01><l2>Built-in Plugin</l2></b>: ',
       '    <input id="riddleRadio" type="checkbox"><label for="riddleRadio">RiddleLimiter Plus</label>; ',
-      '    <input id="encounter" type="checkbox"><label for="encounter"><l0>自动遭遇战</l0><l1>自動遭遇戰</l1><l2>Auto Encounter</l2></label></div>',
+      '    <input id="encounter" type="checkbox"><label for="encounter"><l0>自动遭遇战</l0><l1>自動遭遇戰</l1><l2>Auto Encounter</l2></label><input id="encounterQuickCheck" type="checkbox"><label for="encounterQuickCheck"><l0>精准倒计时(影响性能)</l0><l1>精準(影響性能)</l1><l2>Precise encounter cd(might reduced performsance)</l2></label></div>',
       '  <div><b><l01>魔法技能</l01><l2>Offensive Magic</l2></b>: <br>',
       '    <l0>中阶技能使用条件</l0><l1>中階技能使用條件</l1><l2>Conditions for 2nd Tier</l2>: {{middleSkillCondition}}',
       '    <l0>高阶技能使用条件</l0><l1>高階技能使用條件</l1><l2>Conditions for 3rd Tier</l2>: {{highSkillCondition}}</div>',
@@ -2299,7 +2299,7 @@ try {
       onEncounter();
       return true;
     }
-    let interval = cd > _1h ? _1m : cd > _1m ? _1s : 100;
+    let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck && cd > _1m) ? _1s : 100;
     interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
     setTimeout(() => updateEncounter(engage), interval);
   }
