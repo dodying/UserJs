@@ -2299,7 +2299,7 @@ try {
       onEncounter();
       return true;
     }
-    let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck && cd > _1m) ? _1s : 100;
+    let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck || cd > _1m) ? _1s : 100;
     interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
     setTimeout(() => updateEncounter(engage), interval);
   }
