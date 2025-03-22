@@ -281,7 +281,7 @@ try {
       Debug.log('______________newRound', false);
       newRound(false);
       if (g('option').recordEach && !getValue('battleCode')) {
-        setValue('battleCode', `${time(1)}: ${g('battle').roundType.toUpperCase()}-${g('battle').roundAll}`);
+        setValue('battleCode', `${time(1)}: ${g('battle')?.roundType?.toUpperCase()}-${g('battle')?.roundAll}`);
       }
       onBattle();
       updateEncounter(false, true);
@@ -626,10 +626,10 @@ try {
     const cssContent = [
       // hvAA
       'l0,l1,l01,l2{display:none;}', // l0: 简体 l1: 繁体 l01:简繁体共用 l2: 英文
-      '#hvAABox2{position:absolute;left:1075px}',
+      '#hvAABox2{position:absolute;left:1075px;padding-top: 6px;}',
       '.hvAALog{font-size:20px;}',
       '.hvAAPauseUI{top:30px;left:1246px;position:absolute;z-index:9999}',
-      '.hvAAButton{top:4px;left:1200px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
+      '.hvAAButton{top:5px;left:1255px;position:absolute;z-index:9999;cursor:pointer;width:48px;height:48px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
       '#hvAABox{left:calc(50% - 350px);top:50px;font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
       '.hvAATablist{position:relative;left:14px;}',
       '.hvAATabmenu{position:absolute;left:-9px;}',
@@ -663,7 +663,7 @@ try {
       '.hvAAcheckItems>input.hvAANumber{width:32px}',
       '.hvAAConfig{width:100%;height:16px;}',
       '.hvAAButtonBox{position:relative;top:468px;}',
-      '.encounterUI{font-weight:bold;font-size:large;position:absolute;top:82px;left:1248px;text-decoration:none;writing-mode: vertical-lr;}',
+      '.encounterUI{font-weight:bold;font-size:10pt;position:absolute;top:58px;left:1240px;text-decoration:none;}',
       '.quickSiteBar{position:absolute;top:0px;left:1290px;font-size:18px;text-align:left;width:165px;height:calc(100% - 10px);display:flex;flex-direction:column;flex-wrap:wrap;}',
       '.quickSiteBar>span{display:block;max-height:24px;overflow:hidden;text-overflow:ellipsis;}',
       '.quickSiteBar>span>a{text-decoration:none;}',
@@ -753,7 +753,7 @@ try {
       '    <button class="testNotification"><l0>预处理</l0><l1>預處理</l1><l2>Pretreat</l2></button></div>',
       '  <div><b><l01>内置插件</l01><l2>Built-in Plugin</l2></b>: ',
       '    <input id="riddleRadio" type="checkbox"><label for="riddleRadio">RiddleLimiter Plus</label>; ',
-      '    <input id="encounter" type="checkbox"><label for="encounter"><l0>自动遭遇战</l0><l1>自動遭遇戰</l1><l2>Auto Encounter</l2></label></div>',
+      '    <input id="encounter" type="checkbox"><label for="encounter"><l0>自动遭遇战</l0><l1>自動遭遇戰</l1><l2>Auto Encounter</l2></label><input id="encounterQuickCheck" type="checkbox"><label for="encounterQuickCheck"><l0>精准倒计时(影响性能)</l0><l1>精準(影響性能)</l1><l2>Precise encounter cd(might reduced performsance)</l2></label></div>',
       '  <div><b><l01>魔法技能</l01><l2>Offensive Magic</l2></b>: <br>',
       '    <l0>中阶技能使用条件</l0><l1>中階技能使用條件</l1><l2>Conditions for 2nd Tier</l2>: {{middleSkillCondition}}',
       '    <l0>高阶技能使用条件</l0><l1>高階技能使用條件</l1><l2>Conditions for 3rd Tier</l2>: {{highSkillCondition}}</div>',
@@ -1873,7 +1873,7 @@ try {
         let result;
         for (let key of paramList) {
           if (!result) {
-            result = g(key) ?? getValue(key);
+            result = g(key) ?? getValue(key) ?? (g('battle') ?? getValue('battle', true))[key];
             continue;
           }
           result = result[key]
@@ -2236,7 +2236,7 @@ try {
     stamina += lastTime ? timeNow - lastTime : 0;
     const stmNR = stamina + 24 - (timeNow % 24);
     cost ??= 0;
-    const stmNRChecked = stmNR - cost >= g('option').staminaLowWithReNat;
+    const stmNRChecked = !cost || stmNR - cost >= g('option').staminaLowWithReNat;
     console.log('stamina with nature recover:', stmNR, '\nnext arena stamina cost: ', cost.toString());
     if (stamina - cost >= (low ?? g('option').staminaLow) && stmNRChecked) {
       return 1;
@@ -2276,14 +2276,6 @@ try {
       cd = _1h / 2 + last - now;
     }
     cd = Math.max(0, cd);
-    if (!cd && engage) {
-      onEncounter();
-      return true;
-    }
-    let interval = cd > _1h ? _1m : cd > _1m ? _1s : 10;
-    interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
-    setTimeout(() => updateEncounter(engage), interval);
-
     const ui = gE('.encounterUI') ?? (() => {
       const ui = gE('body').appendChild(cE('a'));
       ui.className = 'encounterUI';
@@ -2291,11 +2283,6 @@ try {
       if (!isInBattle) {
         ui.href = 'https://e-hentai.org/news.php?encounter';
       }
-      // ui.onclick = function () {
-      //   if (count >= 24 && _alert(1, '是否重置', '是否重置', 'Whether to reset')) {
-      //     setEncounter(undefined);
-      //   }
-      // };
       return ui;
     })();
 
@@ -2308,6 +2295,13 @@ try {
       ui.style.cssText += 'color:unset!important;';
     }
     ui.innerHTML = `${formatTime(cd).slice(0, 2).map(cdi => cdi.toString().padStart(2, '0')).join(`:`)}[${encounter.length ? (count >= 24 ? `☯` : count) : `✪`}${missed ? `-${missed}` : ``}]`;
+    if (!cd && engage) {
+      onEncounter();
+      return true;
+    }
+    let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck && cd > _1m) ? _1s : 100;
+    interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
+    setTimeout(() => updateEncounter(engage), interval);
   }
 
   function onEncounter() {
@@ -2337,8 +2331,8 @@ try {
 
   async function updateArena(forceUpdateToken = false) {
     let arena = getValue('arena', true) ?? {};
-    if (!forceUpdateToken && arena && time(2, arena.date) === time(2)) {
-      return arena;
+    if (!forceUpdateToken && arena && arena.date && time(2, arena.date) === time(2)) {
+      return setValue('arena', arena);
     }
     arena.token = {};
     arena.sites ??= [
