@@ -2236,7 +2236,7 @@ try {
     stamina += lastTime ? timeNow - lastTime : 0;
     const stmNR = stamina + 24 - (timeNow % 24);
     cost ??= 0;
-    const stmNRChecked = stmNR - cost >= g('option').staminaLowWithReNat;
+    const stmNRChecked = !cost || stmNR - cost >= g('option').staminaLowWithReNat;
     console.log('stamina with nature recover:', stmNR, '\nnext arena stamina cost: ', cost.toString());
     if (stamina - cost >= (low ?? g('option').staminaLow) && stmNRChecked) {
       return 1;
@@ -2283,11 +2283,6 @@ try {
       if (!isInBattle) {
         ui.href = 'https://e-hentai.org/news.php?encounter';
       }
-      // ui.onclick = function () {
-      //   if (count >= 24 && _alert(1, '是否重置', '是否重置', 'Whether to reset')) {
-      //     setEncounter(undefined);
-      //   }
-      // };
       return ui;
     })();
 
@@ -2304,7 +2299,7 @@ try {
       onEncounter();
       return true;
     }
-    let interval = cd > _1h ? _1m : cd > _1m ? _1s : 10;
+    let interval = cd > _1h ? _1m : cd > _1m ? _1s : 100;
     interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
     setTimeout(() => updateEncounter(engage), interval);
   }
