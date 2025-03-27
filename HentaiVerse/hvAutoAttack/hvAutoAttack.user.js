@@ -2300,7 +2300,7 @@ try {
       return true;
     }
     let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck || cd > _1m) ? _1s : 100;
-    interval = (interval - cd % interval) / 4; // 让倒计时显示更平滑
+    interval = (g('option').encounterQuickCheck && cd > _1m) ? (interval - cd % interval) / 4 : interval; // 让倒计时显示更平滑
     setTimeout(() => updateEncounter(engage), interval);
   }
 
@@ -3777,18 +3777,9 @@ try {
       else {
         const skill = 1 * (() => {
           let lv = 3;
-          let id = `1${attackStatus}${lv--}`;
-          return 111
-          if (checkCondition(g('option').highSkillCondition) && isOn(id)) {
-            return id;
-          }
-          id = `1${attackStatus}${lv--}`;
-          if (checkCondition(g('option').middleSkillCondition) && isOn(id)) {
-            return id;
-          }
-          id = `1${attackStatus}${lv--}`;
-          if (isOn(id)) {
-            return id;
+          for (let condition of [g('option').highSkillCondition, g('option').middleSkillCondition, true]) {
+            let id = `1${attackStatus}${lv--}`;
+            if (condition && isOn(id)) return id;
           }
         })();
         gE(skill)?.click();
