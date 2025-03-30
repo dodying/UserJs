@@ -2098,7 +2098,7 @@ try {
   function quickSite() { // 快捷站点
     const quickSiteBar = gE('body').appendChild(cE('div'));
     quickSiteBar.className = 'quickSiteBar';
-    quickSiteBar.innerHTML = '<span><a href="javascript:void(0);"class="quickSiteBarToggle">&lt;&lt;</a></span><span><a href="http://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
+    quickSiteBar.innerHTML = '<span><a href="javascript:void(0);"class="quickSiteBarToggle">&lt;&lt;</a></span><span><a href="https://tieba.baidu.com/f?kw=hv网页游戏"target="_blank"><img src="https://www.baidu.com/favicon.ico" class="favicon"></img>贴吧</a></span><span><a href="https://forums.e-hentai.org/index.php?showforum=76"target="_blank"><img src="https://forums.e-hentai.org/favicon.ico" class="favicon"></img>Forums</a></span>';
     if (g('option').quickSite) {
       g('option').quickSite.forEach((site) => {
         quickSiteBar.innerHTML = `${quickSiteBar.innerHTML}<span title="${site.name}"><a href="${site.url}"target="_self">${(site.fav) ? `<img src="${site.fav}"class="favicon"></img>` : ''}${site.name}</a></span>`;
@@ -2473,6 +2473,8 @@ try {
       battle.monsterStatus.sort(objArrSort('order'));
     };
     Debug.log('onBattle', `\n`, JSON.stringify(battle, null, 4));
+
+    //人物状态
     if (gE('#vbh')) {
       g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
       g('mp', gE('#vbm>div>img').offsetWidth / 210 * 100);
@@ -2610,6 +2612,7 @@ try {
       }
       return isTitle ? title : `${(info?.name ?? ['未知', '未知', 'Unknown'])[lang]}:[${title}]${subtype ?? ''}`;
     }
+
     const currentTurn = (battle.turn ?? 0) + 1;
 
     gE('.hvAALog').innerHTML = [
@@ -2792,7 +2795,7 @@ try {
         obj.log = battleLog;
         recordUsage(obj);
       }
-      if (gE('#btcp')) {
+      if (gE('#btcp') || g('monsterAlive')===0) {
         if (g('option').dropMonitor) {
           dropMonitor(battleLog);
         }
@@ -2802,6 +2805,12 @@ try {
         if (g('monsterAlive') > 0) { // Defeat
           setAlarm('Defeat');
           delValue(1);
+        } else  if (g('battle').roundNow === g('battle').roundAll) { // Victory
+          setAlarm('Victory');
+          delValue(1);
+          setTimeout(() => {
+            window.location.href = getValue('lastHref');
+          }, 3 * _1s);
         } else if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
           gE('#pane_completion').removeChild(gE('#btcp'));
           $ajax.fetch(window.location.href).then((html) => {
@@ -2827,13 +2836,6 @@ try {
             newRound(true);
             onBattle();
           });
-
-        } else if (g('battle').roundNow === g('battle').roundAll) { // Victory
-          setAlarm('Victory');
-          delValue(1);
-          setTimeout(() => {
-            window.location.href = getValue('lastHref');
-          }, 3 * _1s);
         }
       } else {
         onBattle();
