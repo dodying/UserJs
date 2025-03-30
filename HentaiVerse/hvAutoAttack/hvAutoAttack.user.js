@@ -2967,6 +2967,9 @@ try {
         }
       }
     }
+
+    const roundPrev = battle.roundNow;
+
     if (battleLog[battleLog.length - 1].textContent.match('Initializing')) {
       const monsterStatus = [];
       let order = 0;
@@ -3022,6 +3025,10 @@ try {
     } else if (!battle.monsterStatus || battle.monsterStatus.length !== gE('div.btm2', 'all').length) {
       battle.roundNow = 1;
       battle.roundAll = 1;
+    }
+
+    if(roundPrev !== battle.roundNow) {
+      battle.turn = 0;
     }
     setValue('battle', battle);
 
