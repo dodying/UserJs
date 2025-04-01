@@ -3786,9 +3786,9 @@ try {
       else {
         const skill = 1 * (() => {
           let lv = 3;
-          for (let condition of [g('option').highSkillCondition, g('option').middleSkillCondition, true]) {
+          for (let condition of [g('option').highSkillCondition, g('option').middleSkillCondition, undefined]) {
             let id = `1${attackStatus}${lv--}`;
-            if (condition && isOn(id)) return id;
+            if (checkCondition(condition) && isOn(id)) return id;
           }
         })();
         gE(skill)?.click();
