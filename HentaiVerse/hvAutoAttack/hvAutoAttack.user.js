@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.19b
+// @version      2.90.19c
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -220,9 +220,7 @@ try {
     },
   };
 
-  window.addEventListener('unhandledrejection', (e) => {
-    console.log($ajax.error || e);
-  });
+  window.addEventListener('unhandledrejection', (e) => { console.log($ajax.error, e); });
 
   (function init() {
     if (!checkIsHV()) {
@@ -761,7 +759,7 @@ try {
       '  <div><input id="turnOffSS" type="checkbox"><label for="turnOffSS"><b><l0>关闭灵动架式</l0><l1>關閉靈動架勢</l1><l2>Turn off Spirit Stance</l2></b></label>: {{turnOffSSCondition}}</div>',
       '  <div><input id="defend" type="checkbox"><label for="defend"><b>Defend</b></label>: {{defendCondition}}</div>',
       '  <div><input id="focus" type="checkbox"><label for="focus"><b>Focus</b></label>: {{focusCondition}}</div>',
-      '  <div><l2>If the page </l2><b><l0>页面停留</l0><l1>頁面停留</l1><l2>stays idle</l2></b><l2> for </l2>: ',
+      '  <div><l2>If the page </l2><b><l0>战斗页面停留</l0><l1>戰鬥頁面停留</l1><l2>Stays idle in battle</l2></b><l2> for </l2>: ',
       '    <input id="delayAlert" type="checkbox"><label for="delayAlert"><input class="hvAANumber" name="delayAlertTime" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2></label>; ',
       '    <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label></div>',
       '  <div><l0>当<b>小马答题</b>时间</l0><l1>當<b>小馬答題</b>時間</l1><l2>If <b>RIDDLE</b> ETR</l2><l0></l0><l1></l1><l2></l2> ≤ <input class="hvAANumber" name="riddleAnswerTime" placeholder="3" type="text"><l0>秒，如果输入框为空则随机生成答案并提交</l0><l1>秒，如果輸入框為空則隨機生成答案並提交</l1><l2>s and no answer has been chosen yet, a random answer will be generated and submitted</l2></div>',
@@ -2823,7 +2821,6 @@ try {
               goto();
               return;
             }
-            console.log(window.location.href, doc, gE('#battle_right', doc), gE('#battle_left', doc));
             // if(gE('#battle_right', doc)) {
               gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
             // }
