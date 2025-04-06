@@ -121,7 +121,6 @@ try {
     queue: [],
 
     fetch: function (url, data, method, context = {}, headers = {}) {
-      console.log(url)
       return new Promise((resolve, reject) => {
         $ajax.add(method, url, data, resolve, reject, context, headers);
       });
