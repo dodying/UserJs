@@ -121,6 +121,7 @@ try {
     queue: [],
 
     fetch: function (url, data, method, context = {}, headers = {}) {
+      console.log(url)
       return new Promise((resolve, reject) => {
         $ajax.add(method, url, data, resolve, reject, context, headers);
       });
@@ -2846,7 +2847,12 @@ try {
       const delay = window.sessionStorage.delay * 1;
       const delay2 = window.sessionStorage.delay2 * 1;
       window.info = a;
-      b.open('POST', `${MAIN_URL}json`);
+      if(window.location.href.startsWith('https://')) {
+        b.open('POST', `${MAIN_URL.replace(/^http:\/\//, 'https://')}json`);
+      }
+      else {
+        b.open('POST', `${MAIN_URL}json`);
+      }
       b.setRequestHeader('Content-Type', 'application/json');
       b.withCredentials = true;
       b.onreadystatechange = d;
