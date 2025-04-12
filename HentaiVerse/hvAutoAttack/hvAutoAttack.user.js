@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.21
+// @version      2.90.22
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -37,7 +37,6 @@ try {
     }
     return;
   }
-
   const Debug = {
     Stack: class extends Error {
       constructor(description, ...params) {
@@ -387,7 +386,7 @@ try {
 
   function formatTime(t, size = 2) {
     t = [t / _1h, (t / _1m) % 60, (t / _1s) % 60, (t % _1s) / 10].map(cdi => Math.floor(cdi));
-    while (t.length > size) { // remove zero front
+    while (t.length > size || !g('option').encounterQuickCheck) { // remove zero front
       const front = t.shift();
       if (!front) {
         continue;
@@ -539,6 +538,15 @@ try {
   function goto() { // 前进
     window.location.href = window.location;
     setTimeout(goto, 5000);
+  }
+  function gotoAlt() {
+    const hv = 'hentaiverse.org';
+    const alt = 'alt.' + hv;
+    if(window.location.host === hv) {
+      window.location.href = window.location.href.replace(`://${hv}`, `://${alt}`)
+    } else if (window.location.host === alt) {
+      window.location.href = window.location.href.replace(`://${alt}`, `://${hv}`)
+    }
   }
   function g(key, value) { // 全局变量
     const hvAA = window.hvAA || {};
@@ -719,7 +727,7 @@ try {
       '  <a href="https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js" target="_blank"><l0>更新历史</l0><l1>更新歷史</l1><l2>ChangeLog</l2></a>',
       '  <l01><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md" target="_blank">使用说明</a></l01><l2><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README_en.md" target="_blank">README</a></l2>',
       '  <select name="lang"><option value="0">简体中文</option><option value="1">繁體中文</option><option value="2">English</option></select>',
-      (g('option').optionStandalone? isIsekai?'<l0>当前为异世界单独配置</l0><l1>當前為異世界單獨配置</l1><l2>Using Isekai standalone option</l2>':'<l0>当前为恒定世界单独配置</l0><l1>當前為恆定世界單獨配置</l1><l2>Using Persistent standalone option</l2>':''),
+      (g('option')?.optionStandalone? isIsekai?'<l0>当前为异世界单独配置</l0><l1>當前為異世界單獨配置</l1><l2>Using Isekai standalone option</l2>':'<l0>当前为恒定世界单独配置</l0><l1>當前為恆定世界單獨配置</l1><l2>Using Persistent standalone option</l2>':''),
       '  <l2><span style="font-size:small;"><a target="_blank" href="https://greasyfork.org/forum/profile/18194/Koko191" style="color:#E3E0D1;background-color:#E3E0D1;" title="Thanks to Koko191 who give help in the translation">by Koko191</a></span></l2></div>',
       '<div class="hvAATablist">',
 
@@ -782,7 +790,8 @@ try {
       '    <button class="staminaLostLog"><l0>精力损失日志</l0><l1>精力損失日誌</l1><l2>staminaLostLog</l2></button></div>',
       '    <div style="display: flex; flex-flow: wrap;"><b><l0>战斗页面停留</l0><l1>戰鬥頁面停留</l1><l2>If the page for </l2></b>: ',
       '      <input id="delayAlert" type="checkbox"><label for="delayAlert"><input class="hvAANumber" name="delayAlertTime" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2></label>; ',
-      '      <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label></div>',
+      '      <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label>',
+      '      <div><input id="delayAlt" type="checkbox"><label for="delayAlt"><input class="hvAANumber" name="delayAltTime" type="text"><l0>秒，切换主服务器与alt服务器</l0><l1>秒，切換主服務器與alt服務器</l1><l2>s, switch between alt.hentaiverse</l2></label></div></div>',
       '  </div>',
 
       '<div class="hvAATab" id="hvAATab-BattleStarter">',
@@ -2315,7 +2324,7 @@ try {
       onEncounter();
       return true;
     }
-    let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck || cd > _1m) ? _1s : 100;
+    let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck || cd > _1m) ? _1s : 80;
     interval = (g('option').encounterQuickCheck && cd > _1m) ? (interval - cd % interval) / 4 : interval; // 让倒计时显示更平滑
     setTimeout(() => updateEncounter(engage), interval);
   }
@@ -2763,17 +2772,20 @@ try {
   }
 
   function reloader() {
-    let delayAlert; let delayReload; let obj; let a; let
-      cost;
+    let delayAlert, delayReload, delayAlt;
+    let obj; let a; let cost;
     const eventStart = cE('a');
     eventStart.id = 'eventStart';
     eventStart.onclick = function () {
       a = unsafeWindow.info;
       if (g('option').delayAlert) {
-        delayAlert = setTimeout(setAlarm, g('option').delayAlertTime * _1s);
+        delayAlert = setTimeout(setAlarm, Math.max(1, g('option').delayAlertTime) * _1s);
       }
       if (g('option').delayReload) {
-        delayReload = setTimeout(goto, g('option').delayReloadTime * _1s);
+        delayReload = setTimeout(goto, Math.max(1, g('option').delayReloadTime) * _1s);
+      }
+      if (g('option').delayAlt) {
+        delayAlt = setTimeout(gotoAlt, Math.max(1, g('option').delayAltTime) * _1s);
       }
       if (g('option').recordUsage) {
         obj = {
@@ -2801,6 +2813,9 @@ try {
       }
       if (g('option').delayReload) {
         clearTimeout(delayReload);
+      }
+      if (g('option').delayAlt) {
+        clearTimeout(delayAlt);
       }
       const monsterDead = gE('img[src*="nbardead"]', 'all').length;
       g('monsterAlive', g('monsterAll') - monsterDead);
