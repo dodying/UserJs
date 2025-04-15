@@ -78,8 +78,6 @@ try {
     }
   }
 
-  Debug.switchRealtimeLog();
-
   const standalone = ['option', 'arena', 'drop', 'stats', 'staminaLostLog', 'battleCode', 'disabled', 'stamina', 'staminaTime', 'lastHref', 'battle', 'monsterDB', 'monsterMID', 'ability'];
   const sharable = ['option'];
   const excludeStandalone = { 'option': ['optionStandalone', 'version', 'lang'] };
