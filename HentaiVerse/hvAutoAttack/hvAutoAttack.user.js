@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22
+// @version      2.90.22.1
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -29,6 +29,7 @@
 // @run-at       document-end
 // ==/UserScript==
 /* eslint-disable camelcase */
+let i=0;
 try {
   if (window.self !== window.top) {
     if (!window.top.location.href.match(`/equip/`) && (gE('#riddlecounter') || !gE('#navbar'))) {
@@ -76,6 +77,8 @@ try {
       }
     }
   }
+
+  Debug.switchRealtimeLog();
 
   const standalone = ['option', 'arena', 'drop', 'stats', 'staminaLostLog', 'battleCode', 'disabled', 'stamina', 'staminaTime', 'lastHref', 'battle', 'monsterDB', 'monsterMID', 'ability'];
   const sharable = ['option'];
@@ -305,6 +308,7 @@ try {
     hvAAPauseUI.classList.add('hvAAPauseUI');
     setPauseUI(hvAAPauseUI);
     asyncOnIdle();
+
   }());
 
   function loadOption() {
@@ -386,7 +390,7 @@ try {
 
   function formatTime(t, size = 2) {
     t = [t / _1h, (t / _1m) % 60, (t / _1s) % 60, (t % _1s) / 10].map(cdi => Math.floor(cdi));
-    while (t.length > size || !g('option').encounterQuickCheck) { // remove zero front
+    while (t.length > Math.max(size, g('option').encounterQuickCheck ? 2 : 3)) { // remove zero front
       const front = t.shift();
       if (!front) {
         continue;
