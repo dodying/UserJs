@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22.1
+// @version      2.90.22.2
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -2032,7 +2032,7 @@ try {
         gE('#riddleanswer').value = answer;
         gE('#riddleanswer+img').click();
       } else {
-        $ajax.fetch(window.location.href, `riddleanswer=${answer}`).then(() => { // 待续
+        $ajax.fetch(window.location.href, `riddleanswer=${answer}`)?.then(() => { // 待续
           window.opener.document.location.href = window.location.href;
           window.close();
         });
@@ -2281,7 +2281,7 @@ try {
     }
     const recover = items[11402] ? 5 : items[11401] ? getValue('staminaHathperk') ? 20 : 10 : 0;
     if (recover && stamina <= (100 - recover)) {
-      $ajax.fetch(window.location.href, 'recover=stamina').then(goto);
+      $ajax.fetch(window.location.href, 'recover=stamina')?.then(goto);
       // post(window.location.href, goto, 'recover=stamina');
       return checked;
     }
@@ -2480,7 +2480,7 @@ try {
     }
     document.title = _alert(-1, '闲置竞技场开始', '閒置競技場開始', 'Idle Arena start');
     setValue('arena', arena);
-    $ajax.fetch(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${arena.token[id]}`).then(goto);
+    $ajax.fetch(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${arena.token[id]}`)?.then(goto);
 
     // post(`?s=Battle&ss=${href}`, goto, `initid=${String(id)}&inittoken=${arena.token[id]}`);
     logSwitchAsyncTask(arguments);
@@ -2852,7 +2852,7 @@ try {
           }, g('option').ExitBattleWaitTime * _1s);
         } else if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
           gE('#pane_completion').removeChild(gE('#btcp'));
-          $ajax.fetch(window.location.href).then((html) => {
+          $ajax.fetch(window.location.href)?.then((html) => {
             const doc = $doc(html)
             if (gE('#riddlecounter', doc)) {
               if (g('option').riddlePopup && !window.opener) {
@@ -2863,16 +2863,17 @@ try {
               return;
             }
             // if(gE('#battle_right', doc)) {
-              gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
+            gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
             // }
             // if(gE('#battle_left', doc)) {
-              gE('#battle_main').replaceChild(gE('#battle_left', doc), gE('#battle_left'));
+            gE('#battle_main').replaceChild(gE('#battle_left', doc), gE('#battle_left'));
             // }
             unsafeWindow.battle = new unsafeWindow.Battle();
             unsafeWindow.battle.clear_infopane();
             Debug.log('______________newRound', true);
             newRound(true);
             onBattle();
+            console.clear();
           });
         }
       } else {
