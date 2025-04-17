@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22.2
+// @version      2.90.22.3
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -29,7 +29,6 @@
 // @run-at       document-end
 // ==/UserScript==
 /* eslint-disable camelcase */
-let i=0;
 try {
   if (window.self !== window.top) {
     if (!window.top.location.href.match(`/equip/`) && (gE('#riddlecounter') || !gE('#navbar'))) {
@@ -38,6 +37,13 @@ try {
     }
     return;
   }
+  try {
+    if(window.location.href.startsWith('https://')) {
+        MAIN_URL = MAIN_URL.replace(/^http:/, /^https:/);
+    } else {
+        MAIN_URL = MAIN_URL.replace(/^https:/, /^http:/);
+    }
+  } catch (e) {}
   const Debug = {
     Stack: class extends Error {
       constructor(description, ...params) {
@@ -125,6 +131,9 @@ try {
         $ajax.add(method, url, data, resolve, reject, context, headers);
       });
     },
+    open: function (url, data, method, context = {}, headers = {}) {
+      $ajax.fetch(url, data, method, context, headers).then(goto).catch(e=>{console.error(e)});
+    },
     repeat: function (count, func, ...args) {
       const list = [];
       for (let i = 0; i < count; i++) {
@@ -133,11 +142,7 @@ try {
       return list;
     },
     add: function (method, url, data, onload, onerror, context = {}, headers = {}) {
-      if (!data) {
-        method = 'GET';
-      } else if (!method) {
-        method = 'POST';
-      }
+      method = !data ? 'GET' : method ?? 'POST';
       if (method === 'POST') {
         headers['Content-Type'] ??= 'application/x-www-form-urlencoded';
         if (data && typeof data === 'object') {
@@ -220,7 +225,7 @@ try {
     },
   };
 
-  window.addEventListener('unhandledrejection', (e) => { console.log($ajax.error, e); });
+  window.addEventListener('unhandledrejection', (e) => { console.error($ajax.error, e); });
 
   (function init() {
     if (!checkIsHV()) {
@@ -381,7 +386,6 @@ try {
       }
       if (e.keyCode === g('option').pauseHotkeyCode) {
         pauseChange();
-        // document.removeEventListener('keydown', pause, false);
       }
     }, false);
   }
@@ -421,7 +425,6 @@ try {
     } if (e === 1) {
       return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
     } if (e === 2) {
-      // date.toLocaleDateString(lang,option);
       return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
     } if (e === 3) {
       return date.toLocaleString(navigator.language, {
@@ -530,7 +533,7 @@ try {
     }
     const itemMap = {
       0: ['disabled'],
-      1: ['battle', 'battleCode', 0],
+      1: ['battle', 'battleCode'],
     }
     for (let item of itemMap[key]) {
       delValue(item);
@@ -561,32 +564,6 @@ try {
     window.hvAA = hvAA;
     return window.hvAA[key];
   }
-
-  // function post(href, func, parm, type) { // post
-  //   let xhr = new window.XMLHttpRequest();
-  //   xhr.open(parm ? 'POST' : 'GET', href);
-  //   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-  //   xhr.responseType = type || 'document';
-  //   xhr.onerror = function () {
-  //     xhr = null;
-  //     post(href, func, parm, type);
-  //   };
-  //   xhr.onload = function (e) {
-  //     if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
-  //       const data = e.target.response;
-  //       if (xhr.responseType === 'document' && gE('#messagebox', data)) {
-  //         if (gE('#messagebox')) {
-  //           gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
-  //         } else {
-  //           gE('#csp').appendChild(gE('#messagebox', data));
-  //         }
-  //       }
-  //       func(data, e);
-  //     }
-  //     xhr = null;
-  //   };
-  //   xhr.send(parm);
-  // }
 
   function objArrSort(key) { // 对象数组排序函数，从小到大排序
     return function (obj1, obj2) {
@@ -696,11 +673,12 @@ try {
       '#riddleform>div:nth-child(3)>img{width:700px;}',
       '#battle_right{overflow:visible;}',
       '#pane_log{height:403px;}',
-      // '#pane_monster{counter-reset:order;}',
-      // '.btm2>div:nth-child(1):before{font-size:30px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
-      // '.btm2>div:nth-child(1)>img{display:none;}'
       '.tlbQRA{text-align:left;font-weight:bold;}', // 标记已检测的日志行
       '.tlbWARN{text-align:left;font-weight:bold;color:red;font-size:20pt;}', // 标记检测出异常的日志行
+       // 怪物标号用数字替代字母，目前弃用
+       // '#pane_monster{counter-reset:order;}',
+       // '.btm2>div:nth-child(1):before{font-size:23px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
+       // '.btm2>div:nth-child(1)>img{display:none;}',
     ].join('');
     globalStyle.textContent = cssContent;
     optionButton(lang);
@@ -784,6 +762,7 @@ try {
       '    <div><input id="autoPause" type="checkbox"><label for="autoPause"><b><l0>自动暂停</l0><l1>自動暫停</l1><l2>Pause</l2></b></label>: {{pauseCondition}}</div>',
       '    <div><input id="autoFlee" type="checkbox"><label for="autoFlee"><b><l0>自动逃跑</l0><l1>自動逃跑</l1><l2>Flee</l2></b></label>: {{fleeCondition}}</div>',
       '    <div><input id="autoSkipDefeated" type="checkbox"><label for="autoSkipDefeated"><b><l0>战败自动退出战斗</l0><l1>戰敗自動退出戰鬥</l1><l2>Exit battle when defeated.</l2></b></label></div>',
+      '    <div><b><l0>继续新回合延时</l0><l1>繼續新回合延時</l1><l2>New round wait time</l2></b>: <input class="hvAANumber" name="NewRoundWaitTime" placeholder="3" type="text"><l0>(秒)</l0><l1>(秒)</l1><l2>(s)</l2></div>',
       '    <div><b><l0>战斗结束退出延时</l0><l1>戰鬥結束退出延時</l1><l2>Exit battle wait time</l2></b>: <input class="hvAANumber" name="ExitBattleWaitTime" placeholder="3" type="text"><l0>(秒)</l0><l1>(秒)</l1><l2>(s)</l2></div>',
       '    <div style="display: flex; flex-flow: wrap;"><b><l0>当损失精力</l0><l1>當損失精力</l1><l2>If it lost Stamina</l2></b> ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text">: ',
       '    <input id="staminaPause" type="checkbox"><label for="staminaPause"><l0>脚本暂停</l0><l1>腳本暫停</l1><l2>pause script</l2></label>;',
@@ -1006,7 +985,10 @@ try {
 
       '<div class="hvAATab" id="hvAATab-Rule">',
       '  <span class="hvAATitle"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></span> <l01><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#攻击规则-示例" target="_blank">示例</a></l01><l2><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README_en.md#attack-rule-example" target="_blank">Example</a></l2>',
-      '  <div>1. <l0>初始血量权重=Log10(目标血量/场上最低血量)<l1>初始血量權重=Log10(目標血量/場上最低血量)</l1><l2>BaseHpWeight = BaseHpRatio*Log10(TargetHP/MaxHPOnField)</l2><br><l0>初始权重系数(>0:低血量优先;<0:高血量优先)</l0><l1>初始權重係數(>0:低血量優先;<0:高血量優先)</l1><l2>BaseHpRatio(>0:low hp first;<0:high hp first)</l2><input class="hvAANumber" name="baseHpRatio" placeholder="1" type="text" style="width:40px"><br><l0>不可命中目标的权重</l0><l1>不可名中目標的權重</l1><l2>Unreachable Target Weight</l2><input class="hvAANumber" name="unreachableWeight" placeholder="1000" type="text" style="width:40px"></div>',
+      '  <div>1. <l0>初始血量权重=Log10(目标血量/场上最低血量)<l1>初始血量權重=Log10(目標血量/場上最低血量)</l1><l2>BaseHpWeight = BaseHpRatio*Log10(TargetHP/MaxHPOnField)</l2><br>',
+      '    <l0>初始权重系数(>0:低血量优先;<0:高血量优先)</l0><l1>初始權重係數(>0:低血量優先;<0:高血量優先)</l1><l2>BaseHpRatio(>0:low hp first;<0:high hp first)</l2><input class="hvAANumber" name="baseHpRatio" placeholder="1" type="text" style="width:40px"><br>',
+      '    <l0>不可命中目标的权重</l0><l1>不可名中目標的權重</l1><l2>Unreachable Target Weight</l2><input class="hvAANumber" name="unreachableWeight" placeholder="1000" type="text" style="width:40px"><br>',
+      '    <input id="cacheMonsterHP" type="checkbox"><label for="cacheMonsterHP"><l0>启用HP缓存</l0><l1>啟用HP緩存</l1><l2>Use HP Cache</l2></label><button class="clearMonsterHPCache"><l0>清空缓存</l0><l1>清空緩存</l1><l2>Clear HP Cache</l2></button></div>',
       '  <div>2. <l0>初始权重与下述各Buff权重相加</l0><l1>初始權重與下述各Buff權重相加</l1><l2>PW(X) = BaseHpWeight + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)</l2><br>',
       '    <l0>虚弱(We)</l0><l1>虛弱(We)</l1><l2>Weaken</l2>: <input class="hvAANumber" name="weight_We" placeholder="12" type="text">',
       '    <l0>致盲(Bl)</l0><l1>致盲(Bl)</l1><l2>Blind</l2>: <input class="hvAANumber" name="weight_Bl" placeholder="10" type="text">',
@@ -1405,6 +1387,11 @@ try {
       audio.src = this.value;
       audio.play();
     };
+    // 标签页-攻击规则
+    gE('.clearMonsterHPCache', optionBox).onclick = function () {
+        delValue('monsterDB');
+        delValue('monsterMID');
+    };
     // 标签页-掉落监测
     gE('.reDropMonitor', optionBox).onclick = function () {
       if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
@@ -1473,7 +1460,6 @@ try {
       }
       delete backups[code];
       setValue('backup', backups);
-      // goto();
       rmListItem(code);
     };
     gE('.hvAAExport', optionBox).onclick = function () {
@@ -1490,7 +1476,6 @@ try {
         goto();
       }
     };
-    //
     gE('.hvAAReset', optionBox).onclick = function () {
       if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
         delValue('option');
@@ -2032,14 +2017,10 @@ try {
         gE('#riddleanswer').value = answer;
         gE('#riddleanswer+img').click();
       } else {
-        $ajax.fetch(window.location.href, `riddleanswer=${answer}`)?.then(() => { // 待续
+        $ajax.fetch(window.location.href, `riddleanswer=${answer}`).then(() => { // 待续
           window.opener.document.location.href = window.location.href;
           window.close();
-        });
-        // post(window.location.href, () => { // 待续
-        //   window.opener.document.location.href = window.location.href;
-        //   window.close();
-        // }, `riddleanswer=${answer}`);
+        }).catch(e=>console.error(e));
       }
     }
   }
@@ -2281,8 +2262,8 @@ try {
     }
     const recover = items[11402] ? 5 : items[11401] ? getValue('staminaHathperk') ? 20 : 10 : 0;
     if (recover && stamina <= (100 - recover)) {
-      $ajax.fetch(window.location.href, 'recover=stamina')?.then(goto);
-      // post(window.location.href, goto, 'recover=stamina');
+      console.log(`____`,1)
+      $ajax.open(window.location.href, 'recover=stamina');
       return checked;
     }
   }
@@ -2322,7 +2303,7 @@ try {
       ui.style.cssText += 'color:unset!important;';
     }
     ui.innerHTML = `${formatTime(cd).slice(0, 2).map(cdi => cdi.toString().padStart(2, '0')).join(`:`)}[${encounter.length ? (count >= 24 ? `☯` : count) : `✪`}${missed ? `-${missed}` : ``}]`;
-    if (!cd && engage) {
+    if (engage && !cd) {
       onEncounter();
       return true;
     }
@@ -2390,8 +2371,9 @@ try {
   }
 
   function checkBattleReady(method, condition = {}) {
+    console.log(method)
     if (getValue('disabled')) {
-      setTimeout(method, 1000);
+      setTimeout(method, _1s);
       return;
     }
     if (condition.checkEncounter && getEncounter()[0]?.href && !getEncounter()[0]?.encountered) {
@@ -2480,9 +2462,7 @@ try {
     }
     document.title = _alert(-1, '闲置竞技场开始', '閒置競技場開始', 'Idle Arena start');
     setValue('arena', arena);
-    $ajax.fetch(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${arena.token[id]}`)?.then(goto);
-
-    // post(`?s=Battle&ss=${href}`, goto, `initid=${String(id)}&inittoken=${arena.token[id]}`);
+    $ajax.open(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${arena.token[id]}`);
     logSwitchAsyncTask(arguments);
   }
 
@@ -2714,7 +2694,6 @@ try {
     let msTemp = JSON.parse(JSON.stringify(g('battle').monsterStatus));
     msTemp.sort(objArrSort('order'));
     let unreachableWeight = g('option').unreachableWeight;
-    // TODO 未命中的权重优化
     let minRank;
     for (let i = order - range; i <= order + range; i++) {
       if (i < 0 || i >= msTemp.length || msTemp[i].isDead) {
@@ -2760,6 +2739,7 @@ try {
       if (gE('.pauseChange')) {
         gE('.pauseChange').innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
       }
+      document.title = getValue('disabled');
       delValue(0);
       if (!gE('#navbar')) { // in battle
         onBattle();
@@ -2768,7 +2748,7 @@ try {
       if (gE('.pauseChange')) {
         gE('.pauseChange').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
       }
-      setValue('disabled', true);
+      setValue('disabled', document.title);
       document.title = _alert(-1, 'hvAutoAttack暂停中', 'hvAutoAttack暫停中', 'hvAutoAttack Paused');
     }
   }
@@ -2851,30 +2831,40 @@ try {
             window.location.href = getValue('lastHref');
           }, g('option').ExitBattleWaitTime * _1s);
         } else if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
-          gE('#pane_completion').removeChild(gE('#btcp'));
-          $ajax.fetch(window.location.href)?.then((html) => {
-            const doc = $doc(html)
-            if (gE('#riddlecounter', doc)) {
-              if (g('option').riddlePopup && !window.opener) {
-                window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
+          setTimeout(async ()=>{
+            gE('#pane_completion').removeChild(gE('#btcp'));
+            let i=0;
+            const html = await $ajax.fetch(window.location.href);
+            console.log('___________________',i++, html);
+            try{
+              const doc = $doc(html)
+              console.log('___________________',i++, doc);
+              if (gE('#riddlecounter', doc)) {
+                if (g('option').riddlePopup && !window.opener) {
+                  window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
+                  return;
+                }
+                goto();
                 return;
               }
-              goto();
-              return;
+              console.log('___________________',i++);
+              ['#battle_right', '#battle_left'].forEach(selector=>{
+                // TODO 确认是否需要#battle_right/#battle_left 为空的情况处理
+                // if(gE(selector, doc)) return;
+                gE('#battle_main').replaceChild(gE(selector, doc), gE(selector));
+              })
+              console.log('___________________',i++);
+              unsafeWindow.battle = new unsafeWindow.Battle();
+              unsafeWindow.battle.clear_infopane();
+              Debug.log('______________newRound', true);
+              newRound(true);
+              console.log('___________________',i++);
+              onBattle();
+              console.clear();
+            } catch(e) {
+              e=>console.error(e)
             }
-            // if(gE('#battle_right', doc)) {
-            gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
-            // }
-            // if(gE('#battle_left', doc)) {
-            gE('#battle_main').replaceChild(gE('#battle_left', doc), gE('#battle_left'));
-            // }
-            unsafeWindow.battle = new unsafeWindow.Battle();
-            unsafeWindow.battle.clear_infopane();
-            Debug.log('______________newRound', true);
-            newRound(true);
-            onBattle();
-            console.clear();
-          });
+          }, g('option').NewRoundWaitTime * _1s)
         }
       } else {
         onBattle();
@@ -2888,12 +2878,7 @@ try {
       const delay = window.sessionStorage.delay * 1;
       const delay2 = window.sessionStorage.delay2 * 1;
       window.info = a;
-      if(window.location.href.startsWith('https://')) {
-        b.open('POST', `${MAIN_URL.replace(/^http:\/\//, 'https://')}json`);
-      }
-      else {
-        b.open('POST', `${MAIN_URL}json`);
-      }
+      b.open('POST', `${MAIN_URL}json`);
       b.setRequestHeader('Content-Type', 'application/json');
       b.withCredentials = true;
       b.onreadystatechange = d;
@@ -3050,11 +3035,13 @@ try {
         };
         order++;
       }
-      if (oldDB !== JSON.stringify(monsterDB)) {
-        setValue('monsterDB', monsterDB);
-      }
-      if (oldMID !== JSON.stringify(monsterMID)) {
-        setValue('monsterMID', monsterMID);
+      if(g('option').cacheMonsterHP){
+        if (oldDB !== JSON.stringify(monsterDB)) {
+          setValue('monsterDB', monsterDB);
+        }
+        if (oldMID !== JSON.stringify(monsterMID)) {
+          setValue('monsterMID', monsterMID);
+        }
       }
       battle.monsterStatus = monsterStatus;
 
@@ -3187,7 +3174,7 @@ try {
       let weight = baseHpRatio * Math.log10(monsterStatus[i].hpNow / hpMin); // > 0 生命越低权重越低优先级越高
       monsterStatus[i].hpWeight = weight;
       if (yggdrasilExtraWeight && ('Yggdrasil' === gE('div.btm3>div>div', monsterBuff[i].parentNode).innerText || '世界树 Yggdrasil' === gE('div.btm3>div>div', monsterBuff[i].parentNode).innerText)) { // 默认设置下，任何情况都优先击杀群体大量回血的boss"Yggdrasil"
-        weight += yggdrasilExtraWeight; // defalut -1000
+        weight += yggdrasilExtraWeight; // yggdrasilExtraWeight.defalut -1000
       }
       for (j in skillLib) {
         if (gE(`img[src*="${skillLib[j].img}"]`, monsterBuff[i])) {
@@ -3851,8 +3838,9 @@ try {
   }
 
   function getHPFromMonsterDB(mdb, name, lv) {
-    /////////////////// TODO: 根据lv模糊推测
-    return mdb ? mdb[name] ? mdb[name][lv] : undefined : undefined;
+    let hp = (mdb && mdb[name]) ? mdb[name][lv] : undefined;
+    // TODO: 根据lv模糊推测
+    return hp;
   }
 
   function fixMonsterStatus() { // 修复monsterStatus
@@ -3917,7 +3905,6 @@ try {
           }
           gE(`#mkey_${id}`).style.cssText += `background: ${colorText};`;
         }
-        // gE(`#mkey_${id}`).style.cssText += `background: hsl(${Math.round(max * rank / sec)}deg 50% 50%);`;
       }
       gE(`#mkey_${id}>.btm3`).style.cssText += 'display: flex; flex-direction: row;'
       if (g('option').displayWeight) {
@@ -3927,7 +3914,6 @@ try {
   }
 
   function displayPlayStatePercentage() {
-    // const ocPoints = gE('#vcp');
     const barHP = gE('#vbh') ?? gE('#dvbh');
     const barMP = gE('#vbm') ?? gE('#dvbm');
     const barSP = gE('#vbs') ?? gE('#dvbs');
@@ -4100,7 +4086,6 @@ try {
           stats.hurt._mavg = Math.round(stats.hurt._mtotal / stats.hurt._mcount);
         }
       } else if (text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for \d+( .*)? damage/) || text.match(/^You .* for \d+ .* damage/)) {
-        // text.match(/for \d+ .* damage/);
         reg = text.match(/for (\d+)( .*)? damage/);
         magic = text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ -]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1];
         point = reg[1] * 1;
