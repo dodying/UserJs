@@ -762,7 +762,7 @@ try {
       '    <div><input id="autoPause" type="checkbox"><label for="autoPause"><b><l0>自动暂停</l0><l1>自動暫停</l1><l2>Pause</l2></b></label>: {{pauseCondition}}</div>',
       '    <div><input id="autoFlee" type="checkbox"><label for="autoFlee"><b><l0>自动逃跑</l0><l1>自動逃跑</l1><l2>Flee</l2></b></label>: {{fleeCondition}}</div>',
       '    <div><input id="autoSkipDefeated" type="checkbox"><label for="autoSkipDefeated"><b><l0>战败自动退出战斗</l0><l1>戰敗自動退出戰鬥</l1><l2>Exit battle when defeated.</l2></b></label></div>',
-      '    <div><b><l0>继续新回合延时</l0><l1>繼續新回合延時</l1><l2>New round wait time</l2></b>: <input class="hvAANumber" name="NewRoundWaitTime" placeholder="3" type="text"><l0>(秒)</l0><l1>(秒)</l1><l2>(s)</l2></div>',
+      '    <div><b><l0>继续新回合延时</l0><l1>繼續新回合延時</l1><l2>New round wait time</l2></b>: <input class="hvAANumber" name="NewRoundWaitTime" placeholder="0" type="text"><l0>(秒)</l0><l1>(秒)</l1><l2>(s)</l2></div>',
       '    <div><b><l0>战斗结束退出延时</l0><l1>戰鬥結束退出延時</l1><l2>Exit battle wait time</l2></b>: <input class="hvAANumber" name="ExitBattleWaitTime" placeholder="3" type="text"><l0>(秒)</l0><l1>(秒)</l1><l2>(s)</l2></div>',
       '    <div style="display: flex; flex-flow: wrap;"><b><l0>当损失精力</l0><l1>當損失精力</l1><l2>If it lost Stamina</l2></b> ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text">: ',
       '    <input id="staminaPause" type="checkbox"><label for="staminaPause"><l0>脚本暂停</l0><l1>腳本暫停</l1><l2>pause script</l2></label>;',
