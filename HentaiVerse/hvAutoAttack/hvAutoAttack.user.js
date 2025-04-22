@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22.3
+// @version      2.90.22.4
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -39,9 +39,9 @@ try {
   }
   try {
     if(window.location.href.startsWith('https://')) {
-        MAIN_URL = MAIN_URL.replace(/^http:/, /^https:/);
+      MAIN_URL = MAIN_URL.replace(/^http:/, /^https:/);
     } else {
-        MAIN_URL = MAIN_URL.replace(/^https:/, /^http:/);
+      MAIN_URL = MAIN_URL.replace(/^https:/, /^http:/);
     }
   } catch (e) {}
   const Debug = {
@@ -321,32 +321,44 @@ try {
       'debuffSkillWeAll': 'debuffSkillAllWk',
       'debuffSkillAllImCondition': 'debuffSkillImpCondition',
       'debuffSkillAllWeCondition': 'debuffSkillWkCondition',
+      'battleUnresponsive_Alert': 'delayAlert',
+      'battleUnresponsive_Reload': 'delayReload',
+      'battleUnresponsive_Alt': 'delayAlt',
+      'battleUnresponsiveTime_Alert': 'delayAlertTime',
+      'battleUnresponsiveTime_Reload': 'delayReloadTime',
+      'battleUnresponsiveTime_Alt': 'delayAltTime',
     }
     for (let key in aliasDict) {
-      option[key] ??= option[aliasDict[key]];
-      option[aliasDict[key]] = undefined;
+      const itemArray = key.split('_');
+      if (itemArray.length === 1) {
+        option[key] ??= option[aliasDict[key]];
+        option[aliasDict[key]] = undefined;
+      } else {
+        option[itemArray[0]] ??= {};
+        option[itemArray[0]][itemArray[1]] ??= option[aliasDict[key]];
+      }
     }
     g('option', setValue('option', option));
   }
 
-  async function asyncOnIdle() {
+  async function asyncOnIdle() { try {
     let notBattleReady = false;
     const idleStart = time(0);
     await Promise.all([
-      (async () => {
+      (async () => { try {
         await asyncGetItems();
         const checked = await asyncCheckSupply();
         notBattleReady ||= !checked;
-      })(),
+      } catch (e) {console.error(e)}})(),
       asyncSetStamina(),
       asyncSetEnergyDrinkHathperk(),
       asyncSetAbilityData(),
       updateArena(),
       updateEncounter(g('option').encounter),
-      (async () => {
+      (async () => { try {
         const checked = await asyncCheckRepair();
         notBattleReady ||= !checked;
-      })(),
+      } catch (e) {console.error(e)}})(),
     ]);
     if (notBattleReady) {
       return;
@@ -355,7 +367,7 @@ try {
       startUpdateArena(idleStart);
     }
     setTimeout(autoSwitchIsekai, (g('option').isekaiTime * (Math.random() * 20 + 90) / 100) * _1s - (time(0) - idleStart));
-  }
+  } catch (e) {console.error(e)}}
 
   // 通用//
   function setPauseUI(parent) {
@@ -614,7 +626,7 @@ try {
       '#hvAABox2{position:absolute;left:1075px;padding-top: 6px;}',
       '.hvAALog{font-size:20px;}',
       '.hvAAPauseUI{top:30px;left:1246px;position:absolute;z-index:9999}',
-      '.hvAAButton{top:5px;left:1255px;position:absolute;z-index:9999;cursor:pointer;width:48px;height:48px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
+      '.hvAAButton{top:5px;left:1255px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
       '#hvAABox{left:calc(50% - 350px);top:50px;font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
       '.hvAATablist{position:relative;left:14px;}',
       '.hvAATabmenu{position:absolute;left:-9px;}',
@@ -675,10 +687,10 @@ try {
       '#pane_log{height:403px;}',
       '.tlbQRA{text-align:left;font-weight:bold;}', // 标记已检测的日志行
       '.tlbWARN{text-align:left;font-weight:bold;color:red;font-size:20pt;}', // 标记检测出异常的日志行
-       // 怪物标号用数字替代字母，目前弃用
-       // '#pane_monster{counter-reset:order;}',
-       // '.btm2>div:nth-child(1):before{font-size:23px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
-       // '.btm2>div:nth-child(1)>img{display:none;}',
+      // 怪物标号用数字替代字母，目前弃用
+      // '#pane_monster{counter-reset:order;}',
+      // '.btm2>div:nth-child(1):before{font-size:23px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
+      // '.btm2>div:nth-child(1)>img{display:none;}',
     ].join('');
     globalStyle.textContent = cssContent;
     optionButton(lang);
@@ -770,9 +782,9 @@ try {
       '    <input id="staminaFlee" type="checkbox"><label for="staminaFlee"><l01>逃跑</l01><l2>flee</l2></label>',
       '    <button class="staminaLostLog"><l0>精力损失日志</l0><l1>精力損失日誌</l1><l2>staminaLostLog</l2></button></div>',
       '    <div style="display: flex; flex-flow: wrap;"><b><l0>战斗页面停留</l0><l1>戰鬥頁面停留</l1><l2>If the page for </l2></b>: ',
-      '      <input id="delayAlert" type="checkbox"><label for="delayAlert"><input class="hvAANumber" name="delayAlertTime" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2></label>; ',
-      '      <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label>',
-      '      <div><input id="delayAlt" type="checkbox"><label for="delayAlt"><input class="hvAANumber" name="delayAltTime" type="text"><l0>秒，切换主服务器与alt服务器</l0><l1>秒，切換主服務器與alt服務器</l1><l2>s, switch between alt.hentaiverse</l2></label></div></div>',
+      '      <input id="battleUnresponsive_Alert" type="checkbox"><label for="battleUnresponsive_Alert"><input class="hvAANumber" name="battleUnresponsiveTime_Alert" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2></label>; ',
+      '      <input id="battleUnresponsive_Reload" type="checkbox"><label for="battleUnresponsive_Reload"><input class="hvAANumber" name="battleUnresponsiveTime_Reload" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label>',
+      '      <div><input id="battleUnresponsive_Alt" type="checkbox"><label for="battleUnresponsive_Alt"><input class="hvAANumber" name="battleUnresponsiveTime_Alt" type="text"><l0>秒，切换主服务器与alt服务器</l0><l1>秒，切換主服務器與alt服務器</l1><l2>s, switch between alt.hentaiverse</l2></label></div></div>',
       '  </div>',
 
       '<div class="hvAATab" id="hvAATab-BattleStarter">',
@@ -919,7 +931,7 @@ try {
       '  </div>',
 
       '<div class="hvAATab" id="hvAATab-Debuff">',
-      '  <div><l0>持续</l0><l1>持續</l1><l2>Expire</l2> Turns: <input id="debuffSkillTurnAlert" type="checkbox"><label for="debuffSkillTurnAlert"><l0>无法正常施放DEBUFF技能时，警报</l0><l1>無法正常施放DEBUFF技能時，警報</l1><l2>If it can not cast de-skills normally, alert.</l2></label><br>',
+      '  <div><input id="debuffSkillTurnAlert" type="checkbox"><label for="debuffSkillTurnAlert"><l0>剩余Turns低于阈值时警报</l0><l1>剩餘Turns低於閾值時警報</l1><l2>Alert when remain expire turns less than threshold</l2></label><br>',
       '    <l0>沉眠(Sl)</l0><l1>沉眠(Sl)</l1><l2>Sleep</l2>: <input class="hvAANumber" name="debuffSkillTurn_Sle" type="text">',
       '    <l0>致盲(Bl)</l0><l1>致盲(Bl)</l1><l2>Blind</l2>: <input class="hvAANumber" name="debuffSkillTurn_Bl" type="text">',
       '    <l0>缓慢(Slo)</l0><l1>緩慢(Slo)</l1><l2>Slow</l2>: <input class="hvAANumber" name="debuffSkillTurn_Slo" type="text"><br>',
@@ -1069,7 +1081,7 @@ try {
       const target = (e.target.tagName === 'SPAN') ? e.target : e.target.parentNode;
       const name = target.getAttribute('name');
       let i; let
-        _html;
+      _html;
       if (name === 'Drop') { // 掉落监测
         let drop = getValue('drop', true) || {};
         const dropOld = getValue('dropOld', true) || [];
@@ -1389,8 +1401,8 @@ try {
     };
     // 标签页-攻击规则
     gE('.clearMonsterHPCache', optionBox).onclick = function () {
-        delValue('monsterDB');
-        delValue('monsterMID');
+      delValue('monsterDB');
+      delValue('monsterMID');
     };
     // 标签页-掉落监测
     gE('.reDropMonitor', optionBox).onclick = function () {
@@ -1496,7 +1508,7 @@ try {
       };
       let inputs = gE('input,select', 'all', optionBox);
       let itemName; let itemArray; let itemValue; let
-        i;
+      i;
       for (i = 0; i < inputs.length; i++) {
         if (inputs[i].className === 'hvAADebug') {
           continue;
@@ -1562,11 +1574,11 @@ try {
     };
     if (g('option')) {
       let i; let j; let
-        k;
+      k;
       const _option = g('option');
       const inputs = gE('input,select', 'all', optionBox);
       let itemName; let itemArray; let itemValue; let
-        _html;
+      _html;
       for (i = 0; i < inputs.length; i++) {
         if (inputs[i].className === 'hvAADebug') {
           continue;
@@ -1872,7 +1884,7 @@ try {
       return true;
     }
     let i; let j; let
-      k;
+    k;
     const result = [];
     const returnValue = function (str) {
       if (str.match(/^_/)) {
@@ -2129,12 +2141,12 @@ try {
     window.location.href = `${href.slice(0, href.indexOf('.org') + 4)}/${isIsekai ? '' : 'isekai/'}`;
   }
 
-  async function asyncSetAbilityData() {
+  async function asyncSetAbilityData() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('?s=Character&ss=ab');
     const doc = $doc(html);
     let ability = {};
-    await Promise.all(Array.from(gE('#ability_treelist>div>img', 'all', doc)).map(async img => {
+    await Promise.all(Array.from(gE('#ability_treelist>div>img', 'all', doc)).map(async img => { try {
       const _ = img.getAttribute('onclick')?.match(/(\?s=(.*)tree=(.*))'/);
       const [href, type] = _ ? [_[1], _[3]] : ['?s=Character&ss=ab&tree=general', 'general'];
       const html = await $ajax.fetch(href);
@@ -2148,12 +2160,12 @@ try {
           level: Array.from(gE('.aw1,.aw2,.aw3,.aw4,.aw5,.aw6,.aw7,.aw8,.aw9,.aw10', parent).children).map(div => div.style.cssText.indexOf('f.png') === -1 ? 0 : 1).reduce((x, y) => x + y),
         }
       });
-    }));
+    } catch (e) {console.error(e)}}));
     setValue('ability', ability);
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncSetEnergyDrinkHathperk() {
+  async function asyncSetEnergyDrinkHathperk() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('https://e-hentai.org/hathperks.php');
     const doc = $doc(html);
@@ -2163,17 +2175,17 @@ try {
     }
     setValue('staminaHathperk', perks[25].innerHTML.includes('Obtained'));
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncSetStamina() {
+  async function asyncSetStamina() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch(window.location.href);
     setValue('staminaTime', Math.floor(time(0) / 1000 / 60 / 60));
     setValue('stamina', gE('#stamina_readout .fc4.far>div', $doc(html)).textContent.match(/\d+/)[0] * 1);
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncGetItems() {
+  async function asyncGetItems() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('?s=Character&ss=it');
     const items = {};
@@ -2185,9 +2197,9 @@ try {
     }
     g('items', items);
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncCheckSupply() {
+  async function asyncCheckSupply() { try {
     if (!g('option').checkSupply) {
       return true;
     }
@@ -2213,29 +2225,29 @@ try {
     }
     logSwitchAsyncTask(arguments);
     return !needs.length;
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncCheckRepair() {
+  async function asyncCheckRepair() { try {
     if (!g('option').repair) {
       return true;
     }
     logSwitchAsyncTask(arguments);
     const doc = $doc(await $ajax.fetch('?s=Forge&ss=re'));
     const json = JSON.parse((await $ajax.fetch(gE('#mainpane>script[src]', doc).src)).match(/{.*}/)[0]);
-    const eqps = (await Promise.all(Array.from(gE('.eqp>[id]', 'all', doc)).map(async eqp => {
+    const eqps = (await Promise.all(Array.from(gE('.eqp>[id]', 'all', doc)).map(async eqp => { try {
       const id = eqp.id.match(/\d+/)[0];
       const condition = 1 * json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1];
       if (condition > g('option').repairValue) {
         return;
       }
       return gE('.messagebox_error', $doc(await $ajax.fetch(`?s=Forge&ss=re`, `select_item=${id}`)))?.innerText ? undefined : id;
-    }))).filter(e => e);
+    } catch (e) {console.error(e)}}))).filter(e => e);
     if (eqps.length) {
       console.log('eqps need repair: ', eqps);
     }
     logSwitchAsyncTask(arguments);
     return !eqps.length;
-  }
+  } catch (e) {console.error(e)}}
 
   function checkStamina(low, cost) {
     let stamina = getValue('stamina');
@@ -2262,13 +2274,12 @@ try {
     }
     const recover = items[11402] ? 5 : items[11401] ? getValue('staminaHathperk') ? 20 : 10 : 0;
     if (recover && stamina <= (100 - recover)) {
-      console.log(`____`,1)
       $ajax.open(window.location.href, 'recover=stamina');
       return checked;
     }
   }
 
-  async function updateEncounter(engage, isInBattle) {
+  async function updateEncounter(engage, isInBattle) { try {
     const encounter = getEncounter();
     const encountered = encounter.filter(e => e.encountered && e.href);
     const count = encounter.filter(e => e.href).length;
@@ -2310,7 +2321,7 @@ try {
     let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck || cd > _1m) ? _1s : 80;
     interval = (g('option').encounterQuickCheck && cd > _1m) ? (interval - cd % interval) / 4 : interval; // 让倒计时显示更平滑
     setTimeout(() => updateEncounter(engage), interval);
-  }
+  } catch (e) {console.error(e)}}
 
   function onEncounter() {
     if (getValue('disabled') || getValue('battle') || !checkBattleReady(onEncounter, { staminaLow: g('option').staminaEncounter })) {
@@ -2321,7 +2332,7 @@ try {
     openUrl('https://e-hentai.org/news.php?encounter');
   }
 
-  async function startUpdateArena(idleStart) {
+  async function startUpdateArena(idleStart) { try {
     const now = time(0);
     console.log('startUpdateArena now', now, idleStart);
     if (!idleStart) {
@@ -2335,9 +2346,9 @@ try {
     setTimeout(idleArena, timeout);
     const last = getValue('arena', true)?.date ?? now;
     setTimeout(startUpdateArena, Math.max(0, Math.floor(last / _1d + 1) * _1d - now));
-  }
+  } catch (e) {console.error(e)}}
 
-  async function updateArena(forceUpdateToken = false) {
+  async function updateArena(forceUpdateToken = false) { try {
     let arena = getValue('arena', true) ?? {};
     if (!forceUpdateToken && arena && arena.date && time(2, arena.date) === time(2)) {
       return setValue('arena', arena);
@@ -2349,7 +2360,7 @@ try {
       '?s=Battle&ss=ar&page=2',
       '?s=Battle&ss=rb'
     ]
-    await Promise.all(arena.sites.map(async site => {
+    await Promise.all(arena.sites.map(async site => { try {
       const doc = $doc(await $ajax.fetch(site));
       if (site === '?s=Battle&ss=gr') {
         arena.token.gr = gE('img[src*="startgrindfest.png"]', doc).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
@@ -2359,7 +2370,7 @@ try {
         const temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
         arena.token[temp[1]] = temp[2];
       });
-    }));
+    } catch (e) {console.error(e)}}));
     if (forceUpdateToken) {
       return setValue('arena', arena);
     }
@@ -2368,10 +2379,9 @@ try {
     arena.array = g('option').idleArenaValue.split(',') ?? [];
     arena.array.reverse();
     return setValue('arena', arena);
-  }
+  } catch (e) {console.error(e)}}
 
   function checkBattleReady(method, condition = {}) {
-    console.log(method)
     if (getValue('disabled')) {
       setTimeout(method, _1s);
       return;
@@ -2387,7 +2397,7 @@ try {
     setTimeout(method, Math.floor(time(0) / _1h + 1) * _1h - time(0));
   }
 
-  async function idleArena() { // 闲置竞技场
+  async function idleArena() { try { // 闲置竞技场
     let arena = getValue('arena', true);
     console.log('arena:', getValue('arena', true));
     if (arena.array.length === 0) {
@@ -2438,12 +2448,14 @@ try {
     staminaCost.gr += 1
 
     let href, cost;
+    let token = arena.token[id];
     if (id === 'gr') {
       if (arena.gr <= 0) {
         setValue('arena', arena);
         idleArena();
         return;
       }
+      arena.array.unshift('gr');
       arena.gr--;
       href = 'gr';
       id = 1;
@@ -2462,9 +2474,9 @@ try {
     }
     document.title = _alert(-1, '闲置竞技场开始', '閒置競技場開始', 'Idle Arena start');
     setValue('arena', arena);
-    $ajax.open(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${arena.token[id]}`);
+    $ajax.open(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${token}`);
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
   // 战斗中//
   function onBattle() { // 主程序
@@ -2480,7 +2492,6 @@ try {
       battle.monsterStatus.sort(objArrSort('order'));
     };
     Debug.log('onBattle', `\n`, JSON.stringify(battle, null, 4));
-
     //人物状态
     if (gE('#vbh')) {
       g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
@@ -2654,11 +2665,10 @@ try {
     setValue('battle', battle);
 
     killBug(); // 解决 HentaiVerse 可能出现的 bug
+
     if (g('option').autoFlee && checkCondition(g('option').fleeCondition)) {
       gE('1001').click();
-      setTimeout(() => {
-        window.location.href = getValue('lastHref');
-      }, g('option').ExitBattleWaitTime * _1s);
+      SetExitBattleTimeout('Flee');
       return;
     }
     var taskList = [autoRecover, autoPause, autoSS, autoDefend, useScroll, useChannelSkill, useBuffSkill, useInfusions, useDeSkill, autoFocus, autoSkill, attack];
@@ -2704,8 +2714,8 @@ try {
         let cew = j === i ? centralExtraWeight : 0; // cew <= 0, 增加未命中权重，降低命中权重
         let mon = msTemp[j];
         if (j < 0 || j >= msTemp.length // 超出范围
-          || mon.isDead // 死亡目标
-          || (excludeCondition && excludeCondition(mon))) { // 特殊排除判定
+            || mon.isDead // 死亡目标
+            || (excludeCondition && excludeCondition(mon))) { // 特殊排除判定
           rank += unreachableWeight - cew;
           continue;
         }
@@ -2753,21 +2763,33 @@ try {
     }
   }
 
+  function SetExitBattleTimeout(alarm){
+    setAlarm(alarm);
+    if(alarm === 'SkipDefeated') return;
+    setTimeout(() => {
+      window.location.href = getValue('lastHref');
+    }, g('option').ExitBattleWaitTime * _1s);
+    delValue(1);
+  }
+
   function reloader() {
-    let delayAlert, delayReload, delayAlt;
     let obj; let a; let cost;
+    const battleUnresponsive = {
+      'Alert': { Method: setAlarm },
+      'Reload': { Method: goto },
+      'Alt': { Method: gotoAlt }
+    }
+    function clearBattleUnresponsive(){
+      Object.keys(battleUnresponsive).forEach(t=>clearTimeout(battleUnresponsive[t].Timeout));
+    }
     const eventStart = cE('a');
     eventStart.id = 'eventStart';
     eventStart.onclick = function () {
       a = unsafeWindow.info;
-      if (g('option').delayAlert) {
-        delayAlert = setTimeout(setAlarm, Math.max(1, g('option').delayAlertTime) * _1s);
-      }
-      if (g('option').delayReload) {
-        delayReload = setTimeout(goto, Math.max(1, g('option').delayReloadTime) * _1s);
-      }
-      if (g('option').delayAlt) {
-        delayAlt = setTimeout(gotoAlt, Math.max(1, g('option').delayAltTime) * _1s);
+      for(let t in g('option').battleUnresponsive) {
+        if (g('option').battleUnresponsive[t]) {
+          battleUnresponsive[t].Timeout = setTimeout(battleUnresponsive[t].Method, Math.max(1, g('option').battleUnresponsiveTime[t]) * _1s);
+        }
       }
       if (g('option').recordUsage) {
         obj = {
@@ -2790,15 +2812,6 @@ try {
       const timeNow = time(0);
       g('runSpeed', (1000 / (timeNow - g('timeNow'))).toFixed(2));
       g('timeNow', timeNow);
-      if (g('option').delayAlert) {
-        clearTimeout(delayAlert);
-      }
-      if (g('option').delayReload) {
-        clearTimeout(delayReload);
-      }
-      if (g('option').delayAlt) {
-        clearTimeout(delayAlt);
-      }
       const monsterDead = gE('img[src*="nbardead"]', 'all').length;
       g('monsterAlive', g('monsterAll') - monsterDead);
       const bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
@@ -2808,66 +2821,47 @@ try {
         obj.log = battleLog;
         recordUsage(obj);
       }
-      if (gE('#btcp') || g('monsterAlive')===0) {
-        if (g('option').dropMonitor) {
-          dropMonitor(battleLog);
-        }
-        if (g('option').recordUsage) {
-          recordUsage2();
-        }
-        if (g('monsterAlive') > 0) { // Defeat
-          if(g('option').autoSkipDefeated) {
-            setTimeout(() => {
-              window.location.href = getValue('lastHref');
-            }, g('option').ExitBattleWaitTime * _1s);
-          } else {
-            setAlarm('Defeat');
-            delValue(1);
-          }
-        } else if (g('battle').roundNow === g('battle').roundAll) { // Victory
-          setAlarm('Victory');
-          delValue(1);
-          setTimeout(() => {
-            window.location.href = getValue('lastHref');
-          }, g('option').ExitBattleWaitTime * _1s);
-        } else if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
-          setTimeout(async ()=>{
-            gE('#pane_completion').removeChild(gE('#btcp'));
-            let i=0;
-            const html = await $ajax.fetch(window.location.href);
-            console.log('___________________',i++, html);
-            try{
-              const doc = $doc(html)
-              console.log('___________________',i++, doc);
-              if (gE('#riddlecounter', doc)) {
-                if (g('option').riddlePopup && !window.opener) {
-                  window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
-                  return;
-                }
-                goto();
-                return;
-              }
-              console.log('___________________',i++);
-              ['#battle_right', '#battle_left'].forEach(selector=>{
-                // TODO 确认是否需要#battle_right/#battle_left 为空的情况处理
-                // if(gE(selector, doc)) return;
-                gE('#battle_main').replaceChild(gE(selector, doc), gE(selector));
-              })
-              console.log('___________________',i++);
-              unsafeWindow.battle = new unsafeWindow.Battle();
-              unsafeWindow.battle.clear_infopane();
-              Debug.log('______________newRound', true);
-              newRound(true);
-              console.log('___________________',i++);
-              onBattle();
-              console.clear();
-            } catch(e) {
-              e=>console.error(e)
-            }
-          }, g('option').NewRoundWaitTime * _1s)
-        }
-      } else {
+      if (g('monsterAlive') && !gE('#btcp')) {
+        clearBattleUnresponsive();
         onBattle();
+        return;
+      }
+      if (g('option').dropMonitor) {
+        dropMonitor(battleLog);
+      }
+      if (g('option').recordUsage) {
+        recordUsage2();
+      }
+      if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
+        setTimeout(async ()=>{ try {
+          gE('#pane_completion').removeChild(gE('#btcp'));
+          const html = await $ajax.fetch(window.location.href);
+          clearBattleUnresponsive();
+          const doc = $doc(html)
+          if (gE('#riddlecounter', doc)) {
+            if (g('option').riddlePopup && !window.opener) {
+              window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
+              return;
+            }
+            goto();
+            return;
+          }
+          ['#battle_right', '#battle_left'].forEach(selector=>{ gE('#battle_main').replaceChild(gE(selector, doc), gE(selector)); })
+          unsafeWindow.battle = new unsafeWindow.Battle();
+          unsafeWindow.battle.clear_infopane();
+          Debug.log('______________newRound', true);
+          newRound(true);
+          onBattle();
+        } catch(e) { e=>console.error(e) }}, g('option').NewRoundWaitTime * _1s);
+        return;
+      }
+
+      clearBattleUnresponsive();
+      if (g('monsterAlive') > 0) { // Defeat
+        SetExitBattleTimeout(g('option').autoSkipDefeated ? 'SkipDefeated' : 'Defeat');
+      }
+      if (g('battle').roundNow === g('battle').roundAll) { // Victory
+        SetExitBattleTimeout('Victory');
       }
     };
     gE('body').appendChild(eventEnd);
@@ -3347,7 +3341,7 @@ try {
       },
     };
     let i; let
-      j;
+    j;
     const skillPack = g('option').buffSkillOrderValue.split(',');
     if (g('option').channelSkill) {
       for (i = 0; i < skillPack.length; i++) {
@@ -3510,21 +3504,21 @@ try {
       id: 12101,
       img: 'fireinfusion',
     }, {
-        id: 12201,
-        img: 'coldinfusion',
-      }, {
-        id: 12301,
-        img: 'elecinfusion',
-      }, {
-        id: 12401,
-        img: 'windinfusion',
-      }, {
-        id: 12501,
-        img: 'holyinfusion',
-      }, {
-        id: 12601,
-        img: 'darkinfusion',
-      }];
+      id: 12201,
+      img: 'coldinfusion',
+    }, {
+      id: 12301,
+      img: 'elecinfusion',
+    }, {
+      id: 12401,
+      img: 'windinfusion',
+    }, {
+      id: 12501,
+      img: 'holyinfusion',
+    }, {
+      id: 12601,
+      img: 'darkinfusion',
+    }];
     if (gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`) && !gE(`#pane_effects>img[src*="${infusionLib[[g('attackStatus')]].img}"]`)) {
       gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`).click();
       return true;
@@ -3748,15 +3742,15 @@ try {
     }
     let id = getRangeCenterID(primaryTarget, range, isDebuffed);
     const imgs = gE('img', 'all', gE(`#mkey_${id}>.btm6`));
+    // 已有buff小于6个
+    // 未开启debuff失败警告
+    // buff剩余持续时间大于等于警报时间
     if (imgs.length < 6 || !g('option').debuffSkillTurnAlert || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn[buff])) {
       gE(skillLib[buff].id).click();
       gE(`#mkey_${id}`).click();
       return true;
     }
 
-    // 已有buff小于6个
-    // 未开启debuff失败警告
-    // buff剩余持续时间大于等于警报时间
     _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
     pauseChange();
     return true;
@@ -3950,7 +3944,7 @@ try {
       '#Credit': 0,
     };
     let item; let name; let amount; let
-      regexp;
+    regexp;
     for (let i = 0; i < battleLog.length; i++) {
       if (/^You gain \d+ (EXP|Credit)/.test(battleLog[i].textContent)) {
         regexp = battleLog[i].textContent.match(/^You gain (\d+) (EXP|Credit)/);
@@ -4039,7 +4033,7 @@ try {
       },
     };
     let text; let magic; let point; let
-      reg;
+    reg;
     const battle = g('battle');
     if (g('monsterAlive') === 0) {
       stats.self._turn += battle.turn;
