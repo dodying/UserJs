@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22
+// @version      2.90.22.4
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -37,6 +37,13 @@ try {
     }
     return;
   }
+  try {
+    if(window.location.href.startsWith('https://')) {
+      MAIN_URL = MAIN_URL.replace(/^http:/, /^https:/);
+    } else {
+      MAIN_URL = MAIN_URL.replace(/^https:/, /^http:/);
+    }
+  } catch (e) {}
   const Debug = {
     Stack: class extends Error {
       constructor(description, ...params) {
@@ -124,6 +131,9 @@ try {
         $ajax.add(method, url, data, resolve, reject, context, headers);
       });
     },
+    open: function (url, data, method, context = {}, headers = {}) {
+      $ajax.fetch(url, data, method, context, headers).then(goto).catch(e=>{console.error(e)});
+    },
     repeat: function (count, func, ...args) {
       const list = [];
       for (let i = 0; i < count; i++) {
@@ -132,11 +142,7 @@ try {
       return list;
     },
     add: function (method, url, data, onload, onerror, context = {}, headers = {}) {
-      if (!data) {
-        method = 'GET';
-      } else if (!method) {
-        method = 'POST';
-      }
+      method = !data ? 'GET' : method ?? 'POST';
       if (method === 'POST') {
         headers['Content-Type'] ??= 'application/x-www-form-urlencoded';
         if (data && typeof data === 'object') {
@@ -219,7 +225,7 @@ try {
     },
   };
 
-  window.addEventListener('unhandledrejection', (e) => { console.log($ajax.error, e); });
+  window.addEventListener('unhandledrejection', (e) => { console.error($ajax.error, e); });
 
   (function init() {
     if (!checkIsHV()) {
@@ -305,6 +311,7 @@ try {
     hvAAPauseUI.classList.add('hvAAPauseUI');
     setPauseUI(hvAAPauseUI);
     asyncOnIdle();
+
   }());
 
   function loadOption() {
@@ -314,32 +321,44 @@ try {
       'debuffSkillWeAll': 'debuffSkillAllWk',
       'debuffSkillAllImCondition': 'debuffSkillImpCondition',
       'debuffSkillAllWeCondition': 'debuffSkillWkCondition',
+      'battleUnresponsive_Alert': 'delayAlert',
+      'battleUnresponsive_Reload': 'delayReload',
+      'battleUnresponsive_Alt': 'delayAlt',
+      'battleUnresponsiveTime_Alert': 'delayAlertTime',
+      'battleUnresponsiveTime_Reload': 'delayReloadTime',
+      'battleUnresponsiveTime_Alt': 'delayAltTime',
     }
     for (let key in aliasDict) {
-      option[key] ??= option[aliasDict[key]];
-      option[aliasDict[key]] = undefined;
+      const itemArray = key.split('_');
+      if (itemArray.length === 1) {
+        option[key] ??= option[aliasDict[key]];
+        option[aliasDict[key]] = undefined;
+      } else {
+        option[itemArray[0]] ??= {};
+        option[itemArray[0]][itemArray[1]] ??= option[aliasDict[key]];
+      }
     }
     g('option', setValue('option', option));
   }
 
-  async function asyncOnIdle() {
+  async function asyncOnIdle() { try {
     let notBattleReady = false;
     const idleStart = time(0);
     await Promise.all([
-      (async () => {
+      (async () => { try {
         await asyncGetItems();
         const checked = await asyncCheckSupply();
         notBattleReady ||= !checked;
-      })(),
+      } catch (e) {console.error(e)}})(),
       asyncSetStamina(),
       asyncSetEnergyDrinkHathperk(),
       asyncSetAbilityData(),
       updateArena(),
       updateEncounter(g('option').encounter),
-      (async () => {
+      (async () => { try {
         const checked = await asyncCheckRepair();
         notBattleReady ||= !checked;
-      })(),
+      } catch (e) {console.error(e)}})(),
     ]);
     if (notBattleReady) {
       return;
@@ -348,7 +367,7 @@ try {
       startUpdateArena(idleStart);
     }
     setTimeout(autoSwitchIsekai, (g('option').isekaiTime * (Math.random() * 20 + 90) / 100) * _1s - (time(0) - idleStart));
-  }
+  } catch (e) {console.error(e)}}
 
   // 通用//
   function setPauseUI(parent) {
@@ -379,14 +398,13 @@ try {
       }
       if (e.keyCode === g('option').pauseHotkeyCode) {
         pauseChange();
-        // document.removeEventListener('keydown', pause, false);
       }
     }, false);
   }
 
   function formatTime(t, size = 2) {
     t = [t / _1h, (t / _1m) % 60, (t / _1s) % 60, (t % _1s) / 10].map(cdi => Math.floor(cdi));
-    while (t.length > size || !g('option').encounterQuickCheck) { // remove zero front
+    while (t.length > Math.max(size, g('option').encounterQuickCheck ? 2 : 3)) { // remove zero front
       const front = t.shift();
       if (!front) {
         continue;
@@ -419,7 +437,6 @@ try {
     } if (e === 1) {
       return `${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
     } if (e === 2) {
-      // date.toLocaleDateString(lang,option);
       return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
     } if (e === 3) {
       return date.toLocaleString(navigator.language, {
@@ -528,7 +545,7 @@ try {
     }
     const itemMap = {
       0: ['disabled'],
-      1: ['battle', 'battleCode', 0],
+      1: ['battle', 'battleCode'],
     }
     for (let item of itemMap[key]) {
       delValue(item);
@@ -559,32 +576,6 @@ try {
     window.hvAA = hvAA;
     return window.hvAA[key];
   }
-
-  // function post(href, func, parm, type) { // post
-  //   let xhr = new window.XMLHttpRequest();
-  //   xhr.open(parm ? 'POST' : 'GET', href);
-  //   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-  //   xhr.responseType = type || 'document';
-  //   xhr.onerror = function () {
-  //     xhr = null;
-  //     post(href, func, parm, type);
-  //   };
-  //   xhr.onload = function (e) {
-  //     if (e.target.status >= 200 && e.target.status < 400 && typeof func === 'function') {
-  //       const data = e.target.response;
-  //       if (xhr.responseType === 'document' && gE('#messagebox', data)) {
-  //         if (gE('#messagebox')) {
-  //           gE('#csp').replaceChild(gE('#messagebox', data), gE('#messagebox'));
-  //         } else {
-  //           gE('#csp').appendChild(gE('#messagebox', data));
-  //         }
-  //       }
-  //       func(data, e);
-  //     }
-  //     xhr = null;
-  //   };
-  //   xhr.send(parm);
-  // }
 
   function objArrSort(key) { // 对象数组排序函数，从小到大排序
     return function (obj1, obj2) {
@@ -635,7 +626,7 @@ try {
       '#hvAABox2{position:absolute;left:1075px;padding-top: 6px;}',
       '.hvAALog{font-size:20px;}',
       '.hvAAPauseUI{top:30px;left:1246px;position:absolute;z-index:9999}',
-      '.hvAAButton{top:5px;left:1255px;position:absolute;z-index:9999;cursor:pointer;width:48px;height:48px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
+      '.hvAAButton{top:5px;left:1255px;position:absolute;z-index:9999;cursor:pointer;width:24px;height:24px;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAADi0lEQVRIiZVWPYgUZxj+dvGEk7vsNdPYCMul2J15n+d991PIMkWmOEyMyRW2FoJIUojYp5ADFbZJkyISY3EqKGpgz+Ma4bqrUojICaIsKGIXSSJcsZuD3RT3zWZucquXDwYG5n2f9/d5vnFuHwfAZySfAXgN4DXJzTiOj+3H90OnkmXZAe/9FMm3JJ8AuBGepyRfle2yLDvgnKt8EDVJkq8B3DGzjve+1m63p0n2AVzJbUh2SG455yre+5qZ/aCq983sxMfATwHYJvlCVYckHwFYVdURgO8LAS6RHJJcM7N1VR0CeE5yAGBxT3AR+QrA3wA20tQOq+pFkgOS90Tk85J51Xs9qaorqjoAcC6KohmSGyQHcRx/kbdv7AHgDskXaWqH0zSddc5Voyia2SOXapqmswsLvpam6ez8/Pwn+YcoimYAvARw04XZ5N8qZtZR1aGqXnTOVSd0cRd42U5EzqvqSFWX2u32tPd+yjnnXNiCGslHJAf7ybwM7r2vAdgWkYdZls157w+NK/DeT7Xb7WkAqyTvlZHjOD5oxgtmtqrKLsmze1VJsquqKwsLO9vnnKvkJHpLsq+qo/JAd8BtneTvqvqTiPwoIu9EZKUUpGpmi2Y2UtU+yTdJkhx1JJ8FEl0pruK/TrwA4F2r1WrkgI1G4wjJP0XkdLF9WaZzZnZZVa8GMj5xgf43JvXczFZbLb1ebgnJn0nenjQbEVkG0JsUYOykyi6Aa+XoQTJuTRr8OADJzVBOh+SlckYkz5L8Q0TquXOj0fhURN6r6pkSeAXAUsDaJPnYxXF8jOQrklskh97ryZJTVURWAPwF4DqAX0TkvRl/zTKdK2aeJMnxICFbAHrNZtOKVVdIrrVa2t1jz6sicprkbQC3VPVMGTzMpQvgQY63i8lBFddVdVCk/6TZlMFzopFci+P44H+YHCR3CODc/wUvDPY7ksMg9buZrKr3ATwvyoT3vrafzPP3er1eA9Azs7tjJhcqOBHkeSOKohkROR9K7prZYqnnlSRJjofhb4vIt/V6vUbyN1Xtt1qtb1zpZqs45xyAxXAnvCQ5FJGHqrpiZiMzu5xnHlZxCOABybXw3gvgp/Zq3/gA+BLATVVdyrJsbods2lfVq7lN4crMtapjZndD5pPBixWFLTgU7uQ3AJ6KyLKILAdy9sp25bZMBC//JSRJcjQIYg9Aj+TjZrNp+/mb+Ad711sdZZ1k/QAAAABJRU5ErkJggg==) center no-repeat transparent;}',
       '#hvAABox{left:calc(50% - 350px);top:50px;font-size:16px!important;z-index:4;width:700px;height:538px;position:absolute;text-align:left;background-color:#E3E0D1;border:1px solid #000;border-radius:10px;font-family:"Microsoft Yahei";}',
       '.hvAATablist{position:relative;left:14px;}',
       '.hvAATabmenu{position:absolute;left:-9px;}',
@@ -694,11 +685,12 @@ try {
       '#riddleform>div:nth-child(3)>img{width:700px;}',
       '#battle_right{overflow:visible;}',
       '#pane_log{height:403px;}',
-      // '#pane_monster{counter-reset:order;}',
-      // '.btm2>div:nth-child(1):before{font-size:30px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
-      // '.btm2>div:nth-child(1)>img{display:none;}'
       '.tlbQRA{text-align:left;font-weight:bold;}', // 标记已检测的日志行
       '.tlbWARN{text-align:left;font-weight:bold;color:red;font-size:20pt;}', // 标记检测出异常的日志行
+      // 怪物标号用数字替代字母，目前弃用
+      // '#pane_monster{counter-reset:order;}',
+      // '.btm2>div:nth-child(1):before{font-size:23px;font-weight:bold;text-shadow:1px 1px 2px;content:counter(order);counter-increment:order;}',
+      // '.btm2>div:nth-child(1)>img{display:none;}',
     ].join('');
     globalStyle.textContent = cssContent;
     optionButton(lang);
@@ -782,6 +774,7 @@ try {
       '    <div><input id="autoPause" type="checkbox"><label for="autoPause"><b><l0>自动暂停</l0><l1>自動暫停</l1><l2>Pause</l2></b></label>: {{pauseCondition}}</div>',
       '    <div><input id="autoFlee" type="checkbox"><label for="autoFlee"><b><l0>自动逃跑</l0><l1>自動逃跑</l1><l2>Flee</l2></b></label>: {{fleeCondition}}</div>',
       '    <div><input id="autoSkipDefeated" type="checkbox"><label for="autoSkipDefeated"><b><l0>战败自动退出战斗</l0><l1>戰敗自動退出戰鬥</l1><l2>Exit battle when defeated.</l2></b></label></div>',
+      '    <div><b><l0>继续新回合延时</l0><l1>繼續新回合延時</l1><l2>New round wait time</l2></b>: <input class="hvAANumber" name="NewRoundWaitTime" placeholder="0" type="text"><l0>(秒)</l0><l1>(秒)</l1><l2>(s)</l2></div>',
       '    <div><b><l0>战斗结束退出延时</l0><l1>戰鬥結束退出延時</l1><l2>Exit battle wait time</l2></b>: <input class="hvAANumber" name="ExitBattleWaitTime" placeholder="3" type="text"><l0>(秒)</l0><l1>(秒)</l1><l2>(s)</l2></div>',
       '    <div style="display: flex; flex-flow: wrap;"><b><l0>当损失精力</l0><l1>當損失精力</l1><l2>If it lost Stamina</l2></b> ≥ <input class="hvAANumber" name="staminaLose" placeholder="5" type="text">: ',
       '    <input id="staminaPause" type="checkbox"><label for="staminaPause"><l0>脚本暂停</l0><l1>腳本暫停</l1><l2>pause script</l2></label>;',
@@ -789,9 +782,9 @@ try {
       '    <input id="staminaFlee" type="checkbox"><label for="staminaFlee"><l01>逃跑</l01><l2>flee</l2></label>',
       '    <button class="staminaLostLog"><l0>精力损失日志</l0><l1>精力損失日誌</l1><l2>staminaLostLog</l2></button></div>',
       '    <div style="display: flex; flex-flow: wrap;"><b><l0>战斗页面停留</l0><l1>戰鬥頁面停留</l1><l2>If the page for </l2></b>: ',
-      '      <input id="delayAlert" type="checkbox"><label for="delayAlert"><input class="hvAANumber" name="delayAlertTime" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2></label>; ',
-      '      <input id="delayReload" type="checkbox"><label for="delayReload"><input class="hvAANumber" name="delayReloadTime" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label>',
-      '      <div><input id="delayAlt" type="checkbox"><label for="delayAlt"><input class="hvAANumber" name="delayAltTime" type="text"><l0>秒，切换主服务器与alt服务器</l0><l1>秒，切換主服務器與alt服務器</l1><l2>s, switch between alt.hentaiverse</l2></label></div></div>',
+      '      <input id="battleUnresponsive_Alert" type="checkbox"><label for="battleUnresponsive_Alert"><input class="hvAANumber" name="battleUnresponsiveTime_Alert" type="text"><l0>秒，警报</l0><l1>秒，警報</l1><l2>s, alarm</l2></label>; ',
+      '      <input id="battleUnresponsive_Reload" type="checkbox"><label for="battleUnresponsive_Reload"><input class="hvAANumber" name="battleUnresponsiveTime_Reload" type="text"><l0>秒，刷新页面</l0><l1>秒，刷新頁面</l1><l2>s, reload page</l2></label>',
+      '      <div><input id="battleUnresponsive_Alt" type="checkbox"><label for="battleUnresponsive_Alt"><input class="hvAANumber" name="battleUnresponsiveTime_Alt" type="text"><l0>秒，切换主服务器与alt服务器</l0><l1>秒，切換主服務器與alt服務器</l1><l2>s, switch between alt.hentaiverse</l2></label></div></div>',
       '  </div>',
 
       '<div class="hvAATab" id="hvAATab-BattleStarter">',
@@ -938,7 +931,7 @@ try {
       '  </div>',
 
       '<div class="hvAATab" id="hvAATab-Debuff">',
-      '  <div><l0>持续</l0><l1>持續</l1><l2>Expire</l2> Turns: <input id="debuffSkillTurnAlert" type="checkbox"><label for="debuffSkillTurnAlert"><l0>无法正常施放DEBUFF技能时，警报</l0><l1>無法正常施放DEBUFF技能時，警報</l1><l2>If it can not cast de-skills normally, alert.</l2></label><br>',
+      '  <div><input id="debuffSkillTurnAlert" type="checkbox"><label for="debuffSkillTurnAlert"><l0>剩余Turns低于阈值时警报</l0><l1>剩餘Turns低於閾值時警報</l1><l2>Alert when remain expire turns less than threshold</l2></label><br>',
       '    <l0>沉眠(Sl)</l0><l1>沉眠(Sl)</l1><l2>Sleep</l2>: <input class="hvAANumber" name="debuffSkillTurn_Sle" type="text">',
       '    <l0>致盲(Bl)</l0><l1>致盲(Bl)</l1><l2>Blind</l2>: <input class="hvAANumber" name="debuffSkillTurn_Bl" type="text">',
       '    <l0>缓慢(Slo)</l0><l1>緩慢(Slo)</l1><l2>Slow</l2>: <input class="hvAANumber" name="debuffSkillTurn_Slo" type="text"><br>',
@@ -1004,7 +997,10 @@ try {
 
       '<div class="hvAATab" id="hvAATab-Rule">',
       '  <span class="hvAATitle"><l0>攻击规则</l0><l1>攻擊規則</l1><l2>Attack Rule</l2></span> <l01><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README.md#攻击规则-示例" target="_blank">示例</a></l01><l2><a href="https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README_en.md#attack-rule-example" target="_blank">Example</a></l2>',
-      '  <div>1. <l0>初始血量权重=Log10(目标血量/场上最低血量)<l1>初始血量權重=Log10(目標血量/場上最低血量)</l1><l2>BaseHpWeight = BaseHpRatio*Log10(TargetHP/MaxHPOnField)</l2><br><l0>初始权重系数(>0:低血量优先;<0:高血量优先)</l0><l1>初始權重係數(>0:低血量優先;<0:高血量優先)</l1><l2>BaseHpRatio(>0:low hp first;<0:high hp first)</l2><input class="hvAANumber" name="baseHpRatio" placeholder="1" type="text" style="width:40px"><br><l0>不可命中目标的权重</l0><l1>不可名中目標的權重</l1><l2>Unreachable Target Weight</l2><input class="hvAANumber" name="unreachableWeight" placeholder="1000" type="text" style="width:40px"></div>',
+      '  <div>1. <l0>初始血量权重=Log10(目标血量/场上最低血量)<l1>初始血量權重=Log10(目標血量/場上最低血量)</l1><l2>BaseHpWeight = BaseHpRatio*Log10(TargetHP/MaxHPOnField)</l2><br>',
+      '    <l0>初始权重系数(>0:低血量优先;<0:高血量优先)</l0><l1>初始權重係數(>0:低血量優先;<0:高血量優先)</l1><l2>BaseHpRatio(>0:low hp first;<0:high hp first)</l2><input class="hvAANumber" name="baseHpRatio" placeholder="1" type="text" style="width:40px"><br>',
+      '    <l0>不可命中目标的权重</l0><l1>不可名中目標的權重</l1><l2>Unreachable Target Weight</l2><input class="hvAANumber" name="unreachableWeight" placeholder="1000" type="text" style="width:40px"><br>',
+      '    <input id="cacheMonsterHP" type="checkbox"><label for="cacheMonsterHP"><l0>启用HP缓存</l0><l1>啟用HP緩存</l1><l2>Use HP Cache</l2></label><button class="clearMonsterHPCache"><l0>清空缓存</l0><l1>清空緩存</l1><l2>Clear HP Cache</l2></button></div>',
       '  <div>2. <l0>初始权重与下述各Buff权重相加</l0><l1>初始權重與下述各Buff權重相加</l1><l2>PW(X) = BaseHpWeight + Accumulated_Weight_of_Deprecating_Spells_In_Effect(X)</l2><br>',
       '    <l0>虚弱(We)</l0><l1>虛弱(We)</l1><l2>Weaken</l2>: <input class="hvAANumber" name="weight_We" placeholder="12" type="text">',
       '    <l0>致盲(Bl)</l0><l1>致盲(Bl)</l1><l2>Blind</l2>: <input class="hvAANumber" name="weight_Bl" placeholder="10" type="text">',
@@ -1085,7 +1081,7 @@ try {
       const target = (e.target.tagName === 'SPAN') ? e.target : e.target.parentNode;
       const name = target.getAttribute('name');
       let i; let
-        _html;
+      _html;
       if (name === 'Drop') { // 掉落监测
         let drop = getValue('drop', true) || {};
         const dropOld = getValue('dropOld', true) || [];
@@ -1403,6 +1399,11 @@ try {
       audio.src = this.value;
       audio.play();
     };
+    // 标签页-攻击规则
+    gE('.clearMonsterHPCache', optionBox).onclick = function () {
+      delValue('monsterDB');
+      delValue('monsterMID');
+    };
     // 标签页-掉落监测
     gE('.reDropMonitor', optionBox).onclick = function () {
       if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
@@ -1471,7 +1472,6 @@ try {
       }
       delete backups[code];
       setValue('backup', backups);
-      // goto();
       rmListItem(code);
     };
     gE('.hvAAExport', optionBox).onclick = function () {
@@ -1488,7 +1488,6 @@ try {
         goto();
       }
     };
-    //
     gE('.hvAAReset', optionBox).onclick = function () {
       if (_alert(1, '是否重置', '是否重置', 'Whether to reset')) {
         delValue('option');
@@ -1509,7 +1508,7 @@ try {
       };
       let inputs = gE('input,select', 'all', optionBox);
       let itemName; let itemArray; let itemValue; let
-        i;
+      i;
       for (i = 0; i < inputs.length; i++) {
         if (inputs[i].className === 'hvAADebug') {
           continue;
@@ -1575,11 +1574,11 @@ try {
     };
     if (g('option')) {
       let i; let j; let
-        k;
+      k;
       const _option = g('option');
       const inputs = gE('input,select', 'all', optionBox);
       let itemName; let itemArray; let itemValue; let
-        _html;
+      _html;
       for (i = 0; i < inputs.length; i++) {
         if (inputs[i].className === 'hvAADebug') {
           continue;
@@ -1885,7 +1884,7 @@ try {
       return true;
     }
     let i; let j; let
-      k;
+    k;
     const result = [];
     const returnValue = function (str) {
       if (str.match(/^_/)) {
@@ -2033,11 +2032,7 @@ try {
         $ajax.fetch(window.location.href, `riddleanswer=${answer}`).then(() => { // 待续
           window.opener.document.location.href = window.location.href;
           window.close();
-        });
-        // post(window.location.href, () => { // 待续
-        //   window.opener.document.location.href = window.location.href;
-        //   window.close();
-        // }, `riddleanswer=${answer}`);
+        }).catch(e=>console.error(e));
       }
     }
   }
@@ -2146,12 +2141,12 @@ try {
     window.location.href = `${href.slice(0, href.indexOf('.org') + 4)}/${isIsekai ? '' : 'isekai/'}`;
   }
 
-  async function asyncSetAbilityData() {
+  async function asyncSetAbilityData() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('?s=Character&ss=ab');
     const doc = $doc(html);
     let ability = {};
-    await Promise.all(Array.from(gE('#ability_treelist>div>img', 'all', doc)).map(async img => {
+    await Promise.all(Array.from(gE('#ability_treelist>div>img', 'all', doc)).map(async img => { try {
       const _ = img.getAttribute('onclick')?.match(/(\?s=(.*)tree=(.*))'/);
       const [href, type] = _ ? [_[1], _[3]] : ['?s=Character&ss=ab&tree=general', 'general'];
       const html = await $ajax.fetch(href);
@@ -2165,12 +2160,12 @@ try {
           level: Array.from(gE('.aw1,.aw2,.aw3,.aw4,.aw5,.aw6,.aw7,.aw8,.aw9,.aw10', parent).children).map(div => div.style.cssText.indexOf('f.png') === -1 ? 0 : 1).reduce((x, y) => x + y),
         }
       });
-    }));
+    } catch (e) {console.error(e)}}));
     setValue('ability', ability);
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncSetEnergyDrinkHathperk() {
+  async function asyncSetEnergyDrinkHathperk() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('https://e-hentai.org/hathperks.php');
     const doc = $doc(html);
@@ -2180,17 +2175,17 @@ try {
     }
     setValue('staminaHathperk', perks[25].innerHTML.includes('Obtained'));
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncSetStamina() {
+  async function asyncSetStamina() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch(window.location.href);
     setValue('staminaTime', Math.floor(time(0) / 1000 / 60 / 60));
     setValue('stamina', gE('#stamina_readout .fc4.far>div', $doc(html)).textContent.match(/\d+/)[0] * 1);
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncGetItems() {
+  async function asyncGetItems() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('?s=Character&ss=it');
     const items = {};
@@ -2202,9 +2197,9 @@ try {
     }
     g('items', items);
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncCheckSupply() {
+  async function asyncCheckSupply() { try {
     if (!g('option').checkSupply) {
       return true;
     }
@@ -2230,29 +2225,29 @@ try {
     }
     logSwitchAsyncTask(arguments);
     return !needs.length;
-  }
+  } catch (e) {console.error(e)}}
 
-  async function asyncCheckRepair() {
+  async function asyncCheckRepair() { try {
     if (!g('option').repair) {
       return true;
     }
     logSwitchAsyncTask(arguments);
     const doc = $doc(await $ajax.fetch('?s=Forge&ss=re'));
     const json = JSON.parse((await $ajax.fetch(gE('#mainpane>script[src]', doc).src)).match(/{.*}/)[0]);
-    const eqps = (await Promise.all(Array.from(gE('.eqp>[id]', 'all', doc)).map(async eqp => {
+    const eqps = (await Promise.all(Array.from(gE('.eqp>[id]', 'all', doc)).map(async eqp => { try {
       const id = eqp.id.match(/\d+/)[0];
       const condition = 1 * json[id].d.match(/Condition: \d+ \/ \d+ \((\d+)%\)/)[1];
       if (condition > g('option').repairValue) {
         return;
       }
       return gE('.messagebox_error', $doc(await $ajax.fetch(`?s=Forge&ss=re`, `select_item=${id}`)))?.innerText ? undefined : id;
-    }))).filter(e => e);
+    } catch (e) {console.error(e)}}))).filter(e => e);
     if (eqps.length) {
       console.log('eqps need repair: ', eqps);
     }
     logSwitchAsyncTask(arguments);
     return !eqps.length;
-  }
+  } catch (e) {console.error(e)}}
 
   function checkStamina(low, cost) {
     let stamina = getValue('stamina');
@@ -2279,13 +2274,12 @@ try {
     }
     const recover = items[11402] ? 5 : items[11401] ? getValue('staminaHathperk') ? 20 : 10 : 0;
     if (recover && stamina <= (100 - recover)) {
-      $ajax.fetch(window.location.href, 'recover=stamina').then(goto);
-      // post(window.location.href, goto, 'recover=stamina');
+      $ajax.open(window.location.href, 'recover=stamina');
       return checked;
     }
   }
 
-  async function updateEncounter(engage, isInBattle) {
+  async function updateEncounter(engage, isInBattle) { try {
     const encounter = getEncounter();
     const encountered = encounter.filter(e => e.encountered && e.href);
     const count = encounter.filter(e => e.href).length;
@@ -2320,14 +2314,14 @@ try {
       ui.style.cssText += 'color:unset!important;';
     }
     ui.innerHTML = `${formatTime(cd).slice(0, 2).map(cdi => cdi.toString().padStart(2, '0')).join(`:`)}[${encounter.length ? (count >= 24 ? `☯` : count) : `✪`}${missed ? `-${missed}` : ``}]`;
-    if (!cd && engage) {
+    if (engage && !cd) {
       onEncounter();
       return true;
     }
     let interval = cd > _1h ? _1m : (!g('option').encounterQuickCheck || cd > _1m) ? _1s : 80;
     interval = (g('option').encounterQuickCheck && cd > _1m) ? (interval - cd % interval) / 4 : interval; // 让倒计时显示更平滑
     setTimeout(() => updateEncounter(engage), interval);
-  }
+  } catch (e) {console.error(e)}}
 
   function onEncounter() {
     if (getValue('disabled') || getValue('battle') || !checkBattleReady(onEncounter, { staminaLow: g('option').staminaEncounter })) {
@@ -2338,7 +2332,7 @@ try {
     openUrl('https://e-hentai.org/news.php?encounter');
   }
 
-  async function startUpdateArena(idleStart) {
+  async function startUpdateArena(idleStart) { try {
     const now = time(0);
     console.log('startUpdateArena now', now, idleStart);
     if (!idleStart) {
@@ -2352,9 +2346,9 @@ try {
     setTimeout(idleArena, timeout);
     const last = getValue('arena', true)?.date ?? now;
     setTimeout(startUpdateArena, Math.max(0, Math.floor(last / _1d + 1) * _1d - now));
-  }
+  } catch (e) {console.error(e)}}
 
-  async function updateArena(forceUpdateToken = false) {
+  async function updateArena(forceUpdateToken = false) { try {
     let arena = getValue('arena', true) ?? {};
     if (!forceUpdateToken && arena && arena.date && time(2, arena.date) === time(2)) {
       return setValue('arena', arena);
@@ -2366,7 +2360,7 @@ try {
       '?s=Battle&ss=ar&page=2',
       '?s=Battle&ss=rb'
     ]
-    await Promise.all(arena.sites.map(async site => {
+    await Promise.all(arena.sites.map(async site => { try {
       const doc = $doc(await $ajax.fetch(site));
       if (site === '?s=Battle&ss=gr') {
         arena.token.gr = gE('img[src*="startgrindfest.png"]', doc).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
@@ -2376,7 +2370,7 @@ try {
         const temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
         arena.token[temp[1]] = temp[2];
       });
-    }));
+    } catch (e) {console.error(e)}}));
     if (forceUpdateToken) {
       return setValue('arena', arena);
     }
@@ -2385,11 +2379,11 @@ try {
     arena.array = g('option').idleArenaValue.split(',') ?? [];
     arena.array.reverse();
     return setValue('arena', arena);
-  }
+  } catch (e) {console.error(e)}}
 
   function checkBattleReady(method, condition = {}) {
     if (getValue('disabled')) {
-      setTimeout(method, 1000);
+      setTimeout(method, _1s);
       return;
     }
     if (condition.checkEncounter && getEncounter()[0]?.href && !getEncounter()[0]?.encountered) {
@@ -2403,7 +2397,7 @@ try {
     setTimeout(method, Math.floor(time(0) / _1h + 1) * _1h - time(0));
   }
 
-  async function idleArena() { // 闲置竞技场
+  async function idleArena() { try { // 闲置竞技场
     let arena = getValue('arena', true);
     console.log('arena:', getValue('arena', true));
     if (arena.array.length === 0) {
@@ -2454,12 +2448,14 @@ try {
     staminaCost.gr += 1
 
     let href, cost;
+    let token = arena.token[id];
     if (id === 'gr') {
       if (arena.gr <= 0) {
         setValue('arena', arena);
         idleArena();
         return;
       }
+      arena.array.unshift('gr');
       arena.gr--;
       href = 'gr';
       id = 1;
@@ -2478,11 +2474,9 @@ try {
     }
     document.title = _alert(-1, '闲置竞技场开始', '閒置競技場開始', 'Idle Arena start');
     setValue('arena', arena);
-    $ajax.fetch(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${arena.token[id]}`).then(goto);
-
-    // post(`?s=Battle&ss=${href}`, goto, `initid=${String(id)}&inittoken=${arena.token[id]}`);
+    $ajax.open(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${token}`);
     logSwitchAsyncTask(arguments);
-  }
+  } catch (e) {console.error(e)}}
 
   // 战斗中//
   function onBattle() { // 主程序
@@ -2498,7 +2492,6 @@ try {
       battle.monsterStatus.sort(objArrSort('order'));
     };
     Debug.log('onBattle', `\n`, JSON.stringify(battle, null, 4));
-
     //人物状态
     if (gE('#vbh')) {
       g('hp', gE('#vbh>div>img').offsetWidth / 500 * 100);
@@ -2672,11 +2665,10 @@ try {
     setValue('battle', battle);
 
     killBug(); // 解决 HentaiVerse 可能出现的 bug
+
     if (g('option').autoFlee && checkCondition(g('option').fleeCondition)) {
       gE('1001').click();
-      setTimeout(() => {
-        window.location.href = getValue('lastHref');
-      }, g('option').ExitBattleWaitTime * _1s);
+      SetExitBattleTimeout('Flee');
       return;
     }
     var taskList = [autoRecover, autoPause, autoSS, autoDefend, useScroll, useChannelSkill, useBuffSkill, useInfusions, useDeSkill, autoFocus, autoSkill, attack];
@@ -2712,7 +2704,6 @@ try {
     let msTemp = JSON.parse(JSON.stringify(g('battle').monsterStatus));
     msTemp.sort(objArrSort('order'));
     let unreachableWeight = g('option').unreachableWeight;
-    // TODO 未命中的权重优化
     let minRank;
     for (let i = order - range; i <= order + range; i++) {
       if (i < 0 || i >= msTemp.length || msTemp[i].isDead) {
@@ -2723,8 +2714,8 @@ try {
         let cew = j === i ? centralExtraWeight : 0; // cew <= 0, 增加未命中权重，降低命中权重
         let mon = msTemp[j];
         if (j < 0 || j >= msTemp.length // 超出范围
-          || mon.isDead // 死亡目标
-          || (excludeCondition && excludeCondition(mon))) { // 特殊排除判定
+            || mon.isDead // 死亡目标
+            || (excludeCondition && excludeCondition(mon))) { // 特殊排除判定
           rank += unreachableWeight - cew;
           continue;
         }
@@ -2758,6 +2749,7 @@ try {
       if (gE('.pauseChange')) {
         gE('.pauseChange').innerHTML = '<l0>暂停</l0><l1>暫停</l1><l2>Pause</l2>';
       }
+      document.title = getValue('disabled');
       delValue(0);
       if (!gE('#navbar')) { // in battle
         onBattle();
@@ -2766,26 +2758,38 @@ try {
       if (gE('.pauseChange')) {
         gE('.pauseChange').innerHTML = '<l0>继续</l0><l1>繼續</l1><l2>Continue</l2>';
       }
-      setValue('disabled', true);
+      setValue('disabled', document.title);
       document.title = _alert(-1, 'hvAutoAttack暂停中', 'hvAutoAttack暫停中', 'hvAutoAttack Paused');
     }
   }
 
+  function SetExitBattleTimeout(alarm){
+    setAlarm(alarm);
+    if(alarm === 'SkipDefeated') return;
+    setTimeout(() => {
+      window.location.href = getValue('lastHref');
+    }, g('option').ExitBattleWaitTime * _1s);
+    delValue(1);
+  }
+
   function reloader() {
-    let delayAlert, delayReload, delayAlt;
     let obj; let a; let cost;
+    const battleUnresponsive = {
+      'Alert': { Method: setAlarm },
+      'Reload': { Method: goto },
+      'Alt': { Method: gotoAlt }
+    }
+    function clearBattleUnresponsive(){
+      Object.keys(battleUnresponsive).forEach(t=>clearTimeout(battleUnresponsive[t].Timeout));
+    }
     const eventStart = cE('a');
     eventStart.id = 'eventStart';
     eventStart.onclick = function () {
       a = unsafeWindow.info;
-      if (g('option').delayAlert) {
-        delayAlert = setTimeout(setAlarm, Math.max(1, g('option').delayAlertTime) * _1s);
-      }
-      if (g('option').delayReload) {
-        delayReload = setTimeout(goto, Math.max(1, g('option').delayReloadTime) * _1s);
-      }
-      if (g('option').delayAlt) {
-        delayAlt = setTimeout(gotoAlt, Math.max(1, g('option').delayAltTime) * _1s);
+      for(let t in g('option').battleUnresponsive) {
+        if (g('option').battleUnresponsive[t]) {
+          battleUnresponsive[t].Timeout = setTimeout(battleUnresponsive[t].Method, Math.max(1, g('option').battleUnresponsiveTime[t]) * _1s);
+        }
       }
       if (g('option').recordUsage) {
         obj = {
@@ -2808,15 +2812,6 @@ try {
       const timeNow = time(0);
       g('runSpeed', (1000 / (timeNow - g('timeNow'))).toFixed(2));
       g('timeNow', timeNow);
-      if (g('option').delayAlert) {
-        clearTimeout(delayAlert);
-      }
-      if (g('option').delayReload) {
-        clearTimeout(delayReload);
-      }
-      if (g('option').delayAlt) {
-        clearTimeout(delayAlt);
-      }
       const monsterDead = gE('img[src*="nbardead"]', 'all').length;
       g('monsterAlive', g('monsterAll') - monsterDead);
       const bossDead = gE('div.btm1[style*="opacity"] div.btm2[style*="background"]', 'all').length;
@@ -2826,55 +2821,47 @@ try {
         obj.log = battleLog;
         recordUsage(obj);
       }
-      if (gE('#btcp') || g('monsterAlive')===0) {
-        if (g('option').dropMonitor) {
-          dropMonitor(battleLog);
-        }
-        if (g('option').recordUsage) {
-          recordUsage2();
-        }
-        if (g('monsterAlive') > 0) { // Defeat
-          if(g('option').autoSkipDefeated) {
-            setTimeout(() => {
-              window.location.href = getValue('lastHref');
-            }, g('option').ExitBattleWaitTime * _1s);
-          } else {
-            setAlarm('Defeat');
-            delValue(1);
-          }
-        } else if (g('battle').roundNow === g('battle').roundAll) { // Victory
-          setAlarm('Victory');
-          delValue(1);
-          setTimeout(() => {
-            window.location.href = getValue('lastHref');
-          }, g('option').ExitBattleWaitTime * _1s);
-        } else if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
+      if (g('monsterAlive') && !gE('#btcp')) {
+        clearBattleUnresponsive();
+        onBattle();
+        return;
+      }
+      if (g('option').dropMonitor) {
+        dropMonitor(battleLog);
+      }
+      if (g('option').recordUsage) {
+        recordUsage2();
+      }
+      if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
+        setTimeout(async ()=>{ try {
           gE('#pane_completion').removeChild(gE('#btcp'));
-          $ajax.fetch(window.location.href).then((html) => {
-            const doc = $doc(html)
-            if (gE('#riddlecounter', doc)) {
-              if (g('option').riddlePopup && !window.opener) {
-                window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
-                return;
-              }
-              goto();
+          const html = await $ajax.fetch(window.location.href);
+          clearBattleUnresponsive();
+          const doc = $doc(html)
+          if (gE('#riddlecounter', doc)) {
+            if (g('option').riddlePopup && !window.opener) {
+              window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
               return;
             }
-            // if(gE('#battle_right', doc)) {
-              gE('#battle_main').replaceChild(gE('#battle_right', doc), gE('#battle_right'));
-            // }
-            // if(gE('#battle_left', doc)) {
-              gE('#battle_main').replaceChild(gE('#battle_left', doc), gE('#battle_left'));
-            // }
-            unsafeWindow.battle = new unsafeWindow.Battle();
-            unsafeWindow.battle.clear_infopane();
-            Debug.log('______________newRound', true);
-            newRound(true);
-            onBattle();
-          });
-        }
-      } else {
-        onBattle();
+            goto();
+            return;
+          }
+          ['#battle_right', '#battle_left'].forEach(selector=>{ gE('#battle_main').replaceChild(gE(selector, doc), gE(selector)); })
+          unsafeWindow.battle = new unsafeWindow.Battle();
+          unsafeWindow.battle.clear_infopane();
+          Debug.log('______________newRound', true);
+          newRound(true);
+          onBattle();
+        } catch(e) { e=>console.error(e) }}, g('option').NewRoundWaitTime * _1s);
+        return;
+      }
+
+      clearBattleUnresponsive();
+      if (g('monsterAlive') > 0) { // Defeat
+        SetExitBattleTimeout(g('option').autoSkipDefeated ? 'SkipDefeated' : 'Defeat');
+      }
+      if (g('battle').roundNow === g('battle').roundAll) { // Victory
+        SetExitBattleTimeout('Victory');
       }
     };
     gE('body').appendChild(eventEnd);
@@ -2885,12 +2872,7 @@ try {
       const delay = window.sessionStorage.delay * 1;
       const delay2 = window.sessionStorage.delay2 * 1;
       window.info = a;
-      if(window.location.href.startsWith('https://')) {
-        b.open('POST', `${MAIN_URL.replace(/^http:\/\//, 'https://')}json`);
-      }
-      else {
-        b.open('POST', `${MAIN_URL}json`);
-      }
+      b.open('POST', `${MAIN_URL}json`);
       b.setRequestHeader('Content-Type', 'application/json');
       b.withCredentials = true;
       b.onreadystatechange = d;
@@ -3047,11 +3029,13 @@ try {
         };
         order++;
       }
-      if (oldDB !== JSON.stringify(monsterDB)) {
-        setValue('monsterDB', monsterDB);
-      }
-      if (oldMID !== JSON.stringify(monsterMID)) {
-        setValue('monsterMID', monsterMID);
+      if(g('option').cacheMonsterHP){
+        if (oldDB !== JSON.stringify(monsterDB)) {
+          setValue('monsterDB', monsterDB);
+        }
+        if (oldMID !== JSON.stringify(monsterMID)) {
+          setValue('monsterMID', monsterMID);
+        }
       }
       battle.monsterStatus = monsterStatus;
 
@@ -3184,7 +3168,7 @@ try {
       let weight = baseHpRatio * Math.log10(monsterStatus[i].hpNow / hpMin); // > 0 生命越低权重越低优先级越高
       monsterStatus[i].hpWeight = weight;
       if (yggdrasilExtraWeight && ('Yggdrasil' === gE('div.btm3>div>div', monsterBuff[i].parentNode).innerText || '世界树 Yggdrasil' === gE('div.btm3>div>div', monsterBuff[i].parentNode).innerText)) { // 默认设置下，任何情况都优先击杀群体大量回血的boss"Yggdrasil"
-        weight += yggdrasilExtraWeight; // defalut -1000
+        weight += yggdrasilExtraWeight; // yggdrasilExtraWeight.defalut -1000
       }
       for (j in skillLib) {
         if (gE(`img[src*="${skillLib[j].img}"]`, monsterBuff[i])) {
@@ -3357,7 +3341,7 @@ try {
       },
     };
     let i; let
-      j;
+    j;
     const skillPack = g('option').buffSkillOrderValue.split(',');
     if (g('option').channelSkill) {
       for (i = 0; i < skillPack.length; i++) {
@@ -3520,21 +3504,21 @@ try {
       id: 12101,
       img: 'fireinfusion',
     }, {
-        id: 12201,
-        img: 'coldinfusion',
-      }, {
-        id: 12301,
-        img: 'elecinfusion',
-      }, {
-        id: 12401,
-        img: 'windinfusion',
-      }, {
-        id: 12501,
-        img: 'holyinfusion',
-      }, {
-        id: 12601,
-        img: 'darkinfusion',
-      }];
+      id: 12201,
+      img: 'coldinfusion',
+    }, {
+      id: 12301,
+      img: 'elecinfusion',
+    }, {
+      id: 12401,
+      img: 'windinfusion',
+    }, {
+      id: 12501,
+      img: 'holyinfusion',
+    }, {
+      id: 12601,
+      img: 'darkinfusion',
+    }];
     if (gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`) && !gE(`#pane_effects>img[src*="${infusionLib[[g('attackStatus')]].img}"]`)) {
       gE(`.bti3>div[onmouseover*="${infusionLib[g('attackStatus')].id}"]`).click();
       return true;
@@ -3758,15 +3742,15 @@ try {
     }
     let id = getRangeCenterID(primaryTarget, range, isDebuffed);
     const imgs = gE('img', 'all', gE(`#mkey_${id}>.btm6`));
+    // 已有buff小于6个
+    // 未开启debuff失败警告
+    // buff剩余持续时间大于等于警报时间
     if (imgs.length < 6 || !g('option').debuffSkillTurnAlert || (g('option').debuffSkillTurn && imgs[imgs.length - 1].getAttribute('onmouseover').match(/\(.*,.*, (.*?)\)$/)[1] * 1 >= g('option').debuffSkillTurn[buff])) {
       gE(skillLib[buff].id).click();
       gE(`#mkey_${id}`).click();
       return true;
     }
 
-    // 已有buff小于6个
-    // 未开启debuff失败警告
-    // buff剩余持续时间大于等于警报时间
     _alert(0, '无法正常施放DEBUFF技能，请尝试手动打怪', '無法正常施放DEBUFF技能，請嘗試手動打怪', 'Can not cast de-skills normally, continue the script?\nPlease try attack manually.');
     pauseChange();
     return true;
@@ -3848,8 +3832,9 @@ try {
   }
 
   function getHPFromMonsterDB(mdb, name, lv) {
-    /////////////////// TODO: 根据lv模糊推测
-    return mdb ? mdb[name] ? mdb[name][lv] : undefined : undefined;
+    let hp = (mdb && mdb[name]) ? mdb[name][lv] : undefined;
+    // TODO: 根据lv模糊推测
+    return hp;
   }
 
   function fixMonsterStatus() { // 修复monsterStatus
@@ -3914,7 +3899,6 @@ try {
           }
           gE(`#mkey_${id}`).style.cssText += `background: ${colorText};`;
         }
-        // gE(`#mkey_${id}`).style.cssText += `background: hsl(${Math.round(max * rank / sec)}deg 50% 50%);`;
       }
       gE(`#mkey_${id}>.btm3`).style.cssText += 'display: flex; flex-direction: row;'
       if (g('option').displayWeight) {
@@ -3924,7 +3908,6 @@ try {
   }
 
   function displayPlayStatePercentage() {
-    // const ocPoints = gE('#vcp');
     const barHP = gE('#vbh') ?? gE('#dvbh');
     const barMP = gE('#vbm') ?? gE('#dvbm');
     const barSP = gE('#vbs') ?? gE('#dvbs');
@@ -3961,7 +3944,7 @@ try {
       '#Credit': 0,
     };
     let item; let name; let amount; let
-      regexp;
+    regexp;
     for (let i = 0; i < battleLog.length; i++) {
       if (/^You gain \d+ (EXP|Credit)/.test(battleLog[i].textContent)) {
         regexp = battleLog[i].textContent.match(/^You gain (\d+) (EXP|Credit)/);
@@ -4050,7 +4033,7 @@ try {
       },
     };
     let text; let magic; let point; let
-      reg;
+    reg;
     const battle = g('battle');
     if (g('monsterAlive') === 0) {
       stats.self._turn += battle.turn;
@@ -4097,7 +4080,6 @@ try {
           stats.hurt._mavg = Math.round(stats.hurt._mtotal / stats.hurt._mcount);
         }
       } else if (text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for \d+( .*)? damage/) || text.match(/^You .* for \d+ .* damage/)) {
-        // text.match(/for \d+ .* damage/);
         reg = text.match(/for (\d+)( .*)? damage/);
         magic = text.match(/^[\w ]+ [a-z]+s [\w+ -]+ for/) ? text.match(/^([\w ]+) [a-z]+s [\w+ -]+ for/)[1].replace(/^Your /, '') : text.match(/^You (\w+)/)[1];
         point = reg[1] * 1;
