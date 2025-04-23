@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22.4
+// @version      2.90.22.5
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -134,6 +134,13 @@ try {
     open: function (url, data, method, context = {}, headers = {}) {
       $ajax.fetch(url, data, method, context, headers).then(goto).catch(e=>{console.error(e)});
     },
+    openNoFetch: function (url, newTab) {
+      window.open(url, newTab ? '_blank' : '_self')
+      // const a = gE('body').appendChild(cE('a'));
+      // a.href = url;
+      // a.target = newTab ? '_blank' : '_self';
+      // a.click();
+    },
     repeat: function (count, func, ...args) {
       const list = [];
       for (let i = 0; i < count; i++) {
@@ -251,14 +258,14 @@ try {
     if (g('option').version !== g('version')) {
       gE('.hvAAButton').click();
       if (_alert(1, 'hvAutoAttack版本更新，请重新设置\n强烈推荐【重置设置】后再设置。\n是否查看更新说明？', 'hvAutoAttack版本更新，請重新設置\n強烈推薦【重置設置】後再設置。\n是否查看更新說明？', 'hvAutoAttack version update, please reset\nIt\'s recommended to reset all configuration.\nDo you want to read the changelog?')) {
-        openUrl('https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js', true);
+        $ajax.openNoFetch('https://github.com/dodying/UserJs/commits/master/HentaiVerse/hvAutoAttack/hvAutoAttack.user.js', true);
       }
       gE('.hvAAReset').focus();
       return;
     }
 
     if (gE('[class^="c5"],[class^="c4"]') && _alert(1, '请设置字体\n使用默认字体可能使某些功能失效\n是否查看相关说明？', '請設置字體\n使用默認字體可能使某些功能失效\n是否查看相關說明？', 'Please set the font\nThe default font may make some functions fail to work\nDo you want to see instructions?')) {
-      openUrl(`https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README${g('lang') === '2' ? '_en.md#about-font' : '.md#关于字体的说明'}`, true);
+      $ajax.openNoFetch(`https://github.com/dodying/UserJs/blob/master/HentaiVerse/hvAutoAttack/README${g('lang') === '2' ? '_en.md#about-font' : '.md#关于字体的说明'}`, true);
       return;
     }
 
@@ -605,14 +612,7 @@ try {
     }
   }
 
-  function openUrl(url, newTab) {
-    const a = gE('body').appendChild(cE('a'));
-    a.href = url;
-    a.target = newTab ? '_blank' : '_self';
-    a.click();
-  }
-
-  function addStyle(lang) { // CSS
+   function addStyle(lang) { // CSS
     const langStyle = gE('head').appendChild(cE('style'));
     langStyle.className = 'hvAA-LangStyle';
     langStyle.textContent = `l${lang}{display:inline!important;}`;
@@ -2073,7 +2073,7 @@ try {
     if (!url) {
       if (isEngage && !getValue('battle')) {
         // 自动跳转，同时先刷新遭遇时间，延长下一次遭遇
-        openUrl(getValue('lastHref'));
+        $ajax.openNoFetch(getValue('lastHref'));
       }
       return;
     }
@@ -2087,7 +2087,7 @@ try {
     } else if (getValue('battle')) { //战斗中
       eventpane.style.cssText += 'color:gray;' // 链接置灰提醒
     } else { // 战斗外，自动跳转
-      openUrl(`${href}/${url}`);
+      $ajax.openNoFetch(`${href}/${url}`);
     }
   }
 
@@ -2329,7 +2329,7 @@ try {
     }
     setEncounter(getEncounter()); // 离开页面前保存
     setValue('lastHref', window.location.href);
-    openUrl('https://e-hentai.org/news.php?encounter');
+    $ajax.openNoFetch('https://e-hentai.org/news.php?encounter');
   }
 
   async function startUpdateArena(idleStart) { try {
@@ -2767,7 +2767,7 @@ try {
     setAlarm(alarm);
     if(alarm === 'SkipDefeated') return;
     setTimeout(() => {
-      window.location.href = getValue('lastHref');
+      $ajax.open(getValue('lastHref'));
     }, g('option').ExitBattleWaitTime * _1s);
     delValue(1);
   }
@@ -2833,36 +2833,43 @@ try {
         recordUsage2();
       }
       if (g('battle').roundNow !== g('battle').roundAll) { // Next Round
-        setTimeout(async ()=>{ try {
-          gE('#pane_completion').removeChild(gE('#btcp'));
-          const html = await $ajax.fetch(window.location.href);
-          clearBattleUnresponsive();
-          const doc = $doc(html)
-          if (gE('#riddlecounter', doc)) {
-            if (g('option').riddlePopup && !window.opener) {
-              window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
+        async function onNewRound(){
+          try {
+            gE('#pane_completion').removeChild(gE('#btcp'));
+            const html = await $ajax.fetch(window.location.href);
+            clearBattleUnresponsive();
+            const doc = $doc(html)
+            if (gE('#riddlecounter', doc)) {
+              if (g('option').riddlePopup && !window.opener) {
+                window.open(window.location.href, 'riddleWindow', 'resizable,scrollbars,width=1241,height=707');
+                return;
+              }
+              goto();
               return;
             }
-            goto();
-            return;
-          }
-          ['#battle_right', '#battle_left'].forEach(selector=>{ gE('#battle_main').replaceChild(gE(selector, doc), gE(selector)); })
-          unsafeWindow.battle = new unsafeWindow.Battle();
-          unsafeWindow.battle.clear_infopane();
-          Debug.log('______________newRound', true);
-          newRound(true);
-          onBattle();
-        } catch(e) { e=>console.error(e) }}, g('option').NewRoundWaitTime * _1s);
+            ['#battle_right', '#battle_left'].forEach(selector=>{ gE('#battle_main').replaceChild(gE(selector, doc), gE(selector)); })
+            unsafeWindow.battle = new unsafeWindow.Battle();
+            unsafeWindow.battle.clear_infopane();
+            Debug.log('______________newRound', true);
+            newRound(true);
+            onBattle();
+          } catch(e) { e=>console.error(e) }
+        }
+        if(g('option').NewRoundWaitTime){
+          setTimeout(onNewRound, g('option').NewRoundWaitTime * _1s);
+        } else {
+          onNewRound();
+        }
         return;
       }
 
-      clearBattleUnresponsive();
       if (g('monsterAlive') > 0) { // Defeat
         SetExitBattleTimeout(g('option').autoSkipDefeated ? 'SkipDefeated' : 'Defeat');
       }
       if (g('battle').roundNow === g('battle').roundAll) { // Victory
         SetExitBattleTimeout('Victory');
       }
+      clearBattleUnresponsive();
     };
     gE('body').appendChild(eventEnd);
     window.sessionStorage.delay = g('option').delay;
