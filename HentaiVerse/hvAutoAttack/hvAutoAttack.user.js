@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22.6
+// @version      2.90.22.7
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -303,7 +303,7 @@ try {
       setValue('lastHref', window.location.href); // 缓存进入战斗前的页面地址
     } else {
       // 补充记录（因写入冲突、网络卡顿等）未被记录的encounter链接
-      const encounterURL = window.location.href?.href.split('/')[3];
+      const encounterURL = window.location.href?.split('/')[3];
       const encounter = getEncounter();
       if (!encounter.filter(e => e.href === encounterURL).length) {
         encounter.unshift({ href: encounterURL, time: time(0), encountered: time(0) });
@@ -772,8 +772,8 @@ try {
       '    <input id="battleOrder_useChannelSkill" value="Channel,6" type="checkbox"><label for="battleOrder_useChannelSkill"><l0>引导技能</l0><l1>引導技能</l1><l2>Channel Skill</l2></label>',
       '    <input id="battleOrder_useBuffSkill" value="Buff,7" type="checkbox"><label for="battleOrder_useBuffSkill"><l0>Buff技能</l0><l1>Buff技能</l1><l2>Buff Skills</l2></label>',
       '    <input id="battleOrder_useInfusions" value="Infus,8" type="checkbox"><label for="battleOrder_useInfusions"><l0>使用魔药</l0><l1>使用魔藥</l1><l2>Infusions</l2></label>',
-      '    <input id="battleOrder_useDeSkill" value="Debuff,9" type="checkbox"><label for="battleOrder_useDeSkill"><l0>Debuff技能</l0><l1>Debuff技能</l1><l2>Debuff Skills</l2></label>',
-      '    <input id="battleOrder_autoFocus" value="Focus,10" type="checkbox"><label for="battleOrder_autoFocus"><l0>自动集中</l0><l1>自動集中</l1><l2>Focus</l2></label><br>',
+      '    <input id="battleOrder_useDeSkill" value="Debuff,9" type="checkbox"><label for="battleOrder_useDeSkill"><l0>Debuff技能</l0><l1>Debuff技能</l1><l2>Debuff Skills</l2></label><br>',
+      '    <input id="battleOrder_autoFocus" value="Focus,10" type="checkbox"><label for="battleOrder_autoFocus"><l0>自动集中</l0><l1>自動集中</l1><l2>Focus</l2></label>',
       '    <input id="battleOrder_autoSS" value="SS,3" type="checkbox"><label for="battleOrder_autoSS"><l0>灵动架式</l0><l1>靈動架式</l1><l2>Auto Sprite</l2></label>',
       '    <input id="battleOrder_autoSkill" value="Skill,11" type="checkbox"><label for="battleOrder_autoSkill"><l0>释放技能</l0><l1>釋放技能</l1><l2>Auto Skill</l2></label>',
       '    <input id="battleOrder_attack" value="Atk,12" type="checkbox"><label for="battleOrder_attack"><l0>自动攻击</l0><l1>自動攻擊</l1><l2>Attack</l2></label></div>',
@@ -1193,14 +1193,13 @@ try {
         gE('#hvAATab-Usage>table').innerHTML = _html;
       } else if (name === 'Tools') { // 关于本脚本
         gE('.hvAADebug', 'all', optionBox).forEach((input) => {
-          if(getValue('battle')[input.name]){
+          if(getValue('battle') && getValue('battle')[input.name]){
             input.value = getValue('battle')[input.name];
           } else if (getValue(input.name)) {
             input.value = getValue(input.name);
           }
         });
-      }
-      if (name === 'Drop' || name === 'Usage') {
+      } else if (name === 'Drop' || name === 'Usage') {
         gE('.selectTable', 'all', optionBox).forEach((i) => {
           i.onclick = null;
           i.onclick = function (e) {
