@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22.8
+// @version      2.90.22.9
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -48,7 +48,9 @@ try {
   const isFrame = window.self !== window.top;
   if (isFrame) {
     if (!window.top.location.href.match(`/equip/`) && (gE('#riddlecounter') || !gE('#navbar'))) {
-      setValue('lastHref', window.top.location.href);
+      if(!window.top.location.href.endsWith(`?s=Battle`)){
+        setValue('lastHref', window.top.location.href);
+      }
       window.top.location.href = window.self.location.href;
     }
     if(window.location.href.indexOf(`?s=Battle&ss=ar`) !== -1 || window.location.href.indexOf(`?s=Battle&ss=rb`) !== -1){
@@ -303,10 +305,14 @@ try {
       updateEncounter(false, true);
       return;
     }
+    if(window.top.location.href.endsWith(`?s=Battle`)){
+      $ajax.openNoFetch(getValue('lastHref'));
+      return;
+    }
 
     // 战斗外
     if (window.location.href.indexOf(`?s=Battle&ss=ba`) === -1) { // 不缓存encounter
-      setValue('lastHref', window.location.href); // 缓存进入战斗前的页面地址
+      setValue('lastHref', window.top.location.href); // 缓存进入战斗前的页面地址
       setArenaDisplay();
     } else {
       // 补充记录（因写入冲突、网络卡顿等）未被记录的encounter链接
@@ -1641,7 +1647,7 @@ try {
       }
       if(_option.idleArena && _option.idleArenaValue){
         const arena = getValue('arena', true);
-        arena.date = undefined;
+        arena.isOptionUpdated = undefined;
         setValue('arena', arena);
         goto();
       }
@@ -2337,7 +2343,7 @@ try {
     const stmNR = stamina + 24 - (timeNow % 24);
     cost ??= 0;
     const stmNRChecked = !cost || stmNR - cost >= g('option').staminaLowWithReNat;
-    console.log('stamina with nature recover:', stmNR, '\nnext arena stamina cost: ', cost.toString());
+    console.log('stamina:', stamina,'\nstamina with nature recover:', stmNR, '\nnext arena stamina cost: ', cost.toString());
     if (stamina - cost >= (low ?? g('option').staminaLow) && stmNRChecked) {
       return 1;
     }
@@ -2408,11 +2414,13 @@ try {
       return;
     }
     setEncounter(getEncounter()); // 离开页面前保存
-    setValue('lastHref', window.location.href);
+    if(!window.top.location.href.endsWith(`?s=Battle`)){
+      setValue('lastHref', window.top.location.href);
+    }
     $ajax.openNoFetch('https://e-hentai.org/news.php?encounter');
   }
 
-  async function startUpdateArena(idleStart) { try {
+  async function startUpdateArena(idleStart, startIdleArena=true) { try {
     const now = time(0);
     console.log('startUpdateArena now', now, idleStart);
     if (!idleStart) {
@@ -2423,41 +2431,45 @@ try {
     if (idleStart) {
       timeout -= time(0) - idleStart;
     }
-    setTimeout(idleArena, timeout);
+    if(startIdleArena){
+      setTimeout(idleArena, timeout);
+    }
     const last = getValue('arena', true)?.date ?? now;
     setTimeout(startUpdateArena, Math.max(0, Math.floor(last / _1d + 1) * _1d - now));
   } catch (e) {console.error(e)}}
 
   async function updateArena(forceUpdateToken = false) { try {
     let arena = getValue('arena', true) ?? {};
-    if (!forceUpdateToken && arena && arena.date && time(2, arena.date) === time(2)) {
-      return setValue('arena', arena);
+    const isToday = arena.date && time(2, arena.date) === time(2);
+    if (forceUpdateToken || !isToday || !arena.isOptionUpdated) {
+      arena.token = {};
+      arena.sites ??= [
+        '?s=Battle&ss=gr',
+        '?s=Battle&ss=ar',
+        '?s=Battle&ss=ar&page=2',
+        '?s=Battle&ss=rb'
+      ]
+      await Promise.all(arena.sites.map(async site => { try {
+        const doc = $doc(await $ajax.fetch(site));
+        if (site === '?s=Battle&ss=gr') {
+          arena.token.gr = gE('img[src*="startgrindfest.png"]', doc).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
+          return;
+        }
+        gE('img[src*="startchallenge.png"]', 'all', doc).forEach((_) => {
+          const temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
+          arena.token[temp[1]] = temp[2];
+        });
+      } catch (e) {console.error(e)}}));
     }
-    arena.token = {};
-    arena.sites ??= [
-      '?s=Battle&ss=gr',
-      '?s=Battle&ss=ar',
-      '?s=Battle&ss=ar&page=2',
-      '?s=Battle&ss=rb'
-    ]
-    await Promise.all(arena.sites.map(async site => { try {
-      const doc = $doc(await $ajax.fetch(site));
-      if (site === '?s=Battle&ss=gr') {
-        arena.token.gr = gE('img[src*="startgrindfest.png"]', doc).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
-        return;
-      }
-      gE('img[src*="startchallenge.png"]', 'all', doc).forEach((_) => {
-        const temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
-        arena.token[temp[1]] = temp[2];
-      });
-    } catch (e) {console.error(e)}}));
-    if (forceUpdateToken) {
-      return setValue('arena', arena);
+    if(!isToday){
+      arena.date = time(0);
+      arena.gr = g('option').idleArenaGrTime;
+      arena.arrayDone = [];
     }
-    arena.date = time(0);
-    arena.gr = g('option').idleArenaGrTime;
-    arena.array = g('option').idleArenaValue.split(',') ?? [];
-    arena.array.reverse();
+    if (!isToday || !arena.isOptionUpdated) {
+      arena.array = g('option').idleArenaValue.split(',') ?? [];
+      arena.array.reverse();
+    }
     return setValue('arena', arena);
   } catch (e) {console.error(e)}}
 
@@ -2471,6 +2483,7 @@ try {
       return;
     }
     const staminaChecked = checkStamina(condition.staminaLow, condition.staminaCost);
+    console.log("staminaChecked", condition.staminaLow, condition.staminaCost, staminaChecked);
     if (staminaChecked) { // 1: succeed, -1: failed with nature recover
       return staminaChecked === 1;
     }
@@ -2485,11 +2498,16 @@ try {
       return;
     }
     logSwitchAsyncTask(arguments);
+    const array = [...arena.array];
     let id;
     const RBundone = [];
-    while (arena.array.length > 0) {
-      id = arena.array.pop() * 1;
+    while (array.length > 0) {
+      id = array.pop() * 1;
       id = isNaN(id) ? 'gr' : id;
+      if(arena.arrayDone?.includes(id)){
+        id = undefined;
+        continue;
+      }
       if (id in arena.token) {
         break;
       }
@@ -2498,17 +2516,14 @@ try {
         if (id in arena.token) {
           break;
         }
-        RBundone.unshift(id);
       }
       id = undefined;
     }
-    arena.array = arena.array.concat(RBundone);
     if (!id) {
       setValue('arena', arena);
       logSwitchAsyncTask(arguments);
       return;
     }
-
     let staminaCost = {
       1: 2, 3: 4, 5: 6, 8: 8, 9: 10,
       11: 12, 12: 15, 13: 20, 15: 25, 16: 30,
@@ -2529,32 +2544,36 @@ try {
 
     let href, cost;
     let token = arena.token[id];
-    if (id === 'gr') {
+    const key = id;
+    if (key === 'gr') {
       if (arena.gr <= 0) {
         setValue('arena', arena);
         idleArena();
+        arena.arrayDone.push('gr');
         return;
       }
-      arena.array.unshift('gr');
       arena.gr--;
       href = 'gr';
-      id = 1;
+      key = 1;
       cost = staminaCost.gr;
-    } else if (id >= 105) {
+    } else if (key >= 105) {
       href = 'rb';
-    } else if (id >= 19) {
+    } else if (key >= 19) {
       href = 'ar&page=2';
     } else {
       href = 'ar';
     }
-    cost ??= staminaCost[id];
+    cost ??= staminaCost[key];
     if (!checkBattleReady(idleArena, { staminaCost: cost, checkEncounter: true })) {
       logSwitchAsyncTask(arguments);
       return;
     }
     document.title = _alert(-1, '闲置竞技场开始', '閒置競技場開始', 'Idle Arena start');
+    if(key !== 'gr'){
+      arena.arrayDone.push(key);
+    }
     setValue('arena', arena);
-    $ajax.open(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${token}`);
+    $ajax.open(`?s=Battle&ss=${href}`, `initid=${String(key)}&inittoken=${token}`);
     logSwitchAsyncTask(arguments);
   } catch (e) {console.error(e)}}
 
