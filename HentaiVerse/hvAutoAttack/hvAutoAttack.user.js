@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22.7
+// @version      2.90.22.9
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -29,11 +29,33 @@
 // @run-at       document-end
 // ==/UserScript==
 /* eslint-disable camelcase */
+
+const standalone = ['option', 'arena', 'drop', 'stats', 'staminaLostLog', 'battleCode', 'disabled', 'stamina', 'staminaTime', 'lastHref', 'battle', 'monsterDB', 'monsterMID', 'ability'];
+const sharable = ['option'];
+const excludeStandalone = { 'option': ['optionStandalone', 'version', 'lang'] };
+const href = window.location.href;
+const isIsekai = href.indexOf('isekai') !== -1;
+const current = isIsekai ? 'isekai' : 'persistent';
+const other = isIsekai ? 'persistent' : 'isekai';
+let GM_cache;
+
+const _1s = 1000;
+const _1m = 60 * _1s;
+const _1h = 60 * _1m;
+const _1d = 24 * _1h;
+
 try {
-  if (window.self !== window.top) {
+  const isFrame = window.self !== window.top;
+  if (isFrame) {
     if (!window.top.location.href.match(`/equip/`) && (gE('#riddlecounter') || !gE('#navbar'))) {
-      setValue('lastHref', window.top.location.href);
+      if(!window.top.location.href.endsWith(`?s=Battle`)){
+        setValue('lastHref', window.top.location.href);
+      }
       window.top.location.href = window.self.location.href;
+    }
+    if(window.location.href.indexOf(`?s=Battle&ss=ar`) !== -1 || window.location.href.indexOf(`?s=Battle&ss=rb`) !== -1){
+      loadOption();
+      setArenaDisplay();
     }
     return;
   }
@@ -83,20 +105,6 @@ try {
       }
     }
   }
-
-  const standalone = ['option', 'arena', 'drop', 'stats', 'staminaLostLog', 'battleCode', 'disabled', 'stamina', 'staminaTime', 'lastHref', 'battle', 'monsterDB', 'monsterMID', 'ability'];
-  const sharable = ['option'];
-  const excludeStandalone = { 'option': ['optionStandalone', 'version', 'lang'] };
-  const href = window.location.href;
-  const isIsekai = href.indexOf('isekai') !== -1;
-  const current = isIsekai ? 'isekai' : 'persistent';
-  const other = isIsekai ? 'persistent' : 'isekai';
-  let GM_cache;
-
-  const _1s = 1000;
-  const _1m = 60 * _1s;
-  const _1h = 60 * _1m;
-  const _1d = 24 * _1h;
 
   const asyncList = [];
   function consoleAsyncTasks(name, state) {
@@ -244,7 +252,7 @@ try {
       return;
     }
 
-    g('version', GM_info ? GM_info.script.version.substr(0, 4) : '2.89');
+    g('version', GM_info ? GM_info.script.version.substr(0, 4) : '2.90');
     if (!getValue('option')) {
       g('lang', window.prompt('请输入以下语言代码对应的数字\nPlease put in the number of your preferred language (0, 1 or 2)\n0.简体中文\n1.繁體中文\n2.English', 0) || 2);
       addStyle(g('lang'));
@@ -297,10 +305,15 @@ try {
       updateEncounter(false, true);
       return;
     }
+    if(window.top.location.href.endsWith(`?s=Battle`)){
+      $ajax.openNoFetch(getValue('lastHref'));
+      return;
+    }
 
     // 战斗外
     if (window.location.href.indexOf(`?s=Battle&ss=ba`) === -1) { // 不缓存encounter
-      setValue('lastHref', window.location.href); // 缓存进入战斗前的页面地址
+      setValue('lastHref', window.top.location.href); // 缓存进入战斗前的页面地址
+      setArenaDisplay();
     } else {
       // 补充记录（因写入冲突、网络卡顿等）未被记录的encounter链接
       const encounterURL = window.location.href?.split('/')[3];
@@ -320,6 +333,26 @@ try {
     asyncOnIdle();
 
   }());
+
+  function setArenaDisplay(){
+    if(window.location.href.indexOf(`?s=Battle&ss=ar`) === -1 && window.location.href.indexOf(`?s=Battle&ss=rb`) === -1){
+      return;
+    }
+    var ar = g('option').idleArenaValue?.split(',');
+    if(!ar || ar.length === 0){
+      return;
+    }
+    if(!g('option').obscureNotIdleArena){
+      return;
+    }
+    gE('img[src*="startchallenge.png"]', 'all', document).forEach((btn) => {
+      const temp = btn.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
+      if(ar.includes(temp[1])) {
+        return;
+      }
+      gE('div', 'all', btn.parentNode.parentNode).forEach(div=>{div.style.cssText += 'color:grey!important;'});
+    });
+  }
 
   function loadOption() {
     let option = getValue('option', true);
@@ -345,7 +378,11 @@ try {
         option[itemArray[0]][itemArray[1]] ??= option[aliasDict[key]];
       }
     }
-    g('option', setValue('option', option));
+    if(isFrame){
+      g('option', option);
+    } else{
+      g('option', setValue('option', option));
+    }
   }
 
   async function asyncOnIdle() { try {
@@ -612,7 +649,7 @@ try {
     }
   }
 
-   function addStyle(lang) { // CSS
+  function addStyle(lang) { // CSS
     const langStyle = gE('head').appendChild(cE('style'));
     langStyle.className = 'hvAA-LangStyle';
     langStyle.textContent = `l${lang}{display:inline!important;}`;
@@ -812,7 +849,7 @@ try {
       '        <input id="arLevel_1" value="1,1" type="checkbox"><label for="arLevel_1">1</label> <input id="arLevel_10" value="10,3" type="checkbox"><label for="arLevel_10">10</label> <input id="arLevel_20" value="20,5" type="checkbox"><label for="arLevel_20">20</label> <input id="arLevel_30" value="30,8" type="checkbox"><label for="arLevel_30">30</label> <input id="arLevel_40" value="40,9" type="checkbox"><label for="arLevel_40">40</label> <input id="arLevel_50" value="50,11" type="checkbox"><label for="arLevel_50">50</label> <input id="arLevel_60" value="60,12" type="checkbox"><label for="arLevel_60">60</label> <input id="arLevel_70" value="70,13" type="checkbox"><label for="arLevel_70">70</label> <input id="arLevel_80" value="80,15" type="checkbox"><label for="arLevel_80">80</label> <input id="arLevel_90" value="90,16" type="checkbox"><label for="arLevel_90">90</label> <input id="arLevel_100" value="100,17" type="checkbox"><label for="arLevel_100">100</label> <input id="arLevel_110" value="110,19" type="checkbox"><label for="arLevel_110">110</label>',
       '        <input id="arLevel_120" value="120,20" type="checkbox"><label for="arLevel_120">120</label> <input id="arLevel_130" value="130,21" type="checkbox"><label for="arLevel_130">130</label> <input id="arLevel_140" value="140,23" type="checkbox"><label for="arLevel_140">140</label> <input id="arLevel_150" value="150,24" type="checkbox"><label for="arLevel_150">150</label> <input id="arLevel_165" value="165,26" type="checkbox"><label for="arLevel_165">165</label> <input id="arLevel_180" value="180,27" type="checkbox"><label for="arLevel_180">180</label> <input id="arLevel_200" value="200,28" type="checkbox"><label for="arLevel_200">200</label> <input id="arLevel_225" value="225,29" type="checkbox"><label for="arLevel_225">225</label> <input id="arLevel_250" value="250,32" type="checkbox"><label for="arLevel_250">250</label> <input id="arLevel_300" value="300,33" type="checkbox"><label for="arLevel_300">300</label> <input id="arLevel_400" value="400,34" type="checkbox"><label for="arLevel_400">400</label> <input id="arLevel_500" value="500,35" type="checkbox"><label for="arLevel_500">500</label>',
       '        <input id="arLevel_RB50" value="RB50,105" type="checkbox"><label for="arLevel_RB50">RB50</label> <input id="arLevel_RB75A" value="RB75A,106" type="checkbox"><label for="arLevel_RB75A">RB75A</label> <input id="arLevel_RB75B" value="RB75B,107" type="checkbox"><label for="arLevel_RB75B">RB75B</label> <input id="arLevel_RB75C" value="RB75C,108" type="checkbox"><label for="arLevel_RB75C">RB75C</label>',
-      '        <input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,gr" type="checkbox"><label for="arLevel_GF" >GrindFest </label><input class="hvAANumber" name="idleArenaGrTime" placeholder="1" type="text"></div></div>',
+      '        <input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,gr" type="checkbox"><label for="arLevel_GF" >GrindFest </label><input class="hvAANumber" name="idleArenaGrTime" placeholder="1" type="text"></div><input id="obscureNotIdleArena" type="checkbox"></div><div><label for="obscureNotIdleArena"><l0>页面中置灰未设置且未完成的</l0><l1>頁面中置灰未設置且未完成的</l1><l2>obscure not setted and not battled in Battle&gt;Arena/RingOfBlood</l2></div>',
       '  <div style="display: flex; flex-flow: wrap;">',
       '      <div><b><l0>精力</l0><l1>精力</l1><l2>Stamina</l2>: </b><l0>阈值</l0><l1>閾值</l1><l2><b></b> threshold</l2>: Min(85, <input class="hvAANumber" name="staminaLow" placeholder="60" type="text">); </div>',
       '      <div><l0>含本日自然恢复的阈值<l1>含本日自然恢復的閾值</l1><l2><b></b>Stamina threshold with naturally recovers today.</l2>: <input class="hvAANumber" name="staminaLowWithReNat" placeholder="0" type="text">; </div>',
@@ -1537,6 +1574,7 @@ try {
         }, 0.5 * _1s);
         return;
       }
+      const arenaPrev = g('option')?.idleArenaValue;
       const _option = {
         version: g('version'),
       };
@@ -1601,7 +1639,18 @@ try {
       }
       setValue('option', _option);
       optionBox.style.display = 'none';
-      goto();
+      // 更改设置后实时刷新竞技场数据
+      const arenaNew = _option.idleArenaValue;
+      if(arenaNew === arenaPrev){
+        goto();
+        return;
+      }
+      if(_option.idleArena && _option.idleArenaValue){
+        const arena = getValue('arena', true);
+        arena.isOptionUpdated = undefined;
+        setValue('arena', arena);
+        goto();
+      }
     };
     gE('.hvAACancel', optionBox).onclick = function () {
       optionBox.style.display = 'none';
@@ -2202,6 +2251,9 @@ try {
   async function asyncSetEnergyDrinkHathperk() { try {
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('https://e-hentai.org/hathperks.php');
+    if(!html) {
+      return;
+    }
     const doc = $doc(html);
     const perks = gE('.stuffbox>table>tbody>tr', 'all', doc);
     if (!perks) {
@@ -2291,7 +2343,7 @@ try {
     const stmNR = stamina + 24 - (timeNow % 24);
     cost ??= 0;
     const stmNRChecked = !cost || stmNR - cost >= g('option').staminaLowWithReNat;
-    console.log('stamina with nature recover:', stmNR, '\nnext arena stamina cost: ', cost.toString());
+    console.log('stamina:', stamina,'\nstamina with nature recover:', stmNR, '\nnext arena stamina cost: ', cost.toString());
     if (stamina - cost >= (low ?? g('option').staminaLow) && stmNRChecked) {
       return 1;
     }
@@ -2362,11 +2414,13 @@ try {
       return;
     }
     setEncounter(getEncounter()); // 离开页面前保存
-    setValue('lastHref', window.location.href);
+    if(!window.top.location.href.endsWith(`?s=Battle`)){
+      setValue('lastHref', window.top.location.href);
+    }
     $ajax.openNoFetch('https://e-hentai.org/news.php?encounter');
   }
 
-  async function startUpdateArena(idleStart) { try {
+  async function startUpdateArena(idleStart, startIdleArena=true) { try {
     const now = time(0);
     console.log('startUpdateArena now', now, idleStart);
     if (!idleStart) {
@@ -2377,41 +2431,45 @@ try {
     if (idleStart) {
       timeout -= time(0) - idleStart;
     }
-    setTimeout(idleArena, timeout);
+    if(startIdleArena){
+      setTimeout(idleArena, timeout);
+    }
     const last = getValue('arena', true)?.date ?? now;
     setTimeout(startUpdateArena, Math.max(0, Math.floor(last / _1d + 1) * _1d - now));
   } catch (e) {console.error(e)}}
 
   async function updateArena(forceUpdateToken = false) { try {
     let arena = getValue('arena', true) ?? {};
-    if (!forceUpdateToken && arena && arena.date && time(2, arena.date) === time(2)) {
-      return setValue('arena', arena);
+    const isToday = arena.date && time(2, arena.date) === time(2);
+    if (forceUpdateToken || !isToday || !arena.isOptionUpdated) {
+      arena.token = {};
+      arena.sites ??= [
+        '?s=Battle&ss=gr',
+        '?s=Battle&ss=ar',
+        '?s=Battle&ss=ar&page=2',
+        '?s=Battle&ss=rb'
+      ]
+      await Promise.all(arena.sites.map(async site => { try {
+        const doc = $doc(await $ajax.fetch(site));
+        if (site === '?s=Battle&ss=gr') {
+          arena.token.gr = gE('img[src*="startgrindfest.png"]', doc).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
+          return;
+        }
+        gE('img[src*="startchallenge.png"]', 'all', doc).forEach((_) => {
+          const temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
+          arena.token[temp[1]] = temp[2];
+        });
+      } catch (e) {console.error(e)}}));
     }
-    arena.token = {};
-    arena.sites ??= [
-      '?s=Battle&ss=gr',
-      '?s=Battle&ss=ar',
-      '?s=Battle&ss=ar&page=2',
-      '?s=Battle&ss=rb'
-    ]
-    await Promise.all(arena.sites.map(async site => { try {
-      const doc = $doc(await $ajax.fetch(site));
-      if (site === '?s=Battle&ss=gr') {
-        arena.token.gr = gE('img[src*="startgrindfest.png"]', doc).getAttribute('onclick').match(/init_battle\(1, '(.*?)'\)/)[1];
-        return;
-      }
-      gE('img[src*="startchallenge.png"]', 'all', doc).forEach((_) => {
-        const temp = _.getAttribute('onclick').match(/init_battle\((\d+),\d+,'(.*?)'\)/);
-        arena.token[temp[1]] = temp[2];
-      });
-    } catch (e) {console.error(e)}}));
-    if (forceUpdateToken) {
-      return setValue('arena', arena);
+    if(!isToday){
+      arena.date = time(0);
+      arena.gr = g('option').idleArenaGrTime;
+      arena.arrayDone = [];
     }
-    arena.date = time(0);
-    arena.gr = g('option').idleArenaGrTime;
-    arena.array = g('option').idleArenaValue.split(',') ?? [];
-    arena.array.reverse();
+    if (!isToday || !arena.isOptionUpdated) {
+      arena.array = g('option').idleArenaValue.split(',') ?? [];
+      arena.array.reverse();
+    }
     return setValue('arena', arena);
   } catch (e) {console.error(e)}}
 
@@ -2425,6 +2483,7 @@ try {
       return;
     }
     const staminaChecked = checkStamina(condition.staminaLow, condition.staminaCost);
+    console.log("staminaChecked", condition.staminaLow, condition.staminaCost, staminaChecked);
     if (staminaChecked) { // 1: succeed, -1: failed with nature recover
       return staminaChecked === 1;
     }
@@ -2439,11 +2498,16 @@ try {
       return;
     }
     logSwitchAsyncTask(arguments);
+    const array = [...arena.array];
     let id;
     const RBundone = [];
-    while (arena.array.length > 0) {
-      id = arena.array.pop() * 1;
+    while (array.length > 0) {
+      id = array.pop() * 1;
       id = isNaN(id) ? 'gr' : id;
+      if(arena.arrayDone?.includes(id)){
+        id = undefined;
+        continue;
+      }
       if (id in arena.token) {
         break;
       }
@@ -2452,17 +2516,14 @@ try {
         if (id in arena.token) {
           break;
         }
-        RBundone.unshift(id);
       }
       id = undefined;
     }
-    arena.array = arena.array.concat(RBundone);
     if (!id) {
       setValue('arena', arena);
       logSwitchAsyncTask(arguments);
       return;
     }
-
     let staminaCost = {
       1: 2, 3: 4, 5: 6, 8: 8, 9: 10,
       11: 12, 12: 15, 13: 20, 15: 25, 16: 30,
@@ -2483,32 +2544,36 @@ try {
 
     let href, cost;
     let token = arena.token[id];
-    if (id === 'gr') {
+    const key = id;
+    if (key === 'gr') {
       if (arena.gr <= 0) {
         setValue('arena', arena);
         idleArena();
+        arena.arrayDone.push('gr');
         return;
       }
-      arena.array.unshift('gr');
       arena.gr--;
       href = 'gr';
-      id = 1;
+      key = 1;
       cost = staminaCost.gr;
-    } else if (id >= 105) {
+    } else if (key >= 105) {
       href = 'rb';
-    } else if (id >= 19) {
+    } else if (key >= 19) {
       href = 'ar&page=2';
     } else {
       href = 'ar';
     }
-    cost ??= staminaCost[id];
+    cost ??= staminaCost[key];
     if (!checkBattleReady(idleArena, { staminaCost: cost, checkEncounter: true })) {
       logSwitchAsyncTask(arguments);
       return;
     }
     document.title = _alert(-1, '闲置竞技场开始', '閒置競技場開始', 'Idle Arena start');
+    if(key !== 'gr'){
+      arena.arrayDone.push(key);
+    }
     setValue('arena', arena);
-    $ajax.open(`?s=Battle&ss=${href}`, `initid=${String(id)}&inittoken=${token}`);
+    $ajax.open(`?s=Battle&ss=${href}`, `initid=${String(key)}&inittoken=${token}`);
     logSwitchAsyncTask(arguments);
   } catch (e) {console.error(e)}}
 
