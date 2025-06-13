@@ -1574,7 +1574,7 @@ try {
         }, 0.5 * _1s);
         return;
       }
-      const arenaPrev = g('option').idleArenaValue;
+      const arenaPrev = g('option')?.idleArenaValue;
       const _option = {
         version: g('version'),
       };
