@@ -2,9 +2,9 @@
 // ==UserScript==
 // @name        novelDownloader3
 // @description 菜单```Download Novel```或**双击页面最左侧**来显示面板
-// @version     3.5.510
+// @version     3.5.514
 // @created     2020-03-16 16:59:04
-// @modified    2025-07-11 21:26:37
+// @modified    2025-07-13 09:24:07
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -3148,7 +3148,7 @@
       '  <br>',
       '  书籍作者: <input type="text" name="writer">',
       '  <br>',
-      '  书籍简介: <input type="text" name="intro">',
+      '  书籍简介: <textarea name="intro" style="width:180px;height:1.2em;line-height:1;resize:both;"></textarea>',
       '  <br>',
       '  书籍封面: <input type="text" name="cover">',
       '</div>',
@@ -3731,7 +3731,9 @@
     container.find('[name="config"]').find('button[name="toggle"]').on('click', (e) => {
       container.find('.useless[name="config"]').toggle();
     });
-    container.find('[name="info"]>input[type="text"]').on('change', (e) => (Storage.book[$(e.target).attr('name')] = e.target.value));
+    container.find('[name="info"]>input[type="text"],[name="info"]>textarea').on('change', (e) => {
+      Storage.book[$(e.target).attr('name')] = e.target.value;
+    });
     container.find('[name="how"]').on('click', (e) => {
       const a = window.open('about:blank', '_blank');
       a.document.write(`<img src="${gif}" />`);
