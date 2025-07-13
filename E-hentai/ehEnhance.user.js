@@ -6,8 +6,8 @@
 /* eslint-env browser */
 // ==UserScript==
 // @name        [EH]Enhance
-// @version     1.19.453
-// @modified    2024-07-18 19:11:20
+// @version     1.19.532
+// @modified    2025-04-04 18:21:58
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -117,13 +117,11 @@ const SEL = {
 
       pageCur: '.ptds:eq(0)>a',
       pageMax: '.ptt td:gt(0):eq(-2)>a',
-      btnContainer: '#gdo2',
       previewContainer: '[id="gdt"]',
-      previewDiv: '.gdtm',
-      previewA: '.gdtm>div>a',
-      previewImg: '.gdtm>div>a>img',
+      previewA: '[id="gdt"]>a',
+      previewImg: '[id="gdt"]>a>div',
 
-      uploaderComment: '#comment_0',
+      uploaderComment: '#cdiv>div:nth-child(2)',
     },
     setting: { // 设置页
       // changeEConfig
@@ -252,7 +250,7 @@ async function init() {
   if (G.config.updateIntervalEHT !== 0 && now - lastTime >= G.config.updateIntervalEHT * 24 * 60 * 60 * 1000) {
     try {
       await updateEHT();
-    } catch (err) { }
+    } catch (err) { /* noop */ }
   }
   if (GM_getValue('EHT', {}).version === 6) {
     G.EHT = GM_getValue('EHT').data;
@@ -271,7 +269,7 @@ async function init() {
 
   $('<button title="无人坚守模式" name="passive mode">Passive Mode</button>').on({
     click: (e, remote) => {
-      [window.alertRaw, window.alert] = [window.alert, window.alertRaw || function () { }];
+      [window.alertRaw, window.alert] = [window.alert, window.alertRaw || function () { /* noop */ }];
       [window.confirmRaw, window.confirm] = [window.confirm, window.confirmRaw || function () { return true; }];
       [window.promptRaw, window.prompt] = [window.prompt, window.promptRaw || function (message, value) { return value; }];
       const status = $(e.target).attr('status');
@@ -295,7 +293,7 @@ async function init() {
       if (!GM_getValue('EHD_code') || (G.config.updateIntervalEHD !== 0 && now - lastTime >= G.config.updateIntervalEHD * 24 * 60 * 60 * 1000)) {
         try {
           await updateEHD();
-        } catch (err) { }
+        } catch (err) { /* noop */ }
       }
       const fixEHDCounter = [
         'window.fixEHDCounterTime = 0',
@@ -423,7 +421,7 @@ async function init() {
         'var loadSetting = function () { return new Promise(resolve => { resolve(GM_getValue(\'ehD-setting\')) }) }',
         'let console = {}',
         'for (let i in window.console) { console[i] = new Function() }',
-        'let alert = function () { }',
+        'let alert = function () { /* noop */ }',
         'let confirm = function () { return true }',
         'let prompt = function (message, value) { return value }',
         ';',
@@ -455,7 +453,7 @@ async function init() {
       $('.ehNavBar').attr('style', 'top:0;');
     });
     $(window).on('unload', () => { // 关闭页面时, 从下载列表中移除
-      for (const i in G) delete G[i];
+      for (const i of Object.keys(G)) delete G[i];
       downloadRemove(SEL.EH.info.galleryId);
     });
     if (G.config.changeName) changeName(SEL.EH.info.title); // 修改本子标题（删除集会名、替换其中的罗马数字）
@@ -467,10 +465,10 @@ async function init() {
     btnTask(); // 按钮 -> 添加到下载任务(信息页)
     tagEvent(); // 标签事件
     abortPending(); // 终止EHD所有下载
-    $('<button class="ehThumbBtn">Hide</button>').on('click', (e) => { // 隐藏预览图
+    $('<button>Hide Thumbnail</button>').on('click', (e) => { // 隐藏预览图
       $(SEL.EH.info.previewContainer).toggle();
-      $(e.target).text($(e.target).text() === 'Show' ? 'Hide' : 'Show');
-    }).prependTo(SEL.EH.info.btnContainer);
+      $(e.target).text($(e.target).text() === 'Show Thumbnail' ? 'Hide Thumbnail' : 'Show Thumbnail');
+    }).prependTo('.ehNavBar>div:nth-child(1)');
     if (G.config.showAllThumb) await showAllThumb();
     introPic(); // 宣传图
     if (G.config.enableChangeSize && G.config.sizeS !== G.config.sizeD) await checkImageSize();
@@ -489,6 +487,7 @@ async function init() {
         $(SEL.EH.search.keyword).val(value);
       },
     });
+    window.addEventListener('beforeunload', (e) => { e.preventDefault(); e.returnValue = ''; });
     if ($(SEL.EH.search.keyword).val()) document.title = translateText($(SEL.EH.search.keyword).val());
     if (G.config.preloadResult && $(SEL.EH.search.pageNext).length) await preloadResult(G.config.preloadResult);
     $('<div class="ehContainer"></div>').prependTo(SEL.EH.search.nameTd);
@@ -606,7 +605,7 @@ async function init() {
           highlightBlacklist();
         }
       } else if (e.button === 1) {
-
+        // noop
       } else if (e.button === 2) {
         if ($('.ehBlackListContainer').length) {
           $('.ehBlackListContainer').remove();
@@ -788,7 +787,6 @@ function addStyle() { // 添加样式
     '.ehIframeContainer>[name="src"]{width:50%;}',
     `.ehIframe{width:95%;height:${document.documentElement.clientHeight * 0.7}px;resize:vertical;}`,
     '.ehIframeClose{position:fixed;top:0;right:0;z-index:99999;color:#f00;}',
-    '.ehThumbBtn{width:36px;height:15px;padding:3px 2px;margin:0 2px 4px 2px;float:left;border-radius:5px;border:1px solid #989898;}',
 
     '.ehPreLike{white-space:pre-wrap;word-break:break-word;font-family:Consolas,Monaco,monospace;}',
     `.ehDiffNone{color:${backgroundColor};background-color:${backgroundColor};}`,
@@ -808,9 +806,9 @@ function addStyle() { // 添加样式
     `.ehTagNotice[name="Unlike"],${SEL.EH.info.tagDiv}[name="Unlike"]{color:#f00;background-color:#00f;}`,
     `.ehTagNotice[name="Alert"],${SEL.EH.info.tagDiv}[name="Alert"]{color:#ff0;background-color:#080;}`,
     `.ehTagNotice[name="Like"],${SEL.EH.info.tagDiv}[name="Like"]{color:#000;background-color:#0ff;}`,
-    `${SEL.EH.info.previewDiv} [name="intro"]{white-space:nowrap;}`,
-    `${SEL.EH.info.previewDiv} [name="intro"][on="true"]::after{content:"Block: " attr(file);}`,
-    `${SEL.EH.info.previewDiv} [name="intro"][on="false"]::after{content:"Unblock: " attr(file);}`,
+    `${SEL.EH.info.previewContainer} [name="intro"]{white-space:nowrap;}`,
+    `${SEL.EH.info.previewContainer} [name="intro"][on="true"]::after{content:"Block: " attr(file);}`,
+    `${SEL.EH.info.previewContainer} [name="intro"][on="false"]::after{content:"Unblock: " attr(file);}`,
 
     // unknown
     // '.ih>li{margin:0 2px;cursor:pointer;list-style:none;}',
@@ -1033,9 +1031,9 @@ const generateInfo = () => {
   if ($(SEL.EH.info.uploaderComment).length) infoStr = `${infoStr}Uploader Comment:\n${$(SEL.EH.info.uploaderComment).html().replace(/<br>|<br \/>/gi, '\n')}\n\n`;
 
   $(SEL.EH.info.previewImg).toArray().forEach((i) => {
-    infoStr = `${infoStr}\n\nPage ${i.alt}: ${$(i).parent().attr('href')}\n`;
-    const title = $(i).attr('title') || $(i).attr('raw-title');
-    infoStr = `${infoStr}Image ${i.alt}: ${title.match(/^Page \d+: (.*)$/)[1]}`;
+    const [, index, name] = ($(i).attr('title') || $(i).attr('raw-title')).match(/^Page (\d+): (.*)$/);
+    infoStr = `${infoStr}\n\nPage ${index}: ${$(i).parent().attr('href')}\n`;
+    infoStr = `${infoStr}Image ${index}: ${name}`;
   });
 
   infoStr = `${infoStr}\n\nDownloaded at ${new Date()}\n\nGenerated by E-Hentai Downloader. https://github.com/ccloli/E-Hentai-Downloader`;
@@ -1197,6 +1195,7 @@ function btnSearch2Highlight() {
           const regexp = new RegExp(`${main}:("?)${text.match(/^\w+:(.*)$/)[1]}\\$?\\1`, 'gi');
           const find = listKeys.find((i) => i.match(regexp));
           if (find && now - list[find].time <= 30 * 24 * 60 * 60 * 1000) return true;
+          return false;
         });
         if (arr.length === filtered.length) {
           $(SEL.EH.search.resultContent).filter(`:has([href*="/${info.gid}/${info.token}/"])`).find('.btnSearch').css('background-color', 'green');
@@ -1229,7 +1228,7 @@ function btnTask() { // 按钮 -> 添加到下载列表(信息页)
         const task = GM_getValue('task', []);
         const tasking = GM_getValue('tasking');
         const url = window.location.href.replace(/#\d+$/, '');
-        if (!(task.includes(url)) && tasking === url) {
+        if (!(task.includes(url)) && tasking !== url) {
           task.push(url);
           GM_setValue('task', task);
           $(e.target).attr('content-after', '[+1]');
@@ -1284,7 +1283,7 @@ function btnTask2() { // 按钮 -> 添加到下载列表(搜索页)
         $('.ehBatchActive:visible').find(SEL.EH.search.galleryA).toArray().forEach((i) => {
           if (task.includes(i.href)) {
             task.splice(task.indexOf(i.href), 1);
-            count++;
+            count = count + 1;
           }
         });
         GM_setValue('task', task);
@@ -1315,7 +1314,7 @@ function calcRelativeTime(time) { // 计算相对时间
   };
   let suf;
   let t = delta;
-  for (const i in info) {
+  for (const i of Object.keys(info)) {
     const m = t / info[i]; // 倍数
     const r = t % info[i]; // 语数
     if (m >= 1 || info[i] - r <= 2) { // 进阶
@@ -1392,14 +1391,14 @@ function changeName(e) { // 修改本子标题（删除集会名、替换其中�
           digitalRomajiRe = new RegExp(`(\\W+|^)(${digitalRomajiRe})(\\W+|$)`, 'i');
           if (arr.every((j) => j.match(digitalRomajiRe))) {
             mianTitleArr.splice(i, 1, ...arr.reverse());
-            i--;
+            i = i - 1;
             continue;
           }
         }
       }
 
       let matched = false;
-      for (const j in G.digitalRomaji) {
+      for (const j of Object.keys(G.digitalRomaji)) {
         let re = G.digitalRomaji[j][0].join('|');
         re = new RegExp(`^(${re})(\\W+|$)`, 'i');
         if (!text.match(re)) continue;
@@ -1411,9 +1410,9 @@ function changeName(e) { // 修改本子标题（删除集会名、替换其中�
           const re0 = mianTitleArr[i - 1].match(/^(\d+)(\W+)$/);
           const number0 = re0[1] * 1;
           mianTitleArr[i - 1] = number1 < 10 && number0 < 10 ? number1.toString() + number0.toString() : (number1 + number0).toString();
-          mianTitleArr[i - 1] += re0[2];
+          mianTitleArr[i - 1] = mianTitleArr[i - 1] + re0[2];
           mianTitleArr.splice(i, 1);
-          i--;
+          i = i - 1;
         }
         break;
       }
@@ -1746,10 +1745,10 @@ async function checkImageSize() { // 检查图片尺寸
   const imageSize = await getEConfig('xr');
   let numD = 0; // 双页
   $(SEL.EH.info.previewImg).toArray().forEach((i, j) => {
-    if ($(i).is($('.ehIgnore img'))) return;
+    if ($(i).is($('.ehIgnore *'))) return;
     const rate = $(i).width() / $(i).height(); // 宽高比
     if (rate > G.config.rateD) {
-      numD++;
+      numD = numD + 1;
       G.imageD.push(j + 1);
     } else {
       G.imageS.push(j + 1);
@@ -1802,7 +1801,8 @@ function defaultConfig() { // 默认设置
     checkExist: 'everything',
     checkExistAtStart: true, checkExistName2: false, hideExist: true, checkExistSever: 'http://127.0.0.1:3000/', checkExistPages: false,
     acLength: 3, acItem: 'language,artist,group,parody,character,cosplayer,female,male,mixed,other,reclass,temp',
-    notHideUnlike: true, alwaysShowLike: true, lowRating: 0, fewPages: 1,
+    notHideUnlike: true, alwaysShowLike: true,
+    unlikeLowRating: 0, unlikeFewPages: 4, unlikeMorePages: 250, unlikeNoFemaleTag: true,
     autoUpdateCheck: 25, checkListPerPage: 25,
 
     // 信息页
@@ -1812,7 +1812,7 @@ function defaultConfig() { // 默认设置
     ehdFailed1: 20, ehdFailed1Config: '{"thread-count":1,"timeout":300,"speed-detect":true,"speed-expired":180}',
     ehdFailed2: 30, ehdFailed2Config: '{"thread-count":1,"timeout":0,"speed-detect":false,"speed-expired":0}',
     ehdFailed3: 50, ehdFailed3Time: 600,
-    tagTranslateImage: false, showAllThumb: true, enableChangeSize: true,
+    tagTranslateImage: false, showAllThumb: true, alertMoreAnimated: 100, enableChangeSize: true,
     rateD: 1, sizeD: '3', sizeS: '1',
     downloadSizeChanged: true,
   };
@@ -1880,7 +1880,7 @@ async function getEConfig(key) { // 获取EH设置
 }
 
 async function getInfo() { // 获取信息
-  if (!$(SEL.EH.search.resultTable).length) return;
+  if (!$(SEL.EH.search.resultTable).length) return null;
   const gidlist = $(SEL.EH.search.galleryA).toArray().map((i) => {
     const arr = i.href.split('/');
     return [arr[4], arr[5]];
@@ -1910,8 +1910,10 @@ function hideGalleries() { // 隐藏某些画集
     const info = G.gmetadata.filter((j) => j.gid === i.href.split('/')[4] * 1)[0];
     if (!info) return;
     const container = $(i).parentsUntil(SEL.EH.search.resultTbody).eq(-1).find('.ehContainer');
-    if (info.rating * 1 < G.config.lowRating) $('<span class="ehTagNotice" name="Unlike" title="低评分">低评分</span>').appendTo(container);
-    if (info.filecount * 1 < G.config.fewPages) $('<span class="ehTagNotice" name="Unlike" title="页面少">页面少</span>').appendTo(container);
+    if (info.rating * 1 < G.config.unlikeLowRating) $('<span class="ehTagNotice" name="Unlike" title="低评分">低评分</span>').appendTo(container);
+    if (info.filecount * 1 < G.config.unlikeFewPages) $('<span class="ehTagNotice" name="Unlike" title="页面少">页面少</span>').appendTo(container);
+    if (info.filecount * 1 > G.config.unlikeMorePages) $('<span class="ehTagNotice" name="Unlike" title="页面多">页面多</span>').appendTo(container);
+    if (G.config.unlikeNoFemaleTag && !info.tags.some((i) => i.startsWith('female:'))) $('<span class="ehTagNotice" name="Unlike" title="缺少女性标签">缺少女性标签</span>').appendTo(container);
 
     info.tags.filter((j) => j in tags).forEach((j) => {
       const tagArr = j.split(':');
@@ -1984,7 +1986,7 @@ function introPic() { // 宣传图
   const toggleIgnore = (e) => {
     let introPic = GM_getValue('introPic', []);
     introPic = arrUnique(introPic);
-    const id = $(e.target).prev().attr('href').split('/')[4];
+    const id = $(e.target).parent().attr('href').split('/')[4];
     if ($(e.target).attr('on') === 'true') {
       introPic.push(id);
     } else {
@@ -1998,13 +2000,13 @@ function introPic() { // 宣传图
   $(SEL.EH.info.previewA).toArray().forEach((i) => {
     const url = i.href;
     const id = url.split('/')[4];
-    const name = $(i).find('img:eq(0)').attr('title').match(/Page \d+:\s+(.*)/)[1];
+    const name = $(i).find('div:eq(0)').attr('title').match(/Page \d+:\s+(.*)/)[1];
     const isIntroPic = introPic.includes(id);
-    const btnBlock = $(`<a name="intro" href="javascript:;" on="true" file="${name}"></a>`).on('click', toggleIgnore).appendTo(i.parentNode);
+    const btnBlock = $(`<a name="intro" href="javascript:;" on="true" title="${name}" file="${name.substr(0, 10)}"></a>`).on('click', toggleIgnore).appendTo(i);
 
     if (isIntroPic || G.introPicName.some((j) => name.match(j))) {
       $(btnBlock).attr('on', 'false');
-      $(i).parent().addClass('ehIgnore');
+      $(i).addClass('ehIgnore');
       if (isIntroPic) { // 收集数据
         const introPicStat = GM_getValue('introPicStat', {});
         introPicStat[id] = id in introPicStat ? introPicStat[id] + 1 : 1;
@@ -2355,7 +2357,8 @@ async function preloadResult(number) { // 自动预载
   }
 }
 
-async function saveAs(text, name) { // eslint-disable-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+async function saveAs(text, name) { // hook EHD的saveAs事件
   downloadRemove(SEL.EH.info.galleryId);
   if (text instanceof window.Blob && text.type.match(/^application.*zip$/)) {
     if (G.downloadSizeChanged) {
@@ -2544,7 +2547,7 @@ function searchInOtherSites() { // 在其他站点搜索
     keyword = $(SEL.EH.search.keyword).val();
     keywordJ = $(SEL.EH.search.keyword).val();
   }
-  for (const i in sites) {
+  for (const i of Object.keys(sites)) {
     let url;
     if ('url' in sites[i]) {
       url = sites[i].url instanceof Function ? sites[i].url(keyword) : sites[i].url.replace(/{q}/g, keyword);
@@ -2569,6 +2572,10 @@ async function showAllThumb() { // 显示所有预览页
     const index = $(SEL.EH.info.pageCur, res.response).text();
     $(SEL.EH.info.previewContainer, res.response).find('img').attr('loading', 'lazy');
     $(SEL.EH.info.previewContainer, res.response).appendTo(`.gdtContainer>div:nth-child(${index})`);
+  }
+
+  if ($(SEL.EH.info.previewImg).toArray().filter((i) => i.title.endsWith('.gif')).length > G.config.alertMoreAnimated) {
+    window.alert(`动图数量大于指定值${G.config.alertMoreAnimated}，注意下载可能失败`);
   }
 }
 
@@ -2602,7 +2609,7 @@ function showConfig() { // 显示设置
       '<div class="ehNew"></div>检查本地是否存在: <label for="ehConfig_checkExist_disable"><input type="radio" name="ehConfig_checkExist" id="ehConfig_checkExist_disable" value="" checked>关闭</label><label for="ehConfig_checkExist_everything"><input type="radio" name="ehConfig_checkExist" id="ehConfig_checkExist_everything" value="everything">Everything (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/comicSort/tools/check.js" target="_blank">comicSort/tools/check</a>, <a href="https://www.voidtools.com/downloads/#downloads" target="_blank">Everything</a>, 以及<a href="https://www.voidtools.com/downloads/#cli" target="_blank">Everything CLI</a>)</label><label for="ehConfig_checkExist_mysql"><input type="radio" name="ehConfig_checkExist" id="ehConfig_checkExist_mysql" value="mysql">MySQL (需要后台运行<a href="https://github.com/dodying/Nodejs/blob/master/comicBrowser/check.js" target="_blank">comicBrowser/check</a>, 以及<a href="https://www.mysql.com/" target="_blank">MySQL</a>)</label>',
       '<div class="ehNew"></div>检查本地是否存在: <label for="ehConfig_checkExistAtStart"><input type="checkbox" id="ehConfig_checkExistAtStart">页面载入后检查一次</label>; <label for="ehConfig_checkExistName2" title="去除集会号/作者/原作名/翻译组织/语言等"><input type="checkbox" id="ehConfig_checkExistName2">只搜索主要名称</label>; <label for="ehConfig_hideExist" title="只有完全匹配的本子才会被隐藏 (汉化组不同也视为完全相同)"><input type="checkbox" id="ehConfig_hideExist">隐藏已存在的本子</label>; 本地服务器: <input name="ehConfig_checkExistSever" type="text" placeholder="http://127.0.0.1:3000/" min="0">; <label for="ehConfig_checkExistPages"><input type="checkbox" id="ehConfig_checkExistPages">检查图片数</label>',
       `搜索栏自动完成: 字符数 > <input name="ehConfig_acLength" type="number" placeholder="3" min="-1" title="等于-1时，禁用自动填充"> 时，显示; 显示项目: <input name="ehConfig_acItem" type="text" placeholder="language,artist,group,parody,character,cosplayer,female,male,mixed,other,reclass,temp" title="${htmlEscape('以<span class="ehHighlight">,</span>分割')}">`,
-      '隐藏本子: <label for="ehConfig_notHideUnlike"><input type="checkbox" id="ehConfig_notHideUnlike">不隐藏带有厌恶标签的画廊</label>; <label for="ehConfig_alwaysShowLike"><input type="checkbox" id="ehConfig_alwaysShowLike">总是显示带有喜欢标签的画廊</label>; 评分 < <input name="ehConfig_lowRating" type="number" placeholder="4.0" min="0" max="5" step="0.1">; 页数 < <input name="ehConfig_fewPages" type="number" placeholder="5" min="1">',
+      '隐藏本子: <label for="ehConfig_notHideUnlike"><input type="checkbox" id="ehConfig_notHideUnlike">不隐藏带有厌恶标签的画廊</label>; <label for="ehConfig_alwaysShowLike"><input type="checkbox" id="ehConfig_alwaysShowLike">总是显示带有喜欢标签的画廊</label>; 以下本子添加厌恶标签：评分 < <input name="ehConfig_unlikeLowRating" type="number" placeholder="4.0" min="0" max="5" step="0.1">; 页数 < <input name="ehConfig_unlikeFewPages" type="number" placeholder="4" min="1">; 页数 > <input name="ehConfig_unlikeMorePages" type="number" placeholder="250">; <label for="ehConfig_unlikeNoFemaleTag"><input type="checkbox" id="ehConfig_unlikeNoFemaleTag">缺少女性标签</label>',
       '检测新本子: 结果数目变化 <= <input name="ehConfig_autoUpdateCheck" type="number" placeholder="10" min="0">，自动更新; 每页 <input name="ehConfig_checkListPerPage" type="number" placeholder="25" min="25"> 条CheckList',
       '',
       // 信息页
@@ -2613,7 +2620,7 @@ function showConfig() { // 显示设置
       `<div class="ehNew"></div>下载-EHD相关-下载连续失败: 失败 <input name="ehConfig_ehdFailed1" type="number" placeholder="20" min="1" title="仅当成功下载时，才会重新计数，否则累加直至设定值"> 次时, 设置 <input name="ehConfig_ehdFailed1Config" title="JSON格式，仅影响本次下载" type="text" value="${htmlEscape('{"thread-count":1,"timeout":300,"speed-detect":true,"speed-expired":180}')}">`,
       `<div class="ehNew"></div>下载-EHD相关-下载连续失败: 失败 <input name="ehConfig_ehdFailed2" type="number" placeholder="30" min="1" title="仅当成功下载时，才会重新计数，否则累加直至设定值"> 次时, 设置 <input name="ehConfig_ehdFailed2Config" title="JSON格式，仅影响本次下载" type="text" value="${htmlEscape('{"thread-count":1,"timeout":0,"speed-detect":false,"speed-expired":0}')}">`,
       '<div class="ehNew"></div>下载-EHD相关-下载连续失败: 失败 <input name="ehConfig_ehdFailed3" type="number" placeholder="50" min="1" title="此时重新计数"> 次时，暂停; 当无人坚守模式时，暂停 <input name="ehConfig_ehdFailed3Time" type="number" placeholder="600" min="0" title="当0时，不会继续下载""> 秒后，继续下载',
-      `<label for="ehConfig_tagTranslateImage"><input type="checkbox" id="ehConfig_tagTranslateImage">标签翻译显示图片</label>; <label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">显示所有预览图</label>; <label for="ehConfig_enableChangeSize" title="${htmlEscape('当大图(双页)尺寸与小图(单页)尺寸相同时，失效')}"><input type="checkbox" id="ehConfig_enableChangeSize">启用自动调整图片尺寸</label>`,
+      `<label for="ehConfig_tagTranslateImage"><input type="checkbox" id="ehConfig_tagTranslateImage">标签翻译显示图片</label>; <label for="ehConfig_showAllThumb"><input type="checkbox" id="ehConfig_showAllThumb">显示所有预览图</label>; 动图数量 > <input name="ehConfig_alertMoreAnimated" type="number" placeholder="100" min="1" title="需开启 显示所有预览图"> 时提醒; <label for="ehConfig_enableChangeSize" title="${htmlEscape('当大图(双页)尺寸与小图(单页)尺寸相同时，失效')}"><input type="checkbox" id="ehConfig_enableChangeSize">启用自动调整图片尺寸</label>`,
       '调整图片尺寸: 大图(双页)宽高比: <input name="ehConfig_rateD" type="number" placeholder="1.1" step="0.1">; 其他默认视为小图(单页); 大图(双页)尺寸: <select name="ehConfig_sizeD"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>; 小图(单页)尺寸: <select name="ehConfig_sizeS"><option value="0">Auto</option><option value="5">2400x</option><option value="4">1600x</option><option value="3">1280x</option><option value="2">980x</option><option value="1">780x</option></select>',
       `<label for="ehConfig_downloadSizeChanged" title="${htmlEscape('需开启: <ul><li>启用内置 [E-Hentai-Downloader] (并设置关闭Request File System to handle large Zip file)</li><li>显示所有预览图</li><li>启用自动调整图片尺寸</li><li>大图(双页) 与 小图(单页)尺寸 不同</li></ul><hr>注意: 避免出错，应一次下载一个画廊')}"><input type="checkbox" id="ehConfig_downloadSizeChanged">下载调整过大小的图片压缩档</label>`,
     ].map((i) => (i ? `<li>${i}</li>` : '<hr>')).join('');
@@ -2635,7 +2642,7 @@ function showConfig() { // 显示设置
           if (i.type === 'number') {
             name = i.name;
             value = (i.value || i.placeholder) * 1;
-            if (isNaN(value)) return;
+            if (Number.isNaN(value)) return;
           } else if (i.type === 'text' || i.type === 'hidden') {
             name = i.name;
             value = i.value || i.placeholder;
@@ -2656,7 +2663,7 @@ function showConfig() { // 显示设置
         const searchEvent = config.searchEvent.split('|');
         const searchEventChs = [];
         for (const i of searchEvent) {
-          const arr = i.split(',').map((i) => (isNaN(i * 1) ? i : i * 1));
+          const arr = i.split(',').map((i) => (Number.isNaN(i * 1) ? i : i * 1));
           const chs = [];
           chs.push(`鼠标${'左中右'.split('')[arr[0]]}键`);
           chs.push(arr[1] === -1 ? '任意按键' : ['altKey', 'ctrlKey', 'shiftKey'][arr[1]]);
@@ -2694,16 +2701,16 @@ function showConfig() { // 显示设置
         };
         if (G.infoPage) {
           for (const i of ['common', 'info']) {
-            for (const j in SEL.EH[i]) check(`${i}:${j}`, SEL.EH[i][j]);
+            for (const j of Object.keys(SEL.EH[i])) check(`${i}:${j}`, SEL.EH[i][j]);
           }
-          for (const i in SEL.EHD) check(`EHD:${i}`, SEL.EHD[i]);
+          for (const i of Object.keys(SEL.EHD)) check(`EHD:${i}`, SEL.EHD[i]);
         } else if (G.searchPage) {
           for (const i of ['common', 'search']) {
-            for (const j in SEL.EH[i]) check(`${i}:${j}`, SEL.EH[i][j]);
+            for (const j of Object.keys(SEL.EH[i])) check(`${i}:${j}`, SEL.EH[i][j]);
           }
         } else if (G.settingPage) {
           const i = 'setting';
-          for (const j in SEL.EH.setting) check(`${i}:${j}`, SEL.EH[i][j]);
+          for (const j of Object.keys(SEL.EH.setting)) check(`${i}:${j}`, SEL.EH[i][j]);
         }
         if (arr.length) {
           console.error('test selector:', arr);
@@ -2849,13 +2856,13 @@ function showTooltip() { // 显示提示
     $('.ehTooltip').html(title.filter((i) => i).join('<hr>'));
 
     let top = $(preEle).offset().top - $(window).scrollTop();
-    const height = $(preEle).height() + parseInt($(preEle).css('padding-bottom')) + parseInt($(preEle).css('border-bottom-width')) + parseInt($(preEle).css('margin-bottom'));
-    const _height = $('.ehTooltip').height() + parseInt($('.ehTooltip').css('padding-bottom')) + parseInt($('.ehTooltip').css('border-bottom-width')) + parseInt($('.ehTooltip').css('margin-bottom'));
+    const height = $(preEle).height() + parseInt($(preEle).css('padding-bottom'), 10) + parseInt($(preEle).css('border-bottom-width'), 10) + parseInt($(preEle).css('margin-bottom'), 10);
+    const _height = $('.ehTooltip').height() + parseInt($('.ehTooltip').css('padding-bottom'), 10) + parseInt($('.ehTooltip').css('border-bottom-width'), 10) + parseInt($('.ehTooltip').css('margin-bottom'), 10);
     top = top + height + 5 + _height > window.innerHeight ? top - _height - 5 : top + height + 5;
 
     let left = $(preEle).offset().left - $('body').scrollLeft();
-    const width = $(preEle).width() + parseInt($(preEle).css('padding-left')) + parseInt($(preEle).css('border-left-width')) + parseInt($(preEle).css('margin-left'));
-    const _width = $('.ehTooltip').width() + parseInt($('.ehTooltip').css('padding-left')) + parseInt($('.ehTooltip').css('border-left-width')) + parseInt($('.ehTooltip').css('margin-left'));
+    const width = $(preEle).width() + parseInt($(preEle).css('padding-left'), 10) + parseInt($(preEle).css('border-left-width'), 10) + parseInt($(preEle).css('margin-left'), 10);
+    const _width = $('.ehTooltip').width() + parseInt($('.ehTooltip').css('padding-left'), 10) + parseInt($('.ehTooltip').css('border-left-width'), 10) + parseInt($('.ehTooltip').css('margin-left'), 10);
     left = left + _width > window.innerWidth ? left + width - _width : left;
     if (top < 0) top = 0;
     if (left < 0) left = 0;
@@ -2866,7 +2873,7 @@ function showTooltip() { // 显示提示
   });
 
   $('body').on('wheel', target, (e) => {
-    $('.ehTooltip').get(0).scrollTop += 60 * Math.sign(e.originalEvent.deltaY);
+    $('.ehTooltip').get(0).scrollTop = $('.ehTooltip').get(0).scrollTop + 60 * Math.sign(e.originalEvent.deltaY);
   });
 }
 
@@ -2977,7 +2984,7 @@ function task() { // 下载任务
       return;
     }
 
-    tasking = task.splice(0, 1)[0];
+    [tasking] = task.splice(0, 1);
     GM_setValue('tasking', tasking);
     GM_setValue('task', task);
     await waitFor(() => false, 2 * 1000);
@@ -3220,7 +3227,7 @@ function waitFor(check, timeout) {
       let checked = false;
       try {
         checked = await check();
-      } catch (error) { }
+      } catch (error) { /* noop */ }
       if (checked) {
         if (id) clearInterval(id);
         id = null;
@@ -3280,6 +3287,7 @@ function xhrSync(url, parm = null, opt = {}) {
           }
         }
       } else { // 离线
+        // eslint-disable-next-line no-lonely-if
         if (window.confirm(`${msg}\n注意:您可能离线，请确认是否能打开该网站`)) {
           await waitFor(() => false, 2000);
           xhrSync(url, parm, opt).then((res) => resolve(res), (res) => reject(res));
@@ -3388,7 +3396,7 @@ function removeOtherInfo(text, reverse = false, infoGroup = G.infoGroup) {
 
 function windowClose() {
   if (G.isIframe) {
-    window.alert = window.confirm = window.prompt = function () { };
+    window.alert = window.confirm = window.prompt = function () { /* noop */ };
     $(window).trigger('beforeunload');
     $(window).trigger('unload');
     window.onbeforeunload = null;

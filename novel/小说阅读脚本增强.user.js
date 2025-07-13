@@ -3,9 +3,9 @@
 // @name        小说阅读脚本增强
 // @description 移除鼠标双击事件，增加翻页按钮
 // @include     *
-// @version     1.0.332
+// @version     1.0.337
 // @created     2020-07-20 08:45:13
-// @modified    2024-07-09 21:13:34
+// @modified    2025-02-04 21:02:13
 // @author      dodying
 // @namespace   https://github.com/dodying/UserJs
 // @supportURL  https://github.com/dodying/UserJs/issues
@@ -90,7 +90,7 @@
   }
 
   function addScrollButton() {
-    $('<scroll-button>').css({ all: 'initial' }).insertAfter('body');
+    $('<scroll-button>').css({ all: 'initial' }).insertAfter('body').on({ contextmenu: (e) => { $(e.target).remove(); e.preventDefault(); } });
   }
 
   // Create a class for the element
@@ -195,6 +195,7 @@
       container.appendChild(downBtn);
 
       GM_registerMenuCommand('重置位置', () => {
+        // eslint-disable-next-line no-shadow
         const containerPosition = GM_getValue('position', {});
         delete containerPosition[window.location.host];
         GM_setValue('position', containerPosition);
