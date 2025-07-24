@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.90.22.10
+// @version      2.90.22.11
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -387,7 +387,15 @@ try {
     }
   }
 
+  function pauseAsync(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async function asyncOnIdle() { try {
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await asyncOnIdle();
+    }
     let notBattleReady = false;
     const idleStart = time(0);
     await Promise.all([
@@ -851,7 +859,7 @@ try {
       '        <input id="arLevel_1" value="1,1" type="checkbox"><label for="arLevel_1">1</label> <input id="arLevel_10" value="10,3" type="checkbox"><label for="arLevel_10">10</label> <input id="arLevel_20" value="20,5" type="checkbox"><label for="arLevel_20">20</label> <input id="arLevel_30" value="30,8" type="checkbox"><label for="arLevel_30">30</label> <input id="arLevel_40" value="40,9" type="checkbox"><label for="arLevel_40">40</label> <input id="arLevel_50" value="50,11" type="checkbox"><label for="arLevel_50">50</label> <input id="arLevel_60" value="60,12" type="checkbox"><label for="arLevel_60">60</label> <input id="arLevel_70" value="70,13" type="checkbox"><label for="arLevel_70">70</label> <input id="arLevel_80" value="80,15" type="checkbox"><label for="arLevel_80">80</label> <input id="arLevel_90" value="90,16" type="checkbox"><label for="arLevel_90">90</label> <input id="arLevel_100" value="100,17" type="checkbox"><label for="arLevel_100">100</label> <input id="arLevel_110" value="110,19" type="checkbox"><label for="arLevel_110">110</label>',
       '        <input id="arLevel_120" value="120,20" type="checkbox"><label for="arLevel_120">120</label> <input id="arLevel_130" value="130,21" type="checkbox"><label for="arLevel_130">130</label> <input id="arLevel_140" value="140,23" type="checkbox"><label for="arLevel_140">140</label> <input id="arLevel_150" value="150,24" type="checkbox"><label for="arLevel_150">150</label> <input id="arLevel_165" value="165,26" type="checkbox"><label for="arLevel_165">165</label> <input id="arLevel_180" value="180,27" type="checkbox"><label for="arLevel_180">180</label> <input id="arLevel_200" value="200,28" type="checkbox"><label for="arLevel_200">200</label> <input id="arLevel_225" value="225,29" type="checkbox"><label for="arLevel_225">225</label> <input id="arLevel_250" value="250,32" type="checkbox"><label for="arLevel_250">250</label> <input id="arLevel_300" value="300,33" type="checkbox"><label for="arLevel_300">300</label> <input id="arLevel_400" value="400,34" type="checkbox"><label for="arLevel_400">400</label> <input id="arLevel_500" value="500,35" type="checkbox"><label for="arLevel_500">500</label>',
       '        <input id="arLevel_RB50" value="RB50,105" type="checkbox"><label for="arLevel_RB50">RB50</label> <input id="arLevel_RB75A" value="RB75A,106" type="checkbox"><label for="arLevel_RB75A">RB75A</label> <input id="arLevel_RB75B" value="RB75B,107" type="checkbox"><label for="arLevel_RB75B">RB75B</label> <input id="arLevel_RB75C" value="RB75C,108" type="checkbox"><label for="arLevel_RB75C">RB75C</label>',
-      '        <input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,gr" type="checkbox"><label for="arLevel_GF" >GrindFest </label><input class="hvAANumber" name="idleArenaGrTime" placeholder="1" type="text"></div><input id="obscureNotIdleArena" type="checkbox"></div><div><label for="obscureNotIdleArena"><l0>页面中置灰未设置且未完成的</l0><l1>頁面中置灰未設置且未完成的</l1><l2>obscure not setted and not battled in Battle&gt;Arena/RingOfBlood</l2></div>',
+      '        <input id="arLevel_RB100" value="RB100,109" type="checkbox"><label for="arLevel_RB100">RB100</label> <input id="arLevel_RB150" value="RB150,110" type="checkbox"><label for="arLevel_RB150">RB150</label> <input id="arLevel_RB200" value="RB200,111" type="checkbox"><label for="arLevel_RB200">RB200</label> <input id="arLevel_RB250" value="RB250,112" type="checkbox"><label for="arLevel_RB250">RB250</label> <input id="arLevel_GF" value="GF,gr" type="checkbox"><label for="arLevel_GF" >GrindFest </label><input class="hvAANumber" name="idleArenaGrTime" placeholder="1" type="text"></div><div><input id="obscureNotIdleArena" type="checkbox"><label for="obscureNotIdleArena"><l0>页面中置灰未设置且未完成的</l0><l1>頁面中置灰未設置且未完成的</l1><l2>obscure not setted and not battled in Battle&gt;Arena/RingOfBlood</l2></div></div>',
       '  <div style="display: flex; flex-flow: wrap;">',
       '      <div><b><l0>精力</l0><l1>精力</l1><l2>Stamina</l2>: </b><l0>阈值</l0><l1>閾值</l1><l2><b></b> threshold</l2>: Min(85, <input class="hvAANumber" name="staminaLow" placeholder="60" type="text">); </div>',
       '      <div><l0>含本日自然恢复的阈值<l1>含本日自然恢復的閾值</l1><l2><b></b>Stamina threshold with naturally recovers today.</l2>: <input class="hvAANumber" name="staminaLowWithReNat" placeholder="0" type="text">; </div>',
@@ -1576,7 +1584,7 @@ try {
         }, 0.5 * _1s);
         return;
       }
-      const arenaPrev = g('option').idleArenaValue;
+      const arenaPrev = g('option')?.idleArenaValue;
       const _option = {
         version: g('version'),
       };
@@ -2227,6 +2235,10 @@ try {
   }
 
   async function asyncSetAbilityData() { try {
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await asyncSetAbilityData();
+    }
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('?s=Character&ss=ab');
     const doc = $doc(html);
@@ -2251,6 +2263,13 @@ try {
   } catch (e) {console.error(e)}}
 
   async function asyncSetEnergyDrinkHathperk() { try {
+    if (isIsekai || !g('option').restoreStamina) {
+      return;
+    }
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await asyncSetEnergyDrinkHathperk();
+    }
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('https://e-hentai.org/hathperks.php');
     if(!html) {
@@ -2266,6 +2285,10 @@ try {
   } catch (e) {console.error(e)}}
 
   async function asyncSetStamina() { try {
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await asyncSetStamina();
+    }
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch(window.location.href);
     setValue('staminaTime', Math.floor(time(0) / 1000 / 60 / 60));
@@ -2274,6 +2297,13 @@ try {
   } catch (e) {console.error(e)}}
 
   async function asyncGetItems() { try {
+    if (!g('option').checkSupply && (isIsekai || !g('option').restoreStamina)) {
+      return;
+    }
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await asyncGetItems();
+    }
     logSwitchAsyncTask(arguments);
     const html = await $ajax.fetch('?s=Character&ss=it');
     const items = {};
@@ -2290,6 +2320,10 @@ try {
   async function asyncCheckSupply() { try {
     if (!g('option').checkSupply) {
       return true;
+    }
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await asyncCheckSupply();
     }
     logSwitchAsyncTask(arguments);
     const items = g('items');
@@ -2313,11 +2347,15 @@ try {
     }
     logSwitchAsyncTask(arguments);
     return !needs.length;
-  } catch (e) {console.error(e)}}
+  } catch (e) {console.error(e)} return false; }
 
   async function asyncCheckRepair() { try {
     if (!g('option').repair) {
       return true;
+    }
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await asyncCheckRepair();
     }
     logSwitchAsyncTask(arguments);
     const doc = $doc(await $ajax.fetch('?s=Forge&ss=re'));
@@ -2335,7 +2373,7 @@ try {
     }
     logSwitchAsyncTask(arguments);
     return !eqps.length;
-  } catch (e) {console.error(e)}}
+  } catch (e) {console.error(e)}; return false; }
 
   function checkStamina(low, cost) {
     let stamina = getValue('stamina');
@@ -2368,6 +2406,10 @@ try {
   }
 
   async function updateEncounter(engage, isInBattle) { try {
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await updateEncounter(engage, isInBattle);
+    }
     const encounter = getEncounter();
     const encountered = encounter.filter(e => e.encountered && e.href);
     const count = encounter.filter(e => e.href).length;
@@ -2441,6 +2483,10 @@ try {
   } catch (e) {console.error(e)}}
 
   async function updateArena(forceUpdateToken = false) { try {
+    if(getValue('disabled')){
+      await pauseAsync(_1s);
+      return await updateArena(forceUpdateToken);
+    }
     let arena = getValue('arena', true) ?? {};
     const isToday = arena.date && time(2, arena.date) === time(2);
     if (forceUpdateToken || !isToday || !arena.isOptionUpdated) {
