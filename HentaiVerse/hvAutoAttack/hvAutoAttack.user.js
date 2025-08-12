@@ -290,6 +290,15 @@ try {
       return;
     }
 
+    if (window.location.href.indexOf(`?s=Battle&ss=ba`) !== -1) {
+      // 补充记录（因写入冲突、网络卡顿等）未被记录的encounter链接
+      const encounterURL = window.location.href?.split('/')[3];
+      const encounter = getEncounter();
+      if (!encounter.filter(e => e.href === encounterURL).length) {
+        encounter.unshift({ href: encounterURL, time: time(0), encountered: time(0) });
+      }
+      setEncounter(encounter);
+    }
     if (!gE('#navbar')) { // 战斗中
       const box2 = gE('#battle_main').appendChild(cE('div'));
       box2.id = 'hvAABox2';
@@ -316,14 +325,6 @@ try {
     if (window.location.href.indexOf(`?s=Battle&ss=ba`) === -1) { // 不缓存encounter
       setValue('lastHref', window.top.location.href); // 缓存进入战斗前的页面地址
       setArenaDisplay();
-    } else {
-      // 补充记录（因写入冲突、网络卡顿等）未被记录的encounter链接
-      const encounterURL = window.location.href?.split('/')[3];
-      const encounter = getEncounter();
-      if (!encounter.filter(e => e.href === encounterURL).length) {
-        encounter.unshift({ href: encounterURL, time: time(0), encountered: time(0) });
-      }
-      setEncounter(encounter);
     }
     delValue(1);
     if (g('option').showQuickSite && g('option').quickSite) {
@@ -2138,13 +2139,16 @@ try {
     }
     setValue('lastEH', time(0));
     const isEngage = window.location.href === 'https://e-hentai.org/news.php?encounter';
-    const encounter = getEncounter();
+    let encounter = getEncounter();
     let href = getValue('url') ?? (document.referrer.match('hentaiverse.org') ? new URL(document.referrer).origin : 'https://hentaiverse.org');
     const eventpane = gE('#eventpane');
     const now = time(0);
     let url;
     if (eventpane) { // 新一天或遭遇战
       url = gE('#eventpane>div>a')?.href.split('/')[3];
+      if(url === undefined){ // 新一天
+        encounter = [];
+      }
       encounter.unshift({ href: url, time: now });
       setEncounter(encounter);
     } else {
@@ -3250,9 +3254,9 @@ try {
     if(roundPrev !== battle.roundNow) {
       battle.turn = 0;
     }
+    battle.roundLeft = battle.roundAll - battle.roundNow;
     setValue('battle', battle);
 
-    g('roundLeft', battle.roundAll - battle.roundNow);
     g('skillOTOS', {
       OFC: 0,
       FRD: 0,
