@@ -6,7 +6,7 @@
 // @description  HV auto attack script, for the first user, should configure before use it.
 // @description:zh-CN HV自动打怪脚本，初次使用，请先设置好选项，请确认字体设置正常
 // @description:zh-TW HV自動打怪腳本，初次使用，請先設置好選項，請確認字體設置正常
-// @version      2.91.240
+// @version      2.91.241
 // @author       dodying
 // @namespace    https://github.com/dodying/
 // @supportURL   https://github.com/dodying/UserJs/issues
@@ -7001,6 +7001,7 @@
         }
         if (gE('#btcp')) { // 在没有btcp时跳过，例如被Monsterbation、jpx等其他脚本移除时
           if (option.nativeNewRound) {
+            newRound(true, doc);
             onStepInDone();
             gE('#btcp').click();
             $async.logSwitch(arguments);
@@ -7102,11 +7103,13 @@
     };
 
     let battle = getWithStringfied('battle', true);
-    const turnLog = gE('#textlog').innerHTML.match(/([^]+?)((<tr><td class="tls">)|(<\/tbody>))/)[0];
+    const turnLog = gE('#textlog').innerHTML.match(/([^]+?)((<tr><td class="tls">)|(<\/tbody>))/)?.[0];
 
     // cache last turn channeling
     const channeling = battle.data.channeling || 1;
     battle.data.channeling = getBuff('channeling') ? 1.5 : 1;
+
+    if (!turnLog) return;
 
     if (isNewTurn &&= turnLog !== battle.data.turnLog) {
       battle.data.turnLog = turnLog;
@@ -7315,9 +7318,10 @@
     return true;
   } catch (err) { console.error(err); }}
 
-  function newRound(isNew) { // New Round
+  function newRound(isNew, doc) { // New Round
     $debug.log('______________newRound', isNew);
     const option = g.option;
+    doc ??= document;
     const token = document.documentElement.outerHTML.match(/var battle_token = "(.*)";/)[1];
     let battle = getWithStringfied('battle', true);
     const arena = getValue('arena', true) ?? {};
@@ -7336,11 +7340,11 @@
     if (window.location.hash !== '') {
       goto();
     }
-    realtime.monsterAll = gE(monsterStateKeys.obj, 'all').length;
-    const monsterDead = gE('img[src*="nbardead"]', 'all').length;
+    realtime.monsterAll = gE(monsterStateKeys.obj, 'all', doc).length;
+    const monsterDead = gE('img[src*="nbardead"]', 'all', doc).length;
     realtime.monsterAlive = realtime.monsterAll - monsterDead;
-    realtime.bossAll = gE(`${monsterStateKeys.lv}[style^="background"]`, 'all').length;
-    const bossDead = gE(`${monsterStateKeys.obj}[style*="opacity"] ${monsterStateKeys.lv}[style*="background"]`, 'all').length;
+    realtime.bossAll = gE(`${monsterStateKeys.lv}[style^="background"]`, 'all', doc).length;
+    const bossDead = gE(`${monsterStateKeys.obj}[style*="opacity"] ${monsterStateKeys.lv}[style*="background"]`, 'all', doc).length;
     realtime.bossAlive = realtime.bossAll - bossDead;
     const types = {
       ar: {
@@ -7356,9 +7360,10 @@
       tw: { reg: /^Initializing The Tower/ },
       ba: { reg: /^Initializing random encounter/ },
     }
-    const battleLog = gE('#textlog>tbody>tr>td', 'all');
-    const firstLog = battleLog[battleLog.length - 1].textContent;
-    if (!battle.data.roundType || firstLog.match(/^Initializing/)) {
+    const battleLog = gE('#textlog>tbody>tr>td', 'all', doc);
+    const firstLog = battleLog[battleLog.length - 1]?.textContent;
+
+    if (firstLog && (!battle.data.roundType || firstLog.match(/^Initializing/))) {
       battle.data.tower = (firstLog.match(/\(Floor (\d+)\)/) ?? [null])[1] * 1;
       const id = (firstLog.match(/\d+/) ?? [null])[0] * 1;
       battle.data.roundType = undefined;
@@ -7381,11 +7386,11 @@
 
     const roundPrev = battle.data.roundNow;
 
-    if (battleLog[battleLog.length - 1].textContent.match('Initializing')) {
+    if (firstLog?.match('Initializing')) {
       const monsterStatus = [];
       let order = 0;
-      const monsterNames = Array.from(gE(`${monsterStateKeys.name}>div>div`, 'all')).map(monster => monster.innerText);
-      const monsterLvs = Array.from(gE(`${monsterStateKeys.lv}>div>div`, 'all')).map(monster => monster.innerText);
+      const monsterNames = Array.from(gE(`${monsterStateKeys.name}>div>div`, 'all', doc)).map(monster => monster.innerText);
+      const monsterLvs = Array.from(gE(`${monsterStateKeys.lv}>div>div`, 'all', doc)).map(monster => monster.innerText);
       const monsterDB = getWithStringfied('monsterDB', true, {});
       const monsterMID = getWithStringfied('monsterMID', true, {});
       for (let i = battleLog.length - 2; i > battleLog.length - 2 - realtime.monsterAll; i--) {
@@ -7427,7 +7432,7 @@
         battle.data.roundNow = 1;
         battle.data.roundAll = 1;
       }
-    } else if (!battle.data.monsterStatus || battle.data.monsterStatus.length !== gE(monsterStateKeys.lv, 'all').length) {
+    } else if (!battle.data.monsterStatus || battle.data.monsterStatus.length !== gE(monsterStateKeys.lv, 'all', doc).length) {
       battle.data.roundNow = 1;
       battle.data.roundAll = 1;
     }
